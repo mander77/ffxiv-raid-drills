@@ -48,14 +48,13 @@ type OverlayShape =
   | ({ t: "lineaoe"; w?: number } & Line)
   | ({ t: "band"; w: number } & Line)
   | ({ t: "guide" } & Line)
-  /** A tilted weapon seen from above: x,y is its base, x2,y2 its tip. Flatter = longer. */
-  | ({ t: "lean" } & Line)
   | ({ t: "tornado" } & At)
   | ({ t: "rock" } & At)
   | ({ t: "tower" } & At)
   | ({ t: "target" } & At)
-  | ({ t: "axe" } & At)
-  | ({ t: "sword" } & At)
+  /** ux, uy turn the icon: its long side, from the handle end to the tip. */
+  | ({ t: "axe"; ux?: number; uy?: number } & At)
+  | ({ t: "sword"; ux?: number; uy?: number } & At)
   | ({ t: "puddle"; r: number } & At)
   | ({ t: "tag"; s: string } & At)
   | ({ t: "mark"; l: string; r: "T" | "D" | "H" } & At)

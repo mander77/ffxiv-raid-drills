@@ -233,8 +233,6 @@ td.n{font-weight:700;min-width:170px}
 .wpn .knob{fill:var(--boss);stroke:#fff;stroke-width:.5}
 .lanesoft{fill:rgba(233,120,28,.14)}
 .guide{stroke:#fff;stroke-width:.6;stroke-dasharray:1.6 1.2;opacity:.9}
-.lean line{stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;opacity:.7}
-.lean circle{fill:var(--ink);opacity:.7}
 .portal ellipse{fill:#fff;stroke:var(--ink-2);stroke-width:.35}
 .portal text{fill:var(--ink);font-family:var(--font-mono);font-size:3px;text-anchor:middle;dominant-baseline:central}
 .zone.hit{fill:rgba(194,54,43,.22);stroke:var(--ring);stroke-dasharray:none;stroke-width:.3}

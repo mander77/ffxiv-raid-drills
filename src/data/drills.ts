@@ -5,8 +5,9 @@ import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry";
 import type { Boss, MapDrill, Overlay, Point, RectZone, Slot, Step, StepResult, Zone } from "../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
-/** One weapon in a jump run. `a` is its direction from the arena center, in degrees clockwise from north. */
-export interface Weapon { a: number; p: Point; type: WeaponType; where?: string; tornado?: boolean }
+/** One weapon in a jump run. `a` is its direction from the arena center, in degrees clockwise from north.
+    `axis`, when set, turns the icon: it is the long side, from the handle end to the tip. */
+export interface Weapon { a: number; p: Point; type: WeaponType; where?: string; tornado?: boolean; axis?: Point }
 /** Everything a jump-run drill needs: the weapons, where the boss stands after each jump, the steps and the drawing. */
 export interface Run { W: Weapon[]; states: Boss[]; steps: Step[]; overlays: Overlay[] }
 
@@ -27,15 +28,19 @@ function buildRun(s: Slot, W: Weapon[]): Run {
     prev = w.p;
   });
   /* The scythe lies with its butt on his left and its blade end on his right as he lands,
-     so H1 (butt) and H2 (point) can read their spot from the weapon itself. */
+     so H1 (butt) and H2 (point) can read their spot from the weapon itself.
+     A weapon with an axis is drawn turned that way instead, and the scythe spots follow it. */
+  const scytheAxis = (w: Weapon, i: number): Point => w.axis ?? [-dirs[i][1], dirs[i][0]];
   const overlays: Overlay[] = [];
   W.forEach((w, i) => {
     if(w.type === "scythe"){
-      const d = dirs[i];
-      overlays.push({t:"scythe", spawn:i, x:w.p[0], y:w.p[1], ux:-d[1], uy:d[0], dx:d[0], dy:d[1]}, {t:"tag", spawn:i, x:w.p[0] - d[0] * 9, y:w.p[1] - d[1] * 9, s:"SCYTHE"});
+      const u = scytheAxis(w, i), d: Point = [u[1], -u[0]];
+      overlays.push({t:"scythe", spawn:i, x:w.p[0], y:w.p[1], ux:u[0], uy:u[1], dx:d[0], dy:d[1]}, {t:"tag", spawn:i, x:w.p[0] - d[0] * 9, y:w.p[1] - d[1] * 9, s:"SCYTHE"});
     } else {
-      const out = vadd(w.p, unit([w.p[0] - 50, w.p[1] - 50]), 7.5);
-      overlays.push({t:"tag", spawn:i, x:out[0], y:out[1], s:w.type.toUpperCase()}, {t:w.type, spawn:i, x:w.p[0], y:w.p[1]});
+      // A turned icon or the upright sword reaches farther, so the label sits farther out.
+      const out = vadd(w.p, unit([w.p[0] - 50, w.p[1] - 50]), w.axis ? 13 : w.type === "sword" ? 12.5 : 7.5);
+      const turn = w.axis ? {ux:w.axis[0], uy:w.axis[1]} : {};
+      overlays.push({t:"tag", spawn:i, x:out[0], y:out[1], s:w.type.toUpperCase()}, {t:w.type, spawn:i, x:w.p[0], y:w.p[1], ...turn});
     }
   });
   const HW = 7, side = S(s, 1, -1), own = S(s, "left", "right");
@@ -48,7 +53,8 @@ function buildRun(s: Slot, W: Weapon[]): Run {
       a = "Axe, " + where + ": stack with the whole party in the middle, outside the axe AoE.";
       reveal = [{t:"aoe", x:P[0], y:P[1], r:20}];
     } else if(w.type === "scythe"){
-      z = {c:vadd(P, sv, 9.5), r:5};
+      // H1 at the butt end, H2 at the point end, as the scythe is drawn.
+      z = {c:vadd(P, scytheAxis(w, i), -9.5 * side), r:5};
       a = "Scythe, " + where + ": close in at the " + S(s, "butt (the handle end)", "point (the blade end)") + " of the scythe.";
       reveal = [{t:"donut", x:P[0], y:P[1], r1:13, r2:75}];
     } else {
@@ -69,6 +75,11 @@ function buildRun(s: Slot, W: Weapon[]): Run {
 
 /* Assault Evolved: three weapons. The boss faces the first, then goes clockwise. */
 export function buildAssault(s: Slot): Run {
+  return buildRun(s, assaultWeapons());
+}
+
+/** Three weapons at least 90 degrees apart, in the order he takes them: the first, then clockwise. */
+function assaultWeapons(): Weapon[] {
   const spots = [0,45,90,135,180,225,270,315];
   let pick = [0,135,225];
   for(let t = 0; t < 60; t++){
@@ -78,22 +89,22 @@ export function buildAssault(s: Slot): Run {
   const a0 = pick[0];
   const order = [a0].concat(pick.slice(1).sort((x, y) => ((x - a0 + 360) % 360) - ((y - a0 + 360) % 360)));
   const types = shuffle([...WEAPON_TYPES]);
-  return buildRun(s, order.map((a, i): Weapon => ({a, p:atAngle(a), type:types[i]})));
+  return order.map((a, i): Weapon => ({a, p:atAngle(a), type:types[i]}));
 }
 
 /* Assault Evolved, second set (1:33, after Void Stardust). The boss does not face a weapon
-   yet. The flattest weapon, lying lowest toward him, goes first. Then he goes clockwise.
-   Seen from above, a flat weapon shows its full length and a steep one only a stub. */
-export function buildAssault2(s: Slot): Run & {tilts: number[]} {
-  const run = buildAssault(s);
-  run.states[0].f = null;
-  // Degrees up from the floor: the first weapon lies nearly flat, the other two stand steep.
-  const tilts = [10 + Math.random() * 8, 55 + Math.random() * 25, 55 + Math.random() * 25];
-  run.W.forEach((w, i) => {
-    const tip = vadd(w.p, unit([50 - w.p[0], 50 - w.p[1]]), 14 * Math.cos(tilts[i] * DEG));
-    run.overlays.push({t:"lean", spawn:i, x:w.p[0], y:w.p[1], x2:tip[0], y2:tip[1]});
+   yet. Every weapon is turned. The first one lies square across the line to the boss, with
+   its flat side toward him. The other two are turned 30 to 60 degrees. Then clockwise. */
+export function buildAssault2(s: Slot): Run {
+  const W = assaultWeapons().map((w, i): Weapon => {
+    const turn = i === 0 ? 0 : (30 + Math.random() * 30) * (Math.random() < 0.5 ? 1 : -1);
+    const flip = Math.random() < 0.5 ? 0 : 180;   // which end points which way
+    const t = (w.a + 90 + turn + flip) * DEG;     // w.a + 90 is across the line to the boss
+    return {...w, axis:[Math.sin(t), -Math.cos(t)]};
   });
-  return {...run, tilts};
+  const run = buildRun(s, W);
+  run.states[0].f = null;
+  return run;
 }
 
 /* Ultimate Trophy Weapons: six weapons, resolved in spawn order.
@@ -231,11 +242,11 @@ export const MAPS: MapDrill[] = [
         (spread ? " Comet spread: healers and ranged take any open spot. Fixed spots: MT NW, OT NE, M1 SW, M2 SE." : "")}; }},
   {id:"m-assault-2", order:5, phase:P1, time:"1:33", title:"Assault Evolved: second set",
     build:s=>{ const A = buildAssault2(s); return {
-      setup:"Void Stardust is over. The three weapons from 1:13 hang tilted around the boss, and he does not face one yet. The flattest weapon, lying lowest toward him, goes first. Then he goes clockwise, the same as the first set. The bar from each weapon toward the boss shows how flat it lies: the longer the bar, the flatter the weapon.",
+      setup:"Void Stardust is over. The three weapons from 1:13 are around the boss, each one turned, and he does not face one yet. The weapon that lies square across the line to him, with its flat side toward him, goes first. Then he goes clockwise, the same as the first set.",
       overlays:A.overlays,
       bossAt:n => A.states[Math.min(n, A.states.length - 1)],
       steps:A.steps,
-      rule:"Second set: the flattest weapon goes first, then clockwise. Then the normal rule for each weapon."}; }},
+      rule:"Second set: the weapon with its flat side square to the boss goes first, then clockwise. Then the normal rule for each weapon."}; }},
   {id:"m-dance", order:8.1, rotate:true, phase:P1, time:"2:31", title:"Dance of Domination: pairs",
     build:s=>({setup:"The seven hits are over and the lines are on the floor. Find the side with no outer line. That open side is new south.",
       boss:{x:50, y:50, f:null}, overlays:[

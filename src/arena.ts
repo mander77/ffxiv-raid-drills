@@ -37,8 +37,11 @@ export function drawOverlay(o: Overlay): string {
       return '<g class="scy"><path class="halo" d="' + path + '"/><path class="ink" d="' + path + '"/><circle class="butt" cx="' + f1(B[0]) + '" cy="' + f1(B[1]) + '" r="1.5"/></g>';
     }
     case "axe": case "sword": {
-      // Lies across the line to the arena center, so the label (placed outward) stays clear.
-      const P: Point = [o.x, o.y], d = unit([o.x - 50, o.y - 50]), u: Point = [-d[1], d[0]];
+      // u is the long side (handle end to tip), d is across it. Unless the drill turns the icon,
+      // the sword stands upright, point down, and the axe lies across the line to the arena center.
+      const P: Point = [o.x, o.y], r = unit([o.x - 50, o.y - 50]);
+      const u: Point = o.ux != null && o.uy != null ? [o.ux, o.uy] : o.t === "sword" ? [0, 1] : [-r[1], r[0]];
+      const d: Point = [u[1], -u[0]];
       const at = (a: number, b: number): string => pt(vadd(vadd(P, u, a), d, b));
       let path: string, knob: Point;
       if(o.t === "axe"){
@@ -57,7 +60,6 @@ export function drawOverlay(o: Overlay): string {
     case "lane": return '<rect class="' + (o.soft ? "lanesoft" : "aoe") + '" x="' + o.rect[0] + '" y="' + o.rect[1] + '" width="' + (o.rect[2] - o.rect[0]) + '" height="' + (o.rect[3] - o.rect[1]) + '"/>';
     case "poly": return '<polygon class="aoe" points="' + o.pts.map(pt).join(" ") + '"/>';
     case "guide": return '<line class="guide" x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '"/>';
-    case "lean": return '<g class="lean"><line x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '"/><circle cx="' + f1(o.x2) + '" cy="' + f1(o.y2) + '" r="1.1"/></g>';
     case "portal": return '<g class="portal" transform="translate(' + x + " " + y + ')"><ellipse rx="' + (o.vert ? 6 : 2.2) + '" ry="' + (o.vert ? 2.2 : 6) + '"/><text>' + o.n + "</text></g>";
   }
 }
@@ -86,11 +88,8 @@ export function floorSVG(split = false): string {
 export function sceneSVG(sc: Scene, k: number): string {
   /* Weapons carry a spawn index. Each one gets its own group, so the map view can fade it
      after it resolves and, for spawnPlay scenes, show the weapons appearing one at a time. */
-  /* Tilt bars go in their own groups above the waymarks, so a short bar next to a waymark
-     stays visible. They share the weapon's spawn index, so they fade with it. */
-  const groups: Overlay[][] = [], bars: Overlay[][] = [];
-  sc.overlays.forEach(o => { if(o.spawn != null) ((o.t === "lean" ? bars : groups)[o.spawn] ??= []).push(o); });
-  const barsSVG = bars.map((g, i) => '<g class="spawn" data-spawn="' + i + '">' + g.map(o => drawOverlay(rotOverlay(o, k))).join("") + "</g>").join("");
+  const groups: Overlay[][] = [];
+  sc.overlays.forEach(o => { if(o.spawn != null) (groups[o.spawn] ??= []).push(o); });
   const spawned = groups.map((g, i) => {
     const pos = g.find(o => o.t === "scythe" || o.t === "axe" || o.t === "sword");
     const delay = sc.spawnPlay ? ' style="animation-delay:' + (0.3 + i) + 's"' : "";
@@ -106,7 +105,6 @@ export function sceneSVG(sc: Scene, k: number): string {
   h += '<g id="reveal-layer" clip-path="url(#arenaClip)"></g>';
   h += '<g id="drops"></g>';
   h += drawWaymarks();
-  h += barsSVG;
   h += '<g id="boss-layer"></g>';
   h += '<g id="fb-layer"></g></svg>';
   return h;

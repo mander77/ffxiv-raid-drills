@@ -1,6 +1,6 @@
 import { test, assert } from "vitest";
 import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, type Run } from "../src/data/drills";
-import { inZone } from "../src/geometry";
+import { DEG, inZone } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, Zone } from "../src/types";
 
 const RUNS = 300;
@@ -32,15 +32,18 @@ test("Assault Evolved: the faced weapon goes first, then clockwise", () => {
   }
 });
 
-test("Assault Evolved, second set: the flattest weapon goes first, then clockwise", () => {
+test("Assault Evolved, second set: the weapon square to the boss goes first, then clockwise", () => {
   for(let i = 0; i < RUNS; i++){
     const A = buildAssault2("H1");
-    const lens = A.overlays.flatMap(o => o.t === "lean" ? [{k:o.spawn ?? -1, len:Math.hypot(o.x2 - o.x, o.y2 - o.y)}] : []);
-    assert.equal(lens.length, 3, "one tilt bar for each weapon");
-    const first = lens.find(l => l.k === 0), others = lens.filter(l => l.k !== 0);
-    if(!first) throw new Error("the first weapon has no tilt bar");
-    for(const o of others) assert.isAbove(first.len, o.len + 3, "the first weapon looks clearly flattest");
     assert.isNull(A.states[0].f, "the boss does not point at the first weapon");
+    // |cos| of the angle between the long side and the line to the boss:
+    // 0 = square across it, 0.5 to 0.87 = turned 30 to 60 degrees.
+    const across = A.W.map(w => {
+      if(!w.axis) throw new Error("every second-set weapon is turned");
+      return Math.abs(w.axis[0] * Math.sin(w.a * DEG) - w.axis[1] * Math.cos(w.a * DEG));
+    });
+    assert.isBelow(across[0], 1e-9, "the first weapon is square to the boss");
+    for(const c of across.slice(1)) assert.ok(c >= 0.5 - 1e-9 && c <= 0.867, "the others are turned 30 to 60 degrees");
     const a = A.W.map(w => w.a), d1 = (a[1] - a[0] + 360) % 360, d2 = (a[2] - a[0] + 360) % 360;
     assert.ok(d1 > 0 && d1 < d2, "clockwise after the first");
   }
