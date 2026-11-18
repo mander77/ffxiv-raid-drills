@@ -102,27 +102,35 @@ function drillNav(d: Deck<MapDrill>): string {
     '<span class="dn-time">' + esc(m.time) + "</span>" + esc(m.title) + "</button></li>").join("") + "</ol></nav>";
 }
 
+/* The panel keeps the question to answer near the top, however many steps are done:
+   the setup folds after the first answer, and answered steps shrink to small chips. */
 export function drawMapPanel(): void {
-  const c = run(), d = getDeck("map"), sc = c.scene, done = c.results.length >= sc.steps.length;
+  const c = run(), d = getDeck("map"), sc = c.scene, n = c.results.length, done = n >= sc.steps.length, multi = sc.steps.length > 1;
+  const peek = c.peek ?? n - 1;   // the step whose answer shows: the one picked, or the last one answered
   let h = '<div class="eyebrow"><b>' + esc(c.item.phase) + "</b><span>" + esc(c.item.time) + '</span><span class="progress">Drill ' + (d.i + 1) + " of " + d.items.length + "</span></div>";
-  h += "<h2>" + esc(c.item.title) + '</h2><p class="setup">' + esc(sc.setup) + "</p>";
-  h += '<ol class="steps">' + sc.steps.map((st, i) => {
+  h += "<h2>" + esc(c.item.title) + "</h2>";
+  if(n === 0) h += '<p class="setup">' + esc(sc.setup) + "</p>";
+  else h += '<p class="setup' + (c.setupOpen ? "" : " folded") + '">' + esc(sc.setup) + '</p><button type="button" class="linkbtn" id="setup-toggle">' + (c.setupOpen ? "Less" : "More") + "</button>";
+  if(multi) h += '<ol class="chips" aria-label="Steps">' + sc.steps.map((_st, i) => {
     const r = c.results[i];
-    if(r) return '<li class="' + (r.ok ? "ok" : "bad") + '"><span class="tag">' + (r.ok ? "Right" : "Not there") + "</span>" + esc(st.q) + '<span class="ans">' + esc(st.a) + "</span></li>";
-    if(i === c.results.length) return '<li class="now">' + (sc.steps.length > 1 ? "Step " + (i + 1) + ": " : "") + esc(st.q) + "</li>";
-    return "<li>" + (sc.steps.length > 1 ? "Step " + (i + 1) + ": " : "") + "&hellip;</li>";
+    if(!r) return '<li><span class="chip' + (i === n ? " now" : "") + '">' + (i + 1) + "</span></li>";
+    return '<li><button type="button" class="chip ' + (r.ok ? "ok" : "bad") + '" data-peek="' + i + '" aria-pressed="' + (i === peek) + '" aria-label="Step ' + (i + 1) + ": " + (r.ok ? "right" : "not there") + '">' + (i + 1) + (r.ok ? " &#10003;" : " &#10007;") + "</button></li>";
   }).join("") + "</ol>";
+  if(!done) h += '<div class="nowq">' + (multi ? "<span>Step " + (n + 1) + " of " + sc.steps.length + "</span>" : "") + esc(sc.steps[n].q) + "</div>";
+  const r = c.results[peek];
+  if(r) h += '<div class="lastans ' + (r.ok ? "ok" : "bad") + '"><span class="tag">' + (r.ok ? "Right" : "Not there") + "</span><b>" +
+    (multi ? "Step " + (peek + 1) + ": " : "") + esc(sc.steps[peek].q) + "</b> " + esc(sc.steps[peek].a) + "</div>";
   if(done){
     h += '<div class="rule"><span>Rule</span><strong>' + esc(sc.rule) + "</strong></div>";
     h += '<div class="actions"><button type="button" class="btn" id="map-next">Next drill</button><button type="button" class="btn ghost" id="map-again">Try this one again</button><span class="hint"><kbd>Enter</kbd> next</span></div>';
-  } else if(c.waiting){
-    h += '<p class="hint" style="margin-top:14px">Click the arena for the next step.</p>';
   } else {
-    h += '<p class="hint" style="margin-top:14px">Click the arena. The green area shows the right spot after you click.</p>';
+    h += '<p class="hint" style="margin-top:12px">' + (n === 0 ? "Click the arena. The green area shows the right spot after you click." : "Click the arena for the next step.") + "</p>";
   }
   if(sc.spawnPlay && !done) h += '<div class="actions"><button type="button" class="btn ghost" id="map-replay">Watch the spawns again</button></div>';
   const p = el("map-panel");
   p.innerHTML = h;
+  document.getElementById("setup-toggle")?.addEventListener("click", () => { c.setupOpen = !c.setupOpen; drawMapPanel(); });
+  p.querySelectorAll<HTMLButtonElement>("[data-peek]").forEach(b => b.addEventListener("click", () => { c.peek = Number(b.dataset.peek); drawMapPanel(); }));
   document.getElementById("map-replay")?.addEventListener("click", replaySpawns);
   document.getElementById("map-next")?.addEventListener("click", nextMap);
   document.getElementById("map-again")?.addEventListener("click", () => renderMap(true));
@@ -133,6 +141,7 @@ export function onArenaClick(e: MouseEvent): void {
   if(!c || c.kind !== "map" || c.results.length >= c.scene.steps.length) return;
   // The last answer stays on screen until the next click, and that click answers the next step.
   c.waiting = false;
+  c.peek = undefined;   // show the answer to this new click, not a step picked earlier
   const svg = e.currentTarget as SVGSVGElement, ctm = svg.getScreenCTM();
   if(!ctm) return;
   const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
