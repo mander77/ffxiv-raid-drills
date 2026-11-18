@@ -202,6 +202,10 @@ td.n{font-weight:700;min-width:170px}
 .pick.bad .dot{fill:var(--miss)} .pick.bad .halo{stroke:var(--miss)}
 .drop{fill:var(--aoe-fill);stroke:var(--aoe);stroke-width:.35}
 .aoeband{stroke:var(--aoe);opacity:.4}
+.scy path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.scy .halo{stroke:#fff;stroke-width:3;opacity:.9}
+.scy .ink{stroke:var(--boss);stroke-width:1.4}
+.scy .butt{fill:var(--boss);stroke:#fff;stroke-width:.5}
 .lanesoft{fill:rgba(233,120,28,.14)}
 .guide{stroke:#fff;stroke-width:.6;stroke-dasharray:1.6 1.2;opacity:.9}
 .portal ellipse{fill:#fff;stroke:var(--ink-2);stroke-width:.35}
@@ -303,11 +307,11 @@ const MAPS = [
       rule:"Scythe: tanks spread to the front, the party stacks behind."})},
   {id:"m-assault", order:3, phase:P1, time:"0:48 and 1:33", title:"Assault Evolved: three weapons",
     build:s=>{ const A = buildAssault(s); return {
-      setup:"Three weapons are on the floor. The boss is in the middle, and the red arrow points at the weapon he faces. He jumps to that one first, then goes clockwise. Each landing faces the way he jumped, so watch where he comes from.",
-      overlays:A.W.map(w => ({t:"tag", x:w.p[0], y:w.p[1] - 5.5, s:w.type.toUpperCase()})).concat(A.W.map(w => ({t:"target", x:w.p[0], y:w.p[1]}))),
+      setup:"Three weapons are on the floor. The boss is in the middle, and the red arrow points at the weapon he faces. He jumps to that one first, then goes clockwise. For the sword, watch where he jumps from. For the scythe, read the weapon: the butt has the round knob, the point is the blade end.",
+      overlays:A.overlays,
       bossAt:n => A.states[Math.min(n, A.states.length - 1)],
       steps:A.steps,
-      rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ". Scythe: close in on his " + S(s, "left", "right") + ". Axe: stack in the middle."}; }},
+      rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ". Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: stack in the middle."}; }},
   {id:"m-void", order:4, phase:P1, time:"1:20", title:"Void Stardust",
     build:s=>({setup:"Void Stardust. Three puddles drop under every player, one after another. After the third one, this time it is a stack on a healer (Crushing Comet).",
       boss:BOSS, overlays:[],
@@ -409,11 +413,11 @@ const MECH = [
     why:"The axe is a point-blank AoE where it lands, and a party stack on a random healer. If the stack is on you, stay with the group.",
     rule:"Axe: the whole party stacks in the middle, out of the AoE."})),
   mq("k-scythe", 3.3, P1, "0:50 to 1:45", s=>({prompt:"The boss jumps to the SCYTHE. Where do you go?",
-    options:[{t:S(s,"Close to the boss, relative west: his left side, facing the way he jumped.","Close to the boss, relative east: his right side, facing the way he jumped."), ok:true},
-      {t:S(s,"Close to the boss, relative east.","Close to the boss, relative west.")},
+    options:[{t:S(s,"Close in, at the butt (handle end) of the scythe.","Close in, at the point (blade end) of the scythe."), ok:true},
+      {t:S(s,"Close in, at the point (blade end) of the scythe.","Close in, at the butt (handle end) of the scythe.")},
       {t:"Far out at the edge of the arena."},{t:"Stack with your light party."}],
-    why:"The scythe is a donut AoE and a protean cone on every player. Stand close, in the donut hole, on your boss-relative spot. Relative north is the way he faces when he lands, which is the direction he jumped.",
-    rule:"Scythe: boss-relative spots, close in. H1 relative west, H2 relative east."})),
+    why:"The scythe is a donut AoE and a protean cone on every player, so stand close, in the donut hole. Read the scythe on the floor before he lands: H1 takes the butt end, H2 takes the point end. You do not need to work out his jump.",
+    rule:"Scythe: H1 at the butt, H2 at the point, close in."})),
   mq("k-void", 4, P1, "1:20", s=>({prompt:"Void Stardust starts. What do you do?",
     options:[{t:"Bait 3 puddles: start north of the boss and rotate clockwise. Then spread or stack.", ok:true},{t:"Spread at max range and stand still."},{t:"Stack on the tank and do not move."},{t:"Bait 3 puddles counterclockwise, starting south."}],
     why:"Three puddles drop under every player. Moving one step clockwise each time keeps them in a neat ring.",
@@ -861,6 +865,18 @@ function buildAssault(s){
   const states = [{x:50, y:50, f:a0}];
   let prev = [50, 50];
   W.forEach(w => { const d = unit([w.p[0] - prev[0], w.p[1] - prev[1]]); states.push({x:w.p[0], y:w.p[1], f:angOf(d), d}); prev = w.p; });
+  /* The scythe lies with its butt on his left and its blade end on his right as he lands,
+     so H1 (butt) and H2 (point) can read their spot from the weapon itself. */
+  const overlays = [];
+  W.forEach((w, i) => {
+    if(w.type === "scythe"){
+      const d = states[i + 1].d;
+      overlays.push({t:"scythe", x:w.p[0], y:w.p[1], ux:-d[1], uy:d[0], dx:d[0], dy:d[1]}, {t:"tag", x:w.p[0] - d[0] * 9, y:w.p[1] - d[1] * 9, s:"SCYTHE"});
+    } else {
+      const out = vadd(w.p, unit([w.p[0] - 50, w.p[1] - 50]), 7.5);
+      overlays.push({t:"tag", x:out[0], y:out[1], s:w.type.toUpperCase()}, {t:"target", x:w.p[0], y:w.p[1]});
+    }
+  });
   const HW = 7, side = S(s, 1, -1), own = S(s, "left", "right");
   const steps = W.map((w, i) => {
     const st = states[i + 1], P = [st.x, st.y], d = st.d, L = leftOf(d), sv = [L[0] * side, L[1] * side];
@@ -872,7 +888,7 @@ function buildAssault(s){
       reveal = [{t:"aoe", x:P[0], y:P[1], r:20}];
     } else if(w.type === "scythe"){
       z = {c:vadd(P, sv, 9.5), r:5};
-      a = "Scythe, " + where + ": close in, on his " + own + " side (relative " + S(s, "west", "east") + "). He faces the way he jumped.";
+      a = "Scythe, " + where + ": close in at the " + S(s, "butt (the handle end)", "point (the blade end)") + " of the scythe.";
       reveal = [{t:"donut", x:P[0], y:P[1], r1:13, r2:75}];
     } else {
       const fn = p => { const v = [p[0] - P[0], p[1] - P[1]], f = v[0] * d[0] + v[1] * d[1], sd = v[0] * sv[0] + v[1] * sv[1]; return inArena(p) && f < -HW && sd > HW && Math.hypot(v[0], v[1]) <= 40; };
@@ -885,7 +901,7 @@ function buildAssault(s){
     }
     return {q:["First","Second","Third"][i] + " weapon: click where you go.", z, a, reveal};
   });
-  return {W, states, steps};
+  return {W, states, steps, overlays};
 }
 
 /* Orbital Omen, simplified to 4 lanes each way. Each set fires one north lane and one east lane.
@@ -939,6 +955,12 @@ function drawOverlay(o){
     case "puddle": return '<circle class="puddle" cx="' + x + '" cy="' + y + '" r="' + o.r + '"/>';
     case "tag": { const w = o.s.length * 1.75 + 2.4; return '<g class="tag"><rect x="' + f1(o.x - w / 2) + '" y="' + f1(o.y - 1.9) + '" width="' + f1(w) + '" height="3.8" rx=".8"/><text x="' + x + '" y="' + y + '">' + esc(o.s) + "</text></g>"; }
     case "mark": return '<g class="mk ' + o.r + '"><rect x="' + f1(o.x - 2.4) + '" y="' + f1(o.y - 2.4) + '" width="4.8" height="4.8" rx=".9"/><text x="' + x + '" y="' + y + '">' + esc(o.l) + "</text></g>";
+    case "scythe": {
+      const P = [o.x, o.y], u = [o.ux, o.uy], d = [o.dx, o.dy], pt = p => f1(p[0]) + "," + f1(p[1]);
+      const B = vadd(P, u, -10), K = vadd(P, u, 8), C = vadd(vadd(K, d, 6), u, 1.5), T = vadd(vadd(K, d, 10), u, -3);
+      const path = "M" + pt(B) + " L" + pt(K) + " Q" + pt(C) + " " + pt(T);
+      return '<g class="scy"><path class="halo" d="' + path + '"/><path class="ink" d="' + path + '"/><circle class="butt" cx="' + f1(B[0]) + '" cy="' + f1(B[1]) + '" r="1.5"/></g>';
+    }
     case "band": return '<line class="aoeband" x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '" stroke-width="' + o.w + '"/>';
     case "lane": return '<rect class="' + (o.soft ? "lanesoft" : "aoe") + '" x="' + o.rect[0] + '" y="' + o.rect[1] + '" width="' + (o.rect[2] - o.rect[0]) + '" height="' + (o.rect[3] - o.rect[1]) + '"/>';
     case "poly": return '<polygon class="aoe" points="' + o.pts.map(p => f1(p[0]) + "," + f1(p[1])).join(" ") + '"/>';
