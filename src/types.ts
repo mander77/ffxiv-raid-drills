@@ -75,7 +75,8 @@ export interface Boss { x: number; y: number; f: number | null; d?: Point }
 
 /* ---------- map drills ---------- */
 
-export interface StepResult { p: Point; ok: boolean; z: Zone; drop: Point | null }
+/** One answered step. `missed` means time ran out with no click (full-fight tab). */
+export interface StepResult { p: Point; ok: boolean; z: Zone; drop: Point | null; missed?: boolean }
 
 export interface Step {
   q: string;

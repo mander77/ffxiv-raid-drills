@@ -8,7 +8,7 @@ import type { Job, MapDrill, Option, Question, QuizItem, Scene, Slot, StepResult
 // TS note: other files import these types with `import { state, type Deck } from "./core"`.
 // The `type` keyword inside the braces marks a type-only import next to normal value imports.
 export type QuizCat = "mech" | "next" | "death" | "job";
-export type Tab = "map" | QuizCat | "pressure" | "sheet";
+export type Tab = "map" | "fight" | QuizCat | "pressure" | "sheet";
 
 // TS note: a generic interface, like a C# generic class. Deck<MapDrill> holds map drills
 // and Deck<QuizItem> holds quiz cards.
@@ -18,7 +18,7 @@ export interface Deck<T> { items: T[]; i: number; right: number; done: number }
 /** The map drill on screen. `peek` is the answered step whose answer shows; `setupOpen` unfolds the setup. */
 export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; results: StepResult[]; counted: boolean; waiting?: boolean; peek?: number; setupOpen?: boolean }
 export interface McqCur { kind: "mcq"; cat: QuizCat | "pressure"; item: QuizItem; q: Question; opts: Option[]; answered: boolean; pick: number; slow: boolean }
-export type Cur = MapCur | McqCur | { kind: "pstart" } | { kind: "pdone" } | { kind: "sheet" };
+export type Cur = MapCur | McqCur | { kind: "pstart" } | { kind: "pdone" } | { kind: "sheet" } | { kind: "fight" };
 export interface PressureRun { queue: QuizItem[]; i: number; right: number; wrong: number; froze: number }
 
 interface Decks { map?: Deck<MapDrill>; mech?: Deck<QuizItem>; next?: Deck<QuizItem>; death?: Deck<QuizItem>; job?: Deck<QuizItem> }
@@ -52,6 +52,7 @@ export const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
 
 export const TABS: Array<{id: Tab; label: string; lede: string}> = [
   {id:"map", label:"Where do I stand?", lede:"Click the arena where you go. Patterns that turn in the real fight turn here too, so read the boss and the floor, not the screen."},
+  {id:"fight", label:"Full fight", lede:"The drills in fight order on the fight clock, with the boss cast bar. Click your spot before each hit lands."},
   {id:"mech", label:"Mechanics", lede:"What each mechanic does and what you do. Your answers follow your slot and your group's wtfdig link."},
   {id:"next", label:"What is next?", lede:"Knowing what comes next tells you how much time you have to raise. Times come from the fight timeline."},
   {id:"death", label:"Someone died", lede:"The decisions from your talk with Andrew: who first, when to raise, when to wait."},

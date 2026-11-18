@@ -12,6 +12,7 @@ import { renderMap, nextStep, nextMap } from "./views/map";
 import { renderQuiz, answer, nextQ } from "./views/quiz";
 import { renderPressureStart, startPressure } from "./views/pressure";
 import { renderSheet } from "./views/sheet";
+import { renderFight, togglePause } from "./views/fight";
 import type { Slot } from "./types";
 
 function renderTabs(): void {
@@ -53,6 +54,7 @@ function render(): void {
   stopTimer();
   switch(state.tab){
     case "map": return renderMap();
+    case "fight": return renderFight();
     case "pressure": return renderPressureStart();
     case "sheet": return renderSheet();
     default: return renderQuiz(state.tab);
@@ -89,6 +91,7 @@ document.addEventListener("keydown", e => {
     if(c.waiting){ e.preventDefault(); nextStep(); }
     else if(c.results.length >= c.scene.steps.length){ e.preventDefault(); nextMap(); }
   } else if(c.kind === "pstart" && e.key === "Enter" && !onButton){ e.preventDefault(); startPressure(); }
+  else if(c.kind === "fight" && e.key === " " && !onButton){ e.preventDefault(); togglePause(); }
 });
 window.addEventListener("hashchange", () => { const t = location.hash.slice(1); if(t && t !== state.tab) go(t); });
 

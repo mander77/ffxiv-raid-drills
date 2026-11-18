@@ -2,7 +2,7 @@
 import { S, shuffle } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry";
-import type { Boss, MapDrill, Overlay, Point, RectZone, Slot, Step, StepResult, Zone } from "../types";
+import type { Boss, MapDrill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
 /** One weapon in a jump run. `a` is its direction from the arena center, in degrees clockwise from north.
@@ -152,17 +152,24 @@ const dist = (p: Point, q: Point): number => Math.hypot(p[0] - q[0], p[1] - q[1]
 /** Degrees between two spots, as seen from the arena center (0 to 180). */
 const apart = (p: Point, q: Point): number => { const d = Math.abs(angOf([p[0] - 50, p[1] - 50]) - angOf([q[0] - 50, q[1] - 50])) % 360; return Math.min(d, 360 - d); };
 
-/* With `toward` set (a sword or scythe goes first next), the spread spot must also be on that
-   weapon's side of the arena, so the run to it is short. */
+/* With `toward` set (a sword or scythe goes first next), the spread spot can be anywhere on
+   that weapon's side of the arena, so the run to it is short. That side shows as one shaded
+   area. Any spot in it is right if it is out of the hitbox, out of the puddles and not on a
+   tank or melee spot. */
+const POINT_AT = (deg: number, r: number): Point => [50 + r * Math.sin(deg * DEG), 50 - r * Math.cos(deg * DEG)];
 export function cometSpread(s: Slot, toward: Point | null = null): (results: StepResult[]) => Zone {
   return results => {
     const drops = results.flatMap(r => r.drop ? [r.drop] : []);
     const open = (p: Point): boolean => inArena(p) && far(p, [50, 50], 15) &&
-      FIXED_SPREAD.every(m => far(p, m.p, 14)) && drops.every(q => far(p, q, PUDDLE_R + 1.5));
+      FIXED_SPREAD.every(m => far(p, m.p, 10)) && drops.every(q => far(p, q, PUDDLE_R + 1));
     if(!toward) return {fn:open, label:S<Point>(s, [17, 50], [83, 50]), show:SPREAD_GAPS.map(c => ({c, r:6}))};
-    const fn = (p: Point): boolean => open(p) && apart(p, toward) <= 67.5;
-    const gaps = SPREAD_GAPS.filter(fn).sort((a, b) => dist(a, toward) - dist(b, toward));
-    return {fn, label:gaps[0] ?? toward, show:gaps.map(c => ({c, r:6}))};
+    const aw = angOf([toward[0] - 50, toward[1] - 50]);
+    const fn = (p: Point): boolean => open(p) && apart(p, toward) <= 70;
+    // The area: from just outside the hitbox to past the arena edge, 70 degrees each side of the weapon.
+    const arc = (r: number, a0: number, a1: number): Point[] => Array.from({length:15}, (_x, i) => POINT_AT(a0 + (a1 - a0) * i / 14, r));
+    const poly = [...arc(15, aw - 70, aw + 70), ...arc(75, aw + 70, aw - 70)];
+    const label = [32, 26, 38].map(r => POINT_AT(aw, r)).concat(SPREAD_GAPS).find(fn) ?? toward;
+    return {fn, label, show:[{poly}]};
   };
 }
 
@@ -228,6 +235,56 @@ export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
   };
 }
 
+/* Void Stardust: three puddles, then the spread (Comet) or the stack (Crushing Comet).
+   `toward` is the first weapon of the next set when it is a sword or scythe: the stack or
+   spread then moves toward it. The second Void Stardust has no weapons after it. */
+function voidSteps(s: Slot, spread: boolean, toward: Point | null): Step[] {
+  return [
+    {q:"Where do you drop the first puddle?", z:{c:[50,33],r:9}, a:"North of the boss, just outside the hitbox.", drop:true},
+    {q:"Second puddle?", zf:nextPuddle, a:"Just outside your first puddle, one small step clockwise.", drop:true},
+    {q:"Third puddle?", zf:nextPuddle, a:"Just outside the second puddle, clockwise again.", drop:true},
+    spread
+      ? {q:"Puddles done. Comet: everyone spreads, and the tanks and melee go to their fixed spots. Where do you go?",
+          zf:cometSpread(s, toward), cue:FIXED_SPREAD_MARKS,
+          a:toward ? "Anywhere on the first weapon's side of the arena (the shaded area), out of the puddles and not on a tank or melee spot."
+                   : "Any open spot. Healers and ranged have no fixed spread spot. Keep away from the tank and melee spots and out of the puddles."}
+      : toward ? {q:"Puddles done. Where does the group stack?", zf:stackToward(toward), a:"From the third puddle, move toward the first weapon, out of the puddles."}
+               : {q:"Puddles done. Where does the group stack?", zf:nextPuddle, a:"Just outside the third puddle, one more small step clockwise."}];
+}
+
+/* The first Void Stardust runs straight into the second weapon set: the weapons are already
+   out, so the party finds the first one early. A sword or scythe first means a run, so the
+   stack or spread moves toward it. An axe first keeps the usual spots. With `allWeapons`, the
+   scene goes on through the second and third weapons too (the full-fight tab). */
+export function voidIntoWeapons(s: Slot, spread: boolean, A: Run, allWeapons = false): Scene {
+  const first = A.W[0], run = first.type !== "axe", where = COMPASS[Math.round(first.a / 45) % 8];
+  const steps: Step[] = [
+    {q:"Before the puddles: which weapon goes first after Void Stardust? Click it.", z:{c:first.p, r:9},
+      a:"The " + first.type + ", " + where + ": its flat side is square to the boss. " +
+        (run ? "A sword or scythe first means a run, so the stack or spread moves toward it." : "An axe first means the party stacks in the middle, so the usual spots work.")},
+    ...voidSteps(s, spread, run ? first.p : null),
+    {...A.steps[0], q:"The " + (spread ? "spread" : "stack") + " went off. The boss goes to the first weapon. Click where you go.",
+      a:A.steps[0].a + " If you cannot make it in time, use Sprint. A scholar can use Expedient for the whole party."}];
+  if(allWeapons) steps.push(...A.steps.slice(1));
+  return {
+    setup:"The second set of weapons is out, each one turned, and Void Stardust starts. Three puddles drop under every player, one after another. After the third one, this time it is " +
+      (spread ? "a spread marker on every player (Comet)." : "a stack on a healer (Crushing Comet).") + " Then the boss goes to the first weapon.",
+    overlays:A.overlays.map(o => ({...o, spawn:undefined})),   // no fading: these steps are not one per weapon
+    // The boss stays in the middle for the pick, the puddles and the stack or spread (5 steps).
+    bossAt:n => A.states[Math.max(0, Math.min(n - 5, A.states.length - 1))],
+    steps,
+    rule:"Find the first weapon before the puddles: flat side square to the boss. Puddles start north, each just outside the last, clockwise. Sword or scythe first: stack or spread toward it, and use Sprint or Expedient if it is far." +
+      (spread ? " Comet spread fixed spots: MT NW, OT NE, M1 SW, M2 SE." : "")};
+}
+
+/** The second Void Stardust: the same puddles, ending the other way from the first one. */
+export function voidAgain(s: Slot, spread: boolean): Scene {
+  return {
+    setup:"Void Stardust again. Three puddles, then this time " + (spread ? "a spread (Comet)." : "a stack on a healer (Crushing Comet).") + " It always ends the other way from the first one.",
+    boss:BOSS, overlays:[], steps:voidSteps(s, spread, null),
+    rule:"Puddles start north, each just outside the last, clockwise. The second Void Stardust ends the other way from the first."};
+}
+
 /* ---------- map drills ---------- */
 export const BOSS: Boss = {x:50, y:50, f:0};
 // TS note: `(x): Overlay => (...)` gives the arrow function a return type. Without it,
@@ -254,36 +311,8 @@ export const MAPS: MapDrill[] = [
       bossAt:n => A.states[Math.min(n, A.states.length - 1)],
       steps:A.steps,
       rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ". Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: stack in the middle."}; }},
-  /* The first Void Stardust runs straight into the second weapon set: the weapons are already
-     out, so the party finds the first one early. A sword or scythe first means a run, so the
-     stack or spread moves toward it. An axe first keeps the usual spots. */
   {id:"m-void", order:4, variants:["stack","spread"], phase:P1, time:"1:13 to 1:35", title:"Void Stardust into the second weapons",
-    build:(s, v)=>{
-      const spread = v === "spread", A = buildAssault2(s), first = A.W[0], run = first.type !== "axe";
-      const where = COMPASS[Math.round(first.a / 45) % 8];
-      return {
-      setup:"The second set of weapons is out, each one turned, and Void Stardust starts. Three puddles drop under every player, one after another. After the third one, this time it is " +
-        (spread ? "a spread marker on every player (Comet)." : "a stack on a healer (Crushing Comet).") + " Then the boss goes to the first weapon.",
-      overlays:A.overlays.map(o => ({...o, spawn:undefined})),   // no fading: these steps are not one per weapon
-      bossAt:n => n >= 6 ? A.states[1] : A.states[0],
-      steps:[
-        {q:"Before the puddles: which weapon goes first after Void Stardust? Click it.", z:{c:first.p, r:9},
-          a:"The " + first.type + ", " + where + ": its flat side is square to the boss. " +
-            (run ? "A sword or scythe first means a run, so the stack or spread moves toward it." : "An axe first means the party stacks in the middle, so the usual spots work.")},
-        {q:"Where do you drop the first puddle?", z:{c:[50,33],r:9}, a:"North of the boss, just outside the hitbox.", drop:true},
-        {q:"Second puddle?", zf:nextPuddle, a:"Just outside your first puddle, one small step clockwise.", drop:true},
-        {q:"Third puddle?", zf:nextPuddle, a:"Just outside the second puddle, clockwise again.", drop:true},
-        spread
-          ? {q:"Puddles done. Comet: everyone spreads, and the tanks and melee go to their fixed spots. Where do you go?",
-              zf:cometSpread(s, run ? first.p : null), cue:FIXED_SPREAD_MARKS,
-              a:run ? "An open spot on the first weapon's side, away from the tank and melee spots and out of the puddles."
-                    : "Any open spot. Healers and ranged have no fixed spread spot. Keep away from the tank and melee spots and out of the puddles."}
-          : run ? {q:"Puddles done. Where does the group stack?", zf:stackToward(first.p), a:"From the third puddle, move toward the first weapon, out of the puddles."}
-                : {q:"Puddles done. Where does the group stack?", zf:nextPuddle, a:"Just outside the third puddle, one more small step clockwise."},
-        {...A.steps[0], q:"The " + (spread ? "spread" : "stack") + " went off. The boss goes to the first weapon. Click where you go.",
-          a:A.steps[0].a + " If you cannot make it in time, use Sprint. A scholar can use Expedient for the whole party."}],
-      rule:"Find the first weapon before the puddles: flat side square to the boss. Puddles start north, each just outside the last, clockwise. Sword or scythe first: stack or spread toward it, and use Sprint or Expedient if it is far." +
-        (spread ? " Comet spread fixed spots: MT NW, OT NE, M1 SW, M2 SE." : "")}; }},
+    build:(s, v)=>voidIntoWeapons(s, v === "spread", buildAssault2(s))},
   {id:"m-assault-2", order:5, phase:P1, time:"1:33", title:"Assault Evolved: second set",
     build:s=>{ const A = buildAssault2(s); return {
       setup:"Void Stardust is over. The three weapons from 1:13 are around the boss, each one turned, and he does not face one yet. The weapon that lies square across the line to him, with its flat side toward him, goes first. Then he goes clockwise, the same as the first set.",

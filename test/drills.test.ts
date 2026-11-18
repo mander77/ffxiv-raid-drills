@@ -125,8 +125,11 @@ test("Void Stardust spread: any open spot, on the first weapon's side for a swor
   assert.notOk(inZone([58, 36], z), "inside a puddle");
   assert.notOk(inZone([50, 58], z), "inside the hitbox");
   const south = cometSpread("H1", [50, 79])(VOID_RESULTS);
-  assert.ok(inZone([50, 83], south), "the south gap, on a south weapon's side");
+  if(!("fn" in south)) throw new Error("the spread zone is a rule zone");
+  assert.ok(inZone(south.label, south), "the shown spot");
+  for(const p of [[50, 83], [30, 75], [65, 88], [76, 72], [50, 70]] as Point[]) assert.ok(inZone(p, south), "on a south weapon's side: " + p);
   assert.notOk(inZone([30, 50], south), "west is not on a south weapon's side");
+  assert.notOk(inZone([35, 65], south), "on the M1 spot");
 });
 
 test("Void Stardust into the second weapons: every right spot is inside its zone", () => {

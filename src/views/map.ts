@@ -5,7 +5,7 @@ import { rotZone, rotOverlay, inZone, zoneCenter, f1 } from "../geometry";
 import { sceneSVG, drawOverlay, drawBoss, zoneSVG } from "../arena";
 import { PUDDLE_R } from "../data/drills";
 import { tabHead, renderRoundDone } from "./common";
-import type { MapDrill, Point } from "../types";
+import type { Boss, MapDrill, Point, Scene, StepResult } from "../types";
 
 /** The drill on screen. Only call this while a map drill shows. */
 // TS note: state.cur has the union type Cur. This helper checks `kind` and throws otherwise,
@@ -19,28 +19,35 @@ function run(): MapCur {
 export function drawFeedback(): void {
   const c = state.cur, svg = document.getElementById("arena-svg");
   if(!c || c.kind !== "map" || !svg) return;
-  const sc = c.scene, n = c.results.length, showLast = Boolean(c.waiting) || n >= sc.steps.length;
+  paintArena(svg, c.scene, c.k, c.results, Boolean(c.waiting) || c.results.length >= c.scene.steps.length);
+}
+
+/* Draw the answer layers on an arena: dropped puddles, cues, the boss, and, with showLast,
+   the zone and the click of the last answer. The drill tab and the full-fight tab both use it.
+   `boss` replaces the scene's boss, for example to hide his facing before he turns. */
+export function paintArena(svg: Element, sc: Scene, k: number, results: StepResult[], showLast: boolean, boss?: Boss | null): void {
+  const n = results.length;
   let drops = "", fb = "", rev = "";
-  c.results.forEach((r, i) => {
+  results.forEach((r, i) => {
     const step = sc.steps[i], z = r.z, ctr = zoneCenter(z);
     if(r.drop) drops += '<circle class="drop" cx="' + f1(r.drop[0]) + '" cy="' + f1(r.drop[1]) + '" r="' + PUDDLE_R + '"/>';
     if(step.leave) drops += drawOverlay(step.leave);
     if(i === n - 1 && showLast){
       const cls = r.ok ? "ok" : "bad";
-      if(step.reveal) rev = step.reveal.map(o => drawOverlay(rotOverlay(o, c.k))).join("");
+      if(step.reveal) rev = step.reveal.map(o => drawOverlay(rotOverlay(o, k))).join("");
       fb += '<g clip-path="url(#arenaClip)">' + zoneSVG(z, cls) + "</g>";
       const top = "c" in z ? z.c[1] - z.r : "rect" in z ? z.rect[1] : ctr[1] + 1;
       const bottom = "c" in z ? z.c[1] + z.r : "rect" in z ? z.rect[3] : ctr[1] - 1;
       const ly = "fn" in z ? ctr[1] : (top - 3 >= -3 ? top - 3 : bottom + 3);
       fb += '<g class="zlabel"><rect x="' + f1(ctr[0] - 3.2) + '" y="' + f1(ly - 2.1) + '" width="6.4" height="4.2" rx=".9"/><text x="' + f1(ctr[0]) + '" y="' + f1(ly) + '">' + state.slot + "</text></g>";
-      fb += '<g class="pick ' + cls + '" transform="translate(' + f1(r.p[0]) + " " + f1(r.p[1]) + ')"><circle class="halo" r="2.6"/><circle class="dot" r="1.1"/></g>';
+      if(!r.missed) fb += '<g class="pick ' + cls + '" transform="translate(' + f1(r.p[0]) + " " + f1(r.p[1]) + ')"><circle class="halo" r="2.6"/><circle class="dot" r="1.1"/></g>';
     }
   });
   // Cues show with their step's question and stay. They go on top of the puddles so that
   // a marker on an old puddle stays visible.
   const asking = showLast ? n - 1 : n;
-  const cues = sc.steps.slice(0, asking + 1).flatMap(st => st.cue ?? []).map(o => drawOverlay(rotOverlay(o, c.k))).join("");
-  const boss = sc.bossAt ? sc.bossAt(n) : (sc.boss ? rotOverlay(sc.boss, c.k) : null);
+  const cues = sc.steps.slice(0, asking + 1).flatMap(st => st.cue ?? []).map(o => drawOverlay(rotOverlay(o, k))).join("");
+  if(boss === undefined) boss = sc.bossAt ? sc.bossAt(n) : (sc.boss ? rotOverlay(sc.boss, k) : null);
   const layer = (id: string): Element => svg.querySelector("#" + id) as Element;
   layer("reveal-layer").innerHTML = rev;
   layer("drops").innerHTML = drops + cues;
