@@ -1,24 +1,34 @@
-import { esc, shuffle } from "../util.js";
-import { state, getDeck, record, view, stopTimer } from "../core.js";
-import { tabHead, renderRoundDone } from "./common.js";
-import { showPressureQ } from "./pressure.js";
+// Multiple-choice cards, used by the quiz tabs and the pressure round.
+import { esc, shuffle, el } from "../util";
+import { state, getDeck, record, view, stopTimer, type McqCur, type QuizCat } from "../core";
+import { tabHead, renderRoundDone } from "./common";
+import { showPressureQ } from "./pressure";
+import type { QuizItem } from "../types";
 
-/* ---------- multiple-choice view ---------- */
-export function prepMCQ(item, cat){
-  const q = item.build(state.slot);
-  state.cur = {kind:"mcq", cat, item, q, opts:shuffle(q.options.map(o => Object.assign({}, o))), answered:false, pick:-1, slow:false};
+/** The card on screen. Only call this while a multiple-choice card shows. */
+function card(): McqCur {
+  const c = state.cur;
+  if(!c || c.kind !== "mcq") throw new Error("No question is showing");
+  return c;
 }
-export function renderQuiz(cat){
+
+export function prepMCQ(item: QuizItem, cat: QuizCat | "pressure"): void {
+  const q = item.build(state.slot);
+  state.cur = {kind:"mcq", cat, item, q, opts:shuffle(q.options.map(o => ({...o}))), answered:false, pick:-1, slow:false};
+}
+
+export function renderQuiz(cat: QuizCat): void {
   const d = getDeck(cat);
   if(d.i >= d.items.length) return renderRoundDone(cat, d);
   prepMCQ(d.items[d.i], cat);
   view.innerHTML = tabHead(true) + '<div class="qwrap"><div class="panel" id="q-panel"></div></div>';
   drawMCQ();
 }
-export function drawMCQ(){
-  const c = state.cur, item = c.item, q = c.q, p = document.getElementById("q-panel");
+
+export function drawMCQ(): void {
+  const c = card(), item = c.item, q = c.q, p = el("q-panel");
   let prog = "";
-  if(c.cat === "pressure"){ const pr = state.pressure; prog = "Question " + (pr.i + 1) + " of " + pr.queue.length; }
+  if(c.cat === "pressure"){ const pr = state.pressure; if(pr) prog = "Question " + (pr.i + 1) + " of " + pr.queue.length; }
   else { const d = getDeck(c.cat); prog = "Card " + (d.i + 1) + " of " + d.items.length; }
   let h = '<div class="eyebrow"><b>' + esc(item.phase) + "</b><span>" + esc(item.time) + '</span><span class="progress">' + prog + "</span></div>";
   if(c.cat === "pressure" && !c.answered) h += '<div class="timer" id="timer" aria-hidden="true"><i></i></div>';
@@ -43,21 +53,26 @@ export function drawMCQ(){
     h += '<p class="hint" style="margin-top:12px">Press <kbd>1</kbd> to <kbd>' + c.opts.length + "</kbd> or click an answer.</p>";
   }
   p.innerHTML = h;
-  p.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => answer(Number(b.dataset.i))));
-  const nx = document.getElementById("q-next"); if(nx){ nx.addEventListener("click", nextQ); nx.focus({preventScroll:true}); }
+  p.querySelectorAll<HTMLElement>(".opt").forEach(b => b.addEventListener("click", () => answer(Number(b.dataset.i))));
+  const nx = document.getElementById("q-next");
+  if(nx){ nx.addEventListener("click", nextQ); nx.focus({preventScroll:true}); }
 }
-export function answer(i){
-  const c = state.cur; if(!c || c.kind !== "mcq" || c.answered) return;
+
+export function answer(i: number): void {
+  const c = state.cur;
+  if(!c || c.kind !== "mcq" || c.answered) return;
   stopTimer();
   c.answered = true; c.pick = i;
   const ok = c.opts[i].ok === true;
   record(c.item.id, ok);
-  if(c.cat === "pressure"){ if(ok) state.pressure.right++; else state.pressure.wrong++; }
+  if(c.cat === "pressure"){ if(state.pressure){ if(ok) state.pressure.right++; else state.pressure.wrong++; } }
   else { const d = getDeck(c.cat); d.done++; if(ok) d.right++; }
   drawMCQ();
 }
-export function nextQ(){
-  const c = state.cur;
-  if(c.cat === "pressure"){ state.pressure.i++; return showPressureQ(); }
-  getDeck(c.cat).i++; renderQuiz(c.cat);
+
+export function nextQ(): void {
+  const c = card();
+  if(c.cat === "pressure"){ if(state.pressure) state.pressure.i++; return showPressureQ(); }
+  getDeck(c.cat).i++;
+  renderQuiz(c.cat);
 }

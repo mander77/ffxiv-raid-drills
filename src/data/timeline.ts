@@ -1,9 +1,11 @@
-import { S } from "../util.js";
+// The M11S fight timeline and the phase labels.
+import { S } from "../util";
+import type { Kind, TimelineEvent } from "../types";
 
 export const P1 = "Phase 1: Trophy Weapons", P2 = "Phase 2: Meteorain", P3 = "Phase 3: Arena Split", P4 = "Phase 4: Ecliptic Stampede";
 
 /* ---------- timeline (cactbot r11s timeline, rounded to the second) ---------- */
-export const TL = [
+export const TL: TimelineEvent[] = [
   {t:"0:11", n:"Crown of Arcadia", k:"raidwide", job:s=>"Physical raidwide. Mitigate it, then heal up."},
   {t:"0:18", n:"Raw Steel Trophy (axe or scythe)", k:"buster", job:s=>"Hits land at 0:24 to 0:25. Axe: tanks stack, you spread " + S(s,"SSW","SSE") + " far out. Scythe: tanks spread, party stacks south."},
   {t:"0:38", n:"Trophy Weapons, then Assault Evolved", k:"mech", job:s=>"Weapon hits at 0:50, 0:55 and 1:00. The weapon he faces goes first, then clockwise. Every hit adds a vulnerability, so keep healing."},
@@ -34,4 +36,4 @@ export const TL = [
   {t:"9:53", n:"Heartbreak Kick (three towers)", k:"buster", job:s=>"The tower hits 5, then 6, then 7 times (9:53, 10:12, 10:33). Heal the tanks between hits."},
   {t:"11:00", n:"Heartbreaker (enrage)", k:"enrage", job:s=>"The boss must be dead before this."}
 ];
-export const KIND = {raidwide:"Raidwide", buster:"Tank buster", heal:"Heal-up", mech:"Mechanic", enrage:"Enrage"};
+export const KIND: Record<Kind, string> = {raidwide:"Raidwide", buster:"Tank buster", heal:"Heal-up", mech:"Mechanic", enrage:"Enrage"};

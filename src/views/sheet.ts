@@ -1,17 +1,22 @@
-import { S, esc, LS } from "../util.js";
-import { state, view, POOLS } from "../core.js";
-import { TL, KIND } from "../data/timeline.js";
-import { JOBS } from "../data/jobs.js";
-import { f1, vadd, unit, leftOf } from "../geometry.js";
-import { floorSVG, drawOverlay, drawWaymarks, drawBoss } from "../arena.js";
-import { tabHead } from "./common.js";
+// The cheat sheet: rules, positions, timeline and the suggested job plan on one page.
+import { S, esc, LS, el } from "../util";
+import { state, view, QUIZ_POOLS } from "../core";
+import { TL, KIND } from "../data/timeline";
+import { JOBS } from "../data/jobs";
+import { f1, vadd, unit, leftOf } from "../geometry";
+import { floorSVG, drawOverlay, drawWaymarks, drawBoss } from "../arena";
+import { tabHead } from "./common";
+import type { Point, Slot } from "../types";
 
-/* ---------- cheat sheet ---------- */
-export function swordDiagram(s){
-  const P = [21, 50], d = [-1, 0], L = leftOf(d), HW = 7, mine = S(s, 1, -1);
-  const pocket = side => { const sv = [L[0] * side, L[1] * side], corner = vadd(vadd(P, d, -HW), sv, HW); return [corner, vadd(corner, d, -32), vadd(vadd(corner, d, -32), sv, 32), vadd(corner, sv, 32)]; };
-  const poly = (pts, cls) => '<polygon class="zone ' + cls + '" points="' + pts.map(p => f1(p[0]) + "," + f1(p[1])).join(" ") + '"/>';
-  const label = (side, txt) => { const p = vadd(P, unit(vadd([-d[0], -d[1]], [L[0] * side, L[1] * side])), 17);
+/** A fixed sword example: the boss jumps west from the middle. The player's pocket is green. */
+export function swordDiagram(s: Slot): string {
+  const P: Point = [21, 50], d: Point = [-1, 0], L = leftOf(d), HW = 7, mine = S(s, 1, -1);
+  const pocket = (side: number): Point[] => {
+    const sv: Point = [L[0] * side, L[1] * side], corner = vadd(vadd(P, d, -HW), sv, HW);
+    return [corner, vadd(corner, d, -32), vadd(vadd(corner, d, -32), sv, 32), vadd(corner, sv, 32)];
+  };
+  const poly = (pts: Point[], cls: string): string => '<polygon class="zone ' + cls + '" points="' + pts.map(p => f1(p[0]) + "," + f1(p[1])).join(" ") + '"/>';
+  const label = (side: number, txt: string): string => { const p = vadd(P, unit(vadd([-d[0], -d[1]], [L[0] * side, L[1] * side])), 17);
     return '<g class="zlabel' + (side === mine ? "" : " other") + '"><rect x="' + f1(p[0] - 8) + '" y="' + f1(p[1] - 2.3) + '" width="16" height="4.6" rx=".9"/><text x="' + f1(p[0]) + '" y="' + f1(p[1]) + '">' + txt + "</text></g>"; };
   let h = '<svg viewBox="-4 -6 108 110" role="img" aria-label="Sword example. The boss jumps west from the middle. G1 takes the pocket behind his left side, G2 the pocket behind his right side.">';
   h += floorSVG(false) + '<text class="compass" x="50" y="-2.2">N</text>';
@@ -21,7 +26,7 @@ export function swordDiagram(s){
   h += drawWaymarks() + drawBoss({x:P[0], y:P[1], f:270}) + label(1, "G1 / H1") + label(-1, "G2 / H2");
   return h + "</svg>";
 }
-export function renderSheet(){
+export function renderSheet(): void {
   const s = state.slot;
   const rows = TL.map(e => '<tr><td class="t">' + e.t + '</td><td class="n">' + esc(e.n) + '<br><span class="chip k-' + e.k + '">' + KIND[e.k] + "</span></td><td>" + esc(e.job(s)) + "</td></tr>").join("");
   const seen = Object.keys(state.stats).length;
@@ -56,7 +61,7 @@ export function renderSheet(){
     "<section><h2>Your timeline as " + s + '</h2><div class="tablebox"><table><thead><tr><th>Time</th><th>Mechanic</th><th>Your job</th></tr></thead><tbody>' + rows + "</tbody></table></div>" +
     '<p class="hint">Times are from the cactbot fight timeline. Some phase 1 times move by a second or two with the axe or scythe opener.</p></section>' +
     "<section><h2>Suggested " + JOBS[state.job] + ' plan</h2><div class="tablebox"><table><thead><tr><th>Time</th><th>When</th><th>Press</th></tr></thead><tbody>' +
-    POOLS.job().slice().sort((a, b) => a.order - b.order).map(it => { const q = it.build(s), right = q.options.find(o => o.ok); return '<tr><td class="t">' + esc(it.time) + '</td><td class="n">' + esc(q.rule) + "</td><td>" + esc(right.t) + "</td></tr>"; }).join("") +
+    QUIZ_POOLS.job().slice().sort((a, b) => a.order - b.order).map(it => { const q = it.build(s), right = q.options.find(o => o.ok); return '<tr><td class="t">' + esc(it.time) + '</td><td class="n">' + esc(q.rule) + "</td><td>" + esc(right?.t ?? "") + "</td></tr>"; }).join("") +
     '</tbody></table></div><p class="hint">Switch jobs on the My job tab. This plan uses only your own buttons. Agree with your co-healer who covers each raidwide.</p></section>' +
     '<section><h2>Sources</h2><ul class="links">' +
     '<li><a href="https://wtfdig.info/74/m11s#hector:nobuddies:fixed" target="_blank" rel="noopener">wtfdig M11S</a> <span>Your strats: Hector (Toxic), Kindred No Buddies, Fixed (3CJ)</span></li>' +
@@ -70,7 +75,7 @@ export function renderSheet(){
     "<section><h2>Your progress</h2><p>You answered " + seen + " different items so far. Progress stays in this browser only.</p>" +
     '<div class="actions"><button type="button" class="btn ghost" id="reset">' + (state.confirmReset ? "Click again to erase progress" : "Reset my progress") + "</button></div></section></div>";
   state.cur = {kind:"sheet"};
-  document.getElementById("reset").addEventListener("click", () => {
+  el("reset").addEventListener("click", () => {
     if(!state.confirmReset){ state.confirmReset = true; return renderSheet(); }
     state.confirmReset = false; state.stats = {}; LS.del("stats"); state.decks = {}; renderSheet();
   });

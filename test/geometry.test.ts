@@ -1,6 +1,5 @@
-import { test } from "node:test";
-import assert from "node:assert/strict";
-import { rot, rotZone, inZone, angOf, leftOf } from "../js/geometry.js";
+import { test, assert } from "vitest";
+import { rot, rotZone, inZone, angOf, leftOf } from "../src/geometry";
 
 test("rot turns a point a quarter turn clockwise about the arena center", () => {
   assert.deepEqual(rot([50, 10], 1), [90, 50]);
@@ -25,7 +24,7 @@ test("leftOf gives the left-hand side of a facing", () => {
 
 test("inZone handles circles, rectangles and rule zones", () => {
   assert.ok(inZone([52, 50], {c:[50, 50], r:3}));
-  assert.ok(!inZone([54, 50], {c:[50, 50], r:3}));
+  assert.notOk(inZone([54, 50], {c:[50, 50], r:3}));
   assert.ok(inZone([10, 20], {rect:[0, 0, 25, 25]}));
-  assert.ok(inZone([1, 1], {fn:p => p[0] < 5, label:[1, 1]}));
+  assert.ok(inZone([1, 1], {fn:p => p[0] < 5, label:[1, 1], show:[]}));
 });

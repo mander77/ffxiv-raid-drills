@@ -1,8 +1,12 @@
-import { P1, P2, P3, P4 } from "./timeline.js";
+// Suggested White Mage and Sage plans for M11S, built from the official job guide recasts.
+import { P1, P2, P3, P4 } from "./timeline";
+import type { Job, Question, QuizItem, Slot } from "../types";
 
 /* ---------- job drills: a suggested plan, from the official job guide recasts ---------- */
-export function jq(job, id, order, phase, time, build){ return {job, id, order, phase, time, build}; }
-export const JOB = [
+export function jq(job: Job, id: string, order: number, phase: string, time: string, build: (s: Slot) => Question): QuizItem {
+  return {job, id, order, phase, time, build};
+}
+export const JOB: QuizItem[] = [
   jq("whm", "j-whm-lily", 0, "Before the pull", "0:00", s=>({prompt:"How do your Lilies work in this fight?",
     options:[{t:"You start the fight with full Lilies, then gain 1 every 20 seconds, up to 3.", ok:true},{t:"You start with none and gain one per Glare."},{t:"They only come back after Afflatus Misery."},{t:"You gain one every 60 seconds."}],
     why:"Afflatus Solace and Afflatus Rapture are free, instant heals. Every 3 Lilies you spend bloom the Blood Lily for Afflatus Misery. Patch 7.4 made Lilies start full at the beginning of a duty.",
@@ -109,4 +113,4 @@ export const JOB = [
     why:"Egeiro costs 2,400 MP. Swiftcast (40 seconds) makes it instant. Your Addersgall heals give back 7% MP each, which helps after a raise.",
     rule:"Swiftcast, Egeiro."}))
 ];
-export const JOBS = {whm:"White Mage", sge:"Sage"};
+export const JOBS: Record<Job, string> = {whm:"White Mage", sge:"Sage"};

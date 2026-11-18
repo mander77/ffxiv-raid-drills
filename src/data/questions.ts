@@ -1,11 +1,15 @@
-import { S, shuffle } from "../util.js";
-import { P1, P2, P3, P4, TL } from "./timeline.js";
+// Quiz questions: mechanics, raise decisions, and questions made from the timeline.
+import { S, shuffle } from "../util";
+import { P1, P2, P3, P4, TL } from "./timeline";
+import type { Question, QuizItem, Slot, TimelineEvent } from "../types";
 
 export const ANDREW = "Andrew's rule";
 
 /* ---------- mechanic questions ---------- */
-export function mq(id, order, phase, time, build){ return {id, order, phase, time, build}; }
-export const MECH = [
+export function mq(id: string, order: number, phase: string, time: string, build: (s: Slot) => Question): QuizItem {
+  return {id, order, phase, time, build};
+}
+export const MECH: QuizItem[] = [
   mq("k-raw-first", 1, P1, "0:18", s=>({prompt:"Raw Steel Trophy: the boss pulls out a scythe. What happens?",
     options:[{t:"Tanks spread, and the party stacks south behind the boss.", ok:true},{t:"Tanks stack, and the party spreads."},{t:"Everyone spreads on their clock spot."},{t:"The party stacks north, in front of the boss."}],
     why:"The scythe cones the two tanks, and the rest of the party shares one stack. The axe is the reverse: a shared tank buster and six spread hits.",
@@ -179,7 +183,7 @@ export const MECH = [
 ];
 
 /* ---------- someone died: recovery decisions ---------- */
-export const DEATH = [
+export const DEATH: QuizItem[] = [
   mq("d-freeze", 0, "Panic reset", "Any time", s=>({prompt:"You notice you froze. What is the first thing to do?",
     options:[{t:"Move to your spot for the next mechanic. Then heal.", ok:true},{t:"Stand still until you are sure."},{t:"Spam your strongest heal where you stand."},{t:"Wait for someone to tell you."}],
     why:"Being in the right place keeps you alive. From there, use the order: yourself, then the raise, then the party. (This reset is the drill's own advice, built on Andrew's order.)",
@@ -243,12 +247,12 @@ export const DEATH = [
 ];
 
 /* ---------- generated timeline questions ---------- */
-export const NEXT_ITEMS = [];
+export const NEXT_ITEMS: QuizItem[] = [];
 TL.slice(0, -1).forEach((ev, i) => {
   NEXT_ITEMS.push({id:"n-" + i, order:i, phase:"Timeline", time:ev.t, build:s => {
     const right = TL[i + 1];
     const names = new Set([right.n, ev.n]);
-    const picks = [];
+    const picks: TimelineEvent[] = [];
     shuffle(TL.slice()).forEach(e => { if(picks.length < 3 && !names.has(e.n)){ names.add(e.n); picks.push(e); } });
     return {prompt:ev.n + " (" + ev.t + ") just happened. What comes next?",
       options:[{t:right.n, ok:true}, ...picks.map(p => ({t:p.n}))],

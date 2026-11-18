@@ -1,23 +1,37 @@
-import { S, shuffle } from "../util.js";
-import { P1, P2, P3, P4 } from "./timeline.js";
-import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry.js";
+// Map drills: the arena scenes and the rules that decide each answer zone.
+import { S, shuffle } from "../util";
+import { P1, P2, P3, P4 } from "./timeline";
+import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry";
+import type { Boss, MapDrill, Overlay, Point, RectZone, Slot, Step, StepResult, Zone } from "../types";
 
+export type WeaponType = "axe" | "sword" | "scythe";
+/** One weapon in a jump run. `a` is its direction from the arena center, in degrees clockwise from north. */
+export interface Weapon { a: number; p: Point; type: WeaponType; where?: string; tornado?: boolean }
+/** Everything a jump-run drill needs: the weapons, where the boss stands after each jump, the steps and the drawing. */
+export interface Run { W: Weapon[]; states: Boss[]; steps: Step[]; overlays: Overlay[] }
+
+const WEAPON_TYPES: WeaponType[] = ["axe", "sword", "scythe"];
 const ORDINALS = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"];
-const atAngle = a => [50 + 29 * Math.sin(a * DEG), 50 - 29 * Math.cos(a * DEG)];
+const atAngle = (a: number): Point => [50 + 29 * Math.sin(a * DEG), 50 - 29 * Math.cos(a * DEG)];
 
 /* A jump run: the boss starts in the middle and jumps to each weapon in order.
-   He faces the way he jumped, so relative north at each weapon = his travel direction.
-   W is the weapon list in jump order: {a: degrees clockwise from north, p: [x, y], type, where?, tornado?}. */
-function buildRun(s, W){
-  const states = [{x:50, y:50, f:W[0].a}];
-  let prev = [50, 50];
-  W.forEach(w => { const d = unit([w.p[0] - prev[0], w.p[1] - prev[1]]); states.push({x:w.p[0], y:w.p[1], f:angOf(d), d}); prev = w.p; });
+   He faces the way he jumped, so relative north at each weapon = his travel direction. */
+function buildRun(s: Slot, W: Weapon[]): Run {
+  const states: Boss[] = [{x:50, y:50, f:W[0].a}];
+  const dirs: Point[] = [];   // dirs[i] = the direction of the jump into weapon i
+  let prev: Point = [50, 50];
+  W.forEach(w => {
+    const d = unit([w.p[0] - prev[0], w.p[1] - prev[1]]);
+    dirs.push(d);
+    states.push({x:w.p[0], y:w.p[1], f:angOf(d), d});
+    prev = w.p;
+  });
   /* The scythe lies with its butt on his left and its blade end on his right as he lands,
      so H1 (butt) and H2 (point) can read their spot from the weapon itself. */
-  const overlays = [];
+  const overlays: Overlay[] = [];
   W.forEach((w, i) => {
     if(w.type === "scythe"){
-      const d = states[i + 1].d;
+      const d = dirs[i];
       overlays.push({t:"scythe", spawn:i, x:w.p[0], y:w.p[1], ux:-d[1], uy:d[0], dx:d[0], dy:d[1]}, {t:"tag", spawn:i, x:w.p[0] - d[0] * 9, y:w.p[1] - d[1] * 9, s:"SCYTHE"});
     } else {
       const out = vadd(w.p, unit([w.p[0] - 50, w.p[1] - 50]), 7.5);
@@ -25,10 +39,10 @@ function buildRun(s, W){
     }
   });
   const HW = 7, side = S(s, 1, -1), own = S(s, "left", "right");
-  const steps = W.map((w, i) => {
-    const st = states[i + 1], P = [st.x, st.y], d = st.d, L = leftOf(d), sv = [L[0] * side, L[1] * side];
+  const steps = W.map((w, i): Step => {
+    const st = states[i + 1], P: Point = [st.x, st.y], d = dirs[i], L = leftOf(d), sv: Point = [L[0] * side, L[1] * side];
     const where = w.where || COMPASS[Math.round(w.a / 45) % 8];
-    let z, a, reveal;
+    let z: Zone, a: string, reveal: Overlay[];
     if(w.type === "axe"){
       z = {c:vadd(P, unit([50 - P[0], 50 - P[1]]), 28), r:7};
       a = "Axe, " + where + ": stack with the whole party in the middle, outside the axe AoE.";
@@ -38,7 +52,8 @@ function buildRun(s, W){
       a = "Scythe, " + where + ": close in at the " + S(s, "butt (the handle end)", "point (the blade end)") + " of the scythe.";
       reveal = [{t:"donut", x:P[0], y:P[1], r1:13, r2:75}];
     } else {
-      const fn = p => { const v = [p[0] - P[0], p[1] - P[1]], f = v[0] * d[0] + v[1] * d[1], sd = v[0] * sv[0] + v[1] * sv[1]; return inArena(p) && f < -HW && sd > HW && Math.hypot(v[0], v[1]) <= 40; };
+      // Safe pocket: behind him (f < -HW) and on your side (sd > HW), outside both arms of the cross.
+      const fn = (p: Point): boolean => { const v: Point = [p[0] - P[0], p[1] - P[1]], f = v[0] * d[0] + v[1] * d[1], sd = v[0] * sv[0] + v[1] * sv[1]; return inArena(p) && f < -HW && sd > HW && Math.hypot(v[0], v[1]) <= 40; };
       const corner = vadd(vadd(P, d, -HW), sv, HW);
       const poly = [corner, vadd(corner, d, -32), vadd(vadd(corner, d, -32), sv, 32), vadd(corner, sv, 32)];
       z = {fn, show:[{poly}], label:vadd(P, unit(vadd([-d[0], -d[1]], sv)), 17)};
@@ -46,14 +61,14 @@ function buildRun(s, W){
       reveal = [{t:"band", x:P[0] - d[0] * 150, y:P[1] - d[1] * 150, x2:P[0] + d[0] * 150, y2:P[1] + d[1] * 150, w:HW * 2},
                 {t:"band", x:P[0] - L[0] * 150, y:P[1] - L[1] * 150, x2:P[0] + L[0] * 150, y2:P[1] + L[1] * 150, w:HW * 2}];
     }
-    const leave = w.tornado ? {t:"tornado", x:P[0], y:P[1]} : null;
+    const leave: Overlay | null = w.tornado ? {t:"tornado", x:P[0], y:P[1]} : null;
     return {q:ORDINALS[i] + " weapon: click where you go.", z, a, reveal, leave};
   });
   return {W, states, steps, overlays};
 }
 
 /* Assault Evolved: three weapons. The boss faces the first, then goes clockwise. */
-export function buildAssault(s){
+export function buildAssault(s: Slot): Run {
   const spots = [0,45,90,135,180,225,270,315];
   let pick = [0,135,225];
   for(let t = 0; t < 60; t++){
@@ -62,33 +77,34 @@ export function buildAssault(s){
   }
   const a0 = pick[0];
   const order = [a0].concat(pick.slice(1).sort((x, y) => ((x - a0 + 360) % 360) - ((y - a0 + 360) % 360)));
-  const types = shuffle(["axe","sword","scythe"]);
-  return buildRun(s, order.map((a, i) => ({a, p:atAngle(a), type:types[i]})));
+  const types = shuffle([...WEAPON_TYPES]);
+  return buildRun(s, order.map((a, i): Weapon => ({a, p:atAngle(a), type:types[i]})));
 }
 
 /* Ultimate Trophy Weapons: six weapons, resolved in spawn order.
    The first spawns south, slightly west (then clockwise) or slightly east (then counterclockwise).
    The second spawns northwest or northeast. The rest sit on cardinals, and the last is north.
    The first three are all different, and so are the last three. The last four leave tornadoes. */
-export function buildUltimate(s){
+export function buildUltimate(s: Slot): Run & {cw: boolean} {
   const cw = Math.random() < 0.5;
   const angles = cw ? [200, 315, 90, 180, 270, 0] : [160, 45, 270, 180, 90, 0];
   const names = cw ? ["south, slightly west", "northwest", "east", "south", "west", "north"]
                    : ["south, slightly east", "northeast", "west", "south", "east", "north"];
-  const types = shuffle(["axe","sword","scythe"]).concat(shuffle(["axe","sword","scythe"]));
-  const run = buildRun(s, angles.map((a, i) => ({a, p:atAngle(a), type:types[i], where:names[i], tornado:i >= 2})));
-  run.states[0].f = null;
-  return Object.assign(run, {cw});
+  const types = shuffle([...WEAPON_TYPES]).concat(shuffle([...WEAPON_TYPES]));
+  const run = buildRun(s, angles.map((a, i): Weapon => ({a, p:atAngle(a), type:types[i], where:names[i], tornado:i >= 2})));
+  run.states[0].f = null;   // no facing arrow, so the spawn order is the only clue
+  return {...run, cw};
 }
 
 /* Void Stardust: each puddle goes just outside the previous one, one small step clockwise.
    The next spot is judged from where the last puddle actually dropped. */
 export const PUDDLE_R = 6.5;
-export function nextPuddle(results){
-  const q = results[results.length - 1].drop, rq = Math.max(8, Math.hypot(q[0] - 50, q[1] - 50));
+export function nextPuddle(results: StepResult[]): Zone {
+  const q: Point = results[results.length - 1].drop ?? [50, 33];
+  const rq = Math.max(8, Math.hypot(q[0] - 50, q[1] - 50));
   const step = 2 * Math.asin(Math.min(1, (PUDDLE_R + 2.5) / (2 * rq))) / DEG, ia = (angOf([q[0] - 50, q[1] - 50]) + step) * DEG;
-  const ideal = [50 + rq * Math.sin(ia), 50 - rq * Math.cos(ia)];
-  const fn = p => {
+  const ideal: Point = [50 + rq * Math.sin(ia), 50 - rq * Math.cos(ia)];
+  const fn = (p: Point): boolean => {
     const dq = Math.hypot(p[0] - q[0], p[1] - q[1]), r = Math.hypot(p[0] - 50, p[1] - 50);
     const cw = (angOf([p[0] - 50, p[1] - 50]) - angOf([q[0] - 50, q[1] - 50]) + 360) % 360;
     return inArena(p) && dq >= PUDDLE_R && dq <= PUDDLE_R + 6 && r >= 6 && r <= 32 && cw > 3 && cw < 110;
@@ -98,31 +114,35 @@ export function nextPuddle(results){
 
 /* Orbital Omen, simplified to 4 lanes each way. Each set fires one north lane and one east lane.
    Set 2 always crosses in one of the four middle squares. */
-export function buildOrbital(){
-  const outer = shuffle([0,3]), inner = shuffle([1,2]);
+export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
+  // V[i] is the column (0-3) the #(i+1) north portal fires down. H[i] is the row the #(i+1) east portal fires across.
+  const outer = shuffle([0, 3]), inner = shuffle([1, 2]);
   const V = [outer[0], inner[0]].concat(shuffle([outer[1], inner[1]]));
-  const H = shuffle([1,2]).concat(shuffle([0,3]));
-  const lane = (n, vert) => vert ? {rect:[n * 25, 0, n * 25 + 25, 100]} : {rect:[0, n * 25, 100, n * 25 + 25]};
-  const inV = (p, n) => p[0] >= n * 25 && p[0] <= n * 25 + 25, inH = (p, n) => p[1] >= n * 25 && p[1] <= n * 25 + 25;
+  const H = shuffle([1, 2]).concat(shuffle([0, 3]));
+  const lane = (n: number, vert: boolean): RectZone => vert ? {rect:[n * 25, 0, n * 25 + 25, 100]} : {rect:[0, n * 25, 100, n * 25 + 25]};
+  const inV = (p: Point, n: number): boolean => p[0] >= n * 25 && p[0] <= n * 25 + 25;
+  const inH = (p: Point, n: number): boolean => p[1] >= n * 25 && p[1] <= n * 25 + 25;
   /* Hector's dodge: stay in the four middle squares against the boss hitbox and cross it
      to whichever middle square the next lines miss. */
-  const mid = p => p[0] >= 25 && p[0] <= 75 && p[1] >= 25 && p[1] <= 75;
-  const side = p => Math.abs(p[0] - 50) > Math.abs(p[1] - 50);
-  const misses = (p, sets) => sets.every(i => !inV(p, V[i]) && !inH(p, H[i]));
-  const cellRect = (c, r) => ({rect:[c * 25, r * 25, c * 25 + 25, r * 25 + 25]});
-  const spot = (c, r) => [c === 1 ? 38 : 62, r === 1 ? 44 : 56];
+  const mid = (p: Point): boolean => p[0] >= 25 && p[0] <= 75 && p[1] >= 25 && p[1] <= 75;
+  const side = (p: Point): boolean => Math.abs(p[0] - 50) > Math.abs(p[1] - 50);
+  const misses = (p: Point, sets: number[]): boolean => sets.every(i => !inV(p, V[i]) && !inH(p, H[i]));
+  const cellRect = (c: number, r: number): RectZone => ({rect:[c * 25, r * 25, c * 25 + 25, r * 25 + 25]});
+  const spot = (c: number, r: number): Point => [c === 1 ? 38 : 62, r === 1 ? 44 : 56];
   const c2 = V[1], r2 = H[1], cOpp = 3 - V[1], r1 = H[0];
-  const overlays = [];
+  const overlays: Overlay[] = [];
   V.forEach((n, i) => overlays.push({t:"guide", x:n * 25 + 12.5, y:0, x2:n * 25 + 12.5, y2:100}, {t:"portal", x:n * 25 + 12.5, y:2.6, vert:true, n:i + 1}));
   H.forEach((n, i) => overlays.push({t:"guide", x:0, y:n * 25 + 12.5, x2:100, y2:n * 25 + 12.5}, {t:"portal", x:97.4, y:n * 25 + 12.5, vert:false, n:i + 1}));
-  const lanes = sets => sets.map(i => ({t:"lane", rect:lane(V[i], true).rect})).concat(sets.map(i => ({t:"lane", rect:lane(H[i], false).rect})));
+  const lanes = (sets: number[], soft = false): Overlay[] =>
+    sets.flatMap((i): Overlay[] => [{t:"lane", rect:lane(V[i], true).rect, soft}, {t:"lane", rect:lane(H[i], false).rect, soft}]);
+  const fireAndFury: Overlay[] = [{t:"poly", pts:[[50, 50], [0, 0], [100, 0]]}, {t:"poly", pts:[[50, 50], [0, 100], [100, 100]]}];
   return {
     overlays,
     steps:[
       {q:"Before the #1 lines and Fire and Fury: where do you stand?",
         z:{fn:p => mid(p) && side(p) && misses(p, [0]), label:spot(c2, r2), show:[cellRect(1, r2), cellRect(2, r2)]},
         a:"Against the boss hitbox at his side, in a middle square the #1 lines miss. Best start: the square where the #2 lines cross.",
-        reveal:[{t:"poly", pts:[[50,50],[0,0],[100,0]]}, {t:"poly", pts:[[50,50],[0,100],[100,100]]}].concat(lanes([0]))},
+        reveal:[...fireAndFury, ...lanes([0])]},
       {q:"The #1 lines and Fire and Fury went off. The #2 lines are next. Where do you go?",
         z:{fn:p => mid(p) && misses(p, [1]), label:spot(cOpp, r1), show:[cellRect(cOpp, r1)]},
         a:"Across the boss hitbox to the opposite middle square. The #2 lines miss it.",
@@ -130,16 +150,20 @@ export function buildOrbital(){
       {q:"The #2 lines went off. Where do you go now?",
         z:{fn:p => mid(p) && misses(p, [2, 3]), label:spot(c2, r2), show:[{rect:[c2 * 25, 25, c2 * 25 + 25, 75]}]},
         a:"Back across the hitbox, into the column the #2 line already hit. The #3 and #4 lines miss it, so you stay there.",
-        reveal:lanes([2, 3]).map(o => Object.assign(o, {soft:true}))}
+        reveal:lanes([2, 3], true)}
     ]
   };
 }
 
 /* ---------- map drills ---------- */
-export const BOSS = {x:50, y:50, f:0};
-export const NPUD = [22,34,46,58,70,82].map(x => ({t:"puddle", x, y:5, r:6}));
-export const SPUD = [18,30,42,54,66,78].map(x => ({t:"puddle", x, y:95, r:6}));
-export const MAPS = [
+export const BOSS: Boss = {x:50, y:50, f:0};
+// TS note: `(x): Overlay => (...)` gives the arrow function a return type. Without it,
+// TypeScript would type t as plain string, and "puddle" would not fit the Overlay union.
+export const NPUD = [22, 34, 46, 58, 70, 82].map((x): Overlay => ({t:"puddle", x, y:5, r:6}));
+export const SPUD = [18, 30, 42, 54, 66, 78].map((x): Overlay => ({t:"puddle", x, y:95, r:6}));
+// TS note: the `MapDrill[]` annotation is what checks every drill below. Each build function
+// must return a Scene, so a missing field or a misspelled one is a compile error.
+export const MAPS: MapDrill[] = [
   {id:"m-raw-axe", order:2, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: axe",
     build:s=>({setup:"The boss pulls out an axe. The two tanks stack for a shared buster. The other six players each get an AoE, so everyone else spreads.",
       boss:BOSS, overlays:[{t:"tag",x:50,y:56,s:"AXE"},{t:"mark",x:47,y:31,l:"MT",r:"T"},{t:"mark",x:53,y:31,l:"OT",r:"T"}],
@@ -197,9 +221,10 @@ export const MAPS = [
     build:s=>({setup:"Healers bait the second set, and you have a meteor marker. Two rocks are already down inside the boss hitbox: one NE and one SW.",
       boss:BOSS, overlays:[{t:"rock",x:57,y:43},{t:"rock",x:43,y:57}],
       steps:[{q:"Where do you drop your meteor?",
-        z:S(s, {fn:p => { const r = Math.hypot(p[0] - 50, p[1] - 50), a = angOf([p[0] - 50, p[1] - 50]); return r >= 3 && r <= 11.5 && a >= 285 && a <= 345; },
-                label:[43,43], show:[{poly:[[50,50]].concat([285,300,315,330,345].map(a => [50 + 11 * Math.sin(a * DEG), 50 - 11 * Math.cos(a * DEG)]))}]},
-               {c:[26,74], r:8}),
+        // S<Zone>: the H1 answer is a rule zone and the H2 answer is a circle, so name the shared type.
+        z:S<Zone>(s, {fn:p => { const r = Math.hypot(p[0] - 50, p[1] - 50), a = angOf([p[0] - 50, p[1] - 50]); return r >= 3 && r <= 11.5 && a >= 285 && a <= 345; },
+                label:[43, 43], show:[{poly:[[50, 50], ...[285, 300, 315, 330, 345].map((a): Point => [50 + 11 * Math.sin(a * DEG), 50 - 11 * Math.cos(a * DEG)])]}]},
+               {c:[26, 74], r:8}),
         a:S(s, "Inside the boss hitbox, on his NW side.", "SW, in line with the first SW rock, about halfway to the edge.")}],
       rule:S(s, "H1 drops NW, inside the boss hitbox.", "H2 drops SW in line with the first rock. That rock already sits inside the hitbox, and two rocks too close together explode, so yours goes farther out.") + " Icy Veins swaps H1 and H2 here, so do not mix guides."})},
   {id:"m-meteor-3", order:16.2, phase:P2, time:"5:20", title:"Meteorain: third stack",
@@ -230,13 +255,13 @@ export const MAPS = [
       steps:[{q:"Where do you stand?", z:S(s,{c:[25,74],r:9},{c:[75,74],r:9}), a:S(s,"Southwest, outside.","Southeast, outside.")}],
       rule:"Marked? Go to the safe corner on your wall. Two marked on one side? The one closer to the proximity AoE moves."})},
   {id:"m-ecl-two", order:26.5, variants:["north","south"], phase:P4, time:"9:31", title:"Ecliptic Stampede: Two-way Fireball",
-    build:(s,v)=>({setup:"You were marked and dropped your puddles along the " + v.toUpperCase() + " wall. Now the boss casts Two-way Fireball: two line stacks, east and west.",
+    build:(_s, v)=>({setup:"You were marked and dropped your puddles along the " + (v ?? "north").toUpperCase() + " wall. Now the boss casts Two-way Fireball: two line stacks, east and west.",
       boss:BOSS, overlays:[...NPUD, ...SPUD],
-      steps:[{q:"Which line stack do you join? Click it.", z: v === "north" ? {rect:[16,43,40,57]} : {rect:[60,43,84,57]}, a: v === "north" ? "The west line stack." : "The east line stack."}],
+      steps:[{q:"Which line stack do you join? Click it.", z: v === "south" ? {rect:[60,43,84,57]} : {rect:[16,43,40,57]}, a: v === "south" ? "The east line stack." : "The west line stack."}],
       rule:"Two-way: north puddles = west, south puddles = east."})},
   {id:"m-ecl-four", order:26.6, variants:["north","south"], phase:P4, time:"9:31", title:"Ecliptic Stampede: Four-way Fireball",
-    build:(s,v)=>({setup:"You were marked and dropped your puddles along the " + v.toUpperCase() + " wall. Now the boss casts Four-way Fireball: two-player stacks on the four closest.",
+    build:(_s, v)=>({setup:"You were marked and dropped your puddles along the " + (v ?? "north").toUpperCase() + " wall. Now the boss casts Four-way Fireball: two-player stacks on the four closest.",
       boss:BOSS, overlays:[...NPUD, ...SPUD],
-      steps:[{q:"Where do you bait?", z: v === "north" ? {c:[43,43],r:5.5} : {c:[57,43],r:5.5}, a: v === "north" ? "NW, on the boss hitbox ring." : "NE, on the boss hitbox ring."}],
+      steps:[{q:"Where do you bait?", z: v === "south" ? {c:[57,43],r:5.5} : {c:[43,43],r:5.5}, a: v === "south" ? "NE, on the boss hitbox ring." : "NW, on the boss hitbox ring."}],
       rule:"Four-way: north puddles = NW, south puddles = NE. M1 is always SW, M2 always SE."})}
 ];

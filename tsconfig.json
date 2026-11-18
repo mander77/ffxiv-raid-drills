@@ -1,0 +1,28 @@
+// Settings for the TypeScript compiler (tsc). Unlike plain JSON, this file allows comments.
+// `npm run typecheck` runs tsc. It only checks types. Vite does the actual compiling.
+{
+  "compilerOptions": {
+    // The JavaScript version to check against, and the browser APIs that exist (DOM).
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // Adds types for Vite features, such as importing a .css file.
+    "types": ["vite/client"],
+    // Resolve imports the way Vite does, so "./util" finds util.ts.
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    // Requires `import type` for type-only imports, so tools can drop them safely.
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    // Do not type-check the code inside node_modules.
+    "skipLibCheck": true,
+    // tsc writes no files. Vite builds the output.
+    "noEmit": true,
+    // The strict checks: no hidden `any`, and null must be handled. Like C# nullable warnings as errors.
+    "strict": true,
+    // Report variables and imports that are never used.
+    "noUnusedLocals": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src", "test", "vite.config.ts"]
+}
