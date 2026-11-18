@@ -1,11 +1,11 @@
 // The "Where do I stand?" tab: click the arena, then see the answer zone.
 import { esc, el } from "../util";
-import { state, getDeck, record, view, type MapCur } from "../core";
+import { state, getDeck, record, view, type Deck, type MapCur } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter, f1 } from "../geometry";
 import { sceneSVG, drawOverlay, drawBoss, zoneSVG } from "../arena";
 import { PUDDLE_R } from "../data/drills";
 import { tabHead, renderRoundDone } from "./common";
-import type { Point } from "../types";
+import type { MapDrill, Point } from "../types";
 
 /** The drill on screen. Only call this while a map drill shows. */
 // TS note: state.cur has the union type Cur. This helper checks `kind` and throws otherwise,
@@ -78,13 +78,28 @@ export function renderMap(fresh = true): void {
     state.cur = {kind:"map", item, scene:item.build(state.slot, v), k:item.rotate ? Math.floor(Math.random() * 4) : 0, results:[], counted:false};
   }
   const c = run();
-  view.innerHTML = tabHead(true) +
+  view.innerHTML = tabHead(true) + '<div class="mapwrap">' + drillNav(d) +
     '<div class="stage"><div class="arena">' + sceneSVG(c.scene, c.k) +
     '<div class="legend"><span><i style="background:var(--ring)"></i>Boss hitbox and facing</span><span><i style="background:var(--aoe)"></i>AoE</span><span><i style="background:var(--tank)"></i>Tank</span><span><i style="background:var(--dps)"></i>DPS</span></div></div>' +
-    '<div class="panel" id="map-panel"></div></div>';
+    '<div class="panel" id="map-panel"></div></div></div>';
   el("arena-svg").addEventListener("click", onArenaClick);
+  view.querySelectorAll<HTMLButtonElement>("[data-drill]").forEach(b => b.addEventListener("click", () => {
+    getDeck("map").i = Number(b.dataset.drill); renderMap(true);
+  }));
+  // On narrow screens the list scrolls sideways. Bring the current drill into view.
+  const nav = view.querySelector<HTMLElement>(".drillnav"), now = nav?.querySelector<HTMLElement>("[aria-current]");
+  if(nav && now) nav.scrollLeft = now.offsetLeft - (nav.clientWidth - now.offsetWidth) / 2;
   drawFeedback();
   drawMapPanel();
+}
+
+/** Every drill in the deck, in deck order. Click one to jump to it. */
+// TS note: Deck<MapDrill> fills in the type parameter of the generic interface Deck<T>,
+// the way List<MapDrill> does in C#. So d.items is MapDrill[], and m.title is a known field.
+function drillNav(d: Deck<MapDrill>): string {
+  return '<nav class="drillnav" aria-label="Drills"><ol>' + d.items.map((m, i) =>
+    '<li><button type="button" data-drill="' + i + '"' + (i === d.i ? ' aria-current="step"' : "") + ">" +
+    '<span class="dn-time">' + esc(m.time) + "</span>" + esc(m.title) + "</button></li>").join("") + "</ol></nav>";
 }
 
 export function drawMapPanel(): void {
