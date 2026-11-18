@@ -35,7 +35,7 @@ function buildRun(s: Slot, W: Weapon[]): Run {
       overlays.push({t:"scythe", spawn:i, x:w.p[0], y:w.p[1], ux:-d[1], uy:d[0], dx:d[0], dy:d[1]}, {t:"tag", spawn:i, x:w.p[0] - d[0] * 9, y:w.p[1] - d[1] * 9, s:"SCYTHE"});
     } else {
       const out = vadd(w.p, unit([w.p[0] - 50, w.p[1] - 50]), 7.5);
-      overlays.push({t:"tag", spawn:i, x:out[0], y:out[1], s:w.type.toUpperCase()}, {t:"target", spawn:i, x:w.p[0], y:w.p[1]});
+      overlays.push({t:"tag", spawn:i, x:out[0], y:out[1], s:w.type.toUpperCase()}, {t:w.type, spawn:i, x:w.p[0], y:w.p[1]});
     }
   });
   const HW = 7, side = S(s, 1, -1), own = S(s, "left", "right");

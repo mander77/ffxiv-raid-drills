@@ -54,6 +54,8 @@ type OverlayShape =
   | ({ t: "rock" } & At)
   | ({ t: "tower" } & At)
   | ({ t: "target" } & At)
+  | ({ t: "axe" } & At)
+  | ({ t: "sword" } & At)
   | ({ t: "puddle"; r: number } & At)
   | ({ t: "tag"; s: string } & At)
   | ({ t: "mark"; l: string; r: "T" | "D" | "H" } & At)

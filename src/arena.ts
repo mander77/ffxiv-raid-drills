@@ -1,6 +1,6 @@
 // SVG drawing for the arena map.
 import { esc } from "./util";
-import { f1, vadd, rotOverlay } from "./geometry";
+import { f1, vadd, unit, rotOverlay } from "./geometry";
 import type { Boss, Overlay, Point, Scene, ZoneShape } from "./types";
 
 interface Waymark { id: string; x: number; y: number; c: "red" | "yellow" | "blue" | "purple"; sq: boolean }
@@ -36,6 +36,23 @@ export function drawOverlay(o: Overlay): string {
       const path = "M" + pt(B) + " L" + pt(K) + " Q" + pt(C) + " " + pt(T);
       return '<g class="scy"><path class="halo" d="' + path + '"/><path class="ink" d="' + path + '"/><circle class="butt" cx="' + f1(B[0]) + '" cy="' + f1(B[1]) + '" r="1.5"/></g>';
     }
+    case "axe": case "sword": {
+      // Lies across the line to the arena center, so the label (placed outward) stays clear.
+      const P: Point = [o.x, o.y], d = unit([o.x - 50, o.y - 50]), u: Point = [-d[1], d[0]];
+      const at = (a: number, b: number): string => pt(vadd(vadd(P, u, a), d, b));
+      let path: string, knob: Point;
+      if(o.t === "axe"){
+        // Handle across, then a curved head near one end with its edge toward the center.
+        path = "M" + at(-8, 0) + " L" + at(7.5, 0) + " M" + at(5, 0) + " L" + at(3.2, -5.6) + " Q" + at(6.6, -8.4) + " " + at(10, -5.6) + " L" + at(8.2, 0) + " Z";
+        knob = vadd(P, u, -8);
+      } else {
+        // Pointed blade, crossguard, grip and pommel.
+        path = "M" + at(-2.5, 0.9) + " L" + at(7.6, 0.9) + " L" + at(9.8, 0) + " L" + at(7.6, -0.9) + " L" + at(-2.5, -0.9) + " Z" +
+          " M" + at(-2.5, 3.4) + " L" + at(-2.5, -3.4) + " M" + at(-2.5, 0) + " L" + at(-6.6, 0);
+        knob = vadd(P, u, -7.4);
+      }
+      return '<g class="wpn"><path class="halo" d="' + path + '"/><path class="ink" d="' + path + '"/><circle class="knob" cx="' + f1(knob[0]) + '" cy="' + f1(knob[1]) + '" r="1.1"/></g>';
+    }
     case "band": return '<line class="aoeband" x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '" stroke-width="' + o.w + '"/>';
     case "lane": return '<rect class="' + (o.soft ? "lanesoft" : "aoe") + '" x="' + o.rect[0] + '" y="' + o.rect[1] + '" width="' + (o.rect[2] - o.rect[0]) + '" height="' + (o.rect[3] - o.rect[1]) + '"/>';
     case "poly": return '<polygon class="aoe" points="' + o.pts.map(pt).join(" ") + '"/>';
@@ -69,10 +86,13 @@ export function floorSVG(split = false): string {
 export function sceneSVG(sc: Scene, k: number): string {
   /* Weapons carry a spawn index. Each one gets its own group, so the map view can fade it
      after it resolves and, for spawnPlay scenes, show the weapons appearing one at a time. */
-  const groups: Overlay[][] = [];
-  sc.overlays.forEach(o => { if(o.spawn != null) (groups[o.spawn] ??= []).push(o); });
+  /* Tilt bars go in their own groups above the waymarks, so a short bar next to a waymark
+     stays visible. They share the weapon's spawn index, so they fade with it. */
+  const groups: Overlay[][] = [], bars: Overlay[][] = [];
+  sc.overlays.forEach(o => { if(o.spawn != null) ((o.t === "lean" ? bars : groups)[o.spawn] ??= []).push(o); });
+  const barsSVG = bars.map((g, i) => '<g class="spawn" data-spawn="' + i + '">' + g.map(o => drawOverlay(rotOverlay(o, k))).join("") + "</g>").join("");
   const spawned = groups.map((g, i) => {
-    const pos = g.find(o => o.t === "scythe" || o.t === "target");
+    const pos = g.find(o => o.t === "scythe" || o.t === "axe" || o.t === "sword");
     const delay = sc.spawnPlay ? ' style="animation-delay:' + (0.3 + i) + 's"' : "";
     const ord = sc.spawnPlay && pos && "x" in pos ? '<text class="ord" x="' + f1(pos.x + 4.5) + '" y="' + f1(pos.y + 4.5) + '">' + (i + 1) + "</text>" : "";
     // Weapons past spawnAhead start hidden. The map view shows them one at a time as hits resolve.
@@ -86,6 +106,7 @@ export function sceneSVG(sc: Scene, k: number): string {
   h += '<g id="reveal-layer" clip-path="url(#arenaClip)"></g>';
   h += '<g id="drops"></g>';
   h += drawWaymarks();
+  h += barsSVG;
   h += '<g id="boss-layer"></g>';
   h += '<g id="fb-layer"></g></svg>';
   return h;
