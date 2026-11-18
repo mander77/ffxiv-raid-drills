@@ -2,20 +2,14 @@ import { S, shuffle } from "../util.js";
 import { P1, P2, P3, P4 } from "./timeline.js";
 import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry.js";
 
-/* Assault Evolved: three weapons, boss starts in the middle facing the first, then clockwise.
-   He faces the way he jumped, so relative north at each weapon = his travel direction. */
-export function buildAssault(s){
-  const spots = [0,45,90,135,180,225,270,315];
-  let pick = [0,135,225];
-  for(let t = 0; t < 60; t++){
-    const cand = shuffle(spots.slice()).slice(0, 3);
-    if(cand.every((a, i) => cand.every((b, j) => i === j || Math.min((a - b + 360) % 360, (b - a + 360) % 360) >= 90))){ pick = cand; break; }
-  }
-  const a0 = pick[0];
-  const order = [a0].concat(pick.slice(1).sort((x, y) => ((x - a0 + 360) % 360) - ((y - a0 + 360) % 360)));
-  const types = shuffle(["axe","sword","scythe"]);
-  const W = order.map((a, i) => ({a, p:[50 + 29 * Math.sin(a * DEG), 50 - 29 * Math.cos(a * DEG)], type:types[i]}));
-  const states = [{x:50, y:50, f:a0}];
+const ORDINALS = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"];
+const atAngle = a => [50 + 29 * Math.sin(a * DEG), 50 - 29 * Math.cos(a * DEG)];
+
+/* A jump run: the boss starts in the middle and jumps to each weapon in order.
+   He faces the way he jumped, so relative north at each weapon = his travel direction.
+   W is the weapon list in jump order: {a: degrees clockwise from north, p: [x, y], type, where?, tornado?}. */
+function buildRun(s, W){
+  const states = [{x:50, y:50, f:W[0].a}];
   let prev = [50, 50];
   W.forEach(w => { const d = unit([w.p[0] - prev[0], w.p[1] - prev[1]]); states.push({x:w.p[0], y:w.p[1], f:angOf(d), d}); prev = w.p; });
   /* The scythe lies with its butt on his left and its blade end on his right as he lands,
@@ -24,16 +18,16 @@ export function buildAssault(s){
   W.forEach((w, i) => {
     if(w.type === "scythe"){
       const d = states[i + 1].d;
-      overlays.push({t:"scythe", x:w.p[0], y:w.p[1], ux:-d[1], uy:d[0], dx:d[0], dy:d[1]}, {t:"tag", x:w.p[0] - d[0] * 9, y:w.p[1] - d[1] * 9, s:"SCYTHE"});
+      overlays.push({t:"scythe", spawn:i, x:w.p[0], y:w.p[1], ux:-d[1], uy:d[0], dx:d[0], dy:d[1]}, {t:"tag", spawn:i, x:w.p[0] - d[0] * 9, y:w.p[1] - d[1] * 9, s:"SCYTHE"});
     } else {
       const out = vadd(w.p, unit([w.p[0] - 50, w.p[1] - 50]), 7.5);
-      overlays.push({t:"tag", x:out[0], y:out[1], s:w.type.toUpperCase()}, {t:"target", x:w.p[0], y:w.p[1]});
+      overlays.push({t:"tag", spawn:i, x:out[0], y:out[1], s:w.type.toUpperCase()}, {t:"target", spawn:i, x:w.p[0], y:w.p[1]});
     }
   });
   const HW = 7, side = S(s, 1, -1), own = S(s, "left", "right");
   const steps = W.map((w, i) => {
     const st = states[i + 1], P = [st.x, st.y], d = st.d, L = leftOf(d), sv = [L[0] * side, L[1] * side];
-    const where = COMPASS[Math.round(w.a / 45) % 8];
+    const where = w.where || COMPASS[Math.round(w.a / 45) % 8];
     let z, a, reveal;
     if(w.type === "axe"){
       z = {c:vadd(P, unit([50 - P[0], 50 - P[1]]), 28), r:7};
@@ -52,9 +46,39 @@ export function buildAssault(s){
       reveal = [{t:"band", x:P[0] - d[0] * 150, y:P[1] - d[1] * 150, x2:P[0] + d[0] * 150, y2:P[1] + d[1] * 150, w:HW * 2},
                 {t:"band", x:P[0] - L[0] * 150, y:P[1] - L[1] * 150, x2:P[0] + L[0] * 150, y2:P[1] + L[1] * 150, w:HW * 2}];
     }
-    return {q:["First","Second","Third"][i] + " weapon: click where you go.", z, a, reveal};
+    const leave = w.tornado ? {t:"tornado", x:P[0], y:P[1]} : null;
+    return {q:ORDINALS[i] + " weapon: click where you go.", z, a, reveal, leave};
   });
   return {W, states, steps, overlays};
+}
+
+/* Assault Evolved: three weapons. The boss faces the first, then goes clockwise. */
+export function buildAssault(s){
+  const spots = [0,45,90,135,180,225,270,315];
+  let pick = [0,135,225];
+  for(let t = 0; t < 60; t++){
+    const cand = shuffle(spots.slice()).slice(0, 3);
+    if(cand.every((a, i) => cand.every((b, j) => i === j || Math.min((a - b + 360) % 360, (b - a + 360) % 360) >= 90))){ pick = cand; break; }
+  }
+  const a0 = pick[0];
+  const order = [a0].concat(pick.slice(1).sort((x, y) => ((x - a0 + 360) % 360) - ((y - a0 + 360) % 360)));
+  const types = shuffle(["axe","sword","scythe"]);
+  return buildRun(s, order.map((a, i) => ({a, p:atAngle(a), type:types[i]})));
+}
+
+/* Ultimate Trophy Weapons: six weapons, resolved in spawn order.
+   The first spawns south, slightly west (then clockwise) or slightly east (then counterclockwise).
+   The second spawns northwest or northeast. The rest sit on cardinals, and the last is north.
+   The first three are all different, and so are the last three. The last four leave tornadoes. */
+export function buildUltimate(s){
+  const cw = Math.random() < 0.5;
+  const angles = cw ? [200, 315, 90, 180, 270, 0] : [160, 45, 270, 180, 90, 0];
+  const names = cw ? ["south, slightly west", "northwest", "east", "south", "west", "north"]
+                   : ["south, slightly east", "northeast", "west", "south", "east", "north"];
+  const types = shuffle(["axe","sword","scythe"]).concat(shuffle(["axe","sword","scythe"]));
+  const run = buildRun(s, angles.map((a, i) => ({a, p:atAngle(a), type:types[i], where:names[i], tornado:i >= 2})));
+  run.states[0].f = null;
+  return Object.assign(run, {cw});
 }
 
 /* Void Stardust: each puddle goes just outside the previous one, one small step clockwise.
@@ -149,6 +173,11 @@ export const MAPS = [
         {t:"lineaoe",x:0,y:0,x2:100,y2:100},{t:"lineaoe",x:100,y:0,x2:0,y2:100},{t:"lineaoe",x:50,y:0,x2:50,y2:100}],
       steps:[{q:"Click your pair spot.", z:S(s,{c:[33,91],r:8},{c:[67,91],r:8}), a:S(s,"Relative southwest, the outer spot, with R1.","Relative southeast, the outer spot, with R2.")}],
       rule:"Open side = new south. H1 and R1 relative SW, H2 and R2 relative SE."})},
+  {id:"m-ultimate", order:11.5, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: six weapons",
+    build:s=>{ const U = buildUltimate(s); return {
+      setup:"Everyone is at 1 HP after Charybdistopia. Six weapons spawn one after another, and the boss resolves them in spawn order. Watch where the first one spawns: south and slightly west means clockwise, south and slightly east means counterclockwise. The last one is always north.",
+      spawnPlay:true, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,
+      rule:"First weapon south: slightly west = clockwise, slightly east = counterclockwise. The second is NW or NE, then the cardinals, ending north. Use the normal rule for each weapon."}; }},
   {id:"m-tornado", order:12, phase:P1, time:"3:46", title:"Ultimate Trophy Weapons: tornadoes",
     build:s=>({setup:"The sixth weapon resolved (it is always north). Four tornadoes sit on the cardinals. Each one cones its two closest players.",
       boss:BOSS, overlays:[{t:"tornado",x:50,y:16},{t:"tornado",x:20,y:50},{t:"tornado",x:80,y:50},{t:"tornado",x:50,y:84}],

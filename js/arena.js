@@ -55,10 +55,20 @@ export function floorSVG(split){
 }
 export function sceneSVG(c){
   const sc = c.scene, k = c.k;
-  let h = '<svg id="arena-svg" viewBox="-4 -6 108 110" role="img" aria-label="Arena map. Click to choose a spot.">';
+  /* Weapons carry a spawn index. Each one gets its own group, so the map view can fade it
+     after it resolves and, for spawnPlay scenes, show the weapons appearing one at a time. */
+  const groups = [];
+  sc.overlays.forEach(o => { if(o.spawn != null) (groups[o.spawn] = groups[o.spawn] || []).push(o); });
+  const spawned = groups.map((g, i) => {
+    const pos = g.find(o => o.t === "scythe" || o.t === "target");
+    const delay = sc.spawnPlay ? ' style="animation-delay:' + (0.3 + i) + 's"' : "";
+    const ord = sc.spawnPlay && pos ? '<text class="ord" x="' + f1(pos.x + 4.5) + '" y="' + f1(pos.y + 4.5) + '">' + (i + 1) + "</text>" : "";
+    return '<g class="spawn" data-spawn="' + i + '"' + delay + ">" + g.map(o => drawOverlay(rotOverlay(o, k))).join("") + ord + "</g>";
+  }).join("");
+  let h = '<svg id="arena-svg"' + (sc.spawnPlay ? ' class="play"' : "") + ' viewBox="-4 -6 108 110" role="img" aria-label="Arena map. Click to choose a spot.">';
   h += floorSVG(sc.split);
   h += '<text class="compass" x="50" y="-2.2">N</text>';
-  h += '<g clip-path="url(#arenaClip)">' + sc.overlays.map(o => drawOverlay(rotOverlay(o, k))).filter(Boolean).join("") + "</g>";
+  h += '<g clip-path="url(#arenaClip)">' + sc.overlays.filter(o => o.spawn == null).map(o => drawOverlay(rotOverlay(o, k))).filter(Boolean).join("") + spawned + "</g>";
   h += '<g id="reveal-layer" clip-path="url(#arenaClip)"></g>';
   h += '<g id="drops"></g>';
   h += drawWaymarks();

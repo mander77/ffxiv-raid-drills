@@ -13,6 +13,7 @@ export function drawFeedback(){
   c.results.forEach((r, i) => {
     const step = sc.steps[i], z = r.z || rotZone(step.z, c.k), ctr = zoneCenter(z);
     if(r.drop) drops += '<circle class="drop" cx="' + f1(r.drop[0]) + '" cy="' + f1(r.drop[1]) + '" r="' + PUDDLE_R + '"/>';
+    if(step.leave) drops += drawOverlay(step.leave);
     if(i === n - 1 && showLast){
       const cls = r.ok ? "ok" : "bad";
       if(step.reveal) rev = step.reveal.map(o => drawOverlay(rotOverlay(o, c.k))).join("");
@@ -29,6 +30,18 @@ export function drawFeedback(){
   svg.querySelector("#boss-layer").innerHTML = boss ? drawBoss(boss) : "";
   svg.querySelector("#fb-layer").innerHTML = fb;
   svg.classList.toggle("locked", n >= sc.steps.length || c.waiting);
+  // Weapons that already resolved fade out. The one just answered stays until the next step.
+  const gone = showLast ? n - 1 : n;
+  svg.querySelectorAll("[data-spawn]").forEach(g => g.classList.toggle("gone", Number(g.dataset.spawn) < gone));
+}
+
+/* Restart the spawn animation so the player can watch the order again. */
+function replaySpawns(){
+  const svg = document.getElementById("arena-svg");
+  if(!svg) return;
+  svg.classList.remove("play");
+  void svg.getBoundingClientRect();
+  svg.classList.add("play");
 }
 
 /* ---------- map drill view ---------- */
@@ -67,8 +80,10 @@ export function drawMapPanel(){
   } else {
     h += '<p class="hint" style="margin-top:14px">Click the arena. The green area shows the right spot after you click.</p>';
   }
+  if(sc.spawnPlay && !done) h += '<div class="actions"><button type="button" class="btn ghost" id="map-replay">Watch the spawns again</button></div>';
   const p = document.getElementById("map-panel");
   p.innerHTML = h;
+  const rp = document.getElementById("map-replay"); if(rp) rp.addEventListener("click", replaySpawns);
   const nx = document.getElementById("map-next"); if(nx) nx.addEventListener("click", nextMap);
   const ag = document.getElementById("map-again"); if(ag) ag.addEventListener("click", () => renderMap(true));
   const ns = document.getElementById("map-step"); if(ns) ns.addEventListener("click", nextStep);

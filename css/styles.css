@@ -198,6 +198,13 @@ td.n{font-weight:700;min-width:170px}
 .pick.bad .dot{fill:var(--miss)} .pick.bad .halo{stroke:var(--miss)}
 .drop{fill:var(--aoe-fill);stroke:var(--aoe);stroke-width:.35}
 .aoeband{stroke:var(--aoe);opacity:.4}
+.spawn{transform-box:fill-box;transform-origin:center;transition:opacity .25s}
+.play .spawn{animation:spawn-in .35s ease-out both}
+.spawn.gone{opacity:.15}
+.play .spawn.gone{animation:none}
+@keyframes spawn-in{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:none}}
+.ord{display:none;fill:var(--ink);font-family:var(--font-mono);font-size:3px;font-weight:500}
+@media (prefers-reduced-motion:reduce){.play .spawn{animation:none}.ord{display:inline}}
 .scy path{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .scy .halo{stroke:#fff;stroke-width:3;opacity:.9}
 .scy .ink{stroke:var(--boss);stroke-width:1.4}
