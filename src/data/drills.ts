@@ -112,6 +112,23 @@ export function nextPuddle(results: StepResult[]): Zone {
   return {fn, label:ideal, show:[{c:ideal, r:4.5}]};
 }
 
+/* Comet, the spread that can end Void Stardust. Only the tanks and melee have fixed spots,
+   at the intercardinals just outside the hitbox. Healers and ranged take any open spot. */
+const FIXED_SPREAD: {l: string; r: "T" | "D"; p: Point}[] = [
+  {l:"MT", r:"T", p:[35, 35]}, {l:"OT", r:"T", p:[65, 35]}, {l:"M1", r:"D", p:[35, 65]}, {l:"M2", r:"D", p:[65, 65]}];
+export const FIXED_SPREAD_MARKS = FIXED_SPREAD.map((m): Overlay => ({t:"mark", x:m.p[0], y:m.p[1], l:m.l, r:m.r}));
+/** The open ground at each cardinal, between the fixed spots. Any of them is a good spread spot. */
+const SPREAD_GAPS: Point[] = [[50, 17], [83, 50], [50, 83], [17, 50]];
+export function cometSpread(s: Slot): (results: StepResult[]) => Zone {
+  return results => {
+    const drops = results.flatMap(r => r.drop ? [r.drop] : []);
+    const far = (p: Point, q: Point, d: number): boolean => Math.hypot(p[0] - q[0], p[1] - q[1]) >= d;
+    const fn = (p: Point): boolean => inArena(p) && far(p, [50, 50], 15) &&
+      FIXED_SPREAD.every(m => far(p, m.p, 14)) && drops.every(q => far(p, q, PUDDLE_R + 1.5));
+    return {fn, label:S<Point>(s, [17, 50], [83, 50]), show:SPREAD_GAPS.map(c => ({c, r:6}))};
+  };
+}
+
 /* Orbital Omen, simplified to 4 lanes each way. Each set fires one north lane and one east lane.
    Set 2 always crosses in one of the four middle squares. */
 export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
@@ -181,15 +198,22 @@ export const MAPS: MapDrill[] = [
       bossAt:n => A.states[Math.min(n, A.states.length - 1)],
       steps:A.steps,
       rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ". Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: stack in the middle."}; }},
-  {id:"m-void", order:4, phase:P1, time:"1:20", title:"Void Stardust",
-    build:s=>({setup:"Void Stardust. Three puddles drop under every player, one after another. After the third one, this time it is a stack on a healer (Crushing Comet).",
+  {id:"m-void", order:4, variants:["stack","spread"], phase:P1, time:"1:20 or 1:50", title:"Void Stardust",
+    build:(s, v)=>{ const spread = v === "spread"; return {
+      setup:"Void Stardust. Three puddles drop under every player, one after another. After the third one, this time it is " +
+        (spread ? "a spread marker on every player (Comet)." : "a stack on a healer (Crushing Comet)."),
       boss:BOSS, overlays:[],
       steps:[
         {q:"Where do you drop the first puddle?", z:{c:[50,33],r:9}, a:"North of the boss, just outside the hitbox.", drop:true},
         {q:"Second puddle?", zf:nextPuddle, a:"Just outside your first puddle, one small step clockwise.", drop:true},
         {q:"Third puddle?", zf:nextPuddle, a:"Just outside the second puddle, clockwise again.", drop:true},
-        {q:"Puddles done. Where does the group stack?", zf:nextPuddle, a:"Just outside the third puddle, one more small step clockwise."}],
-      rule:"Start north. Drop each puddle just outside the last one, clockwise, so the group uses as little of the arena as possible."})},
+        spread
+          ? {q:"Puddles done. Comet: everyone spreads, and the tanks and melee go to their fixed spots. Where do you go?",
+              zf:cometSpread(s), cue:FIXED_SPREAD_MARKS,
+              a:"Any open spot. Healers and ranged have no fixed spread spot. Keep away from the tank and melee spots and out of the puddles."}
+          : {q:"Puddles done. Where does the group stack?", zf:nextPuddle, a:"Just outside the third puddle, one more small step clockwise."}],
+      rule:"Start north. Drop each puddle just outside the last one, clockwise, so the group uses as little of the arena as possible." +
+        (spread ? " Comet spread: healers and ranged take any open spot. Fixed spots: MT NW, OT NE, M1 SW, M2 SE." : "")}; }},
   {id:"m-dance", order:8.1, rotate:true, phase:P1, time:"2:31", title:"Dance of Domination: pairs",
     build:s=>({setup:"The seven hits are over and the lines are on the floor. Find the side with no outer line. That open side is new south.",
       boss:{x:50, y:50, f:null}, overlays:[

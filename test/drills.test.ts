@@ -90,6 +90,28 @@ test("Void Stardust: the next puddle goes just outside the last one, clockwise",
   assert.notOk(inZone([52, 35], z), "inside the last puddle");
 });
 
+test("Void Stardust spread: any open spot away from the tank and melee spots", () => {
+  const drill = MAPS.find(m => m.id === "m-void");
+  if(!drill) throw new Error("missing drill m-void");
+  const drops: Point[] = [[50, 33], [58.8, 35.4], [64.9, 41.8]];
+  const results = drops.map(d => ({p:d, ok:true, z:{c:d, r:5}, drop:d}));
+  for(const s of SLOTS){
+    const last = drill.build(s, "spread").steps[3];
+    if(!last.zf) throw new Error("the spread step builds its zone from the puddles");
+    const z = last.zf(results);
+    if(!("fn" in z)) throw new Error("the spread zone is a rule zone");
+    assert.ok(inZone(z.label, z), "the shown spot");
+    for(const gap of z.show) if("c" in gap) assert.ok(inZone(gap.c, z), "every open gap");
+    assert.ok(inZone([30, 50], z), "west, between MT and M1");
+    assert.notOk(inZone([65, 35], z), "the OT spot");
+    assert.notOk(inZone([37, 63], z), "next to the M1 spot");
+    assert.notOk(inZone([58, 36], z), "inside a puddle");
+    assert.notOk(inZone([50, 58], z), "inside the hitbox");
+  }
+  const stack = drill.build("H1", "stack").steps[3];
+  assert.ok(stack.zf && !stack.cue, "the stack version keeps the group stack step");
+});
+
 test("Orbital Omen: Hector's dodge is safe for every pattern", () => {
   const spot = (c: number, r: number): Point => [c === 1 ? 38 : 62, r === 1 ? 44 : 56];
   for(let i = 0; i < RUNS; i++){

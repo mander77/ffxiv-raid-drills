@@ -81,7 +81,10 @@ export interface Step {
   z?: Zone;
   zf?: (results: StepResult[]) => Zone;
   drop?: boolean;
+  /** Drawn after this step is answered. */
   reveal?: Overlay[];
+  /** Drawn from the moment this step's question shows until the drill ends. */
+  cue?: Overlay[];
   leave?: Overlay | null;
 }
 

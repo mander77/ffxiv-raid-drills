@@ -46,6 +46,10 @@ export const MECH: QuizItem[] = [
     options:[{t:"A healer.", ok:true},{t:"The main tank."},{t:"A random DPS."},{t:"Every player has one."}],
     why:"Comet puts a spread marker on every player. Crushing Comet puts one stack on a healer. If it is on you, do not run away from the group.",
     rule:"Comet = spread. Crushing Comet = stack on a healer."})),
+  mq("k-void-spread", 4.2, P1, "1:30", s=>({prompt:"Void Stardust ends with Comet, the spread. Where do you go?",
+    options:[{t:"Any open spot, away from the tanks and melee and out of the puddles.", ok:true},{t:"The southwest intercardinal, next to the boss."},{t:"Stay stacked with the group."},{t:"Under the boss, inside the hitbox."}],
+    why:"The spread is free for all, except for the tanks and melee. They have fixed spots: MT northwest, OT northeast, M1 southwest, M2 southeast. Healers and ranged find open ground, for example at a cardinal between those spots.",
+    rule:"Comet spread: healers and ranged take any open spot. MT NW, OT NE, M1 SW, M2 SE."})),
   mq("k-void-2", 6, P1, "1:56", s=>({prompt:"The first Void Stardust ended with a STACK. How does the second one end?",
     options:[{t:"Spread.", ok:true},{t:"Stack again."},{t:"Pair stacks."},{t:"A tank buster only."}],
     why:"The second Void Stardust always ends the other way.",
@@ -247,6 +251,8 @@ export const DEATH: QuizItem[] = [
 ];
 
 /* ---------- generated timeline questions ---------- */
+// Each raidwide name once. Crown of Arcadia happens six times, so the Set removes the repeats.
+const RAIDWIDE_NAMES = [...new Set(TL.filter(e => e.k === "raidwide").map(e => e.n))];
 export const NEXT_ITEMS: QuizItem[] = [];
 TL.slice(0, -1).forEach((ev, i) => {
   NEXT_ITEMS.push({id:"n-" + i, order:i, phase:"Timeline", time:ev.t, build:s => {
@@ -259,15 +265,20 @@ TL.slice(0, -1).forEach((ev, i) => {
       why:"Next is " + right.n + " at " + right.t + ". " + right.job(s),
       rule:"Know the next thing, and you know how long you have."};
   }});
+  /* The next raidwide, by name only. Knowing which one comes next and whether it is soon is
+     enough to plan a mitigation. The exact time is not asked. */
   const j = TL.findIndex((e, x) => x > i && e.k === "raidwide");
   if(j > i){
     NEXT_ITEMS.push({id:"r-" + i, order:i + 0.5, phase:"Timeline", time:ev.t, build:s => {
-      const right = TL[j];
-      const others = shuffle(TL.filter((e, x) => e.k === "raidwide" && x !== j)).slice(0, 3);
-      return {prompt:"It is just after " + ev.n + " (" + ev.t + "). When is the next raidwide?",
-        options:[{t:right.n + " at " + right.t, ok:true}, ...others.map(o => ({t:o.n + " at " + o.t}))],
-        why:right.n + " at " + right.t + ". " + right.job(s),
-        rule:"A raidwide soon after a death? Heal the party first, then raise."};
+      const right = TL[j], between = TL.slice(i + 1, j);
+      const others = shuffle(RAIDWIDE_NAMES.filter(n => n !== right.n)).slice(0, 3);
+      const when = between.length === 0 ? right.n + " is next, and it comes soon. Have a mitigation ready for it."
+        : between.length <= 2 ? right.n + " is the next raidwide, but first comes " + between.map(e => e.n).join(", then ") + "."
+        : right.n + " is the next raidwide, but " + between.length + " mechanics come first, starting with " + between[0].n + ".";
+      return {prompt:"It is just after " + ev.n + " (" + ev.t + "). Which raidwide comes next, so you can plan a mitigation for it?",
+        options:[{t:right.n, ok:true}, ...others.map(n => ({t:n}))],
+        why:when + " " + right.job(s),
+        rule:"Know the next raidwide and whether it is soon. A raidwide soon after a death? Heal the party first, then raise."};
     }});
   }
 });

@@ -36,10 +36,14 @@ export function drawFeedback(): void {
       fb += '<g class="pick ' + cls + '" transform="translate(' + f1(r.p[0]) + " " + f1(r.p[1]) + ')"><circle class="halo" r="2.6"/><circle class="dot" r="1.1"/></g>';
     }
   });
+  // Cues show with their step's question and stay. They go on top of the puddles so that
+  // a marker on an old puddle stays visible.
+  const asking = showLast ? n - 1 : n;
+  const cues = sc.steps.slice(0, asking + 1).flatMap(st => st.cue ?? []).map(o => drawOverlay(rotOverlay(o, c.k))).join("");
   const boss = sc.bossAt ? sc.bossAt(n) : (sc.boss ? rotOverlay(sc.boss, c.k) : null);
   const layer = (id: string): Element => svg.querySelector("#" + id) as Element;
   layer("reveal-layer").innerHTML = rev;
-  layer("drops").innerHTML = drops;
+  layer("drops").innerHTML = drops + cues;
   layer("boss-layer").innerHTML = boss ? drawBoss(boss) : "";
   layer("fb-layer").innerHTML = fb;
   svg.classList.toggle("locked", n >= sc.steps.length || Boolean(c.waiting));
