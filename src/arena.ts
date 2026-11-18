@@ -74,7 +74,9 @@ export function sceneSVG(sc: Scene, k: number): string {
     const pos = g.find(o => o.t === "scythe" || o.t === "target");
     const delay = sc.spawnPlay ? ' style="animation-delay:' + (0.3 + i) + 's"' : "";
     const ord = sc.spawnPlay && pos && "x" in pos ? '<text class="ord" x="' + f1(pos.x + 4.5) + '" y="' + f1(pos.y + 4.5) + '">' + (i + 1) + "</text>" : "";
-    return '<g class="spawn" data-spawn="' + i + '"' + delay + ">" + g.map(o => drawOverlay(rotOverlay(o, k))).join("") + ord + "</g>";
+    // Weapons past spawnAhead start hidden. The map view shows them one at a time as hits resolve.
+    const later = sc.spawnAhead != null && i >= sc.spawnAhead ? " later" : "";
+    return '<g class="spawn' + later + '" data-spawn="' + i + '"' + delay + ">" + g.map(o => drawOverlay(rotOverlay(o, k))).join("") + ord + "</g>";
   }).join("");
   let h = '<svg id="arena-svg"' + (sc.spawnPlay ? ' class="play"' : "") + ' viewBox="-4 -6 108 110" role="img" aria-label="Arena map. Click to choose a spot.">';
   h += floorSVG(sc.split);

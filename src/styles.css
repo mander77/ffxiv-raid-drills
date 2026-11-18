@@ -204,6 +204,7 @@ td.n{font-weight:700;min-width:170px}
 .spawn{transform-box:fill-box;transform-origin:center;transition:opacity .25s}
 .play .spawn{animation:spawn-in .35s ease-out both}
 .spawn.gone{opacity:.15}
+.spawn.later{display:none}
 .play .spawn.gone{animation:none}
 @keyframes spawn-in{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:none}}
 .ord{display:none;fill:var(--ink);font-family:var(--font-mono);font-size:3px;font-weight:500}

@@ -48,14 +48,21 @@ export function drawFeedback(): void {
   layer("fb-layer").innerHTML = fb;
   svg.classList.toggle("locked", n >= sc.steps.length || Boolean(c.waiting));
   // Weapons that already resolved fade out. The one just answered stays until the next step.
-  const gone = showLast ? n - 1 : n;
-  svg.querySelectorAll<SVGGElement>("[data-spawn]").forEach(g => g.classList.toggle("gone", Number(g.dataset.spawn) < gone));
+  // With spawnAhead, each answered step also brings in the next weapon, with a short delay.
+  const gone = showLast ? n - 1 : n, shown = sc.spawnAhead != null ? sc.spawnAhead + n : Infinity;
+  svg.querySelectorAll<SVGGElement>("[data-spawn]").forEach(g => {
+    const i = Number(g.dataset.spawn);
+    if(g.classList.contains("later") && i < shown){ g.style.animationDelay = "0.2s"; g.classList.remove("later"); }
+    g.classList.toggle("gone", i < gone);
+  });
 }
 
 /** Restart the spawn animation so the player can watch the order again. */
 function replaySpawns(): void {
   const svg = document.getElementById("arena-svg");
   if(!svg) return;
+  // Replay every weapon that shows, in spawn order.
+  svg.querySelectorAll<SVGGElement>("[data-spawn]").forEach(g => { g.style.animationDelay = (0.3 + Number(g.dataset.spawn)) + "s"; });
   svg.classList.remove("play");
   void svg.getBoundingClientRect();
   svg.classList.add("play");

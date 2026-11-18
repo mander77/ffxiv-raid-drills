@@ -223,8 +223,8 @@ export const MAPS: MapDrill[] = [
       rule:"Open side = new south. H1 and R1 relative SW, H2 and R2 relative SE."})},
   {id:"m-ultimate", order:11.5, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: six weapons",
     build:s=>{ const U = buildUltimate(s); return {
-      setup:"Everyone is at 1 HP after Charybdistopia. Six weapons spawn one after another, and the boss resolves them in spawn order. Watch where the first one spawns: south and slightly west means clockwise, south and slightly east means counterclockwise. The last one is always north.",
-      spawnPlay:true, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,
+      setup:"Everyone is at 1 HP after Charybdistopia. Six weapons spawn one after another, and the boss resolves them in spawn order. He starts on the first weapon before the last ones spawn: three show now, and each hit brings in the next one. Watch where the first one spawns: south and slightly west means clockwise, south and slightly east means counterclockwise. The last one is always north.",
+      spawnPlay:true, spawnAhead:3, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,
       rule:"First weapon south: slightly west = clockwise, slightly east = counterclockwise. The second is NW or NE, then the cardinals, ending north. Use the normal rule for each weapon."}; }},
   {id:"m-tornado", order:12, phase:P1, time:"3:46", title:"Ultimate Trophy Weapons: tornadoes",
     build:s=>({setup:"The sixth weapon resolved (it is always north). Four tornadoes sit on the cardinals. Each one cones its two closest players.",

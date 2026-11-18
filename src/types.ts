@@ -97,6 +97,8 @@ export interface Scene {
   bossAt?: (n: number) => Boss;
   split?: boolean;
   spawnPlay?: boolean;
+  /** How many weapons show before the first hit. Each answered step shows one more. */
+  spawnAhead?: number;
 }
 
 export interface MapDrill {
