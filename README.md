@@ -56,6 +56,7 @@ src/styles.css         all styles
 test/                  Vitest tests
 docs/                  guides
 scripts/publish.sh     push the current branch to GitHub
+wrangler.jsonc         Cloudflare deploy configuration
 ```
 
 ## Change a drill or a question
@@ -71,7 +72,13 @@ The data for the drills and the questions is in `src/data/`. Each item has a `bu
 
 ## Publish
 
-Cloudflare builds the site from this repository with the build command `npm run build` and the output directory `dist`. A push to `main` updates the live site. A push to another branch makes a preview at its own address.
+Cloudflare Workers builds the site from this repository. For each push, Cloudflare runs `npm run build`, then Wrangler uploads `dist/`. `wrangler.jsonc` names the project and the `dist/` folder. A push to `main` updates the live site. A push to another branch makes a preview at its own address.
+
+To test the Wrangler configuration without a deploy, run `npm run build`, then run this command:
+
+```sh
+npx wrangler deploy --dry-run
+```
 
 The publish script runs the type check and the tests, then pushes the current branch as the repository owner. The script ignores a `GH_TOKEN` or `GITHUB_TOKEN` in your shell. At the end, the script switches the GitHub CLI back to the account that was active before.
 
