@@ -31,7 +31,8 @@ export function drawMCQ(): void {
   if(c.cat === "pressure"){ const pr = state.pressure; if(pr) prog = "Question " + (pr.i + 1) + " of " + pr.queue.length; }
   else { const d = getDeck(c.cat); prog = "Card " + (d.i + 1) + " of " + d.items.length; }
   let h = '<div class="eyebrow"><b>' + esc(item.phase) + "</b><span>" + esc(item.time) + '</span><span class="progress">' + prog + "</span></div>";
-  if(c.cat === "pressure" && !c.answered) h += '<div class="timer" id="timer" aria-hidden="true"><i></i></div>';
+  if(c.cat === "pressure" && !c.answered)
+    h += '<div class="tphase" id="timer-lbl">Read</div><div class="timer reading" id="timer" aria-hidden="true"><i style="width:0"></i></div>';
   h += "<h2>" + esc(q.prompt) + '</h2><div class="opts" role="group" aria-label="Answers">';
   c.opts.forEach((o, i) => {
     let cls = "opt";

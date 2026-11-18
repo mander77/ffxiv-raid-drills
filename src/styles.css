@@ -126,6 +126,8 @@ main{padding-block:20px 56px}
 .timer{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:4px 0 14px}
 .timer i{display:block;height:100%;width:100%;background:var(--heal)}
 .timer.low i{background:var(--warn)}
+.timer.reading i{background:var(--ink-2);opacity:.35}
+.tphase{margin-top:4px;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
 
 .big{font-family:var(--font-display);font-weight:700;font-size:46px;line-height:1;font-variant-numeric:tabular-nums}
 .tally{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}

@@ -30,6 +30,12 @@ export function shuffle<T>(a: T[]): T[] {
   return a;
 }
 
+/** Time to read some text, in milliseconds: about 4 words a second, and at least 2 seconds. */
+export function readingMs(texts: string[]): number {
+  const words = texts.join(" ").trim().split(/\s+/).length;
+  return Math.max(2000, Math.round(words / 4 * 1000));
+}
+
 // TS note: Record<string, string> is an object used as a map, like Dictionary<string, string>.
 const ESCAPES: Record<string, string> = {"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;"};
 export function esc(t: unknown): string { return String(t).replace(/[&<>"]/g, c => ESCAPES[c]); }

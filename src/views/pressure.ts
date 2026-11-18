@@ -1,5 +1,5 @@
 // The pressure round: 12 mixed questions, each on a timer.
-import { LS, el } from "../util";
+import { LS, el, readingMs } from "../util";
 import { state, view, weighted, record, stopTimer, QUIZ_POOLS } from "../core";
 import { MECH, DEATH, NEXT_ITEMS } from "../data/questions";
 import { tabHead } from "./common";
@@ -7,8 +7,8 @@ import { prepMCQ, drawMCQ } from "./quiz";
 
 export function renderPressureStart(): void {
   view.innerHTML = tabHead(false) + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Pressure round</b><span>12 questions</span></div>' +
-    "<h2>Practice deciding fast</h2><p>Each question has a short timer. When it runs out, the round counts a freeze and shows you the answer. Aim for zero freezes first. Correct answers come with practice.</p>" +
-    '<div class="ctrl" style="margin-top:14px"><span id="secs-lbl">Seconds per question</span><div class="seg small" role="group" aria-labelledby="secs-lbl">' +
+    "<h2>Practice deciding fast</h2><p>Each question first gives you time to read it. The longer the question, the more time you get. Then a short timer runs while you decide. When it runs out, the round counts a freeze and shows you the answer. You can answer at any time. Aim for zero freezes first. Correct answers come with practice.</p>" +
+    '<div class="ctrl" style="margin-top:14px"><span id="secs-lbl">Seconds to decide</span><div class="seg small" role="group" aria-labelledby="secs-lbl">' +
     [4, 6, 8, 10].map(n => '<button type="button" id="secs-' + n + '" data-secs="' + n + '" aria-pressed="' + (state.psecs === n) + '">' + n + "</button>").join("") +
     '</div></div><div class="actions"><button type="button" class="btn" id="p-start">Start</button><span class="hint"><kbd>Enter</kbd> start</span></div></div></div>';
   state.cur = {kind:"pstart"};
@@ -34,19 +34,27 @@ export function showPressureQ(): void {
   startTimer();
 }
 
-/* A timeout ends the question even when the tab is in the background.
+/* Two phases. First the reading time, which depends on the length of the question and its
+   answers: the bar fills up. Then the decision time the player chose: the bar drains.
+   An answer counts in either phase. Only the end of the decision time counts as a freeze.
+   A timeout ends the question even when the tab is in the background.
    The animation frame loop only moves the bar. */
 export function startTimer(): void {
   stopTimer();
-  const ms = state.psecs * 1000, t0 = performance.now();
-  state.tout = window.setTimeout(() => { state.tout = 0; timeout(); }, ms);
+  const cur = state.cur;
+  if(!cur || cur.kind !== "mcq") return;
+  const read = readingMs([cur.q.prompt, ...cur.q.options.map(o => o.t)]), decide = state.psecs * 1000, t0 = performance.now();
+  state.tout = window.setTimeout(() => { state.tout = 0; timeout(); }, read + decide);
   const tick = (now: number): void => {
-    const bar = document.getElementById("timer"), c = state.cur;
+    const bar = document.getElementById("timer"), lbl = document.getElementById("timer-lbl"), c = state.cur;
     if(!bar || !c || c.kind !== "mcq" || c.answered){ state.raf = 0; return; }
-    const left = Math.max(0, 1 - (now - t0) / ms);
-    (bar.firstElementChild as HTMLElement).style.width = (left * 100).toFixed(1) + "%";
-    bar.classList.toggle("low", left < 0.34);
-    state.raf = left > 0 ? requestAnimationFrame(tick) : 0;
+    const t = now - t0, reading = t < read;
+    const fill = reading ? t / read : Math.max(0, 1 - (t - read) / decide);
+    (bar.firstElementChild as HTMLElement).style.width = (fill * 100).toFixed(1) + "%";
+    bar.classList.toggle("reading", reading);
+    bar.classList.toggle("low", !reading && fill < 0.34);
+    if(lbl) lbl.textContent = reading ? "Read" : "Decide";
+    state.raf = reading || fill > 0 ? requestAnimationFrame(tick) : 0;
   };
   state.raf = requestAnimationFrame(tick);
 }
