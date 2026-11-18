@@ -8,5 +8,8 @@
   // Serve the files that `npm run build` writes to dist/. No server code runs.
   "assets": {
     "directory": "./dist"
-  }
+  },
+  // Turns on preview deployments. Cloudflare runs `npx wrangler preview` for each branch
+  // other than main, and that command stops if this block is missing. It can stay empty.
+  "previews": {}
 }
