@@ -51,6 +51,7 @@ export function renderSheet(): void {
     "<li><b>Axe:</b> the whole party stacks in the middle, out of the axe AoE.</li>" +
     "<li><b>Ultimate Trophy Weapons:</b> watch the first spawn. South and slightly west means clockwise, south and slightly east means counterclockwise. The second is NW or NE, then the cardinals, ending north. He resolves them in spawn order.</li>" +
     "<li><b>Void Stardust:</b> start north of the boss. Drop each puddle just outside the last one, a small step clockwise. Then stack or spread.</li>" +
+    "<li><b>Assault Evolved, second set (after Void Stardust):</b> the flattest weapon, lying lowest toward the boss, goes first. Then clockwise, the same as the first set.</li>" +
     "<li><b>Comet spread (after Void Stardust):</b> free for all for healers and ranged. Take any open spot, away from the tanks and melee and out of the puddles. Fixed spots: MT NW, OT NE, M1 SW, M2 SE.</li>" +
     "<li><b>Orbital Omen (Hector's dodge):</b> stay against the boss hitbox, at his side. Start where the #2 lines cross. After #1 and Fire and Fury, cross the hitbox to the opposite middle square. After #2, cross back and stay.</li>" +
     "<li><b>Meteorain, melee (1st set):</b> the melee step in close to the boss to take the first markers. M1 drops NE and M2 drops SW, both inside the boss hitbox. Everyone else stacks NW for the first line stack, with the tanks in front.</li>" +

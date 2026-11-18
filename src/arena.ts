@@ -40,6 +40,7 @@ export function drawOverlay(o: Overlay): string {
     case "lane": return '<rect class="' + (o.soft ? "lanesoft" : "aoe") + '" x="' + o.rect[0] + '" y="' + o.rect[1] + '" width="' + (o.rect[2] - o.rect[0]) + '" height="' + (o.rect[3] - o.rect[1]) + '"/>';
     case "poly": return '<polygon class="aoe" points="' + o.pts.map(pt).join(" ") + '"/>';
     case "guide": return '<line class="guide" x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '"/>';
+    case "lean": return '<g class="lean"><line x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '"/><circle cx="' + f1(o.x2) + '" cy="' + f1(o.y2) + '" r="1.1"/></g>';
     case "portal": return '<g class="portal" transform="translate(' + x + " " + y + ')"><ellipse rx="' + (o.vert ? 6 : 2.2) + '" ry="' + (o.vert ? 2.2 : 6) + '"/><text>' + o.n + "</text></g>";
   }
 }

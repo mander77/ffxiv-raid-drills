@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { MAPS, buildAssault, buildUltimate, buildOrbital, nextPuddle, type Run } from "../src/data/drills";
+import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, type Run } from "../src/data/drills";
 import { inZone } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, Zone } from "../src/types";
 
@@ -32,7 +32,21 @@ test("Assault Evolved: the faced weapon goes first, then clockwise", () => {
   }
 });
 
-const RUN_BUILDERS: Record<string, (s: Slot) => Run> = {buildAssault, buildUltimate};
+test("Assault Evolved, second set: the flattest weapon goes first, then clockwise", () => {
+  for(let i = 0; i < RUNS; i++){
+    const A = buildAssault2("H1");
+    const lens = A.overlays.flatMap(o => o.t === "lean" ? [{k:o.spawn ?? -1, len:Math.hypot(o.x2 - o.x, o.y2 - o.y)}] : []);
+    assert.equal(lens.length, 3, "one tilt bar for each weapon");
+    const first = lens.find(l => l.k === 0), others = lens.filter(l => l.k !== 0);
+    if(!first) throw new Error("the first weapon has no tilt bar");
+    for(const o of others) assert.isAbove(first.len, o.len + 3, "the first weapon looks clearly flattest");
+    assert.isNull(A.states[0].f, "the boss does not point at the first weapon");
+    const a = A.W.map(w => w.a), d1 = (a[1] - a[0] + 360) % 360, d2 = (a[2] - a[0] + 360) % 360;
+    assert.ok(d1 > 0 && d1 < d2, "clockwise after the first");
+  }
+});
+
+const RUN_BUILDERS: Record<string, (s: Slot) => Run> = {buildAssault, buildAssault2, buildUltimate};
 
 test("weapon runs: H1 stands at the scythe butt, H2 at the blade end", () => {
   for(const [name, build] of Object.entries(RUN_BUILDERS)) for(let i = 0; i < RUNS; i++) for(const s of SLOTS){

@@ -81,6 +81,21 @@ export function buildAssault(s: Slot): Run {
   return buildRun(s, order.map((a, i): Weapon => ({a, p:atAngle(a), type:types[i]})));
 }
 
+/* Assault Evolved, second set (1:33, after Void Stardust). The boss does not face a weapon
+   yet. The flattest weapon, lying lowest toward him, goes first. Then he goes clockwise.
+   Seen from above, a flat weapon shows its full length and a steep one only a stub. */
+export function buildAssault2(s: Slot): Run & {tilts: number[]} {
+  const run = buildAssault(s);
+  run.states[0].f = null;
+  // Degrees up from the floor: the first weapon lies nearly flat, the other two stand steep.
+  const tilts = [10 + Math.random() * 8, 55 + Math.random() * 25, 55 + Math.random() * 25];
+  run.W.forEach((w, i) => {
+    const tip = vadd(w.p, unit([50 - w.p[0], 50 - w.p[1]]), 14 * Math.cos(tilts[i] * DEG));
+    run.overlays.push({t:"lean", spawn:i, x:w.p[0], y:w.p[1], x2:tip[0], y2:tip[1]});
+  });
+  return {...run, tilts};
+}
+
 /* Ultimate Trophy Weapons: six weapons, resolved in spawn order.
    The first spawns south, slightly west (then clockwise) or slightly east (then counterclockwise).
    The second spawns northwest or northeast. The rest sit on cardinals, and the last is north.
@@ -191,7 +206,7 @@ export const MAPS: MapDrill[] = [
       boss:BOSS, overlays:[{t:"tag",x:50,y:56,s:"SCYTHE"},{t:"mark",x:37,y:36,l:"MT",r:"T"},{t:"mark",x:63,y:36,l:"OT",r:"T"}],
       steps:[{q:"Click where the party stacks.", z:{c:[50,69],r:9}, a:"South, right behind the boss."}],
       rule:"Scythe: tanks spread to the front, the party stacks behind."})},
-  {id:"m-assault", order:3, phase:P1, time:"0:48 and 1:33", title:"Assault Evolved: three weapons",
+  {id:"m-assault", order:3, phase:P1, time:"0:48", title:"Assault Evolved: three weapons",
     build:s=>{ const A = buildAssault(s); return {
       setup:"Three weapons are on the floor. The boss is in the middle, and the red arrow points at the weapon he faces. He jumps to that one first, then goes clockwise. For the sword, watch where he jumps from. For the scythe, read the weapon: the butt has the round knob, the point is the blade end.",
       overlays:A.overlays,
@@ -214,6 +229,13 @@ export const MAPS: MapDrill[] = [
           : {q:"Puddles done. Where does the group stack?", zf:nextPuddle, a:"Just outside the third puddle, one more small step clockwise."}],
       rule:"Start north. Drop each puddle just outside the last one, clockwise, so the group uses as little of the arena as possible." +
         (spread ? " Comet spread: healers and ranged take any open spot. Fixed spots: MT NW, OT NE, M1 SW, M2 SE." : "")}; }},
+  {id:"m-assault-2", order:5, phase:P1, time:"1:33", title:"Assault Evolved: second set",
+    build:s=>{ const A = buildAssault2(s); return {
+      setup:"Void Stardust is over. The three weapons from 1:13 hang tilted around the boss, and he does not face one yet. The flattest weapon, lying lowest toward him, goes first. Then he goes clockwise, the same as the first set. The bar from each weapon toward the boss shows how flat it lies: the longer the bar, the flatter the weapon.",
+      overlays:A.overlays,
+      bossAt:n => A.states[Math.min(n, A.states.length - 1)],
+      steps:A.steps,
+      rule:"Second set: the flattest weapon goes first, then clockwise. Then the normal rule for each weapon."}; }},
   {id:"m-dance", order:8.1, rotate:true, phase:P1, time:"2:31", title:"Dance of Domination: pairs",
     build:s=>({setup:"The seven hits are over and the lines are on the floor. Find the side with no outer line. That open side is new south.",
       boss:{x:50, y:50, f:null}, overlays:[
