@@ -1,6 +1,6 @@
-# M11S Healer Drills
+# FFXIV Raid Drills
 
-Practice drills for a healer in the Final Fantasy XIV fight M11S (The Tyrant, Savage). The drills follow one static's strategy: Hector/Toxic, Kindred No Buddies split and Fixed (3CJ) Ecliptic.
+Practice drills for Final Fantasy XIV raids. The site has one fight and one role today: M11S (The Tyrant, Savage) for healers. The M11S drills follow one static's strategy: Hector/Toxic, Kindred No Buddies split and Fixed (3CJ) Ecliptic.
 
 The site is written in TypeScript and built with Vite. If you know C# and are new to TypeScript, read [TypeScript for C# developers](docs/typescript-for-csharp.md) first.
 

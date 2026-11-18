@@ -2,7 +2,7 @@
 // `npx wrangler deploy` after `npm run build`. Like tsconfig.json, this file allows comments.
 {
   // Must match the project name in the Cloudflare dashboard.
-  "name": "m11s-healer-drills",
+  "name": "ffxiv-raid-drills",
   // The Workers runtime version to use. This site has no server code, so the date has no effect.
   "compatibility_date": "2026-11-18",
   // Serve the files that `npm run build` writes to dist/. No server code runs.

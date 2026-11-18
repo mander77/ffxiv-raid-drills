@@ -1,7 +1,7 @@
 {
-  "name": "m11s-healer-drills",
+  "name": "ffxiv-raid-drills",
   "private": true,
-  "description": "Healer practice drills for FFXIV M11S (The Tyrant, Savage)",
+  "description": "Practice drills for Final Fantasy XIV raids",
   "type": "module",
   "scripts": {
     "dev": "vite",
