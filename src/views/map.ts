@@ -126,7 +126,11 @@ export function drawMapPanel(): void {
   } else {
     h += '<p class="hint" style="margin-top:12px">' + (n === 0 ? "Click the arena. The green area shows the right spot after you click." : "Click the arena for the next step.") + "</p>";
   }
-  if(sc.spawnPlay && !done) h += '<div class="actions"><button type="button" class="btn ghost" id="map-replay">Watch the spawns again</button></div>';
+  // Mid-drill buttons. Start over builds the drill again, so it does not count toward the score.
+  const extra: string[] = [];
+  if(sc.spawnPlay && !done) extra.push('<button type="button" class="btn ghost" id="map-replay">Watch the spawns again</button>');
+  if(!done && n > 0) extra.push('<button type="button" class="btn ghost" id="map-restart">Start over</button>');
+  if(extra.length) h += '<div class="actions">' + extra.join("") + "</div>";
   const p = el("map-panel");
   p.innerHTML = h;
   document.getElementById("setup-toggle")?.addEventListener("click", () => { c.setupOpen = !c.setupOpen; drawMapPanel(); });
@@ -134,6 +138,7 @@ export function drawMapPanel(): void {
   document.getElementById("map-replay")?.addEventListener("click", replaySpawns);
   document.getElementById("map-next")?.addEventListener("click", nextMap);
   document.getElementById("map-again")?.addEventListener("click", () => renderMap(true));
+  document.getElementById("map-restart")?.addEventListener("click", () => renderMap(true));
 }
 
 export function onArenaClick(e: MouseEvent): void {
