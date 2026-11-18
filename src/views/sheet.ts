@@ -50,7 +50,7 @@ export function renderSheet(): void {
     "<li><b>Scythe:</b> H1 at the butt, H2 at the point, close in.</li>" +
     "<li><b>Axe:</b> the whole party stacks in the middle, out of the axe AoE.</li>" +
     "<li><b>Ultimate Trophy Weapons:</b> watch the first spawn. South and slightly west means clockwise, south and slightly east means counterclockwise. The second is NW or NE, then the cardinals, ending north. He resolves them in spawn order.</li>" +
-    "<li><b>Void Stardust:</b> start north of the boss. Drop each puddle just outside the last one, a small step clockwise. Then stack or spread.</li>" +
+    "<li><b>Void Stardust:</b> start north of the boss. Drop each puddle just outside the last one, a small step clockwise. Then stack or spread. Before the puddles, find the first weapon of the second set. If it is a sword or scythe, stack or spread toward it, and use Sprint or Expedient if it is far.</li>" +
     "<li><b>Assault Evolved, second set (after Void Stardust):</b> the weapon with its flat side square to the boss goes first. Then clockwise, the same as the first set.</li>" +
     "<li><b>Comet spread (after Void Stardust):</b> free for all for healers and ranged. Take any open spot, away from the tanks and melee and out of the puddles. Fixed spots: MT NW, OT NE, M1 SW, M2 SE.</li>" +
     "<li><b>Orbital Omen (Hector's dodge):</b> stay against the boss hitbox, at his side. Start where the #2 lines cross. After #1 and Fire and Fury, cross the hitbox to the opposite middle square. After #2, cross back and stay.</li>" +

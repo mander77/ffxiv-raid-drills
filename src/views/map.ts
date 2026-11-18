@@ -46,7 +46,7 @@ export function drawFeedback(): void {
   layer("drops").innerHTML = drops + cues;
   layer("boss-layer").innerHTML = boss ? drawBoss(boss) : "";
   layer("fb-layer").innerHTML = fb;
-  svg.classList.toggle("locked", n >= sc.steps.length || Boolean(c.waiting));
+  svg.classList.toggle("locked", n >= sc.steps.length);
   // Weapons that already resolved fade out. The one just answered stays until the next step.
   // With spawnAhead, each answered step also brings in the next weapon, with a short delay.
   const gone = showLast ? n - 1 : n, shown = sc.spawnAhead != null ? sc.spawnAhead + n : Infinity;
@@ -116,7 +116,7 @@ export function drawMapPanel(): void {
     h += '<div class="rule"><span>Rule</span><strong>' + esc(sc.rule) + "</strong></div>";
     h += '<div class="actions"><button type="button" class="btn" id="map-next">Next drill</button><button type="button" class="btn ghost" id="map-again">Try this one again</button><span class="hint"><kbd>Enter</kbd> next</span></div>';
   } else if(c.waiting){
-    h += '<div class="actions"><button type="button" class="btn" id="map-step">Next step</button><span class="hint"><kbd>Enter</kbd> next step</span></div>';
+    h += '<p class="hint" style="margin-top:14px">Click the arena for the next step.</p>';
   } else {
     h += '<p class="hint" style="margin-top:14px">Click the arena. The green area shows the right spot after you click.</p>';
   }
@@ -126,12 +126,13 @@ export function drawMapPanel(): void {
   document.getElementById("map-replay")?.addEventListener("click", replaySpawns);
   document.getElementById("map-next")?.addEventListener("click", nextMap);
   document.getElementById("map-again")?.addEventListener("click", () => renderMap(true));
-  document.getElementById("map-step")?.addEventListener("click", nextStep);
 }
 
 export function onArenaClick(e: MouseEvent): void {
   const c = state.cur;
-  if(!c || c.kind !== "map" || c.waiting || c.results.length >= c.scene.steps.length) return;
+  if(!c || c.kind !== "map" || c.results.length >= c.scene.steps.length) return;
+  // The last answer stays on screen until the next click, and that click answers the next step.
+  c.waiting = false;
   const svg = e.currentTarget as SVGSVGElement, ctm = svg.getScreenCTM();
   if(!ctm) return;
   const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());

@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, type Run } from "../src/data/drills";
+import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, type Run } from "../src/data/drills";
 import { DEG, inZone } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, Zone } from "../src/types";
 
@@ -107,26 +107,44 @@ test("Void Stardust: the next puddle goes just outside the last one, clockwise",
   assert.notOk(inZone([52, 35], z), "inside the last puddle");
 });
 
-test("Void Stardust spread: any open spot away from the tank and melee spots", () => {
+/* Results for the Void Stardust drill when every answer is right: the weapon pick (no
+   puddle), then the three puddles at their usual spots. */
+const PUDDLES: Point[] = [[50, 33], [58.8, 35.4], [64.9, 41.8]];
+const VOID_RESULTS = [{p:[0, 0] as Point, ok:true, z:{c:[0, 0] as Point, r:1}, drop:null},
+  ...PUDDLES.map(d => ({p:d, ok:true, z:{c:d, r:5}, drop:d}))];
+const dist = (p: Point, q: Point): number => Math.hypot(p[0] - q[0], p[1] - q[1]);
+
+test("Void Stardust spread: any open spot, on the first weapon's side for a sword or scythe", () => {
+  const z = cometSpread("H1")(VOID_RESULTS);
+  if(!("fn" in z)) throw new Error("the spread zone is a rule zone");
+  assert.ok(inZone(z.label, z), "the shown spot");
+  for(const gap of z.show) if("c" in gap) assert.ok(inZone(gap.c, z), "every open gap");
+  assert.ok(inZone([30, 50], z), "west, between MT and M1");
+  assert.notOk(inZone([65, 35], z), "the OT spot");
+  assert.notOk(inZone([37, 63], z), "next to the M1 spot");
+  assert.notOk(inZone([58, 36], z), "inside a puddle");
+  assert.notOk(inZone([50, 58], z), "inside the hitbox");
+  const south = cometSpread("H1", [50, 79])(VOID_RESULTS);
+  assert.ok(inZone([50, 83], south), "the south gap, on a south weapon's side");
+  assert.notOk(inZone([30, 50], south), "west is not on a south weapon's side");
+});
+
+test("Void Stardust into the second weapons: every right spot is inside its zone", () => {
   const drill = MAPS.find(m => m.id === "m-void");
   if(!drill) throw new Error("missing drill m-void");
-  const drops: Point[] = [[50, 33], [58.8, 35.4], [64.9, 41.8]];
-  const results = drops.map(d => ({p:d, ok:true, z:{c:d, r:5}, drop:d}));
-  for(const s of SLOTS){
-    const last = drill.build(s, "spread").steps[3];
-    if(!last.zf) throw new Error("the spread step builds its zone from the puddles");
-    const z = last.zf(results);
-    if(!("fn" in z)) throw new Error("the spread zone is a rule zone");
-    assert.ok(inZone(z.label, z), "the shown spot");
-    for(const gap of z.show) if("c" in gap) assert.ok(inZone(gap.c, z), "every open gap");
-    assert.ok(inZone([30, 50], z), "west, between MT and M1");
-    assert.notOk(inZone([65, 35], z), "the OT spot");
-    assert.notOk(inZone([37, 63], z), "next to the M1 spot");
-    assert.notOk(inZone([58, 36], z), "inside a puddle");
-    assert.notOk(inZone([50, 58], z), "inside the hitbox");
+  for(let i = 0; i < RUNS; i++) for(const s of SLOTS) for(const v of ["stack", "spread"]){
+    const sc = drill.build(s, v);
+    assert.equal(sc.steps.length, 6, "pick, three puddles, stack or spread, first weapon");
+    const pick = sc.steps[0].z, end = sc.steps[4].zf;
+    if(!pick || !end) throw new Error("missing zone");
+    const z = end(VOID_RESULTS);
+    if(!("fn" in z)) throw new Error("the stack or spread zone is a rule zone");
+    assert.ok(inZone(z.label, z), v + ": the shown spot is right");
+    // The pick answer starts "The axe, ..." when the axe goes first.
+    if(v === "stack" && "c" in pick && !sc.steps[0].a.startsWith("The axe")){
+      assert.isAtMost(dist(z.label, pick.c), dist(PUDDLES[2], pick.c) - 4, "the stack moves toward the first weapon");
+    }
   }
-  const stack = drill.build("H1", "stack").steps[3];
-  assert.ok(stack.zf && !stack.cue, "the stack version keeps the group stack step");
 });
 
 test("Orbital Omen: Hector's dodge is safe for every pattern", () => {
