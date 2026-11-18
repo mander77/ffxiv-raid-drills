@@ -163,6 +163,14 @@ td.n{font-weight:700;min-width:170px}
 .k-heal{background:var(--heal-soft);color:var(--heal-ink)}
 .k-mech{background:var(--paper);color:var(--ink-2)}
 .k-enrage{background:var(--miss-soft);color:var(--miss)}
+.sheet ul.rules{margin:0;padding-left:20px;display:grid;gap:10px;max-width:72ch}
+.mini{margin:0;min-width:0}
+.mini svg{display:block;width:100%;max-width:340px;height:auto;margin:0 auto}
+.mini figcaption{font-size:13px;color:var(--ink-2);margin:6px auto 0;max-width:340px}
+.zone.other{fill:rgba(70,81,102,.10);stroke:var(--ink-2)}
+.zlabel.other rect{fill:var(--ink-2)}
+.ghost{fill:none;stroke:var(--boss);stroke-width:.5;stroke-dasharray:1 1}
+.jump{stroke:var(--ring);stroke-width:.7;stroke-dasharray:1.6 1.2}
 .links{list-style:none;padding:0;margin:0;display:grid;gap:6px}
 .links a{color:var(--wm-blue)}
 .links span{color:var(--ink-2);font-size:14px}
@@ -261,7 +269,7 @@ const TL = [
   {t:"0:11", n:"Crown of Arcadia", k:"raidwide", job:s=>"Physical raidwide. Mitigate it, then heal up."},
   {t:"0:18", n:"Raw Steel Trophy (axe or scythe)", k:"buster", job:s=>"Hits land at 0:24 to 0:25. Axe: tanks stack, you spread " + S(s,"SSW","SSE") + " far out. Scythe: tanks spread, party stacks south."},
   {t:"0:38", n:"Trophy Weapons, then Assault Evolved", k:"mech", job:s=>"Weapon hits at 0:50, 0:55 and 1:00. The weapon he faces goes first, then clockwise. Every hit adds a vulnerability, so keep healing."},
-  {t:"1:13", n:"Trophy Weapons and Void Stardust", k:"mech", job:s=>"Bait 3 puddles from north, clockwise. Then a spread (Comet) or a stack on a healer (Crushing Comet) at 1:30."},
+  {t:"1:13", n:"Trophy Weapons and Void Stardust", k:"mech", job:s=>"Bait 3 puddles from north, each just outside the last, clockwise. Then a spread (Comet) or a stack on a healer (Crushing Comet) at 1:30."},
   {t:"1:33", n:"Assault Evolved (second set)", k:"mech", job:s=>"Weapon hits at 1:35, 1:40 and 1:45."},
   {t:"1:50", n:"Void Stardust (second time)", k:"mech", job:s=>"Puddles again. The spread or stack at 1:56 is the opposite of the first one."},
   {t:"2:02", n:"Crown of Arcadia", k:"raidwide", job:s=>"Raidwide. Heal up fast, Dance of Domination is next."},
@@ -317,10 +325,10 @@ const MAPS = [
       boss:BOSS, overlays:[],
       steps:[
         {q:"Where do you drop the first puddle?", z:{c:[50,33],r:9}, a:"North of the boss, just outside the hitbox.", drop:true},
-        {q:"Second puddle?", z:{c:[67,50],r:9}, a:"East. You rotate clockwise.", drop:true},
-        {q:"Third puddle?", z:{c:[50,67],r:9}, a:"South.", drop:true},
-        {q:"Puddles done. Where does the group stack?", z:{c:[33,50],r:9}, a:"West of the boss, one more step clockwise."}],
-      rule:"Start north and bait clockwise: north, east, south, then finish west."})},
+        {q:"Second puddle?", zf:nextPuddle, a:"Just outside your first puddle, one small step clockwise.", drop:true},
+        {q:"Third puddle?", zf:nextPuddle, a:"Just outside the second puddle, clockwise again.", drop:true},
+        {q:"Puddles done. Where does the group stack?", zf:nextPuddle, a:"Just outside the third puddle, one more small step clockwise."}],
+      rule:"Start north. Drop each puddle just outside the last one, clockwise, so the group uses as little of the arena as possible."})},
   {id:"m-dance", order:8.1, rotate:true, phase:P1, time:"2:31", title:"Dance of Domination: pairs",
     build:s=>({setup:"The seven hits are over and the lines are on the floor. Find the side with no outer line. That open side is new south.",
       boss:{x:50, y:50, f:null}, overlays:[
@@ -419,9 +427,9 @@ const MECH = [
     why:"The scythe is a donut AoE and a protean cone on every player, so stand close, in the donut hole. Read the scythe on the floor before he lands: H1 takes the butt end, H2 takes the point end. You do not need to work out his jump.",
     rule:"Scythe: H1 at the butt, H2 at the point, close in."})),
   mq("k-void", 4, P1, "1:20", s=>({prompt:"Void Stardust starts. What do you do?",
-    options:[{t:"Bait 3 puddles: start north of the boss and rotate clockwise. Then spread or stack.", ok:true},{t:"Spread at max range and stand still."},{t:"Stack on the tank and do not move."},{t:"Bait 3 puddles counterclockwise, starting south."}],
-    why:"Three puddles drop under every player. Moving one step clockwise each time keeps them in a neat ring.",
-    rule:"Start north, bait clockwise, then spread or stack."})),
+    options:[{t:"Bait 3 puddles: start north of the boss, then drop each one just outside the last, clockwise. Then spread or stack.", ok:true},{t:"Spread at max range and stand still."},{t:"Stack on the tank and do not move."},{t:"Bait 3 puddles far apart: north, then east, then south."}],
+    why:"Three puddles drop under every player. Small steps, each just outside the last puddle, keep the puddles packed together and leave the rest of the arena free.",
+    rule:"Start north. Each puddle just outside the last, clockwise."})),
   mq("k-void-target", 4.1, P1, "1:30", s=>({prompt:"Void Stardust ends with Crushing Comet, the stack. Who is the stack on?",
     options:[{t:"A healer.", ok:true},{t:"The main tank."},{t:"A random DPS."},{t:"Every player has one."}],
     why:"Comet puts a spread marker on every player. Crushing Comet puts one stack on a healer. If it is on you, do not run away from the group.",
@@ -904,6 +912,21 @@ function buildAssault(s){
   return {W, states, steps, overlays};
 }
 
+/* Void Stardust: each puddle goes just outside the previous one, one small step clockwise.
+   The next spot is judged from where the last puddle actually dropped. */
+const PUDDLE_R = 6.5;
+function nextPuddle(results){
+  const q = results[results.length - 1].drop, rq = Math.max(8, Math.hypot(q[0] - 50, q[1] - 50));
+  const step = 2 * Math.asin(Math.min(1, (PUDDLE_R + 2.5) / (2 * rq))) / DEG, ia = (angOf([q[0] - 50, q[1] - 50]) + step) * DEG;
+  const ideal = [50 + rq * Math.sin(ia), 50 - rq * Math.cos(ia)];
+  const fn = p => {
+    const dq = Math.hypot(p[0] - q[0], p[1] - q[1]), r = Math.hypot(p[0] - 50, p[1] - 50);
+    const cw = (angOf([p[0] - 50, p[1] - 50]) - angOf([q[0] - 50, q[1] - 50]) + 360) % 360;
+    return inArena(p) && dq >= PUDDLE_R && dq <= PUDDLE_R + 6 && r >= 6 && r <= 32 && cw > 3 && cw < 110;
+  };
+  return {fn, label:ideal, show:[{c:ideal, r:4.5}]};
+}
+
 /* Orbital Omen, simplified to 4 lanes each way. Each set fires one north lane and one east lane.
    Set 1 crosses at the boss's side; set 2 crosses in one of the middle squares. */
 function buildOrbital(){
@@ -1012,8 +1035,8 @@ function drawFeedback(){
   const sc = c.scene, n = c.results.length, showLast = c.waiting || n >= sc.steps.length;
   let drops = "", fb = "", rev = "";
   c.results.forEach((r, i) => {
-    const step = sc.steps[i], z = rotZone(step.z, c.k), ctr = zoneCenter(z);
-    if(step.drop) drops += '<circle class="drop" cx="' + f1(ctr[0]) + '" cy="' + f1(ctr[1]) + '" r="6.5"/>';
+    const step = sc.steps[i], z = r.z || rotZone(step.z, c.k), ctr = zoneCenter(z);
+    if(r.drop) drops += '<circle class="drop" cx="' + f1(r.drop[0]) + '" cy="' + f1(r.drop[1]) + '" r="' + PUDDLE_R + '"/>';
     if(i === n - 1 && showLast){
       const cls = r.ok ? "ok" : "bad";
       if(step.reveal) rev = step.reveal.map(o => drawOverlay(rotOverlay(o, c.k))).join("");
@@ -1135,8 +1158,9 @@ function onArenaClick(e){
   const q = pt.matrixTransform(ctm.inverse());
   const p = [q.x, q.y];
   const step = c.scene.steps[c.results.length];
-  const ok = inZone(p, rotZone(step.z, c.k));
-  c.results.push({p, ok});
+  const zone = rotZone(step.zf ? step.zf(c.results) : step.z, c.k);
+  const ok = inZone(p, zone);
+  c.results.push({p, ok, z:zone, drop:step.drop ? (ok ? p : zoneCenter(zone)) : null});
   if(c.results.length < c.scene.steps.length) c.waiting = true;
   else if(!c.counted){ c.counted = true; const all = c.results.every(r => r.ok); record(c.item.id, all); const d = getDeck("map"); d.done++; if(all) d.right++; }
   drawFeedback(); drawMapPanel();
@@ -1270,6 +1294,20 @@ function renderPressureDone(){
 }
 
 /* ---------- cheat sheet ---------- */
+function swordDiagram(s){
+  const P = [21, 50], d = [-1, 0], L = leftOf(d), HW = 7, mine = S(s, 1, -1);
+  const pocket = side => { const sv = [L[0] * side, L[1] * side], corner = vadd(vadd(P, d, -HW), sv, HW); return [corner, vadd(corner, d, -32), vadd(vadd(corner, d, -32), sv, 32), vadd(corner, sv, 32)]; };
+  const poly = (pts, cls) => '<polygon class="zone ' + cls + '" points="' + pts.map(p => f1(p[0]) + "," + f1(p[1])).join(" ") + '"/>';
+  const label = (side, txt) => { const p = vadd(P, unit(vadd([-d[0], -d[1]], [L[0] * side, L[1] * side])), 17);
+    return '<g class="zlabel' + (side === mine ? "" : " other") + '"><rect x="' + f1(p[0] - 8) + '" y="' + f1(p[1] - 2.3) + '" width="16" height="4.6" rx=".9"/><text x="' + f1(p[0]) + '" y="' + f1(p[1]) + '">' + txt + "</text></g>"; };
+  let h = '<svg viewBox="-4 -6 108 110" role="img" aria-label="Sword example. The boss jumps west from the middle. G1 takes the pocket behind his left side, G2 the pocket behind his right side.">';
+  h += floorSVG(false) + '<text class="compass" x="50" y="-2.2">N</text>';
+  h += '<g clip-path="url(#arenaClip)">' + drawOverlay({t:"band", x:171, y:50, x2:-129, y2:50, w:HW * 2}) + drawOverlay({t:"band", x:21, y:-100, x2:21, y2:200, w:HW * 2}) +
+    poly(pocket(1), mine === 1 ? "ok" : "other") + poly(pocket(-1), mine === -1 ? "ok" : "other") + "</g>";
+  h += '<circle class="ghost" cx="50" cy="50" r="3.4"/><line class="jump" x1="46" y1="50" x2="33" y2="50"/>';
+  h += drawWaymarks() + drawBoss({x:P[0], y:P[1], f:270}) + label(1, "G1 / H1") + label(-1, "G2 / H2");
+  return h + "</svg>";
+}
 function renderSheet(){
   const s = state.slot;
   const rows = TL.map(e => '<tr><td class="t">' + e.t + '</td><td class="n">' + esc(e.n) + '<br><span class="chip k-' + e.k + '">' + KIND[e.k] + "</span></td><td>" + esc(e.job(s)) + "</td></tr>").join("");
@@ -1288,6 +1326,13 @@ function renderSheet(){
     "<li>Self: if you are low, heal or shield yourself.</li>" +
     "<li>Team: a hit soon? Heal the party. Quiet? Raise, and say “I got it.”</li></ol>" +
     "<p>Say it in your head: feet, self, team. If you are not sure, any of these beats standing still.</p></section></div>" +
+    '<section><h2>Trophy weapons</h2><div class="cols"><div><ul class="rules">' +
+    "<li><b>Order:</b> the first weapon is the one he faces. Then he goes clockwise.</li>" +
+    "<li><b>Sword:</b> the cross lines up with the way he jumped. Stand in the pocket behind him, on the side he jumped from: G1 on his left, G2 on his right. As " + s + ", you take the " + S(s, "left", "right") + " pocket, and your light party stacks on you.</li>" +
+    "<li><b>Scythe:</b> H1 at the butt, H2 at the point, close in.</li>" +
+    "<li><b>Axe:</b> the whole party stacks in the middle, out of the axe AoE.</li>" +
+    '</ul></div><figure class="mini">' + swordDiagram(s) +
+    "<figcaption>Example: he jumps west from the middle. The pockets on the side he came from are the two stack spots. Yours is green.</figcaption></figure></div></section>" +
     "<section><h2>Your timeline as " + s + '</h2><div class="tablebox"><table><thead><tr><th>Time</th><th>Mechanic</th><th>Your job</th></tr></thead><tbody>' + rows + "</tbody></table></div>" +
     '<p class="hint">Times are from the cactbot fight timeline. Some phase 1 times move by a second or two with the axe or scythe opener.</p></section>' +
     "<section><h2>Suggested " + JOBS[state.job] + ' plan</h2><div class="tablebox"><table><thead><tr><th>Time</th><th>When</th><th>Press</th></tr></thead><tbody>' +
