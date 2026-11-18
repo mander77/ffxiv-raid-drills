@@ -111,8 +111,12 @@ export interface MapDrill {
   phase: string;
   time: string;
   title: string;
+  /** The arena turns a random number of quarter turns. */
   rotate?: boolean;
+  /** One variant is picked at random for each run. */
   variants?: string[];
+  /** The build itself picks random parts, such as weapon spots or line patterns. */
+  random?: boolean;
   // TS note: a drill's build function may take fewer parameters than this type lists.
   // `s => ({...})` still fits `(s, v) => Scene`, just as JavaScript ignores extra arguments.
   build: (s: Slot, v: string | null) => Scene;

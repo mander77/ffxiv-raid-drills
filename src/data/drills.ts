@@ -285,6 +285,9 @@ export function voidAgain(s: Slot, spread: boolean): Scene {
     rule:"Puddles start north, each just outside the last, clockwise. The second Void Stardust ends the other way from the first."};
 }
 
+/** True when a new run of this drill can look different: random parts, a variant or a turn. */
+export const changes = (m: MapDrill): boolean => Boolean(m.random || m.variants || m.rotate);
+
 /* ---------- map drills ---------- */
 export const BOSS: Boss = {x:50, y:50, f:0};
 // TS note: `(x): Overlay => (...)` gives the arrow function a return type. Without it,
@@ -304,7 +307,7 @@ export const MAPS: MapDrill[] = [
       boss:BOSS, overlays:[{t:"tag",x:50,y:56,s:"SCYTHE"},{t:"mark",x:37,y:36,l:"MT",r:"T"},{t:"mark",x:63,y:36,l:"OT",r:"T"}],
       steps:[{q:"Click where the party stacks.", z:{c:[50,69],r:9}, a:"South, right behind the boss."}],
       rule:"Scythe: tanks spread to the front, the party stacks behind."})},
-  {id:"m-assault", order:3, phase:P1, time:"0:48", title:"Assault Evolved: three weapons",
+  {id:"m-assault", order:3, random:true, phase:P1, time:"0:48", title:"Assault Evolved: three weapons",
     build:s=>{ const A = buildAssault(s); return {
       setup:"Three weapons are on the floor. The boss is in the middle, and the red arrow points at the weapon he faces. He jumps to that one first, then goes clockwise. For the sword, watch where he jumps from. For the scythe, read the weapon: the butt has the round knob, the point is the blade end.",
       overlays:A.overlays,
@@ -313,7 +316,7 @@ export const MAPS: MapDrill[] = [
       rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ". Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: stack in the middle."}; }},
   {id:"m-void", order:4, variants:["stack","spread"], phase:P1, time:"1:13 to 1:35", title:"Void Stardust into the second weapons",
     build:(s, v)=>voidIntoWeapons(s, v === "spread", buildAssault2(s))},
-  {id:"m-assault-2", order:5, phase:P1, time:"1:33", title:"Assault Evolved: second set",
+  {id:"m-assault-2", order:5, random:true, phase:P1, time:"1:33", title:"Assault Evolved: second set",
     build:s=>{ const A = buildAssault2(s); return {
       setup:"Void Stardust is over. The three weapons from 1:13 are around the boss, each one turned, and he does not face one yet. The weapon that lies square across the line to him, with its flat side toward him, goes first. Then he goes clockwise, the same as the first set.",
       overlays:A.overlays,
@@ -327,7 +330,7 @@ export const MAPS: MapDrill[] = [
         {t:"lineaoe",x:0,y:0,x2:100,y2:100},{t:"lineaoe",x:100,y:0,x2:0,y2:100},{t:"lineaoe",x:50,y:0,x2:50,y2:100}],
       steps:[{q:"Click your pair spot.", z:S(s,{c:[33,91],r:8},{c:[67,91],r:8}), a:S(s,"Relative southwest, the outer spot, with R1.","Relative southeast, the outer spot, with R2.")}],
       rule:"Open side = new south. H1 and R1 relative SW, H2 and R2 relative SE."})},
-  {id:"m-ultimate", order:11.5, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: six weapons",
+  {id:"m-ultimate", order:11.5, random:true, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: six weapons",
     build:s=>{ const U = buildUltimate(s); return {
       setup:"Everyone is at 1 HP after Charybdistopia. Six weapons spawn one after another, and the boss resolves them in spawn order. He starts on the first weapon before the last ones spawn: three show now, and each hit brings in the next one. Watch where the first one spawns: south and slightly west means clockwise, south and slightly east means counterclockwise. The last one is always north.",
       spawnPlay:true, spawnAhead:3, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,
@@ -337,7 +340,7 @@ export const MAPS: MapDrill[] = [
       boss:BOSS, overlays:[{t:"tornado",x:50,y:16},{t:"tornado",x:20,y:50},{t:"tornado",x:80,y:50},{t:"tornado",x:50,y:84}],
       steps:[{q:"Click your tornado bait spot.", z:S(s,{c:[12,42],r:6.5},{c:[88,58],r:6.5}), a:S(s,"West tornado, on its north side.","East tornado, on its south side.")}],
       rule:"Supports stand on the left, DPS on the right, as you face in from your tornado."})},
-  {id:"m-orbital", order:15, phase:P2, time:"4:26 and 8:24", title:"Orbital Omen",
+  {id:"m-orbital", order:15, random:true, phase:P2, time:"4:26 and 8:24", title:"Orbital Omen",
     build:s=>{ const O = buildOrbital(); return {
       setup:"Orbital Omen. The main tank points the boss north. Portals on the north and east edges fire lines across the arena in the order shown (1 to 4). Fire and Fury cleaves his front and back right after the #1 lines. Use Hector's dodge: stay against his hitbox and cross it to the middle square the next lines miss.",
       boss:BOSS, overlays:O.overlays, steps:O.steps,

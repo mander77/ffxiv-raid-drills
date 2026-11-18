@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, type Run } from "../src/data/drills";
+import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, changes, type Run } from "../src/data/drills";
 import { DEG, inZone } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, Zone } from "../src/types";
 
@@ -19,6 +19,15 @@ test("every map drill builds for both slots and every variant", () => {
     for(const st of sc.steps) assert.ok(st.z || st.zf, m.id + ": step without a zone");
     assert.ok(sc.setup && sc.rule, m.id);
   }
+});
+
+test("drills with no random parts build the same layout every time", () => {
+  // JSON leaves out the zone functions, but keeps every drawn piece and every fixed zone.
+  for(const m of MAPS.filter(x => !changes(x))) for(const s of SLOTS){
+    const first = JSON.stringify(m.build(s, null));
+    for(let i = 0; i < 20; i++) assert.equal(JSON.stringify(m.build(s, null)), first, m.id + " changed between builds, so mark it random");
+  }
+  assert.equal(MAPS.filter(x => !changes(x)).length, 10, "10 fixed drills");
 });
 
 test("Assault Evolved: the faced weapon goes first, then clockwise", () => {
@@ -76,6 +85,13 @@ test("weapon runs: the sword pocket is behind the boss, never on him", () => {
       if(!("fn" in z)) throw new Error(name + ": the sword zone is a rule zone");
       assert.ok(inZone(z.label, z), name + ": the shown spot is inside the zone");
       assert.notOk(inZone([boss.x, boss.y], z), name + ": the boss's own spot");
+      // Relative to the boss, who faces the way he dashed: the pocket is behind him (never
+      // relative north), H1 on his left (relative west) and H2 on his right (relative east).
+      const f = boss.d;
+      if(!f) throw new Error(name + ": the boss has no dash direction at the sword");
+      const v = [z.label[0] - boss.x, z.label[1] - boss.y], ahead = v[0] * f[0] + v[1] * f[1], left = v[0] * f[1] - v[1] * f[0];
+      assert.isBelow(ahead, 0, name + ": the pocket is behind the boss");
+      assert.equal(left > 0, s === "H1", name + ": " + s + " on the boss's " + (s === "H1" ? "left" : "right"));
     });
   }
 });

@@ -3,7 +3,7 @@ import { esc, el } from "../util";
 import { state, getDeck, record, view, type Deck, type MapCur } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter, f1 } from "../geometry";
 import { sceneSVG, drawOverlay, drawBoss, zoneSVG } from "../arena";
-import { PUDDLE_R } from "../data/drills";
+import { PUDDLE_R, changes } from "../data/drills";
 import { tabHead, renderRoundDone } from "./common";
 import type { Boss, MapDrill, Point, Scene, StepResult } from "../types";
 
@@ -142,14 +142,15 @@ export function drawMapPanel(): void {
   /* Start over keeps this layout and goes back to step 1. The other button builds a new layout.
      A run counts toward the score only the first time it reaches the end. */
   const restartBtn = '<button type="button" class="btn ghost" id="map-restart">Start over</button>';
-  const newBtn = '<button type="button" class="btn ghost" id="map-new">' + (sc.spawnPlay ? "Try another spawn pattern" : "New layout") + "</button>";
+  // A drill with nothing random would look the same again, so it gets no new-layout button.
+  const newBtn = !changes(c.item) ? "" : '<button type="button" class="btn ghost" id="map-new">' + (sc.spawnPlay ? "Try another spawn pattern" : "New layout") + "</button>";
   if(done){
     h += '<div class="rule"><span>Rule</span><strong>' + esc(sc.rule) + "</strong></div>";
     h += '<div class="actions"><button type="button" class="btn" id="map-next">Next drill</button>' + restartBtn + newBtn + '<span class="hint"><kbd>Enter</kbd> next</span></div>';
   } else {
     h += '<p class="hint" style="margin-top:12px">' + (n === 0 ? "Click the arena. The green area shows the right spot after you click." : "Click the arena for the next step.") + "</p>";
-    h += '<div class="actions">' + (sc.spawnPlay ? '<button type="button" class="btn ghost" id="map-replay">Watch the spawns again</button>' : "") +
-      (n > 0 ? restartBtn : "") + newBtn + "</div>";
+    const row = (sc.spawnPlay ? '<button type="button" class="btn ghost" id="map-replay">Watch the spawns again</button>' : "") + (n > 0 ? restartBtn : "") + newBtn;
+    if(row) h += '<div class="actions">' + row + "</div>";
   }
   const p = el("map-panel");
   p.innerHTML = h;
