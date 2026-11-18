@@ -57,15 +57,27 @@ export function drawFeedback(): void {
   });
 }
 
-/** Restart the spawn animation so the player can watch the order again. */
+/* Restart the spawn animation so the player can watch the order again. Every weapon that has
+   spawned so far plays again in spawn order, including the ones that already resolved and
+   faded, because the first spawn is the clue. They fade again when the replay is over. */
+let replayTimer = 0;
 function replaySpawns(): void {
   const svg = document.getElementById("arena-svg");
   if(!svg) return;
-  // Replay every weapon that shows, in spawn order.
-  svg.querySelectorAll<SVGGElement>("[data-spawn]").forEach(g => { g.style.animationDelay = (0.3 + Number(g.dataset.spawn)) + "s"; });
+  const shown = svg.querySelectorAll<SVGGElement>("[data-spawn]:not(.later)");
+  shown.forEach(g => { g.classList.remove("gone"); g.style.animationDelay = (0.3 + Number(g.dataset.spawn)) + "s"; });
   svg.classList.remove("play");
   void svg.getBoundingClientRect();
   svg.classList.add("play");
+  window.clearTimeout(replayTimer);
+  replayTimer = window.setTimeout(() => { if(svg.isConnected) drawFeedback(); }, (0.3 + shown.length) * 1000 + 400);
+}
+
+/** Start the same drill again from step 1, with the same layout. */
+function restart(): void {
+  const c = run();
+  c.results = []; c.waiting = false; c.peek = undefined; c.setupOpen = false;
+  renderMap(false);
 }
 
 export function renderMap(fresh = true): void {
@@ -120,25 +132,26 @@ export function drawMapPanel(): void {
   const r = c.results[peek];
   if(r) h += '<div class="lastans ' + (r.ok ? "ok" : "bad") + '"><span class="tag">' + (r.ok ? "Right" : "Not there") + "</span><b>" +
     (multi ? "Step " + (peek + 1) + ": " : "") + esc(sc.steps[peek].q) + "</b> " + esc(sc.steps[peek].a) + "</div>";
+  /* Start over keeps this layout and goes back to step 1. The other button builds a new layout.
+     A run counts toward the score only the first time it reaches the end. */
+  const restartBtn = '<button type="button" class="btn ghost" id="map-restart">Start over</button>';
+  const newBtn = '<button type="button" class="btn ghost" id="map-new">' + (sc.spawnPlay ? "Try another spawn pattern" : "New layout") + "</button>";
   if(done){
     h += '<div class="rule"><span>Rule</span><strong>' + esc(sc.rule) + "</strong></div>";
-    h += '<div class="actions"><button type="button" class="btn" id="map-next">Next drill</button><button type="button" class="btn ghost" id="map-again">Try this one again</button><span class="hint"><kbd>Enter</kbd> next</span></div>';
+    h += '<div class="actions"><button type="button" class="btn" id="map-next">Next drill</button>' + restartBtn + newBtn + '<span class="hint"><kbd>Enter</kbd> next</span></div>';
   } else {
     h += '<p class="hint" style="margin-top:12px">' + (n === 0 ? "Click the arena. The green area shows the right spot after you click." : "Click the arena for the next step.") + "</p>";
+    h += '<div class="actions">' + (sc.spawnPlay ? '<button type="button" class="btn ghost" id="map-replay">Watch the spawns again</button>' : "") +
+      (n > 0 ? restartBtn : "") + newBtn + "</div>";
   }
-  // Mid-drill buttons. Start over builds the drill again, so it does not count toward the score.
-  const extra: string[] = [];
-  if(sc.spawnPlay && !done) extra.push('<button type="button" class="btn ghost" id="map-replay">Watch the spawns again</button>');
-  if(!done && n > 0) extra.push('<button type="button" class="btn ghost" id="map-restart">Start over</button>');
-  if(extra.length) h += '<div class="actions">' + extra.join("") + "</div>";
   const p = el("map-panel");
   p.innerHTML = h;
   document.getElementById("setup-toggle")?.addEventListener("click", () => { c.setupOpen = !c.setupOpen; drawMapPanel(); });
   p.querySelectorAll<HTMLButtonElement>("[data-peek]").forEach(b => b.addEventListener("click", () => { c.peek = Number(b.dataset.peek); drawMapPanel(); }));
   document.getElementById("map-replay")?.addEventListener("click", replaySpawns);
   document.getElementById("map-next")?.addEventListener("click", nextMap);
-  document.getElementById("map-again")?.addEventListener("click", () => renderMap(true));
-  document.getElementById("map-restart")?.addEventListener("click", () => renderMap(true));
+  document.getElementById("map-restart")?.addEventListener("click", restart);
+  document.getElementById("map-new")?.addEventListener("click", () => renderMap(true));
 }
 
 export function onArenaClick(e: MouseEvent): void {
