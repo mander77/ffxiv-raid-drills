@@ -280,8 +280,8 @@ const TL = [
   {t:"3:46", n:"Powerful Gust (tornadoes)", k:"mech", job:s=>"Bait your tornado: " + S(s,"west tornado, north side","east tornado, south side") + "."},
   {t:"4:00", n:"One and Only", k:"raidwide", job:s=>"Heavy physical raidwide. Stack mitigation on it."},
   {t:"4:13", n:"Great Wall of Fire", k:"buster", job:s=>"Two shared tank busters. Shield and heal the tanks. Stay out of the fire line it leaves."},
-  {t:"4:26", n:"Orbital Omen and Fire and Fury", k:"mech", job:s=>"The boss faces north. Stand at his sides for Fire and Fury, then step into the first line crossing after it goes off."},
-  {t:"4:52", n:"Meteorain", k:"mech", job:s=>"Line stacks at 5:00, 5:10, 5:20 and 5:30. Healers bait the 2nd meteors: " + S(s,"drop yours close, NW","drop yours SW, in line with the first") + "."},
+  {t:"4:26", n:"Orbital Omen and Fire and Fury", k:"mech", job:s=>"The boss faces north. Hector's dodge: stay against his hitbox at his side, and cross it to the middle square the next lines miss."},
+  {t:"4:52", n:"Meteorain", k:"mech", job:s=>"Line stacks at 5:00, 5:10, 5:20 and 5:30. Healers bait the 2nd meteors: " + S(s,"drop yours NW, inside the boss hitbox","drop yours SW, in line with the first, farther out") + "."},
   {t:"5:43", n:"Triple Tyrannhilation", k:"raidwide", job:s=>"Three hits. Hide SW behind the three rocks."},
   {t:"6:02", n:"Flatliner", k:"raidwide", job:s=>"Physical raidwide that splits the arena. Mitigate it. Go " + S(s,"west (G1), north end","east (G2), south end") + "."},
   {t:"6:16", n:"Majestic Meteor", k:"mech", job:s=>"Towers at 6:29 and 7:01. Fire Breath at 6:44 and 7:16. Heal everyone in the middle between sets."},
@@ -343,29 +343,33 @@ const MAPS = [
       rule:"Supports stand on the left, DPS on the right, as you face in from your tornado."})},
   {id:"m-orbital", order:15, phase:P2, time:"4:26 and 8:24", title:"Orbital Omen",
     build:s=>{ const O = buildOrbital(); return {
-      setup:"Orbital Omen. The main tank points the boss north. Portals on the north and east edges fire lines across the arena in the order shown (1 to 4). Fire and Fury cleaves his front and back right after the #1 lines.",
+      setup:"Orbital Omen. The main tank points the boss north. Portals on the north and east edges fire lines across the arena in the order shown (1 to 4). Fire and Fury cleaves his front and back right after the #1 lines. Use Hector's dodge: stay against his hitbox and cross it to the middle square the next lines miss.",
       boss:BOSS, overlays:O.overlays, steps:O.steps,
-      rule:"Wait at his side, out of the #1 lines. When they fire (about the “u” in “Fury”), step into the square where the #1 lines crossed and stay."}; }},
+      rule:"Hector's dodge: stay against the boss hitbox. Start where the #2 lines cross, at his side. After #1 and Fire and Fury, cross the hitbox to the opposite middle square. After #2, cross back and stay."}; }},
   {id:"m-meteor-1", order:16, phase:P2, time:"5:00", title:"Meteorain: first stack",
-    build:s=>({setup:"Meteorain. The melee bait the first two meteors, NE and SW. The first line stack goes off next.",
-      boss:BOSS, overlays:[{t:"target",x:62,y:37},{t:"target",x:37.5,y:63},{t:"mark",x:62,y:37,l:"M1",r:"D"},{t:"mark",x:37.5,y:63,l:"M2",r:"D"}],
+    build:s=>({setup:"Meteorain. The melee bait the first two meteors and drop them inside the boss hitbox, NE and SW. The first line stack goes off next.",
+      boss:BOSS, overlays:[{t:"target",x:57,y:43},{t:"target",x:43,y:57},{t:"mark",x:57,y:43,l:"M1",r:"D"},{t:"mark",x:43,y:57,l:"M2",r:"D"}],
       steps:[{q:"Where do you stand for the first line stack?", z:{c:[36,37],r:8}, a:"NW, in the line stack. The tanks stand in front for this first one."}],
       rule:"Meteor bait order: melee, then healers, then ranged."})},
   {id:"m-meteor-2", order:16.1, phase:P2, time:"5:03", title:"Meteorain: your meteor",
-    build:s=>({setup:"Healers bait the second set, and you have a meteor marker. Two rocks are already down: one NE and one SW.",
-      boss:BOSS, overlays:[{t:"rock",x:62,y:38},{t:"rock",x:37.5,y:62}],
-      steps:[{q:"Where do you drop your meteor?", z:S(s,{c:[37.5,38],r:7},{c:[25,75],r:7.5}), a:S(s,"Bait it close to the boss and drop it NW.","Drop it SW, in line with the first SW rock, about halfway to the edge.")}],
-      rule:"Your group uses wtfdig: H1 drops NW, H2 drops SW. Icy Veins swaps these two, so do not mix guides."})},
+    build:s=>({setup:"Healers bait the second set, and you have a meteor marker. Two rocks are already down inside the boss hitbox: one NE and one SW.",
+      boss:BOSS, overlays:[{t:"rock",x:57,y:43},{t:"rock",x:43,y:57}],
+      steps:[{q:"Where do you drop your meteor?",
+        z:S(s, {fn:p => { const r = Math.hypot(p[0] - 50, p[1] - 50), a = angOf([p[0] - 50, p[1] - 50]); return r >= 3 && r <= 11.5 && a >= 285 && a <= 345; },
+                label:[43,43], show:[{poly:[[50,50]].concat([285,300,315,330,345].map(a => [50 + 11 * Math.sin(a * DEG), 50 - 11 * Math.cos(a * DEG)]))}]},
+               {c:[26,74], r:8}),
+        a:S(s, "Inside the boss hitbox, on his NW side.", "SW, in line with the first SW rock, about halfway to the edge.")}],
+      rule:S(s, "H1 drops NW, inside the boss hitbox.", "H2 drops SW in line with the first rock. That rock already sits inside the hitbox, and two rocks too close together explode, so yours goes farther out.") + " Icy Veins swaps H1 and H2 here, so do not mix guides."})},
   {id:"m-meteor-3", order:16.2, phase:P2, time:"5:20", title:"Meteorain: third stack",
-    build:s=>({setup:"The ranged bait the third set. The rocks are NW (from H1) and two SW in a line. Each stack breaks the rock in front of it.",
-      boss:BOSS, overlays:[{t:"rock",x:37.5,y:38},{t:"rock",x:37.5,y:62},{t:"rock",x:25,y:75}],
-      steps:[{q:"Where do you stand for this line stack?", z:{c:[33,33],r:6.5}, a:"NW, behind the NW rock (farther from the boss than the rock)."}],
+    build:s=>({setup:"The ranged bait the third set. The rocks are NW (from H1, inside the hitbox) and two SW in a line. Each stack breaks the rock in front of it.",
+      boss:BOSS, overlays:[{t:"rock",x:43,y:43},{t:"rock",x:43,y:57},{t:"rock",x:26,y:74}],
+      steps:[{q:"Where do you stand for this line stack?", z:{c:[35,35],r:7}, a:"NW, behind the NW rock (farther from the boss than the rock)."}],
       rule:"Stack behind a rock to break it. Keep the SW line whole."})},
   {id:"m-meteor-4", order:16.3, phase:P2, time:"5:30 to 5:43", title:"Meteorain: last stack, then hide",
     build:s=>({setup:"The last stack has no meteor baits. The rocks are NE (from R2) and three SW in a line.",
-      boss:BOSS, overlays:[{t:"rock",x:62,y:38},{t:"rock",x:37.5,y:62},{t:"rock",x:23,y:77},{t:"rock",x:9,y:91}],
+      boss:BOSS, overlays:[{t:"rock",x:57,y:43},{t:"rock",x:43,y:57},{t:"rock",x:26,y:74},{t:"rock",x:10,y:90}],
       steps:[
-        {q:"Where do you stand for the fourth line stack?", z:{c:[67,30],r:7}, a:"Behind the NE rock, to blow it up."},
+        {q:"Where do you stand for the fourth line stack?", z:{c:[65,35],r:7}, a:"Behind the NE rock, to blow it up."},
         {q:"Triple Tyrannhilation is next. Where do you hide?", z:{c:[5,96],r:6.5}, a:"SW, behind the line of three rocks."}],
       rule:"After the 4th stack, run SW and hide behind the three rocks."})},
   {id:"m-split-line", order:18, phase:P3, time:"6:02", title:"Arena Split: line up",
@@ -478,20 +482,20 @@ const MECH = [
     options:[{t:"At the boss's sides. It hits his front and back.", ok:true},{t:"Right behind the boss."},{t:"Right in front of the boss."},{t:"Anywhere far away."}],
     why:"The main tank points the boss north. Fire and Fury cleaves front and back, so the sides are safe.",
     rule:"Fire and Fury: stand at the sides."})),
-  mq("k-orbital-move", 15.1, P2, "4:35", s=>({prompt:"Orbital Omen lines: when do you step into the line crossing?",
-    options:[{t:"As the first lines go off, about the “u” in “Fury” on the cast bar.", ok:true},{t:"Before the lines appear."},{t:"Never. Stand still."},{t:"When the boss jumps."}],
-    why:"The lines go off in the order they appeared. The first crossing is safe after the first lines fire.",
-    rule:"Move into the crossing after the lines go off."})),
+  mq("k-orbital-move", 15.1, P2, "4:35", s=>({prompt:"Orbital Omen lines: how does Hector's dodge work?",
+    options:[{t:"Stay against the boss hitbox at his side. Before each set of lines, cross the hitbox to the middle square those lines miss.", ok:true},{t:"Run to the arena edge and wait it out."},{t:"Stand in front of the boss and do not move."},{t:"Stand behind the boss for the whole mechanic."}],
+    why:"Start where the #2 lines cross. After the #1 lines and Fire and Fury, cross to the opposite middle square for #2. After #2, cross back: that column is done, and #3 and #4 miss it.",
+    rule:"Hector's dodge: back and forth across the hitbox."})),
   mq("k-meteor-order", 16, P2, "4:52", s=>({prompt:"Meteorain: who baits each set of meteors?",
     options:[{t:"Melee, then healers, then ranged.", ok:true},{t:"Healers, then ranged, then melee."},{t:"Tanks only."},{t:"Ranged, then melee, then healers."}],
     why:"The two players closest to the boss get the meteor markers. Each role steps in for its own set. You bait the second set.",
     rule:"Meteor bait order: M > H > R."})),
   mq("k-meteor-drop", 16.1, P2, "5:03", s=>({prompt:"Meteorain, second set: you have a meteor marker. Where do you drop it?",
-    options:[{t:S(s,"Bait it close to the boss, then drop it NW.","Bait it close, then drop it SW, in line with the first SW meteor."), ok:true},
-      {t:S(s,"Drop it SW, in line with the first SW meteor.","Drop it NW, close to the boss.")},
+    options:[{t:S(s,"Drop it NW, inside the boss hitbox.","Drop it SW, in line with the first SW meteor, about halfway to the edge."), ok:true},
+      {t:S(s,"Drop it SW, in line with the first SW meteor.","Drop it NW, inside the boss hitbox.")},
       {t:"Drop it NE, next to the first meteor."},{t:"Drop it on the party stack."}],
-    why:"Two rocks too close together explode. Your group uses wtfdig. Icy Veins swaps H1 and H2 here, so do not mix guides.",
-    rule:"H1 drops NW. H2 drops SW, in line."})),
+    why:"Two rocks too close together explode. The first SW rock is already inside the hitbox, so the SW drop goes farther out along the same line. Your group uses wtfdig, and Icy Veins swaps H1 and H2 here, so do not mix guides.",
+    rule:"H1: NW inside the hitbox. H2: SW in line, farther out."})),
   mq("k-meteor-stack", 16.2, P2, "5:10", s=>({prompt:"Meteorain, second set (healers baiting). Where does the rest of the party stack?",
     options:[{t:"Behind the NE meteor, to blow it up.", ok:true},{t:"Behind the SW meteors."},{t:"Under the boss."},{t:"They spread."}],
     why:"The line stack breaks the first rock it hits. The party breaks the NE and NW rocks and keeps the SW line.",
@@ -928,31 +932,40 @@ function nextPuddle(results){
 }
 
 /* Orbital Omen, simplified to 4 lanes each way. Each set fires one north lane and one east lane.
-   Set 1 crosses at the boss's side; set 2 crosses in one of the middle squares. */
+   Set 2 always crosses in one of the four middle squares. */
 function buildOrbital(){
   const outer = shuffle([0,3]), inner = shuffle([1,2]);
   const V = [outer[0], inner[0]].concat(shuffle([outer[1], inner[1]]));
   const H = shuffle([1,2]).concat(shuffle([0,3]));
   const lane = (n, vert) => vert ? {rect:[n * 25, 0, n * 25 + 25, 100]} : {rect:[0, n * 25, 100, n * 25 + 25]};
   const inV = (p, n) => p[0] >= n * 25 && p[0] <= n * 25 + 25, inH = (p, n) => p[1] >= n * 25 && p[1] <= n * 25 + 25;
-  const flank = p => { const dx = p[0] - 50, dy = p[1] - 50, r = Math.hypot(dx, dy); return Math.abs(dx) > Math.abs(dy) && r <= 32 && r >= 5; };
-  const wait = p => inArena(p) && flank(p) && !inV(p, V[0]) && !inH(p, H[0]);
-  const label = [[36,56],[36,44],[64,56],[64,44]].find(wait) || [36,56];
+  /* Hector's dodge: stay in the four middle squares against the boss hitbox and cross it
+     to whichever middle square the next lines miss. */
+  const mid = p => p[0] >= 25 && p[0] <= 75 && p[1] >= 25 && p[1] <= 75;
+  const side = p => Math.abs(p[0] - 50) > Math.abs(p[1] - 50);
+  const misses = (p, sets) => sets.every(i => !inV(p, V[i]) && !inH(p, H[i]));
+  const cellRect = (c, r) => ({rect:[c * 25, r * 25, c * 25 + 25, r * 25 + 25]});
+  const spot = (c, r) => [c === 1 ? 38 : 62, r === 1 ? 44 : 56];
+  const c2 = V[1], r2 = H[1], cOpp = 3 - V[1], r1 = H[0];
   const overlays = [];
   V.forEach((n, i) => overlays.push({t:"guide", x:n * 25 + 12.5, y:0, x2:n * 25 + 12.5, y2:100}, {t:"portal", x:n * 25 + 12.5, y:2.6, vert:true, n:i + 1}));
   H.forEach((n, i) => overlays.push({t:"guide", x:0, y:n * 25 + 12.5, x2:100, y2:n * 25 + 12.5}, {t:"portal", x:97.4, y:n * 25 + 12.5, vert:false, n:i + 1}));
-  const cell = {rect:[V[0] * 25, H[0] * 25, V[0] * 25 + 25, H[0] * 25 + 25]};
+  const lanes = sets => sets.map(i => ({t:"lane", rect:lane(V[i], true).rect})).concat(sets.map(i => ({t:"lane", rect:lane(H[i], false).rect})));
   return {
     overlays,
     steps:[
-      {q:"Fire and Fury is casting and the #1 lines fire first. Where do you wait?",
-        z:{fn:wait, label, show:[{poly:[[50,50],[18,18],[18,82]]}, {poly:[[50,50],[82,18],[82,82]]}, Object.assign({cls:"hit"}, lane(V[0], true)), Object.assign({cls:"hit"}, lane(H[0], false))]},
-        a:"At the boss's side, not his front or back, and outside both #1 lines.",
-        reveal:[{t:"poly", pts:[[50,50],[0,0],[100,0]]}, {t:"poly", pts:[[50,50],[0,100],[100,100]]}, {t:"lane", rect:lane(V[0], true).rect}, {t:"lane", rect:lane(H[0], false).rect}]},
-      {q:"The #1 lines and Fire and Fury went off. Where do you go and stay?",
-        z:cell,
-        a:"Into the square where the two #1 lines crossed. Those lines are done, so that square stays safe.",
-        reveal:[1,2,3].map(i => ({t:"lane", rect:lane(V[i], true).rect, soft:true})).concat([1,2,3].map(i => ({t:"lane", rect:lane(H[i], false).rect, soft:true})))}
+      {q:"Before the #1 lines and Fire and Fury: where do you stand?",
+        z:{fn:p => mid(p) && side(p) && misses(p, [0]), label:spot(c2, r2), show:[cellRect(1, r2), cellRect(2, r2)]},
+        a:"Against the boss hitbox at his side, in a middle square the #1 lines miss. Best start: the square where the #2 lines cross.",
+        reveal:[{t:"poly", pts:[[50,50],[0,0],[100,0]]}, {t:"poly", pts:[[50,50],[0,100],[100,100]]}].concat(lanes([0]))},
+      {q:"The #1 lines and Fire and Fury went off. The #2 lines are next. Where do you go?",
+        z:{fn:p => mid(p) && misses(p, [1]), label:spot(cOpp, r1), show:[cellRect(cOpp, r1)]},
+        a:"Across the boss hitbox to the opposite middle square. The #2 lines miss it.",
+        reveal:lanes([1])},
+      {q:"The #2 lines went off. Where do you go now?",
+        z:{fn:p => mid(p) && misses(p, [2, 3]), label:spot(c2, r2), show:[{rect:[c2 * 25, 25, c2 * 25 + 25, 75]}]},
+        a:"Back across the hitbox, into the column the #2 line already hit. The #3 and #4 lines miss it, so you stay there.",
+        reveal:lanes([2, 3]).map(o => Object.assign(o, {soft:true}))}
     ]
   };
 }
@@ -1326,11 +1339,14 @@ function renderSheet(){
     "<li>Self: if you are low, heal or shield yourself.</li>" +
     "<li>Team: a hit soon? Heal the party. Quiet? Raise, and say “I got it.”</li></ol>" +
     "<p>Say it in your head: feet, self, team. If you are not sure, any of these beats standing still.</p></section></div>" +
-    '<section><h2>Trophy weapons</h2><div class="cols"><div><ul class="rules">' +
-    "<li><b>Order:</b> the first weapon is the one he faces. Then he goes clockwise.</li>" +
+    '<section><h2>Positions to remember</h2><div class="cols"><div><ul class="rules">' +
+    "<li><b>Weapon order:</b> the first weapon is the one he faces. Then he goes clockwise.</li>" +
     "<li><b>Sword:</b> the cross lines up with the way he jumped. Stand in the pocket behind him, on the side he jumped from: G1 on his left, G2 on his right. As " + s + ", you take the " + S(s, "left", "right") + " pocket, and your light party stacks on you.</li>" +
     "<li><b>Scythe:</b> H1 at the butt, H2 at the point, close in.</li>" +
     "<li><b>Axe:</b> the whole party stacks in the middle, out of the axe AoE.</li>" +
+    "<li><b>Void Stardust:</b> start north of the boss. Drop each puddle just outside the last one, a small step clockwise. Then stack or spread.</li>" +
+    "<li><b>Orbital Omen (Hector's dodge):</b> stay against the boss hitbox, at his side. Start where the #2 lines cross. After #1 and Fire and Fury, cross the hitbox to the opposite middle square. After #2, cross back and stay.</li>" +
+    "<li><b>Meteorain, your meteor:</b> " + S(s, "drop it NW, inside the boss hitbox.", "drop it SW, in line with the first SW rock, farther out.") + "</li>" +
     '</ul></div><figure class="mini">' + swordDiagram(s) +
     "<figcaption>Example: he jumps west from the middle. The pockets on the side he came from are the two stack spots. Yours is green.</figcaption></figure></div></section>" +
     "<section><h2>Your timeline as " + s + '</h2><div class="tablebox"><table><thead><tr><th>Time</th><th>Mechanic</th><th>Your job</th></tr></thead><tbody>' + rows + "</tbody></table></div>" +
