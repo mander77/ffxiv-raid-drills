@@ -24,5 +24,7 @@ if [ "$who" != "$OWNER" ]; then
   exit 1
 fi
 
-git push origin main
+# The empty credential.helper clears inherited helpers (macOS adds osxkeychain at the
+# system level, which can hold another account), so only the GitHub CLI answers.
+git -c credential.helper= -c "credential.helper=!gh auth git-credential" push origin main
 echo "Pushed. GitHub Pages updates https://$OWNER.github.io/m11s-healer-drills/ in about a minute."
