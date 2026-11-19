@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, changes, assaultScene, ultimateScene, facingNext, type Run } from "../src/data/drills";
+import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, stackToward, changes, assaultScene, ultimateScene, facingNext, type Run } from "../src/data/drills";
 import { angOf, inZone, zoneCenter } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, StepResult, Zone } from "../src/types";
 
@@ -252,4 +252,14 @@ test("weapon runs: before each jump, the boss turns to face the weapon he jumps 
       assert.equal(facingNext(sc, R.states.length - 1, last), last, name + ": no jump after the last weapon");
     }
   }
+});
+
+test("Void Stardust stack toward the first weapon: a spot right next to the weapon is right", () => {
+  // The first weapon southeast, and the usual three puddles (the third ends east of south-east).
+  const w: Point = [70.5, 70.5], q = PUDDLES[2], z = stackToward(w)(VOID_RESULTS);
+  if(!("fn" in z)) throw new Error("the stack zone is a rule zone");
+  const l = Math.hypot(w[0] - q[0], w[1] - q[1]), next: Point = [w[0] + (w[0] - q[0]) / l * 5, w[1] + (w[1] - q[1]) / l * 5];
+  assert.ok(inZone(next, z), "5 units past the weapon, away from the last puddle");
+  assert.ok(inZone(z.label, z), "the shown spot");
+  assert.notOk(inZone(q, z), "inside the last puddle");
 });

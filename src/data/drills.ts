@@ -265,17 +265,18 @@ export function cometSpread(s: Slot, toward: Point | null = null, c: Point = CEN
 
 /* The stack after the third puddle when a sword or scythe goes first next: the group moves
    from the third puddle toward that weapon. Any spot out of the third puddle and the hitbox,
-   within a short move of the third puddle and clearly closer to the weapon, is right.
-   The spot shown is the one in reach that is closest to the weapon. */
+   within a short move of the third puddle and clearly closer to the weapon, is right, right
+   up to the weapon itself. The spot shown is the one in reach that is closest to the weapon,
+   but it stops short of the weapon, so it does not hide under the weapon's icon. */
 export function stackToward(w: Point): (results: StepResult[]) => Zone {
   return results => {
     const q: Point = results[results.length - 1].drop ?? [50, 33];
     const fn = (p: Point): boolean => inArena(p) && far(p, [50, 50], HITBOX + 1.5) && far(p, q, PUDDLE_R) &&
-      dist(p, q) <= PUDDLE_R + 16 && dist(p, w) <= dist(q, w) - 4 && far(p, w, 8);   // not on the weapon itself
+      dist(p, q) <= PUDDLE_R + 16 && dist(p, w) <= dist(q, w) - 4;
     let label: Point = q, best = Infinity;
     for(let x = 0; x <= 100; x += 1.5) for(let y = 0; y <= 100; y += 1.5){
       const p: Point = [x, y];
-      if(dist(p, q) <= PUDDLE_R + 10 && fn(p) && dist(p, w) < best){ best = dist(p, w); label = p; }
+      if(dist(p, q) <= PUDDLE_R + 10 && fn(p) && far(p, w, 8) && dist(p, w) < best){ best = dist(p, w); label = p; }
     }
     return {fn, label, show:[{c:label, r:5}]};
   };
