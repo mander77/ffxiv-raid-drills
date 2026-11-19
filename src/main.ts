@@ -15,6 +15,7 @@ import { renderQuiz, answer, nextQ, previews, pickOpt, lockIn, openQuestion } fr
 import { renderPressureStart, startPressure } from "./views/pressure";
 import { renderSheet } from "./views/sheet";
 import { renderHome } from "./views/home";
+import { renderAbout } from "./views/about";
 import { renderFight, togglePause, openFight, seekBy } from "./views/fight";
 import { parseChoices } from "./data/fight";
 import type { Slot } from "./types";
@@ -74,6 +75,7 @@ function render(): void {
     case "map": return state.play === "time" ? renderFight() : renderMap();
     case "pressure": return renderPressureStart();
     case "sheet": return renderSheet();
+    case "about": return renderAbout();
     default: return renderQuiz(state.tab);
   }
 }

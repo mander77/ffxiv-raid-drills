@@ -9,7 +9,7 @@ import type { Job, MapDrill, Option, Question, QuizItem, Scene, Slot, StepResult
 // TS note: other files import these types with `import { state, type Deck } from "./core"`.
 // The `type` keyword inside the braces marks a type-only import next to normal value imports.
 export type QuizCat = "mech" | "next" | "death" | "job";
-export type Tab = "home" | "map" | QuizCat | "pressure" | "sheet";
+export type Tab = "home" | "map" | QuizCat | "pressure" | "sheet" | "about";
 /** How the "Where do I stand?" tab plays: one drill at a time, or all of them on the fight clock. */
 export type Play = "step" | "time";
 
@@ -26,7 +26,7 @@ export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; 
     the question's own list, which the answer previews follow. `sel` is the answer picked for a
     preview but not locked in yet (-1 for none), and `pick` the one locked in. */
 export interface McqCur { kind: "mcq"; cat: QuizCat | "pressure"; item: QuizItem; q: Question; opts: Array<Option & {k: number}>; answered: boolean; pick: number; sel: number; slow: boolean }
-export type Cur = MapCur | McqCur | { kind: "pstart" } | { kind: "pdone" } | { kind: "sheet" } | { kind: "home" } | { kind: "fight" } | { kind: "ability"; i: number };
+export type Cur = MapCur | McqCur | { kind: "pstart" } | { kind: "pdone" } | { kind: "sheet" } | { kind: "home" } | { kind: "about" } | { kind: "fight" } | { kind: "ability"; i: number };
 export interface PressureRun { queue: QuizItem[]; i: number; right: number; wrong: number; froze: number }
 
 interface Decks { map?: Deck<MapDrill>; mech?: Deck<QuizItem>; next?: Deck<QuizItem>; death?: Deck<QuizItem>; job?: Deck<QuizItem> }
@@ -60,7 +60,8 @@ export const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
 };
 
 /** In the order a player learns the fight: the mechanics, the spots, the timeline, the cooldowns,
-    the raises, then a timed test. The cheat sheet comes last because it sums up the rest. */
+    the raises, then a timed test. The cheat sheet comes after them because it sums up the rest.
+    About this tool is last: it is not practice. */
 export const TABS: Array<{id: Tab; label: string; lede: string}> = [
   {id:"home", label:"Home", lede:"Practice drills for the healers in M11S, The Tyrant (Savage). You practice where to stand, what comes next, when to raise and which cooldown to press, away from the raid. The answers follow your group's strats: Hector (Toxic), Kindred No Buddies and Fixed (3CJ) Ecliptic."},
   {id:"mech", label:"Mechanics", lede:"Read your group's wtfdig guide first, then test yourself here. The answers follow the guide and your slot. After you answer, the arena picture shows the right spot."},
@@ -69,7 +70,8 @@ export const TABS: Array<{id: Tab; label: string; lede: string}> = [
   {id:"job", label:"My job", lede:"A suggested plan for your job, built from the current ability recasts. It is not your group's plan, so agree with your co-healer who uses what, and do not stack the same 10% on the same hit."},
   {id:"death", label:"Someone died", lede:"The decisions from your talk with Andrew: who first, when to raise, when to wait."},
   {id:"pressure", label:"Pressure round", lede:"Mixed questions on a timer. The goal is to pick something every time. A wrong answer beats a freeze."},
-  {id:"sheet", label:"Cheat sheet", lede:"The rules and your timeline on one page."}
+  {id:"sheet", label:"Cheat sheet", lede:"The rules and your timeline on one page."},
+  {id:"about", label:"About this tool", lede:"Why I made this tool, and what it can do."}
 ];
 
 const savedSecs = LS.get("psecs", 6);

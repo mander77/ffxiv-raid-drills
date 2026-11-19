@@ -12,7 +12,7 @@
 //                                  clicks so far (arena units), so a link shows the same answers
 //   /map/ability/<n>               the card for row n of the fight list (counted from 1)
 //   /fight[/<CODE>[/<picks>]]      Real time, with a fight code and fight pattern picks
-//   /pressure, /sheet              the Pressure round and the Cheat sheet
+//   /pressure, /sheet, /about      the Pressure round, the Cheat sheet and About this tool
 //
 // Anything else opens the landing screen. Old links put the route after a # (/#mech/k-sword,
 // /#map/m-assault/K3PZ, /#fight/K3PZ/raw=axe). They still open the same screen, and the address
@@ -28,7 +28,7 @@ import type { Point } from "./types";
 // TS note: Route is a discriminated union on `tab`, like Overlay in types.ts. After a check such
 // as `r.tab === "map"`, TypeScript knows that r has `drill` and `code`.
 export type Route =
-  | { tab: "home" | "pressure" | "sheet" }
+  | { tab: "home" | "pressure" | "sheet" | "about" }
   | { tab: QuizCat; card?: string }
   | { tab: "map"; drill?: string; code?: string; picks?: string; at?: Point[]; ability?: number }
   | { tab: "fight"; code?: string; picks?: string };
@@ -65,7 +65,7 @@ export function parseRoute(link: string): Route {
   if(name === "map") return only({tab:"map" as const, drill:a});
   if(name === "fight") return isCode(a) ? only({tab:"fight" as const, code:a.toUpperCase(), picks:b}) : {tab:"fight"};
   if(isQuiz(name)) return only({tab:name, card:a});
-  if(name === "pressure" || name === "sheet") return {tab:name};
+  if(name === "pressure" || name === "sheet" || name === "about") return {tab:name};
   return {tab:"home"};
 }
 
@@ -88,7 +88,7 @@ export function routeLink(r: Route): string {
       return "/map" + add(r.drill, r.drill ? r.code : undefined, exact ? r.picks : undefined) + at;
     }
     case "fight": return "/fight" + add(r.code, r.code ? r.picks : undefined);
-    case "pressure": case "sheet": return "/" + r.tab;
+    case "pressure": case "sheet": case "about": return "/" + r.tab;
     default: return "/" + r.tab + add(r.card);
   }
 }

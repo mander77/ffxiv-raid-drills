@@ -10,10 +10,11 @@ import type { Job } from "../types";
 
 interface Card { kind: string; about: string; count: () => string }
 
-// TS note: Exclude<Tab, "home"> is the Tab union without "home". Record then needs a card for
-// every other tab, so a new tab in core.ts without a card here is a compile error.
-// `count` is a function so it reads the data when the screen draws, not when the file loads.
-const CARDS: Record<Exclude<Tab, "home">, Card> = {
+// TS note: Exclude<Tab, "home" | "about"> is the Tab union without "home" and "about". Record
+// then needs a card for every other tab, so a new tab in core.ts without a card here is a
+// compile error. `count` is a function so it reads the data when the screen draws, not when the
+// file loads. About this tool (views/about.ts) lists the same text as the app's features.
+export const CARDS: Record<Exclude<Tab, "home" | "about">, Card> = {
   map: {kind:"Arena drills", about:"Click where you stand on the arena for each mechanic. Step by step gives one drill at a time with no timer. Real time runs the whole fight on the fight clock, to the enrage.",
     count: () => MAPS.length + " drills · " + ABILITIES.length + " abilities"},
   mech: {kind:"Quiz", about:"What each mechanic does and what you do in it, with an arena picture for each question. Read the wtfdig guide first.", count: () => MECH.length + " questions"},
@@ -30,10 +31,11 @@ const link = (id: Tab): string => '<a href="' + routeLink({tab:id}) + '">' + esc
 
 export function renderHome(): void {
   const home = TABS.find(t => t.id === "home");
-  // TS note: after `if(t.id === "home") return`, TypeScript narrows t.id to the other tabs,
-  // so CARDS[t.id] type-checks. Narrowing works on a property path such as t.id, not only on a variable.
+  // TS note: after `if(t.id === "home" || t.id === "about") return`, TypeScript narrows t.id to
+  // the other tabs, so CARDS[t.id] type-checks. Narrowing works on a property path such as t.id,
+  // not only on a variable.
   const cards = TABS.map(t => {
-    if(t.id === "home") return "";
+    if(t.id === "home" || t.id === "about") return "";
     const c = CARDS[t.id];
     return '<li><a class="tabcard" href="' + routeLink({tab:t.id}) + '"><span class="tc-kind">' + esc(c.kind) + '</span><b class="tc-name">' + esc(t.label) + "</b>" +
       '<span class="tc-about">' + esc(c.about) + '</span><span class="tc-count">' + esc(c.count()) + "</span></a></li>";

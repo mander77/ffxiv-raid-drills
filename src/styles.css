@@ -355,6 +355,15 @@ td.n .cmline{margin-top:4px;gap:6px;font-size:12px;font-weight:400}
 .tc-name::after{content:" \2192";color:var(--heal)}
 .tc-about{flex:1;font-size:14.5px;color:var(--ink-2);max-width:72ch}
 .tc-count{margin-top:6px;font-family:var(--font-mono);font-size:12px;color:var(--ink-2)}
+/* About this tool */
+.about{display:grid;gap:20px}
+.about section{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;min-width:0}
+.about h2{font-family:var(--font-display);font-size:26px;letter-spacing:.02em;text-transform:uppercase;margin:0 0 10px}
+.about h3{font-family:var(--font-display);font-size:19px;letter-spacing:.02em;text-transform:uppercase;margin:18px 0 8px}
+.about p{margin:0;max-width:72ch}
+.about .features{margin:0;padding-left:20px;display:grid;gap:10px;max-width:72ch}
+.about a{color:var(--heal-ink);font-weight:700}
+.about .features b{color:var(--heal-ink)}
 @media (max-width:860px){.tabcards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:560px){.tabcards{grid-template-columns:minmax(0,1fr)}.home h2{font-size:26px}}
 
