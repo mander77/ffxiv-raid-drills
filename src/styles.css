@@ -270,6 +270,7 @@ td.n{font-weight:700;min-width:170px}
 .aoe{fill:var(--aoe-fill);stroke:var(--aoe);stroke-width:.4}
 .lineaoe{stroke:var(--line-aoe);stroke-linecap:butt;opacity:.95}
 .ring{fill:none;stroke:var(--ring);stroke-width:1.1}
+.ringmark{fill:none;stroke:var(--ring);stroke-width:1.1;stroke-linecap:round}
 .bosscore{fill:var(--boss)}
 .face{fill:var(--ring)}
 .wm text{font-family:var(--font-display);font-weight:700;font-size:4.2px;text-anchor:middle;dominant-baseline:central}

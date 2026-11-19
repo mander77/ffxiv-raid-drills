@@ -1,6 +1,6 @@
 // SVG drawing for the arena map.
 import { esc } from "./util";
-import { f1, vadd, unit, rotOverlay } from "./geometry";
+import { DEG, f1, vadd, unit, rotOverlay } from "./geometry";
 import type { Boss, Overlay, Point, Scene, ZoneShape } from "./types";
 
 interface Waymark { id: string; x: number; y: number; c: "red" | "yellow" | "blue" | "purple"; sq: boolean }
@@ -64,9 +64,20 @@ export function drawOverlay(o: Overlay): string {
   }
 }
 
+/* The boss and his target ring, drawn like the game's: a marker at his front, a short tick on
+   each flank (his east and west), and an opening at his rear, between the two rear corners
+   (135 to 225 degrees from his front). The whole ring turns with his facing.
+   With no facing (f null), the ring is a plain circle, so it does not give away where he faces. */
+const RING = 11, REAR = 45;   // the ring radius, and half of the rear opening in degrees
+const onRing = (deg: number, r: number): string => f1(r * Math.sin(deg * DEG)) + " " + f1(-r * Math.cos(deg * DEG));
 export function drawBoss(b: Boss): string {
-  return '<g transform="translate(' + f1(b.x) + " " + f1(b.y) + ')"><circle class="ring" r="11"/><circle class="bosscore" r="3.4"/>' +
-    (b.f == null ? "" : '<path class="face" transform="rotate(' + b.f + ')" d="M0,-14.6 L-2.6,-10.4 L2.6,-10.4 Z"/>') + "</g>";
+  const at = "translate(" + f1(b.x) + " " + f1(b.y) + ")";
+  if(b.f == null) return '<g transform="' + at + '"><circle class="ring" r="' + RING + '"/><circle class="bosscore" r="3.4"/></g>';
+  return '<g transform="' + at + " rotate(" + b.f + ')">' +
+    // From the left rear corner, clockwise past his front, to the right rear corner.
+    '<path class="ring" d="M' + onRing(180 + REAR, RING) + " A" + RING + " " + RING + " 0 1 1 " + onRing(180 - REAR, RING) + '"/>' +
+    '<path class="ringmark" d="M' + onRing(90, RING - 2) + " L" + onRing(90, RING + 2) + " M" + onRing(270, RING - 2) + " L" + onRing(270, RING + 2) + '"/>' +
+    '<circle class="bosscore" r="3.4"/><path class="face" d="M0,-14.6 L-2.6,-10.4 L2.6,-10.4 Z"/></g>';
 }
 
 export function drawWaymarks(): string {
