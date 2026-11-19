@@ -2,7 +2,7 @@
 import { S, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry";
-import { HITBOX, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, donut, lineTo, swordCross, swordPocket } from "./attacks";
+import { HITBOX, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
 import type { Boss, MapDrill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
@@ -67,8 +67,10 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       // Proteans: a cone on every player, so each player takes a clock spot close around him.
       // The point and the butt (H2 and H1) are two of the eight spots, opposite each other.
       const pointAt = angOf(scytheAxis(w, i));
-      // And a donut: only close to him is safe, so the clock spots are close in.
-      reveal = [donut(P, SCYTHE_SAFE), ...Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, PROTEAN_HALF, PROTEAN_LEN))];
+      // And a donut: only close to him is safe, so the clock spots are close in. The safe circle
+      // shows in green, and the cones as outlines, so your lane inside the circle stays readable.
+      reveal = [donut(P, SCYTHE_SAFE), safeRing(P, SCYTHE_SAFE),
+        ...Array.from({length:8}, (_x, k): Overlay => ({...cleave(P, pointAt + k * 45, PROTEAN_HALF, PROTEAN_LEN), line:true}))];
     } else {
       // Safe pocket: behind him (f < -HW) and on your side (sd > HW), outside both arms of the
       // cross. Anywhere in it inside the arena is right, and the drawn pocket is the same area.

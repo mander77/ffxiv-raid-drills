@@ -59,7 +59,8 @@ export function drawOverlay(o: Overlay): string {
     }
     case "band": return '<line class="aoeband" x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '" stroke-width="' + o.w + '"/>';
     case "lane": return '<rect class="' + (o.soft ? "lanesoft" : "aoe") + '" x="' + o.rect[0] + '" y="' + o.rect[1] + '" width="' + (o.rect[2] - o.rect[0]) + '" height="' + (o.rect[3] - o.rect[1]) + '"/>';
-    case "poly": return '<polygon class="aoe" points="' + o.pts.map(pt).join(" ") + '"/>';
+    case "poly": return '<polygon class="' + (o.line ? "aoeline" : "aoe") + '" points="' + o.pts.map(pt).join(" ") + '"/>';
+    case "safe": return '<circle class="safe" cx="' + x + '" cy="' + y + '" r="' + o.r + '"/>';
     case "guide": return '<line class="guide" x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '"/>';
     case "portal": return '<g class="portal" transform="translate(' + x + " " + y + ')"><ellipse rx="' + (o.vert ? 6 : 2.2) + '" ry="' + (o.vert ? 2.2 : 6) + '"/><text>' + o.n + "</text></g>";
   }
@@ -96,6 +97,17 @@ export function floorSVG(split = false): string {
   return h;
 }
 
+/** True for the filled area of an attack. */
+const isHit = (o: Overlay): boolean =>
+  o.t === "aoe" || o.t === "donut" || o.t === "band" || (o.t === "poly" && !o.line) || (o.t === "lane" && !o.soft);
+/** Overlays with the attacks first, as one flat layer: the group has one opacity and the shapes
+    inside are solid, so where two attacks overlap the colour does not get darker. Then the rest
+    (outlines, safe rings, weapons) on top, at full strength. */
+export function hitsSVG(os: Overlay[]): string {
+  const hits = os.filter(isHit), rest = os.filter(o => !isHit(o));
+  return (hits.length ? '<g class="hits">' + hits.map(drawOverlay).join("") + "</g>" : "") + rest.map(drawOverlay).join("");
+}
+
 /** The full arena for a scene, turned k quarter turns. Feedback layers stay empty until an answer. */
 export function sceneSVG(sc: Scene, k: number): string {
   /* Weapons carry a spawn index. Each one gets its own group, so the map view can fade it
@@ -113,8 +125,9 @@ export function sceneSVG(sc: Scene, k: number): string {
   let h = '<svg id="arena-svg"' + (sc.spawnPlay ? ' class="play"' : "") + ' viewBox="-4 -6 108 110" role="img" aria-label="Arena map. Click to choose a spot.">';
   h += floorSVG(sc.split);
   h += '<text class="compass" x="50" y="-2.2">N</text>';
-  h += '<g clip-path="url(#arenaClip)">' + sc.overlays.filter(o => o.spawn == null).map(o => drawOverlay(rotOverlay(o, k))).join("") + spawned + "</g>";
+  // What an answer reveals (the attacks) goes under the weapons, so their icons stay sharp.
   h += '<g id="reveal-layer" clip-path="url(#arenaClip)"></g>';
+  h += '<g clip-path="url(#arenaClip)">' + hitsSVG(sc.overlays.filter(o => o.spawn == null).map(o => rotOverlay(o, k))) + spawned + "</g>";
   h += '<g id="drops"></g>';
   h += drawWaymarks();
   h += '<g id="boss-layer"></g>';
@@ -133,7 +146,7 @@ export function figSVG(f: Fig, answered: boolean, label: string, preview?: Previ
   const isLabel = (o: Overlay): boolean => o.t === "tag" || o.t === "mark";
   const draw = (os: Overlay[]): string => os.map(drawOverlay).join("");
   let h = '<svg class="qfig-svg" viewBox="-4 -6 108 110" role="img" aria-label="' + esc(label) + '">' + floorSVG(f.split) + '<text class="compass" x="50" y="-2.2">N</text>';
-  h += '<g clip-path="url(#arenaClip)">' + draw(pieces.filter(o => !isLabel(o))) + zones.join("") + draw(pieces.filter(isLabel)) + "</g>";
+  h += '<g clip-path="url(#arenaClip)">' + hitsSVG(pieces.filter(o => !isLabel(o))) + zones.join("") + draw(pieces.filter(isLabel)) + "</g>";
   return h + drawWaymarks() + (f.boss ? drawBoss(f.boss) : "") + "</svg>";
 }
 

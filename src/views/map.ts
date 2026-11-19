@@ -2,7 +2,7 @@
 import { esc, el, newCode, random, withSeed } from "../util";
 import { state, getDeck, record, view, setChoices, type MapCur } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter, f1 } from "../geometry";
-import { sceneSVG, drawOverlay, drawBoss, zoneSVG } from "../arena";
+import { sceneSVG, drawOverlay, drawBoss, zoneSVG, hitsSVG } from "../arena";
 import { BOSS, MAPS, changes, facingNext } from "../data/drills";
 import { PUDDLE_R } from "../data/attacks";
 import { ABILITIES } from "../data/abilities";
@@ -54,7 +54,7 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
     if(step.leave) drops += drawOverlay(step.leave);
     if(i === n - 1 && showLast){
       const cls = r.ok ? "ok" : "bad";
-      if(step.reveal) rev = step.reveal.map(o => drawOverlay(rotOverlay(o, k))).join("");
+      if(step.reveal) rev = hitsSVG(step.reveal.map(o => rotOverlay(o, k)));
       fb += '<g clip-path="url(#arenaClip)">' + zoneSVG(z, cls) + "</g>";
       const top = "c" in z ? z.c[1] - z.r : "rect" in z ? z.rect[1] : ctr[1] + 1;
       const bottom = "c" in z ? z.c[1] + z.r : "rect" in z ? z.rect[3] : ctr[1] - 1;

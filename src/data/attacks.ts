@@ -49,6 +49,8 @@ export const ATOMIC_R = yalms(5);
 
 /** A circle that hits everything inside it. */
 export const aoe = (c: Point, r: number): Overlay => ({t:"aoe", x:c[0], y:c[1], r});
+/** The safe ground inside an attack: a green ring of radius r around c. */
+export const safeRing = (c: Point, r: number): Overlay => ({t:"safe", x:c[0], y:c[1], r});
 /** A donut around c: it hits everything from r1 out to r2. */
 export const donut = (c: Point, r1: number, r2 = 150): Overlay => ({t:"donut", x:c[0], y:c[1], r1, r2});
 /** A line from `from` through `to` and on past the arena edge, w units wide: a line stack by default. */
@@ -58,7 +60,9 @@ export const lineTo = (from: Point, to: Point, w = LINE_STACK_W): Overlay => {
 };
 
 /** A cone from c toward a (degrees clockwise from north), `half` degrees to each side, r units long. */
-export function cleave(c: Point, a: number, half = 16, r = 80): Overlay {
+// TS note: Extract keeps only the poly member of the Overlay union, so a caller can spread a
+// cone and add a poly-only field (line) without a type error.
+export function cleave(c: Point, a: number, half = 16, r = 80): Extract<Overlay, {t: "poly"}> {
   const p = (d: number): Point => [c[0] + r * Math.sin(d * DEG), c[1] - r * Math.cos(d * DEG)];
   return {t:"poly", pts:[c, p(a - half), p(a), p(a + half)]};
 }
