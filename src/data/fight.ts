@@ -32,22 +32,32 @@ export interface FightSeg {
     the player asked for, so a link can carry it. */
 export interface Fight { segs: FightSeg[]; events: TLEvent[]; end: number; split: [number, number]; summary: string; code: string; picks: Picks; choices: Choices }
 
-/** How each random part of a fight comes out. `set1` and `set2` are the first weapon of the
+// TS note: a template literal type builds a string type from other types, the way a C#
+// interpolated string builds a value. A WeaponOrder is three weapon names joined by "-",
+// for example "sword-axe-scythe".
+/** The weapons of one Assault Evolved set, in the order the boss takes them. */
+export type WeaponOrder = `${WeaponType}-${WeaponType}-${WeaponType}`;
+
+/** How each random part of a fight comes out. `set1` and `set2` are the weapon orders of the
     Assault Evolved sets at 0:48 and 1:33. */
-export interface Picks { raw: "axe" | "scythe"; void: "stack" | "spread"; set1: WeaponType; set2: WeaponType; ult: "cw" | "ccw"; fireball: "two" | "four"; wall: "north" | "south" }
+export interface Picks { raw: "axe" | "scythe"; void: "stack" | "spread"; set1: WeaponOrder; set2: WeaponOrder; ult: "cw" | "ccw"; fireball: "two" | "four"; wall: "north" | "south" }
 // TS note: Choices is a mapped type. `[K in keyof Picks]` walks every field of Picks, so Choices
 // has the same fields, and each one takes the same values or "random". Add a field to Picks and
 // Choices gets it too. C# has no direct match; you would write the second class by hand.
 export type Choices = { [K in keyof Picks]: Picks[K] | "random" };
 export const RANDOM: Choices = {raw:"random", void:"random", set1:"random", set2:"random", ult:"random", fireball:"random", wall:"random"};
 
+/** The six weapon orders, as [value, text]: "sword-axe-scythe" shows as "Sword, axe, scythe". */
+export const orderText = (o: string): string => { const s = o.split("-").join(", "); return s.charAt(0).toUpperCase() + s.slice(1); };
+const ORDERS: Array<[string, string]> = ["sword-axe-scythe", "sword-scythe-axe", "axe-sword-scythe", "axe-scythe-sword", "scythe-sword-axe", "scythe-axe-sword"]
+  .map((o): [string, string] => [o, orderText(o)]);
+
 /** The choices on the Real time settings screen, in fight order, with the text for each value. */
-const WEAPONS: Array<[string, string]> = [["sword", "Sword"], ["axe", "Axe"], ["scythe", "Scythe"]];
 export const CHOICE_ROWS: Array<{key: keyof Picks; label: string; options: Array<[string, string]>}> = [
   {key:"raw", label:"First Raw Steel Trophy", options:[["axe", "Axe"], ["scythe", "Scythe"]]},
-  {key:"set1", label:"First weapon at 0:48", options:WEAPONS},
+  {key:"set1", label:"Weapon order at 0:48", options:ORDERS},
   {key:"void", label:"First Void Stardust ends in", options:[["stack", "Stack"], ["spread", "Spread"]]},
-  {key:"set2", label:"First weapon at 1:33", options:WEAPONS},
+  {key:"set2", label:"Weapon order at 1:33", options:ORDERS},
   {key:"ult", label:"Ultimate Trophy Weapons", options:[["cw", "Clockwise"], ["ccw", "Counterclockwise"]]},
   {key:"fireball", label:"Ecliptic Fireball", options:[["two", "Two-way"], ["four", "Four-way"]]},
   {key:"wall", label:"Your Ecliptic puddles", options:[["north", "North wall"], ["south", "South wall"]]}
@@ -87,13 +97,15 @@ export function buildFight(s: Slot, code = newCode(), choices: Choices = RANDOM)
 /* A choice replaces a random result, but the random call still happens first. So the parts
    left on "random" come out the same as without the choice, and a code keeps its meaning. */
 const choose = <T extends string>(choice: T | "random", rolled: T): T => choice === "random" ? rolled : choice;
-const forced = <T extends string>(choice: T | "random"): T | undefined => choice === "random" ? undefined : choice;
+// cleanChoices already checked the order against the six known ones, so the split is safe.
+const orderOf = (choice: WeaponOrder | "random"): WeaponType[] | undefined => choice === "random" ? undefined : choice.split("-") as WeaponType[];
+const orderIn = (A: {W: Array<{type: WeaponType}>}): WeaponOrder => A.W.map(w => w.type).join("-") as WeaponOrder;
 
 function fightFor(s: Slot, code: string, c: Choices): Fight {
   const w1 = choose(c.raw, random() < 0.5 ? "axe" : "scythe"), w2 = w1 === "axe" ? "scythe" : "axe";
   const stackFirst = choose(c.void, random() < 0.5 ? "stack" : "spread") === "stack";
   // Built in this order on purpose: a fight code replays the same random calls in the same order.
-  const A1 = buildAssault(s, forced(c.set1)), assault1 = assaultScene(A1, s), A2 = buildAssault2(s, forced(c.set2));
+  const A1 = buildAssault(s, orderOf(c.set1)), assault1 = assaultScene(A1, s), A2 = buildAssault2(s, orderOf(c.set2));
   /* Assault Evolved (ability B417) has a 6.0-second cast, so the boss turns to the first weapon
      6.0 seconds before cactbot's line: at 0:42.2 for the first set (line 0:48.2) and 1:26.7 for
      the second (line 1:32.7). That leaves about 8 seconds before the first hit. */
@@ -185,10 +197,10 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     [659.6, "Heartbreaker (Enrage)"]
   ];
   const events = lines.map(([t, name]): TLEvent => ({t, name, raidwide:RAIDWIDE.has(name)}));
-  const picks: Picks = {raw:w1, void:stackFirst ? "stack" : "spread", set1:A1.W[0].type, set2:A2.W[0].type,
+  const picks: Picks = {raw:w1, void:stackFirst ? "stack" : "spread", set1:orderIn(A1), set2:orderIn(A2),
     ult:U.cw ? "cw" : "ccw", fireball:four ? "four" : "two", wall};
-  const summary = "Raw Steel Trophy: " + w1 + " first, then " + w2 + ". Assault Evolved: " + picks.set1 + " first at 0:48, " +
-    picks.set2 + " first at 1:33. Void Stardust: " + (stackFirst ? "stack first, then spread." : "spread first, then stack.") +
+  const summary = "Raw Steel Trophy: " + w1 + " first, then " + w2 + ". Assault Evolved at 0:48: " + orderText(picks.set1).toLowerCase() +
+    ". At 1:33: " + orderText(picks.set2).toLowerCase() + ". Void Stardust: " + (stackFirst ? "stack first, then spread." : "spread first, then stack.") +
     " Ultimate Trophy Weapons: " + (U.cw ? "clockwise." : "counterclockwise.") +
     " Ecliptic Stampede: " + fireball + ", with your puddles along the " + wall + " wall.";
   return {segs, events, end:662, split:[361.8, 479.4], summary, code, picks, choices:c};

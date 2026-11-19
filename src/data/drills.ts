@@ -76,13 +76,14 @@ function buildRun(s: Slot, W: Weapon[]): Run {
 }
 
 /* Assault Evolved: three weapons. The boss faces the first, then goes clockwise.
-   `first` forces the type of the first weapon (Real time choices); without it, it is random. */
-export function buildAssault(s: Slot, first?: WeaponType): Run {
-  return buildRun(s, assaultWeapons(first));
+   `order` forces the weapon types in the order he takes them (Real time choices); without it,
+   the order is random. */
+export function buildAssault(s: Slot, order?: WeaponType[]): Run {
+  return buildRun(s, assaultWeapons(order));
 }
 
 /** Three weapons at least 90 degrees apart, in the order he takes them: the first, then clockwise. */
-function assaultWeapons(first?: WeaponType): Weapon[] {
+function assaultWeapons(order?: WeaponType[]): Weapon[] {
   const spots = [0,45,90,135,180,225,270,315];
   let pick = [0,135,225];
   for(let t = 0; t < 60; t++){
@@ -90,19 +91,18 @@ function assaultWeapons(first?: WeaponType): Weapon[] {
     if(cand.every((a, i) => cand.every((b, j) => i === j || Math.min((a - b + 360) % 360, (b - a + 360) % 360) >= 90))){ pick = cand; break; }
   }
   const a0 = pick[0];
-  const order = [a0].concat(pick.slice(1).sort((x, y) => ((x - a0 + 360) % 360) - ((y - a0 + 360) % 360)));
-  const types = shuffle([...WEAPON_TYPES]);
-  // A forced first weapon swaps places after the shuffle, so the random calls stay the same and
-  // a fight code still rebuilds every other part the same way.
-  if(first){ const i = types.indexOf(first); [types[0], types[i]] = [types[i], types[0]]; }
-  return order.map((a, i): Weapon => ({a, p:atAngle(a), type:types[i]}));
+  const angles = [a0].concat(pick.slice(1).sort((x, y) => ((x - a0 + 360) % 360) - ((y - a0 + 360) % 360)));
+  // A forced order replaces the shuffle's result, but the shuffle still runs, so the random
+  // calls stay the same and a fight code still rebuilds every other part the same way.
+  const shuffled = shuffle([...WEAPON_TYPES]), types = order ?? shuffled;
+  return angles.map((a, i): Weapon => ({a, p:atAngle(a), type:types[i]}));
 }
 
 /* Assault Evolved, second set (1:33, after Void Stardust). The boss does not face a weapon
    yet. Every weapon is turned. The first one lies square across the line to the boss, with
    its flat side toward him. The other two are turned 30 to 60 degrees. Then clockwise. */
-export function buildAssault2(s: Slot, first?: WeaponType): Run {
-  const W = assaultWeapons(first).map((w, i): Weapon => {
+export function buildAssault2(s: Slot, order?: WeaponType[]): Run {
+  const W = assaultWeapons(order).map((w, i): Weapon => {
     const turn = i === 0 ? 0 : (30 + random() * 30) * (random() < 0.5 ? 1 : -1);
     const flip = random() < 0.5 ? 0 : 180;   // which end points which way
     const t = (w.a + 90 + turn + flip) * DEG;     // w.a + 90 is across the line to the boss

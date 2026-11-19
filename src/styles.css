@@ -69,6 +69,14 @@ main{padding-block:20px 56px}
 .lede{margin:0;max-width:68ch;color:var(--ink-2);min-width:0;flex:1 1 360px}
 .ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
 .fpick{margin:22px 0 2px;font-size:18px}
+/* Weapon cards: drag them into the order the boss takes them. Dashed with "?" while on Random. */
+.wcards{display:flex;gap:6px;list-style:none;margin:0;padding:0}
+.wcard{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1.5px solid var(--heal);border-radius:8px;background:var(--card);color:var(--ink);font-size:14px;font-weight:700;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.wcard b{font-family:var(--font-mono);color:var(--heal)}
+.wcard:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.wcard.dragging{cursor:grabbing;border-color:var(--ink);box-shadow:0 4px 12px rgba(19,26,43,.2)}
+.wcards.random .wcard{border-style:dashed;border-color:var(--ink-2);color:var(--ink-2);font-weight:500}
+.wcards.random .wcard b{color:var(--ink-2)}
 .stage{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
 @media (max-width:860px){.stage{grid-template-columns:minmax(0,1fr)}}
 .mapwrap{display:grid;grid-template-columns:230px minmax(0,1fr);gap:20px;align-items:start}

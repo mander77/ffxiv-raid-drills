@@ -9,16 +9,17 @@ const seg = (f: Fight, title: string) => {
   return g;
 };
 const WEAPON = new Set(["axe", "sword", "scythe"]);
-/** The type of the weapon the boss takes first, read from the drawing (spawn 0). */
-const firstWeapon = (f: Fight, title: string): string | undefined =>
-  seg(f, title).scene.overlays.find(o => o.spawn === 0 && WEAPON.has(o.t))?.t;
+/** The weapons in the order the boss takes them, read from the step answers ("Axe, east: ..."). */
+const orderIn = (steps: Array<{a: string}>): string => steps.map(st => st.a.split(",")[0].toLowerCase()).join("-");
 
 /* What the arena shows for each pick, read from the built scenes, not only from f.picks. */
 const SHOWS: { [K in keyof Picks]: (f: Fight, v: string) => boolean } = {
   raw: (f, v) => f.segs[0].title === "Raw Steel Trophy: " + v,
   void: (f, v) => /Comet/.test(seg(f, "Void Stardust into").scene.steps[4].q) === (v === "spread"),
-  set1: (f, v) => firstWeapon(f, "Assault Evolved") === v,
-  set2: (f, v) => seg(f, "Void Stardust into").scene.steps[0].a.startsWith("The " + v + ","),
+  set1: (f, v) => orderIn(seg(f, "Assault Evolved").scene.steps) === v,
+  // The Void Stardust stretch asks for the first weapon, then the puddles, then all three weapons.
+  set2: (f, v) => orderIn(seg(f, "Void Stardust into").scene.steps.slice(5)) === v &&
+    seg(f, "Void Stardust into").scene.steps[0].a.startsWith("The " + v.split("-")[0] + ","),
   // The first of the six weapons spawns south and slightly west for clockwise, slightly east otherwise.
   ult: (f, v) => {
     const o = seg(f, "Ultimate Trophy Weapons").scene.overlays.find(x => x.spawn === 0 && WEAPON.has(x.t));
@@ -64,11 +65,13 @@ test("a choice changes only its own part: the rest still comes from the fight co
 });
 
 test("a fight link carries the choices", () => {
-  const c: Choices = {...RANDOM, raw:"scythe", set2:"sword", ult:"ccw", wall:"north"};
-  assert.equal(choicesText(c), "raw=scythe,set2=sword,ult=ccw,wall=north");
+  const c: Choices = {...RANDOM, raw:"scythe", set2:"scythe-sword-axe", ult:"ccw", wall:"north"};
+  assert.equal(choicesText(c), "raw=scythe,set2=scythe-sword-axe,ult=ccw,wall=north");
   assert.deepEqual(parseChoices(choicesText(c)), c);
   assert.equal(choicesText(RANDOM), "");
   assert.deepEqual(parseChoices(""), RANDOM);
   // Unknown parts and values from a hand-edited link become Random.
   assert.deepEqual(parseChoices("raw=hammer,ult=cw,bogus=1"), {...RANDOM, ult:"cw"});
+  // An order must hold each weapon once.
+  assert.deepEqual(parseChoices("set1=axe-axe-sword,set2=sword"), RANDOM);
 });
