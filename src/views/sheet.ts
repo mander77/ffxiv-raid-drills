@@ -5,7 +5,7 @@ import { TL, KIND } from "../data/timeline";
 import { JOBS } from "../data/jobs";
 import { f1, vadd, unit, leftOf } from "../geometry";
 import { floorSVG, drawOverlay, drawWaymarks, drawBoss } from "../arena";
-import { tabHead } from "./common";
+import { tabHead, WTFDIG } from "./common";
 import type { Point, Slot } from "../types";
 
 /** A fixed sword example: the boss jumps west from the middle. The player's pocket is green. */
@@ -66,7 +66,7 @@ export function renderSheet(): void {
     QUIZ_POOLS.job().slice().sort((a, b) => a.order - b.order).map(it => { const q = it.build(s), right = q.options.find(o => o.ok); return '<tr><td class="t">' + esc(it.time) + '</td><td class="n">' + esc(q.rule) + "</td><td>" + esc(right?.t ?? "") + "</td></tr>"; }).join("") +
     '</tbody></table></div><p class="hint">Switch jobs on the My job tab. This plan uses only your own buttons. Agree with your co-healer who covers each raidwide.</p></section>' +
     '<section><h2>Sources</h2><ul class="links">' +
-    '<li><a href="https://wtfdig.info/74/m11s#hector:nobuddies:fixed" target="_blank" rel="noopener">wtfdig M11S</a> <span>Your strats: Hector (Toxic), Kindred No Buddies, Fixed (3CJ)</span></li>' +
+    '<li><a href="' + WTFDIG + '" target="_blank" rel="noopener">wtfdig M11S</a> <span>Your strats: Hector (Toxic), Kindred No Buddies, Fixed (3CJ)</span></li>' +
     '<li><a href="https://www.youtube.com/watch?v=w1uuwzhyf5A" target="_blank" rel="noopener">Hector\'s video guide</a></li>' +
     '<li><a href="https://raidplan.io/plan/HJAbE7fuWodELUSB" target="_blank" rel="noopener">Toxic Friends raidplan</a> <span>Phases 1 and 2</span></li>' +
     '<li><a href="https://raidplan.io/plan/hvbysrfwvrc55ahz" target="_blank" rel="noopener">Kindred raidplan</a> <span>Arena Split</span></li>' +

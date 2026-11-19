@@ -15,7 +15,7 @@ interface Card { kind: string; about: string; count: () => string }
 const CARDS: Record<Exclude<Tab, "home">, Card> = {
   map: {kind:"Arena drills", about:"Click where you stand on the arena for each mechanic. Step by step gives one drill at a time with no timer. Real time runs the whole fight on the fight clock, to the enrage.",
     count: () => MAPS.length + " drills · " + ABILITIES.length + " abilities"},
-  mech: {kind:"Quiz", about:"What each mechanic does and what you do in it.", count: () => MECH.length + " questions"},
+  mech: {kind:"Quiz", about:"What each mechanic does and what you do in it, with an arena picture for each question. Read the wtfdig guide first.", count: () => MECH.length + " questions"},
   next: {kind:"Quiz", about:"Which mechanic comes next, so you know how much time you have to raise.", count: () => NEXT_ITEMS.length + " questions"},
   death: {kind:"Quiz", about:"Who to raise first, when to raise and when to wait.", count: () => DEATH.length + " questions"},
   job: {kind:"Quiz", about:"A suggested cooldown plan for White Mage or Sage, asked one hit at a time.",

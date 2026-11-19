@@ -60,7 +60,7 @@ export const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
     the raises, then a timed test. The cheat sheet comes last because it sums up the rest. */
 export const TABS: Array<{id: Tab; label: string; lede: string}> = [
   {id:"home", label:"Home", lede:"Practice drills for the healers in M11S, The Tyrant (Savage). You practice where to stand, what comes next, when to raise and which cooldown to press, away from the raid. The answers follow your group's strats: Hector (Toxic), Kindred No Buddies and Fixed (3CJ) Ecliptic."},
-  {id:"mech", label:"Mechanics", lede:"What each mechanic does and what you do. Your answers follow your slot and your group's wtfdig link."},
+  {id:"mech", label:"Mechanics", lede:"Read your group's wtfdig guide first, then test yourself here. The answers follow the guide and your slot. After you answer, the arena picture shows the right spot."},
   {id:"map", label:"Where do I stand?", lede:"The list is the whole fight in cast order. Click an ability to see what it does, or a drill to practice it. Step by step has no timer. Real time runs the fight clock. Patterns turn as they do in the real fight, so read the boss and the floor."},
   {id:"next", label:"What is next?", lede:"Knowing what comes next tells you how much time you have to raise. Times come from the fight timeline."},
   {id:"job", label:"My job", lede:"A suggested plan for your job, built from the current ability recasts. It is not your group's plan, so agree with your co-healer who uses what, and do not stack the same 10% on the same hit."},

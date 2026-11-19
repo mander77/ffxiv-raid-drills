@@ -50,7 +50,7 @@ type OverlayShape =
   | ({ t: "guide" } & Line)
   | ({ t: "tornado" } & At)
   | ({ t: "rock" } & At)
-  | ({ t: "tower" } & At)
+  | ({ t: "tower"; r?: number } & At)
   | ({ t: "target" } & At)
   /** ux, uy turn the icon: its long side, from the handle end to the tip. */
   | ({ t: "axe"; ux?: number; uy?: number } & At)
@@ -127,6 +127,11 @@ export interface MapDrill {
 }
 
 /* ---------- questions ---------- */
+
+/** An arena picture for a quiz question. `overlays` and `boss` always show. `before` shows
+    until you answer. After the answer, `after` draws what the mechanic does and the green
+    `answer` zones show the right spot. `note` is a caption under the picture. */
+export interface Fig { overlays: Overlay[]; boss?: Boss; split?: boolean; before?: Overlay[]; after?: Overlay[]; answer?: ZoneShape[]; note?: string }
 
 export interface Option { t: string; ok?: boolean }
 export interface Question { prompt: string; options: Option[]; why: string; rule: string; src?: string }

@@ -13,11 +13,12 @@ export interface Run { W: Weapon[]; states: Boss[]; steps: Step[]; overlays: Ove
 
 const WEAPON_TYPES: WeaponType[] = ["axe", "sword", "scythe"];
 const ORDINALS = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"];
-const atAngle = (a: number): Point => [50 + 29 * Math.sin(a * DEG), 50 - 29 * Math.cos(a * DEG)];
+/** A weapon spot: 29 units from the arena center, `a` degrees clockwise from north. */
+export const atAngle = (a: number): Point => [50 + 29 * Math.sin(a * DEG), 50 - 29 * Math.cos(a * DEG)];
 
 /* A jump run: the boss starts in the middle and jumps to each weapon in order.
    He faces the way he jumped, so relative north at each weapon = his travel direction. */
-function buildRun(s: Slot, W: Weapon[]): Run {
+export function buildRun(s: Slot, W: Weapon[]): Run {
   const states: Boss[] = [{x:50, y:50, f:W[0].a}];
   const dirs: Point[] = [];   // dirs[i] = the direction of the jump into weapon i
   let prev: Point = [50, 50];

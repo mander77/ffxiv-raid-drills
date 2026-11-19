@@ -201,6 +201,16 @@ button.chip{cursor:pointer}
 .fsum .chip{height:24px;min-width:26px;font-size:12px;padding:0 6px}
 
 .qwrap{max-width:780px;margin:0 auto}
+/* A question with an arena picture: the answers on the left, the picture on the right.
+   On a phone the picture goes above the answers, at a size that leaves them close by. */
+.qwrap.wide{max-width:1000px}
+.qgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);grid-template-areas:"main fig";gap:22px;align-items:start}
+.qmain{grid-area:main;min-width:0}
+.qfig{grid-area:fig;margin:0}
+.qfig svg{display:block;width:100%;height:auto}
+.qfig figcaption{margin-top:6px;font-size:13px;color:var(--ink-2)}
+@media (max-width:760px){.qgrid{grid-template-columns:minmax(0,1fr);grid-template-areas:"fig" "main";gap:12px}.qfig{width:100%;max-width:210px;margin:0 auto}}
+.tabhead .guide{flex:none;text-decoration:none;font-size:14px;padding:8px 14px}
 .opts{display:grid;gap:10px;margin:14px 0 0}
 .opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);font:inherit;color:var(--ink);cursor:pointer;line-height:1.4}
 .opt:hover:not(:disabled){border-color:var(--heal)}

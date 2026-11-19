@@ -3,6 +3,8 @@ import { esc, shuffle, el } from "../util";
 import { state, getDeck, record, view, stopTimer, type McqCur, type QuizCat } from "../core";
 import { tabHead, renderRoundDone } from "./common";
 import { showPressureQ } from "./pressure";
+import { MECH_FIGS } from "../data/figs";
+import { figSVG } from "../arena";
 import type { QuizItem } from "../types";
 
 /** The card on screen. Only call this while a multiple-choice card shows. */
@@ -33,7 +35,16 @@ export function drawMCQ(): void {
   let h = '<div class="eyebrow"><b>' + esc(item.phase) + "</b><span>" + esc(item.time) + '</span><span class="progress">' + prog + "</span></div>";
   if(c.cat === "pressure" && !c.answered)
     h += '<div class="tphase" id="timer-lbl">Read</div><div class="timer reading" id="timer" aria-hidden="true"><i style="width:0"></i></div>';
-  h += "<h2>" + esc(q.prompt) + '</h2><div class="opts" role="group" aria-label="Answers">';
+  h += "<h2>" + esc(q.prompt) + "</h2>";
+  // A Mechanics question has an arena picture beside the answers (above them on a phone).
+  // The Pressure round shows it too, because it asks the same questions.
+  const fig = MECH_FIGS[item.id]?.(state.slot);
+  if(fig){
+    const label = c.answered ? "Arena picture. The green area shows the answer." : "Arena picture of the setup.";
+    h += '<div class="qgrid"><figure class="qfig">' + figSVG(fig, c.answered, label) +
+      (fig.note && c.answered ? "<figcaption>" + esc(fig.note) + "</figcaption>" : "") + '</figure><div class="qmain">';
+  }
+  h += '<div class="opts" role="group" aria-label="Answers">';
   c.opts.forEach((o, i) => {
     let cls = "opt";
     if(c.answered){ if(o.ok) cls += " ok"; else if(i === c.pick) cls += " bad"; else cls += " dim"; }
@@ -53,7 +64,9 @@ export function drawMCQ(): void {
   } else {
     h += '<p class="hint" style="margin-top:12px">Press <kbd>1</kbd> to <kbd>' + c.opts.length + "</kbd> or click an answer.</p>";
   }
+  if(fig) h += "</div></div>";
   p.innerHTML = h;
+  p.parentElement?.classList.toggle("wide", Boolean(fig));
   p.querySelectorAll<HTMLElement>(".opt").forEach(b => b.addEventListener("click", () => answer(Number(b.dataset.i))));
   const nx = document.getElementById("q-next");
   if(nx){ nx.addEventListener("click", nextQ); nx.focus({preventScroll:true}); }

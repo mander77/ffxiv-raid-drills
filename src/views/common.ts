@@ -4,9 +4,15 @@ import { state, TABS, view, app, type Deck, type QuizCat } from "../core";
 import { JOBS } from "../data/jobs";
 import type { Job } from "../types";
 
+/** Your group's guide on wtfdig, opened with your strats picked: Hector (Toxic), Kindred No Buddies, Fixed (3CJ). */
+export const WTFDIG = "https://wtfdig.info/74/m11s#hector:nobuddies:fixed";
+
 export function tabHead(): string {
   const t = TABS.find(x => x.id === state.tab) ?? TABS[0];
   let h = '<div class="tabhead"><p class="lede">' + esc(t.lede) + "</p>";
+  if(state.tab === "mech"){
+    h += '<a class="btn ghost guide" href="' + WTFDIG + '" target="_blank" rel="noopener">Read the wtfdig guide first <span aria-hidden="true">↗</span></a>';
+  }
   if(state.tab === "map"){
     h += '<div class="ctrl"><span id="play-lbl">Mode</span><div class="seg small" role="group" aria-labelledby="play-lbl">' +
       '<button type="button" id="play-step" data-play="step" aria-pressed="' + (state.play === "step") + '">Step by step</button>' +
