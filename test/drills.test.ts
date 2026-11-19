@@ -1,6 +1,6 @@
 import { test, assert } from "vitest";
 import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, changes, type Run } from "../src/data/drills";
-import { DEG, inZone, zoneCenter } from "../src/geometry";
+import { inZone, zoneCenter } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, StepResult, Zone } from "../src/types";
 
 const RUNS = 300;
@@ -41,18 +41,20 @@ test("Assault Evolved: the faced weapon goes first, then clockwise", () => {
   }
 });
 
-test("Assault Evolved, second set: the weapon square to the boss goes first, then clockwise", () => {
+test("Assault Evolved, second set: each weapon faces where he jumps from, the first faces the middle", () => {
   for(let i = 0; i < RUNS; i++){
     const A = buildAssault2("H1");
     assert.isNull(A.states[0].f, "the boss does not point at the first weapon");
-    // |cos| of the angle between the long side and the line to the boss:
-    // 0 = square across it, 0.5 to 0.87 = turned 30 to 60 degrees.
-    const across = A.W.map(w => {
+    let prev: Point = [50, 50];
+    A.W.forEach((w, k) => {
       if(!w.axis) throw new Error("every second-set weapon is turned");
-      return Math.abs(w.axis[0] * Math.sin(w.a * DEG) - w.axis[1] * Math.cos(w.a * DEG));
+      const l = Math.hypot(w.p[0] - prev[0], w.p[1] - prev[1]), t: Point = [(w.p[0] - prev[0]) / l, (w.p[1] - prev[1]) / l];
+      // The long side lies square across his jump into it (the first: across the line to the middle).
+      assert.closeTo(w.axis[0] * t[0] + w.axis[1] * t[1], 0, 1e-9, "weapon " + (k + 1) + " is square to his jump");
+      // The long side runs from the butt to the tip, so the butt is on his left: u . left < 0.
+      assert.isBelow(w.axis[0] * t[1] - w.axis[1] * t[0], 0, "weapon " + (k + 1) + ": the butt is on his left");
+      prev = w.p;
     });
-    assert.isBelow(across[0], 1e-9, "the first weapon is square to the boss");
-    for(const c of across.slice(1)) assert.ok(c >= 0.5 - 1e-9 && c <= 0.867, "the others are turned 30 to 60 degrees");
     const a = A.W.map(w => w.a), d1 = (a[1] - a[0] + 360) % 360, d2 = (a[2] - a[0] + 360) % 360;
     assert.ok(d1 > 0 && d1 < d2, "clockwise after the first");
   }

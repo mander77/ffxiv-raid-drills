@@ -7,7 +7,7 @@
 // picture is built from that drill, so the two always agree.
 import { S, withSeed } from "../util";
 import { DEG, angOf, rotOverlay, unit, zoneCenter } from "../geometry";
-import { MAPS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, type Run, type Weapon, type WeaponType } from "./drills";
+import { MAPS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, type Run, type Weapon, type WeaponType } from "./drills";
 import { PUDDLE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, aoe, axeHit, cleave, swordCross } from "./attacks";
 import type { Boss, Fig, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
@@ -119,7 +119,6 @@ const named = (R: Run): Overlay[] => [...R.overlays.filter(o => o.t !== "tag"),
 // one pair, so the code reads like the data.
 const weapons = (list: Array<[number, WeaponType]>): Weapon[] => list.map(([a, type]): Weapon => ({a, p:atAngle(a), type}));
 /** A second-set weapon, turned `turn` degrees away from lying square across the line to the boss. */
-const turned = (a: number, type: WeaponType, turn: number): Weapon => { const t = (a + 90 + turn) * DEG; return {a, p:atAngle(a), type, axis:[Math.sin(t), -Math.cos(t)]}; };
 /** A label between weapon w and the boss: its place in the order, or "?". */
 const numAt = (w: Weapon, l: string): Overlay => tag(...at(w.a, 16), l);
 /** The boss's jumps, from the middle through the given spots in turn. */
@@ -216,7 +215,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
     return {overlays:[...PUDDLE_PIECES, ...FIXED_SPREAD_MARKS], boss:BOSS, answer:[gaps], options:[
       hit(youIn(s, gaps), spreadWith(zoneCenter(gaps))), hit(youAt(s, [37, 71]), spreadWith([37, 71])),
       show([stackHit(stackedMarks), ...stackedMarks]), hit(youAt(s, [50, 58], 9), [donut(CENTER, 11)])]}; },
-  "k-void-run": s => { const R = buildRun(s, [turned(270, "scythe", 0)]), toward = cometSpread(s, R.W[0].p)(VOID_RESULTS), lb = zoneCenter(toward);
+  "k-void-run": s => { const R = buildRun(s, faceApproach(weapons([[270, "scythe"]]))), toward = cometSpread(s, R.W[0].p)(VOID_RESULTS), lb = zoneCenter(toward);
     const waitAt = S<Point>(s, [83, 50], [50, 83]);
     return {overlays:[...PUDDLE_PIECES, ...named(R), ...FIXED_SPREAD_MARKS], boss:STILL, answer:[toward],
       note:"Example: the first weapon of the second set is a scythe in the west.", options:[
@@ -224,7 +223,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
         show([aoe(waitAt, SPREAD_R), you(s, waitAt), say("WAIT FOR HIS FACING", 8)], [cometSpread(s)(VOID_RESULTS)]),
         youAt(s, [70, 44]),
         show([RAIDWIDE, ...stackedMarks, say("MITIGATE, STAY PUT", 8)])]}; },
-  "k-assault-2": s => { const R = buildRun(s, [turned(135, "scythe", 0), turned(270, "axe", 40), turned(0, "sword", -45)]), W = R.W;
+  "k-assault-2": s => { const R = buildRun(s, faceApproach(weapons([[135, "scythe"], [270, "axe"], [0, "sword"]]))), W = R.W;
     return {overlays:named(R), boss:STILL, after:inOrder(W, [0, 1, 2]), answer:[circle(W[0].p, 9)], options:[
       show(inOrder(W, [0, 1, 2]), [circle(W[0].p, 9)]),
       show([...inOrder(W, [1, 2, 0]), say("THE ONE HE FACED IN SET 1", 94)], [circle(W[1].p, 9)]),

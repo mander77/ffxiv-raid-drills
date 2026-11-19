@@ -111,16 +111,26 @@ function assaultWeapons(order?: WeaponType[]): Weapon[] {
   return angles.map((a, i): Weapon => ({a, p:atAngle(a), type:types[i]}));
 }
 
-/* Assault Evolved, second set (1:33, after Void Stardust). The boss does not face a weapon
-   yet. Every weapon is turned. The first one lies square across the line to the boss, with
-   its flat side toward him. The other two are turned 30 to 60 degrees. Then clockwise. */
-export function buildAssault2(s: Slot, order?: WeaponType[]): Run {
-  const W = assaultWeapons(order).map((w, i): Weapon => {
-    const turn = i === 0 ? 0 : (30 + random() * 30) * (random() < 0.5 ? 1 : -1);
-    const flip = random() < 0.5 ? 0 : 180;   // which end points which way
-    const t = (w.a + 90 + turn + flip) * DEG;     // w.a + 90 is across the line to the boss
-    return {...w, axis:[Math.sin(t), -Math.cos(t)]};
+/** Each weapon faces where the boss jumps to it from: its long side lies square across that
+    jump, with its flat side toward him. The first faces the middle, and each other one faces the
+    weapon before it. He always lands on the flat side, so the scythe's butt is on his left. */
+export function faceApproach(W: Weapon[]): Weapon[] {
+  let prev: Point = [50, 50];
+  return W.map((w): Weapon => {
+    const t = unit([w.p[0] - prev[0], w.p[1] - prev[1]]);
+    prev = w.p;
+    return {...w, axis:[-t[1], t[0]]};
   });
+}
+
+/* Assault Evolved, second set (1:33, after Void Stardust). The boss does not face a weapon until
+   his cast starts, but the weapons show the order (cactbot reads it from their facing): the one
+   that faces the middle, square to the boss, goes first. Then clockwise. */
+export function buildAssault2(s: Slot, order?: WeaponType[]): Run {
+  const W = faceApproach(assaultWeapons(order));
+  // The weapons used to get a random turn and flip. Those random numbers are still drawn, so a
+  // fight code made before this change builds the rest of the fight the same way.
+  for(let i = 0; i < W.length; i++){ if(i){ random(); random(); } random(); }
   const run = buildRun(s, W);
   run.states[0].f = null;
   return run;
@@ -345,7 +355,7 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: Run): Scene {
       a:A.steps[0].a + " If you cannot make it in time, use Sprint or a movement ability. A scholar can use Expedient for the whole party."}];
   steps.push(...A.steps.slice(1));
   return {
-    setup:"The second set of weapons is out, each one turned, and Void Stardust starts. Three puddles drop under every player, one after another. After the third one, this time it is " +
+    setup:"The second set of weapons is out, each one facing where he will jump from, and Void Stardust starts. Three puddles drop under every player, one after another. After the third one, this time it is " +
       (spread ? "a spread marker on every player (Comet)." : "a stack on a healer (Crushing Comet).") + " Then the boss goes to the first weapon, and on clockwise to the other two.",
     overlays:A.overlays.map(o => ({...o, spawn:undefined})),   // no fading: these steps are not one per weapon
     // The boss stays in the middle for the pick, the puddles and the stack or spread (5 steps).
