@@ -130,7 +130,7 @@ export function buildAssault2(s: Slot, order?: WeaponType[]): Run {
 
 /* Ultimate Trophy Weapons: six weapons, resolved in spawn order.
    The first spawns south, slightly west (then clockwise) or slightly east (then counterclockwise).
-   The second spawns northwest or northeast. The rest sit on cardinals, and the last is north.
+   The second spawns northwest or northeast. The rest sit on cardinals.
    The first three are all different, and so are the last three. The last four leave tornadoes. */
 export function buildUltimate(s: Slot, forceCw?: boolean): Run & {cw: boolean} {
   // The coin is always tossed, so a forced direction leaves the other random calls in place.
@@ -160,9 +160,9 @@ export function assaultScene(A: Run, s: Slot): Scene {
 }
 export function ultimateScene(U: Run): Scene {
   return {
-    setup:"Everyone is at 1 HP after Charybdistopia. Six weapons spawn one after another, and the boss resolves them in spawn order. He starts on the first weapon before the last ones spawn: three show now, and each hit brings in the next one. Watch where the first one spawns: south and slightly west means clockwise, south and slightly east means counterclockwise. The last one is always north.",
+    setup:"Everyone is at 1 HP after Charybdistopia. Six weapons spawn one after another, and the boss resolves them in spawn order. He starts on the first weapon before the last ones spawn: three show now, and each hit brings in the next one. Watch where the first one spawns: south and slightly west means clockwise, south and slightly east means counterclockwise.",
     spawnPlay:true, spawnAhead:3, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,
-    rule:"First weapon south: slightly west = clockwise, slightly east = counterclockwise. The second is NW or NE, then the cardinals, ending north. Use the normal rule for each weapon."};
+    rule:"First weapon south: slightly west = clockwise, slightly east = counterclockwise. The second is NW or NE, then the cardinals. Use the normal rule for each weapon."};
 }
 
 /* Void Stardust: each puddle goes just outside the previous one, one small step clockwise
@@ -434,7 +434,7 @@ export const MAPS: MapDrill[] = [
   {id:"m-ultimate", order:11.5, random:true, follows:{pick:"ult"}, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: six weapons",
     build:(s, _v, pick)=>ultimateScene(buildUltimate(s, pick ? pick === "cw" : undefined))},
   {id:"m-tornado", order:12, phase:P1, time:"3:46", title:"Ultimate Trophy Weapons: tornadoes",
-    build:s=>({setup:"The sixth weapon resolved (it is always north). Four tornadoes sit on the cardinals. Each one cones its two closest players.",
+    build:s=>({setup:"The sixth weapon resolved. Four tornadoes sit on the cardinals. Each one cones its two closest players.",
       boss:BOSS, overlays:[{t:"tornado",x:50,y:16},{t:"tornado",x:20,y:50},{t:"tornado",x:80,y:50},{t:"tornado",x:50,y:84}],
       steps:[{q:"Click your tornado bait spot.", z:S(s,{c:[12,42],r:6.5},{c:[88,58],r:6.5}), a:S(s,"West tornado, on its north side.","East tornado, on its south side.")}],
       rule:"Supports stand on the left, DPS on the right, as you face in from your tornado."})},

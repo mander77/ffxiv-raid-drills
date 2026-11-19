@@ -261,12 +261,6 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
     return {overlays:ring(ALL, 20, 22.5, 45), boss:BOSS, after:[RAIDWIDE, say("EVERYONE AT 1 HP", 8)], options:[
       show([RAIDWIDE, say("EVERYONE AT 1 HP", 8)]), show([aoe(mt, 7), target(mt), say("THE TANK DIES", 8)]),
       show([aoe(mt, 7), target(mt), say("TANK BUSTER", 8)]), show([say("NOTHING HAPPENS", 8)])]}; },
-  "k-ult-last": s => { const R = ultRun(s);
-    return {overlays:ultPart(s, i => i < 5), boss:STILL, after:ultPart(s, i => i === 5), answer:[circle(R.W[5].p, 9)], options:[
-      show([tag(...at(0, 16), "6")], [circle(at(0, 29), 9)]),
-      show([tag(...at(160, 22), "6")], [circle(at(180, 29), 9)]),
-      show([tag(50, 58, "6")], [circle(CENTER, 9)]),
-      show([tag(...at(60, 40), "6?"), tag(...at(240, 40), "6?"), tag(...at(135, 40), "6?")])]}; },
   "k-ult-spawn": s => { const R = ultRun(s), cw: Array<[number, string]> = [[315, "2"], [90, "3"], [180, "4"], [270, "5"], [0, "6"]];
     return {overlays:ultPart(s, i => i === 0), boss:STILL, after:ultPart(s, i => i > 0), answer:[circle(R.W[1].p, 9)], options:[
       show(spotTags(cw), [circle(at(315, 29), 7)]),
