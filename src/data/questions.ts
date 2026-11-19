@@ -12,7 +12,7 @@ export function mq(id: string, order: number, phase: string, time: string, build
 export const MECH: QuizItem[] = [
   mq("k-raw-first", 1, P1, "0:18", s=>({prompt:"Raw Steel Trophy: the boss pulls out a scythe. What happens?",
     options:[{t:"Tanks spread, and the party stacks south behind the boss.", ok:true},{t:"Tanks stack, and the party spreads."},{t:"Everyone spreads on their clock spot."},{t:"The party stacks north, in front of the boss."}],
-    why:"The scythe cones the two tanks, and the rest of the party shares one stack. The axe is the reverse: a shared tank buster and six spread hits.",
+    why:"The scythe cleaves three times: one cone on each tank, and one cone that the rest of the party shares behind him. The axe is the reverse: a shared tank buster and six spread hits.",
     rule:"Axe: tanks stack, party spreads. Scythe: tanks spread, party stacks."})),
   mq("k-raw-second", 9, P1, "2:36", s=>({prompt:"The first Raw Steel Trophy was an axe. What is the second one, at 2:36?",
     options:[{t:"A scythe. It is always the other weapon.", ok:true},{t:"An axe again."},{t:"It is random."},{t:"A sword."}],
@@ -36,7 +36,7 @@ export const MECH: QuizItem[] = [
     options:[{t:S(s,"Close in, at the butt (handle end) of the scythe.","Close in, at the point (blade end) of the scythe."), ok:true},
       {t:S(s,"Close in, at the point (blade end) of the scythe.","Close in, at the butt (handle end) of the scythe.")},
       {t:"Far out at the edge of the arena."},{t:"Stack with your light party."}],
-    why:"The scythe is a donut AoE and a protean cone on every player, so stand close, in the donut hole. Read the scythe on the floor before he lands: H1 takes the butt end, H2 takes the point end. You do not need to work out his jump.",
+    why:"The scythe puts a protean cone on every player, so everyone takes their own clock spot close around him. Read the scythe on the floor before he lands: H1 takes the butt end, H2 takes the point end. You do not need to work out his jump.",
     rule:"Scythe: H1 at the butt, H2 at the point, close in."})),
   mq("k-void", 4, P1, "1:20", s=>({prompt:"Void Stardust starts. What do you do?",
     options:[{t:"Bait 3 puddles: start north of the boss, then drop each one just outside the last, clockwise. Then spread or stack.", ok:true},{t:"Spread at max range and stand still."},{t:"Stack on the tank and do not move."},{t:"Bait 3 puddles far apart: north, then east, then south."}],

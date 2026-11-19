@@ -9,7 +9,7 @@ import "./styles.css";
 import { LS, esc, el, isCode } from "./util";
 import { state, TABS, view, app, stopTimer, type Tab, type Play } from "./core";
 import { renderMap, nextStep, nextMap, openPattern } from "./views/map";
-import { renderQuiz, answer, nextQ } from "./views/quiz";
+import { renderQuiz, answer, nextQ, previews, pickOpt, lockIn } from "./views/quiz";
 import { renderPressureStart, startPressure } from "./views/pressure";
 import { renderSheet } from "./views/sheet";
 import { renderHome } from "./views/home";
@@ -97,7 +97,11 @@ document.addEventListener("keydown", e => {
   if(!c) return;
   const onButton = (e.target as HTMLElement | null)?.tagName === "BUTTON";
   if(c.kind === "mcq"){
-    if(!c.answered && /^[1-9]$/.test(e.key)){ const i = Number(e.key) - 1; if(i < c.opts.length){ e.preventDefault(); answer(i); } }
+    // On the Mechanics tab, a number key picks an answer to see it on the map, and Enter locks
+    // it in. Enter on the picked answer's own button locks it in too; on another answer it picks that one.
+    const pv = previews(c), onPicked = (e.target as HTMLElement | null)?.dataset?.i === String(c.sel);
+    if(!c.answered && /^[1-9]$/.test(e.key)){ const i = Number(e.key) - 1; if(i < c.opts.length){ e.preventDefault(); if(pv) pickOpt(i); else answer(i); } }
+    else if(!c.answered && pv && e.key === "Enter" && c.sel >= 0 && (!onButton || onPicked)){ e.preventDefault(); lockIn(); }
     else if(c.answered && (e.key === "Enter" || e.key === " ") && !onButton){ e.preventDefault(); nextQ(); }
   } else if(c.kind === "map" && e.key === "Enter" && !onButton){
     if(c.waiting){ e.preventDefault(); nextStep(); }

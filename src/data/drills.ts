@@ -15,6 +15,11 @@ const WEAPON_TYPES: WeaponType[] = ["axe", "sword", "scythe"];
 const ORDINALS = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"];
 /** A weapon spot: 29 units from the arena center, `a` degrees clockwise from north. */
 export const atAngle = (a: number): Point => [50 + 29 * Math.sin(a * DEG), 50 - 29 * Math.cos(a * DEG)];
+/** A cone from c toward a (degrees clockwise from north), `half` degrees to each side, r units long. */
+export function cleave(c: Point, a: number, half = 16, r = 80): Overlay {
+  const p = (d: number): Point => [c[0] + r * Math.sin(d * DEG), c[1] - r * Math.cos(d * DEG)];
+  return {t:"poly", pts:[c, p(a - half), p(a), p(a + half)]};
+}
 
 /* A jump run: the boss starts in the middle and jumps to each weapon in order.
    He faces the way he jumped, so relative north at each weapon = his travel direction. */
@@ -59,7 +64,10 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       // H1 at the butt end, H2 at the point end, as the scythe is drawn.
       z = {c:vadd(P, scytheAxis(w, i), -9.5 * side), r:5};
       a = "Scythe, " + where + ": close in at the " + S(s, "butt (the handle end)", "point (the blade end)") + " of the scythe.";
-      reveal = [{t:"donut", x:P[0], y:P[1], r1:13, r2:75}];
+      // Proteans: a cone on every player, so each player takes a clock spot close around him.
+      // The point and the butt (H2 and H1) are two of the eight spots, opposite each other.
+      const pointAt = angOf(scytheAxis(w, i));
+      reveal = Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, 9, 32));
     } else {
       // Safe pocket: behind him (f < -HW) and on your side (sd > HW), outside both arms of the cross.
       const fn = (p: Point): boolean => { const v: Point = [p[0] - P[0], p[1] - P[1]], f = v[0] * d[0] + v[1] * d[1], sd = v[0] * sv[0] + v[1] * sv[1]; return inArena(p) && f < -HW && sd > HW && Math.hypot(v[0], v[1]) <= 40; };
@@ -317,6 +325,24 @@ export const changes = (m: MapDrill): boolean => Boolean(m.random || m.variants 
 
 /* ---------- map drills ---------- */
 export const BOSS: Boss = {x:50, y:50, f:0};
+/** Where the name of the weapon the boss holds goes, below the weapon. */
+export const HELD_TAG: Point = [66, 64.5];
+/** The weapon the boss holds for Raw Steel Trophy: the same icon as the weapons on the floor,
+    upright at his east side just outside his hitbox, with the head or blade turned east. */
+export function heldWeapon(type: WeaponType): Overlay[] {
+  const x = 63, y = 50;
+  // TS note: `t:type` is "axe" or "sword" here. TypeScript checks the object against both
+  // matching members of the Overlay union, so one line covers both weapons.
+  const icon: Overlay = type === "scythe" ? {t:"scythe", x, y, ux:0, uy:-1, dx:1, dy:0} : {t:type, x, y, ux:0, uy:-1};
+  return [icon, {t:"tag", x:HELD_TAG[0], y:HELD_TAG[1], s:type.toUpperCase()}];
+}
+/* Raw Steel Trophy, scythe: three cleaves. One cone on each tank (MT at 317 degrees, OT at 43),
+   and one cone behind him that the rest of the party shares. The party's spot is inside that
+   shared cone, outside his hitbox. */
+export const SCYTHE_CLEAVES: Overlay[] = [cleave([50, 50], 317), cleave([50, 50], 43), cleave([50, 50], 180)];
+const SCYTHE_STACK: Zone = {
+  fn:p => { const v: Point = [p[0] - 50, p[1] - 50], r = Math.hypot(v[0], v[1]); return r >= 11 && r <= 40 && Math.abs(angOf(v) - 180) <= 16; },
+  label:[50, 69], show:[{poly:[...[164, 172, 180, 188, 196].map(a => POINT_AT(a, 11)), ...[196, 188, 180, 172, 164].map(a => POINT_AT(a, 34))]}]};
 // TS note: `(x): Overlay => (...)` gives the arrow function a return type. Without it,
 // TypeScript would type t as plain string, and "puddle" would not fit the Overlay union.
 export const NPUD = [22, 34, 46, 58, 70, 82].map((x): Overlay => ({t:"puddle", x, y:5, r:6}));
@@ -326,14 +352,14 @@ export const SPUD = [18, 30, 42, 54, 66, 78].map((x): Overlay => ({t:"puddle", x
 export const MAPS: MapDrill[] = [
   {id:"m-raw-axe", order:2, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: axe",
     build:s=>({setup:"The boss pulls out an axe. The two tanks stack for a shared buster. The other six players each get an AoE, so everyone else spreads.",
-      boss:BOSS, overlays:[{t:"tag",x:50,y:56,s:"AXE"},{t:"mark",x:47,y:31,l:"MT",r:"T"},{t:"mark",x:53,y:31,l:"OT",r:"T"}],
+      boss:BOSS, overlays:[...heldWeapon("axe"),{t:"mark",x:47,y:31,l:"MT",r:"T"},{t:"mark",x:53,y:31,l:"OT",r:"T"}],
       steps:[{q:"Click your spread spot.", z:S(s,{c:[34,85],r:10},{c:[66,85],r:10}), a:S(s,"South-southwest, far out.","South-southeast, far out.")}],
       rule:"Axe: tanks stack, party spreads. Scythe: tanks spread, party stacks."})},
   {id:"m-raw-scythe", order:2.1, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: scythe",
-    build:s=>({setup:"The boss pulls out a scythe. Each tank takes a cone, so the tanks spread. Everyone else shares one stack.",
-      boss:BOSS, overlays:[{t:"tag",x:50,y:56,s:"SCYTHE"},{t:"mark",x:37,y:36,l:"MT",r:"T"},{t:"mark",x:63,y:36,l:"OT",r:"T"}],
-      steps:[{q:"Click where the party stacks.", z:{c:[50,69],r:9}, a:"South, right behind the boss."}],
-      rule:"Scythe: tanks spread to the front, the party stacks behind."})},
+    build:s=>({setup:"The boss pulls out a scythe and cleaves three times: one cone on each tank, and one cone that everyone else shares. So the tanks spread, and the rest of the party stacks.",
+      boss:BOSS, overlays:[...heldWeapon("scythe"),{t:"mark",x:37,y:36,l:"MT",r:"T"},{t:"mark",x:63,y:36,l:"OT",r:"T"}],
+      steps:[{q:"Click where the party stacks.", z:SCYTHE_STACK, a:"South, right behind the boss, inside the shared cone.", reveal:SCYTHE_CLEAVES}],
+      rule:"Scythe: three cleaves. The tanks spread to the front, and the party stacks behind."})},
   {id:"m-assault", order:3, random:true, follows:{pick:"set1"}, phase:P1, time:"0:48", title:"Assault Evolved: three weapons",
     build:(s, _v, pick)=>assaultScene(buildAssault(s, orderFrom(pick)), s)},
   // One drill for the whole stretch: the weapons spawn at 1:13, Void Stardust runs, then the boss

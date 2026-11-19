@@ -1,7 +1,7 @@
 // SVG drawing for the arena map.
 import { esc } from "./util";
 import { DEG, f1, vadd, unit, rotOverlay } from "./geometry";
-import type { Boss, Fig, Overlay, Point, Scene, ZoneShape } from "./types";
+import type { Boss, Fig, Overlay, Point, Preview, Scene, ZoneShape } from "./types";
 
 interface Waymark { id: string; x: number; y: number; c: "red" | "yellow" | "blue" | "purple"; sq: boolean }
 export const WAYMARKS: Waymark[] = [
@@ -121,15 +121,18 @@ export function sceneSVG(sc: Scene, k: number): string {
   return h;
 }
 
-/** A still arena picture for a quiz question. Until `answered`, it shows only the setup.
-    Labels (tags and role marks) go on top, so an AoE or a green zone never hides them. */
-export function figSVG(f: Fig, answered: boolean, label: string): string {
-  const pieces = [...f.overlays, ...(answered ? f.after ?? [] : f.before ?? [])];
+/** A still arena picture for a quiz question. Until `answered`, it shows the setup, or the
+    setup with one answer `preview` in the neutral colour. After the answer, it shows what the
+    mechanic does and the right spot in green. Labels (tags and role marks) go on top, so an
+    AoE or a zone never hides them. */
+export function figSVG(f: Fig, answered: boolean, label: string, preview?: Preview): string {
+  const extra = answered ? f.after ?? [] : preview ? preview.pieces : f.before ?? [];
+  const zones = answered ? (f.answer ?? []).map(z => zoneSVG(z, "ok")) : (preview?.zones ?? []).map(z => zoneSVG(z, "pick"));
+  const pieces = [...f.overlays, ...extra];
   const isLabel = (o: Overlay): boolean => o.t === "tag" || o.t === "mark";
   const draw = (os: Overlay[]): string => os.map(drawOverlay).join("");
   let h = '<svg class="qfig-svg" viewBox="-4 -6 108 110" role="img" aria-label="' + esc(label) + '">' + floorSVG(f.split) + '<text class="compass" x="50" y="-2.2">N</text>';
-  h += '<g clip-path="url(#arenaClip)">' + draw(pieces.filter(o => !isLabel(o))) +
-    (answered ? (f.answer ?? []).map(z => zoneSVG(z, "ok")).join("") : "") + draw(pieces.filter(isLabel)) + "</g>";
+  h += '<g clip-path="url(#arenaClip)">' + draw(pieces.filter(o => !isLabel(o))) + zones.join("") + draw(pieces.filter(isLabel)) + "</g>";
   return h + drawWaymarks() + (f.boss ? drawBoss(f.boss) : "") + "</svg>";
 }
 

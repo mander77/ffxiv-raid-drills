@@ -128,10 +128,15 @@ export interface MapDrill {
 
 /* ---------- questions ---------- */
 
+/** What one answer looks like on the arena, right or wrong: the pieces it adds, and the spots
+    it marks. All answers draw in the same neutral colour, so a preview never gives away the answer. */
+export interface Preview { pieces: Overlay[]; zones?: ZoneShape[] }
+
 /** An arena picture for a quiz question. `overlays` and `boss` always show. `before` shows
-    until you answer. After the answer, `after` draws what the mechanic does and the green
-    `answer` zones show the right spot. `note` is a caption under the picture. */
-export interface Fig { overlays: Overlay[]; boss?: Boss; split?: boolean; before?: Overlay[]; after?: Overlay[]; answer?: ZoneShape[]; note?: string }
+    until you answer, unless an answer preview replaces it. After the answer, `after` draws what
+    the mechanic does and the green `answer` zones show the right spot. `options` holds one
+    preview per answer, in the order the question lists them. `note` is a caption. */
+export interface Fig { overlays: Overlay[]; boss?: Boss; split?: boolean; before?: Overlay[]; after?: Overlay[]; answer?: ZoneShape[]; options?: Preview[]; note?: string }
 
 export interface Option { t: string; ok?: boolean }
 export interface Question { prompt: string; options: Option[]; why: string; rule: string; src?: string }

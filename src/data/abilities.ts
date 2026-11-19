@@ -21,10 +21,10 @@ export interface Ability { t: number; name: string; cats: Cat[]; note: string; d
 const N = {
   crown: "Raid damage on the whole party.",
   rawTrophy: "The boss picks up an axe or a scythe. The hit that follows depends on which one.",
-  rawSteel: "Axe: the tanks share a buster and everyone else spreads. Scythe: each tank takes a buster and everyone else stacks.",
+  rawSteel: "Axe: the tanks share a buster and everyone else spreads. Scythe: three cleaves, one cone on each tank and one cone that everyone else shares behind him.",
   trophy: "Three weapons appear around the arena: a sword, an axe and a scythe.",
   assaultCast: "The boss turns to his first weapon when this cast starts. Then he jumps to each weapon in turn, clockwise.",
-  assault: "The boss uses a weapon. Sword: a cross under him and a line stack on each healer. Axe: a circle under him and a stack on one player. Scythe: a donut around him and a cone on every player.",
+  assault: "The boss uses a weapon. Sword: a cross under him and a line stack on each healer. Axe: a circle under him and a stack on one player. Scythe: a cone on every player (proteans), so everyone takes a clock spot close around him.",
   voidCast: "Void Stardust: three sets of puddles to bait, then a spread or a stack.",
   voidBaits: "Three sets of baited circles. Drop each one just outside the last, clockwise.",
   voidEnd: "Comet: everyone spreads. Crushing Comet: everyone stacks. The second Void Stardust does the other one.",

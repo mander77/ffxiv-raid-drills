@@ -219,6 +219,12 @@ button.chip{cursor:pointer}
 .opt.ok{border-color:var(--heal);background:var(--heal-soft)}
 .opt.bad{border-color:var(--miss);background:var(--miss-soft)}
 .opt.dim{opacity:.55}
+/* A picked answer that is not locked in yet, and its spots on the map. Blue, not green, so the
+   preview never looks like a right answer. */
+.opt.sel{border-color:#1C6FC4;background:#E8F0FB;box-shadow:inset 0 0 0 1px #1C6FC4}
+.opt.sel .key{border-color:#1C6FC4;color:#1C6FC4}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:disabled:hover{background:var(--heal);border-color:var(--heal)}
 
 .fb{margin-top:16px;border-radius:8px;padding:14px 16px;border:1.5px solid}
 .fb.ok{background:var(--heal-soft);border-color:var(--heal)}
@@ -336,6 +342,7 @@ td.n{font-weight:700;min-width:170px}
 .puddle{fill:rgba(194,54,43,.38);stroke:var(--ring);stroke-width:.3}
 .zone{stroke-width:.7;stroke-dasharray:1.6 1}
 .zone.ok{fill:rgba(27,116,72,.22);stroke:var(--heal)}
+.zone.pick{fill:rgba(28,111,196,.2);stroke:#1C6FC4}
 .zone.bad{fill:rgba(27,116,72,.16);stroke:var(--heal)}
 .zlabel rect{fill:var(--heal)} .zlabel text{fill:#fff;font-family:var(--font-display);font-weight:700;font-size:3.2px;text-anchor:middle;dominant-baseline:central}
 .pick .dot{fill:var(--ink)} .pick .halo{fill:none;stroke:var(--ink);stroke-width:.55}

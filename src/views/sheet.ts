@@ -47,7 +47,7 @@ export function renderSheet(): void {
     '<section><h2>Positions to remember</h2><div class="cols"><div><ul class="rules">' +
     "<li><b>Weapon order:</b> the first weapon is the one he faces. Then he goes clockwise.</li>" +
     "<li><b>Sword:</b> the cross lines up with the way he jumped. Stand in the pocket behind him, on the side he jumped from: G1 on his left, G2 on his right. As " + s + ", you take the " + S(s, "left", "right") + " pocket, and your light party stacks on you.</li>" +
-    "<li><b>Scythe:</b> H1 at the butt, H2 at the point, close in.</li>" +
+    "<li><b>Scythe:</b> proteans, so everyone takes a clock spot close around him. H1 at the butt, H2 at the point.</li>" +
     "<li><b>Axe:</b> the whole party stacks in the middle, out of the axe AoE.</li>" +
     "<li><b>Ultimate Trophy Weapons:</b> watch the first spawn. South and slightly west means clockwise, south and slightly east means counterclockwise. The second is NW or NE, then the cardinals, ending north. He resolves them in spawn order.</li>" +
     "<li><b>Void Stardust:</b> start north of the boss. Drop each puddle just outside the last one, a small step clockwise. Then stack or spread. Before the puddles, find the first weapon of the second set. If it is a sword or scythe, stack or spread toward it, and use Sprint or Expedient if it is far.</li>" +
