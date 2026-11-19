@@ -5,7 +5,7 @@ import { MECH, DEATH, NEXT_ITEMS } from "../src/data/questions";
 import { JOB } from "../src/data/jobs";
 import { ABILITIES } from "../src/data/abilities";
 
-test("every card in every tab has a link that reads back to the same card", () => {
+test("every card in every tab has a path that reads back to the same card", () => {
   const routes: Route[] = [
     {tab:"home"}, {tab:"pressure"}, {tab:"sheet"}, {tab:"map"}, {tab:"fight"},
     ...MECH.map((q): Route => ({tab:"mech", card:q.id})),
@@ -17,24 +17,34 @@ test("every card in every tab has a link that reads back to the same card", () =
     ...ABILITIES.map((_a, i): Route => ({tab:"map", ability:i + 1})),
     {tab:"fight", code:"K3PZ"}, {tab:"fight", code:"K3PZ", picks:"raw=axe,set1=axe-sword-scythe"}
   ];
-  for(const r of routes) assert.deepEqual(parseRoute(routeLink(r)), r, routeLink(r));
+  for(const r of routes){
+    const link = routeLink(r);
+    assert.match(link, /^\/[a-z0-9/=,-]*$/i, "a plain path: " + link);
+    assert.deepEqual(parseRoute(link), r, link);
+  }
+  assert.equal(routeLink({tab:"home"}), "/");
+  assert.equal(routeLink({tab:"mech", card:"k-sword"}), "/mech/k-sword");
 });
 
-test("old links still open the same screens", () => {
+test("old # links still open the same screens", () => {
   assert.deepEqual(parseRoute("#map/m-assault/k3pz"), {tab:"map", drill:"m-assault", code:"K3PZ"});
   assert.deepEqual(parseRoute("#fight/K3PZ/raw=axe,ult=cw"), {tab:"fight", code:"K3PZ", picks:"raw=axe,ult=cw"});
+  assert.deepEqual(parseRoute("#mech/k-sword"), parseRoute("/mech/k-sword"));
   assert.deepEqual(parseRoute("#mech"), {tab:"mech"});
+  assert.deepEqual(parseRoute("#home"), {tab:"home"});
 });
 
-test("a link that names nothing known opens the landing screen or the plain tab", () => {
+test("a path that names nothing known opens the landing screen or the plain tab", () => {
   assert.deepEqual(parseRoute(""), {tab:"home"});
-  assert.deepEqual(parseRoute("#nonsense/abc"), {tab:"home"});
-  assert.deepEqual(parseRoute("#fight/not-a-code"), {tab:"fight"});
-  assert.deepEqual(parseRoute("#map/ability/0"), {tab:"map"});
-  assert.deepEqual(parseRoute("#map/ability/x"), {tab:"map"});
+  assert.deepEqual(parseRoute("/"), {tab:"home"});
+  assert.deepEqual(parseRoute("/nonsense/abc"), {tab:"home"});
+  assert.deepEqual(parseRoute("/mech/"), {tab:"mech"});
+  assert.deepEqual(parseRoute("/fight/not-a-code"), {tab:"fight"});
+  assert.deepEqual(parseRoute("/map/ability/0"), {tab:"map"});
+  assert.deepEqual(parseRoute("/map/ability/x"), {tab:"map"});
 });
 
-test("card ids are unique, so a link opens one card", () => {
+test("card ids are unique, so a path opens one card", () => {
   const ids = [...MECH, ...NEXT_ITEMS, ...DEATH, ...JOB].map(q => q.id).concat(MAPS.map(m => m.id));
   assert.equal(new Set(ids).size, ids.length);
 });

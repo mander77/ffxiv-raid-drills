@@ -1,8 +1,9 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  // Relative asset paths, so the same build works at a domain root or under a sub-path.
-  base: "./",
+  // Asset paths from the domain root (/assets/...). The app uses real paths such as /mech/k-sword,
+  // so a relative path (./assets/...) would point inside that path and not find the files.
+  base: "/",
   test: {
     include: ["test/**/*.test.ts"]
   }

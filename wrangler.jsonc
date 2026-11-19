@@ -7,7 +7,10 @@
   "compatibility_date": "2026-11-18",
   // Serve the files that `npm run build` writes to dist/. No server code runs.
   "assets": {
-    "directory": "./dist"
+    "directory": "./dist",
+    // A page address with no file behind it, such as /mech/k-sword, gets index.html, and the
+    // app reads the path itself (src/router.ts). Real files, such as /assets/..., still come first.
+    "not_found_handling": "single-page-application"
   },
   // Turns on preview deployments. Cloudflare runs `npx wrangler preview` for each branch
   // other than main, and that command stops if this block is missing. It can stay empty.

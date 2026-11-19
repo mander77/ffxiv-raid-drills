@@ -1,5 +1,6 @@
 // The landing screen: what the site does, and a card that links to each tab.
 import { esc } from "../util";
+import { routeLink } from "../router";
 import { state, TABS, view, type Tab } from "../core";
 import { MAPS } from "../data/drills";
 import { ABILITIES } from "../data/abilities";
@@ -25,7 +26,7 @@ const CARDS: Record<Exclude<Tab, "home">, Card> = {
   sheet: {kind:"Reference", about:"The rules, the positions, your timeline and the job plan on one page, with links to the sources.", count: () => "One page"}
 };
 
-const link = (id: Tab): string => '<a href="#' + id + '">' + esc(TABS.find(t => t.id === id)?.label ?? id) + "</a>";
+const link = (id: Tab): string => '<a href="' + routeLink({tab:id}) + '">' + esc(TABS.find(t => t.id === id)?.label ?? id) + "</a>";
 
 export function renderHome(): void {
   const home = TABS.find(t => t.id === "home");
@@ -34,7 +35,7 @@ export function renderHome(): void {
   const cards = TABS.map(t => {
     if(t.id === "home") return "";
     const c = CARDS[t.id];
-    return '<li><a class="tabcard" href="#' + t.id + '"><span class="tc-kind">' + esc(c.kind) + '</span><b class="tc-name">' + esc(t.label) + "</b>" +
+    return '<li><a class="tabcard" href="' + routeLink({tab:t.id}) + '"><span class="tc-kind">' + esc(c.kind) + '</span><b class="tc-name">' + esc(t.label) + "</b>" +
       '<span class="tc-about">' + esc(c.about) + '</span><span class="tc-count">' + esc(c.count()) + "</span></a></li>";
   }).join("");
   view.innerHTML = '<div class="home"><section class="intro"><h2>Healer practice for M11S</h2>' +

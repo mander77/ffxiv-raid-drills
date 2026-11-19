@@ -8,7 +8,7 @@
 import "./styles.css";
 import { LS, esc, el } from "./util";
 import { state, TABS, view, app, stopTimer, type Tab, type Play } from "./core";
-import { parseRoute, showRoute, type Route } from "./router";
+import { parseRoute, currentRoute, showRoute, type Route } from "./router";
 import { renderMap, nextStep, nextMap, openPattern, openAbility } from "./views/map";
 import { renderQuiz, answer, nextQ, previews, pickOpt, lockIn, openQuestion } from "./views/quiz";
 import { renderPressureStart, startPressure } from "./views/pressure";
@@ -44,10 +44,12 @@ function setSlot(s: Slot): void {
 
 function setPlay(p: Play): void { state.play = p; LS.set("play", p); }
 
-/** Open a route (see router.ts): a tab, and the card the link names, if any. */
-function go(r: Route): void {
-  // A link can open one card: a drill step by step (#map/<drill>[/<code>]), a fight in real time
-  // (#fight/<code>[/<picks>]; Real time was a tab of its own before), or a quiz card (#mech/<card>).
+/** Open a route (see router.ts): a tab, and the card the link names, if any. With `push`, the
+    move gets a history entry, so the Back button returns to the screen before. */
+function go(r: Route, push = false): void {
+  if(push) showRoute(r, true);
+  // A link can open one card: a drill step by step (/map/<drill>[/<code>]), a fight in real time
+  // (/fight/<code>[/<picks>]; Real time was a tab of its own before), or a quiz card (/mech/<card>).
   if(r.tab === "map" && r.drill){ setPlay("step"); openPattern(r.drill, r.code); }
   if(r.tab === "map" && r.ability){ setPlay("step"); openAbility(r.ability); }
   if(r.tab === "fight"){ setPlay("time"); if(r.code) openFight(r.code, r.picks ? parseChoices(r.picks) : undefined); }
@@ -82,7 +84,16 @@ el("tabs").addEventListener("click", e => {
   // which is true for a click. closest<HTMLElement>() passes a type argument so the result
   // has `.dataset`, which plain Element does not have.
   const b = (e.target as Element).closest<HTMLElement>("[data-tab]");
-  if(b?.dataset.tab) go(parseRoute(b.dataset.tab));
+  if(b?.dataset.tab) go(parseRoute(b.dataset.tab), true);
+});
+// Links inside the app (the landing screen cards and its intro) change the screen without loading
+// the page again. A click with a modifier key, such as Cmd-click for a new tab, works as usual.
+document.addEventListener("click", e => {
+  if(e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = (e.target as Element).closest<HTMLAnchorElement>('a[href^="/"]');
+  if(!a || a.target) return;
+  e.preventDefault();
+  go(parseRoute(a.getAttribute("href") ?? "/"), true);
 });
 document.querySelectorAll<HTMLElement>(".seg button[data-slot]").forEach(b => b.addEventListener("click", () => setSlot(b.dataset.slot === "H2" ? "H2" : "H1")));
 view.addEventListener("click", e => {
@@ -114,10 +125,11 @@ document.addEventListener("keydown", e => {
   else if(c.kind === "fight" && e.key === " " && !onButton){ e.preventDefault(); togglePause(); }
   else if(c.kind === "fight" && (e.key === "ArrowLeft" || e.key === "ArrowRight")){ e.preventDefault(); seekBy(e.key === "ArrowLeft" ? -5 : 5); }
 });
-// A link typed in the address bar, a link on the page (the landing screen cards) and the Back
-// button all change the hash. The app's own address updates do not (see showRoute).
-window.addEventListener("hashchange", () => go(parseRoute(location.hash)));
+// The Back and Forward buttons: open the screen of that history entry. An old # link typed into
+// the address bar fires hashchange; it opens its screen, and the address bar then shows the path.
+window.addEventListener("popstate", () => go(currentRoute()));
+window.addEventListener("hashchange", () => go(currentRoute()));
 
 showSlot();
-go(parseRoute(location.hash));
+go(currentRoute());
 document.fonts?.ready.then(scrollActiveTab).catch(() => { /* fonts are optional */ });
