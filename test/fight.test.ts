@@ -35,6 +35,19 @@ test("every click is due on a timeline line, and the lines run in time order", (
   }
 });
 
+test("the boss turns to the first weapon when his cast starts, at least 6 seconds before the hit", () => {
+  for(let i = 0; i < 20; i++){
+    const f = buildFight("H1");
+    const set1 = f.segs.find(g => g.title === "Assault Evolved"), set2 = f.segs.find(g => g.title.startsWith("Void Stardust into"));
+    if(!set1?.turn || !set2?.turn) throw new Error("both Assault Evolved sets need a turn time");
+    assert.closeTo(set1.turn.at, 42.2, 0.05, "first set: 0:48.2 minus the 6.0 s cast");
+    assert.closeTo(set2.turn.at, 86.7, 0.05, "second set: 1:32.7 minus the 6.0 s cast");
+    assert.isAtLeast(set1.due[0] - set1.turn.at, 6, "time to react before the first hit");
+    assert.isAtLeast(set2.due[5] - set2.turn.at, 6, "time to react before the first weapon of the second set");
+    assert.equal(set1.turn.f, set1.scene.bossAt?.(0).f, "he faces the first weapon of the first set");
+  }
+});
+
 test("the second Raw Steel Trophy and the second Void Stardust go the other way", () => {
   for(let i = 0; i < RUNS; i++){
     const f = buildFight("H1");

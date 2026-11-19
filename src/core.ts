@@ -53,7 +53,7 @@ export const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
 
 export const TABS: Array<{id: Tab; label: string; lede: string}> = [
   {id:"map", label:"Where do I stand?", lede:"Click the arena where you go. Patterns that turn in the real fight turn here too, so read the boss and the floor, not the screen."},
-  {id:"fight", label:"Full fight", lede:"The drills in fight order on the fight clock, with the boss cast bar. Click your spot before each hit lands."},
+  {id:"fight", label:"Full fight", lede:"The drills in fight order on the fight clock, with the fight timeline. Click your spot before each hit lands. Drag the slider to go to any moment."},
   {id:"mech", label:"Mechanics", lede:"What each mechanic does and what you do. Your answers follow your slot and your group's wtfdig link."},
   {id:"next", label:"What is next?", lede:"Knowing what comes next tells you how much time you have to raise. Times come from the fight timeline."},
   {id:"death", label:"Someone died", lede:"The decisions from your talk with Andrew: who first, when to raise, when to wait."},

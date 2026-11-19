@@ -80,10 +80,49 @@ function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
   R = {mode, fight, t:settings.skip ? Math.max(0, fight.events[0].t - SOON) : 0, results:fight.segs.map(() => []),
        clicks:mode === "replay" ? clicks : [], next:0, hold:"", last:performance.now(), shown:""};
   state.cur = {kind:"fight"};
-  view.innerHTML = tabHead(false) + '<div class="stage"><div class="arena" id="f-arena"></div><div class="panel" id="f-panel"></div></div>';
+  view.innerHTML = tabHead(false) + '<div class="stage"><div class="arena" id="f-arena"></div><div class="panel"><div id="f-panel"></div>' + controls(fight) + "</div></div>";
+  const seek = el<HTMLInputElement>("f-seek");
+  seek.addEventListener("pointerdown", () => { dragging = true; });
+  seek.addEventListener("pointerup", () => { dragging = false; });
+  seek.addEventListener("input", () => seekTo(Number(seek.value)));
+  el("f-play").addEventListener("click", togglePause);
   frame();
   state.raf = requestAnimationFrame(tick);
 }
+
+/* The fight controls stay outside the panel part that redraws, so a drag is never cut off:
+   play or pause, and a slider for the fight time. Its ticks mark where each mechanic starts. */
+let dragging = false;
+function controls(f: Fight): string {
+  return '<div class="fctl"><button type="button" class="btn ghost fplay" id="f-play" aria-label="Pause">&#10074;&#10074;</button>' +
+    '<input type="range" id="f-seek" min="0" max="' + f.end + '" step="0.1" value="0" list="f-marks" aria-label="Fight time">' +
+    '<span class="ftime" id="f-time"></span></div>' +
+    '<datalist id="f-marks">' + f.segs.map(g => '<option value="' + g.from + '"></option>').join("") + "</datalist>" +
+    '<p class="hint" style="margin-top:6px"><kbd>Space</kbd> play or pause &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 5 seconds &middot; the Full fight tab goes back to the settings</p>';
+}
+
+/* Go to any moment. Back: the answers to hits after that moment are forgotten, so you can
+   do them again. Forward: steps you jump over count as skipped, not as missed. Watch and
+   play-back runs fill in what they jumped over by themselves. */
+export function seekTo(to: number): void {
+  const r = R;
+  if(!r) return;
+  const f = r.fight;
+  to = Math.max(0, Math.min(f.end, to));
+  if(to < r.t){
+    f.segs.forEach((g, si) => { const res = r.results[si]; while(res.length && g.due[res.length - 1] > to) res.pop(); });
+    if(r.mode === "live") r.clicks = r.clicks.filter(c => c.t <= to);
+    if(r.mode === "replay"){ const i = r.clicks.findIndex(c => c.t > to); r.next = i < 0 ? r.clicks.length : i; }
+  } else if(r.mode === "live"){
+    f.segs.forEach((g, si) => { while(r.results[si].length < g.due.length && g.due[r.results[si].length] <= to) answer(si, null, true, true); });
+  }
+  r.t = to;
+  if(r.hold === "wait") r.hold = "";
+  r.shown = "";   // build the arena again: weapons that had not spawned yet must hide again
+  r.last = performance.now();
+  frame();
+}
+export function seekBy(d: number): void { if(R) seekTo(R.t + d); }
 
 /** The segment on the arena at time t, or -1 between mechanics. */
 function activeSeg(f: Fight, t: number): number {
@@ -126,8 +165,9 @@ function skipQuiet(r: Run): void {
   if(next - r.t > SOON + 2) r.t = next - SOON;
 }
 
-/** Score the next step of segment si: a click at p, the right spot (p null), or a miss. */
-function answer(si: number, p: Point | null, missed = false): void {
+/** Score the next step of segment si: a click at p, the right spot (p null), a miss, or a
+    step skipped with the slider. */
+function answer(si: number, p: Point | null, missed = false, skipped = false): void {
   const r = R;
   if(!r) return;
   const g = r.fight.segs[si], res = r.results[si], step = g.scene.steps[res.length];
@@ -135,7 +175,7 @@ function answer(si: number, p: Point | null, missed = false): void {
   if(!base) return;
   const zone = rotZone(base, g.k), at: Point = p ?? zoneCenter(zone);
   const ok = !missed && inZone(at, zone);
-  res.push({p:at, ok, z:zone, drop:step.drop ? (ok ? at : zoneCenter(zone)) : null, missed});
+  res.push({p:at, ok, z:zone, drop:step.drop ? (ok ? at : zoneCenter(zone)) : null, missed, skipped});
   if(r.mode === "live" && p) r.clicks.push({si, t:r.t, p});
 }
 
@@ -167,15 +207,16 @@ function frame(): void {
   const r = R;
   if(!r) return;
   const f = r.fight, si = activeSeg(f, r.t), g = si >= 0 ? f.segs[si] : null, res = g ? r.results[si] : [];
-  const faceless = Boolean(g && g.faceAt != null && r.t < g.faceAt);
-  const key = si + ":" + res.length + ":" + faceless + ":" + r.hold;
+  const turned = Boolean(g?.turn && r.t >= g.turn.at);
+  const key = si + ":" + res.length + ":" + turned + ":" + r.hold;
   if(key !== r.shown){
     const fresh = r.shown.split(":")[0] !== String(si);   // a new scene: build the arena again
     r.shown = key;
     const sc = g ? g.scene : IDLE, k = g ? g.k : 0;
     if(fresh){ el("f-arena").innerHTML = sceneSVG(sc, k); el("arena-svg").addEventListener("click", onClick); }
     let boss: Boss | null = sc.bossAt ? sc.bossAt(res.length) : (sc.boss ? rotOverlay(sc.boss, k) : null);
-    if(boss && faceless) boss = {...boss, f:null};
+    // In the middle, before his cast, he faces no weapon. When the cast starts he turns to the first one.
+    if(boss && g?.turn && boss.x === 50 && boss.y === 50) boss = {...boss, f:turned ? g.turn.f : null};
     paintArena(el("arena-svg"), sc, k, res, res.length > 0, boss);
     drawPanel(r, si);
   }
@@ -183,7 +224,7 @@ function frame(): void {
 }
 
 function lastBox(g: FightSeg, i: number, x: StepResult): string {
-  const tag = x.missed ? "Missed" : x.ok ? "Right" : "Not there";
+  const tag = x.skipped ? "Skipped" : x.missed ? "Missed" : x.ok ? "Right" : "Not there";
   return '<div class="lastans ' + (x.ok ? "ok" : "bad") + '"><span class="tag">' + tag + "</span><b>" + esc(g.scene.steps[i].q) + "</b> " + esc(g.scene.steps[i].a) + "</div>";
 }
 
@@ -202,10 +243,7 @@ function drawPanel(r: Run, si: number): void {
     const nx = f.segs.find(x => x.from > r.t);
     h += "<h2>Between mechanics</h2>" + (nx ? '<p class="setup">Next: ' + esc(nx.title) + " at " + clock(nx.from) + ".</p>" : "");
   }
-  h += '<div class="actions"><button type="button" class="btn ghost" id="f-pause">' + (r.hold === "user" ? "Resume" : "Pause") + '</button><button type="button" class="btn ghost" id="f-quit">Stop</button><span class="hint"><kbd>Space</kbd> pause</span></div>';
   el("f-panel").innerHTML = h;
-  el("f-pause").addEventListener("click", togglePause);
-  el("f-quit").addEventListener("click", renderFight);
 }
 
 /* The timeline works like cactbot's raidboss timeline, with its default settings: a line
@@ -217,6 +255,14 @@ const SHOW_AT = 30, SOON = 6, KEEP = 0.7, ROWS = 6;
 function updateLive(r: Run): void {
   const f = r.fight, set = (id: string, s: string): void => { const n = document.getElementById(id); if(n) n.textContent = s; };
   set("f-clock", clock(r.t));
+  set("f-time", clock(r.t) + " / " + clock(f.end));
+  const seek = document.getElementById("f-seek") as HTMLInputElement | null, play = document.getElementById("f-play");
+  if(seek && !dragging) seek.value = r.t.toFixed(1);
+  if(play){
+    const paused = r.hold === "user";
+    play.innerHTML = paused ? "&#9654;" : "&#10074;&#10074;";
+    play.setAttribute("aria-label", paused ? "Play" : "Pause");
+  }
   const tl = document.getElementById("f-tl");
   if(tl){
     const rows = f.events.filter(e => e.t >= r.t - KEEP && e.t - r.t <= SHOW_AT).slice(0, ROWS);
@@ -258,9 +304,11 @@ function renderSummary(watched: Fight | null = null): void {
     el("f-back").addEventListener("click", renderFight);
     return;
   }
-  const all = d.results.flat(), right = all.filter(x => x.ok).length, missed = all.filter(x => x.missed).length, wrong = all.length - right - missed;
+  // Steps skipped with the slider do not count.
+  const all = d.results.flat().filter(x => !x.skipped), right = all.filter(x => x.ok).length, missed = all.filter(x => x.missed).length, wrong = all.length - right - missed;
   const rows = d.fight.segs.map((g, si) => '<li><span class="fs-time">' + clock(g.from) + "</span><span>" + esc(g.title) + '</span><span class="fs-chips">' +
-    d.results[si].map(x => '<span class="chip ' + (x.ok ? "ok" : "bad") + '">' + (x.missed ? "&ndash;" : x.ok ? "&#10003;" : "&#10007;") + "</span>").join("") + "</span></li>").join("");
+    d.results[si].map(x => x.skipped ? '<span class="chip" title="Skipped">&raquo;</span>' :
+      '<span class="chip ' + (x.ok ? "ok" : "bad") + '">' + (x.missed ? "&ndash;" : x.ok ? "&#10003;" : "&#10007;") + "</span>").join("") + "</span></li>").join("");
   view.innerHTML = tabHead(false) + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Full fight</b><span>Phase 1 done</span><span>Fight ' + d.fight.code + "</span></div>" +
     "<h2>" + right + " of " + all.length + " spots right</h2><p>" + esc(d.fight.summary) + "</p>" +
     '<div class="tally"><div class="ok"><span>Right</span><div class="big">' + right + '</div></div><div class="bad"><span>Wrong</span><div class="big">' + wrong + '</div></div><div class="slow"><span>Missed</span><div class="big">' + missed + "</div></div></div>" +

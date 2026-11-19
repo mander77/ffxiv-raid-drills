@@ -18,8 +18,9 @@ export interface FightSeg {
   /** When the scene appears on the arena. */
   from: number;
   due: number[];
-  /** Until this time the boss shows no facing arrow, because he turns at the cast. */
-  faceAt?: number;
+  /** While the boss stands in the middle: no facing arrow until `at`, when his cast starts
+      and he turns to the first weapon (facing `f`, degrees clockwise from north). */
+  turn?: { at: number; f: number };
 }
 
 /** `code` rebuilds the same fight: the same weapons, the same stack or spread, and so on. */
@@ -46,13 +47,19 @@ export function buildFight(s: Slot, code = newCode()): Fight {
 function fightFor(s: Slot, code: string): Fight {
   const axeFirst = random() < 0.5, stackFirst = random() < 0.5;
   const w1 = axeFirst ? "axe" : "scythe", w2 = axeFirst ? "scythe" : "axe";
+  // Built in this order on purpose: a fight code replays the same random calls in the same order.
+  const assault1 = drill("m-assault", s), A2 = buildAssault2(s);
+  /* Assault Evolved (ability B417) has a 6.0-second cast, so the boss turns to the first weapon
+     6.0 seconds before cactbot's line: at 0:42.2 for the first set (line 0:48.2) and 1:26.7 for
+     the second (line 1:32.7). That leaves about 8 seconds before the first hit. */
+  const CAST = 6.0, face1 = assault1.bossAt?.(0).f;
   /* Each click is due when the hit that checks it lands, in seconds into the fight. A scene
      appears when its cast starts (cactbot's StartsUsing or the ability before it). */
   const segs: FightSeg[] = [
     {title:"Raw Steel Trophy: " + w1, scene:drill("m-raw-" + w1, s), k:0, from:15.7, due:[25.1]},
-    {title:"Assault Evolved", scene:drill("m-assault", s), k:0, from:38.4, faceAt:48.2, due:[50.4, 55.5, 60.6]},
-    {title:"Void Stardust into the second weapons", scene:voidIntoWeapons(s, !stackFirst, buildAssault2(s), true), k:0, from:72.7,
-      due:[79.8, 83.9, 85.9, 87.9, 89.9, 94.9, 100.0, 105.1]},
+    {title:"Assault Evolved", scene:assault1, k:0, from:38.4, turn:face1 != null ? {at:48.2 - CAST, f:face1} : undefined, due:[50.4, 55.5, 60.6]},
+    {title:"Void Stardust into the second weapons", scene:voidIntoWeapons(s, !stackFirst, A2, true), k:0, from:72.7,
+      turn:{at:92.7 - CAST, f:A2.W[0].a}, due:[79.8, 83.9, 85.9, 87.9, 89.9, 94.9, 100.0, 105.1]},
     {title:"Void Stardust again", scene:voidAgain(s, stackFirst), k:0, from:106, due:[110.2, 112.2, 114.2, 116.2]},
     {title:"Dance of Domination", scene:drill("m-dance", s), k:Math.floor(random() * 4), from:134.6, due:[150.5]},
     {title:"Raw Steel Trophy: " + w2, scene:drill("m-raw-" + w2, s), k:0, from:156.4, due:[163.8]},

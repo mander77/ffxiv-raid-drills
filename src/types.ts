@@ -75,8 +75,9 @@ export interface Boss { x: number; y: number; f: number | null; d?: Point }
 
 /* ---------- map drills ---------- */
 
-/** One answered step. `missed` means time ran out with no click (full-fight tab). */
-export interface StepResult { p: Point; ok: boolean; z: Zone; drop: Point | null; missed?: boolean }
+/** One answered step. In the full-fight tab, `missed` means time ran out with no click, and
+    `skipped` means the slider jumped past it (it does not count in the score). */
+export interface StepResult { p: Point; ok: boolean; z: Zone; drop: Point | null; missed?: boolean; skipped?: boolean }
 
 export interface Step {
   q: string;

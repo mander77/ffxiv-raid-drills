@@ -12,7 +12,7 @@ import { renderMap, nextStep, nextMap, openPattern } from "./views/map";
 import { renderQuiz, answer, nextQ } from "./views/quiz";
 import { renderPressureStart, startPressure } from "./views/pressure";
 import { renderSheet } from "./views/sheet";
-import { renderFight, togglePause, openFight } from "./views/fight";
+import { renderFight, togglePause, openFight, seekBy } from "./views/fight";
 import type { Slot } from "./types";
 
 function renderTabs(): void {
@@ -96,6 +96,7 @@ document.addEventListener("keydown", e => {
     else if(c.results.length >= c.scene.steps.length){ e.preventDefault(); nextMap(); }
   } else if(c.kind === "pstart" && e.key === "Enter" && !onButton){ e.preventDefault(); startPressure(); }
   else if(c.kind === "fight" && e.key === " " && !onButton){ e.preventDefault(); togglePause(); }
+  else if(c.kind === "fight" && (e.key === "ArrowLeft" || e.key === "ArrowRight")){ e.preventDefault(); seekBy(e.key === "ArrowLeft" ? -5 : 5); }
 });
 window.addEventListener("hashchange", () => { const t = location.hash.slice(1); if(t && t !== state.tab) go(t); });
 
