@@ -137,6 +137,10 @@ main{padding-block:20px 56px}
 .hq.done.ok .hcount{color:var(--heal)}
 .hq.done.bad .hcount{color:var(--miss)}
 .hq .btn{margin-left:auto;flex:none;padding:7px 14px}
+/* The step chips in the HUD: only when the panel is below the arena (phones), where its own
+   chips are off screen. */
+.hud .hchips{display:none;margin:0}
+@media (max-width:860px){.hud .hchips{display:flex}}
 /* The countdown ring around the boss: it empties as your hit comes closer. */
 .tring{fill:none;stroke:var(--heal);stroke-width:1.3;stroke-linecap:round;pointer-events:none}
 .tring.urgent{stroke:var(--miss)}

@@ -25,9 +25,16 @@ function run(): MapCur {
 export function drawFeedback(): void {
   const c = state.cur, svg = document.getElementById("arena-svg");
   if(!c || c.kind !== "map" || !svg) return;
-  const p = c.peek, back = p != null && p < c.results.length - 1;
-  paintArena(svg, c.scene, c.k, p != null && back ? c.results.slice(0, p + 1) : c.results,
-    back || Boolean(c.waiting) || c.results.length >= c.scene.steps.length);
+  const b = lookBack(c);
+  paintArena(svg, c.scene, c.k, b >= 0 ? c.results.slice(0, b + 1) : c.results,
+    b >= 0 || Boolean(c.waiting) || c.results.length >= c.scene.steps.length);
+}
+
+/** The earlier step the arena shows from a chip, or -1. A chip for the answer that is already
+    on the arena (just answered, or the end of the drill) is not a look back. */
+function lookBack(c: MapCur): number {
+  const n = c.results.length, live = c.waiting || n >= c.scene.steps.length ? n - 1 : -1;
+  return c.peek != null && c.peek !== live ? c.peek : -1;
 }
 
 /* Draw the answer layers on an arena: dropped puddles, cues, the boss, and, with showLast,
@@ -164,21 +171,22 @@ export function showAbility(i: number): void {
 export function drawMapPanel(): void {
   const c = run(), d = getDeck("map"), sc = c.scene, n = c.results.length, done = n >= sc.steps.length, multi = sc.steps.length > 1;
   const peek = c.peek ?? n - 1;   // the step whose answer shows: the one picked, or the last one answered
-  const back = c.peek != null && c.peek < n - 1;   // looking back: the arena shows an earlier step
+  const back = lookBack(c) >= 0;   // looking back: the arena shows an earlier step
   const onArena = back ? peek : done ? n - 1 : n;   // the step the arena shows; its chip is pressed
   let h = '<div class="eyebrow"><b>' + esc(c.item.phase) + "</b><span>" + esc(c.item.time) + '</span><span class="progress">Drill ' + (d.i + 1) + " of " + d.items.length + "</span>" +
     (changes(c.item) ? '<span title="Send this code to rebuild this exact pattern">Pattern ' + c.code + "</span>" : "") + "</div>";
   h += "<h2>" + esc(c.item.title) + "</h2>";
   if(n === 0) h += '<p class="setup">' + esc(sc.setup) + "</p>";
   else h += '<p class="setup' + (c.setupOpen ? "" : " folded") + '">' + esc(sc.setup) + '</p><button type="button" class="linkbtn" id="setup-toggle">' + (c.setupOpen ? "Less" : "More") + "</button>";
-  if(multi) h += '<ol class="chips" aria-label="Steps">' + sc.steps.map((_st, i) => {
+  const chips = sc.steps.map((_st, i) => {
     const r = c.results[i];
     // The step you are on is a button too: it brings the arena back from an earlier step.
     if(!r) return i === n
       ? '<li><button type="button" class="chip now" data-peek="live" aria-pressed="' + (i === onArena) + '" aria-label="Step ' + (i + 1) + ': the step you are on">' + (i + 1) + "</button></li>"
       : '<li><span class="chip">' + (i + 1) + "</span></li>";
     return '<li><button type="button" class="chip ' + (r.ok ? "ok" : "bad") + '" data-peek="' + i + '" aria-pressed="' + (i === onArena) + '" aria-label="Step ' + (i + 1) + ": " + (r.ok ? "right" : "not there") + '">' + (i + 1) + (r.ok ? " &#10003;" : " &#10007;") + "</button></li>";
-  }).join("") + "</ol>";
+  }).join("");
+  if(multi) h += '<ol class="chips" aria-label="Steps">' + chips + "</ol>";
   if(!done) h += '<div class="nowq">' + (multi ? "<span>Step " + (n + 1) + " of " + sc.steps.length + "</span>" : "") + esc(sc.steps[n].q) + "</div>";
   const r = c.results[peek];
   if(r) h += '<div class="lastans ' + (r.ok ? "ok" : "bad") + '"><span class="tag">' + (r.ok ? "Right" : "Not there") + "</span><b>" +
@@ -218,8 +226,11 @@ export function drawMapPanel(): void {
       '</span><button type="button" class="btn" id="hud-step">Next step</button></div></div>';
     el("hud-step").addEventListener("click", nextStep);
   } else el("m-hud").innerHTML = hudPrompt((n + 1) + "/" + sc.steps.length, sc.steps[n].q);
+  // On a phone the panel is below the arena, so the HUD gets the step chips too (CSS shows this
+  // copy only when the panel is not beside the arena). Both copies work the same way.
+  if(multi) el("m-hud").querySelector(".hud")?.insertAdjacentHTML("afterbegin", '<ol class="chips hchips" aria-label="Steps">' + chips + "</ol>");
   document.getElementById("setup-toggle")?.addEventListener("click", () => { c.setupOpen = !c.setupOpen; drawMapPanel(); });
-  p.querySelectorAll<HTMLButtonElement>("[data-peek]").forEach(b => b.addEventListener("click", () => {
+  view.querySelectorAll<HTMLButtonElement>(".stage [data-peek]").forEach(b => b.addEventListener("click", () => {
     c.peek = b.dataset.peek === "live" ? undefined : Number(b.dataset.peek);
     drawMapPanel(); drawFeedback();
   }));
