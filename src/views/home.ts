@@ -40,7 +40,8 @@ export function renderHome(): void {
   view.innerHTML = '<div class="home"><section class="intro"><h2>Healer practice for M11S</h2>' +
     "<p>" + esc(home?.lede ?? "") + "</p>" +
     "<p>You are set as <b>" + state.slot + "</b>. Positions and answers follow your slot, so change it with the H1 / H2 switch at the top if you play the other one. Your progress stays in this browser.</p>" +
-    "<p>If you are new to the fight, start with " + link("mech") + " and the " + link("sheet") + ". Then use " + link("map") + " to practice your spots. Finish with a " + link("pressure") + ".</p></section>" +
+    "<p>The tabs run in the order to learn the fight: what each mechanic does, where you stand, what comes next, your cooldowns and your raises. A " +
+    link("pressure") + " then tests it all, and the " + link("sheet") + " puts it on one page.</p></section>" +
     '<ol class="tabcards">' + cards + "</ol></div>";
   state.cur = {kind:"home"};
 }
