@@ -7,7 +7,8 @@
 // picture is built from that drill, so the two always agree.
 import { S, withSeed } from "../util";
 import { DEG, angOf, rotOverlay, unit, zoneCenter } from "../geometry";
-import { MAPS, BOSS, PUDDLE_R, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, cleave, type Run, type Weapon, type WeaponType } from "./drills";
+import { MAPS, BOSS, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, type Run, type Weapon, type WeaponType } from "./drills";
+import { PUDDLE_R, SPREAD_R, PROTEAN_HALF, aoe, axeHit, cleave, swordCross } from "./attacks";
 import type { Boss, Fig, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
 type Role = "T" | "D" | "H";
@@ -54,13 +55,9 @@ const ring = (who: Who[], r: number, a0 = 0, step = 360 / who.length, c: Point =
 const pairsAt = (spots: Point[]): Overlay[][] => spots.map((p, i) => cluster(p, PAIRED.slice(i * 2, i * 2 + 2), 2));
 
 /* ---------- the boss attacks an answer assumes ---------- */
-const aoe = (p: Point, r: number): Overlay => ({t:"aoe", x:p[0], y:p[1], r});
 const RAIDWIDE = aoe(CENTER, 72);
 /** Where the role marks in a list stand. */
 const spotsOf = (os: Overlay[]): Point[] => os.flatMap((o): Point[] => o.t === "mark" ? [[o.x, o.y]] : []);
-/** Every spread and stack in this fight is 6 yalms (15 units): Raw Steel, Comet, Crushing Comet,
-    Eye of the Hurricane and Massive Meteor (BossMod's M11S module). */
-const SPREAD_R = 15;
 /** A spread: one AoE on every player. */
 const spreadHits = (os: Overlay[], r = SPREAD_R): Overlay[] => spotsOf(os).map(p => aoe(p, r));
 /** A stack: one AoE that the whole group shares, centered on the group, never smaller than the
@@ -70,16 +67,13 @@ function stackHit(os: Overlay[], pad = 4.5): Overlay {
   return aoe(c, Math.max(SPREAD_R, Math.max(0, ...ps.map(p => Math.hypot(p[0] - c[0], p[1] - c[1]))) + pad));
 }
 /** Proteans: a cone from `from` toward every player. */
-const proteans = (from: Point, os: Overlay[], r = 40): Overlay[] => spotsOf(os).map(p => cleave(from, angOf([p[0] - from[0], p[1] - from[1]]), 9, r));
+const proteans = (from: Point, os: Overlay[], r = 40): Overlay[] => spotsOf(os).map(p => cleave(from, angOf([p[0] - from[0], p[1] - from[1]]), PROTEAN_HALF, r));
 /** A cone from `from` toward one spot. */
 const coneTo = (from: Point, to: Point, half = 12, r = 60): Overlay => cleave(from, angOf([to[0] - from[0], to[1] - from[1]]), half, r);
 /** A line stack or line hit: a wide band from `from` through `to` and on past the edge. */
 const lineTo = (from: Point, to: Point, w = 9): Overlay => { const d = unit([to[0] - from[0], to[1] - from[1]]); return {t:"band", x:from[0], y:from[1], x2:from[0] + d[0] * 150, y2:from[1] + d[1] * 150, w}; };
 /** A donut around c: safe inside r1. */
 const donut = (c: Point, r1: number): Overlay => ({t:"donut", x:c[0], y:c[1], r1, r2:80});
-/** The sword: a cross through the boss along the way he faces. Each arm is 5 yalms each side of
-    its center line (BossMod: "width 10 cross"), so 25 units wide. */
-const swordCross = (c: Point, f: number, w = 25): Overlay[] => [lineTo(at(f + 180, 150, c), c, w), lineTo(at(f + 270, 150, c), c, w)];
 /** One half of the arena, as a cleave: front is "north" for a boss facing north. */
 const half = (side: "north" | "south"): Overlay => ({t:"lane", rect:side === "north" ? [0, 0, 100, 50] : [0, 50, 100, 100]});
 
@@ -184,7 +178,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
       show([...SCYTHE_CLEAVES, ...heldWeapon("scythe"), ...TANKS_APART]),
       show([...AXE_HITS, ...heldWeapon("axe"), ...TANKS_TOGETHER, ...AXE_SPREAD]),
       show([tag(...HELD_TAG, "AXE OR SCYTHE")]),
-      show([...swordCross(CENTER, 0), ...heldWeapon("sword")])]}; },
+      show([...swordCross(CENTER, [0, -1]), ...heldWeapon("sword")])]}; },
   "k-first-weapon": s => { const R = buildRun(s, weapons([[315, "scythe"], [90, "axe"], [180, "sword"]])), W = R.W;
     return {overlays:named(R), boss:R.states[0], after:inOrder(W, [0, 1, 2]), answer:[circle(W[0].p, 9)], options:[
       show(inOrder(W, [0, 1, 2]), [circle(W[0].p, 9)]),
@@ -193,7 +187,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
       show(W.map(w => numAt(w, "?")))]}; },
   "k-sword": s => { const j = jump(s, "sword", 270), around = ring(ALL, 14, 0, 45, j.at), mid = cluster(CENTER);
     return {...j.fig, options:[hit(youIn(s, j.zone, j.stand), j.hits), hit(youIn(s, j.zoneOther, j.standOther), j.hits),
-      show([...proteans(j.at, around, 30), ...around]), show([aoe(j.at, 20), stackHit(mid), ...mid])]}; },
+      show([...proteans(j.at, around, 30), ...around]), show([axeHit(j.at), stackHit(mid), ...mid])]}; },
   "k-axe": s => { const j = jump(s, "axe", 90), mid = cluster(zoneCenter(j.zone)), spread = ring(ALL, 33, 22.5, 45);
     const lp = [cluster([62, 30], G1, 2), cluster([62, 70], G2, 2)], close = cluster([66, 50], ALL, 2);
     return {...j.fig, options:[

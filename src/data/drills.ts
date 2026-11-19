@@ -2,6 +2,7 @@
 import { S, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry";
+import { HITBOX, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, axeHit, cleave, swordCross } from "./attacks";
 import type { Boss, MapDrill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
@@ -15,11 +16,10 @@ const WEAPON_TYPES: WeaponType[] = ["axe", "sword", "scythe"];
 const ORDINALS = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"];
 /** A weapon spot: 29 units from the arena center, `a` degrees clockwise from north. */
 export const atAngle = (a: number): Point => [50 + 29 * Math.sin(a * DEG), 50 - 29 * Math.cos(a * DEG)];
-/** A cone from c toward a (degrees clockwise from north), `half` degrees to each side, r units long. */
-export function cleave(c: Point, a: number, half = 16, r = 80): Overlay {
-  const p = (d: number): Point => [c[0] + r * Math.sin(d * DEG), c[1] - r * Math.cos(d * DEG)];
-  return {t:"poly", pts:[c, p(a - half), p(a), p(a + half)]};
-}
+/** Just outside the boss's hitbox: where the first puddle and his butt spot are. */
+const OUTSIDE = HITBOX + 4.5;
+/** The first Void Stardust puddle: north of the boss, just outside his hitbox. */
+export const FIRST_PUDDLE: Point = [50, 50 - OUTSIDE];
 
 /* A jump run: the boss starts in the middle and jumps to each weapon in order.
    He faces the way he jumped, so relative north at each weapon = his travel direction. */
@@ -51,8 +51,7 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       overlays.push({t:"tag", spawn:i, x:out[0], y:out[1], s:w.type.toUpperCase()}, {t:w.type, spawn:i, x:w.p[0], y:w.p[1], ...turn});
     }
   });
-  // HW: the half-width of each sword arm, 5 yalms (BossMod: "range 40 width 10 cross").
-  const HW = 12.5, side = S(s, 1, -1), own = S(s, "left", "right");
+  const HW = SWORD_HALF, side = S(s, 1, -1), own = S(s, "left", "right");
   const steps = W.map((w, i): Step => {
     const st = states[i + 1], P: Point = [st.x, st.y], d = dirs[i], L = leftOf(d), sv: Point = [L[0] * side, L[1] * side];
     const where = w.where || COMPASS[Math.round(w.a / 45) % 8];
@@ -60,7 +59,7 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
     if(w.type === "axe"){
       z = {c:vadd(P, unit([50 - P[0], 50 - P[1]]), 28), r:7};
       a = "Axe, " + where + ": stack with the whole party in the middle, outside the axe AoE.";
-      reveal = [{t:"aoe", x:P[0], y:P[1], r:20}];
+      reveal = [axeHit(P)];
     } else if(w.type === "scythe"){
       // H1 at the butt end, H2 at the point end, as the scythe is drawn.
       z = {c:vadd(P, scytheAxis(w, i), -9.5 * side), r:5};
@@ -68,7 +67,7 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       // Proteans: a cone on every player, so each player takes a clock spot close around him.
       // The point and the butt (H2 and H1) are two of the eight spots, opposite each other.
       const pointAt = angOf(scytheAxis(w, i));
-      reveal = Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, 9, 32));
+      reveal = Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, PROTEAN_HALF, 32));
     } else {
       // Safe pocket: behind him (f < -HW) and on your side (sd > HW), outside both arms of the cross.
       const fn = (p: Point): boolean => { const v: Point = [p[0] - P[0], p[1] - P[1]], f = v[0] * d[0] + v[1] * d[1], sd = v[0] * sv[0] + v[1] * sv[1]; return inArena(p) && f < -HW && sd > HW && Math.hypot(v[0], v[1]) <= 40; };
@@ -81,8 +80,7 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       stand = vadd(vadd(P, d, -(HW + CLEAR)), sv, HW + CLEAR);
       z = {fn, show:[{poly}], label:vadd(P, unit(vadd([-d[0], -d[1]], sv)), (HW + CLEAR) * Math.SQRT2 + 4)};
       a = "Sword, " + where + ": the pocket behind him on his " + own + ", on the side he jumped from, a few steps in from its inner corner. " + S(s, "G1", "G2") + " stacks on you.";
-      reveal = [{t:"band", x:P[0] - d[0] * 150, y:P[1] - d[1] * 150, x2:P[0] + d[0] * 150, y2:P[1] + d[1] * 150, w:HW * 2},
-                {t:"band", x:P[0] - L[0] * 150, y:P[1] - L[1] * 150, x2:P[0] + L[0] * 150, y2:P[1] + L[1] * 150, w:HW * 2}];
+      reveal = swordCross(P, d);
     }
     const leave: Overlay | null = w.tornado ? {t:"tornado", x:P[0], y:P[1]} : null;
     return {q:ORDINALS[i] + " weapon: click where you go.", z, a, reveal, leave, stand};
@@ -167,13 +165,11 @@ export function ultimateScene(U: Run): Scene {
 
 /* Void Stardust: each puddle goes just outside the previous one, one small step clockwise
    around the boss at c. The next spot is judged from where the last puddle actually dropped. */
-/** A puddle's radius: 6 yalms (BossMod: Cometite, "range 6 circle"). */
-export const PUDDLE_R = 15;
 const CENTER: Point = [50, 50];
 export function puddleAfter(c: Point = CENTER): (results: StepResult[]) => Zone {
   const rel = (p: Point): Point => [p[0] - c[0], p[1] - c[1]];
   return results => {
-    const q: Point = results[results.length - 1].drop ?? [c[0], c[1] - 17];
+    const q: Point = results[results.length - 1].drop ?? [c[0], c[1] - OUTSIDE];
     const rq = Math.max(8, Math.hypot(...rel(q)));
     const step = 2 * Math.asin(Math.min(1, (PUDDLE_R + 2.5) / (2 * rq))) / DEG, ia = (angOf(rel(q)) + step) * DEG;
     const ideal: Point = [c[0] + rq * Math.sin(ia), c[1] - rq * Math.cos(ia)];
@@ -227,8 +223,8 @@ export function cometSpread(s: Slot, toward: Point | null = null, c: Point = CEN
   const fixed = fixedAround(c), gaps = gapsAround(c);
   return results => {
     const drops = results.flatMap(r => r.drop ? [r.drop] : []), last = drops[drops.length - 1];
-    const open = (p: Point): boolean => inArena(p) && far(p, c, 15) &&
-      fixed.every(m => far(p, m.p, 15)) && (!last || far(p, last, PUDDLE_R + 1));
+    const open = (p: Point): boolean => inArena(p) && far(p, c, HITBOX + 2.5) &&
+      fixed.every(m => far(p, m.p, SPREAD_R)) && (!last || far(p, last, PUDDLE_R + 1));
     if(!toward){
       // H1 shows the west gap first, H2 the east one. Next to a wall a gap can be off the arena,
       // and the last puddle can cover one, so only the open gaps show.
@@ -257,7 +253,7 @@ export function cometSpread(s: Slot, toward: Point | null = null, c: Point = CEN
 export function stackToward(w: Point): (results: StepResult[]) => Zone {
   return results => {
     const q: Point = results[results.length - 1].drop ?? [50, 33];
-    const fn = (p: Point): boolean => inArena(p) && far(p, [50, 50], 14) && far(p, q, PUDDLE_R) &&
+    const fn = (p: Point): boolean => inArena(p) && far(p, [50, 50], HITBOX + 1.5) && far(p, q, PUDDLE_R) &&
       dist(p, q) <= PUDDLE_R + 16 && dist(p, w) <= dist(q, w) - 4 && far(p, w, 8);   // not on the weapon itself
     let label: Point = q, best = Infinity;
     for(let x = 0; x <= 100; x += 1.5) for(let y = 0; y <= 100; y += 1.5){
@@ -315,7 +311,7 @@ export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
    `toward` is the first weapon of the next set when it is a sword or scythe: the stack or
    spread then moves toward it. The second Void Stardust has no weapons after it.
    `c` is where the boss stands, and `start` is the first puddle spot with its answer. */
-const NORTH_START = {p:[50, 33] as Point, a:"North of the boss, just outside the hitbox."};
+const NORTH_START = {p:FIRST_PUDDLE, a:"North of the boss, just outside the hitbox."};
 function voidSteps(s: Slot, spread: boolean, toward: Point | null, c: Point = CENTER, start = NORTH_START): Step[] {
   const next = puddleAfter(c);
   return [
@@ -367,7 +363,7 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: Run): Scene {
 /** The spot right behind the boss, at his butt, just outside his hitbox. */
 export function behind(boss: Boss): Point {
   const f = (boss.f ?? 0) * DEG;
-  return [boss.x - 17 * Math.sin(f), boss.y + 17 * Math.cos(f)];
+  return [boss.x - OUTSIDE * Math.sin(f), boss.y + OUTSIDE * Math.cos(f)];
 }
 export function voidAgain(s: Slot, spread: boolean, boss: Boss): Scene {
   const c: Point = [boss.x, boss.y], butt = behind(boss);

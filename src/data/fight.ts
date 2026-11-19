@@ -2,7 +2,7 @@
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6).
-import { MAPS, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, type WeaponType } from "./drills";
+import { MAPS, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
 import { newCode, random, withSeed } from "../util";
 import type { Point, Scene, Slot } from "../types";
 
@@ -115,8 +115,6 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
      6.0 seconds before cactbot's line: at 0:42.2 for the first set (line 0:48.2) and 1:26.7 for
      the second (line 1:32.7). That leaves about 8 seconds before the first hit. */
   const CAST = 6.0, face1 = assault1.bossAt?.(0).f;
-  /** The first Void Stardust puddle: north of the boss, just outside his hitbox (see drills.ts). */
-  const FIRST_PUDDLE: Point = [50, 33];
   /* A Void Stardust puddle drops under you when its 3.0-second cast starts (Cometite in BossMod)
      and goes off at cactbot's line, 3 seconds later. Where you drop it counts when it drops, so
      you can leave right away. */

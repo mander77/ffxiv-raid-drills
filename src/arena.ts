@@ -1,6 +1,7 @@
 // SVG drawing for the arena map.
 import { esc } from "./util";
 import { DEG, f1, vadd, unit, rotOverlay } from "./geometry";
+import { HITBOX } from "./data/attacks";
 import type { Boss, Fig, Overlay, Point, Preview, Scene, ZoneShape } from "./types";
 
 interface Waymark { id: string; x: number; y: number; c: "red" | "yellow" | "blue" | "purple"; sq: boolean }
@@ -68,8 +69,7 @@ export function drawOverlay(o: Overlay): string {
    each flank (his east and west), and an opening at his rear, between the two rear corners
    (135 to 225 degrees from his front). The whole ring turns with his facing.
    With no facing (f null), the ring is a plain circle, so it does not give away where he faces. */
-// The ring is his hitbox: 5 yalms (12.5 units). BossMod's M11S module lists the boss as R5.000.
-const RING = 12.5, REAR = 45;   // the ring radius, and half of the rear opening in degrees
+const RING = HITBOX, REAR = 45;   // the ring is his hitbox; half of the rear opening in degrees
 const onRing = (deg: number, r: number): string => f1(r * Math.sin(deg * DEG)) + " " + f1(-r * Math.cos(deg * DEG));
 export function drawBoss(b: Boss): string {
   const at = "translate(" + f1(b.x) + " " + f1(b.y) + ")";

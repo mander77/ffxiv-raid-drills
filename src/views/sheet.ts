@@ -5,12 +5,13 @@ import { TL, KIND } from "../data/timeline";
 import { JOBS } from "../data/jobs";
 import { f1, vadd, unit, leftOf } from "../geometry";
 import { floorSVG, drawOverlay, drawWaymarks, drawBoss } from "../arena";
+import { SWORD_HALF, swordCross } from "../data/attacks";
 import { tabHead, WTFDIG } from "./common";
 import type { Point, Slot } from "../types";
 
 /** A fixed sword example: the boss jumps west from the middle. The player's pocket is green. */
 export function swordDiagram(s: Slot): string {
-  const P: Point = [21, 50], d: Point = [-1, 0], L = leftOf(d), HW = 12.5, mine = S(s, 1, -1);
+  const P: Point = [21, 50], d: Point = [-1, 0], L = leftOf(d), HW = SWORD_HALF, mine = S(s, 1, -1);
   const pocket = (side: number): Point[] => {
     const sv: Point = [L[0] * side, L[1] * side], corner = vadd(vadd(P, d, -HW), sv, HW);
     return [corner, vadd(corner, d, -32), vadd(vadd(corner, d, -32), sv, 32), vadd(corner, sv, 32)];
@@ -20,7 +21,7 @@ export function swordDiagram(s: Slot): string {
     return '<g class="zlabel' + (side === mine ? "" : " other") + '"><rect x="' + f1(p[0] - 8) + '" y="' + f1(p[1] - 2.3) + '" width="16" height="4.6" rx=".9"/><text x="' + f1(p[0]) + '" y="' + f1(p[1]) + '">' + txt + "</text></g>"; };
   let h = '<svg viewBox="-4 -6 108 110" role="img" aria-label="Sword example. The boss jumps west from the middle. G1 takes the pocket behind his left side, G2 the pocket behind his right side.">';
   h += floorSVG(false) + '<text class="compass" x="50" y="-2.2">N</text>';
-  h += '<g clip-path="url(#arenaClip)">' + drawOverlay({t:"band", x:171, y:50, x2:-129, y2:50, w:HW * 2}) + drawOverlay({t:"band", x:21, y:-100, x2:21, y2:200, w:HW * 2}) +
+  h += '<g clip-path="url(#arenaClip)">' + swordCross(P, d).map(drawOverlay).join("") +
     poly(pocket(1), mine === 1 ? "ok" : "other") + poly(pocket(-1), mine === -1 ? "ok" : "other") + "</g>";
   h += '<circle class="ghost" cx="50" cy="50" r="3.4"/><line class="jump" x1="46" y1="50" x2="33" y2="50"/>';
   h += drawWaymarks() + drawBoss({x:P[0], y:P[1], f:270}) + label(1, "G1 / H1") + label(-1, "G2 / H2");
