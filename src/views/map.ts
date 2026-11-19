@@ -1,11 +1,14 @@
 // The "Where do I stand?" tab: click the arena, then see the answer zone.
 import { esc, el, newCode, random, withSeed } from "../util";
-import { state, getDeck, record, view, type Deck, type MapCur } from "../core";
+import { state, getDeck, record, view, type MapCur } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter, f1 } from "../geometry";
 import { sceneSVG, drawOverlay, drawBoss, zoneSVG } from "../arena";
-import { PUDDLE_R, changes } from "../data/drills";
+import { BOSS, MAPS, PUDDLE_R, changes } from "../data/drills";
+import { ABILITIES } from "../data/abilities";
+import { clock } from "../data/fight";
 import { tabHead, renderRoundDone } from "./common";
-import type { Boss, MapDrill, Point, Scene, StepResult } from "../types";
+import { tlNav, wireNav, marks, catNames } from "./tlnav";
+import type { Boss, Point, Scene, StepResult } from "../types";
 
 /** The drill on screen. Only call this while a map drill shows. */
 // TS note: state.cur has the union type Cur. This helper checks `kind` and throws otherwise,
@@ -109,28 +112,44 @@ export function renderMap(fresh = true): void {
     state.cur = {kind:"map", item, scene:made.scene, k:made.k, code, results:[], counted:false};
   }
   const c = run();
-  view.innerHTML = tabHead() + '<div class="mapwrap">' + drillNav(d) +
-    '<div class="stage"><div class="arena">' + sceneSVG(c.scene, c.k) +
-    '<div class="legend"><span><i style="background:var(--ring)"></i>Boss hitbox and facing</span><span><i style="background:var(--aoe)"></i>AoE</span><span><i style="background:var(--tank)"></i>Tank</span><span><i style="background:var(--dps)"></i>DPS</span></div></div>' +
+  view.innerHTML = tabHead() + '<div class="mapwrap">' + tlNav({current:[item.id]}) +
+    '<div class="stage"><div class="arena">' + sceneSVG(c.scene, c.k) + LEGEND + "</div>" +
     '<div class="panel" id="map-panel"></div></div></div>';
   el("arena-svg").addEventListener("click", onArenaClick);
-  view.querySelectorAll<HTMLButtonElement>("[data-drill]").forEach(b => b.addEventListener("click", () => {
-    getDeck("map").i = Number(b.dataset.drill); renderMap(true);
-  }));
-  // On narrow screens the list scrolls sideways. Bring the current drill into view.
-  const nav = view.querySelector<HTMLElement>(".drillnav"), now = nav?.querySelector<HTMLElement>("[aria-current]");
-  if(nav && now) nav.scrollLeft = now.offsetLeft - (nav.clientWidth - now.offsetWidth) / 2;
+  wireNav(showAbility, openDrill);
   drawFeedback();
   drawMapPanel();
 }
 
-/** Every drill in the deck, in deck order. Click one to jump to it. */
-// TS note: Deck<MapDrill> fills in the type parameter of the generic interface Deck<T>,
-// the way List<MapDrill> does in C#. So d.items is MapDrill[], and m.title is a known field.
-function drillNav(d: Deck<MapDrill>): string {
-  return '<nav class="drillnav" aria-label="Drills"><ol>' + d.items.map((m, i) =>
-    '<li><button type="button" data-drill="' + i + '"' + (i === d.i ? ' aria-current="step"' : "") + ">" +
-    '<span class="dn-time">' + esc(m.time) + "</span>" + esc(m.title) + "</button></li>").join("") + "</ol></nav>";
+const LEGEND = '<div class="legend"><span><i style="background:var(--ring)"></i>Boss hitbox and facing</span><span><i style="background:var(--aoe)"></i>AoE</span><span><i style="background:var(--tank)"></i>Tank</span><span><i style="background:var(--dps)"></i>DPS</span></div>';
+
+/** A drill picked in the fight list. */
+function openDrill(id: string): void {
+  const d = getDeck("map"), i = d.items.findIndex(m => m.id === id);
+  if(i < 0) return;
+  d.i = i;
+  renderMap(true);
+}
+
+/* An ability picked in the fight list: what it does, when it hits, its category, and the drills
+   for it. The arena stays on screen, empty, so the page does not jump around. */
+const IDLE: Scene = {setup:"", rule:"", steps:[], overlays:[], boss:BOSS};
+export function showAbility(i: number): void {
+  const a = ABILITIES[i];
+  if(!a) return;
+  state.cur = {kind:"ability", i};
+  const drills = (a.drills ?? []).flatMap(id => MAPS.filter(m => m.id === id));
+  view.innerHTML = tabHead() + '<div class="mapwrap">' + tlNav({open:i}) +
+    '<div class="stage"><div class="arena">' + sceneSVG(IDLE, 0) + "</div>" +
+    '<div class="panel"><div class="eyebrow"><b>' + esc(a.phase) + "</b><span>Hits at " + clock(a.t) + "</span></div>" +
+    "<h2>" + esc(a.name) + '</h2><p class="cmline">' + marks(a.cats) + esc(catNames(a.cats)) + '</p><p class="setup">' + esc(a.note) + "</p>" +
+    (drills.length
+      ? '<div class="actions">' + drills.map(m => '<button type="button" class="btn" data-drill-id="' + m.id + '">Practice: ' + esc(m.title) + "</button>").join("") + "</div>"
+      : '<p class="hint" style="margin-top:12px">No drill for this one yet. Pick a drill in the list to practice.</p>') +
+    "</div></div></div>";
+  paintArena(el("arena-svg"), IDLE, 0, [], false);
+  wireNav(showAbility, openDrill);
+  view.querySelectorAll<HTMLButtonElement>(".panel [data-drill-id]").forEach(b => b.addEventListener("click", () => openDrill(b.dataset.drillId ?? "")));
 }
 
 /* The panel keeps the question to answer near the top, however many steps are done:

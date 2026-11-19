@@ -7,7 +7,9 @@ import { sceneSVG } from "../arena";
 import { paintArena } from "./map";
 import { tabHead } from "./common";
 import { buildFight, clock, type Fight, type FightSeg } from "../data/fight";
-import { BOSS, MAPS } from "../data/drills";
+import { BOSS } from "../data/drills";
+import { ABILITIES } from "../data/abilities";
+import { tlNav, wireNav, markNav } from "./tlnav";
 import type { Boss, Point, Scene, StepResult } from "../types";
 
 /** live = you click; demo = the right clicks play by themselves; replay = your clicks play back. */
@@ -49,42 +51,39 @@ function nextFight(): Fight {
 }
 const IDLE: Scene = {setup:"", rule:"", steps:[], overlays:[], boss:BOSS};
 
-/* ---------- the drill list ---------- */
-/* Every real-time screen sits beside the same drill list as Step by step, in fight order.
-   A drill the fight clock does not reach yet (Phase 2 and later) is greyed out. Every fight
-   covers the same drills, so one built fight tells which ones. */
-let covered: Set<string> | null = null;
-function fightNav(): string {
-  // TS note: `a ??= b` has a value, like an assignment in C#. Here its type is Set<string>,
-  // never null, so the map() callback below can use inFight without another check.
-  const inFight = (covered ??= new Set(buildFight(state.slot).segs.flatMap(g => g.drills)));
-  return '<nav class="drillnav" aria-label="Go to a mechanic"><ol>' + MAPS.slice().sort((a, b) => a.order - b.order).map(m =>
-    '<li><button type="button" data-fdrill="' + m.id + '"' + (inFight.has(m.id) ? "" : ' disabled title="Real time covers Phase 1 for now"') + ">" +
-    '<span class="dn-time">' + esc(m.time) + "</span>" + esc(m.title) + "</button></li>").join("") + "</ol></nav>";
+/* ---------- the fight list ---------- */
+/* Every real-time screen sits beside the fight list, as in Step by step. Rows the fight clock
+   does not reach yet (after 4:01) are greyed out. Every fight covers the same drills and ends
+   at the same time, so one built fight tells which rows. */
+let reach: {drills: Set<string>; end: number} | null = null;
+function fightReach(): {drills: Set<string>; end: number} {
+  if(!reach){ const f = buildFight(state.slot); reach = {drills:new Set(f.segs.flatMap(g => g.drills)), end:f.end}; }
+  return reach;
 }
+let navKey = "";   // what the list highlights, so it updates only when that changes
 
 function show(inner: string): void {
-  view.innerHTML = tabHead() + '<div class="mapwrap">' + fightNav() + inner + "</div>";
-  view.querySelectorAll<HTMLButtonElement>("[data-fdrill]").forEach(b => b.addEventListener("click", () => jumpTo(b.dataset.fdrill ?? "")));
+  const r = fightReach();
+  view.innerHTML = tabHead() + '<div class="mapwrap">' +
+    tlNav({drillOk:id => r.drills.has(id), abilityOk:a => a.t <= r.end, offTitle:"Real time covers Phase 1 for now"}) + inner + "</div>";
+  navKey = "";
+  wireNav(jumpToAbility, jumpTo);
 }
 
-/* A click in the drill list goes to the moment that mechanic starts. With no fight running it
-   starts one first, so the list is also a quick way in. Steps before it count as skipped. */
+/* A click on a drill goes to the moment that mechanic starts. With no fight running it starts
+   one first, so the list is also a quick way in. Steps before it count as skipped. */
 function jumpTo(id: string): void {
   if(!R) startRun("live", nextFight());
   const g = R?.fight.segs.find(x => x.drills.includes(id));
   if(g) seekTo(g.from);
 }
 
-/** Highlight the drills on the arena now, or none between mechanics. */
-function markNav(g: FightSeg | null): void {
-  view.querySelectorAll<HTMLButtonElement>("[data-fdrill]").forEach(b => {
-    if(g?.drills.includes(b.dataset.fdrill ?? "")) b.setAttribute("aria-current", "step");
-    else b.removeAttribute("aria-current");
-  });
-  // On narrow screens the list scrolls sideways, as in Step by step. Keep the mechanic in view.
-  const nav = view.querySelector<HTMLElement>(".drillnav"), now = nav?.querySelector<HTMLElement>("[aria-current]");
-  if(nav && now) nav.scrollLeft = now.offsetLeft - (nav.clientWidth - now.offsetWidth) / 2;
+/* A click on an ability goes to a few seconds before it hits, so it shows as "soon" first. */
+function jumpToAbility(i: number): void {
+  const a = ABILITIES[i];
+  if(!a) return;
+  if(!R) startRun("live", nextFight());
+  seekTo(Math.max(0, a.t - SOON));
 }
 
 /* ---------- start screen ---------- */
@@ -95,7 +94,7 @@ export function renderFight(): void {
     '<div class="ctrl" style="margin-top:12px"><span id="' + key + '-lbl">' + label + '</span><div class="seg small" role="group" aria-labelledby="' + key + '-lbl">' +
     choices.map(([v, t]) => '<button type="button" data-set="' + key + '" data-val="' + v + '" aria-pressed="' + (v === cur) + '">' + t + "</button>").join("") + "</div></div>";
   show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b><span>Phase 1: the pull to 4:01</span></div>' +
-    "<h2>Play the fight in order</h2><p>The drills play one after another on the fight clock. The timeline shows what the boss does next, like the cactbot overlay. Click your spot before each hit lands. Each run picks its own scenario: axe or scythe first, stack or spread first, and new weapon patterns. To start at one mechanic, click it in the drill list.</p>" +
+    "<h2>Play the fight in order</h2><p>The drills play one after another on the fight clock. The timeline shows what the boss does next, like the cactbot overlay. Click your spot before each hit lands. Each run picks its own scenario: axe or scythe first, stack or spread first, and new weapon patterns. To start at one moment, click an ability or a drill in the fight list.</p>" +
     row("fskip", "Quiet stretches", [["yes", "Skip ahead"], ["no", "Real time"]], settings.skip ? "yes" : "no") +
     row("fspeed", "Speed", SPEEDS.map((n): [string, string] => [String(n), n + "x"]), String(settings.speed)) +
     row("fpause", "Missed spot", [["no", "Fight goes on"], ["yes", "Fight pauses"]], settings.pause ? "yes" : "no") +
@@ -262,7 +261,6 @@ function frame(): void {
     if(boss && g?.turn && boss.x === 50 && boss.y === 50) boss = {...boss, f:turned ? g.turn.f : null};
     paintArena(el("arena-svg"), sc, k, res, res.length > 0, boss);
     drawPanel(r, si);
-    markNav(g);
   }
   updateLive(r);
 }
@@ -322,6 +320,10 @@ function updateLive(r: Run): void {
     const g = f.segs[si], j = r.results[si].length;
     if(j < g.due.length) set("f-due", Math.max(0, g.due[j] - r.t).toFixed(1) + " s");
   }
+  // The fight list follows the clock: the drills on the arena now, and the next ability to hit.
+  const drills = si >= 0 ? f.segs[si].drills : [], nextAb = ABILITIES.findIndex(a => a.t >= r.t);
+  const key = drills.join(",") + ":" + nextAb;
+  if(key !== navKey){ navKey = key; markNav(drills, nextAb); }
 }
 
 /* ---------- the end ---------- */

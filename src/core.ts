@@ -21,7 +21,7 @@ export interface Deck<T> { items: T[]; i: number; right: number; done: number }
     shows; `setupOpen` unfolds the setup. */
 export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; code: string; results: StepResult[]; counted: boolean; waiting?: boolean; peek?: number; setupOpen?: boolean }
 export interface McqCur { kind: "mcq"; cat: QuizCat | "pressure"; item: QuizItem; q: Question; opts: Option[]; answered: boolean; pick: number; slow: boolean }
-export type Cur = MapCur | McqCur | { kind: "pstart" } | { kind: "pdone" } | { kind: "sheet" } | { kind: "fight" };
+export type Cur = MapCur | McqCur | { kind: "pstart" } | { kind: "pdone" } | { kind: "sheet" } | { kind: "fight" } | { kind: "ability"; i: number };
 export interface PressureRun { queue: QuizItem[]; i: number; right: number; wrong: number; froze: number }
 
 interface Decks { map?: Deck<MapDrill>; mech?: Deck<QuizItem>; next?: Deck<QuizItem>; death?: Deck<QuizItem>; job?: Deck<QuizItem> }
@@ -54,7 +54,7 @@ export const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
 };
 
 export const TABS: Array<{id: Tab; label: string; lede: string}> = [
-  {id:"map", label:"Where do I stand?", lede:"Click the arena where you go. Step by step teaches one mechanic at a time, with no timer. Real time plays the drills in fight order on the fight clock. Patterns turn as they do in the real fight, so read the boss and the floor."},
+  {id:"map", label:"Where do I stand?", lede:"The list is the whole fight in cast order. Click an ability to see what it does, or a drill to practice it. Step by step has no timer. Real time runs the fight clock. Patterns turn as they do in the real fight, so read the boss and the floor."},
   {id:"mech", label:"Mechanics", lede:"What each mechanic does and what you do. Your answers follow your slot and your group's wtfdig link."},
   {id:"next", label:"What is next?", lede:"Knowing what comes next tells you how much time you have to raise. Times come from the fight timeline."},
   {id:"death", label:"Someone died", lede:"The decisions from your talk with Andrew: who first, when to raise, when to wait."},

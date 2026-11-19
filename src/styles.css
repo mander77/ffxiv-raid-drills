@@ -71,7 +71,7 @@ main{padding-block:20px 56px}
 .ctrl{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
 .stage{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
 @media (max-width:860px){.stage{grid-template-columns:minmax(0,1fr)}}
-.mapwrap{display:grid;grid-template-columns:190px minmax(0,1fr);gap:20px;align-items:start}
+.mapwrap{display:grid;grid-template-columns:230px minmax(0,1fr);gap:20px;align-items:start}
 .drillnav{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:6px}
 .drillnav ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
 .drillnav button{display:block;width:100%;text-align:left;font:inherit;font-size:13.5px;line-height:1.25;padding:7px 9px;border:0;border-radius:6px;background:none;color:var(--ink);cursor:pointer}
@@ -80,11 +80,37 @@ main{padding-block:20px 56px}
 .dn-time{display:block;font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--ink-2)}
 .drillnav button[aria-current] .dn-time{color:#fff}
 .drillnav button:disabled{opacity:.45;cursor:default;background:none}
+/* The fight list: every ability in cast order, with drills under them. The colour marks follow
+   the timeline sheet's categories, toned for the light theme. On wide screens it stays beside
+   the arena and scrolls by itself. */
+:root{--c-raid:#D2362B;--c-tank:#E07800;--c-spot:#C29A00;--c-dodge:#2F9E44;--c-target:#1C7ED6;--c-mech:#7048E8;--c-enrage:#6E0E0A;--c-none:#AAB2BF}
+.tlnav{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto;scrollbar-width:thin}
+.cmkey{position:sticky;top:-6px;z-index:1;display:flex;flex-wrap:wrap;gap:3px 10px;padding:6px 6px 8px;margin:-6px 0 4px;background:var(--card);border-bottom:1px solid var(--line);font-size:11px;color:var(--ink-2)}
+.cmkey span{display:inline-flex;align-items:center;gap:4px}
+.cms{display:inline-flex;gap:2px;flex:none}
+.cm{display:block;width:8px;height:8px;border-radius:50%;background:var(--c-none)}
+.cm.raid{background:var(--c-raid)} .cm.tank{background:var(--c-tank)} .cm.spot{background:var(--c-spot)} .cm.dodge{background:var(--c-dodge)}
+.cm.target{background:var(--c-target)} .cm.mech{background:var(--c-mech)} .cm.enrage{background:var(--c-enrage)}
+.tlnav .ph{padding:10px 8px 3px;font-family:var(--font-mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
+.tlnav .ab{display:flex;align-items:center;gap:6px;font-size:12.5px;padding:4px 8px}
+.tlnav .ab .dn-time{display:inline;flex:none;width:2.7em}
+.tlnav .ab.next{box-shadow:inset 3px 0 0 var(--heal);background:var(--heal-soft)}
+.tlnav .dr{margin:1px 0 3px 18px;width:calc(100% - 18px);font-size:12.5px;font-weight:700;padding:5px 8px;border:1px solid var(--line)}
+.dtag{margin-right:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--heal)}
+.drillnav button[aria-current] .dtag{color:#fff}
+.cmline{display:flex;align-items:center;gap:8px;margin:6px 0 0;font-size:13.5px;color:var(--ink-2)}
+.cmline .cm{width:10px;height:10px}
 @media (max-width:1100px){
   .mapwrap{grid-template-columns:minmax(0,1fr);gap:12px}
   .drillnav{overflow-x:auto;scrollbar-width:thin;padding:4px}
   .drillnav ol{flex-direction:row}
   .drillnav button{white-space:nowrap}
+  /* The fight list becomes one long strip that scrolls sideways and follows the highlight. */
+  .tlnav{position:relative;top:auto;max-height:none;overflow-y:hidden}
+  .cmkey{display:none}
+  .tlnav ol{align-items:center}
+  .tlnav .ph{padding:0 6px 0 10px;white-space:nowrap}
+  .tlnav .dr{margin:0;width:auto}
 }
 .arena{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:10px}
 .arena svg{display:block;width:100%;max-width:600px;height:auto;margin:0 auto;aspect-ratio:108/110;cursor:crosshair;touch-action:manipulation;user-select:none;-webkit-user-select:none}

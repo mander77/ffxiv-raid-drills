@@ -19,6 +19,8 @@ C# keeps type information at run time. TypeScript does not. When the code runs, 
 
 - String unions, such as `type Slot = "H1" | "H2"`. The closest C# match is an enum, but the values stay plain strings. See `src/types.ts`.
 - Tuples, such as `type Point = [number, number]`. The closest C# match is a value tuple, `(double X, double Y)`. See `src/types.ts`.
+- Labeled tuples, such as `[t: number, name: string, drills?: string[]]`. The labels only name the positions for the reader. A `?` makes a position optional. See `Row` in `src/data/abilities.ts`.
+- `as const`. It keeps a literal value as narrow as possible: an array becomes a fixed, read-only tuple, and text keeps its exact value. `new Map(list.map(m => [m.id, m.title] as const))` needs it, because without it each pair is a plain `string[]`. See `src/views/tlnav.ts` and `COMPASS` in `src/geometry.ts`.
 - Interfaces, such as `interface CircleZone { c: Point; r: number }`. They describe the shape of an object, like a C# interface or record. TypeScript compares shapes, not names: any object with the right fields fits. See `src/types.ts`.
 - Optional fields, such as `cls?: string`. The type is `string | undefined`, like `string? Cls` in C#. See `src/types.ts`.
 - Null in the type, such as `f: number | null`. With `"strict": true` in `tsconfig.json`, null is not a valid number. This works like C# nullable reference types with warnings treated as errors. See `Boss` in `src/types.ts`.
