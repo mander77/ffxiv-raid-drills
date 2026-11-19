@@ -371,6 +371,9 @@ td.n .cmline{margin-top:4px;gap:6px;font-size:12px;font-weight:400}
 .ringmark{fill:none;stroke:var(--ring);stroke-width:1.1;stroke-linecap:round}
 .bosscore{fill:var(--boss)}
 .face{fill:var(--ring)}
+/* The boss turning to face his next target: the ring turns, it does not jump (see paintBoss). */
+.turn{transition:transform .5s ease-in-out}
+@media (prefers-reduced-motion:reduce){.turn{transition:none}}
 .wm text{font-family:var(--font-display);font-weight:700;font-size:4.2px;text-anchor:middle;dominant-baseline:central}
 .wm-red circle,.wm-red rect{fill:var(--wm-red)} .wm-red text{fill:#fff}
 .wm-yellow circle,.wm-yellow rect{fill:var(--wm-yellow)} .wm-yellow text{fill:var(--ink)}

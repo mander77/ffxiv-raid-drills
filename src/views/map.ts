@@ -2,7 +2,7 @@
 import { esc, el, newCode, random, withSeed } from "../util";
 import { state, getDeck, record, view, setChoices, type MapCur } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter, f1 } from "../geometry";
-import { sceneSVG, drawOverlay, drawBoss, zoneSVG, hitsSVG } from "../arena";
+import { sceneSVG, drawOverlay, paintBoss, zoneSVG, hitsSVG } from "../arena";
 import { BOSS, MAPS, changes, facingNext } from "../data/drills";
 import { PUDDLE_R } from "../data/attacks";
 import { ABILITIES } from "../data/abilities";
@@ -76,7 +76,7 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
   const layer = (id: string): Element => svg.querySelector("#" + id) as Element;
   layer("reveal-layer").innerHTML = rev;
   layer("drops").innerHTML = drops + cueRest;
-  layer("boss-layer").innerHTML = boss ? drawBoss(boss) : "";
+  paintBoss(layer("boss-layer"), boss ?? null);
   layer("fb-layer").innerHTML = fb;
   layer("label-layer").innerHTML = zlabel;
   layer("cue-marks").innerHTML = cueMarks;

@@ -74,18 +74,39 @@ export function drawOverlay(o: Overlay): string {
 
 /* The boss and his target ring, drawn like the game's: a marker at his front, a short tick on
    each flank (his east and west), and an opening at his rear, between the two rear corners
-   (135 to 225 degrees from his front). The whole ring turns with his facing.
+   (135 to 225 degrees from his front). The whole ring turns with his facing: an inner group
+   turned with a CSS transform, so paintBoss can turn it smoothly (see .turn in styles.css).
    With no facing (f null), the ring is a plain circle, so it does not give away where he faces. */
 const RING = HITBOX, REAR = 45;   // the ring is his hitbox; half of the rear opening in degrees
 const onRing = (deg: number, r: number): string => f1(r * Math.sin(deg * DEG)) + " " + f1(-r * Math.cos(deg * DEG));
 export function drawBoss(b: Boss): string {
   const at = "translate(" + f1(b.x) + " " + f1(b.y) + ")";
   if(b.f == null) return '<g transform="' + at + '"><circle class="ring" r="' + RING + '"/><circle class="bosscore" r="3.4"/></g>';
-  return '<g transform="' + at + " rotate(" + b.f + ')">' +
+  return '<g transform="' + at + '"><g class="turn" style="transform:rotate(' + f1(b.f) + 'deg)">' +
     // From the left rear corner, clockwise past his front, to the right rear corner.
     '<path class="ring" d="M' + onRing(180 + REAR, RING) + " A" + RING + " " + RING + " 0 1 1 " + onRing(180 - REAR, RING) + '"/>' +
     '<path class="ringmark" d="M' + onRing(90, RING - 2) + " L" + onRing(90, RING + 2) + " M" + onRing(270, RING - 2) + " L" + onRing(270, RING + 2) + '"/>' +
-    '<circle class="bosscore" r="3.4"/><path class="face" d="M0,' + f1(-(RING + 3.6)) + " L-2.6," + f1(-(RING - 0.6)) + " L2.6," + f1(-(RING - 0.6)) + ' Z"/></g>';
+    '<circle class="bosscore" r="3.4"/><path class="face" d="M0,' + f1(-(RING + 3.6)) + " L-2.6," + f1(-(RING - 0.6)) + " L2.6," + f1(-(RING - 0.6)) + ' Z"/></g></g>';
+}
+
+/** Draw the boss in his layer of a live arena. When he only turns (the same spot, a new
+    facing), his ring is not drawn again: it turns from the old facing to the new one, the short
+    way round, as he does in the game. A jump, or a change to or from no facing, draws him
+    again at once. The layer keeps his spot and his facing (in degrees, not wrapped to 0..360,
+    so the next turn starts from where the ring is) in data attributes. */
+export function paintBoss(layer: Element, b: Boss | null): void {
+  const el = layer as SVGGElement, d = el.dataset, ring = el.querySelector<SVGGElement>(".turn");
+  const s = (n: number): string => String(f1(n));
+  const was = d.f ? Number(d.f) : null;
+  if(b && ring && was != null && b.f != null && d.x === s(b.x) && d.y === s(b.y)){
+    const turn = ((b.f - was) % 360 + 540) % 360 - 180;
+    if(Math.abs(turn) < 0.01) return;
+    d.f = s(was + turn);
+    ring.style.transform = "rotate(" + d.f + "deg)";
+    return;
+  }
+  el.innerHTML = b ? drawBoss(b) : "";
+  d.x = b ? s(b.x) : ""; d.y = b ? s(b.y) : ""; d.f = b?.f != null ? s(b.f) : "";
 }
 
 export function drawWaymarks(): string {
