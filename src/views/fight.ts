@@ -11,6 +11,7 @@ import { buildFight, clock, choicesText, CHOICE_ROWS, RANDOM, type Choices, type
 import { BOSS } from "../data/drills";
 import { ABILITIES } from "../data/abilities";
 import { tlNav, wireNav, markNav } from "./tlnav";
+import { showRoute, type Route } from "../router";
 import type { Boss, Point, Scene, StepResult } from "../types";
 
 /** live = you click; demo = the right clicks play by themselves; replay = your clicks play back. */
@@ -30,6 +31,9 @@ interface Run {
   review: number;            // while hold is "review": the segment whose wrong answer shows
   last: number;              // performance.now() at the last frame
   shown: string;             // what the arena and panel show, so they redraw only on a change
+  hits: Hit[];               // every hit of this fight, in time order (see buildHits)
+  nextHit: number;           // the first hit in `hits` that has not shown yet
+  bossAt: Point;             // where the boss stands on the arena now, for the tank buster pulse
 }
 /** A finished live run, for the summary and the replays. */
 interface Done { fight: Fight; clicks: Click[]; results: StepResult[][] }
@@ -58,10 +62,7 @@ function nextFight(): Fight {
 }
 /* While a fight runs, the address bar holds its link, so you can copy it to share the exact
    fight and choices. Back on the start screen it shows the tab again. */
-function setLink(hash: string): void {
-  try { history.replaceState(null, "", hash); } catch { /* sandboxed frame */ }
-}
-const fightLink = (f: Fight): string => "#fight/" + f.code + (choicesText(f.choices) ? "/" + choicesText(f.choices) : "");
+const fightRoute = (f: Fight): Route => ({tab:"fight", code:f.code, picks:choicesText(f.choices) || undefined});
 /* Between mechanics the arena is empty, but it is two platforms from Flatliner until the
    Crown of Arcadia that joins them again. */
 const IDLE: Scene = {setup:"", rule:"", steps:[], overlays:[], boss:BOSS};
@@ -131,7 +132,8 @@ function wireSettings(after: () => void): void {
 export function renderFight(): void {
   stopTimer(); R = null;
   state.cur = {kind:"fight"};
-  setLink("#map");
+  // A fight code from a link stays in the address bar until the fight starts, so a reload keeps it.
+  showRoute(wantedFight ? {tab:"fight", code:wantedFight, picks:choicesText(state.choices) || undefined} : {tab:"map"});
   show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b><span>The pull to the enrage at 10:59</span></div>' +
     "<h2>Play the fight in order</h2><p>The drills play one after another on the fight clock. The timeline shows what the boss does next, like the cactbot overlay. Click your spot before each hit lands. Each run picks a new scenario for every part you leave on Random. To start at one moment, click an ability or a drill in the fight list.</p>" +
     settingRows() + pickRows() +
@@ -147,10 +149,14 @@ export function renderFight(): void {
 function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
   stopTimer();
   R = {mode, fight, t:0, results:fight.segs.map(() => []),
-       clicks:mode === "replay" ? clicks : [], next:0, hold:"", review:-1, last:performance.now(), shown:""};
+       clicks:mode === "replay" ? clicks : [], next:0, hold:"", review:-1, last:performance.now(), shown:"",
+       hits:buildHits(fight), nextHit:0, bossAt:[50, 50]};
   state.cur = {kind:"fight"};
-  setLink(fightLink(fight));
-  show('<div class="stage"><div class="arena">' + HUD + '<div id="f-arena"></div></div><div class="panel"><div id="f-panel"></div>' + controls(fight) + "</div></div>");
+  showRoute(fightRoute(fight));
+  // The flash and the hit's name sit over the arena, outside #f-arena, so a new scene does not remove them.
+  show('<div class="stage"><div class="arena">' + HUD + '<div class="fxbox"><div id="f-arena"></div>' +
+    '<div class="hitfx" id="f-fx" aria-hidden="true"></div><div class="hitlbl" id="f-hit" role="status"></div></div></div>' +
+    '<div class="panel"><div id="f-panel"></div>' + controls(fight) + "</div></div>");
   const seek = el<HTMLInputElement>("f-seek");
   seek.addEventListener("pointerdown", () => { dragging = true; });
   seek.addEventListener("pointerup", () => { dragging = false; });
@@ -205,6 +211,9 @@ export function seekTo(to: number): void {
     f.segs.forEach((g, si) => { while(r.results[si].length < g.due.length && g.due[r.results[si].length] <= to) answer(si, null, true, true); });
   }
   r.t = to;
+  // A jump does not replay the hits it passes: the next hit to show is the first one after `to`.
+  const after = r.hits.findIndex(h => h.t > to);
+  r.nextHit = after < 0 ? r.hits.length : after;
   if(r.hold === "wait" || r.hold === "review") r.hold = "";
   r.shown = "";   // build the arena again: weapons that had not spawned yet must hide again
   r.last = performance.now();
@@ -232,6 +241,8 @@ function tick(now: number): void {
   r.last = now;
   if(!r.hold) r.t += dt * settings.speed;
   const f = r.fight;
+  // Damage going out: each hit shows once, on the frame the clock passes it.
+  while(r.nextHit < r.hits.length && r.hits[r.nextHit].t <= r.t) showHit(r, r.hits[r.nextHit++]);
   while(r.mode === "replay" && r.next < r.clicks.length && r.clicks[r.next].t <= r.t){ const c = r.clicks[r.next++]; answer(c.si, c.p); }
   f.segs.forEach((g, si) => {
     const j = r.results[si].length;
@@ -321,6 +332,7 @@ function frame(): void {
     paintArena(el("arena-svg"), sc, k, res, res.length > 0, boss);
     // The ring sits around the boss, and moves with him when he jumps. It starts at the top.
     const c = boss ?? {x:50, y:50};
+    r.bossAt = [c.x, c.y];
     const ring = el("tring");
     ring.setAttribute("cx", String(c.x)); ring.setAttribute("cy", String(c.y));
     ring.setAttribute("transform", "rotate(-90 " + c.x + " " + c.y + ")");
@@ -390,6 +402,55 @@ function updateLive(r: Run): void {
   const key = drills.join(",") + ":" + nextAb;
   if(key !== navKey){ navKey = key; markNav(drills, nextAb); }
   updateHud(r, si);
+}
+
+/* ---------- damage going out ---------- */
+/* Every hit of the fight, so Real time shows damage going out also where no drill runs. A raidwide
+   flashes the arena floor, a tank buster pulses a ring at the boss, shared hits (a stack or a
+   tower the party shares) flash softer, and the enrage flashes long and dark. Every hit, the
+   other AoEs too, shows its name over the arena for a moment. The colours follow the fight list. */
+type HitKind = "raid" | "tank" | "shared" | "enrage" | "aoe";
+interface Hit { t: number; name: string; kind: HitKind }
+const HIT_LABEL: Record<HitKind, string> = {raid:"Raidwide", tank:"Tank buster", shared:"Shared hits", enrage:"Enrage", aoe:"AoE"};
+/** Dance of Domination hits seven times, from the first hit to the last on the timeline. */
+const DANCE_HITS = 7, DANCE_GAP = 0.7;
+
+function buildHits(f: Fight): Hit[] {
+  const hits: Hit[] = [];
+  for(const a of ABILITIES){
+    if(a.cats.includes("enrage")) hits.push({t:a.t, name:a.name, kind:"enrage"});
+    else if(a.name === "Dance of Domination hits"){
+      for(let i = 0; i < DANCE_HITS; i++) hits.push({t:a.t + i * DANCE_GAP, name:"Dance of Domination " + (i + 1), kind:"raid"});
+    }
+    else if(a.cats.includes("raid")) hits.push({t:a.t, name:a.name, kind:"raid"});
+    else if(a.cats.includes("tank")) hits.push({t:a.t, name:a.name, kind:"tank"});
+    else if(a.name === "Massive Meteor") hits.push({t:a.t, name:a.name, kind:"shared"});
+    else if(a.cats.includes("target") || a.cats.includes("dodge")) hits.push({t:a.t, name:a.name, kind:"aoe"});
+  }
+  // Each Heartbreak Kick hit is its own line on the timeline: one flash per hit on the shared tower.
+  for(const e of f.events) if(/^Heartbreak Kick \d/.test(e.name)) hits.push({t:e.t, name:e.name, kind:"shared"});
+  return hits.sort((a, b) => a.t - b.t);
+}
+
+/** Start a CSS animation again on an element that may still run it: drop the classes, make the
+    browser lay the page out (reading offsetWidth does that), then add them back. */
+function restart(n: HTMLElement, cls: string): void {
+  n.className = "";
+  void n.offsetWidth;
+  n.className = cls;
+}
+
+function showHit(r: Run, h: Hit): void {
+  const fx = document.getElementById("f-fx"), label = document.getElementById("f-hit");
+  if(label){ label.textContent = HIT_LABEL[h.kind] + " · " + h.name; restart(label, "hitlbl show " + h.kind); }
+  if(fx && (h.kind === "raid" || h.kind === "shared" || h.kind === "enrage")) restart(fx, "hitfx " + h.kind);
+  if(h.kind === "tank"){
+    // A ring that grows out from the boss's hitbox and fades. It removes itself when done.
+    document.getElementById("arena-svg")?.insertAdjacentHTML("beforeend",
+      '<circle class="fx-tank" cx="' + r.bossAt[0] + '" cy="' + r.bossAt[1] + '" r="12"/>');
+    const pulse = document.querySelector("#arena-svg .fx-tank:last-of-type");
+    setTimeout(() => pulse?.remove(), 900);
+  }
 }
 
 /* ---------- the HUD ---------- */

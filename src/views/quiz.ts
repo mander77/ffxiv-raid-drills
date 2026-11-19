@@ -1,7 +1,9 @@
 // Multiple-choice cards, used by the quiz tabs and the pressure round.
-import { esc, shuffle, el } from "../util";
+import { esc, shuffle, el, LS } from "../util";
 import { state, getDeck, record, view, stopTimer, type McqCur, type QuizCat } from "../core";
 import { tabHead, renderRoundDone } from "./common";
+import { showRoute } from "../router";
+import { JOB } from "../data/jobs";
 import { showPressureQ } from "./pressure";
 import { MECH_FIGS } from "../data/figs";
 import { figSVG } from "../arena";
@@ -21,12 +23,36 @@ export function prepMCQ(item: QuizItem, cat: QuizCat | "pressure"): void {
   state.cur = {kind:"mcq", cat, item, q, opts:shuffle(q.options.map((o, k) => ({...o, k}))), answered:false, pick:-1, sel:-1, slow:false};
 }
 
+/* Any card of a quiz tab can be opened directly: from the "Go to question" list on the card, or
+   with a link such as #mech/k-sword (see router.ts). While a card shows, the address bar holds
+   its link, so you can copy it. */
+let wanted: {cat: QuizCat; id: string} | null = null;
+export function openQuestion(cat: QuizCat, id: string): void { wanted = {cat, id}; }
+
 export function renderQuiz(cat: QuizCat): void {
+  const ask = wanted?.cat === cat ? wanted.id : null;
+  wanted = null;
+  // A My job card belongs to one job. A link to the other job's card switches the job.
+  const jobCard = cat === "job" && ask ? JOB.find(x => x.id === ask) : undefined;
+  if(jobCard?.job && jobCard.job !== state.job){ state.job = jobCard.job; LS.set("job", state.job); delete state.decks.job; }
   const d = getDeck(cat);
-  if(d.i >= d.items.length) return renderRoundDone(cat, d);
+  if(ask){ const i = d.items.findIndex(x => x.id === ask); if(i >= 0) d.i = i; }
+  if(d.i >= d.items.length){ showRoute({tab:cat}); return renderRoundDone(cat, d); }
   prepMCQ(d.items[d.i], cat);
+  showRoute({tab:cat, card:d.items[d.i].id});
   view.innerHTML = tabHead() + '<div class="qwrap"><div class="panel" id="q-panel"></div></div>';
   drawMCQ();
+}
+
+/** The "Go to question" list: every card of the tab in fight order, grouped by phase. */
+function jumpList(cat: QuizCat): string {
+  const d = getDeck(cat), cut = (s: string): string => s.length <= 58 ? s : s.slice(0, s.lastIndexOf(" ", 56)) + "…";
+  let h = '<label class="qjump"><span>Go to question</span><select id="q-jump">', phase = "";
+  d.items.forEach((it, i) => {
+    if(it.phase !== phase){ h += (phase ? "</optgroup>" : "") + '<optgroup label="' + esc(it.phase) + '">'; phase = it.phase; }
+    h += '<option value="' + i + '"' + (i === d.i ? " selected" : "") + ">" + (i + 1) + ". " + esc(it.time) + " · " + esc(cut(it.build(state.slot).prompt)) + "</option>";
+  });
+  return h + "</optgroup></select></label>";
 }
 
 /** The arena picture of a card, when its question has one (the Mechanics questions). */
@@ -61,7 +87,8 @@ export function drawMCQ(): void {
   let prog = "";
   if(c.cat === "pressure"){ const pr = state.pressure; if(pr) prog = "Question " + (pr.i + 1) + " of " + pr.queue.length; }
   else { const d = getDeck(c.cat); prog = "Card " + (d.i + 1) + " of " + d.items.length; }
-  let h = '<div class="eyebrow"><b>' + esc(item.phase) + "</b><span>" + esc(item.time) + '</span><span class="progress">' + prog + "</span></div>";
+  let h = '<div class="qtop"><div class="eyebrow"><b>' + esc(item.phase) + "</b><span>" + esc(item.time) + '</span><span class="progress">' + prog + "</span></div>" +
+    (c.cat !== "pressure" ? jumpList(c.cat) : "") + "</div>";
   if(c.cat === "pressure" && !c.answered)
     h += '<div class="tphase" id="timer-lbl">Read</div><div class="timer reading" id="timer" aria-hidden="true"><i style="width:0"></i></div>';
   h += "<h2>" + esc(q.prompt) + "</h2>";
@@ -107,6 +134,11 @@ export function drawMCQ(): void {
     b.addEventListener("blur", showPicked);
   });
   document.getElementById("q-lock")?.addEventListener("click", lockIn);
+  // TS note: querySelector<HTMLSelectElement> types the result, so `.value` is known to exist.
+  // TS note: `cat` is a const narrowed to QuizCat by the check, and the arrow function keeps that
+  // narrowing, because a const can never change after the check.
+  const jump = document.querySelector<HTMLSelectElement>("#q-jump"), cat = c.cat;
+  if(jump && cat !== "pressure") jump.addEventListener("change", () => { getDeck(cat).i = Number(jump.value); renderQuiz(cat); });
   const nx = document.getElementById("q-next");
   if(nx){ nx.addEventListener("click", nextQ); nx.focus({preventScroll:true}); }
 }

@@ -7,6 +7,7 @@ import { BOSS, MAPS, PUDDLE_R, changes } from "../data/drills";
 import { ABILITIES } from "../data/abilities";
 import { clock, type Picks } from "../data/fight";
 import { tabHead, renderRoundDone, hudPrompt } from "./common";
+import { showRoute } from "../router";
 import { tlNav, wireNav, marks, catNames } from "./tlnav";
 import { patternRows, wirePattern, picked } from "./pattern";
 import type { Boss, MapDrill, Point, Scene, StepResult } from "../types";
@@ -114,15 +115,21 @@ function followedPick(key?: string): string | undefined {
 const followedKeys = (m: MapDrill): Array<keyof Picks> =>
   [m.follows?.variant, m.follows?.pick].filter((k): k is keyof Picks => Boolean(k && k in state.choices));
 
-/* A drill and pattern code asked for by a link, such as #map/m-assault/A7K2. */
-let wanted: {id: string; code: string} | null = null;
-export function openPattern(id: string, code: string): void { wanted = {id, code}; }
+/* A drill asked for by a link, such as #map/m-assault/A7K2 (with a pattern code) or #map/m-assault
+   (a new pattern), and an ability card asked for by a link, such as #map/ability/12. */
+let wanted: {id: string; code?: string} | null = null;
+let wantedAbility: number | null = null;
+export function openPattern(id: string, code?: string): void { wanted = {id, code}; }
+/** `n` counts the rows of the fight list from 1, as the link does. */
+export function openAbility(n: number): void { wantedAbility = n - 1; }
 
 export function renderMap(fresh = true): void {
+  if(wantedAbility != null && ABILITIES[wantedAbility]){ const i = wantedAbility; wantedAbility = null; return showAbility(i); }
+  wantedAbility = null;
   const d = getDeck("map"), ask = wanted;
   wanted = null;
   if(ask){ const i = d.items.findIndex(m => m.id === ask.id); if(i >= 0) d.i = i; }
-  if(d.i >= d.items.length) return renderRoundDone("map", d);
+  if(d.i >= d.items.length){ showRoute({tab:"map"}); return renderRoundDone("map", d); }
   const item = d.items[d.i];
   const cur = state.cur;
   if(ask || fresh || !cur || cur.kind !== "map" || cur.item !== item){
@@ -139,6 +146,8 @@ export function renderMap(fresh = true): void {
     state.cur = {kind:"map", item, scene:made.scene, k:made.k, code, results:[], counted:false};
   }
   const c = run();
+  // The link to this drill with this exact pattern, so you can copy it from the address bar.
+  showRoute({tab:"map", drill:item.id, code:c.code});
   view.innerHTML = tabHead() + '<div class="mapwrap">' + tlNav({current:[item.id]}) +
     '<div class="stage"><div class="arena"><div id="m-hud"></div>' + sceneSVG(c.scene, c.k) + LEGEND + "</div>" +
     '<div class="panel" id="map-panel"></div></div></div>';
@@ -165,6 +174,7 @@ export function showAbility(i: number): void {
   const a = ABILITIES[i];
   if(!a) return;
   state.cur = {kind:"ability", i};
+  showRoute({tab:"map", ability:i + 1});
   const drills = (a.drills ?? []).flatMap(id => MAPS.filter(m => m.id === id));
   view.innerHTML = tabHead() + '<div class="mapwrap">' + tlNav({open:i}) +
     '<div class="stage"><div class="arena">' + hudPrompt(clock(a.t), a.name, true) + sceneSVG(IDLE, 0) + "</div>" +

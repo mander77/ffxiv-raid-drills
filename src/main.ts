@@ -6,10 +6,11 @@
 // TS note: importing a CSS file is a Vite feature, not TypeScript. Vite adds the styles to the page
 // in development and writes them to one CSS file in the build.
 import "./styles.css";
-import { LS, esc, el, isCode } from "./util";
+import { LS, esc, el } from "./util";
 import { state, TABS, view, app, stopTimer, type Tab, type Play } from "./core";
-import { renderMap, nextStep, nextMap, openPattern } from "./views/map";
-import { renderQuiz, answer, nextQ, previews, pickOpt, lockIn } from "./views/quiz";
+import { parseRoute, showRoute, type Route } from "./router";
+import { renderMap, nextStep, nextMap, openPattern, openAbility } from "./views/map";
+import { renderQuiz, answer, nextQ, previews, pickOpt, lockIn, openQuestion } from "./views/quiz";
 import { renderPressureStart, startPressure } from "./views/pressure";
 import { renderSheet } from "./views/sheet";
 import { renderHome } from "./views/home";
@@ -43,27 +44,28 @@ function setSlot(s: Slot): void {
 
 function setPlay(p: Play): void { state.play = p; LS.set("play", p); }
 
-function go(tab: string): void {
-  // A link can name a pattern: #map/<drill id>/<code> opens that drill step by step, and
-  // #fight/<code> opens that fight in real time. #fight was a tab of its own before.
-  const [name, a = "", b = ""] = tab.split("/");
-  // TS note: `?.` and `??` work as in C#. If find() returns undefined, `?.id` is undefined,
-  // and `?? "home"` falls back to the landing screen. Any text from the URL becomes a valid Tab.
-  const t: Tab = name === "fight" ? "map" : TABS.find(x => x.id === name)?.id ?? "home";
-  if(t === "map" && a && isCode(b)){ setPlay("step"); openPattern(a, b.toUpperCase()); }
-  // #fight/<code>/raw=axe,ult=cw: the code, then the fight pattern choices, if any.
-  if(name === "fight"){ setPlay("time"); if(isCode(a)) openFight(a.toUpperCase(), b ? parseChoices(b) : undefined); }
+/** Open a route (see router.ts): a tab, and the card the link names, if any. */
+function go(r: Route): void {
+  // A link can open one card: a drill step by step (#map/<drill>[/<code>]), a fight in real time
+  // (#fight/<code>[/<picks>]; Real time was a tab of its own before), or a quiz card (#mech/<card>).
+  if(r.tab === "map" && r.drill){ setPlay("step"); openPattern(r.drill, r.code); }
+  if(r.tab === "map" && r.ability){ setPlay("step"); openAbility(r.ability); }
+  if(r.tab === "fight"){ setPlay("time"); if(r.code) openFight(r.code, r.picks ? parseChoices(r.picks) : undefined); }
+  // TS note: `"card" in r` narrows r to the quiz member of Route, so r.tab is a QuizCat here.
+  if("card" in r && r.card) openQuestion(r.tab, r.card);
+  const t: Tab = r.tab === "fight" ? "map" : r.tab;
   stopTimer();
   // A new tab starts at the top, also when you open it from a card low on the landing screen.
   if(t !== state.tab) window.scrollTo(0, 0);
   state.tab = t; state.pressure = null;
   renderTabs();
-  if(location.hash !== "#" + t){ try { history.replaceState(null, "", "#" + t); } catch { /* sandboxed frame */ } }
   render();
 }
 
 function render(): void {
   stopTimer();
+  // The address bar shows the tab. A screen that shows one card then puts that card's link there.
+  showRoute({tab:state.tab});
   switch(state.tab){
     case "home": return renderHome();
     case "map": return state.play === "time" ? renderFight() : renderMap();
@@ -80,7 +82,7 @@ el("tabs").addEventListener("click", e => {
   // which is true for a click. closest<HTMLElement>() passes a type argument so the result
   // has `.dataset`, which plain Element does not have.
   const b = (e.target as Element).closest<HTMLElement>("[data-tab]");
-  if(b?.dataset.tab) go(b.dataset.tab);
+  if(b?.dataset.tab) go(parseRoute(b.dataset.tab));
 });
 document.querySelectorAll<HTMLElement>(".seg button[data-slot]").forEach(b => b.addEventListener("click", () => setSlot(b.dataset.slot === "H2" ? "H2" : "H1")));
 view.addEventListener("click", e => {
@@ -93,6 +95,8 @@ view.addEventListener("click", e => {
 });
 document.addEventListener("keydown", e => {
   if(e.altKey || e.ctrlKey || e.metaKey) return;
+  // In the "Go to question" list, number keys and Enter belong to the list.
+  if((e.target as HTMLElement | null)?.tagName === "SELECT") return;
   const c = state.cur;
   if(!c) return;
   const onButton = (e.target as HTMLElement | null)?.tagName === "BUTTON";
@@ -110,8 +114,10 @@ document.addEventListener("keydown", e => {
   else if(c.kind === "fight" && e.key === " " && !onButton){ e.preventDefault(); togglePause(); }
   else if(c.kind === "fight" && (e.key === "ArrowLeft" || e.key === "ArrowRight")){ e.preventDefault(); seekBy(e.key === "ArrowLeft" ? -5 : 5); }
 });
-window.addEventListener("hashchange", () => { const t = location.hash.slice(1); if(t && t !== state.tab) go(t); });
+// A link typed in the address bar, a link on the page (the landing screen cards) and the Back
+// button all change the hash. The app's own address updates do not (see showRoute).
+window.addEventListener("hashchange", () => go(parseRoute(location.hash)));
 
 showSlot();
-go(location.hash.slice(1) || "home");
+go(parseRoute(location.hash));
 document.fonts?.ready.then(scrollActiveTab).catch(() => { /* fonts are optional */ });
