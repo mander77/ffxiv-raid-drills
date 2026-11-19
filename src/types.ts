@@ -89,8 +89,8 @@ export interface Step {
   /** A look-ahead step: you click to show what you have spotted (a weapon, for example), but you
       do not move there. The moving marker in Real time skips it. */
   look?: boolean;
-  /** The best spot to stand when the zone has one, for example a step in from the sword
-      pocket's inner corner, close to the boss's hitbox. The moving marker goes there instead of
+  /** The best spot to stand when the zone has one, for example a few steps in from the
+      sword pocket's inner corner. The moving marker goes there instead of
       the middle of the zone. */
   stand?: Point;
   /** The puddles dropped before this step are gone from the moment it is asked. After Void

@@ -74,12 +74,11 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       const corner = vadd(vadd(P, d, -HW), sv, HW);
       const poly = [corner, vadd(corner, d, -32), vadd(vadd(corner, d, -32), sv, 32), vadd(corner, sv, 32)];
       z = {fn, show:[{poly}], label:vadd(P, unit(vadd([-d[0], -d[1]], sv)), 17)};
-      // Where to stand: a step in from the pocket's inner corner, where the arms of the cross meet
-      // (6 units on the diagonal, about 4 units clear of each arm), so in the moment you can see
-      // that you are safe. That is about 16 units from him, 5 outside his ring, so the melee in
-      // the light party stack can still hit him.
-      stand = vadd(corner, unit(vadd([-d[0], -d[1]], sv)), 6);
-      a = "Sword, " + where + ": the pocket behind him on his " + own + ", on the side he jumped from, a step in from its inner corner, close to his hitbox. " + S(s, "G1", "G2") + " stacks on you.";
+      // Where to stand: a few steps in from the pocket's inner corner, where the arms of the cross
+      // meet (10 units on the diagonal, about 7 units clear of each arm), so in the moment you can
+      // see that you are safe. That is about 20 units from him, 9 outside his ring.
+      stand = vadd(corner, unit(vadd([-d[0], -d[1]], sv)), 10);
+      a = "Sword, " + where + ": the pocket behind him on his " + own + ", on the side he jumped from, a few steps in from its inner corner. " + S(s, "G1", "G2") + " stacks on you.";
       reveal = [{t:"band", x:P[0] - d[0] * 150, y:P[1] - d[1] * 150, x2:P[0] + d[0] * 150, y2:P[1] + d[1] * 150, w:HW * 2},
                 {t:"band", x:P[0] - L[0] * 150, y:P[1] - L[1] * 150, x2:P[0] + L[0] * 150, y2:P[1] + L[1] * 150, w:HW * 2}];
     }
@@ -155,7 +154,7 @@ export function assaultScene(A: Run, s: Slot): Scene {
     overlays:A.overlays,
     bossAt:n => A.states[Math.min(n, A.states.length - 1)],
     steps:A.steps,
-    rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ", a step in from its inner corner. Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: stack in the middle."};
+    rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ", a few steps in from its inner corner. Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: stack in the middle."};
 }
 export function ultimateScene(U: Run): Scene {
   return {
