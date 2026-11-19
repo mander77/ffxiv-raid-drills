@@ -46,7 +46,7 @@ export function renderSheet(): void {
     "<p>Say it in your head: feet, self, team. If you are not sure, any of these beats standing still.</p></section></div>" +
     '<section><h2>Positions to remember</h2><div class="cols"><div><ul class="rules">' +
     "<li><b>Weapon order:</b> the first weapon is the one he faces. Then he goes clockwise.</li>" +
-    "<li><b>Sword:</b> the cross lines up with the way he jumped. Stand in the pocket behind him, on the side he jumped from: G1 on his left, G2 on his right. Stand at its inner corner, where the arms of the cross meet, next to his hitbox, so the melee can still hit him. As " + s + ", you take the " + S(s, "left", "right") + " pocket, and your light party stacks on you.</li>" +
+    "<li><b>Sword:</b> the cross lines up with the way he jumped. Stand in the pocket behind him, on the side he jumped from: G1 on his left, G2 on his right. Stand a step in from its inner corner, where the arms of the cross meet. There you can see that you are clear of both arms, and the melee can still hit him. As " + s + ", you take the " + S(s, "left", "right") + " pocket, and your light party stacks on you.</li>" +
     "<li><b>Scythe:</b> proteans, so everyone takes a clock spot close around him. H1 at the butt, H2 at the point.</li>" +
     "<li><b>Axe:</b> the whole party stacks in the middle, out of the axe AoE.</li>" +
     "<li><b>Ultimate Trophy Weapons:</b> watch the first spawn. South and slightly west means clockwise, south and slightly east means counterclockwise. The second is NW or NE, then the cardinals, ending north. He resolves them in spawn order.</li>" +

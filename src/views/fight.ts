@@ -42,7 +42,8 @@ interface Run {
 /** A finished live run, for the summary and the replays. */
 interface Done { fight: Fight; clicks: Click[]; results: StepResult[][] }
 
-const SPEEDS = [1, 1.5, 2];
+// Half speed is for learning the moves. The faster speeds are for practice under pressure.
+const SPEEDS = [0.5, 1, 1.5, 2];
 const savedSpeed = LS.get("fspeed", 1);
 const settings = {
   speed: SPEEDS.includes(savedSpeed) ? savedSpeed : 1,

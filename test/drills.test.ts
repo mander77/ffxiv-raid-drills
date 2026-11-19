@@ -96,7 +96,7 @@ test("weapon runs: the sword pocket is behind the boss, never on him", () => {
   }
 });
 
-test("weapon runs: the sword's best spot is the pocket's inner corner, just outside his hitbox", () => {
+test("weapon runs: the sword's best spot is a step in from the pocket's inner corner, close to his hitbox", () => {
   for(const [name, build] of Object.entries(RUN_BUILDERS)) for(let i = 0; i < RUNS; i++) for(const s of SLOTS){
     const R = build(s);
     R.W.forEach((w, k) => {
@@ -104,9 +104,17 @@ test("weapon runs: the sword's best spot is the pocket's inner corner, just outs
       const st = R.steps[k], boss = R.states[k + 1];
       if(!st.stand) throw new Error(name + ": a sword step has no best spot");
       assert.ok(inZone(st.stand, zoneOf(st.z)), name + ": the best spot is in the pocket");
-      // His hitbox ring is 11 units across the middle; the corner of the cross is about 9.9 out.
+      // His hitbox ring has a radius of 11 units, and the corner of the cross is about 9.9 out.
+      // The spot is clearly inside the pocket, but well within melee range (3 yalms, 7.5 units,
+      // past the ring).
       const d = Math.hypot(st.stand[0] - boss.x, st.stand[1] - boss.y);
-      assert.ok(d > 11 && d < 14, name + ": " + d.toFixed(1) + " units from him, not just outside his hitbox");
+      assert.ok(d > 14 && d < 17.5, name + ": " + d.toFixed(1) + " units from him, not a step into the pocket");
+      // Not on the corner: a circle of 3.5 units around the spot is all inside the pocket, so it is
+      // clear of both arms of the cross.
+      for(let a = 0; a < 360; a += 22.5){
+        const r = a * Math.PI / 180, p: Point = [st.stand[0] + 3.5 * Math.cos(r), st.stand[1] + 3.5 * Math.sin(r)];
+        assert.ok(inZone(p, zoneOf(st.z)), name + ": the spot is too close to an arm of the cross");
+      }
     });
   }
 });
@@ -202,4 +210,17 @@ test("Meteorain: H1 drops inside the boss hitbox, H2 farther out on the SW line"
   assert.notOk(inZone([37.5, 38], h1), "just outside the hitbox");
   assert.ok(inZone([26, 74], h2));
   assert.notOk(inZone([43, 57], h2), "on top of the first SW rock");
+});
+
+test("Void Stardust into the weapons: the puddles are gone when the weapons start", () => {
+  const drill = MAPS.find(m => m.id === "m-void");
+  if(!drill) throw new Error("missing drill m-void");
+  for(const s of SLOTS) for(const v of ["stack", "spread"]){
+    const steps = drill.build(s, v).steps, first = steps.findIndex(st => st.clearDrops);
+    // Only the first of the three weapons clears them. All puddles drop before it, none after.
+    assert.equal(steps.filter(st => st.clearDrops).length, 1);
+    assert.equal(first, steps.length - 3, "the first weapon clears the puddles");
+    assert.ok(steps.slice(0, first).some(st => st.drop), "the puddles drop before the weapons");
+    assert.notOk(steps.slice(first).some(st => st.drop), "no puddle drops during the weapons");
+  }
 });

@@ -43,11 +43,13 @@ function lookBack(c: MapCur): number {
    the zone and the click of the last answer. The drill tab and the full-fight tab both use it.
    `boss` replaces the scene's boss, for example to hide his facing before he turns. */
 export function paintArena(svg: Element, sc: Scene, k: number, results: StepResult[], showLast: boolean, boss?: Boss | null): void {
-  const n = results.length;
+  const n = results.length, asking = showLast ? n - 1 : n;
+  // The puddles dropped before the last step with clearDrops (up to the one asked) are gone.
+  const kept = sc.steps.slice(0, asking + 1).reduce((from, st, i) => st.clearDrops ? i : from, 0);
   let drops = "", fb = "", rev = "";
   results.forEach((r, i) => {
     const step = sc.steps[i], z = r.z, ctr = zoneCenter(z);
-    if(r.drop) drops += '<circle class="drop" cx="' + f1(r.drop[0]) + '" cy="' + f1(r.drop[1]) + '" r="' + PUDDLE_R + '"/>';
+    if(r.drop && i >= kept) drops +='<circle class="drop" cx="' + f1(r.drop[0]) + '" cy="' + f1(r.drop[1]) + '" r="' + PUDDLE_R + '"/>';
     if(step.leave) drops += drawOverlay(step.leave);
     if(i === n - 1 && showLast){
       const cls = r.ok ? "ok" : "bad";
@@ -62,7 +64,6 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
   });
   // Cues show with their step's question and stay. They go on top of the puddles so that
   // a marker on an old puddle stays visible.
-  const asking = showLast ? n - 1 : n;
   const cues = sc.steps.slice(0, asking + 1).flatMap(st => st.cue ?? []).map(o => drawOverlay(rotOverlay(o, k))).join("");
   if(boss === undefined) boss = sc.bossAt ? sc.bossAt(n) : (sc.boss ? rotOverlay(sc.boss, k) : null);
   const layer = (id: string): Element => svg.querySelector("#" + id) as Element;

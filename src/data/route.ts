@@ -49,7 +49,7 @@ function middleOf(z: Zone, from: Point): Point {
 
 /** The right spots of the whole fight, in time order. "Watch the right moves" answers with these
     same points. Each one is the middle of its spot (see middleOf). A step with a best spot goes
-    there instead: the sword pocket's inner corner, next to the boss. A spot that depends on the
+    there instead: a step in from the sword pocket's inner corner, close to the boss. A spot that depends on the
     steps before it (a puddle, for example) is worked out from these answers. */
 export function rightRoute(f: Fight): Stop[] {
   return f.segs.flatMap((g, si) => {
