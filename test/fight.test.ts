@@ -26,6 +26,15 @@ test("every mechanic has one hit time per step, in order, inside the fight", () 
   }
 });
 
+test("every click is due on a timeline line, and the lines run in time order", () => {
+  for(let i = 0; i < 20; i++){
+    const f = buildFight("H1");
+    f.events.forEach((e, j) => assert.isAtLeast(e.t, j ? f.events[j - 1].t : 0, e.name));
+    for(const g of f.segs) for(const d of g.due)
+      assert.ok(f.events.some(e => Math.abs(e.t - d) < 0.05), g.title + ": nothing on the timeline at " + d);
+  }
+});
+
 test("the second Raw Steel Trophy and the second Void Stardust go the other way", () => {
   for(let i = 0; i < RUNS; i++){
     const f = buildFight("H1");

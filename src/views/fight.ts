@@ -77,7 +77,7 @@ export function renderFight(): void {
 /* ---------- the run ---------- */
 function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
   stopTimer();
-  R = {mode, fight, t:settings.skip ? Math.max(0, fight.casts[0].start - 3) : 0, results:fight.segs.map(() => []),
+  R = {mode, fight, t:settings.skip ? Math.max(0, fight.events[0].t - SOON) : 0, results:fight.segs.map(() => []),
        clicks:mode === "replay" ? clicks : [], next:0, hold:"", last:performance.now(), shown:""};
   state.cur = {kind:"fight"};
   view.innerHTML = tabHead(false) + '<div class="stage"><div class="arena" id="f-arena"></div><div class="panel" id="f-panel"></div></div>';
@@ -116,13 +116,14 @@ function tick(now: number): void {
   state.raf = requestAnimationFrame(tick);
 }
 
-/* "Skip ahead": when no mechanic is on the arena and no cast is running, jump to 3 seconds
-   before the next cast or mechanic. */
+/* "Skip ahead": when no mechanic is on the arena and nothing happens for a while, jump to
+   just before the next timeline line or mechanic, so it still shows as "soon". A line that
+   just happened stays on screen first. */
 function skipQuiet(r: Run): void {
   const f = r.fight;
-  if(activeSeg(f, r.t) >= 0 || f.casts.some(c => c.start <= r.t && r.t < c.end)) return;
-  const next = Math.min(f.end, ...f.segs.map(g => g.from).concat(f.casts.map(c => c.start)).filter(x => x > r.t));
-  if(next - r.t > 5) r.t = next - 3;
+  if(activeSeg(f, r.t) >= 0 || f.events.some(e => e.t <= r.t && r.t - e.t < KEEP)) return;
+  const next = Math.min(f.end, ...f.segs.map(g => g.from).concat(f.events.map(e => e.t)).filter(x => x > r.t));
+  if(next - r.t > SOON + 2) r.t = next - SOON;
 }
 
 /** Score the next step of segment si: a click at p, the right spot (p null), or a miss. */
@@ -190,7 +191,7 @@ function drawPanel(r: Run, si: number): void {
   const f = r.fight, g = si >= 0 ? f.segs[si] : null, res = g ? r.results[si] : [];
   const label = r.mode === "demo" ? "The right moves" : r.mode === "replay" ? "Your run, played back" : "Full fight";
   let h = '<div class="eyebrow"><b>' + label + '</b><span id="f-clock"></span><span>' + settings.speed + "x</span><span>Fight " + f.code + "</span></div>";
-  h += '<div class="castbar" id="f-cast"><div class="cb-top"><span id="f-cast-name"></span><span id="f-cast-time"></span></div><div class="cb-bar"><i id="f-cast-fill"></i></div></div>';
+  h += '<ol class="ftl" id="f-tl" aria-label="Fight timeline"></ol>';
   if(g){
     const j = res.length;
     h += "<h2>" + esc(g.title) + "</h2>";
@@ -207,18 +208,24 @@ function drawPanel(r: Run, si: number): void {
   el("f-quit").addEventListener("click", renderFight);
 }
 
+/* The timeline works like cactbot's raidboss timeline, with its default settings: a line
+   shows once it is 30 seconds away, at most 6 lines show, a line turns "soon" in its last
+   6 seconds, and a line that just happened stays for 0.7 seconds. Each bar fills as its
+   line comes closer. */
+const SHOW_AT = 30, SOON = 6, KEEP = 0.7, ROWS = 6;
+
 function updateLive(r: Run): void {
   const f = r.fight, set = (id: string, s: string): void => { const n = document.getElementById(id); if(n) n.textContent = s; };
   set("f-clock", clock(r.t));
-  let c = null;
-  for(const x of f.casts) if(x.start <= r.t && r.t < x.end + 1.5) c = x;   // the latest cast that started
-  const box = document.getElementById("f-cast"), fill = document.getElementById("f-cast-fill");
-  if(box && fill){
-    box.classList.toggle("idle", !c);
-    box.classList.toggle("rw", Boolean(c?.raidwide));
-    set("f-cast-name", c ? c.name : "No cast");
-    set("f-cast-time", c ? (r.t < c.end ? (c.end - r.t).toFixed(1) + " s" : "now") : "");
-    fill.style.width = c ? (Math.min(1, (r.t - c.start) / Math.max(0.1, c.end - c.start)) * 100).toFixed(1) + "%" : "0";
+  const tl = document.getElementById("f-tl");
+  if(tl){
+    const rows = f.events.filter(e => e.t >= r.t - KEEP && e.t - r.t <= SHOW_AT).slice(0, ROWS);
+    const next = f.events.find(e => e.t > r.t);
+    tl.innerHTML = rows.length ? rows.map(e => {
+      const left = e.t - r.t, fill = Math.max(0, Math.min(1, 1 - left / SHOW_AT));
+      const cls = (left <= 0 ? "now" : left <= SOON ? "soon" : "") + (e.raidwide ? " rw" : "");
+      return '<li class="' + cls + '"><i style="width:' + (fill * 100).toFixed(1) + '%"></i><span>' + esc(e.name) + "</span><b>" + (left > 0 ? left.toFixed(1) : "") + "</b></li>";
+    }).join("") : '<li class="idle"><span>' + (next ? "Next: " + esc(next.name) + " in " + Math.round(next.t - r.t) + " s" : "No more lines") + "</span></li>";
   }
   const si = activeSeg(f, r.t);
   if(si >= 0){

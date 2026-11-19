@@ -112,12 +112,16 @@ button.chip{cursor:pointer}
 .lastans.ok{background:var(--heal-soft)} .lastans.bad{background:var(--miss-soft)}
 .lastans .tag{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-right:6px}
 .lastans.ok .tag{color:var(--heal-ink)} .lastans.bad .tag{color:var(--miss)}
-.castbar{margin:10px 0 12px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px}
-.castbar.idle{opacity:.5}
-.cb-top{display:flex;justify-content:space-between;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:5px}
-.cb-bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
-.cb-bar i{display:block;height:100%;width:0;background:var(--boss)}
-.castbar.rw .cb-bar i{background:var(--warn)}
+.ftl{list-style:none;margin:10px 0 12px;padding:4px;display:grid;gap:3px;align-content:start;min-height:calc(6 * 27px + 8px);border:1.5px solid var(--line);border-radius:8px}
+.ftl li{position:relative;display:flex;justify-content:space-between;gap:8px;height:24px;align-items:center;padding:0 8px;border-radius:5px;background:var(--paper);font-size:13.5px;overflow:hidden}
+.ftl li i{position:absolute;inset:0 auto 0 0;background:var(--tank);opacity:.3}
+.ftl li span,.ftl li b{position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ftl li b{font-family:var(--font-mono);font-weight:500;flex:none}
+.ftl li.soon i{background:var(--miss);opacity:.45}
+.ftl li.now{box-shadow:inset 0 0 0 2px var(--ink)}
+.ftl li.now i{background:var(--miss);opacity:.6}
+.ftl li.rw span{font-weight:700}
+.ftl li.idle{background:none;color:var(--ink-2)}
 .fsum{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:6px}
 .fsum li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:14.5px}
 .fsum .fs-time{font-family:var(--font-mono);font-size:12px;color:var(--ink-2);min-width:3.2em}
