@@ -1,7 +1,7 @@
 // The full-fight run-through: one random scenario, laid out on the fight clock.
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
-// This first version covers Phase 1 (the pull to One and Only at 4:00.4).
+// It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6).
 import { MAPS, buildAssault2, voidIntoWeapons, voidAgain } from "./drills";
 import { newCode, random, withSeed } from "../util";
 import type { Scene, Slot } from "../types";
@@ -12,7 +12,7 @@ export interface TLEvent { t: number; name: string; raidwide?: boolean }
 /** One stretch of the fight with a scene on the arena. `due[i]` is when step i resolves. */
 export interface FightSeg {
   title: string;
-  /** The "Where do I stand?" drills this stretch tests. A click on one in the drill list
+  /** The "Where do I stand?" drills this stretch tests. A click on one in the fight list
       moves the fight clock to `from`. */
   drills: string[];
   scene: Scene;
@@ -26,18 +26,20 @@ export interface FightSeg {
   turn?: { at: number; f: number };
 }
 
-/** `code` rebuilds the same fight: the same weapons, the same stack or spread, and so on. */
-export interface Fight { segs: FightSeg[]; events: TLEvent[]; end: number; summary: string; code: string }
+/** `code` rebuilds the same fight: the same weapons, the same stack or spread, and so on.
+    `split` is when the arena is two platforms, from Flatliner to the Crown of Arcadia that
+    joins it again, in seconds. */
+export interface Fight { segs: FightSeg[]; events: TLEvent[]; end: number; split: [number, number]; summary: string; code: string }
 
 /** "1:24" to 84. */
 export const sec = (t: string): number => { const [m, s] = t.split(":").map(Number); return m * 60 + s; };
 /** 84 to "1:24". */
 export const clock = (t: number): string => Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0");
 
-function drill(id: string, s: Slot): Scene {
+function drill(id: string, s: Slot, variant: string | null = null): Scene {
   const m = MAPS.find(x => x.id === id);
   if(!m) throw new Error("missing drill " + id);
-  return m.build(s, null);
+  return m.build(s, variant);
 }
 
 /* One fight. The random parts stay consistent: the second Raw Steel Trophy uses the other
@@ -70,6 +72,25 @@ function fightFor(s: Slot, code: string): Fight {
     {title:"Ultimate Trophy Weapons", drills:["m-ultimate"], scene:drill("m-ultimate", s), k:0, from:184.6, due:[194.6, 199.7, 204.8, 209.9, 215.0, 220.1]},
     {title:"Tornadoes", drills:["m-tornado"], scene:drill("m-tornado", s), k:0, from:221.2, due:[226.3]}
   ];
+  /* Phases 2 to 4. They are built after Phase 1 on purpose, so a fight code made before they
+     existed still replays the same Phase 1. At 9:31 the boss casts Two-way or Four-way Fireball,
+     and your Ecliptic Stampede puddles went down along the north or the south wall.
+     Orbital Omen checks you before the #1 lines (with Fire and Fury), the #2 lines and the #3 line.
+     The meteor you bait in Meteorain is due when it lands (Cosmic Kiss). */
+  const four = random() < 0.5, wall = random() < 0.5 ? "north" : "south";
+  const fireball = four ? "Four-way Fireball" : "Two-way Fireball", ecl = four ? "m-ecl-four" : "m-ecl-two";
+  segs.push(
+    {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:266.1, due:[275.2, 276.8, 278.4]},
+    {title:"Meteorain: first stack", drills:["m-meteor-1"], scene:drill("m-meteor-1", s), k:0, from:292.1, due:[300.1]},
+    {title:"Meteorain: your meteor", drills:["m-meteor-2"], scene:drill("m-meteor-2", s), k:0, from:301.3, due:[311.4]},
+    {title:"Meteorain: third stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:312.0, due:[320.2]},
+    {title:"Meteorain: last stack, then hide", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:321.5, due:[330.2, 342.9]},
+    {title:"Arena Split: line up", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:361.8, due:[375.9]},
+    {title:"Arena Split: first towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:376.5, due:[389.0]},
+    {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:504.0, due:[513.1, 514.7, 516.3]},
+    {title:"Ecliptic Stampede: start", drills:["m-ecl-start"], scene:drill("m-ecl-start", s), k:0, from:527.0, due:[541.2]},
+    {title:"Ecliptic Stampede: " + fireball, drills:[ecl], scene:drill(ecl, s, wall), k:0, from:557.5, due:[571.1]}
+  );
   /* The timeline lines, with cactbot's names. Where the arena is the test, the names stay as
      general as cactbot's before it syncs: "Comet/Crushing Comet", "Assault Evolved 1". */
   const raw = (w: string, t: number): Array<[number, string]> => w === "axe"
@@ -78,7 +99,10 @@ function fightFor(s: Slot, code: string): Fight {
   const assault = (times: number[]): Array<[number, string]> => times.map((t, i) => [t, "Assault Evolved " + (i + 1)]);
   const comets = (t: number): Array<[number, string]> =>
     [[t, "Cometite 1"], [t + 2, "Cometite 2"], [t + 4, "Cometite 3"], [t + 6, "Comet/Crushing Comet"]];
-  const RAIDWIDE = new Set(["Crown of Arcadia", "Dance of Domination 1", "Dance of Domination 7", "One and Only"]);
+  const kicks = (t: number, n: number): Array<[number, string]> =>
+    [[t, "Heartbreak Kick"], ...Array.from({length:n}, (_x, i): [number, string] => [t + 1.1 + 2 * i, "Heartbreak Kick " + (i + 1)])];
+  const RAIDWIDE = new Set(["Crown of Arcadia", "Dance of Domination 1", "Dance of Domination 7", "One and Only",
+    "Triple Tyrannhilation", "Flatliner", "Mammoth Meteor x2", "Heartbreaker (Enrage)"]);
   const lines: Array<[number, string]> = [
     [10.6, "Crown of Arcadia"],
     ...raw(w1, 17.7), [33.1, "--middle--"],
@@ -91,10 +115,34 @@ function fightFor(s: Slot, code: string): Fight {
     [178.9, "Charybdistopia"], [184.6, "Ultimate Trophy Weapons"], [192.4, "Assault Apex"],
     ...assault([194.6, 199.7, 204.8, 209.9, 215.0, 220.1]), [221.2, "--middle--"],
     [226.3, "Powerful Gust"], [227.3, "Immortal Reign"],
-    [240.4, "One and Only"]
+    [240.4, "One and Only"],
+    [252.8, "Great Wall of Fire 1"], [256.0, "Great Wall of Fire 2"], [256.6, "Explosion 1"], [259.8, "Explosion 2"],
+    [266.1, "Orbital Omen"], [275.2, "Orbital Omen 1"], [275.8, "Fire and Fury"], [276.8, "Orbital Omen 2"], [278.4, "Orbital Omen 3"], [279.8, "Orbital Omen 4"],
+    [285.0, "--middle--"],
+    [292.1, "Meteorain"], [300.1, "Fearsome Fireball"], [301.3, "Cosmic Kiss"],
+    [309.3, "Foregone Fatality"], [310.2, "Fearsome Fireball"], [311.4, "Cosmic Kiss"], [314.0, "Explosion"],
+    [319.3, "Foregone Fatality"], [320.2, "Fearsome Fireball"], [321.4, "Cosmic Kiss"], [324.0, "Explosion"],
+    [329.3, "Foregone Fatality"], [330.2, "Fearsome Fireball"], [334.0, "Explosion"],
+    [342.9, "Triple Tyrannhilation"],
+    [361.8, "Flatliner"], [375.9, "Majestic Meteor"], [389.0, "Explosion"],
+    [400.0, "Majestic Meteor 1"], [402.0, "Majestic Meteor 2"], [403.9, "Majestic Meteowrath/Majestic Meteorain/Fire Breath"], [404.1, "Majestic Meteor 3"],
+    [421.1, "Explosion"],
+    [432.1, "Majestic Meteor 1"], [434.1, "Majestic Meteor 2"], [436.0, "Majestic Meteowrath/Majestic Meteorain/Fire Breath"], [436.1, "Majestic Meteor 3"],
+    [445.3, "Massive Meteor"], [446.4, "Massive Meteor x5"], [458.8, "Explosion"], [468.7, "Arcadion Avalanche"],
+    [479.4, "Crown of Arcadia"],
+    [490.7, "Great Wall of Fire 1"], [493.9, "Great Wall of Fire 2"], [494.5, "Explosion 1"], [497.7, "Explosion 2"],
+    [504.0, "Orbital Omen"], [513.1, "Orbital Omen 1"], [513.7, "Fire and Fury"], [514.7, "Orbital Omen 2"], [516.3, "Orbital Omen 3"], [517.7, "Orbital Omen 4"],
+    [521.8, "Crown of Arcadia"], [527.0, "--middle--"],
+    [534.1, "Ecliptic Stampede"], [541.2, "Mammoth Meteor x2"], [541.2, "Atomic Impact 1"], [544.2, "Atomic Impact 2"], [547.2, "Atomic Impact 3"],
+    [550.2, "Atomic Impact 4"], [553.2, "Atomic Impact 5"], [556.2, "Atomic Impact 6"], [557.2, "Cosmic Kiss"],
+    [566.8, "Majestic Meteowrath x4"], [571.1, fireball],
+    [579.4, "Crown of Arcadia"], [584.6, "--middle--"],
+    ...kicks(593.3, 5), ...kicks(612.4, 6), ...kicks(633.5, 7),
+    [659.6, "Heartbreaker (Enrage)"]
   ];
   const events = lines.map(([t, name]): TLEvent => ({t, name, raidwide:RAIDWIDE.has(name)}));
   const summary = "Raw Steel Trophy: " + w1 + " first, then " + w2 + ". Void Stardust: " +
-    (stackFirst ? "stack first, then spread." : "spread first, then stack.");
-  return {segs, events, end:242, summary, code};
+    (stackFirst ? "stack first, then spread." : "spread first, then stack.") +
+    " Ecliptic Stampede: " + fireball + ", with your puddles along the " + wall + " wall.";
+  return {segs, events, end:662, split:[361.8, 479.4], summary, code};
 }

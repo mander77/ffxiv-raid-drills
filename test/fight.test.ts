@@ -49,13 +49,20 @@ test("the boss turns to the first weapon when his cast starts, at least 6 second
   }
 });
 
-test("the drill list can reach every Phase 1 drill on the fight clock", () => {
-  const ids = new Set(MAPS.map(m => m.id)), phase1 = MAPS.find(m => m.id === "m-raw-axe")?.phase;
-  for(let i = 0; i < 20; i++){
-    const covered = new Set(buildFight("H1").segs.flatMap(g => g.drills));
-    for(const id of covered) assert.ok(ids.has(id), "the fight names a drill that does not exist: " + id);
-    for(const m of MAPS.filter(x => x.phase === phase1)) assert.ok(covered.has(m.id), m.title + " has no place in the fight");
+test("every drill has a place on the fight clock", () => {
+  const ids = new Set(MAPS.map(m => m.id)), seen = new Set<string>();
+  for(let i = 0; i < 100; i++){
+    const covered = buildFight("H1").segs.flatMap(g => g.drills);
+    for(const id of covered){ assert.ok(ids.has(id), "the fight names a drill that does not exist: " + id); seen.add(id); }
   }
+  // Two-way and Four-way Fireball take turns from fight to fight, so check over many fights.
+  for(const m of MAPS) assert.ok(seen.has(m.id), m.title + " has no place in the fight");
+});
+
+test("the arena is split from Flatliner until the Crown of Arcadia that joins it", () => {
+  const f = buildFight("H1");
+  assert.deepEqual(f.split.map(t => f.events.find(e => Math.abs(e.t - t) < 0.05)?.name), ["Flatliner", "Crown of Arcadia"]);
+  for(const g of f.segs) assert.equal(Boolean(g.scene.split), g.from >= f.split[0] && g.from < f.split[1], g.title + ": split arena only between Flatliner and the Crown");
 });
 
 test("the second Raw Steel Trophy and the second Void Stardust go the other way", () => {

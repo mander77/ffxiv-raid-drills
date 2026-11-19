@@ -49,32 +49,28 @@ function nextFight(): Fight {
   wantedFight = null;
   return f;
 }
+/* Between mechanics the arena is empty, but it is two platforms from Flatliner until the
+   Crown of Arcadia that joins them again. */
 const IDLE: Scene = {setup:"", rule:"", steps:[], overlays:[], boss:BOSS};
+const IDLE_SPLIT: Scene = {...IDLE, split:true};
 
 /* ---------- the fight list ---------- */
-/* Every real-time screen sits beside the fight list, as in Step by step. Rows the fight clock
-   does not reach yet (after 4:01) are greyed out. Every fight covers the same drills and ends
-   at the same time, so one built fight tells which rows. */
-let reach: {drills: Set<string>; end: number} | null = null;
-function fightReach(): {drills: Set<string>; end: number} {
-  if(!reach){ const f = buildFight(state.slot); reach = {drills:new Set(f.segs.flatMap(g => g.drills)), end:f.end}; }
-  return reach;
-}
+/* Every real-time screen sits beside the fight list, as in Step by step. */
 let navKey = "";   // what the list highlights, so it updates only when that changes
 
 function show(inner: string): void {
-  const r = fightReach();
-  view.innerHTML = tabHead() + '<div class="mapwrap">' +
-    tlNav({drillOk:id => r.drills.has(id), abilityOk:a => a.t <= r.end, offTitle:"Real time covers Phase 1 for now"}) + inner + "</div>";
+  view.innerHTML = tabHead() + '<div class="mapwrap">' + tlNav() + inner + "</div>";
   navKey = "";
   wireNav(jumpToAbility, jumpTo);
 }
 
 /* A click on a drill goes to the moment that mechanic starts. With no fight running it starts
-   one first, so the list is also a quick way in. Steps before it count as skipped. */
-function jumpTo(id: string): void {
+   one first, so the list is also a quick way in. Steps before it count as skipped. Orbital
+   Omen and Raw Steel Trophy happen twice, so it goes to the one nearest the row clicked. */
+function jumpTo(id: string, row: number): void {
   if(!R) startRun("live", nextFight());
-  const g = R?.fight.segs.find(x => x.drills.includes(id));
+  const near = ABILITIES[row]?.t ?? 0, gap = (g: FightSeg): number => Math.abs(g.from - near);
+  const g = R?.fight.segs.filter(x => x.drills.includes(id)).sort((a, b) => gap(a) - gap(b))[0];
   if(g) seekTo(g.from);
 }
 
@@ -93,7 +89,7 @@ export function renderFight(): void {
   const row = (key: string, label: string, choices: Array<[string, string]>, cur: string): string =>
     '<div class="ctrl" style="margin-top:12px"><span id="' + key + '-lbl">' + label + '</span><div class="seg small" role="group" aria-labelledby="' + key + '-lbl">' +
     choices.map(([v, t]) => '<button type="button" data-set="' + key + '" data-val="' + v + '" aria-pressed="' + (v === cur) + '">' + t + "</button>").join("") + "</div></div>";
-  show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b><span>Phase 1: the pull to 4:01</span></div>' +
+  show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b><span>The pull to the enrage at 10:59</span></div>' +
     "<h2>Play the fight in order</h2><p>The drills play one after another on the fight clock. The timeline shows what the boss does next, like the cactbot overlay. Click your spot before each hit lands. Each run picks its own scenario: axe or scythe first, stack or spread first, and new weapon patterns. To start at one moment, click an ability or a drill in the fight list.</p>" +
     row("fskip", "Quiet stretches", [["yes", "Skip ahead"], ["no", "Real time"]], settings.skip ? "yes" : "no") +
     row("fspeed", "Speed", SPEEDS.map((n): [string, string] => [String(n), n + "x"]), String(settings.speed)) +
@@ -250,11 +246,13 @@ function frame(): void {
   if(!r) return;
   const f = r.fight, si = activeSeg(f, r.t), g = si >= 0 ? f.segs[si] : null, res = g ? r.results[si] : [];
   const turned = Boolean(g?.turn && r.t >= g.turn.at);
-  const key = si + ":" + res.length + ":" + turned + ":" + r.hold;
+  // What the arena shows: a mechanic's scene, or the empty arena, whole or split.
+  const where = g ? String(si) : r.t >= f.split[0] && r.t < f.split[1] ? "split" : "idle";
+  const key = where + ":" + res.length + ":" + turned + ":" + r.hold;
   if(key !== r.shown){
-    const fresh = r.shown.split(":")[0] !== String(si);   // a new scene: build the arena again
+    const fresh = r.shown.split(":")[0] !== where;   // a new scene: build the arena again
     r.shown = key;
-    const sc = g ? g.scene : IDLE, k = g ? g.k : 0;
+    const sc = g ? g.scene : where === "split" ? IDLE_SPLIT : IDLE, k = g ? g.k : 0;
     if(fresh){ el("f-arena").innerHTML = sceneSVG(sc, k); el("arena-svg").addEventListener("click", onClick); }
     let boss: Boss | null = sc.bossAt ? sc.bossAt(res.length) : (sc.boss ? rotOverlay(sc.boss, k) : null);
     // In the middle, before his cast, he faces no weapon. When the cast starts he turns to the first one.
@@ -355,7 +353,7 @@ function renderSummary(watched: Fight | null = null): void {
   const rows = d.fight.segs.map((g, si) => '<li><span class="fs-time">' + clock(g.from) + "</span><span>" + esc(g.title) + '</span><span class="fs-chips">' +
     d.results[si].map(x => x.skipped ? '<span class="chip" title="Skipped">&raquo;</span>' :
       '<span class="chip ' + (x.ok ? "ok" : "bad") + '">' + (x.missed ? "&ndash;" : x.ok ? "&#10003;" : "&#10007;") + "</span>").join("") + "</span></li>").join("");
-  show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b><span>Phase 1 done</span><span>Fight ' + d.fight.code + "</span></div>" +
+  show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b><span>Fight done</span><span>Fight ' + d.fight.code + "</span></div>" +
     "<h2>" + right + " of " + all.length + " spots right</h2><p>" + esc(d.fight.summary) + "</p>" +
     '<div class="tally"><div class="ok"><span>Right</span><div class="big">' + right + '</div></div><div class="bad"><span>Wrong</span><div class="big">' + wrong + '</div></div><div class="slow"><span>Missed</span><div class="big">' + missed + "</div></div></div>" +
     '<ol class="fsum">' + rows + "</ol>" +

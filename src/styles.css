@@ -78,9 +78,7 @@ main{padding-block:20px 56px}
 .drillnav button:hover{background:var(--paper)}
 .drillnav button[aria-current]{background:var(--heal);color:#fff;font-weight:700}
 .dn-time{display:block;font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--ink-2)}
-.drillnav button[aria-current] .dn-time{color:#fff}
-.drillnav button:disabled{opacity:.45;cursor:default;background:none}
-/* The fight list: every ability in cast order, with drills under them. The colour marks follow
+.drillnav button[aria-current] .dn-time{color:#fff}/* The fight list: every ability in cast order, with drills under them. The colour marks follow
    the timeline sheet's categories, toned for the light theme. On wide screens it stays beside
    the arena and scrolls by itself. */
 :root{--c-raid:#D2362B;--c-tank:#E07800;--c-spot:#C29A00;--c-dodge:#2F9E44;--c-target:#1C7ED6;--c-mech:#7048E8;--c-enrage:#6E0E0A;--c-none:#AAB2BF}

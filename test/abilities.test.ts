@@ -16,8 +16,10 @@ test("every drill sits under an ability, and every drill an ability names exists
   for(const m of MAPS) assert.ok(listed.has(m.id), m.title + " is not in the fight list");
 });
 
-test("the rows the fight clock reaches use the fight clock's times", () => {
+test("every row is on the fight clock, at the fight clock's time", () => {
   const f = buildFight("H1");
-  for(const a of ABILITIES.filter(x => x.t <= f.end))
+  for(const a of ABILITIES){
+    assert.isBelow(a.t, f.end, a.name + " is after the end of the fight clock");
     assert.ok(f.events.some(e => Math.abs(e.t - a.t) < 0.05), a.name + " at " + a.t + " is not a line on the fight timeline");
+  }
 });

@@ -4,22 +4,11 @@
 import { esc } from "../util";
 import { view } from "../core";
 import { MAPS } from "../data/drills";
-import { PHASES, CATS, type Ability, type Cat } from "../data/abilities";
+import { PHASES, CATS, type Cat } from "../data/abilities";
 import { clock } from "../data/fight";
 
-/** What the list highlights, and what can be clicked. */
-export interface NavOpts {
-  /** The drills to highlight. */
-  current?: string[];
-  /** The ability whose card is open. */
-  open?: number;
-  /** Only drills that pass can be clicked. Real time: the drills the fight clock reaches. */
-  drillOk?: (id: string) => boolean;
-  /** Only abilities that pass can be clicked. */
-  abilityOk?: (a: Ability) => boolean;
-  /** The tooltip on a greyed-out row. */
-  offTitle?: string;
-}
+/** What the list highlights: the drills on screen, or the ability whose card is open. */
+export interface NavOpts { current?: string[]; open?: number }
 
 // TS note: `as const` turns [m.id, m.title] into a fixed pair. Without it, TypeScript reads it as a
 // plain string[] and the Map constructor, which needs [key, value] pairs, does not accept it.
@@ -43,15 +32,12 @@ export function tlNav(o: NavOpts = {}): string {
   for(const ph of PHASES){
     h += '<li class="ph">' + esc(ph.name) + "</li>";
     for(const a of ph.rows){
-      const ok = o.abilityOk ? o.abilityOk(a) : true;
-      h += '<li><button type="button" class="ab" data-ab="' + i + '"' + (o.open === i ? ' aria-current="true"' : "") +
-        (ok ? ' title="' + esc(catNames(a.cats)) + '"' : ' disabled title="' + esc(o.offTitle ?? "") + '"') + ">" +
+      h += '<li><button type="button" class="ab" data-ab="' + i + '"' + (o.open === i ? ' aria-current="true"' : "") + ' title="' + esc(catNames(a.cats)) + '">' +
         marks(a.cats) + '<span class="dn-time">' + clock(a.t) + "</span><span>" + esc(a.name) + "</span></button></li>";
-      for(const id of a.drills ?? []){
-        const dok = o.drillOk ? o.drillOk(id) : true;
-        h += '<li><button type="button" class="dr" data-drill-id="' + id + '"' + (o.current?.includes(id) ? ' aria-current="step"' : "") +
-          (dok ? "" : ' disabled title="' + esc(o.offTitle ?? "") + '"') + '><span class="dtag">Drill</span>' + esc(short(TITLE.get(id) ?? id)) + "</button></li>";
-      }
+      // data-row: the ability this drill sits under, so Real time can pick the nearer of two.
+      for(const id of a.drills ?? [])
+        h += '<li><button type="button" class="dr" data-drill-id="' + id + '" data-row="' + i + '"' + (o.current?.includes(id) ? ' aria-current="step"' : "") +
+          '><span class="dtag">Drill</span>' + esc(short(TITLE.get(id) ?? id)) + "</button></li>";
       i++;
     }
   }
@@ -59,12 +45,14 @@ export function tlNav(o: NavOpts = {}): string {
 }
 
 /** Send clicks on the list to the mode's handlers. Call it after the list is on the page. */
-export function wireNav(onAbility: (i: number) => void, onDrill: (id: string) => void): void {
+// TS note: Step by step passes an onDrill that takes only the id. That still fits this type,
+// because TypeScript, like JavaScript, lets a function ignore arguments it does not need.
+export function wireNav(onAbility: (i: number) => void, onDrill: (id: string, row: number) => void): void {
   view.querySelector(".tlnav")?.addEventListener("click", e => {
     const b = (e.target as Element).closest<HTMLButtonElement>("button");
-    if(!b || b.disabled) return;
+    if(!b) return;
     if(b.dataset.ab) onAbility(Number(b.dataset.ab));
-    else if(b.dataset.drillId) onDrill(b.dataset.drillId);
+    else if(b.dataset.drillId) onDrill(b.dataset.drillId, Number(b.dataset.row));
   });
   scrollNav();
 }
