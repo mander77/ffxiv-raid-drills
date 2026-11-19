@@ -80,16 +80,16 @@ function replaySpawns(): void {
   replayTimer = window.setTimeout(() => { if(svg.isConnected) drawFeedback(); }, (0.3 + shown.length) * 1000 + 400);
 }
 
-/** Start the same drill again from step 1, with the same layout. */
+/** Start the same drill again from step 1, with the same pattern. */
 function restart(): void {
   const c = run();
   c.results = []; c.waiting = false; c.peek = undefined; c.setupOpen = false;
   renderMap(false);
 }
 
-/* A drill and layout code asked for by a link, such as #map/m-assault/A7K2. */
+/* A drill and pattern code asked for by a link, such as #map/m-assault/A7K2. */
 let wanted: {id: string; code: string} | null = null;
-export function openLayout(id: string, code: string): void { wanted = {id, code}; }
+export function openPattern(id: string, code: string): void { wanted = {id, code}; }
 
 export function renderMap(fresh = true): void {
   const d = getDeck("map"), ask = wanted;
@@ -99,7 +99,7 @@ export function renderMap(fresh = true): void {
   const item = d.items[d.i];
   const cur = state.cur;
   if(ask || fresh || !cur || cur.kind !== "map" || cur.item !== item){
-    // The code seeds every random choice: the variant, the turn and the drill's own layout.
+    // The code seeds every random choice: the variant, the turn and the drill's own pattern.
     const code = ask?.code ?? newCode();
     const made = withSeed(code, () => {
       const v = item.variants ? item.variants[Math.floor(random() * item.variants.length)] : null;
@@ -139,7 +139,7 @@ export function drawMapPanel(): void {
   const c = run(), d = getDeck("map"), sc = c.scene, n = c.results.length, done = n >= sc.steps.length, multi = sc.steps.length > 1;
   const peek = c.peek ?? n - 1;   // the step whose answer shows: the one picked, or the last one answered
   let h = '<div class="eyebrow"><b>' + esc(c.item.phase) + "</b><span>" + esc(c.item.time) + '</span><span class="progress">Drill ' + (d.i + 1) + " of " + d.items.length + "</span>" +
-    (changes(c.item) ? '<span title="Send this code to rebuild this exact layout">Layout ' + c.code + "</span>" : "") + "</div>";
+    (changes(c.item) ? '<span title="Send this code to rebuild this exact pattern">Pattern ' + c.code + "</span>" : "") + "</div>";
   h += "<h2>" + esc(c.item.title) + "</h2>";
   if(n === 0) h += '<p class="setup">' + esc(sc.setup) + "</p>";
   else h += '<p class="setup' + (c.setupOpen ? "" : " folded") + '">' + esc(sc.setup) + '</p><button type="button" class="linkbtn" id="setup-toggle">' + (c.setupOpen ? "Less" : "More") + "</button>";
@@ -152,7 +152,7 @@ export function drawMapPanel(): void {
   const r = c.results[peek];
   if(r) h += '<div class="lastans ' + (r.ok ? "ok" : "bad") + '"><span class="tag">' + (r.ok ? "Right" : "Not there") + "</span><b>" +
     (multi ? "Step " + (peek + 1) + ": " : "") + esc(sc.steps[peek].q) + "</b> " + esc(sc.steps[peek].a) + "</div>";
-  /* Start over keeps this layout and goes back to step 1. The other button builds a new layout.
+  /* Start over keeps this pattern and goes back to step 1. The other button builds a new pattern.
      A run counts toward the score only the first time it reaches the end. */
   const restartBtn = '<button type="button" class="btn ghost" id="map-restart">Start over</button>';
   // A drill with nothing random would look the same again, so it gets no reroll button.

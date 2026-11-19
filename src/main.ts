@@ -8,7 +8,7 @@
 import "./styles.css";
 import { LS, esc, el, isCode } from "./util";
 import { state, TABS, view, app, stopTimer, type Tab } from "./core";
-import { renderMap, nextStep, nextMap, openLayout } from "./views/map";
+import { renderMap, nextStep, nextMap, openPattern } from "./views/map";
 import { renderQuiz, answer, nextQ } from "./views/quiz";
 import { renderPressureStart, startPressure } from "./views/pressure";
 import { renderSheet } from "./views/sheet";
@@ -40,12 +40,12 @@ function setSlot(s: Slot): void {
 }
 
 function go(tab: string): void {
-  // A link can name a layout: #map/<drill id>/<code> or #fight/<code>.
+  // A link can name a pattern: #map/<drill id>/<code> or #fight/<code>.
   const [name, a = "", b = ""] = tab.split("/");
   // TS note: `?.` and `??` work as in C#. If find() returns undefined, `?.id` is undefined,
   // and `?? "map"` falls back to the map tab. Any text from the URL becomes a valid Tab.
   const t: Tab = TABS.find(x => x.id === name)?.id ?? "map";
-  if(t === "map" && a && isCode(b)) openLayout(a, b.toUpperCase());
+  if(t === "map" && a && isCode(b)) openPattern(a, b.toUpperCase());
   if(t === "fight" && isCode(a)) openFight(a.toUpperCase());
   stopTimer();
   state.tab = t; state.pressure = null;

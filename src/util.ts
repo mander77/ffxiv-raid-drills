@@ -25,9 +25,9 @@ export const LS = {
 // and S(s, "left", "right") gives a string. Both arguments must have the same type T.
 export const S = <T>(s: Slot, h1: T, h2: T): T => s === "H1" ? h1 : h2;
 
-/* Random numbers for layouts. They come from Math.random, except inside withSeed(), which
-   uses a seeded generator: the same seed always gives the same numbers, so a layout code
-   always rebuilds the same layout. */
+/* Random numbers for patterns. They come from Math.random, except inside withSeed(), which
+   uses a seeded generator: the same seed always gives the same numbers, so a pattern code
+   always rebuilds the same pattern. */
 let rng: () => number = Math.random;
 export const random = (): number => rng();
 
@@ -42,7 +42,7 @@ function seeded(seed: number): () => number {
   };
 }
 
-/** Run fn with random() seeded from a layout code, and return what fn returns. */
+/** Run fn with random() seeded from a pattern code, and return what fn returns. */
 // TS note: <T> lets withSeed return whatever fn returns, a Scene or a Fight, with its own type.
 // try/finally works as in C#: the old generator comes back even if fn throws.
 export function withSeed<T>(code: string, fn: () => T): T {
@@ -51,7 +51,7 @@ export function withSeed<T>(code: string, fn: () => T): T {
   try { return fn(); } finally { rng = before; }
 }
 
-/* Layout codes: 4 characters, without 0, O, 1 and I, which are easy to mix up. */
+/* Pattern codes: 4 characters, without 0, O, 1 and I, which are easy to mix up. */
 const CODE_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 export const newCode = (): string => Array.from({length:4}, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join("");
 export const isCode = (s: string): boolean => /^[2-9A-HJ-NP-Z]{4}$/.test(s.toUpperCase());

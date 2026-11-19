@@ -21,7 +21,7 @@ test("every map drill builds for both slots and every variant", () => {
   }
 });
 
-test("drills with no random parts build the same layout every time", () => {
+test("drills with no random parts build the same pattern every time", () => {
   // JSON leaves out the zone functions, but keeps every drawn piece and every fixed zone.
   for(const m of MAPS.filter(x => !changes(x))) for(const s of SLOTS){
     const first = JSON.stringify(m.build(s, null));

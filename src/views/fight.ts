@@ -56,7 +56,7 @@ export function renderFight(): void {
     '<div class="ctrl" style="margin-top:12px"><span id="' + key + '-lbl">' + label + '</span><div class="seg small" role="group" aria-labelledby="' + key + '-lbl">' +
     choices.map(([v, t]) => '<button type="button" data-set="' + key + '" data-val="' + v + '" aria-pressed="' + (v === cur) + '">' + t + "</button>").join("") + "</div></div>";
   view.innerHTML = tabHead(false) + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Full fight</b><span>Phase 1: the pull to 4:01</span></div>' +
-    "<h2>Play the fight in order</h2><p>The drills from \"Where do I stand?\" play one after another on the fight clock. The cast bar shows what the boss is doing. Click your spot before each hit lands. Each run picks its own scenario: axe or scythe first, stack or spread first, and new weapon layouts.</p>" +
+    "<h2>Play the fight in order</h2><p>The drills from \"Where do I stand?\" play one after another on the fight clock. The timeline shows what the boss does next, like the cactbot overlay. Click your spot before each hit lands. Each run picks its own scenario: axe or scythe first, stack or spread first, and new weapon patterns.</p>" +
     row("fskip", "Quiet stretches", [["yes", "Skip ahead"], ["no", "Real time"]], settings.skip ? "yes" : "no") +
     row("fspeed", "Speed", SPEEDS.map((n): [string, string] => [String(n), n + "x"]), String(settings.speed)) +
     row("fpause", "Missed spot", [["no", "Fight goes on"], ["yes", "Fight pauses"]], settings.pause ? "yes" : "no") +
