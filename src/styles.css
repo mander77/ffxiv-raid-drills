@@ -364,8 +364,8 @@ td.n .cmline{margin-top:4px;gap:6px;font-size:12px;font-weight:400}
 .edge{fill:none;stroke:#B49C6C;stroke-width:.6}
 .voidr{fill:var(--void)}
 .aoe{fill:var(--aoe-fill);stroke:var(--aoe);stroke-width:.4}
-/* The safe ground inside an attack (green, dashed). */
-.safe{fill:rgba(27,116,72,.1);stroke:var(--heal);stroke-width:.6;stroke-dasharray:1.4 .9}
+/* The inner edge of the scythe's donut: a green dashed outline, with no fill. */
+.safe{fill:none;stroke:var(--heal);stroke-width:.6;stroke-dasharray:1.4 .9}
 .lineaoe{stroke:var(--line-aoe);stroke-linecap:butt;opacity:.95}
 .ring{fill:none;stroke:var(--ring);stroke-width:1.1}
 .ringmark{fill:none;stroke:var(--ring);stroke-width:1.1;stroke-linecap:round}

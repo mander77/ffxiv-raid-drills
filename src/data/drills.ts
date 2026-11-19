@@ -67,11 +67,10 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       // Proteans: a cone on every player, so each player takes a clock spot close around him.
       // The point and the butt (H2 and H1) are two of the eight spots, opposite each other.
       const pointAt = angOf(scytheAxis(w, i));
-      // And a donut: only close to him is safe, so the clock spots are close in. The safe circle
-      // shows in green and stays clear, as the donut's telegraph does in the game. The cones run
-      // out from its edge, so you can see each player's lane.
+      // And a donut: only close to him is out of it, so the clock spots are close in. Its inner
+      // edge shows as a green ring. Each player still takes their own protean cone there.
       reveal = [donut(P, SCYTHE_SAFE), safeRing(P, SCYTHE_SAFE),
-        ...Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, PROTEAN_HALF, PROTEAN_LEN, SCYTHE_SAFE))];
+        ...Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, PROTEAN_HALF, PROTEAN_LEN))];
     } else {
       // Safe pocket: behind him (f < -HW) and on your side (sd > HW), outside both arms of the
       // cross. Anywhere in it inside the arena is right, and the drawn pocket is the same area.

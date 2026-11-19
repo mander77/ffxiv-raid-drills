@@ -49,7 +49,8 @@ export const ATOMIC_R = yalms(5);
 
 /** A circle that hits everything inside it. */
 export const aoe = (c: Point, r: number): Overlay => ({t:"aoe", x:c[0], y:c[1], r});
-/** The safe ground inside an attack: a green ring of radius r around c. */
+/** The edge of the ground an attack does not reach: a green ring of radius r around c (the
+    inside of the scythe's donut, where the proteans still hit each player). */
 export const safeRing = (c: Point, r: number): Overlay => ({t:"safe", x:c[0], y:c[1], r});
 /** A donut around c: it hits everything from r1 out to r2. */
 export const donut = (c: Point, r1: number, r2 = 150): Overlay => ({t:"donut", x:c[0], y:c[1], r1, r2});
@@ -60,11 +61,9 @@ export const lineTo = (from: Point, to: Point, w = LINE_STACK_W): Overlay => {
 };
 
 /** A cone from c toward a (degrees clockwise from north), `half` degrees to each side, r units long. */
-export function cleave(c: Point, a: number, half = 16, r = 80, r0 = 0): Overlay {
-  const at = (d: number, rr: number): Point => [c[0] + rr * Math.sin(d * DEG), c[1] - rr * Math.cos(d * DEG)];
-  const outer = [at(a - half, r), at(a, r), at(a + half, r)];
-  // With r0, the cone starts r0 out from c, so the ground closer in stays clear in the picture.
-  return {t:"poly", pts:r0 > 0 ? [at(a - half, r0), ...outer, at(a + half, r0), at(a, r0)] : [c, ...outer]};
+export function cleave(c: Point, a: number, half = 16, r = 80): Overlay {
+  const p = (d: number): Point => [c[0] + r * Math.sin(d * DEG), c[1] - r * Math.cos(d * DEG)];
+  return {t:"poly", pts:[c, p(a - half), p(a), p(a + half)]};
 }
 
 /** The axe hit: a circle around the boss at c. */

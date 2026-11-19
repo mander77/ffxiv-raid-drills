@@ -62,7 +62,7 @@ type OverlayShape =
   | ({ t: "scythe"; ux: number; uy: number; dx: number; dy: number } & At)
   | { t: "lane"; rect: RectBox; soft?: boolean }
   | { t: "poly"; pts: Point[] }
-  // A safe circle: the only ground an attack does not hit (inside the scythe's donut).
+  // The inner edge of the scythe's donut, drawn as a green outline.
   | ({ t: "safe"; r: number } & At);
 /** `spawn` groups a weapon's pieces so the map can fade or animate them together. */
 export type Overlay = OverlayShape & { spawn?: number };
