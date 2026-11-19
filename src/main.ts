@@ -50,7 +50,7 @@ function go(r: Route, push = false): void {
   if(push) showRoute(r, true);
   // A link can open one card: a drill step by step (/map/<drill>[/<code>]), a fight in real time
   // (/fight/<code>[/<picks>]; Real time was a tab of its own before), or a quiz card (/mech/<card>).
-  if(r.tab === "map" && r.drill){ setPlay("step"); openPattern(r.drill, r.code); }
+  if(r.tab === "map" && r.drill){ setPlay("step"); openPattern(r.drill, r.code, r.picks, r.at); }
   if(r.tab === "map" && r.ability){ setPlay("step"); openAbility(r.ability); }
   if(r.tab === "fight"){ setPlay("time"); if(r.code) openFight(r.code, r.picks ? parseChoices(r.picks) : undefined); }
   // TS note: `"card" in r` narrows r to the quiz member of Route, so r.tab is a QuizCat here.

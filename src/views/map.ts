@@ -1,11 +1,11 @@
 // The "Where do I stand?" tab: click the arena, then see the answer zone.
 import { esc, el, newCode, random, withSeed } from "../util";
-import { state, getDeck, record, view, type MapCur } from "../core";
+import { state, getDeck, record, view, setChoices, type MapCur } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter, f1 } from "../geometry";
 import { sceneSVG, drawOverlay, drawBoss, zoneSVG } from "../arena";
 import { BOSS, MAPS, PUDDLE_R, changes } from "../data/drills";
 import { ABILITIES } from "../data/abilities";
-import { clock, type Picks } from "../data/fight";
+import { clock, choicesText, parseChoices, RANDOM, type Choices, type Picks } from "../data/fight";
 import { tabHead, renderRoundDone, hudPrompt } from "./common";
 import { showRoute } from "../router";
 import { tlNav, wireNav, marks, catNames } from "./tlnav";
@@ -115,11 +115,31 @@ function followedPick(key?: string): string | undefined {
 const followedKeys = (m: MapDrill): Array<keyof Picks> =>
   [m.follows?.variant, m.follows?.pick].filter((k): k is keyof Picks => Boolean(k && k in state.choices));
 
-/* A drill asked for by a link, such as #map/m-assault/A7K2 (with a pattern code) or #map/m-assault
-   (a new pattern), and an ability card asked for by a link, such as #map/ability/12. */
-let wanted: {id: string; code?: string} | null = null;
+/** The picks a drill follows, written for its link ("set2=axe-sword-scythe"), or "" when they are all Random. */
+function drillPicks(m: MapDrill): string {
+  const c: Choices = {...RANDOM};
+  // TS note: with a key typed as a union (keyof Picks), TypeScript cannot match the two sides of
+  // `c[k] = state.choices[k]`, so the copy goes through a plain string record.
+  for(const k of followedKeys(m)) (c as Record<string, string>)[k] = state.choices[k];
+  return choicesText(c);
+}
+
+/** Set the picks a drill follows to the ones in a link. A pick the link leaves out was Random. */
+function usePicks(m: MapDrill, picks?: string): void {
+  const keys = followedKeys(m);
+  if(!keys.length) return;
+  const from = picks ? parseChoices(picks) : RANDOM, next: Choices = {...state.choices};
+  for(const k of keys) (next as Record<string, string>)[k] = from[k];
+  setChoices(next);
+}
+
+/* A drill asked for by a link (see router.ts): /map/m-assault (a new pattern), /map/m-assault/A7K2
+   (that pattern), with the fight pattern picks it follows and the clicks so far if the link has
+   them. Also an ability card asked for by a link, such as /map/ability/12. */
+interface Wanted { id: string; code?: string; picks?: string; at?: Point[] }
+let wanted: Wanted | null = null;
 let wantedAbility: number | null = null;
-export function openPattern(id: string, code?: string): void { wanted = {id, code}; }
+export function openPattern(id: string, code?: string, picks?: string, at?: Point[]): void { wanted = {id, code, picks, at}; }
 /** `n` counts the rows of the fight list from 1, as the link does. */
 export function openAbility(n: number): void { wantedAbility = n - 1; }
 
@@ -131,6 +151,10 @@ export function renderMap(fresh = true): void {
   if(ask){ const i = d.items.findIndex(m => m.id === ask.id); if(i >= 0) d.i = i; }
   if(d.i >= d.items.length){ showRoute({tab:"map"}); return renderRoundDone("map", d); }
   const item = d.items[d.i];
+  // A link to an exact pattern also sets the fight pattern picks this drill follows, the way they
+  // were when the link was made (a pick missing from the link was Random). Otherwise your own
+  // saved picks would build a different pattern from the same code.
+  if(ask?.code) usePicks(item, ask.picks);
   const cur = state.cur;
   if(ask || fresh || !cur || cur.kind !== "map" || cur.item !== item){
     // The code seeds every random choice: the variant, the turn and the drill's own pattern.
@@ -146,8 +170,14 @@ export function renderMap(fresh = true): void {
     state.cur = {kind:"map", item, scene:made.scene, k:made.k, code, results:[], counted:false};
   }
   const c = run();
-  // The link to this drill with this exact pattern, so you can copy it from the address bar.
-  showRoute({tab:"map", drill:item.id, code:c.code});
+  // A link with clicks: answer them again, the same as the clicks that made the link, so the
+  // arena shows the same answers. Each step before the last one was gone past with Next step.
+  // A drill opened this way does not count toward your score.
+  if(ask?.at?.length){
+    const clicks = ask.at.slice(0, c.scene.steps.length);
+    clicks.forEach((p, i) => { answerAt(c, p); if(i < clicks.length - 1){ c.waiting = false; c.stop = false; } });
+    c.counted = c.results.length >= c.scene.steps.length;
+  }
   view.innerHTML = tabHead() + '<div class="mapwrap">' + tlNav({current:[item.id]}) +
     '<div class="stage"><div class="arena"><div id="m-hud"></div>' + sceneSVG(c.scene, c.k) + LEGEND + "</div>" +
     '<div class="panel" id="map-panel"></div></div></div>';
@@ -268,6 +298,9 @@ export function drawMapPanel(): void {
   document.getElementById("map-next")?.addEventListener("click", nextMap);
   document.getElementById("map-restart")?.addEventListener("click", restart);
   document.getElementById("map-new")?.addEventListener("click", () => renderMap(true));
+  // The address bar holds this drill as it is now: the pattern, the picks it follows and the
+  // clicks so far, so a copied link opens the same map.
+  showRoute({tab:"map", drill:c.item.id, code:c.code, picks:drillPicks(c.item) || undefined, at:c.results.length ? c.results.map(r => r.p) : undefined});
 }
 
 export function onArenaClick(e: MouseEvent): void {
@@ -275,26 +308,30 @@ export function onArenaClick(e: MouseEvent): void {
   if(!c || c.kind !== "map" || c.results.length >= c.scene.steps.length) return;
   // After a wrong spot the drill waits for Next step, so a click here does not answer by accident.
   if(c.stop) return;
-  // After a right spot the answer stays on screen until the next click, which answers the next step.
-  c.waiting = false;
-  c.peek = undefined;   // show the answer to this new click, not a step picked earlier
   const svg = e.currentTarget as SVGSVGElement, ctm = svg.getScreenCTM();
   if(!ctm) return;
   const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
-  const p: Point = [q.x, q.y];
-  const step = c.scene.steps[c.results.length];
-  const base = step.zf ? step.zf(c.results) : step.z;
-  if(!base) return;
-  const zone = rotZone(base, c.k);
-  const ok = inZone(p, zone);
-  c.results.push({p, ok, z:zone, drop:step.drop ? (ok ? p : zoneCenter(zone)) : null});
-  if(c.results.length < c.scene.steps.length){ c.waiting = true; c.stop = !ok; }
-  else if(!c.counted){
+  answerAt(c, [q.x, q.y]);
+  if(c.results.length >= c.scene.steps.length && !c.counted){
     c.counted = true;
     const all = c.results.every(r => r.ok), d = getDeck("map");
     record(c.item.id, all); d.done++; if(all) d.right++;
   }
   drawFeedback(); drawMapPanel();
+}
+
+/** Answer the next step with a click at p (arena units). A click on the arena and a link with
+    clicks both come here, so a link shows exactly what the clicks showed. */
+function answerAt(c: MapCur, p: Point): void {
+  const step = c.scene.steps[c.results.length];
+  const base = step?.zf ? step.zf(c.results) : step?.z;
+  if(!step || !base) return;
+  // After a right spot the answer stays on screen until the next click, which answers the next step.
+  c.waiting = false;
+  c.peek = undefined;   // show the answer to this new click, not a step picked earlier
+  const zone = rotZone(base, c.k), ok = inZone(p, zone);
+  c.results.push({p, ok, z:zone, drop:step.drop ? (ok ? p : zoneCenter(zone)) : null});
+  if(c.results.length < c.scene.steps.length){ c.waiting = true; c.stop = !ok; }
 }
 
 /** Next step (the HUD button, or Enter): clear the last answer and ask the next step. */
