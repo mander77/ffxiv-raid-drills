@@ -19,10 +19,15 @@ function run(): MapCur {
   return c;
 }
 
+/* Draw the answers on the arena. When you look back at an earlier step (c.peek), the arena shows
+   the moment right after that answer: its zone and click, the puddles up to then, and where the
+   boss stood. */
 export function drawFeedback(): void {
   const c = state.cur, svg = document.getElementById("arena-svg");
   if(!c || c.kind !== "map" || !svg) return;
-  paintArena(svg, c.scene, c.k, c.results, Boolean(c.waiting) || c.results.length >= c.scene.steps.length);
+  const p = c.peek, back = p != null && p < c.results.length - 1;
+  paintArena(svg, c.scene, c.k, p != null && back ? c.results.slice(0, p + 1) : c.results,
+    back || Boolean(c.waiting) || c.results.length >= c.scene.steps.length);
 }
 
 /* Draw the answer layers on an arena: dropped puddles, cues, the boss, and, with showLast,
@@ -60,9 +65,11 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
   // Weapons that already resolved fade out. The one just answered stays until the next step.
   // With spawnAhead, each answered step also brings in the next weapon, with a short delay.
   const gone = showLast ? n - 1 : n, shown = sc.spawnAhead != null ? sc.spawnAhead + n : Infinity;
+  // A look back at an earlier step hides the weapons that spawned after it again.
   svg.querySelectorAll<SVGGElement>("[data-spawn]").forEach(g => {
     const i = Number(g.dataset.spawn);
-    if(g.classList.contains("later") && i < shown){ g.style.animationDelay = "0.2s"; g.classList.remove("later"); }
+    if(i >= shown) g.classList.add("later");
+    else if(g.classList.contains("later")){ g.style.animationDelay = "0.2s"; g.classList.remove("later"); }
     g.classList.toggle("gone", i < gone);
   });
 }
@@ -157,6 +164,8 @@ export function showAbility(i: number): void {
 export function drawMapPanel(): void {
   const c = run(), d = getDeck("map"), sc = c.scene, n = c.results.length, done = n >= sc.steps.length, multi = sc.steps.length > 1;
   const peek = c.peek ?? n - 1;   // the step whose answer shows: the one picked, or the last one answered
+  const back = c.peek != null && c.peek < n - 1;   // looking back: the arena shows an earlier step
+  const onArena = back ? peek : done ? n - 1 : n;   // the step the arena shows; its chip is pressed
   let h = '<div class="eyebrow"><b>' + esc(c.item.phase) + "</b><span>" + esc(c.item.time) + '</span><span class="progress">Drill ' + (d.i + 1) + " of " + d.items.length + "</span>" +
     (changes(c.item) ? '<span title="Send this code to rebuild this exact pattern">Pattern ' + c.code + "</span>" : "") + "</div>";
   h += "<h2>" + esc(c.item.title) + "</h2>";
@@ -164,8 +173,11 @@ export function drawMapPanel(): void {
   else h += '<p class="setup' + (c.setupOpen ? "" : " folded") + '">' + esc(sc.setup) + '</p><button type="button" class="linkbtn" id="setup-toggle">' + (c.setupOpen ? "Less" : "More") + "</button>";
   if(multi) h += '<ol class="chips" aria-label="Steps">' + sc.steps.map((_st, i) => {
     const r = c.results[i];
-    if(!r) return '<li><span class="chip' + (i === n ? " now" : "") + '">' + (i + 1) + "</span></li>";
-    return '<li><button type="button" class="chip ' + (r.ok ? "ok" : "bad") + '" data-peek="' + i + '" aria-pressed="' + (i === peek) + '" aria-label="Step ' + (i + 1) + ": " + (r.ok ? "right" : "not there") + '">' + (i + 1) + (r.ok ? " &#10003;" : " &#10007;") + "</button></li>";
+    // The step you are on is a button too: it brings the arena back from an earlier step.
+    if(!r) return i === n
+      ? '<li><button type="button" class="chip now" data-peek="live" aria-pressed="' + (i === onArena) + '" aria-label="Step ' + (i + 1) + ': the step you are on">' + (i + 1) + "</button></li>"
+      : '<li><span class="chip">' + (i + 1) + "</span></li>";
+    return '<li><button type="button" class="chip ' + (r.ok ? "ok" : "bad") + '" data-peek="' + i + '" aria-pressed="' + (i === onArena) + '" aria-label="Step ' + (i + 1) + ": " + (r.ok ? "right" : "not there") + '">' + (i + 1) + (r.ok ? " &#10003;" : " &#10007;") + "</button></li>";
   }).join("") + "</ol>";
   if(!done) h += '<div class="nowq">' + (multi ? "<span>Step " + (n + 1) + " of " + sc.steps.length + "</span>" : "") + esc(sc.steps[n].q) + "</div>";
   const r = c.results[peek];
@@ -189,7 +201,12 @@ export function drawMapPanel(): void {
   // The same prompt above the arena, where your eyes are when you click.
   // When the drill is done, the HUD shows the result and the Next drill button. On a phone the
   // panel is below the arena, so this keeps the button in view without scrolling.
-  if(done){
+  if(back){
+    // Looking back: say so, and offer the way back where your eyes are.
+    el("m-hud").innerHTML = '<div class="hud"><div class="hq idle"><b class="hcount">' + (peek + 1) + "/" + sc.steps.length + "</b><span>Looking back at step " + (peek + 1) + '.</span><button type="button" class="btn ghost" id="hud-back">' +
+      (done ? "Back to the end" : "Back to step " + (n + 1)) + "</button></div></div>";
+    el("hud-back").addEventListener("click", () => { c.peek = undefined; drawMapPanel(); drawFeedback(); });
+  } else if(done){
     const right = c.results.filter(x => x.ok).length, all = right === sc.steps.length;
     const result = all ? (multi ? "All steps right" : "Right") : multi ? right + " of " + sc.steps.length + " right" : "Not there";
     el("m-hud").innerHTML = '<div class="hud"><div class="hq done ' + (all ? "ok" : "bad") + '"><b class="hcount">' + (all ? "&#10003;" : "&#10007;") + "</b><span>" + result +
@@ -197,7 +214,10 @@ export function drawMapPanel(): void {
     el("hud-next").addEventListener("click", nextMap);
   } else el("m-hud").innerHTML = hudPrompt((n + 1) + "/" + sc.steps.length, sc.steps[n].q);
   document.getElementById("setup-toggle")?.addEventListener("click", () => { c.setupOpen = !c.setupOpen; drawMapPanel(); });
-  p.querySelectorAll<HTMLButtonElement>("[data-peek]").forEach(b => b.addEventListener("click", () => { c.peek = Number(b.dataset.peek); drawMapPanel(); }));
+  p.querySelectorAll<HTMLButtonElement>("[data-peek]").forEach(b => b.addEventListener("click", () => {
+    c.peek = b.dataset.peek === "live" ? undefined : Number(b.dataset.peek);
+    drawMapPanel(); drawFeedback();
+  }));
   document.getElementById("map-replay")?.addEventListener("click", replaySpawns);
   document.getElementById("map-next")?.addEventListener("click", nextMap);
   document.getElementById("map-restart")?.addEventListener("click", restart);
