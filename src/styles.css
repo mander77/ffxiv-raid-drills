@@ -118,6 +118,23 @@ main{padding-block:20px 56px}
 }
 .arena{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:10px}
 .arena svg{display:block;width:100%;max-width:600px;height:auto;margin:0 auto;aspect-ratio:108/110;cursor:crosshair;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+/* The HUD right above the arena floor: the boss cast bar, the prompt and the time left, so your
+   eyes stay on the field, as they do in the game. */
+.hud{display:grid;gap:6px;max-width:600px;margin:0 auto 8px}
+.hcast{position:relative;display:flex;justify-content:space-between;align-items:center;gap:10px;height:28px;padding:0 10px;border-radius:6px;background:var(--void);color:#fff;font-size:14px;font-weight:700;overflow:hidden}
+.hcast i{position:absolute;inset:0 auto 0 0;width:0;background:var(--aoe);opacity:.5}
+.hcast span,.hcast b{position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hcast b{flex:none;font-family:var(--font-mono);font-weight:500}
+.hcast.idle{background:var(--paper);color:var(--ink-2);font-weight:500}
+.hq{display:flex;align-items:center;gap:12px;min-height:48px;padding:6px 12px;border:2px solid var(--ink);border-radius:8px;background:var(--card);font-size:16px;font-weight:700;line-height:1.25}
+.hcount{flex:none;min-width:2.8em;font-family:var(--font-mono);font-size:22px;font-weight:600;text-align:center;color:var(--heal)}
+.hq.urgent{border-color:var(--miss)}
+.hq.urgent .hcount{color:var(--miss)}
+.hq.idle{border-color:var(--line);color:var(--ink-2);font-weight:500}
+.hq.idle .hcount{color:var(--ink-2);font-size:16px}
+/* The countdown ring around the boss: it empties as your hit comes closer. */
+.tring{fill:none;stroke:var(--heal);stroke-width:1.3;stroke-linecap:round;pointer-events:none}
+.tring.urgent{stroke:var(--miss)}
 .arena svg.locked{cursor:default}
 .arena .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--ink-2);margin:8px 4px 2px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}

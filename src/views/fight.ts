@@ -5,7 +5,7 @@ import { state, view, stopTimer } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter } from "../geometry";
 import { sceneSVG } from "../arena";
 import { paintArena } from "./map";
-import { tabHead } from "./common";
+import { tabHead, hudPrompt } from "./common";
 import { buildFight, clock, type Fight, type FightSeg } from "../data/fight";
 import { BOSS } from "../data/drills";
 import { ABILITIES } from "../data/abilities";
@@ -123,7 +123,7 @@ function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
   R = {mode, fight, t:0, results:fight.segs.map(() => []),
        clicks:mode === "replay" ? clicks : [], next:0, hold:"", last:performance.now(), shown:""};
   state.cur = {kind:"fight"};
-  show('<div class="stage"><div class="arena" id="f-arena"></div><div class="panel"><div id="f-panel"></div>' + controls(fight) + "</div></div>");
+  show('<div class="stage"><div class="arena">' + HUD + '<div id="f-arena"></div></div><div class="panel"><div id="f-panel"></div>' + controls(fight) + "</div></div>");
   const seek = el<HTMLInputElement>("f-seek");
   seek.addEventListener("pointerdown", () => { dragging = true; });
   seek.addEventListener("pointerup", () => { dragging = false; });
@@ -268,11 +268,21 @@ function frame(): void {
     const fresh = r.shown.split(":")[0] !== where;   // a new scene: build the arena again
     r.shown = key;
     const sc = g ? g.scene : where === "split" ? IDLE_SPLIT : IDLE, k = g ? g.k : 0;
-    if(fresh){ el("f-arena").innerHTML = sceneSVG(sc, k); el("arena-svg").addEventListener("click", onClick); }
+    if(fresh){
+      el("f-arena").innerHTML = sceneSVG(sc, k);
+      el("arena-svg").addEventListener("click", onClick);
+      // The countdown ring goes on top of everything and lets clicks through (see .tring).
+      el("arena-svg").insertAdjacentHTML("beforeend", '<circle id="tring" class="tring" r="16" pathLength="100" stroke-dasharray="100"/>');
+    }
     let boss: Boss | null = sc.bossAt ? sc.bossAt(res.length) : (sc.boss ? rotOverlay(sc.boss, k) : null);
     // In the middle, before his cast, he faces no weapon. When the cast starts he turns to the first one.
     if(boss && g?.turn && boss.x === 50 && boss.y === 50) boss = {...boss, f:turned ? g.turn.f : null};
     paintArena(el("arena-svg"), sc, k, res, res.length > 0, boss);
+    // The ring sits around the boss, and moves with him when he jumps. It starts at the top.
+    const c = boss ?? {x:50, y:50};
+    const ring = el("tring");
+    ring.setAttribute("cx", String(c.x)); ring.setAttribute("cy", String(c.y));
+    ring.setAttribute("transform", "rotate(-90 " + c.x + " " + c.y + ")");
     drawPanel(r, si);
   }
   updateLive(r);
@@ -337,6 +347,54 @@ function updateLive(r: Run): void {
   const drills = si >= 0 ? f.segs[si].drills : [], nextAb = ABILITIES.findIndex(a => a.t >= r.t);
   const key = drills.join(",") + ":" + nextAb;
   if(key !== navKey){ navKey = key; markNav(drills, nextAb); }
+  updateHud(r, si);
+}
+
+/* ---------- the HUD ---------- */
+/* In the game, the boss cast bar and the floor are in the middle of the screen. The HUD puts
+   the same things right above the arena floor: a cast bar for the next timeline line, your
+   prompt, and the seconds left to your hit. The ring around the boss shows that time too.
+   The HUD is built once per run; each frame only changes its text, widths and classes. */
+const HUD = '<div class="hud"><div class="hcast" id="h-cast"><i id="h-fill"></i><span id="h-name"></span><b id="h-left"></b></div>' +
+  '<div class="hq" id="h-q"><b class="hcount" id="h-count"></b><span id="h-text"></span></div></div>';
+const CAST_MAX = 10;   // the longest a cast bar takes to fill, in seconds
+const URGENT = 3;      // the last seconds before a hit turn the prompt and the ring red
+
+function updateHud(r: Run, si: number): void {
+  const f = r.fight, put = (id: string, s: string): void => { const n = document.getElementById(id); if(n && n.textContent !== s) n.textContent = s; };
+  const box = document.getElementById("h-q"), cast = document.getElementById("h-cast"), fill = document.getElementById("h-fill"), ring = document.getElementById("tring");
+  if(!box || !cast || !fill) return;
+  // The cast bar: the next line that is not a "--sync--" marker. It fills from the line before it,
+  // like a cast that starts when the last one ends, but never over more than CAST_MAX seconds.
+  const lines = f.events.filter(e => !e.name.startsWith("--")), k = lines.findIndex(e => e.t > r.t - KEEP);
+  const e = k >= 0 ? lines[k] : null;
+  if(e){
+    const left = e.t - r.t, span = Math.max(1, Math.min(CAST_MAX, e.t - (k > 0 ? lines[k - 1].t : 0)));
+    const casting = left <= span;
+    cast.classList.toggle("idle", !casting);
+    fill.style.width = casting ? (Math.min(1, 1 - left / span) * 100).toFixed(1) + "%" : "0%";
+    put("h-name", casting ? e.name : "Next: " + e.name);
+    put("h-left", left > 0 ? (casting ? left.toFixed(1) : Math.round(left) + " s") : "");
+  } else { cast.classList.add("idle"); fill.style.width = "0%"; put("h-name", "No more casts"); put("h-left", ""); }
+  // Your prompt and the time left, or the next mechanic.
+  const g = si >= 0 ? f.segs[si] : null, j = g ? r.results[si].length : 0;
+  if(g && j < g.due.length){
+    const left = Math.max(0, g.due[j] - r.t), start = j ? g.due[j - 1] : g.from;
+    box.className = "hq" + (left <= URGENT ? " urgent" : "");
+    put("h-count", left.toFixed(1));
+    put("h-text", g.scene.steps[j].q);
+    if(ring){
+      ring.style.display = "";
+      ring.classList.toggle("urgent", left <= URGENT);
+      ring.setAttribute("stroke-dashoffset", (100 * (1 - Math.min(1, left / Math.max(0.1, g.due[j] - start)))).toFixed(1));
+    }
+  } else {
+    const nx = f.segs.find(x => x.from > r.t);
+    box.className = "hq idle";
+    put("h-count", "");
+    put("h-text", nx ? "Next: " + nx.title + " in " + Math.round(nx.from - r.t) + " s" : "No more mechanics");
+    if(ring) ring.style.display = "none";
+  }
 }
 
 /* ---------- the end ---------- */
@@ -390,7 +448,7 @@ function renderStep(i: number): void {
   if(!list.length) return renderSummary();
   i = Math.max(0, Math.min(i, list.length - 1));
   const {si, j} = list[i], g = d.fight.segs[si], res = d.results[si].slice(0, j + 1);
-  show('<div class="stage"><div class="arena">' + sceneSVG(g.scene, g.k) + '</div><div class="panel"><div class="eyebrow"><b>Your run, step by step</b><span>' + clock(g.due[j]) + "</span><span>Step " + (i + 1) + " of " + list.length + "</span></div>" +
+  show('<div class="stage"><div class="arena">' + hudPrompt((i + 1) + "/" + list.length, g.scene.steps[j].q) + sceneSVG(g.scene, g.k) + '</div><div class="panel"><div class="eyebrow"><b>Your run, step by step</b><span>' + clock(g.due[j]) + "</span><span>Step " + (i + 1) + " of " + list.length + "</span></div>" +
     "<h2>" + esc(g.title) + "</h2>" + lastBox(g, j, res[j]) +
     '<div class="actions"><button type="button" class="btn ghost" id="f-prev">Back</button><button type="button" class="btn" id="f-next">Next</button><button type="button" class="btn ghost" id="f-sum">Summary</button></div></div></div>');
   paintArena(el("arena-svg"), g.scene, g.k, res, true);

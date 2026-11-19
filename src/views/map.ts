@@ -6,7 +6,7 @@ import { sceneSVG, drawOverlay, drawBoss, zoneSVG } from "../arena";
 import { BOSS, MAPS, PUDDLE_R, changes } from "../data/drills";
 import { ABILITIES } from "../data/abilities";
 import { clock } from "../data/fight";
-import { tabHead, renderRoundDone } from "./common";
+import { tabHead, renderRoundDone, hudPrompt } from "./common";
 import { tlNav, wireNav, marks, catNames } from "./tlnav";
 import type { Boss, Point, Scene, StepResult } from "../types";
 
@@ -113,7 +113,7 @@ export function renderMap(fresh = true): void {
   }
   const c = run();
   view.innerHTML = tabHead() + '<div class="mapwrap">' + tlNav({current:[item.id]}) +
-    '<div class="stage"><div class="arena">' + sceneSVG(c.scene, c.k) + LEGEND + "</div>" +
+    '<div class="stage"><div class="arena"><div id="m-hud"></div>' + sceneSVG(c.scene, c.k) + LEGEND + "</div>" +
     '<div class="panel" id="map-panel"></div></div></div>';
   el("arena-svg").addEventListener("click", onArenaClick);
   wireNav(showAbility, openDrill);
@@ -140,7 +140,7 @@ export function showAbility(i: number): void {
   state.cur = {kind:"ability", i};
   const drills = (a.drills ?? []).flatMap(id => MAPS.filter(m => m.id === id));
   view.innerHTML = tabHead() + '<div class="mapwrap">' + tlNav({open:i}) +
-    '<div class="stage"><div class="arena">' + sceneSVG(IDLE, 0) + "</div>" +
+    '<div class="stage"><div class="arena">' + hudPrompt(clock(a.t), a.name, true) + sceneSVG(IDLE, 0) + "</div>" +
     '<div class="panel"><div class="eyebrow"><b>' + esc(a.phase) + "</b><span>Hits at " + clock(a.t) + "</span></div>" +
     "<h2>" + esc(a.name) + '</h2><p class="cmline">' + marks(a.cats) + esc(catNames(a.cats)) + '</p><p class="setup">' + esc(a.note) + "</p>" +
     (drills.length
@@ -186,6 +186,8 @@ export function drawMapPanel(): void {
   }
   const p = el("map-panel");
   p.innerHTML = h;
+  // The same prompt above the arena, where your eyes are when you click.
+  el("m-hud").innerHTML = done ? hudPrompt("✓", "Done. Press Enter for the next drill.", true) : hudPrompt((n + 1) + "/" + sc.steps.length, sc.steps[n].q);
   document.getElementById("setup-toggle")?.addEventListener("click", () => { c.setupOpen = !c.setupOpen; drawMapPanel(); });
   p.querySelectorAll<HTMLButtonElement>("[data-peek]").forEach(b => b.addEventListener("click", () => { c.peek = Number(b.dataset.peek); drawMapPanel(); }));
   document.getElementById("map-replay")?.addEventListener("click", replaySpawns);

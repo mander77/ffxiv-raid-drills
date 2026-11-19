@@ -19,6 +19,12 @@ export function tabHead(): string {
   return h + "</div>";
 }
 
+/** The prompt row of the HUD above the arena: a short value on the left (a step count or a time)
+    and the text to read. Real time adds a cast bar and a live countdown above it. */
+export function hudPrompt(count: string, text: string, idle = false): string {
+  return '<div class="hud"><div class="hq' + (idle ? " idle" : "") + '"><b class="hcount">' + esc(count) + "</b><span>" + esc(text) + "</span></div></div>";
+}
+
 export function renderRoundDone(cat: "map" | QuizCat, d: Deck<unknown>): void {
   const pct = d.done ? Math.round(100 * d.right / d.done) : 0;
   view.innerHTML = tabHead() + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Round done</b></div><h2>' + d.right + " of " + d.done + " right (" + pct + "%)</h2>" +
