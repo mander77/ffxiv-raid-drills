@@ -27,7 +27,7 @@ export const MECH: QuizItem[] = [
       {t:S(s,"The pocket behind him on his right. Your light party stacks on you.","The pocket behind him on his left. Your light party stacks on you.")},
       {t:"Spread on your clock spot around the boss."},{t:"Stack with the whole party in the middle."}],
     why:"The sword's cross lines up with the way he jumped. The two safe pockets on the side he came from belong to the light parties: G1 on his left, G2 on his right. Each pocket has a line stack on its healer, so your light party follows you.",
-    rule:"Sword: look where he jumped from. G1 left pocket, G2 right pocket. You are the stack."})),
+    rule:"Sword: look where he jumped from. G1 left pocket, G2 right pocket, at the inner corner next to his hitbox. You are the stack."})),
   mq("k-axe", 3.2, P1, "0:50 to 1:45", s=>({prompt:"The boss jumps to the AXE. Where do you go?",
     options:[{t:"Stack with the whole party in the middle, out of the axe AoE.", ok:true},{t:"Spread out on your clock spot."},{t:"Light party stacks, left and right."},{t:"Inside the axe AoE, next to the boss."}],
     why:"The axe is a point-blank AoE where it lands, and a party stack on a random healer. If the stack is on you, stay with the group.",

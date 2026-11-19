@@ -96,6 +96,21 @@ test("weapon runs: the sword pocket is behind the boss, never on him", () => {
   }
 });
 
+test("weapon runs: the sword's best spot is the pocket's inner corner, just outside his hitbox", () => {
+  for(const [name, build] of Object.entries(RUN_BUILDERS)) for(let i = 0; i < RUNS; i++) for(const s of SLOTS){
+    const R = build(s);
+    R.W.forEach((w, k) => {
+      if(w.type !== "sword") return;
+      const st = R.steps[k], boss = R.states[k + 1];
+      if(!st.stand) throw new Error(name + ": a sword step has no best spot");
+      assert.ok(inZone(st.stand, zoneOf(st.z)), name + ": the best spot is in the pocket");
+      // His hitbox ring is 11 units across the middle; the corner of the cross is about 9.9 out.
+      const d = Math.hypot(st.stand[0] - boss.x, st.stand[1] - boss.y);
+      assert.ok(d > 11 && d < 14, name + ": " + d.toFixed(1) + " units from him, not just outside his hitbox");
+    });
+  }
+});
+
 test("Ultimate Trophy Weapons: the first spawn sets the direction, and the last is north", () => {
   for(let i = 0; i < RUNS; i++){
     const U = buildUltimate("H1"), a = U.W.map(w => w.a), t = U.W.map(w => w.type);

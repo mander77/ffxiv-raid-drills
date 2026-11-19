@@ -89,6 +89,9 @@ export interface Step {
   /** A look-ahead step: you click to show what you have spotted (a weapon, for example), but you
       do not move there. The moving marker in Real time skips it. */
   look?: boolean;
+  /** The best spot to stand when the zone has one, for example the sword pocket's inner corner,
+      next to the boss's hitbox. The moving marker goes there instead of the nearest point. */
+  stand?: Point;
   /** Drawn after this step is answered. */
   reveal?: Overlay[];
   /** Drawn from the moment this step's question shows until the drill ends. */

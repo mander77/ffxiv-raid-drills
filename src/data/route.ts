@@ -7,7 +7,7 @@
 // center (100, 100) and the numbered marks about 16.3 yalms out, which is where this app draws them
 // (25 and about 41 units out). So 1 unit is 0.4 yalm, and the arena is 40 x 40 yalms. No guide
 // states the size; this follows from the waymarks.
-import { inZone, rotZone, zoneCenter } from "../geometry";
+import { inZone, rot, rotZone, zoneCenter } from "../geometry";
 import type { Fight } from "./fight";
 import type { Point, StepResult, Zone } from "../types";
 
@@ -74,7 +74,8 @@ export function rightRoute(f: Fight): Stop[] {
       const base = st.zf ? st.zf(res) : st.z;
       if(!base) return;
       // A look-ahead is answered at the middle of its area, and the player stays where they are.
-      const z = rotZone(base, g.k), p = st.drop || st.look ? zoneCenter(z) : nearestIn(z, from);
+      // A step with a best spot (the sword pocket's inner corner) goes there.
+      const z = rotZone(base, g.k), p = st.drop || st.look ? zoneCenter(z) : st.stand ? rot(st.stand, g.k) : nearestIn(z, from);
       res.push({p, ok:inZone(p, z), z, drop:st.drop ? p : null});
       if(st.look){ stops.push({p, hit:g.due[j], show:g.from, si, j, look:true}); return; }
       stops.push({p, hit:g.due[j], show:g.from, si, j});

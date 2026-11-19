@@ -55,7 +55,7 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
   const steps = W.map((w, i): Step => {
     const st = states[i + 1], P: Point = [st.x, st.y], d = dirs[i], L = leftOf(d), sv: Point = [L[0] * side, L[1] * side];
     const where = w.where || COMPASS[Math.round(w.a / 45) % 8];
-    let z: Zone, a: string, reveal: Overlay[];
+    let z: Zone, a: string, reveal: Overlay[], stand: Point | undefined;
     if(w.type === "axe"){
       z = {c:vadd(P, unit([50 - P[0], 50 - P[1]]), 28), r:7};
       a = "Axe, " + where + ": stack with the whole party in the middle, outside the axe AoE.";
@@ -74,12 +74,16 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       const corner = vadd(vadd(P, d, -HW), sv, HW);
       const poly = [corner, vadd(corner, d, -32), vadd(vadd(corner, d, -32), sv, 32), vadd(corner, sv, 32)];
       z = {fn, show:[{poly}], label:vadd(P, unit(vadd([-d[0], -d[1]], sv)), 17)};
-      a = "Sword, " + where + ": the pocket behind him on his " + own + ", on the side he jumped from. " + S(s, "G1", "G2") + " stacks on you.";
+      // Where to stand: the pocket's inner corner, where the arms of the cross meet, a step past
+      // the corner (2.5 units on the diagonal) so you are clear of both arms and just outside his
+      // hitbox. The whole light party stacks there, so the melee can still hit him.
+      stand = vadd(corner, unit(vadd([-d[0], -d[1]], sv)), 2.5);
+      a = "Sword, " + where + ": the pocket behind him on his " + own + ", on the side he jumped from, at its inner corner next to his hitbox. " + S(s, "G1", "G2") + " stacks on you.";
       reveal = [{t:"band", x:P[0] - d[0] * 150, y:P[1] - d[1] * 150, x2:P[0] + d[0] * 150, y2:P[1] + d[1] * 150, w:HW * 2},
                 {t:"band", x:P[0] - L[0] * 150, y:P[1] - L[1] * 150, x2:P[0] + L[0] * 150, y2:P[1] + L[1] * 150, w:HW * 2}];
     }
     const leave: Overlay | null = w.tornado ? {t:"tornado", x:P[0], y:P[1]} : null;
-    return {q:ORDINALS[i] + " weapon: click where you go.", z, a, reveal, leave};
+    return {q:ORDINALS[i] + " weapon: click where you go.", z, a, reveal, leave, stand};
   });
   return {W, states, steps, overlays};
 }
@@ -150,7 +154,7 @@ export function assaultScene(A: Run, s: Slot): Scene {
     overlays:A.overlays,
     bossAt:n => A.states[Math.min(n, A.states.length - 1)],
     steps:A.steps,
-    rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ". Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: stack in the middle."};
+    rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ", at its inner corner next to his hitbox. Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: stack in the middle."};
 }
 export function ultimateScene(U: Run): Scene {
   return {

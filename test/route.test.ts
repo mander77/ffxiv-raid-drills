@@ -69,6 +69,20 @@ test("at run speed the runner reaches almost every right spot before its hit", (
   assert.isBelow(late / stops, 0.02, late + " of " + stops + " spots reached late");
 });
 
+test("on a sword the route goes to the pocket's best spot, next to the boss", () => {
+  let swords = 0;
+  for(const s of SLOTS) for(let i = 0; i < 10; i++){
+    const f = buildFight(s, newCode(), RANDOM);
+    for(const st of rightRoute(f)){
+      const stand = f.segs[st.si].scene.steps[st.j].stand;
+      if(!stand) continue;
+      swords++;
+      assert.isTrue(near(st.p, stand), f.segs[st.si].title + " step " + (st.j + 1));
+    }
+  }
+  assert.isAbove(swords, 0, "the fights have swords");
+});
+
 test("a look-ahead step has an answer, but the runner does not go there", () => {
   for(const s of SLOTS) for(let i = 0; i < 10; i++){
     const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f), si = f.segs.findIndex(g => g.drills.includes("m-void"));

@@ -87,8 +87,8 @@ const hit = (p: Preview, attack: Overlay[]): Preview => ({pieces:[...attack, ...
 const you = (s: Slot, p: Point): Overlay => mark(p[0], p[1], s, "H");
 /** You at p, with that spot circled. */
 const youAt = (s: Slot, p: Point, r = 5, more: Overlay[] = []): Preview => show([you(s, p), ...more], [circle(p, r)]);
-/** You in zone z, at its shown spot. */
-const youIn = (s: Slot, z: Zone): Preview => show([you(s, zoneCenter(z))], [z]);
+/** You in zone z: at `p` when the zone has a best spot (see Step.stand), else at its shown spot. */
+const youIn = (s: Slot, z: Zone, p?: Point): Preview => show([you(s, p ?? zoneCenter(z))], [z]);
 
 /** One step of a map drill as a picture: its floor, boss and pieces, then what it hits and its answer zone. */
 function fromDrill(id: string, s: Slot, v: string | null = null, k = 0): Fig & {zone: Zone} {
@@ -106,7 +106,7 @@ function jump(s: Slot, type: WeaponType, a: number) {
   const W: Weapon[] = [{a, p:atAngle(a), type}], R = buildRun(s, W), st = R.steps[0], b = R.states[1], st2 = buildRun(other(s), W).steps[0];
   if(!st.z || !st2.z) throw new Error("a weapon step has no zone");
   const fig: Fig = {overlays:[guide(CENTER, [b.x, b.y]), ...R.overlays.filter(o => o.t !== "tag")], boss:b, after:st.reveal, answer:[st.z]};
-  return {fig, b, at:[b.x, b.y] as Point, zone:st.z, zoneOther:st2.z, hits:st.reveal ?? []};
+  return {fig, b, at:[b.x, b.y] as Point, zone:st.z, zoneOther:st2.z, hits:st.reveal ?? [], stand:st.stand, standOther:st2.stand};
 }
 
 /** A run's pieces with each weapon's name outside it (41 units out), clear of the order
@@ -185,7 +185,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
       show([mark(66, 42, "MT", "T"), ...inOrder(W, [1, 0, 2])], [circle(W[1].p, 9)]),
       show(W.map(w => numAt(w, "?")))]}; },
   "k-sword": s => { const j = jump(s, "sword", 270), around = ring(ALL, 14, 0, 45, j.at), mid = cluster(CENTER);
-    return {...j.fig, options:[hit(youIn(s, j.zone), j.hits), hit(youIn(s, j.zoneOther), j.hits),
+    return {...j.fig, options:[hit(youIn(s, j.zone, j.stand), j.hits), hit(youIn(s, j.zoneOther, j.standOther), j.hits),
       show([...proteans(j.at, around, 30), ...around]), show([aoe(j.at, 20), stackHit(mid), ...mid])]}; },
   "k-axe": s => { const j = jump(s, "axe", 90), mid = cluster(zoneCenter(j.zone)), spread = ring(ALL, 33, 22.5, 45);
     const lp = [cluster([62, 30], G1, 2), cluster([62, 70], G2, 2)], close = cluster([66, 50], ALL, 2);
