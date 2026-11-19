@@ -7,7 +7,7 @@
 // picture is built from that drill, so the two always agree.
 import { S, withSeed } from "../util";
 import { DEG, angOf, rotOverlay, unit, zoneCenter } from "../geometry";
-import { MAPS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, type Run, type Weapon, type WeaponType } from "./drills";
+import { MAPS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, type Run, type Weapon, type WeaponType } from "./drills";
 import { PUDDLE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, aoe, axeHit, cleave, swordCross } from "./attacks";
 import type { Boss, Fig, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
@@ -51,6 +51,8 @@ function cluster(c: Point, who: Who[] = ALL, cols = 4): Overlay[] {
 /** Role marks on a ring of radius r around c, from angle a0, `step` degrees apart. */
 const ring = (who: Who[], r: number, a0 = 0, step = 360 / who.length, c: Point = CENTER): Overlay[] =>
   who.map(([l, role], i) => mark(...at(a0 + i * step, r, c), l, role));
+/** Everyone on their clock spot, r units from c, for a boss facing f (degrees clockwise from north). */
+const clockRing = (r: number, c: Point = CENTER, f = 0): Overlay[] => ALL.map(([l, role]) => mark(...at(f + CLOCK[l], r, c), l, role));
 /** The pairs, two marks side by side at each spot. */
 const pairsAt = (spots: Point[]): Overlay[][] => spots.map((p, i) => cluster(p, PAIRED.slice(i * 2, i * 2 + 2), 2));
 
@@ -169,7 +171,7 @@ const AXE_HITS = [stackHit(TANKS_TOGETHER, 4), ...spreadHits(AXE_SPREAD)];
 // TS note: Partial<Record<string, ...>> says any key may be missing, so a lookup returns
 // the function or undefined, and the caller must check before it calls it.
 export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
-  "k-raw-first": s => { const d = fromDrill("m-raw-scythe", s), north = cluster([50, 35], NONTANK, 3), all = ring(ALL, 33, 0, 45);
+  "k-raw-first": s => { const d = fromDrill("m-raw-scythe", s), north = cluster([50, 35], NONTANK, 3), all = clockRing(33);
     return {overlays:heldWeapon("scythe"), boss:BOSS, after:[...TANKS_APART, ...SCYTHE_CLEAVES], answer:d.answer, options:[
       show([...SCYTHE_CLEAVES, ...TANKS_APART, ...cluster([50, 66], NONTANK, 3)]),
       show([...AXE_HITS, ...TANKS_TOGETHER, ...AXE_SPREAD]),
@@ -187,10 +189,10 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
       show([...path([W[2].p]), numAt(W[2], "1"), say("ALWAYS THE SWORD FIRST", 8)], [circle(W[2].p, 9)]),
       show([mark(66, 42, "MT", "T"), ...inOrder(W, [1, 0, 2])], [circle(W[1].p, 9)]),
       show(W.map(w => numAt(w, "?")))]}; },
-  "k-sword": s => { const j = jump(s, "sword", 270), around = ring(ALL, 14, 0, 45, j.at), mid = cluster(CENTER);
+  "k-sword": s => { const j = jump(s, "sword", 270), around = clockRing(14, j.at, j.b.f ?? 0), mid = cluster(CENTER);
     return {...j.fig, options:[hit(youIn(s, j.zone, j.stand), j.hits), hit(youIn(s, j.zoneOther, j.standOther), j.hits),
       show([...proteans(j.at, around), ...around]), show([axeHit(j.at), stackHit(mid), ...mid])]}; },
-  "k-axe": s => { const j = jump(s, "axe", 90), mid = cluster(zoneCenter(j.zone)), spread = ring(ALL, 33, 22.5, 45);
+  "k-axe": s => { const j = jump(s, "axe", 90), mid = cluster(zoneCenter(j.zone)), spread = clockRing(14, j.at, j.b.f ?? 0);
     const lp = [cluster([62, 30], G1, 2), cluster([62, 70], G2, 2)], close = cluster([66, 50], ALL, 2);
     return {...j.fig, options:[
       show([...j.hits, stackHit(mid), ...mid], [j.zone]), show([...spreadHits(spread), ...spread]),

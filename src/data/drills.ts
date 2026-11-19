@@ -395,6 +395,9 @@ export function heldWeapon(type: WeaponType): Overlay[] {
    west and east walls, and the healers far out south-southwest and south-southeast. The drill and
    the Mechanics pictures both use these spots. */
 export const AXE_TANKS: Point = [50, 35];
+/** Clock spots, in degrees clockwise from the boss's front: the standard spots on wtfdig and in
+    BossMod's preset. The tanks are front and back, and the healers are on his sides. */
+export const CLOCK: Record<string, number> = {MT:0, R2:45, H2:90, M2:135, OT:180, M1:225, H1:270, R1:315};
 export const AXE_SPREAD_SPOTS: Record<string, Point> = {M1:[37.5, 62.5], M2:[62.5, 62.5], R1:[9, 68.5], R2:[91, 68.5], H1:[34, 84.5], H2:[66, 84.5]};
 /* Raw Steel Trophy, scythe: three cleaves. One cone on each tank (MT at 317 degrees, OT at 43),
    and one cone behind him that the rest of the party shares. The party's spot is inside that
