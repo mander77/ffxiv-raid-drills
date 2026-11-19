@@ -33,7 +33,6 @@ interface Done { fight: Fight; clicks: Click[]; results: StepResult[][] }
 const SPEEDS = [1, 1.5, 2];
 const savedSpeed = LS.get("fspeed", 1);
 const settings = {
-  skip: LS.get<string>("fskip", "yes") !== "no",
   speed: SPEEDS.includes(savedSpeed) ? savedSpeed : 1,
   pause: LS.get<string>("fpause", "no") === "yes"
 };
@@ -91,17 +90,15 @@ export function renderFight(): void {
     choices.map(([v, t]) => '<button type="button" data-set="' + key + '" data-val="' + v + '" aria-pressed="' + (v === cur) + '">' + t + "</button>").join("") + "</div></div>";
   show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b><span>The pull to the enrage at 10:59</span></div>' +
     "<h2>Play the fight in order</h2><p>The drills play one after another on the fight clock. The timeline shows what the boss does next, like the cactbot overlay. Click your spot before each hit lands. Each run picks its own scenario: axe or scythe first, stack or spread first, and new weapon patterns. To start at one moment, click an ability or a drill in the fight list.</p>" +
-    row("fskip", "Quiet stretches", [["yes", "Skip ahead"], ["no", "Real time"]], settings.skip ? "yes" : "no") +
     row("fspeed", "Speed", SPEEDS.map((n): [string, string] => [String(n), n + "x"]), String(settings.speed)) +
     row("fpause", "Missed spot", [["no", "Fight goes on"], ["yes", "Fight pauses"]], settings.pause ? "yes" : "no") +
     (wantedFight ? '<p class="hint" style="margin-top:12px">Fight code ' + esc(wantedFight) + " is ready: the next start uses it.</p>" : "") +
     '<div class="actions"><button type="button" class="btn" id="f-start">Start the fight</button><button type="button" class="btn ghost" id="f-watch">Watch the right moves</button></div></div></div>');
   view.querySelectorAll<HTMLButtonElement>("[data-set]").forEach(b => b.addEventListener("click", () => {
     const v = b.dataset.val ?? "";
-    if(b.dataset.set === "fskip") settings.skip = v === "yes";
     if(b.dataset.set === "fspeed") settings.speed = Number(v);
     if(b.dataset.set === "fpause") settings.pause = v === "yes";
-    LS.set("fskip", settings.skip ? "yes" : "no"); LS.set("fspeed", settings.speed); LS.set("fpause", settings.pause ? "yes" : "no");
+    LS.set("fspeed", settings.speed); LS.set("fpause", settings.pause ? "yes" : "no");
     renderFight();
   }));
   el("f-start").addEventListener("click", () => startRun("live", nextFight()));
@@ -111,7 +108,7 @@ export function renderFight(): void {
 /* ---------- the run ---------- */
 function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
   stopTimer();
-  R = {mode, fight, t:settings.skip ? Math.max(0, fight.events[0].t - SOON) : 0, results:fight.segs.map(() => []),
+  R = {mode, fight, t:0, results:fight.segs.map(() => []),
        clicks:mode === "replay" ? clicks : [], next:0, hold:"", last:performance.now(), shown:""};
   state.cur = {kind:"fight"};
   show('<div class="stage"><div class="arena" id="f-arena"></div><div class="panel"><div id="f-panel"></div>' + controls(fight) + "</div></div>");
@@ -187,20 +184,9 @@ function tick(now: number): void {
     if(r.mode === "live" && settings.pause){ r.t = g.due[j]; r.hold = "wait"; return; }
     answer(si, null, true);
   });
-  if(settings.skip && !r.hold) skipQuiet(r);
   if(r.t >= f.end) return finish();
   frame();
   state.raf = requestAnimationFrame(tick);
-}
-
-/* "Skip ahead": when no mechanic is on the arena and nothing happens for a while, jump to
-   just before the next timeline line or mechanic, so it still shows as "soon". A line that
-   just happened stays on screen first. */
-function skipQuiet(r: Run): void {
-  const f = r.fight;
-  if(activeSeg(f, r.t) >= 0 || f.events.some(e => e.t <= r.t && r.t - e.t < KEEP)) return;
-  const next = Math.min(f.end, ...f.segs.map(g => g.from).concat(f.events.map(e => e.t)).filter(x => x > r.t));
-  if(next - r.t > SOON + 2) r.t = next - SOON;
 }
 
 /** Score the next step of segment si: a click at p, the right spot (p null), a miss, or a
