@@ -23,7 +23,10 @@ interface Run {
   results: StepResult[][];   // one list per segment
   clicks: Click[];           // live: your clicks, kept for the replay; replay: the clicks to play back
   next: number;              // replay: the next click to play back
-  hold: "" | "user" | "wait";   // paused by you, or waiting for your click ("Fight pauses")
+  // Paused by you; or, with "Fight pauses", waiting for a missed click ("wait") or showing why a
+  // spot was wrong until you press Next step ("review").
+  hold: "" | "user" | "wait" | "review";
+  review: number;            // while hold is "review": the segment whose wrong answer shows
   last: number;              // performance.now() at the last frame
   shown: string;             // what the arena and panel show, so they redraw only on a change
 }
@@ -121,7 +124,7 @@ export function renderFight(): void {
 function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
   stopTimer();
   R = {mode, fight, t:0, results:fight.segs.map(() => []),
-       clicks:mode === "replay" ? clicks : [], next:0, hold:"", last:performance.now(), shown:""};
+       clicks:mode === "replay" ? clicks : [], next:0, hold:"", review:-1, last:performance.now(), shown:""};
   state.cur = {kind:"fight"};
   show('<div class="stage"><div class="arena">' + HUD + '<div id="f-arena"></div></div><div class="panel"><div id="f-panel"></div>' + controls(fight) + "</div></div>");
   const seek = el<HTMLInputElement>("f-seek");
@@ -129,14 +132,15 @@ function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
   seek.addEventListener("pointerup", () => { dragging = false; });
   seek.addEventListener("input", () => seekTo(Number(seek.value)));
   el("f-play").addEventListener("click", togglePause);
+  el("h-go").addEventListener("click", goOn);
   // A setting changed during the fight works at once. With "Fight goes on", a fight that waits
-  // for a missed spot goes on.
+  // for a missed or wrong spot goes on.
   wireSettings(() => {
     view.querySelectorAll<HTMLButtonElement>("[data-set]").forEach(b =>
       b.setAttribute("aria-pressed", String(b.dataset.val === (b.dataset.set === "fspeed" ? String(settings.speed) : settings.pause ? "yes" : "no"))));
     const r = R;
     if(!r) return;
-    if(!settings.pause && r.hold === "wait") r.hold = "";
+    if(!settings.pause && (r.hold === "wait" || r.hold === "review")) r.hold = "";
     r.shown = ""; r.last = performance.now();
     frame();
   });
@@ -177,7 +181,7 @@ export function seekTo(to: number): void {
     f.segs.forEach((g, si) => { while(r.results[si].length < g.due.length && g.due[r.results[si].length] <= to) answer(si, null, true, true); });
   }
   r.t = to;
-  if(r.hold === "wait") r.hold = "";
+  if(r.hold === "wait" || r.hold === "review") r.hold = "";
   r.shown = "";   // build the arena again: weapons that had not spawned yet must hide again
   r.last = performance.now();
   frame();
@@ -234,7 +238,8 @@ function answer(si: number, p: Point | null, missed = false, skipped = false): v
 
 function onClick(e: MouseEvent): void {
   const r = R;
-  if(!r || r.mode !== "live") return;
+  // While a wrong spot shows, a click on the arena does not answer the next step by accident.
+  if(!r || r.mode !== "live" || r.hold === "review") return;
   const si = activeSeg(r.fight, r.t);
   if(si < 0 || r.results[si].length >= r.fight.segs[si].due.length) return;
   const svg = e.currentTarget as SVGSVGElement, ctm = svg.getScreenCTM();
@@ -242,14 +247,26 @@ function onClick(e: MouseEvent): void {
   const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
   answer(si, [q.x, q.y]);
   if(r.hold === "wait") r.hold = "";
+  // With "Fight pauses", a wrong spot stops the fight until you read why and press Next step.
+  const res = r.results[si];
+  if(settings.pause && !res[res.length - 1].ok){ r.hold = "review"; r.review = si; }
   frame();
 }
 
-/** Pause or resume (the Pause button and the space bar). */
+/** Pause or resume (the Pause button and the space bar). From a wrong spot, it goes on. */
 export function togglePause(): void {
   const r = R;
   if(!r || r.hold === "wait") return;
-  r.hold = r.hold === "user" ? "" : "user";
+  r.hold = r.hold ? "" : "user";
+  r.last = performance.now();
+  frame();
+}
+
+/** Next step, after a wrong spot: the fight goes on. */
+function goOn(): void {
+  const r = R;
+  if(!r || r.hold !== "review") return;
+  r.hold = "";
   r.last = performance.now();
   frame();
 }
@@ -303,6 +320,7 @@ function drawPanel(r: Run, si: number): void {
     h += "<h2>" + esc(g.title) + "</h2>";
     if(j < g.due.length) h += '<div class="nowq"><span>Step ' + (j + 1) + " of " + g.due.length + ' &middot; hits in <b id="f-due"></b></span>' + esc(g.scene.steps[j].q) + "</div>";
     if(r.hold === "wait") h += '<p class="hint" style="margin-top:10px">The fight is paused. Click your spot.</p>';
+    if(r.hold === "review") h += '<p class="hint" style="margin-top:10px">Not there. The fight is paused. Press Next step above the arena, or Space, to go on.</p>';
     if(j > 0) h += lastBox(g, j - 1, res[j - 1]);
   } else {
     const nx = f.segs.find(x => x.from > r.t);
@@ -324,7 +342,7 @@ function updateLive(r: Run): void {
   const seek = document.getElementById("f-seek") as HTMLInputElement | null, play = document.getElementById("f-play");
   if(seek && !dragging) seek.value = r.t.toFixed(1);
   if(play){
-    const paused = r.hold === "user";
+    const paused = r.hold === "user" || r.hold === "review";
     play.innerHTML = paused ? "&#9654;" : "&#10074;&#10074;";
     play.setAttribute("aria-label", paused ? "Play" : "Pause");
   }
@@ -356,7 +374,7 @@ function updateLive(r: Run): void {
    prompt, and the seconds left to your hit. The ring around the boss shows that time too.
    The HUD is built once per run; each frame only changes its text, widths and classes. */
 const HUD = '<div class="hud"><div class="hcast" id="h-cast"><i id="h-fill"></i><span id="h-name"></span><b id="h-left"></b></div>' +
-  '<div class="hq" id="h-q"><b class="hcount" id="h-count"></b><span id="h-text"></span></div></div>';
+  '<div class="hq" id="h-q"><b class="hcount" id="h-count"></b><span id="h-text"></span><button type="button" class="btn" id="h-go" hidden>Next step</button></div></div>';
 const CAST_MAX = 10;   // the longest a cast bar takes to fill, in seconds
 const URGENT = 3;      // the last seconds before a hit turn the prompt and the ring red
 
@@ -376,6 +394,17 @@ function updateHud(r: Run, si: number): void {
     put("h-name", casting ? e.name : "Next: " + e.name);
     put("h-left", left > 0 ? (casting ? left.toFixed(1) : Math.round(left) + " s") : "");
   } else { cast.classList.add("idle"); fill.style.width = "0%"; put("h-name", "No more casts"); put("h-left", ""); }
+  // After a wrong spot with "Fight pauses": why it was wrong, and Next step to go on.
+  const go = document.getElementById("h-go");
+  if(go) go.hidden = r.hold !== "review";
+  if(r.hold === "review"){
+    const rg = f.segs[r.review], rj = r.results[r.review].length - 1;
+    box.className = "hq done bad";
+    put("h-count", "✗");
+    put("h-text", "Not there. " + rg.scene.steps[rj].a);
+    if(ring) ring.style.display = "none";
+    return;
+  }
   // Your prompt and the time left, or the next mechanic.
   const g = si >= 0 ? f.segs[si] : null, j = g ? r.results[si].length : 0;
   if(g && j < g.due.length){

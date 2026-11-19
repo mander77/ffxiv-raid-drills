@@ -18,8 +18,9 @@ export interface Deck<T> { items: T[]; i: number; right: number; done: number }
 // TS note: Cur is a discriminated union on `kind`. Code checks `c.kind === "map"`
 // before it touches map-only fields such as `c.results`.
 /** The map drill on screen. `code` rebuilds its pattern; `peek` is the answered step whose answer
-    shows; `setupOpen` unfolds the setup. */
-export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; code: string; results: StepResult[]; counted: boolean; waiting?: boolean; peek?: number; setupOpen?: boolean }
+    shows; `setupOpen` unfolds the setup; `stop` holds the drill after a wrong spot until you press
+    Next step. */
+export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; code: string; results: StepResult[]; counted: boolean; waiting?: boolean; stop?: boolean; peek?: number; setupOpen?: boolean }
 export interface McqCur { kind: "mcq"; cat: QuizCat | "pressure"; item: QuizItem; q: Question; opts: Option[]; answered: boolean; pick: number; slow: boolean }
 export type Cur = MapCur | McqCur | { kind: "pstart" } | { kind: "pdone" } | { kind: "sheet" } | { kind: "fight" } | { kind: "ability"; i: number };
 export interface PressureRun { queue: QuizItem[]; i: number; right: number; wrong: number; froze: number }

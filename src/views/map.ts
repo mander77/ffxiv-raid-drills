@@ -93,7 +93,7 @@ function replaySpawns(): void {
 /** Start the same drill again from step 1, with the same pattern. */
 function restart(): void {
   const c = run();
-  c.results = []; c.waiting = false; c.peek = undefined; c.setupOpen = false;
+  c.results = []; c.waiting = false; c.stop = false; c.peek = undefined; c.setupOpen = false;
   renderMap(false);
 }
 
@@ -192,7 +192,7 @@ export function drawMapPanel(): void {
     h += '<div class="rule"><span>Rule</span><strong>' + esc(sc.rule) + "</strong></div>";
     h += '<div class="actions"><button type="button" class="btn" id="map-next">Next drill</button>' + restartBtn + newBtn + '<span class="hint"><kbd>Enter</kbd> next</span></div>';
   } else {
-    h += '<p class="hint" style="margin-top:12px">' + (n === 0 ? "Click the arena. The green area shows the right spot after you click." : "Click the arena for the next step.") + "</p>";
+    h += '<p class="hint" style="margin-top:12px">' + (n === 0 ? "Click the arena. The green area shows the right spot after you click." : c.stop ? "Not there. Press Next step above the arena, or Enter, to go on." : "Click the arena for the next step.") + "</p>";
     const row = (sc.spawnPlay ? '<button type="button" class="btn ghost" id="map-replay">Watch the spawns again</button>' : "") + (n > 0 ? restartBtn : "") + newBtn;
     if(row) h += '<div class="actions">' + row + "</div>";
   }
@@ -212,6 +212,11 @@ export function drawMapPanel(): void {
     el("m-hud").innerHTML = '<div class="hud"><div class="hq done ' + (all ? "ok" : "bad") + '"><b class="hcount">' + (all ? "&#10003;" : "&#10007;") + "</b><span>" + result +
       '</span><button type="button" class="btn" id="hud-next">Next drill</button></div></div>';
     el("hud-next").addEventListener("click", nextMap);
+  } else if(c.stop){
+    // A wrong spot: say so where your eyes are, give the right answer, and wait for Next step.
+    el("m-hud").innerHTML = '<div class="hud"><div class="hq done bad"><b class="hcount">&#10007;</b><span><b>Not there.</b> ' + esc(sc.steps[n - 1].a) +
+      '</span><button type="button" class="btn" id="hud-step">Next step</button></div></div>';
+    el("hud-step").addEventListener("click", nextStep);
   } else el("m-hud").innerHTML = hudPrompt((n + 1) + "/" + sc.steps.length, sc.steps[n].q);
   document.getElementById("setup-toggle")?.addEventListener("click", () => { c.setupOpen = !c.setupOpen; drawMapPanel(); });
   p.querySelectorAll<HTMLButtonElement>("[data-peek]").forEach(b => b.addEventListener("click", () => {
@@ -227,7 +232,9 @@ export function drawMapPanel(): void {
 export function onArenaClick(e: MouseEvent): void {
   const c = state.cur;
   if(!c || c.kind !== "map" || c.results.length >= c.scene.steps.length) return;
-  // The last answer stays on screen until the next click, and that click answers the next step.
+  // After a wrong spot the drill waits for Next step, so a click here does not answer by accident.
+  if(c.stop) return;
+  // After a right spot the answer stays on screen until the next click, which answers the next step.
   c.waiting = false;
   c.peek = undefined;   // show the answer to this new click, not a step picked earlier
   const svg = e.currentTarget as SVGSVGElement, ctm = svg.getScreenCTM();
@@ -240,7 +247,7 @@ export function onArenaClick(e: MouseEvent): void {
   const zone = rotZone(base, c.k);
   const ok = inZone(p, zone);
   c.results.push({p, ok, z:zone, drop:step.drop ? (ok ? p : zoneCenter(zone)) : null});
-  if(c.results.length < c.scene.steps.length) c.waiting = true;
+  if(c.results.length < c.scene.steps.length){ c.waiting = true; c.stop = !ok; }
   else if(!c.counted){
     c.counted = true;
     const all = c.results.every(r => r.ok), d = getDeck("map");
@@ -249,5 +256,10 @@ export function onArenaClick(e: MouseEvent): void {
   drawFeedback(); drawMapPanel();
 }
 
-export function nextStep(): void { run().waiting = false; drawFeedback(); drawMapPanel(); }
+/** Next step (the HUD button, or Enter): clear the last answer and ask the next step. */
+export function nextStep(): void {
+  const c = run();
+  c.waiting = false; c.stop = false; c.peek = undefined;
+  drawFeedback(); drawMapPanel();
+}
 export function nextMap(): void { getDeck("map").i++; renderMap(true); }
