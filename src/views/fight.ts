@@ -3,7 +3,7 @@
 import { LS, esc, el } from "../util";
 import { state, view, stopTimer, setChoices } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter } from "../geometry";
-import { sceneSVG } from "../arena";
+import { sceneSVG, drawOverlay } from "../arena";
 import { paintArena } from "./map";
 import { tabHead, hudPrompt, segRow } from "./common";
 import { patternRows, wirePattern } from "./pattern";
@@ -12,7 +12,7 @@ import { BOSS } from "../data/drills";
 import { ABILITIES } from "../data/abilities";
 import { tlNav, wireNav, markNav } from "./tlnav";
 import { showRoute, type Route } from "../router";
-import type { Boss, Point, Scene, StepResult } from "../types";
+import type { Boss, Overlay, Point, Scene, StepResult } from "../types";
 
 /** live = you click; demo = the right clicks play by themselves; replay = your clicks play back. */
 type Mode = "live" | "demo" | "replay";
@@ -406,9 +406,9 @@ function updateLive(r: Run): void {
 
 /* ---------- damage going out ---------- */
 /* Every hit of the fight, so Real time shows damage going out also where no drill runs. A raidwide
-   flashes the arena floor, a tank buster pulses a ring at the boss, shared hits (a stack or a
-   tower the party shares) flash softer, and the enrage flashes long and dark. Every hit, the
-   other AoEs too, shows its name over the arena for a moment. The colours follow the fight list. */
+   flashes the arena floor, a tank buster draws the tanks and the hit on them, shared hits (a
+   stack or a tower the party shares) flash softer, and the enrage flashes long and dark. Every
+   hit, the other AoEs too, shows its name over the arena for a moment. */
 type HitKind = "raid" | "tank" | "shared" | "enrage" | "aoe";
 interface Hit { t: number; name: string; kind: HitKind }
 const HIT_LABEL: Record<HitKind, string> = {raid:"Raidwide", tank:"Tank buster", shared:"Shared hits", enrage:"Enrage", aoe:"AoE"};
@@ -445,12 +445,27 @@ function showHit(r: Run, h: Hit): void {
   if(label){ label.textContent = HIT_LABEL[h.kind] + " · " + h.name; restart(label, "hitlbl show " + h.kind); }
   if(fx && (h.kind === "raid" || h.kind === "shared" || h.kind === "enrage")) restart(fx, "hitfx " + h.kind);
   if(h.kind === "tank"){
-    // A ring that grows out from the boss's hitbox and fades. It removes itself when done.
-    document.getElementById("arena-svg")?.insertAdjacentHTML("beforeend",
-      '<circle class="fx-tank" cx="' + r.bossAt[0] + '" cy="' + r.bossAt[1] + '" r="12"/>');
-    const pulse = document.querySelector("#arena-svg .fx-tank:last-of-type");
-    setTimeout(() => pulse?.remove(), 900);
+    // The tanks, where they take the buster, and the hit on them. It removes itself when it has faded.
+    document.getElementById("arena-svg")?.insertAdjacentHTML("beforeend", '<g class="fx-buster">' + busterPieces(h.name, r.bossAt).map(drawOverlay).join("") + "</g>");
+    const hit = document.querySelector("#arena-svg .fx-buster:last-of-type");
+    setTimeout(() => hit?.remove(), BUSTER_MS);
   }
+}
+
+const BUSTER_MS = 1500;
+/** The tanks for a buster, and what hits them. Great Wall of Fire is a line buster the two tanks
+    share: they stand together in front of the boss (he faces north), and the line runs from him
+    through them. Foregone Fatality puts a buster on each tethered tank: the MT on the NE tether,
+    the OT on the SW tether, away from the party stack. */
+function busterPieces(name: string, boss: Point): Overlay[] {
+  const tank = (p: Point, l: string): Overlay[] => [{t:"target", x:p[0], y:p[1]}, {t:"mark", x:p[0], y:p[1], l, r:"T"}];
+  if(name.startsWith("Great Wall of Fire")){
+    const front: Point = [boss[0], boss[1] - 17];
+    return [{t:"band", x:boss[0], y:boss[1], x2:boss[0], y2:-20, w:10}, {t:"aoe", x:front[0], y:front[1], r:7},
+      ...tank([front[0] - 3, front[1]], "MT"), ...tank([front[0] + 3, front[1]], "OT")];
+  }
+  const mt: Point = [boss[0] + 14, boss[1] - 14], ot: Point = [boss[0] - 14, boss[1] + 14];
+  return [{t:"aoe", x:mt[0], y:mt[1], r:6}, {t:"aoe", x:ot[0], y:ot[1], r:6}, ...tank(mt, "MT"), ...tank(ot, "OT")];
 }
 
 /* ---------- the HUD ---------- */
