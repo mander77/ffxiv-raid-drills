@@ -4,7 +4,7 @@
 //
 // Sizes come from BossMod's M11S module (awgil/ffxiv_bossmod, RM11STheTyrant), which lists each
 // ability's shape in yalms. The arena is 40 yalms across and 100 units in this app.
-import { DEG, leftOf, vadd } from "../geometry";
+import { DEG, leftOf, unit, vadd } from "../geometry";
 import type { Overlay, Point } from "../types";
 
 /** Yalms to arena units. */
@@ -25,6 +25,14 @@ export const PUDDLE_R = yalms(6);
     the arena ("range 60 30-degree cone"). */
 export const PROTEAN_HALF = 15;
 export const PROTEAN_LEN = yalms(60);
+/** The weapon scythe's donut: safe only within 5 yalms of him ("range 5-60 donut"). Its
+    proteans hit at the same time. */
+export const SCYTHE_SAFE = yalms(5);
+/** A line stack's full width: the Meteorain charge (Fearsome Fireball) and Two-way and Four-way
+    Fireball ("range 60 width 6 rect"). */
+export const LINE_STACK_W = yalms(6);
+/** A Hurricane Explosion line's full width, in Dance of Domination ("range 60 width 10 rect"). */
+export const HURRICANE_W = yalms(10);
 /** Raw Steel Trophy, scythe: half the angle of the cone on each tank ("range 60 90-degree
     cone") and of the cone the party shares ("range 60 45-degree cone"), in degrees. */
 export const RAW_TANK_HALF = 45;
@@ -41,6 +49,13 @@ export const ATOMIC_R = yalms(5);
 
 /** A circle that hits everything inside it. */
 export const aoe = (c: Point, r: number): Overlay => ({t:"aoe", x:c[0], y:c[1], r});
+/** A donut around c: it hits everything from r1 out to r2. */
+export const donut = (c: Point, r1: number, r2 = 150): Overlay => ({t:"donut", x:c[0], y:c[1], r1, r2});
+/** A line from `from` through `to` and on past the arena edge, w units wide: a line stack by default. */
+export const lineTo = (from: Point, to: Point, w = LINE_STACK_W): Overlay => {
+  const d = unit([to[0] - from[0], to[1] - from[1]]);
+  return {t:"band", x:from[0], y:from[1], x2:from[0] + d[0] * 150, y2:from[1] + d[1] * 150, w};
+};
 
 /** A cone from c toward a (degrees clockwise from north), `half` degrees to each side, r units long. */
 export function cleave(c: Point, a: number, half = 16, r = 80): Overlay {

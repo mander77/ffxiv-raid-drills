@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, stackToward, changes, assaultScene, ultimateScene, facingNext, type Run } from "../src/data/drills";
+import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, stackToward, changes, assaultScene, ultimateScene, facingNext, jumpsNext, DANCE_LINES, DANCE_PAIRS, type Run } from "../src/data/drills";
 import { angOf, inZone, zoneCenter } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, StepResult, Zone } from "../src/types";
 
@@ -248,7 +248,9 @@ test("weapon runs: before each jump, the boss turns to face the weapon he jumps 
         assert.deepEqual([b.x, b.y], [now.x, now.y], name + ": he turns where he stands");
         assert.closeTo(b.f ?? -1, angOf([next.x - now.x, next.y - now.y]), 1e-9, name + " after weapon " + n);
       }
+      for(let n = 0; n < R.states.length - 1; n++) assert.isTrue(jumpsNext(sc, n), name + ": a jump after step " + n);
       const last = R.states[R.states.length - 1];
+      assert.isFalse(jumpsNext(sc, R.states.length - 1), name + ": no jump after the last weapon");
       assert.equal(facingNext(sc, R.states.length - 1, last), last, name + ": no jump after the last weapon");
     }
   }
@@ -262,4 +264,18 @@ test("Void Stardust stack toward the first weapon: a spot right next to the weap
   assert.ok(inZone(next, z), "5 units past the weapon, away from the last puddle");
   assert.ok(inZone(z.label, z), "the shown spot");
   assert.notOk(inZone(q, z), "inside the last puddle");
+});
+
+test("Dance of Domination: every pair spot is clear of the 10-yalm Hurricane Explosion lines", () => {
+  // Distance from p to the line through a and b.
+  const off = (p: Point, a: Point, b: Point): number => Math.abs((b[0] - a[0]) * (a[1] - p[1]) - (a[0] - p[0]) * (b[1] - a[1])) / Math.hypot(b[0] - a[0], b[1] - a[1]);
+  for(const [who, c] of Object.entries(DANCE_PAIRS)) for(const l of DANCE_LINES){
+    const d = off(c, [l.x, l.y], [l.x2, l.y2]);
+    // Out of half the line's width (12.5). H1 and H2 also have room for the drill's 5-unit answer circle.
+    assert.isAbove(d, 12.5 + (who[0] === "H" ? 5 : 0), who + " is too close to the line from " + l.x + "," + l.y);
+  }
+  // The H1 and H2 answers are those spots.
+  const drill = MAPS.find(m => m.id === "m-dance");
+  if(!drill) throw new Error("missing drill m-dance");
+  for(const s of SLOTS) assert.deepEqual(zoneOf(drill.build(s, null).steps[0].z), {c:DANCE_PAIRS[s], r:5});
 });

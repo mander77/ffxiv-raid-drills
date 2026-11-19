@@ -2,7 +2,7 @@
 import { S, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry";
-import { HITBOX, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, axeHit, cleave, swordCross, swordPocket } from "./attacks";
+import { HITBOX, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, donut, lineTo, swordCross, swordPocket } from "./attacks";
 import type { Boss, MapDrill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
@@ -67,7 +67,8 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       // Proteans: a cone on every player, so each player takes a clock spot close around him.
       // The point and the butt (H2 and H1) are two of the eight spots, opposite each other.
       const pointAt = angOf(scytheAxis(w, i));
-      reveal = Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, PROTEAN_HALF, PROTEAN_LEN));
+      // And a donut: only close to him is safe, so the clock spots are close in.
+      reveal = [donut(P, SCYTHE_SAFE), ...Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, PROTEAN_HALF, PROTEAN_LEN))];
     } else {
       // Safe pocket: behind him (f < -HW) and on your side (sd > HW), outside both arms of the
       // cross. Anywhere in it inside the arena is right, and the drawn pocket is the same area.
@@ -156,6 +157,11 @@ export function buildUltimate(s: Slot, forceCw?: boolean): Run & {cw: boolean} {
     The picks were checked against the known orders when they were saved. */
 const orderFrom = (pick?: string): WeaponType[] | undefined => pick ? pick.split("-") as WeaponType[] : undefined;
 
+/** True when the boss jumps once `n` steps of the scene are done: his next place is elsewhere. */
+export function jumpsNext(sc: Scene, n: number): boolean {
+  const now = sc.bossAt?.(n), next = sc.bossAt?.(n + 1);
+  return Boolean(now && next && (next.x !== now.x || next.y !== now.y));
+}
 /** The boss before a jump: he turns to face the weapon he jumps to next. `n` steps of the scene
     are done. He stays as he is when no jump comes next. */
 export function facingNext(sc: Scene, n: number, boss: Boss): Boss {
@@ -413,6 +419,11 @@ export function heldWeapon(type: WeaponType): Overlay[] {
    west and east walls, and the healers far out south-southwest and south-southeast. The drill and
    the Mechanics pictures both use these spots. */
 export const AXE_TANKS: Point = [50, 35];
+/* Dance of Domination, with the open side south: the cuts in the floor, and the four pair spots
+   from wtfdig (Toxic), all clear of the 10-yalm Hurricane Explosion lines along the cuts. */
+export const DANCE_LINES = [{x:0, y:12, x2:100, y2:12}, {x:12, y:0, x2:12, y2:100}, {x:88, y:0, x2:88, y2:100},
+  {x:0, y:0, x2:100, y2:100}, {x:100, y:0, x2:0, y2:100}, {x:50, y:0, x2:50, y2:100}];
+export const DANCE_PAIRS: Record<string, Point> = {MT:[27.5, 50], OT:[72.5, 50], H1:[31.5, 93.5], H2:[68.5, 93.5]};
 /** Clock spots, in degrees clockwise from the boss's front: the standard spots on wtfdig and in
     BossMod's preset. The tanks are front and back, and the healers are on his sides. */
 export const CLOCK: Record<string, number> = {MT:0, R2:45, H2:90, M2:135, OT:180, M1:225, H1:270, R1:315};
@@ -450,10 +461,10 @@ export const MAPS: MapDrill[] = [
     build:(s, v, pick)=>voidIntoWeapons(s, v === "spread", buildAssault2(s, orderFrom(pick)))},
   {id:"m-dance", order:8.1, rotate:true, phase:P1, time:"2:31", title:"Dance of Domination: pairs",
     build:s=>({setup:"The seven hits are over and the lines are on the floor. Find the side with no outer line. That open side is new south.",
-      boss:{x:50, y:50, f:null}, overlays:[
-        {t:"lineaoe",x:0,y:12,x2:100,y2:12},{t:"lineaoe",x:12,y:0,x2:12,y2:100},{t:"lineaoe",x:88,y:0,x2:88,y2:100},
-        {t:"lineaoe",x:0,y:0,x2:100,y2:100},{t:"lineaoe",x:100,y:0,x2:0,y2:100},{t:"lineaoe",x:50,y:0,x2:50,y2:100}],
-      steps:[{q:"Click your pair spot.", z:S(s,{c:[33,91],r:8},{c:[67,91],r:8}), a:S(s,"Relative southwest, the outer spot, with R1.","Relative southeast, the outer spot, with R2.")}],
+      boss:{x:50, y:50, f:null}, overlays:DANCE_LINES.map((l): Overlay => ({t:"lineaoe", ...l})),
+      steps:[{q:"Click your pair spot.", z:{c:DANCE_PAIRS[s], r:5}, a:S(s,"Relative southwest, the outer spot, with R1.","Relative southeast, the outer spot, with R2."),
+        // The lines explode as the pairs land (Hurricane Explosion, 10 yalms wide).
+        reveal:DANCE_LINES.map((l): Overlay => ({t:"band", ...l, w:HURRICANE_W}))}],
       rule:"Open side = new south. H1 and R1 relative SW, H2 and R2 relative SE."})},
   {id:"m-ultimate", order:11.5, random:true, follows:{pick:"ult"}, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: six weapons",
     build:(s, _v, pick)=>ultimateScene(buildUltimate(s, pick ? pick === "cw" : undefined))},
@@ -512,11 +523,14 @@ export const MAPS: MapDrill[] = [
   {id:"m-ecl-two", order:26.5, variants:["north","south"], follows:{variant:"wall"}, phase:P4, time:"9:31", title:"Ecliptic Stampede: Two-way Fireball",
     build:(_s, v)=>({setup:"You were marked and dropped your puddles along the " + (v ?? "north").toUpperCase() + " wall. Now the boss casts Two-way Fireball: two line stacks, east and west.",
       boss:BOSS, overlays:[...NPUD, ...SPUD],
-      steps:[{q:"Which line stack do you join? Click it.", z: v === "south" ? {rect:[60,43,84,57]} : {rect:[16,43,40,57]}, a: v === "south" ? "The east line stack." : "The west line stack."}],
+      steps:[{q:"Which line stack do you join? Click it.", z: v === "south" ? {rect:[60,43,84,57]} : {rect:[16,43,40,57]}, a: v === "south" ? "The east line stack." : "The west line stack.",
+        reveal:[lineTo([50, 50], [0, 50]), lineTo([50, 50], [100, 50])]}],
       rule:"Two-way: north puddles = west, south puddles = east."})},
   {id:"m-ecl-four", order:26.6, variants:["north","south"], follows:{variant:"wall"}, phase:P4, time:"9:31", title:"Ecliptic Stampede: Four-way Fireball",
     build:(_s, v)=>({setup:"You were marked and dropped your puddles along the " + (v ?? "north").toUpperCase() + " wall. Now the boss casts Four-way Fireball: two-player stacks on the four closest.",
       boss:BOSS, overlays:[...NPUD, ...SPUD],
-      steps:[{q:"Where do you bait?", z: v === "south" ? {c:[57,43],r:5.5} : {c:[43,43],r:5.5}, a: v === "south" ? "NE, on the boss hitbox ring." : "NW, on the boss hitbox ring."}],
+      steps:[{q:"Where do you bait?", z: v === "south" ? {c:[57,43],r:5.5} : {c:[43,43],r:5.5}, a: v === "south" ? "NE, on the boss hitbox ring." : "NW, on the boss hitbox ring.",
+        // Four line stacks from the boss through the four closest pairs: NW, NE, SW and SE.
+        reveal:[315, 45, 225, 135].map(a => lineTo([50, 50], POINT_AT(a, 10)))}],
       rule:"Four-way: north puddles = NW, south puddles = NE. M1 is always SW, M2 always SE."})}
 ];

@@ -8,7 +8,7 @@ import { paintArena } from "./map";
 import { tabHead, hudPrompt, segRow } from "./common";
 import { patternRows, wirePattern } from "./pattern";
 import { buildFight, clock, choicesText, CHOICE_ROWS, RANDOM, type Choices, type Fight, type FightSeg } from "../data/fight";
-import { BOSS, facingNext } from "../data/drills";
+import { BOSS, facingNext, jumpsNext } from "../data/drills";
 import { WALL_W } from "../data/attacks";
 import { ABILITIES, CATS, catsAt, type Cat } from "../data/abilities";
 import { tlNav, wireNav, markNav, marks } from "./tlnav";
@@ -328,9 +328,11 @@ function frame(): void {
   // In the watched run, the green answer and what the mechanic did show for GREEN_FOR seconds
   // after the hit, then clear, so the next blue target is the only area on the floor.
   const lastHit = g && res.length ? g.due[res.length - 1] : -Infinity, showAnswer = res.length > 0 && (r.mode !== "demo" || r.t - lastHit < GREEN_FOR);
-  // After a weapon hits, he turns to face the next weapon before he jumps to it.
+  // After a weapon hits, he turns to face the next weapon. He lands on it JUMP_LEAD seconds
+  // before it hits.
   const facing = res.length > 0 && r.t >= lastHit + TURN_AFTER;
-  const key = where + ":" + res.length + ":" + turned + ":" + facing + ":" + r.hold + ":" + showAnswer;
+  const jumped = Boolean(g && res.length < g.due.length && r.t >= g.due[res.length] - JUMP_LEAD && jumpsNext(g.scene, res.length));
+  const key = where + ":" + res.length + ":" + turned + ":" + facing + ":" + jumped + ":" + r.hold + ":" + showAnswer;
   if(key !== r.shown){
     const fresh = r.shown.split(":")[0] !== where;   // a new scene: build the arena again
     r.shown = key;
@@ -341,10 +343,11 @@ function frame(): void {
       // The countdown ring goes on top of everything and lets clicks through (see .tring).
       el("arena-svg").insertAdjacentHTML("beforeend", '<circle id="tring" class="tring" r="16" pathLength="100" stroke-dasharray="100"/>');
     }
-    let boss: Boss | null = sc.bossAt ? sc.bossAt(res.length) : (sc.boss ? rotOverlay(sc.boss, k) : null);
+    let boss: Boss | null = sc.bossAt ? sc.bossAt(res.length + (jumped ? 1 : 0)) : (sc.boss ? rotOverlay(sc.boss, k) : null);
     // In the middle, before his cast, he faces no weapon. When the cast starts he turns to the first one.
     if(boss && g?.turn && boss.x === 50 && boss.y === 50) boss = {...boss, f:turned ? g.turn.f : null};
-    if(boss && facing) boss = facingNext(sc, res.length, boss);
+    // Once he has landed, he faces the way he jumped.
+    if(boss && facing && !jumped) boss = facingNext(sc, res.length, boss);
     paintArena(el("arena-svg"), sc, k, res, showAnswer, boss);
     // The ring sits around the boss, and moves with him when he jumps. It starts at the top.
     const c = boss ?? {x:50, y:50};
@@ -429,6 +432,9 @@ const GREEN_FOR = 1.5;
     gives this time: cactbot has only the jump itself, about 2 seconds before the next hit, and
     the hits are about 5 seconds apart. So this is an estimate, and he turns well before he jumps. */
 const TURN_AFTER = 1.0;
+/** How long before a weapon hits the boss lands on it, in seconds: cactbot's "--jump N--" lines
+    come 2.0 seconds before each "Assault Evolved N" hit, in both sets. */
+const JUMP_LEAD = 2.0;
 /* In "Watch the right moves" and "Your run, played back", a marker with your role runs the route:
    it waits on each spot until the hit lands, then runs to the next one at run speed. Its target
    (the spot for the next hit) shows in blue: a dotted line from the marker and a ring on the exact
