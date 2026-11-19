@@ -58,12 +58,16 @@ const aoe = (p: Point, r: number): Overlay => ({t:"aoe", x:p[0], y:p[1], r});
 const RAIDWIDE = aoe(CENTER, 72);
 /** Where the role marks in a list stand. */
 const spotsOf = (os: Overlay[]): Point[] => os.flatMap((o): Point[] => o.t === "mark" ? [[o.x, o.y]] : []);
+/** Every spread and stack in this fight is 6 yalms (15 units): Raw Steel, Comet, Crushing Comet,
+    Eye of the Hurricane and Massive Meteor (BossMod's M11S module). */
+const SPREAD_R = 15;
 /** A spread: one AoE on every player. */
-const spreadHits = (os: Overlay[], r = 5): Overlay[] => spotsOf(os).map(p => aoe(p, r));
-/** A stack: one AoE that the whole group shares, just big enough to cover it. */
+const spreadHits = (os: Overlay[], r = SPREAD_R): Overlay[] => spotsOf(os).map(p => aoe(p, r));
+/** A stack: one AoE that the whole group shares, centered on the group, never smaller than the
+    6-yalm stack. */
 function stackHit(os: Overlay[], pad = 4.5): Overlay {
   const ps = spotsOf(os), c: Point = [ps.reduce((n, p) => n + p[0], 0) / ps.length, ps.reduce((n, p) => n + p[1], 0) / ps.length];
-  return aoe(c, Math.max(0, ...ps.map(p => Math.hypot(p[0] - c[0], p[1] - c[1]))) + pad);
+  return aoe(c, Math.max(SPREAD_R, Math.max(0, ...ps.map(p => Math.hypot(p[0] - c[0], p[1] - c[1]))) + pad));
 }
 /** Proteans: a cone from `from` toward every player. */
 const proteans = (from: Point, os: Overlay[], r = 40): Overlay[] => spotsOf(os).map(p => cleave(from, angOf([p[0] - from[0], p[1] - from[1]]), 9, r));
@@ -73,8 +77,9 @@ const coneTo = (from: Point, to: Point, half = 12, r = 60): Overlay => cleave(fr
 const lineTo = (from: Point, to: Point, w = 9): Overlay => { const d = unit([to[0] - from[0], to[1] - from[1]]); return {t:"band", x:from[0], y:from[1], x2:from[0] + d[0] * 150, y2:from[1] + d[1] * 150, w}; };
 /** A donut around c: safe inside r1. */
 const donut = (c: Point, r1: number): Overlay => ({t:"donut", x:c[0], y:c[1], r1, r2:80});
-/** The sword: a cross through the boss along the way he faces. */
-const swordCross = (c: Point, f: number, w = 14): Overlay[] => [lineTo(at(f + 180, 150, c), c, w), lineTo(at(f + 270, 150, c), c, w)];
+/** The sword: a cross through the boss along the way he faces. Each arm is 5 yalms each side of
+    its center line (BossMod: "width 10 cross"), so 25 units wide. */
+const swordCross = (c: Point, f: number, w = 25): Overlay[] => [lineTo(at(f + 180, 150, c), c, w), lineTo(at(f + 270, 150, c), c, w)];
 /** One half of the arena, as a cleave: front is "north" for a boss facing north. */
 const half = (side: "north" | "south"): Overlay => ({t:"lane", rect:side === "north" ? [0, 0, 100, 50] : [0, 50, 100, 100]});
 
@@ -209,7 +214,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
       show([...stackOn("MT"), tag(68, 83, "STACK")]),
       show([...stackOn("R1"), tag(68, 83, "STACK, RANDOM DPS")]),
       show([...spreadHits(stackedMarks), ...ALL.map(([l]) => target(inStack(l))), tag(68, 83, "8 STACKS")])]}; },
-  "k-void-spread": s => { const gaps = cometSpread(s)(VOID_RESULTS), spreadWith = (p: Point): Overlay[] => spreadHits([...FIXED_SPREAD_MARKS, you(s, p)], 6);
+  "k-void-spread": s => { const gaps = cometSpread(s)(VOID_RESULTS), spreadWith = (p: Point): Overlay[] => spreadHits([...FIXED_SPREAD_MARKS, you(s, p)]);
     return {overlays:[...PUDDLE_PIECES, ...FIXED_SPREAD_MARKS], boss:BOSS, answer:[gaps], options:[
       hit(youIn(s, gaps), spreadWith(zoneCenter(gaps))), hit(youAt(s, [37, 71]), spreadWith([37, 71])),
       show([stackHit(stackedMarks), ...stackedMarks]), hit(youAt(s, [50, 58], 9), [donut(CENTER, 11)])]}; },
@@ -217,8 +222,8 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
     const waitAt = S<Point>(s, [83, 50], [50, 83]);
     return {overlays:[...PUDDLE_PIECES, ...named(R), ...FIXED_SPREAD_MARKS], boss:STILL, answer:[toward],
       note:"Example: the first weapon of the second set is a scythe in the west.", options:[
-        show([aoe(lb, 6), you(s, lb), guide(lb, R.W[0].p)], [toward]),
-        show([aoe(waitAt, 6), you(s, waitAt), say("WAIT FOR HIS FACING", 8)], [cometSpread(s)(VOID_RESULTS)]),
+        show([aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], [toward]),
+        show([aoe(waitAt, SPREAD_R), you(s, waitAt), say("WAIT FOR HIS FACING", 8)], [cometSpread(s)(VOID_RESULTS)]),
         youAt(s, [70, 44]),
         show([RAIDWIDE, ...stackedMarks, say("MITIGATE, STAY PUT", 8)])]}; },
   "k-assault-2": s => { const R = buildRun(s, [turned(135, "scythe", 0), turned(270, "axe", 40), turned(0, "sword", -45)]), W = R.W;
@@ -229,7 +234,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
       show([you(s, [24, 33]), ...path([W[1].p]), numAt(W[1], "1")], [circle(W[1].p, 9)])]}; },
   "k-void-2": s => { const gaps = cometSpread(s)(VOID_RESULTS), pairs = pairsAt(GAPS), me = you(s, zoneCenter(gaps));
     return {overlays:[...PUDDLE_PIECES, tag(50, 8, "1ST ENDED: STACK")], boss:BOSS, after:[tag(50, 94, "2ND ENDS: SPREAD"), ...FIXED_SPREAD_MARKS], answer:[gaps], options:[
-      show([...spreadHits([...FIXED_SPREAD_MARKS, me], 6), ...FIXED_SPREAD_MARKS, me], [gaps]),
+      show([...spreadHits([...FIXED_SPREAD_MARKS, me]), ...FIXED_SPREAD_MARKS, me], [gaps]),
       show([stackHit(stackedMarks), ...stackedMarks]),
       show([...pairs.map(p => stackHit(p)), ...pairs.flat()]),
       show([aoe([50, 36], 7), mark(50, 36, "MT", "T"), target([50, 36]), say("TANK BUSTER", 94)])]}; },

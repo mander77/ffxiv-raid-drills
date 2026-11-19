@@ -23,15 +23,15 @@ export const LOOK = 0.5;
     so on is a short run away. Pre-positioning is a big part of the raid. */
 export const HOME: Point = [50, 56];
 /** A quiet stretch at least this long (seconds from a hit to the next mechanic) sends the player
-    to the next mechanic's pre-position. */
+    to HOME, when the next mechanic has no pre-position of its own. */
 export const REST_GAP = 8;
 
 /** One stop on the route: the spot `p`, the hit at `hit` (seconds into the fight) that the spot is
     for, and `show`, when that mechanic appears on the arena. `si` and `j` say which segment and
-    step of the fight it answers. `pre` is where to pre-position before that mechanic (the
-    segment's `pre`, or HOME). A `look` stop is a look-ahead step: it has an answer (the click),
-    but the player does not move there, so the runner skips it. */
-export interface Stop { p: Point; hit: number; show: number; si: number; j: number; pre: Point; look?: boolean }
+    step of the fight it answers. `pre` is the segment's own pre-position, when it has one: a
+    first move known in advance. A `look` stop is a look-ahead step: it has an answer (the
+    click), but the player does not move there, so the runner skips it. */
+export interface Stop { p: Point; hit: number; show: number; si: number; j: number; pre?: Point; look?: boolean }
 
 const dist = (a: Point, b: Point): number => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
@@ -53,15 +53,15 @@ function middleOf(z: Zone, from: Point): Point {
     steps before it (a puddle, for example) is worked out from these answers. */
 export function rightRoute(f: Fight): Stop[] {
   return f.segs.flatMap((g, si) => {
-    const res: StepResult[] = [], pre = g.pre ?? HOME;
-    let from = pre;   // the player meets the mechanic at its pre-position
+    const res: StepResult[] = [], pre = g.pre;
+    let from = pre ?? HOME;   // the player meets the mechanic at its pre-position
     return g.scene.steps.flatMap((st, j): Stop[] => {
       const base = st.zf ? st.zf(res) : st.z;
       if(!base) return [];
       const z = rotZone(base, g.k), p = st.stand && !st.look ? rot(st.stand, g.k) : middleOf(z, from);
       res.push({p, ok:inZone(p, z), z, drop:st.drop ? p : null});
       if(!st.look) from = p;   // a look-ahead does not move the player
-      return [{p, hit:g.due[j], show:g.from, si, j, pre, ...(st.look ? {look:true} : {})}];
+      return [{p, hit:g.due[j], show:g.from, si, j, ...(pre ? {pre} : {}), ...(st.look ? {look:true} : {})}];
     });
   }).sort((a, b) => a.hit - b.hit);
 }
@@ -70,20 +70,21 @@ export function rightRoute(f: Fight): Stop[] {
 export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Point}>): Stop[] {
   return clicks.flatMap((c): Stop[] => {
     const g = f.segs[c.si], hit = g?.due[c.j];
-    return g && hit != null ? [{p:c.p, hit, show:g.from, si:c.si, j:c.j, pre:g.pre ?? HOME, look:g.scene.steps[c.j]?.look}] : [];
+    return g && hit != null ? [{p:c.p, hit, show:g.from, si:c.si, j:c.j, ...(g.pre ? {pre:g.pre} : {}), look:g.scene.steps[c.j]?.look}] : [];
   }).sort((a, b) => a.hit - b.hit);
 }
 
 /** Where the runner is at time t, and its target: the stop for the next hit, once that mechanic is
     on the arena (null before it shows, and at the end). The runner waits on each spot until that
     spot's hit, plus REACT, then runs straight to the next spot at RUN_SPEED. It leaves for the
-    first spot of a mechanic LOOK seconds after the mechanic appears. In a quiet stretch of
-    REST_GAP seconds or more, it first pre-positions for the next mechanic (Stop.pre) right after
-    the last hit. Look-ahead stops are skipped: the player does not move for them. */
+    first spot of a mechanic LOOK seconds after the mechanic appears. Before a mechanic with its
+    own pre-position (Stop.pre), it goes there right after the last hit. Before any other
+    mechanic, after a quiet stretch of REST_GAP seconds or more, it goes to HOME. Look-ahead
+    stops are skipped: the player does not move for them. */
 export function runnerAt(route: Stop[], t: number): {at: Point; target: Stop | null} {
   const moves = route.filter(s => !s.look);
   const target = moves.find(s => s.hit > t && s.show <= t) ?? null;
-  let at = HOME, lastHit = -Infinity;
+  let at = HOME, lastHit = -Infinity, seg = -1;
   /* One straight run from `at` to p, leaving at `leave`. Returns where the runner is at t if t
      falls before the end of this run, or null when the run is over by t. */
   const leg = (p: Point, leave: number): Point | null => {
@@ -94,9 +95,11 @@ export function runnerAt(route: Stop[], t: number): {at: Point; target: Stop | n
     return null;
   };
   for(const s of moves){
-    if(s.show - lastHit >= REST_GAP && dist(at, s.pre) > 0.5){
-      const pre = leg(s.pre, lastHit + REACT);
-      if(pre) return {at:pre, target};
+    if(s.si !== seg){   // the first move of a mechanic
+      seg = s.si;
+      const pre = s.pre ?? (s.show - lastHit >= REST_GAP ? HOME : null);
+      const go = pre && dist(at, pre) > 0.5 ? leg(pre, lastHit + REACT) : null;
+      if(go) return {at:go, target};
     }
     const step = leg(s.p, Math.max(lastHit + REACT, s.show + LOOK));
     if(step) return {at:step, target};

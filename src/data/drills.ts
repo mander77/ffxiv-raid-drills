@@ -165,32 +165,53 @@ export function ultimateScene(U: Run): Scene {
     rule:"First weapon south: slightly west = clockwise, slightly east = counterclockwise. The second is NW or NE, then the cardinals, ending north. Use the normal rule for each weapon."};
 }
 
-/* Void Stardust: each puddle goes just outside the previous one, one small step clockwise.
-   The next spot is judged from where the last puddle actually dropped. */
+/* Void Stardust: each puddle goes just outside the previous one, one small step clockwise
+   around the boss at c. The next spot is judged from where the last puddle actually dropped. */
 /** A puddle's radius: 6 yalms (BossMod: Cometite, "range 6 circle"). */
 export const PUDDLE_R = 15;
-export function nextPuddle(results: StepResult[]): Zone {
-  const q: Point = results[results.length - 1].drop ?? [50, 33];
-  const rq = Math.max(8, Math.hypot(q[0] - 50, q[1] - 50));
-  const step = 2 * Math.asin(Math.min(1, (PUDDLE_R + 2.5) / (2 * rq))) / DEG, ia = (angOf([q[0] - 50, q[1] - 50]) + step) * DEG;
-  const ideal: Point = [50 + rq * Math.sin(ia), 50 - rq * Math.cos(ia)];
-  const fn = (p: Point): boolean => {
-    const dq = Math.hypot(p[0] - q[0], p[1] - q[1]), r = Math.hypot(p[0] - 50, p[1] - 50);
-    const cw = (angOf([p[0] - 50, p[1] - 50]) - angOf([q[0] - 50, q[1] - 50]) + 360) % 360;
-    return inArena(p) && dq >= PUDDLE_R && dq <= PUDDLE_R + 6 && r >= 6 && r <= 32 && cw > 3 && cw < 110;
+const CENTER: Point = [50, 50];
+export function puddleAfter(c: Point = CENTER): (results: StepResult[]) => Zone {
+  const rel = (p: Point): Point => [p[0] - c[0], p[1] - c[1]];
+  return results => {
+    const q: Point = results[results.length - 1].drop ?? [c[0], c[1] - 17];
+    const rq = Math.max(8, Math.hypot(...rel(q)));
+    const step = 2 * Math.asin(Math.min(1, (PUDDLE_R + 2.5) / (2 * rq))) / DEG, ia = (angOf(rel(q)) + step) * DEG;
+    const ideal: Point = [c[0] + rq * Math.sin(ia), c[1] - rq * Math.cos(ia)];
+    const fn = (p: Point): boolean => {
+      const dq = dist(p, q), r = Math.hypot(...rel(p)), cw = (angOf(rel(p)) - angOf(rel(q)) + 360) % 360;
+      return inArena(p) && dq >= PUDDLE_R && dq <= PUDDLE_R + 6 && r >= 6 && r <= 32 && cw > 3 && cw < 110;
+    };
+    // Next to a wall the ideal spot can be off the arena. Then the shown spot is the nearest right one.
+    const label = fn(ideal) ? ideal : nearestTo(ideal, fn) ?? ideal;
+    return {fn, label, show:[{c:label, r:4.5}]};
   };
-  return {fn, label:ideal, show:[{c:ideal, r:4.5}]};
+}
+/** The next puddle around the arena center, as in the first Void Stardust. */
+export const nextPuddle = puddleAfter();
+
+/** The point nearest to t (on a half-unit grid) for which fn is true, or null if there is none. */
+function nearestTo(t: Point, fn: (p: Point) => boolean): Point | null {
+  let best: Point | null = null, bd = Infinity;
+  for(let x = 0; x <= 100; x += 0.5) for(let y = 0; y <= 100; y += 0.5){
+    const p: Point = [x, y], d = dist(p, t);
+    if(d < bd && fn(p)){ best = p; bd = d; }
+  }
+  return best;
 }
 
 /* Comet, the spread that can end Void Stardust. Only the tanks and melee have fixed spots,
    at the intercardinals just outside the hitbox. Healers and ranged take any open spot.
    Each puddle goes off once, 3 seconds after it drops, so by the stack or spread all three are
    gone. Only the last one matters: you leave it as it goes off, on the way to your spot. */
-const FIXED_SPREAD: {l: string; r: "T" | "D"; p: Point}[] = [
-  {l:"MT", r:"T", p:[35, 35]}, {l:"OT", r:"T", p:[65, 35]}, {l:"M1", r:"D", p:[35, 65]}, {l:"M2", r:"D", p:[65, 65]}];
-export const FIXED_SPREAD_MARKS = FIXED_SPREAD.map((m): Overlay => ({t:"mark", x:m.p[0], y:m.p[1], l:m.l, r:m.r}));
-/** The open ground at each cardinal, between the fixed spots. Any of them is a good spread spot. */
-const SPREAD_GAPS: Point[] = [[50, 17], [83, 50], [50, 83], [17, 50]];
+const FIXED_SPREAD: {l: string; r: "T" | "D"; off: Point}[] = [
+  {l:"MT", r:"T", off:[-15, -15]}, {l:"OT", r:"T", off:[15, -15]}, {l:"M1", r:"D", off:[-15, 15]}, {l:"M2", r:"D", off:[15, 15]}];
+/** The tank and melee spread spots around a boss at c. */
+const fixedAround = (c: Point): Array<{l: string; r: "T" | "D"; p: Point}> => FIXED_SPREAD.map(m => ({...m, p:vadd(c, m.off)}));
+export const spreadMarks = (c: Point = CENTER): Overlay[] => fixedAround(c).map((m): Overlay => ({t:"mark", x:m.p[0], y:m.p[1], l:m.l, r:m.r}));
+export const FIXED_SPREAD_MARKS = spreadMarks();
+/** The open ground north, east, south and west of a boss at c, between the fixed spots. Any of
+    them is a good spread spot. */
+const gapsAround = (c: Point): Point[] => ([[0, -33], [33, 0], [0, 33], [-33, 0]] as Point[]).map(o => vadd(c, o));
 const far = (p: Point, q: Point, d: number): boolean => Math.hypot(p[0] - q[0], p[1] - q[1]) >= d;
 const dist = (p: Point, q: Point): number => Math.hypot(p[0] - q[0], p[1] - q[1]);
 /** Degrees between two spots, as seen from the arena center (0 to 180). */
@@ -202,12 +223,19 @@ const apart = (p: Point, q: Point): number => { const d = Math.abs(angOf([p[0] -
    tank or melee spot. A spread is 6 yalms (15 units), so a spot closer than that to a tank or
    melee spot hits them. */
 const POINT_AT = (deg: number, r: number): Point => [50 + r * Math.sin(deg * DEG), 50 - r * Math.cos(deg * DEG)];
-export function cometSpread(s: Slot, toward: Point | null = null): (results: StepResult[]) => Zone {
+export function cometSpread(s: Slot, toward: Point | null = null, c: Point = CENTER): (results: StepResult[]) => Zone {
+  const fixed = fixedAround(c), gaps = gapsAround(c);
   return results => {
     const drops = results.flatMap(r => r.drop ? [r.drop] : []), last = drops[drops.length - 1];
-    const open = (p: Point): boolean => inArena(p) && far(p, [50, 50], 15) &&
-      FIXED_SPREAD.every(m => far(p, m.p, 15)) && (!last || far(p, last, PUDDLE_R + 1));
-    if(!toward) return {fn:open, label:S<Point>(s, [17, 50], [83, 50]), show:SPREAD_GAPS.map(c => ({c, r:6}))};
+    const open = (p: Point): boolean => inArena(p) && far(p, c, 15) &&
+      fixed.every(m => far(p, m.p, 15)) && (!last || far(p, last, PUDDLE_R + 1));
+    if(!toward){
+      // H1 shows the west gap first, H2 the east one. Next to a wall a gap can be off the arena,
+      // and the last puddle can cover one, so only the open gaps show.
+      const pref = S(s, [3, 1, 0, 2], [1, 3, 0, 2]).map(i => gaps[i]), shown = gaps.filter(open);
+      const label = pref.find(open) ?? nearestTo(pref[0], open) ?? pref[0];
+      return {fn:open, label, show:(shown.length ? shown : [label]).map(g => ({c:g, r:6}))};
+    }
     const aw = angOf([toward[0] - 50, toward[1] - 50]);
     const fn = (p: Point): boolean => open(p) && apart(p, toward) <= 70;
     // The area: from just outside the hitbox to past the arena edge, 70 degrees each side of the weapon.
@@ -217,7 +245,7 @@ export function cometSpread(s: Slot, toward: Point | null = null): (results: Ste
     // last puddle, so the spread is in reach in the 2 seconds after the last puddle.
     const toPuddle = last ? ((angOf([last[0] - 50, last[1] - 50]) - aw + 540) % 360) - 180 : 0;
     const turn = Math.sign(toPuddle) * Math.min(45, Math.abs(toPuddle));
-    const label = [turn, turn * 2 / 3, turn / 3, 0].flatMap(t => [26, 32, 22].map(r => POINT_AT(aw + t, r))).concat(SPREAD_GAPS).find(fn) ?? toward;
+    const label = [turn, turn * 2 / 3, turn / 3, 0].flatMap(t => [26, 32, 22].map(r => POINT_AT(aw + t, r))).concat(gaps).find(fn) ?? toward;
     return {fn, label, show:[{poly}]};
   };
 }
@@ -285,19 +313,22 @@ export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
 
 /* Void Stardust: three puddles, then the spread (Comet) or the stack (Crushing Comet).
    `toward` is the first weapon of the next set when it is a sword or scythe: the stack or
-   spread then moves toward it. The second Void Stardust has no weapons after it. */
-function voidSteps(s: Slot, spread: boolean, toward: Point | null): Step[] {
+   spread then moves toward it. The second Void Stardust has no weapons after it.
+   `c` is where the boss stands, and `start` is the first puddle spot with its answer. */
+const NORTH_START = {p:[50, 33] as Point, a:"North of the boss, just outside the hitbox."};
+function voidSteps(s: Slot, spread: boolean, toward: Point | null, c: Point = CENTER, start = NORTH_START): Step[] {
+  const next = puddleAfter(c);
   return [
-    {q:"Where do you drop the first puddle?", z:{c:[50,33],r:9}, a:"North of the boss, just outside the hitbox.", drop:true},
-    {q:"Second puddle?", zf:nextPuddle, a:"Just outside your first puddle, one small step clockwise.", drop:true},
-    {q:"Third puddle?", zf:nextPuddle, a:"Just outside the second puddle, clockwise again.", drop:true},
+    {q:"Where do you drop the first puddle?", z:{c:start.p, r:9}, a:start.a, drop:true},
+    {q:"Second puddle?", zf:next, a:"Just outside your first puddle, one small step clockwise.", drop:true},
+    {q:"Third puddle?", zf:next, a:"Just outside the second puddle, clockwise again.", drop:true},
     spread
       ? {q:"Puddles done. Comet: everyone spreads, and the tanks and melee go to their fixed spots. Where do you go?",
-          zf:cometSpread(s, toward), cue:FIXED_SPREAD_MARKS,
+          zf:cometSpread(s, toward, c), cue:spreadMarks(c),
           a:toward ? "Anywhere on the first weapon's side of the arena (the shaded area), out of the last puddle and not on a tank or melee spot."
                    : "Any open spot. Healers and ranged have no fixed spread spot. Keep away from the tank and melee spots and out of the last puddle."}
       : toward ? {q:"Puddles done. Where does the group stack?", zf:stackToward(toward), a:"From the third puddle, move toward the first weapon, out of that puddle."}
-               : {q:"Puddles done. Where does the group stack?", zf:nextPuddle, a:"Just outside the third puddle, one more small step clockwise."}];
+               : {q:"Puddles done. Where does the group stack?", zf:next, a:"Just outside the third puddle, one more small step clockwise."}];
 }
 
 /* The first Void Stardust runs straight into the second weapon set: the weapons are already
@@ -328,12 +359,23 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: Run): Scene {
       (spread ? " Comet spread fixed spots: MT NW, OT NE, M1 SW, M2 SE." : "")};
 }
 
-/** The second Void Stardust: the same puddles, ending the other way from the first one. */
-export function voidAgain(s: Slot, spread: boolean): Scene {
+/* The second Void Stardust: the same puddles, ending the other way from the first one. The boss
+   stays on the third weapon of the second set: he does not jump to the middle until Dance of
+   Domination (cactbot's "--middle--"). The first puddle drops 2.3 seconds after the third weapon,
+   so the group stands at his butt, right behind him, and drops it there. The puddles then go
+   clockwise around him. */
+/** The spot right behind the boss, at his butt, just outside his hitbox. */
+export function behind(boss: Boss): Point {
+  const f = (boss.f ?? 0) * DEG;
+  return [boss.x - 17 * Math.sin(f), boss.y + 17 * Math.cos(f)];
+}
+export function voidAgain(s: Slot, spread: boolean, boss: Boss): Scene {
+  const c: Point = [boss.x, boss.y], butt = behind(boss);
   return {
-    setup:"Void Stardust again. Three puddles, then this time " + (spread ? "a spread (Comet)." : "a stack on a healer (Crushing Comet).") + " It always ends the other way from the first one.",
-    boss:BOSS, overlays:[], steps:voidSteps(s, spread, null),
-    rule:"Puddles start north, each just outside the last, clockwise. The second Void Stardust ends the other way from the first."};
+    setup:"Void Stardust again. The boss stays on the third weapon. The group stands at his butt, right behind him, and drops the first puddle there. Three puddles, then this time " +
+      (spread ? "a spread (Comet)." : "a stack on a healer (Crushing Comet).") + " It always ends the other way from the first one.",
+    boss, overlays:[], steps:voidSteps(s, spread, null, c, {p:butt, a:"At his butt, right behind him, just outside the hitbox."}),
+    rule:"The boss stays on the third weapon. Puddles start at his butt, each just outside the last, clockwise around him. The second Void Stardust ends the other way from the first."};
 }
 
 /** True when a new run of this drill can look different: random parts, a variant or a turn. */

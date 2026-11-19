@@ -2,7 +2,7 @@
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6).
-import { MAPS, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, type WeaponType } from "./drills";
+import { MAPS, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, type WeaponType } from "./drills";
 import { newCode, random, withSeed } from "../util";
 import type { Point, Scene, Slot } from "../types";
 
@@ -25,8 +25,9 @@ export interface FightSeg {
       and he turns to the first weapon (facing `f`, degrees clockwise from north). */
   turn?: { at: number; f: number };
   /** Where to pre-position before this stretch, when the first move is known in advance (the
-      first Void Stardust puddle is always north). Without it, the pre-position is right up at
-      the boss, the most central spot (see data/route.ts). */
+      first Void Stardust puddle is always north, the second one is at the boss's butt). The
+      player goes there right after the last hit before it. Without it, the player waits right up
+      at the boss in a quiet stretch (see data/route.ts). */
   pre?: Point;
 }
 
@@ -116,6 +117,12 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   const CAST = 6.0, face1 = assault1.bossAt?.(0).f;
   /** The first Void Stardust puddle: north of the boss, just outside his hitbox (see drills.ts). */
   const FIRST_PUDDLE: Point = [50, 33];
+  /* A Void Stardust puddle drops under you when its 3.0-second cast starts (Cometite in BossMod)
+     and goes off at cactbot's line, 3 seconds later. Where you drop it counts when it drops, so
+     you can leave right away. */
+  const placed = (hits: number[]): number[] => hits.map(t => Math.round((t - 3.0) * 10) / 10);
+  // The boss after the third weapon of the second set. He stays there for the second Void Stardust.
+  const lastBoss = A2.states[A2.states.length - 1];
   /* Each click is due when the hit that checks it lands, in seconds into the fight. A scene
      appears when its cast starts (cactbot's StartsUsing or the ability before it). */
   const segs: FightSeg[] = [
@@ -123,8 +130,8 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Assault Evolved", drills:["m-assault"], scene:assault1, k:0, from:38.4, turn:face1 != null ? {at:48.2 - CAST, f:face1} : undefined, due:[50.4, 55.5, 60.6]},
     // The second set of weapons spawns when this Void Stardust starts, and the drill runs through all three.
     {title:"Void Stardust into the second weapons", drills:["m-void"], scene:voidIntoWeapons(s, !stackFirst, A2), k:0, from:72.7,
-      turn:{at:92.7 - CAST, f:A2.W[0].a}, due:[79.8, 83.9, 85.9, 87.9, 89.9, 94.9, 100.0, 105.1], pre:FIRST_PUDDLE},
-    {title:"Void Stardust again", drills:[], scene:voidAgain(s, stackFirst), k:0, from:106, due:[110.2, 112.2, 114.2, 116.2], pre:FIRST_PUDDLE},
+      turn:{at:92.7 - CAST, f:A2.W[0].a}, due:[79.8, ...placed([83.9, 85.9, 87.9]), 89.9, 94.9, 100.0, 105.1], pre:FIRST_PUDDLE},
+    {title:"Void Stardust again", drills:[], scene:voidAgain(s, stackFirst, lastBoss), k:0, from:106, due:[...placed([110.2, 112.2, 114.2]), 116.2], pre:behind(lastBoss)},
     // The lines on the floor show only just after the 7th and last hit (2:25.5), so the scene
     // with the lines appears then, not at the Trophy cast. Until then the arena stays empty.
     {title:"Dance of Domination", drills:["m-dance"], scene:drill("m-dance", s), k:Math.floor(random() * 4), from:146.0, due:[150.5]},
@@ -161,8 +168,10 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     ? [[t, "Raw Steel Trophy Axe"], [t + 6.3, "Raw Steel (Axe)"], [t + 7.4, "Impact x6 (Axe)"]]
     : [[t, "Raw Steel Trophy Scythe"], [t + 7.4, "Heavy Hitter (Scythe)"]];
   const assault = (times: number[]): Array<[number, string]> => times.map((t, i) => [t, "Assault Evolved " + (i + 1)]);
+  // Each Cometite puddle drops 3 seconds before it goes off, when its cast starts (BossMod).
   const comets = (t: number): Array<[number, string]> =>
-    [[t, "Cometite 1"], [t + 2, "Cometite 2"], [t + 4, "Cometite 3"], [t + 6, "Comet/Crushing Comet"]];
+    [[t - 3, "Cometite 1 drops"], [t - 1, "Cometite 2 drops"], [t, "Cometite 1"], [t + 1, "Cometite 3 drops"],
+     [t + 2, "Cometite 2"], [t + 4, "Cometite 3"], [t + 6, "Comet/Crushing Comet"]];
   const kicks = (t: number, n: number): Array<[number, string]> =>
     [[t, "Heartbreak Kick"], ...Array.from({length:n}, (_x, i): [number, string] => [t + 1.1 + 2 * i, "Heartbreak Kick " + (i + 1)])];
   const RAIDWIDE = new Set(["Crown of Arcadia", "Dance of Domination 1", "Dance of Domination 7", "One and Only",

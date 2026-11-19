@@ -34,7 +34,7 @@ test("every spot of the right route is a right answer, so the watched run scores
 });
 
 test("the runner waits on a spot until its hit, then runs straight to the next spot", () => {
-  const route: Stop[] = [{p:[50, 34], hit:10, show:5, si:0, j:0, pre:START}, {p:[80, 34], hit:20, show:5, si:0, j:1, pre:START}];
+  const route: Stop[] = [{p:[50, 34], hit:10, show:5, si:0, j:0}, {p:[80, 34], hit:20, show:5, si:0, j:1}];
   // Before the mechanic shows: at the start, with no target yet.
   assert.deepEqual(runnerAt(route, 1), {at:START, target:null});
   // The mechanic is on the arena: still waiting, and the target is the spot for the first hit.
@@ -62,16 +62,10 @@ test("at run speed the runner is never more than half a second late to a right s
     // A look-ahead stop is never reached on purpose, so it does not count.
     for(const st of route.filter(x => !x.look)){
       const g = f.segs[st.si];
-      // How far short the runner is at the hit, in seconds of running.
+      // How far short the runner is at the hit, in seconds of running. A Void Stardust puddle
+      // counts when it drops, 3 seconds before it goes off, so the runner leaves it then.
       const short = dist(runnerAt(route, st.hit).at, st.p) / RUN_SPEED;
-      // One known exception: after the first Void Stardust, the stack or spread moves toward the
-      // first weapon of the next set, 2 seconds after the last puddle. With that weapon across from
-      // the puddles, the party uses Expedient (scholar), or each player uses Sprint or a movement
-      // ability (the drill says so). The runner keeps plain run speed, so it can be late there.
-      // It also waits on each puddle until it goes off, not just until it is placed (3 seconds
-      // earlier in the fight), so it leaves the third puddle late.
-      const allowed = g.drills.includes("m-void") && g.scene.steps[st.j].q.startsWith("Puddles done") ? 1.25 : 0.5;
-      if(short > allowed) late.push(g.title + " step " + (st.j + 1) + ": " + short.toFixed(2) + " s");
+      if(short > 0.5) late.push(g.title + " step " + (st.j + 1) + ": " + short.toFixed(2) + " s");
     }
   }
   // The route runs to the middle of each spot, so a few tight spots are reached a little after
@@ -117,12 +111,18 @@ test("in a quiet stretch the runner pre-positions for the next mechanic", () => 
       // When the mechanic shows, the runner already stands on its pre-position. The runner does
       // not take a step of half a unit or less, so it can stand that close instead.
       const at = runnerAt(route, st.show).at;
-      assert.isAtMost(dist(at, st.pre), 0.5, f.segs[st.si].title + ": at " + at + ", not " + st.pre);
+      const pre = st.pre ?? START;
+      assert.isAtMost(dist(at, pre), 0.5, f.segs[st.si].title + ": at " + at + ", not " + pre);
     });
     assert.isAbove(quiet, 2, "the fight has quiet stretches");
-    // Both Void Stardusts start with the first puddle north of the boss, so the player waits there.
-    // Every other mechanic waits right up at the boss.
-    for(const st of moves) assert.deepEqual(st.pre, f.segs[st.si].title.startsWith("Void Stardust") ? [50, 33] : START);
+    // The first Void Stardust starts with the first puddle north of the boss, and the second at
+    // his butt, so the player pre-positions on that first puddle. Other mechanics have no
+    // pre-position of their own.
+    for(const st of moves){
+      const title = f.segs[st.si].title, first = moves.find(m => m.si === st.si);
+      if(title.startsWith("Void Stardust")) assert.deepEqual(st.pre, first?.p, title);
+      else assert.isUndefined(st.pre, title);
+    }
   }
 });
 
