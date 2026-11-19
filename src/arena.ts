@@ -18,6 +18,11 @@ export function circlePath(cx: number, cy: number, r: number): string {
   return "M" + f1(cx - r) + "," + f1(cy) + " a" + r + "," + r + " 0 1,0 " + (2 * r) + ",0 a" + r + "," + r + " 0 1,0 " + (-2 * r) + ",0";
 }
 
+/** How far inside its true edge a safe ring is drawn, in arena units. The scythe's safe edge is
+    5 yalms, the same as the boss's hitbox ring, so without this the green ring would hide under
+    it. Inside, not outside, so the ring never makes the safe ground look bigger than it is. */
+const SAFE_INSET = 1.6;
+
 export function drawOverlay(o: Overlay): string {
   const x = "x" in o ? f1(o.x) : 0, y = "y" in o ? f1(o.y) : 0;
   switch(o.t){
@@ -60,7 +65,8 @@ export function drawOverlay(o: Overlay): string {
     case "band": return '<line class="aoeband" x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '" stroke-width="' + o.w + '"/>';
     case "lane": return '<rect class="' + (o.soft ? "lanesoft" : "aoe") + '" x="' + o.rect[0] + '" y="' + o.rect[1] + '" width="' + (o.rect[2] - o.rect[0]) + '" height="' + (o.rect[3] - o.rect[1]) + '"/>';
     case "poly": return '<polygon class="aoe" points="' + o.pts.map(pt).join(" ") + '"/>';
-    case "safe": return '<circle class="safe" cx="' + x + '" cy="' + y + '" r="' + o.r + '"/>';
+    // A safe ring draws SAFE_INSET inside its true edge, so it never sits under the boss's ring.
+    case "safe": return '<circle class="safe" cx="' + x + '" cy="' + y + '" r="' + f1(o.r - SAFE_INSET) + '"/>';
     case "guide": return '<line class="guide" x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '"/>';
     case "portal": return '<g class="portal" transform="translate(' + x + " " + y + ')"><ellipse rx="' + (o.vert ? 6 : 2.2) + '" ry="' + (o.vert ? 2.2 : 6) + '"/><text>' + o.n + "</text></g>";
   }
