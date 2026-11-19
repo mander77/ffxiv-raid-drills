@@ -2,7 +2,7 @@
 import { S, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry";
-import { HITBOX, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, axeHit, cleave, swordCross } from "./attacks";
+import { HITBOX, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, axeHit, cleave, swordCross, swordPocket } from "./attacks";
 import type { Boss, MapDrill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
@@ -69,10 +69,10 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       const pointAt = angOf(scytheAxis(w, i));
       reveal = Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, PROTEAN_HALF, PROTEAN_LEN));
     } else {
-      // Safe pocket: behind him (f < -HW) and on your side (sd > HW), outside both arms of the cross.
-      const fn = (p: Point): boolean => { const v: Point = [p[0] - P[0], p[1] - P[1]], f = v[0] * d[0] + v[1] * d[1], sd = v[0] * sv[0] + v[1] * sv[1]; return inArena(p) && f < -HW && sd > HW && Math.hypot(v[0], v[1]) <= 40; };
-      const corner = vadd(vadd(P, d, -HW), sv, HW);
-      const poly = [corner, vadd(corner, d, -32), vadd(vadd(corner, d, -32), sv, 32), vadd(corner, sv, 32)];
+      // Safe pocket: behind him (f < -HW) and on your side (sd > HW), outside both arms of the
+      // cross. Anywhere in it inside the arena is right, and the drawn pocket is the same area.
+      const fn = (p: Point): boolean => { const v: Point = [p[0] - P[0], p[1] - P[1]], f = v[0] * d[0] + v[1] * d[1], sd = v[0] * sv[0] + v[1] * sv[1]; return inArena(p) && f < -HW && sd > HW; };
+      const poly = swordPocket(P, d, sv);
       // Where to stand: on the pocket's diagonal, 2 yalms (5 units) clear of each arm, so in the
       // moment you can see that you are safe. That is about 25 units (9.9 yalms) from him. The
       // sword's stack is a line from him through you, so the melee can stand closer in that line.

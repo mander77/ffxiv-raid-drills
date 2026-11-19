@@ -110,6 +110,13 @@ test("weapon runs: the sword's best spot is 2 yalms clear of both arms of the cr
       // past both: 17.5 units along each, so about 24.7 units from him on the diagonal.
       const d = Math.hypot(st.stand[0] - boss.x, st.stand[1] - boss.y);
       assert.ok(d > 24.5 && d < 25, name + ": " + d.toFixed(1) + " units from him, not 2 yalms clear of the arms");
+      // The whole pocket is safe, also far from him: one more step out along the diagonal, or to
+      // the arena edge, is still right (the arms reach past the arena).
+      const diag: Point = [(st.stand[0] - boss.x) / d, (st.stand[1] - boss.y) / d];
+      for(const k of [20, 40]){
+        const far: Point = [st.stand[0] + diag[0] * k, st.stand[1] + diag[1] * k];
+        if(far[0] >= 0 && far[0] <= 100 && far[1] >= 0 && far[1] <= 100) assert.ok(inZone(far, zoneOf(st.z)), name + ": " + k + " units farther out is still in the pocket");
+      }
       // Not on the corner: a circle of 4.5 units around the spot is all inside the pocket, so it is
       // clear of both arms of the cross.
       for(let a = 0; a < 360; a += 22.5){

@@ -7,17 +7,14 @@ import { marks, catNames, catKey } from "./tlnav";
 import { JOBS } from "../data/jobs";
 import { f1, vadd, unit, leftOf } from "../geometry";
 import { floorSVG, drawOverlay, drawWaymarks, drawBoss } from "../arena";
-import { SWORD_HALF, swordCross } from "../data/attacks";
+import { swordCross, swordPocket } from "../data/attacks";
 import { tabHead, WTFDIG } from "./common";
 import type { Point, Slot } from "../types";
 
 /** A fixed sword example: the boss jumps west from the middle. The player's pocket is green. */
 export function swordDiagram(s: Slot): string {
-  const P: Point = [21, 50], d: Point = [-1, 0], L = leftOf(d), HW = SWORD_HALF, mine = S(s, 1, -1);
-  const pocket = (side: number): Point[] => {
-    const sv: Point = [L[0] * side, L[1] * side], corner = vadd(vadd(P, d, -HW), sv, HW);
-    return [corner, vadd(corner, d, -32), vadd(vadd(corner, d, -32), sv, 32), vadd(corner, sv, 32)];
-  };
+  const P: Point = [21, 50], d: Point = [-1, 0], L = leftOf(d), mine = S(s, 1, -1);
+  const pocket = (side: number): Point[] => swordPocket(P, d, [L[0] * side, L[1] * side]);
   const poly = (pts: Point[], cls: string): string => '<polygon class="zone ' + cls + '" points="' + pts.map(p => f1(p[0]) + "," + f1(p[1])).join(" ") + '"/>';
   const label = (side: number, txt: string): string => { const p = vadd(P, unit(vadd([-d[0], -d[1]], [L[0] * side, L[1] * side])), 29);
     return '<g class="zlabel' + (side === mine ? "" : " other") + '"><rect x="' + f1(p[0] - 8) + '" y="' + f1(p[1] - 2.3) + '" width="16" height="4.6" rx=".9"/><text x="' + f1(p[0]) + '" y="' + f1(p[1]) + '">' + txt + "</text></g>"; };
