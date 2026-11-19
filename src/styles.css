@@ -79,7 +79,7 @@ main{padding-block:20px 56px}
 .wcard b{font-family:var(--font-mono);color:var(--heal)}
 .wcard:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .wcard.dragging{cursor:grabbing;border-color:var(--ink);box-shadow:0 4px 12px rgba(19,26,43,.2)}
-.wcards.random .wcard{border-style:dashed;border-color:var(--ink-2);color:var(--ink-2);font-weight:500}
+.wcards.random .wcard{border-style:dashed;border-color:var(--ink-2);color:var(--ink-2);font-weight:500;cursor:default;touch-action:auto}
 .wcards.random .wcard b{color:var(--ink-2)}
 .stage{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
 @media (max-width:860px){.stage{grid-template-columns:minmax(0,1fr)}}

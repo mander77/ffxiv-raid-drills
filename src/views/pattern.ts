@@ -15,16 +15,17 @@ export function patternRows(keys: Array<keyof Picks>): string {
 /** True when any of these picks is not Random. */
 export const picked = (keys: Array<keyof Picks>): boolean => keys.some(k => state.choices[k] !== "random");
 
-/* A weapon order: three cards in the order the boss takes them. Drag a card to a new place, or
-   focus it and use the left and right arrows. On Random the cards show "?" and any move sets an
-   order. The Random button goes back to Random. */
+/* A weapon order: Random or Set order, then three cards in the order the boss takes them.
+   On Random the cards show "?" and stay put. Set order numbers them 1, 2, 3 in the default
+   order, and then you can drag a card to a new place, or focus it and use the arrow keys. */
 const WEAPON_NAMES: Record<WeaponType, string> = {sword:"Sword", axe:"Axe", scythe:"Scythe"};
 function orderRow(key: "set1" | "set2", label: string): string {
   const cur = state.choices[key], random = cur === "random", order = (random ? "sword-axe-scythe" : cur).split("-") as WeaponType[];
   return '<div class="ctrl" style="margin-top:12px"><span id="fc-' + key + '-lbl">' + label + '</span>' +
-    '<div class="seg small" role="group" aria-labelledby="fc-' + key + '-lbl"><button type="button" data-pick="fc-' + key + '" data-val="random" aria-pressed="' + random + '">Random</button></div>' +
-    '<ol class="wcards' + (random ? " random" : "") + '" data-key="' + key + '" aria-label="' + label + ': drag the cards, or use the arrow keys">' +
-    order.map((w, i) => '<li class="wcard" data-w="' + w + '" tabindex="0" aria-label="' + WEAPON_NAMES[w] + (random ? ", order random" : ", number " + (i + 1)) + '">' +
+    '<div class="seg small" role="group" aria-labelledby="fc-' + key + '-lbl"><button type="button" data-pick="fc-' + key + '" data-val="random" aria-pressed="' + random + '">Random</button>' +
+    '<button type="button" data-pick="fc-' + key + '" data-val="' + order.join("-") + '" aria-pressed="' + !random + '">Set order</button></div>' +
+    '<ol class="wcards' + (random ? " random" : "") + '" data-key="' + key + '" aria-label="' + label + (random ? ": random" : ": drag the cards, or use the arrow keys") + '">' +
+    order.map((w, i) => '<li class="wcard" data-w="' + w + '"' + (random ? "" : ' tabindex="0"') + ' aria-label="' + WEAPON_NAMES[w] + (random ? ", order random" : ", number " + (i + 1)) + '">' +
       "<b>" + (random ? "?" : i + 1) + "</b>" + WEAPON_NAMES[w] + "</li>").join("") + "</ol></div>";
 }
 
@@ -43,7 +44,8 @@ export function wirePattern(after: () => void): void {
    While a card is dragged, it changes places with a neighbor once the pointer passes the middle
    of that neighbor; the new order is saved when you let go. */
 function wireCards(after: () => void): void {
-  view.querySelectorAll<HTMLElement>(".wcards").forEach(list => {
+  // On Random the cards stay put: press Set order first.
+  view.querySelectorAll<HTMLElement>(".wcards:not(.random)").forEach(list => {
     const key = list.dataset.key === "set2" ? "set2" : "set1";
     const cards = (): HTMLElement[] => [...list.querySelectorAll<HTMLElement>(".wcard")];
     const save = (focusW?: string): void => {

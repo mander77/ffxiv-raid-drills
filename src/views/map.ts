@@ -222,7 +222,7 @@ export function drawMapPanel(): void {
   // The fight pattern picks that fit this drill, shared with Real time. A change builds the drill
   // again with the pick; Random leaves that part to the pattern code.
   if(keys.length) h += '<div class="drillpick"><h3 class="fpick">Practice a pattern</h3><p class="hint">Real time uses these picks too.' +
-    (keys.some(k => k === "set1" || k === "set2") ? " Drag the weapon cards into the order the boss takes them." : "") + "</p>" + patternRows(keys) + "</div>";
+    (keys.some(k => k === "set1" || k === "set2") ? " For a weapon order, press Set order, then drag the cards into the order the boss takes them." : "") + "</p>" + patternRows(keys) + "</div>";
   const p = el("map-panel");
   p.innerHTML = h;
   wirePattern(() => renderMap(true));

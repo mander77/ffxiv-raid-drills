@@ -106,7 +106,7 @@ function settingRows(): string {
 /* The fight pattern: every pick, on the start screen only, because a pick changes the fight that
    gets built. The Step by step drills show the picks that fit them (see pattern.ts). */
 function pickRows(): string {
-  return '<h3 class="fpick">Fight pattern</h3><p class="hint">Pick a part to practice it on purpose. Parts left on Random still come from the fight code. Drag the weapon cards into the order the boss takes them. Step by step uses the picks that fit each drill.</p>' +
+  return '<h3 class="fpick">Fight pattern</h3><p class="hint">Pick a part to practice it on purpose. Parts left on Random still come from the fight code. For a weapon order, press Set order, then drag the cards into the order the boss takes them. Step by step uses the picks that fit each drill.</p>' +
     patternRows(CHOICE_ROWS.map(r => r.key)) +
     (choicesText(state.choices) ? '<p style="margin-top:10px"><button type="button" class="linkbtn" id="f-allrandom">Set all to Random</button></p>' : "");
 }
