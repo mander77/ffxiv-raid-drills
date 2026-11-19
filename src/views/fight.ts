@@ -81,26 +81,38 @@ function jumpToAbility(i: number): void {
   seekTo(Math.max(0, a.t - SOON));
 }
 
-/* ---------- start screen ---------- */
-export function renderFight(): void {
-  stopTimer(); R = null;
-  state.cur = {kind:"fight"};
+/* ---------- settings ---------- */
+/* Speed and Missed spot. The start screen shows them, and so does a running fight, under the
+   slider: the clock reads both on every tick, so a change works at once. */
+function settingRows(): string {
   const row = (key: string, label: string, choices: Array<[string, string]>, cur: string): string =>
     '<div class="ctrl" style="margin-top:12px"><span id="' + key + '-lbl">' + label + '</span><div class="seg small" role="group" aria-labelledby="' + key + '-lbl">' +
     choices.map(([v, t]) => '<button type="button" data-set="' + key + '" data-val="' + v + '" aria-pressed="' + (v === cur) + '">' + t + "</button>").join("") + "</div></div>";
-  show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b><span>The pull to the enrage at 10:59</span></div>' +
-    "<h2>Play the fight in order</h2><p>The drills play one after another on the fight clock. The timeline shows what the boss does next, like the cactbot overlay. Click your spot before each hit lands. Each run picks its own scenario: axe or scythe first, stack or spread first, and new weapon patterns. To start at one moment, click an ability or a drill in the fight list.</p>" +
-    row("fspeed", "Speed", SPEEDS.map((n): [string, string] => [String(n), n + "x"]), String(settings.speed)) +
-    row("fpause", "Missed spot", [["no", "Fight goes on"], ["yes", "Fight pauses"]], settings.pause ? "yes" : "no") +
-    (wantedFight ? '<p class="hint" style="margin-top:12px">Fight code ' + esc(wantedFight) + " is ready: the next start uses it.</p>" : "") +
-    '<div class="actions"><button type="button" class="btn" id="f-start">Start the fight</button><button type="button" class="btn ghost" id="f-watch">Watch the right moves</button></div></div></div>');
+  return row("fspeed", "Speed", SPEEDS.map((n): [string, string] => [String(n), n + "x"]), String(settings.speed)) +
+    row("fpause", "Missed spot", [["no", "Fight goes on"], ["yes", "Fight pauses"]], settings.pause ? "yes" : "no");
+}
+
+/** Save a setting when its button is clicked, then call `after` so the screen can show it. */
+function wireSettings(after: () => void): void {
   view.querySelectorAll<HTMLButtonElement>("[data-set]").forEach(b => b.addEventListener("click", () => {
     const v = b.dataset.val ?? "";
     if(b.dataset.set === "fspeed") settings.speed = Number(v);
     if(b.dataset.set === "fpause") settings.pause = v === "yes";
     LS.set("fspeed", settings.speed); LS.set("fpause", settings.pause ? "yes" : "no");
-    renderFight();
+    after();
   }));
+}
+
+/* ---------- start screen ---------- */
+export function renderFight(): void {
+  stopTimer(); R = null;
+  state.cur = {kind:"fight"};
+  show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b><span>The pull to the enrage at 10:59</span></div>' +
+    "<h2>Play the fight in order</h2><p>The drills play one after another on the fight clock. The timeline shows what the boss does next, like the cactbot overlay. Click your spot before each hit lands. Each run picks its own scenario: axe or scythe first, stack or spread first, and new weapon patterns. To start at one moment, click an ability or a drill in the fight list.</p>" +
+    settingRows() +
+    (wantedFight ? '<p class="hint" style="margin-top:12px">Fight code ' + esc(wantedFight) + " is ready: the next start uses it.</p>" : "") +
+    '<div class="actions"><button type="button" class="btn" id="f-start">Start the fight</button><button type="button" class="btn ghost" id="f-watch">Watch the right moves</button></div></div></div>');
+  wireSettings(renderFight);
   el("f-start").addEventListener("click", () => startRun("live", nextFight()));
   el("f-watch").addEventListener("click", () => startRun("demo", nextFight()));
 }
@@ -117,19 +129,36 @@ function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
   seek.addEventListener("pointerup", () => { dragging = false; });
   seek.addEventListener("input", () => seekTo(Number(seek.value)));
   el("f-play").addEventListener("click", togglePause);
+  // A setting changed during the fight works at once. With "Fight goes on", a fight that waits
+  // for a missed spot goes on.
+  wireSettings(() => {
+    view.querySelectorAll<HTMLButtonElement>("[data-set]").forEach(b =>
+      b.setAttribute("aria-pressed", String(b.dataset.val === (b.dataset.set === "fspeed" ? String(settings.speed) : settings.pause ? "yes" : "no"))));
+    const r = R;
+    if(!r) return;
+    if(!settings.pause && r.hold === "wait") r.hold = "";
+    r.shown = ""; r.last = performance.now();
+    frame();
+  });
+  // Start over: the same fight from 0:00, in the same mode. Settings: back to the start screen.
+  el("f-restart").addEventListener("click", () => { const r = R; if(r) startRun(r.mode, r.fight, r.mode === "replay" ? r.clicks : []); });
+  el("f-settings").addEventListener("click", renderFight);
   frame();
   state.raf = requestAnimationFrame(tick);
 }
 
 /* The fight controls stay outside the panel part that redraws, so a drag is never cut off:
-   play or pause, and a slider for the fight time. Its ticks mark where each mechanic starts. */
+   play or pause, a slider for the fight time (its ticks mark where each mechanic starts), the
+   settings, and the buttons to start over or go back to the start screen. */
 let dragging = false;
 function controls(f: Fight): string {
   return '<div class="fctl"><button type="button" class="btn ghost fplay" id="f-play" aria-label="Pause">&#10074;&#10074;</button>' +
     '<input type="range" id="f-seek" min="0" max="' + f.end + '" step="0.1" value="0" list="f-marks" aria-label="Fight time">' +
     '<span class="ftime" id="f-time"></span></div>' +
     '<datalist id="f-marks">' + f.segs.map(g => '<option value="' + g.from + '"></option>').join("") + "</datalist>" +
-    '<p class="hint" style="margin-top:6px"><kbd>Space</kbd> play or pause &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 5 seconds &middot; the Real time button goes back to the settings</p>';
+    '<p class="hint" style="margin-top:6px"><kbd>Space</kbd> play or pause &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 5 seconds</p>' +
+    settingRows() +
+    '<div class="actions"><button type="button" class="btn ghost" id="f-restart">Start over</button><button type="button" class="btn ghost" id="f-settings">Settings</button></div>';
 }
 
 /* Go to any moment. Back: the answers to hits after that moment are forgotten, so you can
