@@ -89,24 +89,36 @@ export function drawBoss(b: Boss): string {
     '<circle class="bosscore" r="3.4"/><path class="face" d="M0,' + f1(-(RING + 3.6)) + " L-2.6," + f1(-(RING - 0.6)) + " L2.6," + f1(-(RING - 0.6)) + ' Z"/></g></g>';
 }
 
+/** Where a boss with no facing turns from when he first turns to a target: north, where his
+    tank holds him before the cast. */
+const TURN_FROM = 0;
+
 /** Draw the boss in his layer of a live arena. When he only turns (the same spot, a new
     facing), his ring is not drawn again: it turns from the old facing to the new one, the short
-    way round, as he does in the game. A jump, or a change to or from no facing, draws him
-    again at once. The layer keeps his spot and his facing (in degrees, not wrapped to 0..360,
-    so the next turn starts from where the ring is) in data attributes. */
+    way round, as he does in the game. His first turn on a spot, from no facing (a plain ring)
+    to a target, starts from TURN_FROM. A jump, or a change to no facing, draws him again at
+    once. The layer keeps his spot and his facing (in degrees, not wrapped to 0..360, so the
+    next turn starts from where the ring is) in data attributes. */
 export function paintBoss(layer: Element, b: Boss | null): void {
-  const el = layer as SVGGElement, d = el.dataset, ring = el.querySelector<SVGGElement>(".turn");
+  const el = layer as SVGGElement, d = el.dataset;
   const s = (n: number): string => String(f1(n));
-  const was = d.f ? Number(d.f) : null;
-  if(b && ring && was != null && b.f != null && d.x === s(b.x) && d.y === s(b.y)){
-    const turn = ((b.f - was) % 360 + 540) % 360 - 180;
-    if(Math.abs(turn) < 0.01) return;
-    d.f = s(was + turn);
-    ring.style.transform = "rotate(" + d.f + "deg)";
+  const same = b != null && d.x === s(b.x) && d.y === s(b.y);
+  if(!b || b.f == null || !same){
+    el.innerHTML = b ? drawBoss(b) : "";
+    d.x = b ? s(b.x) : ""; d.y = b ? s(b.y) : ""; d.f = b?.f != null ? s(b.f) : "";
     return;
   }
-  el.innerHTML = b ? drawBoss(b) : "";
-  d.x = b ? s(b.x) : ""; d.y = b ? s(b.y) : ""; d.f = b?.f != null ? s(b.f) : "";
+  let was = d.f ? Number(d.f) : null;
+  if(was == null){
+    // He had no facing: draw his ring at TURN_FROM, make the browser apply that angle (reading
+    // the layout does it), and then turn him from there.
+    el.innerHTML = drawBoss({...b, f:TURN_FROM});
+    void el.getBoundingClientRect();
+    was = TURN_FROM;
+  }
+  const ring = el.querySelector<SVGGElement>(".turn"), turn = ((b.f - was) % 360 + 540) % 360 - 180;
+  d.f = s(was + turn);
+  if(ring && Math.abs(turn) >= 0.01) ring.style.transform = "rotate(" + d.f + "deg)";
 }
 
 export function drawWaymarks(): string {
