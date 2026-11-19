@@ -47,7 +47,7 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
   const n = results.length, asking = showLast ? n - 1 : n;
   // The puddles dropped before the last step with clearDrops (up to the one asked) are gone.
   const kept = sc.steps.slice(0, asking + 1).reduce((from, st, i) => st.clearDrops ? i : from, 0);
-  let drops = "", fb = "", rev = "", me = "";
+  let drops = "", fb = "", rev = "", zlabel = "", me = "";
   results.forEach((r, i) => {
     const step = sc.steps[i], z = r.z, ctr = zoneCenter(z);
     if(r.drop && i >= kept) drops +='<circle class="drop" cx="' + f1(r.drop[0]) + '" cy="' + f1(r.drop[1]) + '" r="' + PUDDLE_R + '"/>';
@@ -55,11 +55,11 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
     if(i === n - 1 && showLast){
       const cls = r.ok ? "ok" : "bad";
       if(step.reveal) rev = hitsSVG(step.reveal.map(o => rotOverlay(o, k)));
-      fb += '<g clip-path="url(#arenaClip)">' + zoneSVG(z, cls) + "</g>";
+      fb = zoneSVG(z, cls);
       const top = "c" in z ? z.c[1] - z.r : "rect" in z ? z.rect[1] : ctr[1] + 1;
       const bottom = "c" in z ? z.c[1] + z.r : "rect" in z ? z.rect[3] : ctr[1] - 1;
       const ly = "fn" in z ? ctr[1] : (top - 3 >= -3 ? top - 3 : bottom + 3);
-      fb += '<g class="zlabel"><rect x="' + f1(ctr[0] - 3.2) + '" y="' + f1(ly - 2.1) + '" width="6.4" height="4.2" rx=".9"/><text x="' + f1(ctr[0]) + '" y="' + f1(ly) + '">' + state.slot + "</text></g>";
+      zlabel = '<g class="zlabel"><rect x="' + f1(ctr[0] - 3.2) + '" y="' + f1(ly - 2.1) + '" width="6.4" height="4.2" rx=".9"/><text x="' + f1(ctr[0]) + '" y="' + f1(ly) + '">' + state.slot + "</text></g>";
       if(!r.missed) me = '<g class="pick ' + cls + '" transform="translate(' + f1(r.p[0]) + " " + f1(r.p[1]) + ')"><circle class="halo" r="2.6"/><circle class="dot" r="1.1"/></g>';
     }
   });
@@ -78,6 +78,7 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
   layer("drops").innerHTML = drops + cueRest;
   layer("boss-layer").innerHTML = boss ? drawBoss(boss) : "";
   layer("fb-layer").innerHTML = fb;
+  layer("label-layer").innerHTML = zlabel;
   layer("cue-marks").innerHTML = cueMarks;
   layer("me-layer").innerHTML = me;
   svg.classList.toggle("locked", n >= sc.steps.length);

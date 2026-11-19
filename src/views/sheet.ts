@@ -6,7 +6,7 @@ import { tlCats } from "../data/abilities";
 import { marks, catNames, catKey } from "./tlnav";
 import { JOBS } from "../data/jobs";
 import { f1, vadd, unit, leftOf } from "../geometry";
-import { floorSVG, drawOverlay, drawWaymarks, drawBoss } from "../arena";
+import { arenaSVG, drawOverlay, drawBoss } from "../arena";
 import { swordCross, swordPocket } from "../data/attacks";
 import { tabHead, WTFDIG } from "./common";
 import type { Point, Slot } from "../types";
@@ -18,13 +18,13 @@ export function swordDiagram(s: Slot): string {
   const poly = (pts: Point[], cls: string): string => '<polygon class="zone ' + cls + '" points="' + pts.map(p => f1(p[0]) + "," + f1(p[1])).join(" ") + '"/>';
   const label = (side: number, txt: string): string => { const p = vadd(P, unit(vadd([-d[0], -d[1]], [L[0] * side, L[1] * side])), 29);
     return '<g class="zlabel' + (side === mine ? "" : " other") + '"><rect x="' + f1(p[0] - 8) + '" y="' + f1(p[1] - 2.3) + '" width="16" height="4.6" rx=".9"/><text x="' + f1(p[0]) + '" y="' + f1(p[1]) + '">' + txt + "</text></g>"; };
-  let h = '<svg viewBox="-4 -6 108 110" role="img" aria-label="Sword example. The boss jumps west from the middle. G1 takes the pocket behind his left side, G2 the pocket behind his right side.">';
-  h += floorSVG(false) + '<text class="compass" x="50" y="-2.2">N</text>';
-  h += '<g clip-path="url(#arenaClip)">' + swordCross(P, d).map(drawOverlay).join("") +
-    poly(pocket(1), mine === 1 ? "ok" : "other") + poly(pocket(-1), mine === -1 ? "ok" : "other") + "</g>";
-  h += '<circle class="ghost" cx="50" cy="50" r="3.4"/><line class="jump" x1="46" y1="50" x2="33" y2="50"/>';
-  h += drawWaymarks() + drawBoss({x:P[0], y:P[1], f:270}) + label(1, "G1 / H1") + label(-1, "G2 / H2");
-  return h + "</svg>";
+  return arenaSVG('aria-label="Sword example. The boss jumps west from the middle. G1 takes the pocket behind his left side, G2 the pocket behind his right side."', {
+    ground:swordCross(P, d).map(drawOverlay).join(""),
+    zones:poly(pocket(1), mine === 1 ? "ok" : "other") + poly(pocket(-1), mine === -1 ? "ok" : "other"),
+    // Where he stood in the middle, his jump, and where he lands.
+    boss:'<circle class="ghost" cx="50" cy="50" r="3.4"/><line class="jump" x1="46" y1="50" x2="33" y2="50"/>' + drawBoss({x:P[0], y:P[1], f:270}),
+    labels:label(1, "G1 / H1") + label(-1, "G2 / H2"),
+  });
 }
 export function renderSheet(): void {
   const s = state.slot;

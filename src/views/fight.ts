@@ -3,7 +3,7 @@
 import { LS, esc, el } from "../util";
 import { state, view, stopTimer, setChoices } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter } from "../geometry";
-import { sceneSVG, drawOverlay, zoneSVG } from "../arena";
+import { sceneSVG, drawOverlay, zoneSVG, layerIn } from "../arena";
 import { paintArena } from "./map";
 import { tabHead, hudPrompt, segRow } from "./common";
 import { patternRows, wirePattern } from "./pattern";
@@ -343,7 +343,7 @@ function frame(): void {
       el("arena-svg").addEventListener("click", onClick);
       // The flash for damage going out and the countdown ring go over the arena, but under the
       // player marks. Both let clicks through (see .hitfx and .tring).
-      el("arena-svg").querySelector("#marks-layer")?.insertAdjacentHTML("beforebegin",
+      layerIn(el("arena-svg"), "effects")?.insertAdjacentHTML("beforeend",
         '<rect id="f-fx" class="hitfx" x="0" y="0" width="100" height="100" aria-hidden="true"/>' +
         '<circle id="tring" class="tring" r="16" pathLength="100" stroke-dasharray="100"/>');
     }
@@ -451,9 +451,10 @@ function drawRunner(r: Run): void {
   const svg = document.getElementById("arena-svg");
   if(!svg || !r.route) return;
   if(!document.getElementById("f-runner")){
-    // The target area goes under the puddles, waymarks and boss; the marker, line and ring on top.
-    svg.querySelector("#reveal-layer")?.insertAdjacentHTML("afterend", '<g id="f-runzone" clip-path="url(#arenaClip)" aria-hidden="true"></g>');
-    svg.insertAdjacentHTML("beforeend", '<g id="f-runner" aria-hidden="true"><line class="runpath" id="f-runpath"/><circle class="runnext" id="f-runnext" r="2.6"/>' +
+    // The target area goes with the other zones, under the answer zone. The marker, line and
+    // ring go on top of everything, over your own click.
+    layerIn(svg, "zones")?.insertAdjacentHTML("afterbegin", '<g id="f-runzone" aria-hidden="true"></g>');
+    layerIn(svg, "me")?.insertAdjacentHTML("beforeend", '<g id="f-runner" aria-hidden="true"><line class="runpath" id="f-runpath"/><circle class="runnext" id="f-runnext" r="2.6"/>' +
       '<g id="f-runme"><circle class="runhalo" r="4.2"/>' + drawOverlay({t:"mark", x:0, y:0, l:state.slot, r:"H"}) + "</g></g>");
     r.zoneKey = "";
   }
@@ -528,7 +529,8 @@ function showHit(r: Run, h: Hit): void {
   if(h.kind === "tank"){
     // The tanks, where they take the buster, and the hit on them, under the other player marks.
     // It removes itself when it has faded.
-    document.querySelector("#arena-svg #marks-layer")?.insertAdjacentHTML("beforebegin", '<g class="fx-buster">' + busterPieces(h.name, r.bossAt).map(drawOverlay).join("") + "</g>");
+    const svg = document.getElementById("arena-svg");
+    if(svg) layerIn(svg, "effects")?.insertAdjacentHTML("beforeend", '<g class="fx-buster">' + busterPieces(h.name, r.bossAt).map(drawOverlay).join("") + "</g>");
     const hit = document.querySelector("#arena-svg .fx-buster:last-of-type");
     setTimeout(() => hit?.remove(), BUSTER_MS);
   }

@@ -106,14 +106,46 @@ export function floorSVG(split = false): string {
 /** True for the filled area of an attack. */
 const isHit = (o: Overlay): boolean =>
   o.t === "aoe" || o.t === "donut" || o.t === "band" || o.t === "poly" || (o.t === "lane" && !o.soft);
-/** Overlays with the attacks first, then the rest (safe rings, weapons, marks) on top, so an
+/** Overlays with the attacks first, then the rest (safe rings, weapons, towers) on top, so an
     attack never covers a weapon icon. Each attack keeps its own see-through fill and edge, so
     where attacks overlap the colour gets darker. */
 export function hitsSVG(os: Overlay[]): string {
   return os.filter(isHit).map(drawOverlay).join("") + os.filter(o => !isHit(o)).map(drawOverlay).join("");
 }
 
-/** The full arena for a scene, turned k quarter turns. Feedback layers stay empty until an answer. */
+/* ---------- one layer order for every arena picture ---------- */
+/** The layers of an arena picture, from the bottom up. The Mechanics pictures, the drills, Real
+    time and the cheat sheet all draw in this order, so a piece looks the same everywhere.
+    ground: the attacks, then the weapons and other pieces on the floor (clipped to the arena).
+    drops: puddles and other pieces that stay on the floor after a step.
+    zones: where to stand, as the right answer, a preview or a target (clipped to the arena).
+    waymarks, then boss: the boss and his ring.
+    labels: name tags for weapons and zones, over the boss so they stay readable.
+    effects: what Real time adds over the arena (the flash, the countdown ring, a tank buster).
+    marks: the other players. me: your own click and your moving marker, on top of everything. */
+const LAYERS = ["ground", "drops", "zones", "waymarks", "boss", "labels", "effects", "marks", "me"] as const;
+export type Layer = typeof LAYERS[number];
+const CLIPPED: ReadonlySet<Layer> = new Set<Layer>(["ground", "zones"]);
+
+/** An arena picture: the floor, then one group for each layer, in LAYERS order. `attrs` goes on
+    the svg element. Each group has data-layer set to its name, so a view can add to it later. */
+export function arenaSVG(attrs: string, layers: Partial<Record<Layer, string>>, split = false): string {
+  const all: Partial<Record<Layer, string>> = {...layers, waymarks:drawWaymarks()};
+  return "<svg " + attrs + ' viewBox="-4 -6 108 110" role="img">' + floorSVG(split) + '<text class="compass" x="50" y="-2.2">N</text>' +
+    LAYERS.map(l => '<g data-layer="' + l + '"' + (CLIPPED.has(l) ? ' clip-path="url(#arenaClip)"' : "") + ">" + (all[l] ?? "") + "</g>").join("") + "</svg>";
+}
+
+/** The group for one layer of an arena picture. */
+export const layerIn = (svg: Element, l: Layer): Element | null => svg.querySelector('[data-layer="' + l + '"]');
+
+/** Overlays sorted into their layers: tags are labels, role marks are marks, the rest is ground. */
+export function piecesSVG(os: Overlay[]): Pick<Record<Layer, string>, "ground" | "labels" | "marks"> {
+  const draw = (t: Overlay["t"]): string => os.filter(o => o.t === t).map(drawOverlay).join("");
+  return {ground:hitsSVG(os.filter(o => o.t !== "tag" && o.t !== "mark")), labels:draw("tag"), marks:draw("mark")};
+}
+
+/** The full arena for a scene, turned k quarter turns. The named groups inside the layers stay
+    empty until paintArena (map view) fills them. */
 export function sceneSVG(sc: Scene, k: number): string {
   /* Weapons carry a spawn index. Each one gets its own group, so the map view can fade it
      after it resolves and, for spawnPlay scenes, show the weapons appearing one at a time. */
@@ -127,40 +159,29 @@ export function sceneSVG(sc: Scene, k: number): string {
     const later = sc.spawnAhead != null && i >= sc.spawnAhead ? " later" : "";
     return '<g class="spawn' + later + '" data-spawn="' + i + '"' + delay + ">" + g.map(o => drawOverlay(rotOverlay(o, k))).join("") + ord + "</g>";
   }).join("");
-  const isMark = (o: Overlay): boolean => o.t === "mark";
-  const base = sc.overlays.filter(o => o.spawn == null).map(o => rotOverlay(o, k));
-  let h = '<svg id="arena-svg"' + (sc.spawnPlay ? ' class="play"' : "") + ' viewBox="-4 -6 108 110" role="img" aria-label="Arena map. Click to choose a spot.">';
-  h += floorSVG(sc.split);
-  h += '<text class="compass" x="50" y="-2.2">N</text>';
-  // What an answer reveals (the attacks) goes under the weapons, so their icons stay sharp.
-  h += '<g id="reveal-layer" clip-path="url(#arenaClip)"></g>';
-  h += '<g clip-path="url(#arenaClip)">' + hitsSVG(base.filter(o => !isMark(o))) + spawned + "</g>";
-  h += '<g id="drops"></g>';
-  h += drawWaymarks();
-  h += '<g id="boss-layer"></g>';
-  h += '<g id="fb-layer"></g>';
-  // Player marks go on top of everything else: the other players (the scene's marks, then the
-  // step cues), and over them your own click. Views that add effects put them before this layer.
-  h += '<g id="marks-layer">' + base.filter(isMark).map(drawOverlay).join("") + '<g id="cue-marks"></g></g>';
-  h += '<g id="me-layer"></g></svg>';
-  return h;
+  const base = piecesSVG(sc.overlays.filter(o => o.spawn == null).map(o => rotOverlay(o, k)));
+  return arenaSVG('id="arena-svg"' + (sc.spawnPlay ? ' class="play"' : "") + ' aria-label="Arena map. Click to choose a spot."', {
+    // What an answer reveals (the attacks) goes under the weapons, so their icons stay sharp.
+    ground:'<g id="reveal-layer"></g>' + base.ground + spawned,
+    drops:'<g id="drops"></g>',
+    zones:'<g id="fb-layer"></g>',
+    boss:'<g id="boss-layer"></g>',
+    labels:base.labels + '<g id="label-layer"></g>',
+    // The scene's own marks, then the marks of the step cues.
+    marks:base.marks + '<g id="cue-marks"></g>',
+    me:'<g id="me-layer"></g>',
+  }, sc.split);
 }
 
 /** A still arena picture for a quiz question. Until `answered`, it shows the setup, or the
     setup with one answer `preview` in the neutral colour. After the answer, it shows what the
-    mechanic does and the right spot in green. Tags go over the attacks and zones, so an AoE
-    or a zone never hides them. Player marks go on top of everything, the waymarks and the boss
-    too. */
+    mechanic does and the right spot in green. */
 export function figSVG(f: Fig, answered: boolean, label: string, preview?: Preview): string {
   const extra = answered ? f.after ?? [] : preview ? preview.pieces : f.before ?? [];
   const zones = answered ? (f.answer ?? []).map(z => zoneSVG(z, "ok")) : (preview?.zones ?? []).map(z => zoneSVG(z, "pick"));
-  const pieces = [...f.overlays, ...extra];
-  const isLabel = (o: Overlay): boolean => o.t === "tag" || o.t === "mark";
-  const draw = (os: Overlay[]): string => os.map(drawOverlay).join("");
-  const marks = pieces.filter(o => o.t === "mark"), tags = pieces.filter(o => o.t === "tag");
-  let h = '<svg class="qfig-svg" viewBox="-4 -6 108 110" role="img" aria-label="' + esc(label) + '">' + floorSVG(f.split) + '<text class="compass" x="50" y="-2.2">N</text>';
-  h += '<g clip-path="url(#arenaClip)">' + hitsSVG(pieces.filter(o => !isLabel(o))) + zones.join("") + draw(tags) + "</g>";
-  return h + drawWaymarks() + (f.boss ? drawBoss(f.boss) : "") + draw(marks) + "</svg>";
+  return arenaSVG('class="qfig-svg" aria-label="' + esc(label) + '"', {
+    ...piecesSVG([...f.overlays, ...extra]), zones:zones.join(""), boss:f.boss ? drawBoss(f.boss) : "",
+  }, f.split);
 }
 
 export function zoneSVG(z: ZoneShape, cls: string): string {
