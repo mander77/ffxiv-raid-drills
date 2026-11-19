@@ -5,10 +5,11 @@ import { rotZone, rotOverlay, inZone, zoneCenter, f1 } from "../geometry";
 import { sceneSVG, drawOverlay, drawBoss, zoneSVG } from "../arena";
 import { BOSS, MAPS, PUDDLE_R, changes } from "../data/drills";
 import { ABILITIES } from "../data/abilities";
-import { clock } from "../data/fight";
+import { clock, type Picks } from "../data/fight";
 import { tabHead, renderRoundDone, hudPrompt } from "./common";
 import { tlNav, wireNav, marks, catNames } from "./tlnav";
-import type { Boss, Point, Scene, StepResult } from "../types";
+import { patternRows, wirePattern, picked } from "./pattern";
+import type { Boss, MapDrill, Point, Scene, StepResult } from "../types";
 
 /** The drill on screen. Only call this while a map drill shows. */
 // TS note: state.cur has the union type Cur. This helper checks `kind` and throws otherwise,
@@ -104,6 +105,15 @@ function restart(): void {
   renderMap(false);
 }
 
+/** The pick for a fight pattern key, or undefined when it is Random (or the key is not set). */
+function followedPick(key?: string): string | undefined {
+  const v = key ? (state.choices as Record<string, string>)[key] : undefined;
+  return v && v !== "random" ? v : undefined;
+}
+/** The fight pattern keys a drill follows, for its pick rows. */
+const followedKeys = (m: MapDrill): Array<keyof Picks> =>
+  [m.follows?.variant, m.follows?.pick].filter((k): k is keyof Picks => Boolean(k && k in state.choices));
+
 /* A drill and pattern code asked for by a link, such as #map/m-assault/A7K2. */
 let wanted: {id: string; code: string} | null = null;
 export function openPattern(id: string, code: string): void { wanted = {id, code}; }
@@ -117,11 +127,14 @@ export function renderMap(fresh = true): void {
   const cur = state.cur;
   if(ask || fresh || !cur || cur.kind !== "map" || cur.item !== item){
     // The code seeds every random choice: the variant, the turn and the drill's own pattern.
+    // A fight pattern pick that fits this drill replaces a random result; the random call still
+    // happens, so the code keeps its meaning for the other parts.
     const code = ask?.code ?? newCode();
     const made = withSeed(code, () => {
-      const v = item.variants ? item.variants[Math.floor(random() * item.variants.length)] : null;
+      const rolled = item.variants ? item.variants[Math.floor(random() * item.variants.length)] : null;
+      const want = followedPick(item.follows?.variant), v = want && item.variants?.includes(want) ? want : rolled;
       const k = item.rotate ? Math.floor(random() * 4) : 0;
-      return {scene:item.build(state.slot, v), k};
+      return {scene:item.build(state.slot, v, followedPick(item.follows?.pick)), k};
     });
     state.cur = {kind:"map", item, scene:made.scene, k:made.k, code, results:[], counted:false};
   }
@@ -173,8 +186,10 @@ export function drawMapPanel(): void {
   const peek = c.peek ?? n - 1;   // the step whose answer shows: the one picked, or the last one answered
   const back = lookBack(c) >= 0;   // looking back: the arena shows an earlier step
   const onArena = back ? peek : done ? n - 1 : n;   // the step the arena shows; its chip is pressed
+  const keys = followedKeys(c.item);   // the fight pattern picks that fit this drill
   let h = '<div class="eyebrow"><b>' + esc(c.item.phase) + "</b><span>" + esc(c.item.time) + '</span><span class="progress">Drill ' + (d.i + 1) + " of " + d.items.length + "</span>" +
-    (changes(c.item) ? '<span title="Send this code to rebuild this exact pattern">Pattern ' + c.code + "</span>" : "") + "</div>";
+    (changes(c.item) ? '<span title="Send this code to rebuild this exact pattern">Pattern ' + c.code + "</span>" : "") +
+    (picked(keys) ? '<span class="mypick" title="A fight pattern pick is set for this drill. Change it below.">Your pick</span>' : "") + "</div>";
   h += "<h2>" + esc(c.item.title) + "</h2>";
   if(n === 0) h += '<p class="setup">' + esc(sc.setup) + "</p>";
   else h += '<p class="setup' + (c.setupOpen ? "" : " folded") + '">' + esc(sc.setup) + '</p><button type="button" class="linkbtn" id="setup-toggle">' + (c.setupOpen ? "Less" : "More") + "</button>";
@@ -204,8 +219,13 @@ export function drawMapPanel(): void {
     const row = (sc.spawnPlay ? '<button type="button" class="btn ghost" id="map-replay">Watch the spawns again</button>' : "") + (n > 0 ? restartBtn : "") + newBtn;
     if(row) h += '<div class="actions">' + row + "</div>";
   }
+  // The fight pattern picks that fit this drill, shared with Real time. A change builds the drill
+  // again with the pick; Random leaves that part to the pattern code.
+  if(keys.length) h += '<div class="drillpick"><h3 class="fpick">Practice a pattern</h3><p class="hint">Real time uses these picks too.' +
+    (keys.some(k => k === "set1" || k === "set2") ? " Drag the weapon cards into the order the boss takes them." : "") + "</p>" + patternRows(keys) + "</div>";
   const p = el("map-panel");
   p.innerHTML = h;
+  wirePattern(() => renderMap(true));
   // The same prompt above the arena, where your eyes are when you click.
   // When the drill is done, the HUD shows the result and the Next drill button. On a phone the
   // panel is below the arena, so this keeps the button in view without scrolling.

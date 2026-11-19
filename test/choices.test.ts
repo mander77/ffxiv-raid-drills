@@ -1,6 +1,7 @@
 import { test, assert } from "vitest";
 import { buildFight, CHOICE_ROWS, RANDOM, choicesText, parseChoices, type Choices, type Fight, type Picks } from "../src/data/fight";
 import { newCode } from "../src/util";
+import { MAPS } from "../src/data/drills";
 
 const RUNS = 40;
 const seg = (f: Fight, title: string) => {
@@ -61,6 +62,26 @@ test("a choice changes only its own part: the rest still comes from the fight co
       // The same code and choice always build the same fight.
       assert.deepEqual(buildFight("H1", code, {...RANDOM, [row.key]: v}).picks, f.picks);
     }
+  }
+});
+
+test("Step by step drills follow the picks that fit them", () => {
+  const drill = (id: string) => { const m = MAPS.find(x => x.id === id); if(!m) throw new Error("missing drill " + id); return m; };
+  const orders = CHOICE_ROWS.find(r => r.key === "set1")?.options.map(([o]) => o) ?? [];
+  assert.lengthOf(orders, 6);
+  for(const o of orders){
+    assert.equal(orderIn(drill("m-assault").build("H1", null, o).steps), o, "Assault Evolved follows " + o);
+    assert.equal(orderIn(drill("m-void").build("H2", "spread", o).steps.slice(5)), o, "Void Stardust's second set follows " + o);
+  }
+  for(const dir of ["cw", "ccw"]){
+    const first = drill("m-ultimate").build("H1", null, dir).overlays.find(x => x.spawn === 0 && WEAPON.has(x.t));
+    assert.ok(first && "x" in first && (first.x < 50) === (dir === "cw"), "Ultimate follows " + dir);
+  }
+  // Every pick a drill follows is a real one, and a followed variant takes that pick's values.
+  for(const m of MAPS) if(m.follows){
+    for(const k of [m.follows.variant, m.follows.pick]) if(k) assert.ok(CHOICE_ROWS.some(r => r.key === k), m.id + " follows an unknown pick " + k);
+    const row = CHOICE_ROWS.find(r => r.key === m.follows?.variant);
+    if(row) assert.sameMembers(m.variants ?? [], row.options.map(([v]) => v), m.id + ": its variants are the pick's values");
   }
 });
 

@@ -129,6 +129,10 @@ export function buildUltimate(s: Slot, forceCw?: boolean): Run & {cw: boolean} {
   return {...run, cw};
 }
 
+/** A picked weapon order ("sword-axe-scythe") as weapon types, or undefined for Random.
+    The picks were checked against the known orders when they were saved. */
+const orderFrom = (pick?: string): WeaponType[] | undefined => pick ? pick.split("-") as WeaponType[] : undefined;
+
 /* The scenes around a weapon run. The drill list and the Real time fight both use them, so a
    fight can pass in a run built with the player's choices. */
 export function assaultScene(A: Run, s: Slot): Scene {
@@ -329,12 +333,12 @@ export const MAPS: MapDrill[] = [
       boss:BOSS, overlays:[{t:"tag",x:50,y:56,s:"SCYTHE"},{t:"mark",x:37,y:36,l:"MT",r:"T"},{t:"mark",x:63,y:36,l:"OT",r:"T"}],
       steps:[{q:"Click where the party stacks.", z:{c:[50,69],r:9}, a:"South, right behind the boss."}],
       rule:"Scythe: tanks spread to the front, the party stacks behind."})},
-  {id:"m-assault", order:3, random:true, phase:P1, time:"0:48", title:"Assault Evolved: three weapons",
-    build:s=>assaultScene(buildAssault(s), s)},
+  {id:"m-assault", order:3, random:true, follows:{pick:"set1"}, phase:P1, time:"0:48", title:"Assault Evolved: three weapons",
+    build:(s, _v, pick)=>assaultScene(buildAssault(s, orderFrom(pick)), s)},
   // One drill for the whole stretch: the weapons spawn at 1:13, Void Stardust runs, then the boss
   // takes the same three weapons. A separate drill for the weapons would show a different set.
-  {id:"m-void", order:4, random:true, variants:["stack","spread"], phase:P1, time:"1:13 to 1:45", title:"Void Stardust into the second weapons",
-    build:(s, v)=>voidIntoWeapons(s, v === "spread", buildAssault2(s))},
+  {id:"m-void", order:4, random:true, variants:["stack","spread"], follows:{variant:"void", pick:"set2"}, phase:P1, time:"1:13 to 1:45", title:"Void Stardust into the second weapons",
+    build:(s, v, pick)=>voidIntoWeapons(s, v === "spread", buildAssault2(s, orderFrom(pick)))},
   {id:"m-dance", order:8.1, rotate:true, phase:P1, time:"2:31", title:"Dance of Domination: pairs",
     build:s=>({setup:"The seven hits are over and the lines are on the floor. Find the side with no outer line. That open side is new south.",
       boss:{x:50, y:50, f:null}, overlays:[
@@ -342,8 +346,8 @@ export const MAPS: MapDrill[] = [
         {t:"lineaoe",x:0,y:0,x2:100,y2:100},{t:"lineaoe",x:100,y:0,x2:0,y2:100},{t:"lineaoe",x:50,y:0,x2:50,y2:100}],
       steps:[{q:"Click your pair spot.", z:S(s,{c:[33,91],r:8},{c:[67,91],r:8}), a:S(s,"Relative southwest, the outer spot, with R1.","Relative southeast, the outer spot, with R2.")}],
       rule:"Open side = new south. H1 and R1 relative SW, H2 and R2 relative SE."})},
-  {id:"m-ultimate", order:11.5, random:true, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: six weapons",
-    build:s=>ultimateScene(buildUltimate(s))},
+  {id:"m-ultimate", order:11.5, random:true, follows:{pick:"ult"}, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: six weapons",
+    build:(s, _v, pick)=>ultimateScene(buildUltimate(s, pick ? pick === "cw" : undefined))},
   {id:"m-tornado", order:12, phase:P1, time:"3:46", title:"Ultimate Trophy Weapons: tornadoes",
     build:s=>({setup:"The sixth weapon resolved (it is always north). Four tornadoes sit on the cardinals. Each one cones its two closest players.",
       boss:BOSS, overlays:[{t:"tornado",x:50,y:16},{t:"tornado",x:20,y:50},{t:"tornado",x:80,y:50},{t:"tornado",x:50,y:84}],
@@ -396,12 +400,12 @@ export const MAPS: MapDrill[] = [
       boss:BOSS, overlays:[{t:"mark",x:25,y:25,l:"R1",r:"D"},{t:"mark",x:75,y:25,l:"R2",r:"D"}],
       steps:[{q:"Where do you stand?", z:S(s,{c:[25,74],r:9},{c:[75,74],r:9}), a:S(s,"Southwest, outside.","Southeast, outside.")}],
       rule:"Marked? Go to the safe corner on your wall. Two marked on one side? The one closer to the proximity AoE moves."})},
-  {id:"m-ecl-two", order:26.5, variants:["north","south"], phase:P4, time:"9:31", title:"Ecliptic Stampede: Two-way Fireball",
+  {id:"m-ecl-two", order:26.5, variants:["north","south"], follows:{variant:"wall"}, phase:P4, time:"9:31", title:"Ecliptic Stampede: Two-way Fireball",
     build:(_s, v)=>({setup:"You were marked and dropped your puddles along the " + (v ?? "north").toUpperCase() + " wall. Now the boss casts Two-way Fireball: two line stacks, east and west.",
       boss:BOSS, overlays:[...NPUD, ...SPUD],
       steps:[{q:"Which line stack do you join? Click it.", z: v === "south" ? {rect:[60,43,84,57]} : {rect:[16,43,40,57]}, a: v === "south" ? "The east line stack." : "The west line stack."}],
       rule:"Two-way: north puddles = west, south puddles = east."})},
-  {id:"m-ecl-four", order:26.6, variants:["north","south"], phase:P4, time:"9:31", title:"Ecliptic Stampede: Four-way Fireball",
+  {id:"m-ecl-four", order:26.6, variants:["north","south"], follows:{variant:"wall"}, phase:P4, time:"9:31", title:"Ecliptic Stampede: Four-way Fireball",
     build:(_s, v)=>({setup:"You were marked and dropped your puddles along the " + (v ?? "north").toUpperCase() + " wall. Now the boss casts Four-way Fireball: two-player stacks on the four closest.",
       boss:BOSS, overlays:[...NPUD, ...SPUD],
       steps:[{q:"Where do you bait?", z: v === "south" ? {c:[57,43],r:5.5} : {c:[43,43],r:5.5}, a: v === "south" ? "NE, on the boss hitbox ring." : "NW, on the boss hitbox ring."}],

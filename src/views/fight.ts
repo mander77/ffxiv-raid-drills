@@ -1,13 +1,14 @@
 // Real time, the second mode of the "Where do I stand?" tab: the drills play in fight order on
 // the fight clock, with the fight timeline.
 import { LS, esc, el } from "../util";
-import { state, view, stopTimer } from "../core";
+import { state, view, stopTimer, setChoices } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter } from "../geometry";
 import { sceneSVG } from "../arena";
 import { paintArena } from "./map";
-import { tabHead, hudPrompt } from "./common";
-import { buildFight, clock, cleanChoices, choicesText, CHOICE_ROWS, RANDOM, type Choices, type Fight, type FightSeg } from "../data/fight";
-import { BOSS, type WeaponType } from "../data/drills";
+import { tabHead, hudPrompt, segRow } from "./common";
+import { patternRows, wirePattern } from "./pattern";
+import { buildFight, clock, choicesText, CHOICE_ROWS, RANDOM, type Choices, type Fight, type FightSeg } from "../data/fight";
+import { BOSS } from "../data/drills";
 import { ABILITIES } from "../data/abilities";
 import { tlNav, wireNav, markNav } from "./tlnav";
 import type { Boss, Point, Scene, StepResult } from "../types";
@@ -43,18 +44,15 @@ const settings = {
 // for example `const r = R; if(!r) return;`. After that check TypeScript knows r is a Run.
 let R: Run | null = null;
 let lastLive: Done | null = null;
-/* The parts of the fight the player picked (the rest stay random). The app keeps them. */
-let choices: Choices = cleanChoices(LS.get<unknown>("fchoices", null));
-function saveChoices(c: Choices): void { choices = c; LS.set("fchoices", c); }
 /* A fight code asked for by a link, such as #fight/K3PZ or #fight/K3PZ/raw=axe,ult=cw.
-   The next start uses the code, and the link's choices replace the saved ones. */
+   The next start uses the code, and the link's choices replace the saved picks. */
 let wantedFight: string | null = null;
 export function openFight(code: string, picked?: Choices): void {
   wantedFight = code;
-  if(picked) saveChoices(picked);
+  if(picked) setChoices(picked);
 }
 function nextFight(): Fight {
-  const f = buildFight(state.slot, wantedFight ?? undefined, choices);
+  const f = buildFight(state.slot, wantedFight ?? undefined, state.choices);
   wantedFight = null;
   return f;
 }
@@ -98,12 +96,6 @@ function jumpToAbility(i: number): void {
 }
 
 /* ---------- settings ---------- */
-/** One row of toggle buttons. `attr` is the data attribute the click handler looks for. */
-function segRow(attr: string, key: string, label: string, options: Array<[string, string]>, cur: string): string {
-  return '<div class="ctrl" style="margin-top:12px"><span id="' + key + '-lbl">' + label + '</span><div class="seg small" role="group" aria-labelledby="' + key + '-lbl">' +
-    options.map(([v, t]) => '<button type="button" data-' + attr + '="' + key + '" data-val="' + v + '" aria-pressed="' + (v === cur) + '">' + t + "</button>").join("") + "</div></div>";
-}
-
 /* Speed and Missed spot. The start screen shows them, and so does a running fight, under the
    slider: the clock reads both on every tick, so a change works at once. */
 function settingRows(): string {
@@ -111,79 +103,17 @@ function settingRows(): string {
     segRow("set", "fpause", "Missed spot", [["no", "Fight goes on"], ["yes", "Fight pauses"]], settings.pause ? "yes" : "no");
 }
 
-/* The fight pattern: each random part of the fight, Random or a pick. Only the start screen
-   shows these, because a pick changes the fight that gets built. */
+/* The fight pattern: every pick, on the start screen only, because a pick changes the fight that
+   gets built. The Step by step drills show the picks that fit them (see pattern.ts). */
 function pickRows(): string {
-  return '<h3 class="fpick">Fight pattern</h3><p class="hint">Pick a part to practice it on purpose. Parts left on Random still come from the fight code. Drag the weapon cards into the order the boss takes them.</p>' +
-    CHOICE_ROWS.map(r => r.key === "set1" || r.key === "set2" ? orderRow(r.key, r.label)
-      : segRow("pick", "fc-" + r.key, r.label, [["random", "Random"] as [string, string]].concat(r.options), choices[r.key])).join("") +
-    (choicesText(choices) ? '<p style="margin-top:10px"><button type="button" class="linkbtn" id="f-allrandom">Set all to Random</button></p>' : "");
-}
-
-/* A weapon order: three cards in the order the boss takes them. Drag a card to a new place, or
-   focus it and use the left and right arrows. On Random the cards show "?" and any move sets an
-   order. The Random button goes back to Random. */
-const WEAPON_NAMES: Record<WeaponType, string> = {sword:"Sword", axe:"Axe", scythe:"Scythe"};
-function orderRow(key: "set1" | "set2", label: string): string {
-  const random = choices[key] === "random", order = (random ? "sword-axe-scythe" : choices[key]).split("-") as WeaponType[];
-  return '<div class="ctrl" style="margin-top:12px"><span id="fc-' + key + '-lbl">' + label + '</span>' +
-    '<div class="seg small" role="group" aria-labelledby="fc-' + key + '-lbl"><button type="button" data-pick="fc-' + key + '" data-val="random" aria-pressed="' + random + '">Random</button></div>' +
-    '<ol class="wcards' + (random ? " random" : "") + '" data-key="' + key + '" aria-label="' + label + ': drag the cards, or use the arrow keys">' +
-    order.map((w, i) => '<li class="wcard" data-w="' + w + '" tabindex="0" aria-label="' + WEAPON_NAMES[w] + (random ? ", order random" : ", number " + (i + 1)) + '">' +
-      "<b>" + (random ? "?" : i + 1) + "</b>" + WEAPON_NAMES[w] + "</li>").join("") + "</ol></div>";
-}
-
-/* Drag and the arrow keys for the weapon cards. Pointer events work for a mouse and a finger.
-   While a card is dragged, it changes places with a neighbor once the pointer passes the middle
-   of that neighbor; the new order is saved when you let go. */
-function wireCards(): void {
-  view.querySelectorAll<HTMLElement>(".wcards").forEach(list => {
-    const key = list.dataset.key === "set2" ? "set2" : "set1";
-    const cards = (): HTMLElement[] => [...list.querySelectorAll<HTMLElement>(".wcard")];
-    const save = (focusW?: string): void => {
-      saveChoices(cleanChoices({...choices, [key]: cards().map(c => c.dataset.w).join("-")}));
-      renderFight();
-      if(focusW) view.querySelector<HTMLElement>('.wcards[data-key="' + key + '"] [data-w="' + focusW + '"]')?.focus();
-    };
-    const mid = (c: HTMLElement): number => { const r = c.getBoundingClientRect(); return r.left + r.width / 2; };
-    cards().forEach(card => {
-      card.addEventListener("pointerdown", e => {
-        e.preventDefault();
-        try { card.setPointerCapture(e.pointerId); } catch { /* a synthetic event has no real pointer */ }
-        card.classList.add("dragging");
-        let moved = false;
-        const move = (ev: PointerEvent): void => {
-          const all = cards(), i = all.indexOf(card), prev = all[i - 1], next = all[i + 1];
-          if(next && ev.clientX > mid(next)){ list.insertBefore(next, card); moved = true; }
-          else if(prev && ev.clientX < mid(prev)){ list.insertBefore(card, prev); moved = true; }
-          if(moved) cards().forEach((c, n) => { const b = c.querySelector("b"); if(b) b.textContent = String(n + 1); });
-        };
-        const up = (): void => {
-          card.removeEventListener("pointermove", move); card.removeEventListener("pointerup", up); card.removeEventListener("pointercancel", up);
-          card.classList.remove("dragging");
-          if(moved) save();   // a tap with no move changes nothing
-        };
-        card.addEventListener("pointermove", move); card.addEventListener("pointerup", up); card.addEventListener("pointercancel", up);
-      });
-      card.addEventListener("keydown", e => {
-        const all = cards(), i = all.indexOf(card), j = e.key === "ArrowLeft" ? i - 1 : e.key === "ArrowRight" ? i + 1 : -1;
-        if(j < 0 || j >= all.length) return;
-        e.preventDefault(); e.stopPropagation();   // the arrows move the card, not the fight clock
-        if(j < i) list.insertBefore(card, all[j]); else list.insertBefore(all[j], card);
-        save(card.dataset.w);
-      });
-    });
-  });
+  return '<h3 class="fpick">Fight pattern</h3><p class="hint">Pick a part to practice it on purpose. Parts left on Random still come from the fight code. Drag the weapon cards into the order the boss takes them. Step by step uses the picks that fit each drill.</p>' +
+    patternRows(CHOICE_ROWS.map(r => r.key)) +
+    (choicesText(state.choices) ? '<p style="margin-top:10px"><button type="button" class="linkbtn" id="f-allrandom">Set all to Random</button></p>' : "");
 }
 
 function wirePicks(): void {
-  view.querySelectorAll<HTMLButtonElement>("[data-pick]").forEach(b => b.addEventListener("click", () => {
-    // cleanChoices checks the value, so only a known pick goes into the saved choices.
-    saveChoices(cleanChoices({...choices, [(b.dataset.pick ?? "").replace("fc-", "")]: b.dataset.val}));
-    renderFight();
-  }));
-  wireCards();
-  document.getElementById("f-allrandom")?.addEventListener("click", () => { saveChoices({...RANDOM}); renderFight(); });
+  wirePattern(renderFight);
+  document.getElementById("f-allrandom")?.addEventListener("click", () => { setChoices({...RANDOM}); renderFight(); });
 }
 
 /** Save a setting when its button is clicked, then call `after` so the screen can show it. */

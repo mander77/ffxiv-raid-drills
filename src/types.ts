@@ -118,9 +118,12 @@ export interface MapDrill {
   variants?: string[];
   /** The build itself picks random parts, such as weapon spots or line patterns. */
   random?: boolean;
+  /** The fight pattern picks this drill follows (keys of Picks in data/fight.ts): `variant`
+      chooses its variant, and `pick` goes to build as its third argument. */
+  follows?: { variant?: string; pick?: string };
   // TS note: a drill's build function may take fewer parameters than this type lists.
-  // `s => ({...})` still fits `(s, v) => Scene`, just as JavaScript ignores extra arguments.
-  build: (s: Slot, v: string | null) => Scene;
+  // `s => ({...})` still fits `(s, v, pick) => Scene`, just as JavaScript ignores extra arguments.
+  build: (s: Slot, v: string | null, pick?: string) => Scene;
 }
 
 /* ---------- questions ---------- */

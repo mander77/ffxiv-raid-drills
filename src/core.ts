@@ -3,6 +3,7 @@ import { LS, el } from "./util";
 import { MAPS } from "./data/drills";
 import { MECH, DEATH, NEXT_ITEMS } from "./data/questions";
 import { JOB } from "./data/jobs";
+import { cleanChoices, type Choices } from "./data/fight";
 import type { Job, MapDrill, Option, Question, QuizItem, Scene, Slot, StepResult } from "./types";
 
 // TS note: other files import these types with `import { state, type Deck } from "./core"`.
@@ -30,6 +31,8 @@ interface AppState {
   slot: Slot;
   job: Job;
   play: Play;
+  /** The fight pattern picks. Real time and the Step by step drills that fit them share them. */
+  choices: Choices;
   psecs: number;
   stats: Record<string, {s: number; r: number}>;
   tab: Tab;
@@ -69,6 +72,7 @@ export const state: AppState = {
   slot: LS.get<string>("slot", "H1") === "H2" ? "H2" : "H1",
   job: LS.get<string>("job", "whm") === "sge" ? "sge" : "whm",
   play: LS.get<string>("play", "step") === "time" ? "time" : "step",
+  choices: cleanChoices(LS.get<unknown>("fchoices", null)),
   psecs: [4, 6, 8, 10].includes(savedSecs) ? savedSecs : 6,
   stats: LS.get<AppState["stats"]>("stats", {}) || {},
   tab: "map",
@@ -81,6 +85,9 @@ export const state: AppState = {
 };
 
 export const view = el("view");
+
+/** Save the fight pattern picks; the app keeps them for the next visit. */
+export function setChoices(c: Choices): void { state.choices = c; LS.set("fchoices", c); }
 
 /** Save a right or wrong answer to the stats for that question or drill. They stay in this
     browser, and the Pressure round uses them to ask missed questions more often. */

@@ -19,6 +19,13 @@ export function tabHead(): string {
   return h + "</div>";
 }
 
+/** One row of toggle buttons with a label. `attr` names the data attribute that the click
+    handler looks for (data-set, data-pick); `cur` is the value shown as pressed. */
+export function segRow(attr: string, key: string, label: string, options: Array<[string, string]>, cur: string): string {
+  return '<div class="ctrl" style="margin-top:12px"><span id="' + key + '-lbl">' + label + '</span><div class="seg small" role="group" aria-labelledby="' + key + '-lbl">' +
+    options.map(([v, t]) => '<button type="button" data-' + attr + '="' + key + '" data-val="' + v + '" aria-pressed="' + (v === cur) + '">' + t + "</button>").join("") + "</div></div>";
+}
+
 /** The prompt row of the HUD above the arena: a short value on the left (a step count or a time)
     and the text to read. Real time adds a cast bar and a live countdown above it. */
 export function hudPrompt(count: string, text: string, idle = false): string {
