@@ -30,7 +30,7 @@ export function renderSheet(): void {
   const s = state.slot;
   const rows = TL.map(e => '<tr><td class="t">' + e.t + '</td><td class="n">' + esc(e.n) + '<br><span class="chip k-' + e.k + '">' + KIND[e.k] + "</span></td><td>" + esc(e.job(s)) + "</td></tr>").join("");
   const seen = Object.keys(state.stats).length;
-  view.innerHTML = tabHead(false) + '<div class="sheet">' +
+  view.innerHTML = tabHead() + '<div class="sheet">' +
     '<div class="cols"><section><h2>Someone died</h2><ol>' +
     "<li>Are you about to die? Heal yourself first.</li>" +
     "<li>Did Andrew call “let's get them up”? Raise now and say “I got it.”</li>" +

@@ -28,7 +28,6 @@ interface Decks { map?: Deck<MapDrill>; mech?: Deck<QuizItem>; next?: Deck<QuizI
 interface AppState {
   slot: Slot;
   job: Job;
-  order: "fight" | "weak";
   play: Play;
   psecs: number;
   stats: Record<string, {s: number; r: number}>;
@@ -69,7 +68,6 @@ export const state: AppState = {
   // LS.get<string> reads any saved string. Each ternary then turns it into one of the allowed values.
   slot: LS.get<string>("slot", "H1") === "H2" ? "H2" : "H1",
   job: LS.get<string>("job", "whm") === "sge" ? "sge" : "whm",
-  order: LS.get<string>("order", "fight") === "weak" ? "weak" : "fight",
   play: LS.get<string>("play", "step") === "time" ? "time" : "step",
   psecs: [4, 6, 8, 10].includes(savedSecs) ? savedSecs : 6,
   stats: LS.get<AppState["stats"]>("stats", {}) || {},
@@ -113,7 +111,8 @@ export function weighted<T extends {id: string}>(list: T[]): T[] {
 }
 
 function makeDeck<T extends {id: string; order: number}>(src: T[]): Deck<T> {
-  const items = state.order === "fight" ? src.slice().sort((a, b) => a.order - b.order) : weighted(src);
+  // Every deck runs in fight order.
+  const items = src.slice().sort((a, b) => a.order - b.order);
   return {items, i: 0, right: 0, done: 0};
 }
 

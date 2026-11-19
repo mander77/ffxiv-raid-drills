@@ -109,7 +109,7 @@ export function renderMap(fresh = true): void {
     state.cur = {kind:"map", item, scene:made.scene, k:made.k, code, results:[], counted:false};
   }
   const c = run();
-  view.innerHTML = tabHead(true) + '<div class="mapwrap">' + drillNav(d) +
+  view.innerHTML = tabHead() + '<div class="mapwrap">' + drillNav(d) +
     '<div class="stage"><div class="arena">' + sceneSVG(c.scene, c.k) +
     '<div class="legend"><span><i style="background:var(--ring)"></i>Boss hitbox and facing</span><span><i style="background:var(--aoe)"></i>AoE</span><span><i style="background:var(--tank)"></i>Tank</span><span><i style="background:var(--dps)"></i>DPS</span></div></div>' +
     '<div class="panel" id="map-panel"></div></div></div>';

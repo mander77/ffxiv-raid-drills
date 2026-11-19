@@ -64,7 +64,7 @@ function fightNav(): string {
 }
 
 function show(inner: string): void {
-  view.innerHTML = tabHead(false) + '<div class="mapwrap">' + fightNav() + inner + "</div>";
+  view.innerHTML = tabHead() + '<div class="mapwrap">' + fightNav() + inner + "</div>";
   view.querySelectorAll<HTMLButtonElement>("[data-fdrill]").forEach(b => b.addEventListener("click", () => jumpTo(b.dataset.fdrill ?? "")));
 }
 

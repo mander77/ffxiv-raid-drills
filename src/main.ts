@@ -83,10 +83,7 @@ view.addEventListener("click", e => {
   if(j){ state.job = j.dataset.job === "sge" ? "sge" : "whm"; LS.set("job", state.job); delete state.decks.job; return render(); }
   // A click on Real time while it is on goes back to the fight settings.
   const m = t.closest<HTMLElement>("[data-play]");
-  if(m){ setPlay(m.dataset.play === "time" ? "time" : "step"); return render(); }
-  const b = t.closest<HTMLElement>("[data-order]");
-  if(!b) return;
-  state.order = b.dataset.order === "weak" ? "weak" : "fight"; LS.set("order", state.order); state.decks = {}; render();
+  if(m){ setPlay(m.dataset.play === "time" ? "time" : "step"); render(); }
 });
 document.addEventListener("keydown", e => {
   if(e.altKey || e.ctrlKey || e.metaKey) return;

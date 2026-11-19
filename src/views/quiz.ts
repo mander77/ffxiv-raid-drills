@@ -21,7 +21,7 @@ export function renderQuiz(cat: QuizCat): void {
   const d = getDeck(cat);
   if(d.i >= d.items.length) return renderRoundDone(cat, d);
   prepMCQ(d.items[d.i], cat);
-  view.innerHTML = tabHead(true) + '<div class="qwrap"><div class="panel" id="q-panel"></div></div>';
+  view.innerHTML = tabHead() + '<div class="qwrap"><div class="panel" id="q-panel"></div></div>';
   drawMCQ();
 }
 

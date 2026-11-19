@@ -6,7 +6,7 @@ import { tabHead } from "./common";
 import { prepMCQ, drawMCQ } from "./quiz";
 
 export function renderPressureStart(): void {
-  view.innerHTML = tabHead(false) + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Pressure round</b><span>12 questions</span></div>' +
+  view.innerHTML = tabHead() + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Pressure round</b><span>12 questions</span></div>' +
     "<h2>Practice deciding fast</h2><p>Each question first gives you time to read it. The longer the question, the more time you get. Then a short timer runs while you decide. When it runs out, the round counts a freeze and shows you the answer. You can answer at any time. Aim for zero freezes first. Correct answers come with practice.</p>" +
     '<div class="ctrl" style="margin-top:14px"><span id="secs-lbl">Seconds to decide</span><div class="seg small" role="group" aria-labelledby="secs-lbl">' +
     [4, 6, 8, 10].map(n => '<button type="button" id="secs-' + n + '" data-secs="' + n + '" aria-pressed="' + (state.psecs === n) + '">' + n + "</button>").join("") +
@@ -29,7 +29,7 @@ export function showPressureQ(): void {
   if(!pr) return;
   if(pr.i >= pr.queue.length) return renderPressureDone();
   prepMCQ(pr.queue[pr.i], "pressure");
-  view.innerHTML = tabHead(false) + '<div class="qwrap"><div class="panel" id="q-panel"></div></div>';
+  view.innerHTML = tabHead() + '<div class="qwrap"><div class="panel" id="q-panel"></div></div>';
   drawMCQ();
   startTimer();
 }
@@ -74,7 +74,7 @@ export function renderPressureDone(): void {
   if(!pr) return;
   const msg = pr.froze === 0 ? "No freezes. You made a choice every time, which is the habit you want in the fight." :
     "Each freeze is a moment you would stand still in the fight. Run it again and aim for zero freezes, even if some answers are wrong.";
-  view.innerHTML = tabHead(false) + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Round done</b></div><h2>' + pr.right + " of " + pr.queue.length + " right</h2>" +
+  view.innerHTML = tabHead() + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Round done</b></div><h2>' + pr.right + " of " + pr.queue.length + " right</h2>" +
     '<div class="tally"><div class="ok"><span>Right</span><div class="big">' + pr.right + '</div></div><div class="bad"><span>Wrong</span><div class="big">' + pr.wrong + '</div></div><div class="slow"><span>Froze</span><div class="big">' + pr.froze + "</div></div></div>" +
     "<p>" + msg + '</p><div class="actions"><button type="button" class="btn" id="p-again">Run it again</button><button type="button" class="btn ghost" id="p-speed">Change speed</button></div></div></div>';
   state.cur = {kind:"pdone"};
