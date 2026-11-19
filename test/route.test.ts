@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { rightRoute, clickRoute, runnerAt, RUN_SPEED, REACT, LOOK, HOME as START, type Stop } from "../src/data/route";
+import { rightRoute, clickRoute, runnerAt, RUN_SPEED, REACT, LOOK, REST_GAP, HOME as START, type Stop } from "../src/data/route";
 import { buildFight, RANDOM } from "../src/data/fight";
 import { newCode } from "../src/util";
 import { inZone, rotZone } from "../src/geometry";
@@ -34,7 +34,7 @@ test("every spot of the right route is a right answer, so the watched run scores
 });
 
 test("the runner waits on a spot until its hit, then runs straight to the next spot", () => {
-  const route: Stop[] = [{p:[50, 34], hit:10, show:5, si:0, j:0}, {p:[80, 34], hit:20, show:5, si:0, j:1}];
+  const route: Stop[] = [{p:[50, 34], hit:10, show:5, si:0, j:0, pre:START}, {p:[80, 34], hit:20, show:5, si:0, j:1, pre:START}];
   // Before the mechanic shows: at the start, with no target yet.
   assert.deepEqual(runnerAt(route, 1), {at:START, target:null});
   // The mechanic is on the arena: still waiting, and the target is the spot for the first hit.
@@ -42,7 +42,7 @@ test("the runner waits on a spot until its hit, then runs straight to the next s
   // It leaves LOOK seconds after the mechanic shows, and gets there at run speed.
   const leave = 5 + LOOK, arrive = leave + dist(START, [50, 34]) / RUN_SPEED;
   const mid = runnerAt(route, (leave + arrive) / 2);
-  assert.isTrue(near(mid.at, [50, 49]), "halfway: " + mid.at);
+  assert.isTrue(near(mid.at, [(START[0] + 50) / 2, (START[1] + 34) / 2]), "halfway: " + mid.at);
   // On the first spot, the target stays that spot until its hit lands.
   const wait = runnerAt(route, 9.9);
   assert.isTrue(near(wait.at, [50, 34]));
@@ -55,19 +55,40 @@ test("the runner waits on a spot until its hit, then runs straight to the next s
   assert.deepEqual(runnerAt(route, 99), {at:[80, 34], target:null});
 });
 
-test("at run speed the runner reaches almost every right spot before its hit", () => {
-  let stops = 0, late = 0;
+test("at run speed the runner is never more than half a second late to a right spot", () => {
+  const late: string[] = [];
   for(const s of SLOTS) for(let i = 0; i < 30; i++){
-    const route = rightRoute(buildFight(s, newCode(), RANDOM));
+    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f);
     // A look-ahead stop is never reached on purpose, so it does not count.
     for(const st of route.filter(x => !x.look)){
-      stops++;
-      if(!near(runnerAt(route, st.hit).at, st.p)) late++;
+      const g = f.segs[st.si];
+      // How far short the runner is at the hit, in seconds of running.
+      const short = dist(runnerAt(route, st.hit).at, st.p) / RUN_SPEED;
+      // One known exception: after the first Void Stardust, the stack or spread moves toward the
+      // first weapon of the next set, 2 seconds after the last puddle. With that weapon across from
+      // the puddles, the party uses Expedient (scholar), or each player uses Sprint or a movement
+      // ability (the drill says so). The runner keeps plain run speed, so it can be late there.
+      const allowed = g.drills.includes("m-void") && g.scene.steps[st.j].q.startsWith("Puddles done") ? 1 : 0.5;
+      if(short > allowed) late.push(g.title + " step " + (st.j + 1) + ": " + short.toFixed(2) + " s");
     }
   }
-  // The route takes the short way and goes home in quiet stretches, so nearly every spot is
-  // reached in time. A spot that is not shows the run as it is: late.
-  assert.isBelow(late / stops, 0.02, late + " of " + stops + " spots reached late");
+  // The route runs to the middle of each spot, so a few tight spots are reached a little after
+  // the hit, as in the fight (the Orbital Omen lines come 1.6 seconds apart). None is far off.
+  assert.deepEqual(late, []);
+});
+
+test("the spread after the puddles goes to the middle of the nearest open gap", () => {
+  for(const s of SLOTS) for(let i = 0; i < 20; i++){
+    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f);
+    f.segs.forEach((g, si) => {
+      const steps = g.scene.steps, j = steps.findIndex(st => st.q.startsWith("Puddles done. Comet"));
+      if(j < 0) return;
+      const spread = route.find(st => st.si === si && st.j === j), last = route.find(st => st.si === si && st.j === j - 1);
+      if(!spread || !last) throw new Error("missing stops");
+      // The spread spot is at most as far from the last puddle as the farthest gap (no long detour).
+      assert.isBelow(dist(spread.p, last.p), 50, g.title + ": the spread spot is far from the last puddle");
+    });
+  }
 });
 
 test("on a sword the route goes to the pocket's best spot, next to the boss", () => {
@@ -82,6 +103,25 @@ test("on a sword the route goes to the pocket's best spot, next to the boss", ()
     }
   }
   assert.isAbove(swords, 0, "the fights have swords");
+});
+
+test("in a quiet stretch the runner pre-positions for the next mechanic", () => {
+  for(const s of SLOTS) for(let i = 0; i < 10; i++){
+    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f), moves = route.filter(st => !st.look);
+    let quiet = 0;
+    moves.forEach((st, k) => {
+      if(k && st.show - moves[k - 1].hit < REST_GAP) return;
+      quiet++;
+      // When the mechanic shows, the runner already stands on its pre-position. The runner does
+      // not take a step of half a unit or less, so it can stand that close instead.
+      const at = runnerAt(route, st.show).at;
+      assert.isAtMost(dist(at, st.pre), 0.5, f.segs[st.si].title + ": at " + at + ", not " + st.pre);
+    });
+    assert.isAbove(quiet, 2, "the fight has quiet stretches");
+    // Both Void Stardusts start with the first puddle north of the boss, so the player waits there.
+    // Every other mechanic waits right up at the boss.
+    for(const st of moves) assert.deepEqual(st.pre, f.segs[st.si].title.startsWith("Void Stardust") ? [50, 33] : START);
+  }
 });
 
 test("a look-ahead step has an answer, but the runner does not go there", () => {

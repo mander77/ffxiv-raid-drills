@@ -4,7 +4,7 @@
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6).
 import { MAPS, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, type WeaponType } from "./drills";
 import { newCode, random, withSeed } from "../util";
-import type { Scene, Slot } from "../types";
+import type { Point, Scene, Slot } from "../types";
 
 /** One line on the fight timeline: `name` happens at `t`, in seconds into the fight. */
 export interface TLEvent { t: number; name: string; raidwide?: boolean }
@@ -24,6 +24,10 @@ export interface FightSeg {
   /** While the boss stands in the middle: no facing arrow until `at`, when his cast starts
       and he turns to the first weapon (facing `f`, degrees clockwise from north). */
   turn?: { at: number; f: number };
+  /** Where to pre-position before this stretch, when the first move is known in advance (the
+      first Void Stardust puddle is always north). Without it, the pre-position is right up at
+      the boss, the most central spot (see data/route.ts). */
+  pre?: Point;
 }
 
 /** `code` rebuilds the same fight: the same weapons, the same stack or spread, and so on.
@@ -110,6 +114,8 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
      6.0 seconds before cactbot's line: at 0:42.2 for the first set (line 0:48.2) and 1:26.7 for
      the second (line 1:32.7). That leaves about 8 seconds before the first hit. */
   const CAST = 6.0, face1 = assault1.bossAt?.(0).f;
+  /** The first Void Stardust puddle: north of the boss, just outside his hitbox (see drills.ts). */
+  const FIRST_PUDDLE: Point = [50, 33];
   /* Each click is due when the hit that checks it lands, in seconds into the fight. A scene
      appears when its cast starts (cactbot's StartsUsing or the ability before it). */
   const segs: FightSeg[] = [
@@ -117,8 +123,8 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Assault Evolved", drills:["m-assault"], scene:assault1, k:0, from:38.4, turn:face1 != null ? {at:48.2 - CAST, f:face1} : undefined, due:[50.4, 55.5, 60.6]},
     // The second set of weapons spawns when this Void Stardust starts, and the drill runs through all three.
     {title:"Void Stardust into the second weapons", drills:["m-void"], scene:voidIntoWeapons(s, !stackFirst, A2), k:0, from:72.7,
-      turn:{at:92.7 - CAST, f:A2.W[0].a}, due:[79.8, 83.9, 85.9, 87.9, 89.9, 94.9, 100.0, 105.1]},
-    {title:"Void Stardust again", drills:[], scene:voidAgain(s, stackFirst), k:0, from:106, due:[110.2, 112.2, 114.2, 116.2]},
+      turn:{at:92.7 - CAST, f:A2.W[0].a}, due:[79.8, 83.9, 85.9, 87.9, 89.9, 94.9, 100.0, 105.1], pre:FIRST_PUDDLE},
+    {title:"Void Stardust again", drills:[], scene:voidAgain(s, stackFirst), k:0, from:106, due:[110.2, 112.2, 114.2, 116.2], pre:FIRST_PUDDLE},
     // The lines on the floor show only just after the 7th and last hit (2:25.5), so the scene
     // with the lines appears then, not at the Trophy cast. Until then the arena stays empty.
     {title:"Dance of Domination", drills:["m-dance"], scene:drill("m-dance", s), k:Math.floor(random() * 4), from:146.0, due:[150.5]},

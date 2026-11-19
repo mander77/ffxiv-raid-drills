@@ -207,7 +207,11 @@ export function cometSpread(s: Slot, toward: Point | null = null): (results: Ste
     // The area: from just outside the hitbox to past the arena edge, 70 degrees each side of the weapon.
     const arc = (r: number, a0: number, a1: number): Point[] => Array.from({length:15}, (_x, i) => POINT_AT(a0 + (a1 - a0) * i / 14, r));
     const poly = [...arc(15, aw - 70, aw + 70), ...arc(75, aw + 70, aw - 70)];
-    const label = [32, 26, 38].map(r => POINT_AT(aw, r)).concat(SPREAD_GAPS).find(fn) ?? toward;
+    // The shown spot: well inside that side, turned up to 45 degrees from the weapon toward the
+    // last puddle, so the spread is in reach in the 2 seconds after the last puddle.
+    const last = drops[drops.length - 1], toPuddle = last ? ((angOf([last[0] - 50, last[1] - 50]) - aw + 540) % 360) - 180 : 0;
+    const turn = Math.sign(toPuddle) * Math.min(45, Math.abs(toPuddle));
+    const label = [turn, turn * 2 / 3, turn / 3, 0].flatMap(t => [26, 32, 22].map(r => POINT_AT(aw + t, r))).concat(SPREAD_GAPS).find(fn) ?? toward;
     return {fn, label, show:[{poly}]};
   };
 }
@@ -305,7 +309,7 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: Run): Scene {
         (run ? "A sword or scythe first means a run, so the stack or spread moves toward it." : "An axe first means the party stacks in the middle, so the usual spots work.")},
     ...voidSteps(s, spread, run ? first.p : null),
     {...A.steps[0], q:"The " + (spread ? "spread" : "stack") + " went off. The boss goes to the first weapon. Click where you go.",
-      a:A.steps[0].a + " If you cannot make it in time, use Sprint. A scholar can use Expedient for the whole party."}];
+      a:A.steps[0].a + " If you cannot make it in time, use Sprint or a movement ability. A scholar can use Expedient for the whole party."}];
   steps.push(...A.steps.slice(1));
   return {
     setup:"The second set of weapons is out, each one turned, and Void Stardust starts. Three puddles drop under every player, one after another. After the third one, this time it is " +
@@ -314,7 +318,7 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: Run): Scene {
     // The boss stays in the middle for the pick, the puddles and the stack or spread (5 steps).
     bossAt:n => A.states[Math.max(0, Math.min(n - 5, A.states.length - 1))],
     steps,
-    rule:"Find the first weapon before the puddles: flat side square to the boss. Puddles start north, each just outside the last, clockwise. Sword or scythe first: stack or spread toward it, and use Sprint or Expedient if it is far. Then the other two weapons go clockwise, with the normal rule for each." +
+    rule:"Find the first weapon before the puddles: flat side square to the boss. Puddles start north, each just outside the last, clockwise. Sword or scythe first: stack or spread toward it, and use Expedient, Sprint or a movement ability if it is far. Then the other two weapons go clockwise, with the normal rule for each." +
       (spread ? " Comet spread fixed spots: MT NW, OT NE, M1 SW, M2 SE." : "")};
 }
 
