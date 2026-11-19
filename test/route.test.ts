@@ -149,3 +149,17 @@ test("a played-back run follows your clicks, each one at the hit of the step it 
   assert.deepEqual(route.map(st => st.hit), [g.due[0], g.due[1]], "in time order, and an unknown mechanic is left out");
   assert.deepEqual(route[0].p, [60, 60]);
 });
+
+test("the watched run shows no weapon spot before the boss turns to the first weapon", () => {
+  for(const s of SLOTS) for(let i = 0; i < 20; i++){
+    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f);
+    f.segs.forEach((g, si) => {
+      if(!g.turn) return;
+      const first = g.scene.steps.length - g.turn.weapons;
+      for(const st of route.filter(x => x.si === si && x.j >= first)) assert.isAtLeast(st.show, g.turn.at, g.title);
+      // Just before he turns, the target (and its blue area) is not a weapon spot yet.
+      const before = runnerAt(route, g.turn.at - 0.05).target;
+      assert.isFalse(before?.si === si && before.j >= first, g.title + ": a weapon spot shows before he turns");
+    });
+  }
+});

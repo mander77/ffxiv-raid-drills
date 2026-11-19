@@ -8,7 +8,7 @@
 // (25 and about 41 units out). So 1 unit is 0.4 yalm, and the arena is 40 x 40 yalms. No guide
 // states the size; this follows from the waymarks.
 import { inZone, rot, rotZone, zoneCenter } from "../geometry";
-import type { Fight } from "./fight";
+import type { Fight, FightSeg } from "./fight";
 import type { Point, StepResult, Zone } from "../types";
 
 /** Normal run speed, about 6 yalms a second, in arena units a second (6 / 0.4). Tune it here. */
@@ -34,6 +34,11 @@ export const REST_GAP = 8;
 export interface Stop { p: Point; hit: number; show: number; si: number; j: number; pre?: Point; look?: boolean }
 
 const dist = (a: Point, b: Point): number => Math.hypot(a[0] - b[0], a[1] - b[1]);
+
+/** When step j of a mechanic appears for the player: when the mechanic does, but a weapon only
+    once the boss turns to the first one. Before that, nobody can know where to go. */
+const showOf = (g: FightSeg, j: number): number =>
+  g.turn && j >= g.scene.steps.length - g.turn.weapons ? Math.max(g.from, g.turn.at) : g.from;
 
 /** The middle of the spot to stand on in zone z, coming from `from`. Mostly the middle of the
     zone (a circle or a box) or its shown point (an area with a rule), because standing on the edge
@@ -61,7 +66,7 @@ export function rightRoute(f: Fight): Stop[] {
       const z = rotZone(base, g.k), p = st.stand && !st.look ? rot(st.stand, g.k) : middleOf(z, from);
       res.push({p, ok:inZone(p, z), z, drop:st.drop ? p : null});
       if(!st.look) from = p;   // a look-ahead does not move the player
-      return [{p, hit:g.due[j], show:g.from, si, j, ...(pre ? {pre} : {}), ...(st.look ? {look:true} : {})}];
+      return [{p, hit:g.due[j], show:showOf(g, j), si, j, ...(pre ? {pre} : {}), ...(st.look ? {look:true} : {})}];
     });
   }).sort((a, b) => a.hit - b.hit);
 }
@@ -70,7 +75,7 @@ export function rightRoute(f: Fight): Stop[] {
 export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Point}>): Stop[] {
   return clicks.flatMap((c): Stop[] => {
     const g = f.segs[c.si], hit = g?.due[c.j];
-    return g && hit != null ? [{p:c.p, hit, show:g.from, si:c.si, j:c.j, ...(g.pre ? {pre:g.pre} : {}), look:g.scene.steps[c.j]?.look}] : [];
+    return g && hit != null ? [{p:c.p, hit, show:showOf(g, c.j), si:c.si, j:c.j, ...(g.pre ? {pre:g.pre} : {}), look:g.scene.steps[c.j]?.look}] : [];
   }).sort((a, b) => a.hit - b.hit);
 }
 
