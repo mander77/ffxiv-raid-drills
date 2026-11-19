@@ -155,8 +155,8 @@ export function drawMapPanel(): void {
   /* Start over keeps this layout and goes back to step 1. The other button builds a new layout.
      A run counts toward the score only the first time it reaches the end. */
   const restartBtn = '<button type="button" class="btn ghost" id="map-restart">Start over</button>';
-  // A drill with nothing random would look the same again, so it gets no new-layout button.
-  const newBtn = !changes(c.item) ? "" : '<button type="button" class="btn ghost" id="map-new">' + (sc.spawnPlay ? "Try another spawn pattern" : "New layout") + "</button>";
+  // A drill with nothing random would look the same again, so it gets no reroll button.
+  const newBtn = !changes(c.item) ? "" : '<button type="button" class="btn ghost" id="map-new">' + (sc.spawnPlay ? "Try another spawn pattern" : "Reroll random mechs") + "</button>";
   if(done){
     h += '<div class="rule"><span>Rule</span><strong>' + esc(sc.rule) + "</strong></div>";
     h += '<div class="actions"><button type="button" class="btn" id="map-next">Next drill</button>' + restartBtn + newBtn + '<span class="hint"><kbd>Enter</kbd> next</span></div>';
