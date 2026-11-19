@@ -1,5 +1,5 @@
 // The "Where do I stand?" tab: click the arena, then see the answer zone.
-import { esc, el } from "../util";
+import { esc, el, newCode, random, withSeed } from "../util";
 import { state, getDeck, record, view, type Deck, type MapCur } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter, f1 } from "../geometry";
 import { sceneSVG, drawOverlay, drawBoss, zoneSVG } from "../arena";
@@ -87,14 +87,26 @@ function restart(): void {
   renderMap(false);
 }
 
+/* A drill and layout code asked for by a link, such as #map/m-assault/A7K2. */
+let wanted: {id: string; code: string} | null = null;
+export function openLayout(id: string, code: string): void { wanted = {id, code}; }
+
 export function renderMap(fresh = true): void {
-  const d = getDeck("map");
+  const d = getDeck("map"), ask = wanted;
+  wanted = null;
+  if(ask){ const i = d.items.findIndex(m => m.id === ask.id); if(i >= 0) d.i = i; }
   if(d.i >= d.items.length) return renderRoundDone("map", d);
   const item = d.items[d.i];
   const cur = state.cur;
-  if(fresh || !cur || cur.kind !== "map" || cur.item !== item){
-    const v = item.variants ? item.variants[Math.floor(Math.random() * item.variants.length)] : null;
-    state.cur = {kind:"map", item, scene:item.build(state.slot, v), k:item.rotate ? Math.floor(Math.random() * 4) : 0, results:[], counted:false};
+  if(ask || fresh || !cur || cur.kind !== "map" || cur.item !== item){
+    // The code seeds every random choice: the variant, the turn and the drill's own layout.
+    const code = ask?.code ?? newCode();
+    const made = withSeed(code, () => {
+      const v = item.variants ? item.variants[Math.floor(random() * item.variants.length)] : null;
+      const k = item.rotate ? Math.floor(random() * 4) : 0;
+      return {scene:item.build(state.slot, v), k};
+    });
+    state.cur = {kind:"map", item, scene:made.scene, k:made.k, code, results:[], counted:false};
   }
   const c = run();
   view.innerHTML = tabHead(true) + '<div class="mapwrap">' + drillNav(d) +
@@ -126,7 +138,8 @@ function drillNav(d: Deck<MapDrill>): string {
 export function drawMapPanel(): void {
   const c = run(), d = getDeck("map"), sc = c.scene, n = c.results.length, done = n >= sc.steps.length, multi = sc.steps.length > 1;
   const peek = c.peek ?? n - 1;   // the step whose answer shows: the one picked, or the last one answered
-  let h = '<div class="eyebrow"><b>' + esc(c.item.phase) + "</b><span>" + esc(c.item.time) + '</span><span class="progress">Drill ' + (d.i + 1) + " of " + d.items.length + "</span></div>";
+  let h = '<div class="eyebrow"><b>' + esc(c.item.phase) + "</b><span>" + esc(c.item.time) + '</span><span class="progress">Drill ' + (d.i + 1) + " of " + d.items.length + "</span>" +
+    (changes(c.item) ? '<span title="Send this code to rebuild this exact layout">Layout ' + c.code + "</span>" : "") + "</div>";
   h += "<h2>" + esc(c.item.title) + "</h2>";
   if(n === 0) h += '<p class="setup">' + esc(sc.setup) + "</p>";
   else h += '<p class="setup' + (c.setupOpen ? "" : " folded") + '">' + esc(sc.setup) + '</p><button type="button" class="linkbtn" id="setup-toggle">' + (c.setupOpen ? "Less" : "More") + "</button>";

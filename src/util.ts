@@ -25,8 +25,44 @@ export const LS = {
 // and S(s, "left", "right") gives a string. Both arguments must have the same type T.
 export const S = <T>(s: Slot, h1: T, h2: T): T => s === "H1" ? h1 : h2;
 
+/* Random numbers for layouts. They come from Math.random, except inside withSeed(), which
+   uses a seeded generator: the same seed always gives the same numbers, so a layout code
+   always rebuilds the same layout. */
+let rng: () => number = Math.random;
+export const random = (): number => rng();
+
+/** A small seeded generator (mulberry32). Each call returns a number from 0 up to 1. */
+function seeded(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Run fn with random() seeded from a layout code, and return what fn returns. */
+// TS note: <T> lets withSeed return whatever fn returns, a Scene or a Fight, with its own type.
+// try/finally works as in C#: the old generator comes back even if fn throws.
+export function withSeed<T>(code: string, fn: () => T): T {
+  const before = rng;
+  rng = seeded(codeSeed(code));
+  try { return fn(); } finally { rng = before; }
+}
+
+/* Layout codes: 4 characters, without 0, O, 1 and I, which are easy to mix up. */
+const CODE_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+export const newCode = (): string => Array.from({length:4}, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join("");
+export const isCode = (s: string): boolean => /^[2-9A-HJ-NP-Z]{4}$/.test(s.toUpperCase());
+function codeSeed(code: string): number {
+  let n = 0;
+  for(const ch of code.toUpperCase()) n = n * CODE_CHARS.length + Math.max(0, CODE_CHARS.indexOf(ch));
+  return n * 2654435761;   // spread nearby codes far apart
+}
+
 export function shuffle<T>(a: T[]): T[] {
-  for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
 }
 

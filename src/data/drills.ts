@@ -1,5 +1,5 @@
 // Map drills: the arena scenes and the rules that decide each answer zone.
-import { S, shuffle } from "../util";
+import { S, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry";
 import type { Boss, MapDrill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
@@ -99,8 +99,8 @@ function assaultWeapons(): Weapon[] {
    its flat side toward him. The other two are turned 30 to 60 degrees. Then clockwise. */
 export function buildAssault2(s: Slot): Run {
   const W = assaultWeapons().map((w, i): Weapon => {
-    const turn = i === 0 ? 0 : (30 + Math.random() * 30) * (Math.random() < 0.5 ? 1 : -1);
-    const flip = Math.random() < 0.5 ? 0 : 180;   // which end points which way
+    const turn = i === 0 ? 0 : (30 + random() * 30) * (random() < 0.5 ? 1 : -1);
+    const flip = random() < 0.5 ? 0 : 180;   // which end points which way
     const t = (w.a + 90 + turn + flip) * DEG;     // w.a + 90 is across the line to the boss
     return {...w, axis:[Math.sin(t), -Math.cos(t)]};
   });
@@ -114,7 +114,7 @@ export function buildAssault2(s: Slot): Run {
    The second spawns northwest or northeast. The rest sit on cardinals, and the last is north.
    The first three are all different, and so are the last three. The last four leave tornadoes. */
 export function buildUltimate(s: Slot): Run & {cw: boolean} {
-  const cw = Math.random() < 0.5;
+  const cw = random() < 0.5;
   const angles = cw ? [200, 315, 90, 180, 270, 0] : [160, 45, 270, 180, 90, 0];
   const names = cw ? ["south, slightly west", "northwest", "east", "south", "west", "north"]
                    : ["south, slightly east", "northeast", "west", "south", "east", "north"];

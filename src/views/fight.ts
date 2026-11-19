@@ -38,6 +38,14 @@ const settings = {
 // for example `const r = R; if(!r) return;`. After that check TypeScript knows r is a Run.
 let R: Run | null = null;
 let lastLive: Done | null = null;
+/* A fight code asked for by a link, such as #fight/K3PZ. The next start uses it. */
+let wantedFight: string | null = null;
+export function openFight(code: string): void { wantedFight = code; }
+function nextFight(): Fight {
+  const f = buildFight(state.slot, wantedFight ?? undefined);
+  wantedFight = null;
+  return f;
+}
 const IDLE: Scene = {setup:"", rule:"", steps:[], overlays:[], boss:BOSS};
 
 /* ---------- start screen ---------- */
@@ -52,6 +60,7 @@ export function renderFight(): void {
     row("fskip", "Quiet stretches", [["yes", "Skip ahead"], ["no", "Real time"]], settings.skip ? "yes" : "no") +
     row("fspeed", "Speed", SPEEDS.map((n): [string, string] => [String(n), n + "x"]), String(settings.speed)) +
     row("fpause", "Missed spot", [["no", "Fight goes on"], ["yes", "Fight pauses"]], settings.pause ? "yes" : "no") +
+    (wantedFight ? '<p class="hint" style="margin-top:12px">Fight code ' + esc(wantedFight) + " is ready: the next start uses it.</p>" : "") +
     '<div class="actions"><button type="button" class="btn" id="f-start">Start the fight</button><button type="button" class="btn ghost" id="f-watch">Watch the right moves</button></div></div></div>';
   view.querySelectorAll<HTMLButtonElement>("[data-set]").forEach(b => b.addEventListener("click", () => {
     const v = b.dataset.val ?? "";
@@ -61,8 +70,8 @@ export function renderFight(): void {
     LS.set("fskip", settings.skip ? "yes" : "no"); LS.set("fspeed", settings.speed); LS.set("fpause", settings.pause ? "yes" : "no");
     renderFight();
   }));
-  el("f-start").addEventListener("click", () => startRun("live", buildFight(state.slot)));
-  el("f-watch").addEventListener("click", () => startRun("demo", buildFight(state.slot)));
+  el("f-start").addEventListener("click", () => startRun("live", nextFight()));
+  el("f-watch").addEventListener("click", () => startRun("demo", nextFight()));
 }
 
 /* ---------- the run ---------- */
@@ -180,7 +189,7 @@ function lastBox(g: FightSeg, i: number, x: StepResult): string {
 function drawPanel(r: Run, si: number): void {
   const f = r.fight, g = si >= 0 ? f.segs[si] : null, res = g ? r.results[si] : [];
   const label = r.mode === "demo" ? "The right moves" : r.mode === "replay" ? "Your run, played back" : "Full fight";
-  let h = '<div class="eyebrow"><b>' + label + '</b><span id="f-clock"></span><span>' + settings.speed + "x</span></div>";
+  let h = '<div class="eyebrow"><b>' + label + '</b><span id="f-clock"></span><span>' + settings.speed + "x</span><span>Fight " + f.code + "</span></div>";
   h += '<div class="castbar" id="f-cast"><div class="cb-top"><span id="f-cast-name"></span><span id="f-cast-time"></span></div><div class="cb-bar"><i id="f-cast-fill"></i></div></div>';
   if(g){
     const j = res.length;
@@ -245,7 +254,7 @@ function renderSummary(watched: Fight | null = null): void {
   const all = d.results.flat(), right = all.filter(x => x.ok).length, missed = all.filter(x => x.missed).length, wrong = all.length - right - missed;
   const rows = d.fight.segs.map((g, si) => '<li><span class="fs-time">' + clock(g.from) + "</span><span>" + esc(g.title) + '</span><span class="fs-chips">' +
     d.results[si].map(x => '<span class="chip ' + (x.ok ? "ok" : "bad") + '">' + (x.missed ? "&ndash;" : x.ok ? "&#10003;" : "&#10007;") + "</span>").join("") + "</span></li>").join("");
-  view.innerHTML = tabHead(false) + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Full fight</b><span>Phase 1 done</span></div>' +
+  view.innerHTML = tabHead(false) + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Full fight</b><span>Phase 1 done</span><span>Fight ' + d.fight.code + "</span></div>" +
     "<h2>" + right + " of " + all.length + " spots right</h2><p>" + esc(d.fight.summary) + "</p>" +
     '<div class="tally"><div class="ok"><span>Right</span><div class="big">' + right + '</div></div><div class="bad"><span>Wrong</span><div class="big">' + wrong + '</div></div><div class="slow"><span>Missed</span><div class="big">' + missed + "</div></div></div>" +
     '<ol class="fsum">' + rows + "</ol>" +
@@ -255,7 +264,7 @@ function renderSummary(watched: Fight | null = null): void {
   el("f-play").addEventListener("click", () => startRun("replay", d.fight, d.clicks));
   el("f-watch").addEventListener("click", () => startRun("demo", d.fight));
   el("f-same").addEventListener("click", () => startRun("live", d.fight));
-  el("f-new").addEventListener("click", () => startRun("live", buildFight(state.slot)));
+  el("f-new").addEventListener("click", () => startRun("live", nextFight()));
   el("f-back").addEventListener("click", renderFight);
 }
 
