@@ -1,7 +1,7 @@
 import { test, assert } from "vitest";
 import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, changes, type Run } from "../src/data/drills";
-import { DEG, inZone } from "../src/geometry";
-import type { Point, ScytheOverlay, Slot, Zone } from "../src/types";
+import { DEG, inZone, zoneCenter } from "../src/geometry";
+import type { Point, ScytheOverlay, Slot, StepResult, Zone } from "../src/types";
 
 const RUNS = 300;
 const SLOTS: Slot[] = ["H1", "H2"];
@@ -96,7 +96,7 @@ test("weapon runs: the sword pocket is behind the boss, never on him", () => {
   }
 });
 
-test("weapon runs: the sword's best spot is 10 units in from the pocket's inner corner", () => {
+test("weapon runs: the sword's best spot is 2 yalms clear of both arms of the cross", () => {
   for(const [name, build] of Object.entries(RUN_BUILDERS)) for(let i = 0; i < RUNS; i++) for(const s of SLOTS){
     const R = build(s);
     R.W.forEach((w, k) => {
@@ -104,13 +104,14 @@ test("weapon runs: the sword's best spot is 10 units in from the pocket's inner 
       const st = R.steps[k], boss = R.states[k + 1];
       if(!st.stand) throw new Error(name + ": a sword step has no best spot");
       assert.ok(inZone(st.stand, zoneOf(st.z)), name + ": the best spot is in the pocket");
-      // The corner of the cross is about 9.9 units from him, so 10 more on the diagonal is about 19.9.
+      // Each arm reaches 12.5 units (5 yalms) from its center line, and the spot is 5 units (2 yalms)
+      // past both: 17.5 units along each, so about 24.7 units from him on the diagonal.
       const d = Math.hypot(st.stand[0] - boss.x, st.stand[1] - boss.y);
-      assert.ok(d > 19.5 && d < 20.5, name + ": " + d.toFixed(1) + " units from him, not 10 units in from the corner");
-      // Not on the corner: a circle of 6.5 units around the spot is all inside the pocket, so it is
-      // clear of both arms of the cross (about 7 units each).
+      assert.ok(d > 24.5 && d < 25, name + ": " + d.toFixed(1) + " units from him, not 2 yalms clear of the arms");
+      // Not on the corner: a circle of 4.5 units around the spot is all inside the pocket, so it is
+      // clear of both arms of the cross.
       for(let a = 0; a < 360; a += 22.5){
-        const r = a * Math.PI / 180, p: Point = [st.stand[0] + 6.5 * Math.cos(r), st.stand[1] + 6.5 * Math.sin(r)];
+        const r = a * Math.PI / 180, p: Point = [st.stand[0] + 4.5 * Math.cos(r), st.stand[1] + 4.5 * Math.sin(r)];
         assert.ok(inZone(p, zoneOf(st.z)), name + ": the spot is too close to an arm of the cross");
       }
     });
@@ -137,18 +138,20 @@ test("Ultimate Trophy Weapons: the first spawn sets the direction, and the last 
 test("Void Stardust: the next puddle goes just outside the last one, clockwise", () => {
   const z = nextPuddle([{p:[50, 33], ok:true, z:{c:[50, 33], r:9}, drop:[50, 33]}]);
   if(!("fn" in z)) throw new Error("the puddle zone is a rule zone");
-  assert.ok(inZone([59.5, 36.5], z), "small step clockwise");
+  // A puddle is 6 yalms (15 units) across its radius, so "just outside" is a step of 15 to 21 units.
+  assert.ok(inZone([64, 40], z), "small step clockwise");
   assert.ok(inZone(z.label, z), "the shown spot");
   assert.notOk(inZone([67, 50], z), "far step");
-  assert.notOk(inZone([40.5, 36.5], z), "counterclockwise");
+  assert.notOk(inZone([36, 40], z), "counterclockwise");
+  assert.notOk(inZone([59.5, 36.5], z), "still inside the last puddle");
   assert.notOk(inZone([52, 35], z), "inside the last puddle");
 });
 
 /* Results for the Void Stardust drill when every answer is right: the weapon pick (no
-   puddle), then the three puddles at their usual spots. */
-const PUDDLES: Point[] = [[50, 33], [58.8, 35.4], [64.9, 41.8]];
-const VOID_RESULTS = [{p:[0, 0] as Point, ok:true, z:{c:[0, 0] as Point, r:1}, drop:null},
-  ...PUDDLES.map(d => ({p:d, ok:true, z:{c:d, r:5}, drop:d}))];
+   puddle), then the three puddles at their usual spots, each placed by nextPuddle. */
+const asDrops = (ps: Point[]): StepResult[] => ps.map(d => ({p:d, ok:true, z:{c:d, r:5}, drop:d}));
+const PUDDLES: Point[] = [1, 2].reduce((ps: Point[]) => [...ps, zoneCenter(nextPuddle(asDrops(ps)))], [[50, 33]]);
+const VOID_RESULTS: StepResult[] = [{p:[0, 0], ok:true, z:{c:[0, 0], r:1}, drop:null}, ...asDrops(PUDDLES)];
 const dist = (p: Point, q: Point): number => Math.hypot(p[0] - q[0], p[1] - q[1]);
 
 test("Void Stardust spread: any open spot, on the first weapon's side for a sword or scythe", () => {
@@ -159,12 +162,15 @@ test("Void Stardust spread: any open spot, on the first weapon's side for a swor
   assert.ok(inZone([30, 50], z), "west, between MT and M1");
   assert.notOk(inZone([65, 35], z), "the OT spot");
   assert.notOk(inZone([37, 63], z), "next to the M1 spot");
-  assert.notOk(inZone([58, 36], z), "inside a puddle");
+  assert.notOk(inZone(PUDDLES[2], z), "inside the last puddle");
+  assert.ok(inZone([50, 17], z), "on the first puddle, which went off before the spread");
   assert.notOk(inZone([50, 58], z), "inside the hitbox");
   const south = cometSpread("H1", [50, 79])(VOID_RESULTS);
   if(!("fn" in south)) throw new Error("the spread zone is a rule zone");
   assert.ok(inZone(south.label, south), "the shown spot");
-  for(const p of [[50, 83], [30, 75], [65, 88], [76, 72], [50, 70]] as Point[]) assert.ok(inZone(p, south), "on a south weapon's side: " + p);
+  for(const p of [[50, 83], [25, 80], [65, 88], [80, 78], [50, 70]] as Point[]) assert.ok(inZone(p, south), "on a south weapon's side: " + p);
+  // A spread is 6 yalms (15 units): closer than that to a melee spot hits them.
+  assert.notOk(inZone([30, 75], south), "4.5 yalms from M1");
   assert.notOk(inZone([30, 50], south), "west is not on a south weapon's side");
   assert.notOk(inZone([35, 65], south), "on the M1 spot");
 });

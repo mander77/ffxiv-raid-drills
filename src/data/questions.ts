@@ -47,7 +47,7 @@ export const MECH: QuizItem[] = [
     why:"Comet puts a spread marker on every player. Crushing Comet puts one stack on a healer. If it is on you, do not run away from the group.",
     rule:"Comet = spread. Crushing Comet = stack on a healer."})),
   mq("k-void-spread", 4.2, P1, "1:30", s=>({prompt:"Void Stardust ends with Comet, the spread. Where do you go?",
-    options:[{t:"Any open spot, away from the tanks and melee and out of the puddles.", ok:true},{t:"The southwest intercardinal, next to the boss."},{t:"Stay stacked with the group."},{t:"Under the boss, inside the hitbox."}],
+    options:[{t:"Any open spot, away from the tanks and melee and out of the last puddle.", ok:true},{t:"The southwest intercardinal, next to the boss."},{t:"Stay stacked with the group."},{t:"Under the boss, inside the hitbox."}],
     why:"The spread is free for all, except for the tanks and melee. They have fixed spots: MT northwest, OT northeast, M1 southwest, M2 southeast. Healers and ranged find open ground, for example at a cardinal between those spots.",
     rule:"Comet spread: healers and ranged take any open spot. MT NW, OT NE, M1 SW, M2 SE."})),
   mq("k-void-run", 4.3, P1, "1:30", s=>({prompt:"Void Stardust ends with a spread, and the first weapon of the second set is a scythe on the far side of the arena. How does the party get there in time?",

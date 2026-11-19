@@ -68,7 +68,8 @@ export function drawOverlay(o: Overlay): string {
    each flank (his east and west), and an opening at his rear, between the two rear corners
    (135 to 225 degrees from his front). The whole ring turns with his facing.
    With no facing (f null), the ring is a plain circle, so it does not give away where he faces. */
-const RING = 11, REAR = 45;   // the ring radius, and half of the rear opening in degrees
+// The ring is his hitbox: 5 yalms (12.5 units). BossMod's M11S module lists the boss as R5.000.
+const RING = 12.5, REAR = 45;   // the ring radius, and half of the rear opening in degrees
 const onRing = (deg: number, r: number): string => f1(r * Math.sin(deg * DEG)) + " " + f1(-r * Math.cos(deg * DEG));
 export function drawBoss(b: Boss): string {
   const at = "translate(" + f1(b.x) + " " + f1(b.y) + ")";
@@ -77,7 +78,7 @@ export function drawBoss(b: Boss): string {
     // From the left rear corner, clockwise past his front, to the right rear corner.
     '<path class="ring" d="M' + onRing(180 + REAR, RING) + " A" + RING + " " + RING + " 0 1 1 " + onRing(180 - REAR, RING) + '"/>' +
     '<path class="ringmark" d="M' + onRing(90, RING - 2) + " L" + onRing(90, RING + 2) + " M" + onRing(270, RING - 2) + " L" + onRing(270, RING + 2) + '"/>' +
-    '<circle class="bosscore" r="3.4"/><path class="face" d="M0,-14.6 L-2.6,-10.4 L2.6,-10.4 Z"/></g>';
+    '<circle class="bosscore" r="3.4"/><path class="face" d="M0,' + f1(-(RING + 3.6)) + " L-2.6," + f1(-(RING - 0.6)) + " L2.6," + f1(-(RING - 0.6)) + ' Z"/></g>';
 }
 
 export function drawWaymarks(): string {

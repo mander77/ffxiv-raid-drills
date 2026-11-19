@@ -68,7 +68,9 @@ test("at run speed the runner is never more than half a second late to a right s
       // first weapon of the next set, 2 seconds after the last puddle. With that weapon across from
       // the puddles, the party uses Expedient (scholar), or each player uses Sprint or a movement
       // ability (the drill says so). The runner keeps plain run speed, so it can be late there.
-      const allowed = g.drills.includes("m-void") && g.scene.steps[st.j].q.startsWith("Puddles done") ? 1 : 0.5;
+      // It also waits on each puddle until it goes off, not just until it is placed (3 seconds
+      // earlier in the fight), so it leaves the third puddle late.
+      const allowed = g.drills.includes("m-void") && g.scene.steps[st.j].q.startsWith("Puddles done") ? 1.25 : 0.5;
       if(short > allowed) late.push(g.title + " step " + (st.j + 1) + ": " + short.toFixed(2) + " s");
     }
   }

@@ -51,7 +51,8 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       overlays.push({t:"tag", spawn:i, x:out[0], y:out[1], s:w.type.toUpperCase()}, {t:w.type, spawn:i, x:w.p[0], y:w.p[1], ...turn});
     }
   });
-  const HW = 7, side = S(s, 1, -1), own = S(s, "left", "right");
+  // HW: the half-width of each sword arm, 5 yalms (BossMod: "range 40 width 10 cross").
+  const HW = 12.5, side = S(s, 1, -1), own = S(s, "left", "right");
   const steps = W.map((w, i): Step => {
     const st = states[i + 1], P: Point = [st.x, st.y], d = dirs[i], L = leftOf(d), sv: Point = [L[0] * side, L[1] * side];
     const where = w.where || COMPASS[Math.round(w.a / 45) % 8];
@@ -73,11 +74,12 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       const fn = (p: Point): boolean => { const v: Point = [p[0] - P[0], p[1] - P[1]], f = v[0] * d[0] + v[1] * d[1], sd = v[0] * sv[0] + v[1] * sv[1]; return inArena(p) && f < -HW && sd > HW && Math.hypot(v[0], v[1]) <= 40; };
       const corner = vadd(vadd(P, d, -HW), sv, HW);
       const poly = [corner, vadd(corner, d, -32), vadd(vadd(corner, d, -32), sv, 32), vadd(corner, sv, 32)];
-      z = {fn, show:[{poly}], label:vadd(P, unit(vadd([-d[0], -d[1]], sv)), 17)};
-      // Where to stand: a few steps in from the pocket's inner corner, where the arms of the cross
-      // meet (10 units on the diagonal, about 7 units clear of each arm), so in the moment you can
-      // see that you are safe. That is about 20 units from him, 9 outside his ring.
-      stand = vadd(corner, unit(vadd([-d[0], -d[1]], sv)), 10);
+      // Where to stand: on the pocket's diagonal, 2 yalms (5 units) clear of each arm, so in the
+      // moment you can see that you are safe. That is about 25 units (9.9 yalms) from him. The
+      // sword's stack is a line from him through you, so the melee can stand closer in that line.
+      const CLEAR = 5;
+      stand = vadd(vadd(P, d, -(HW + CLEAR)), sv, HW + CLEAR);
+      z = {fn, show:[{poly}], label:vadd(P, unit(vadd([-d[0], -d[1]], sv)), (HW + CLEAR) * Math.SQRT2 + 4)};
       a = "Sword, " + where + ": the pocket behind him on his " + own + ", on the side he jumped from, a few steps in from its inner corner. " + S(s, "G1", "G2") + " stacks on you.";
       reveal = [{t:"band", x:P[0] - d[0] * 150, y:P[1] - d[1] * 150, x2:P[0] + d[0] * 150, y2:P[1] + d[1] * 150, w:HW * 2},
                 {t:"band", x:P[0] - L[0] * 150, y:P[1] - L[1] * 150, x2:P[0] + L[0] * 150, y2:P[1] + L[1] * 150, w:HW * 2}];
@@ -165,7 +167,8 @@ export function ultimateScene(U: Run): Scene {
 
 /* Void Stardust: each puddle goes just outside the previous one, one small step clockwise.
    The next spot is judged from where the last puddle actually dropped. */
-export const PUDDLE_R = 6.5;
+/** A puddle's radius: 6 yalms (BossMod: Cometite, "range 6 circle"). */
+export const PUDDLE_R = 15;
 export function nextPuddle(results: StepResult[]): Zone {
   const q: Point = results[results.length - 1].drop ?? [50, 33];
   const rq = Math.max(8, Math.hypot(q[0] - 50, q[1] - 50));
@@ -180,7 +183,9 @@ export function nextPuddle(results: StepResult[]): Zone {
 }
 
 /* Comet, the spread that can end Void Stardust. Only the tanks and melee have fixed spots,
-   at the intercardinals just outside the hitbox. Healers and ranged take any open spot. */
+   at the intercardinals just outside the hitbox. Healers and ranged take any open spot.
+   Each puddle goes off once, 3 seconds after it drops, so by the stack or spread all three are
+   gone. Only the last one matters: you leave it as it goes off, on the way to your spot. */
 const FIXED_SPREAD: {l: string; r: "T" | "D"; p: Point}[] = [
   {l:"MT", r:"T", p:[35, 35]}, {l:"OT", r:"T", p:[65, 35]}, {l:"M1", r:"D", p:[35, 65]}, {l:"M2", r:"D", p:[65, 65]}];
 export const FIXED_SPREAD_MARKS = FIXED_SPREAD.map((m): Overlay => ({t:"mark", x:m.p[0], y:m.p[1], l:m.l, r:m.r}));
@@ -193,14 +198,15 @@ const apart = (p: Point, q: Point): number => { const d = Math.abs(angOf([p[0] -
 
 /* With `toward` set (a sword or scythe goes first next), the spread spot can be anywhere on
    that weapon's side of the arena, so the run to it is short. That side shows as one shaded
-   area. Any spot in it is right if it is out of the hitbox, out of the puddles and not on a
-   tank or melee spot. */
+   area. Any spot in it is right if it is out of the hitbox, out of the last puddle and not on a
+   tank or melee spot. A spread is 6 yalms (15 units), so a spot closer than that to a tank or
+   melee spot hits them. */
 const POINT_AT = (deg: number, r: number): Point => [50 + r * Math.sin(deg * DEG), 50 - r * Math.cos(deg * DEG)];
 export function cometSpread(s: Slot, toward: Point | null = null): (results: StepResult[]) => Zone {
   return results => {
-    const drops = results.flatMap(r => r.drop ? [r.drop] : []);
+    const drops = results.flatMap(r => r.drop ? [r.drop] : []), last = drops[drops.length - 1];
     const open = (p: Point): boolean => inArena(p) && far(p, [50, 50], 15) &&
-      FIXED_SPREAD.every(m => far(p, m.p, 10)) && drops.every(q => far(p, q, PUDDLE_R + 1));
+      FIXED_SPREAD.every(m => far(p, m.p, 15)) && (!last || far(p, last, PUDDLE_R + 1));
     if(!toward) return {fn:open, label:S<Point>(s, [17, 50], [83, 50]), show:SPREAD_GAPS.map(c => ({c, r:6}))};
     const aw = angOf([toward[0] - 50, toward[1] - 50]);
     const fn = (p: Point): boolean => open(p) && apart(p, toward) <= 70;
@@ -209,7 +215,7 @@ export function cometSpread(s: Slot, toward: Point | null = null): (results: Ste
     const poly = [...arc(15, aw - 70, aw + 70), ...arc(75, aw + 70, aw - 70)];
     // The shown spot: well inside that side, turned up to 45 degrees from the weapon toward the
     // last puddle, so the spread is in reach in the 2 seconds after the last puddle.
-    const last = drops[drops.length - 1], toPuddle = last ? ((angOf([last[0] - 50, last[1] - 50]) - aw + 540) % 360) - 180 : 0;
+    const toPuddle = last ? ((angOf([last[0] - 50, last[1] - 50]) - aw + 540) % 360) - 180 : 0;
     const turn = Math.sign(toPuddle) * Math.min(45, Math.abs(toPuddle));
     const label = [turn, turn * 2 / 3, turn / 3, 0].flatMap(t => [26, 32, 22].map(r => POINT_AT(aw + t, r))).concat(SPREAD_GAPS).find(fn) ?? toward;
     return {fn, label, show:[{poly}]};
@@ -217,14 +223,13 @@ export function cometSpread(s: Slot, toward: Point | null = null): (results: Ste
 }
 
 /* The stack after the third puddle when a sword or scythe goes first next: the group moves
-   from the third puddle toward that weapon. Any spot out of the puddles and the hitbox,
+   from the third puddle toward that weapon. Any spot out of the third puddle and the hitbox,
    within a short move of the third puddle and clearly closer to the weapon, is right.
    The spot shown is the one in reach that is closest to the weapon. */
 export function stackToward(w: Point): (results: StepResult[]) => Zone {
   return results => {
     const q: Point = results[results.length - 1].drop ?? [50, 33];
-    const drops = results.flatMap(r => r.drop ? [r.drop] : []);
-    const fn = (p: Point): boolean => inArena(p) && far(p, [50, 50], 14) && drops.every(d => far(p, d, PUDDLE_R)) &&
+    const fn = (p: Point): boolean => inArena(p) && far(p, [50, 50], 14) && far(p, q, PUDDLE_R) &&
       dist(p, q) <= PUDDLE_R + 16 && dist(p, w) <= dist(q, w) - 4 && far(p, w, 8);   // not on the weapon itself
     let label: Point = q, best = Infinity;
     for(let x = 0; x <= 100; x += 1.5) for(let y = 0; y <= 100; y += 1.5){
@@ -289,9 +294,9 @@ function voidSteps(s: Slot, spread: boolean, toward: Point | null): Step[] {
     spread
       ? {q:"Puddles done. Comet: everyone spreads, and the tanks and melee go to their fixed spots. Where do you go?",
           zf:cometSpread(s, toward), cue:FIXED_SPREAD_MARKS,
-          a:toward ? "Anywhere on the first weapon's side of the arena (the shaded area), out of the puddles and not on a tank or melee spot."
-                   : "Any open spot. Healers and ranged have no fixed spread spot. Keep away from the tank and melee spots and out of the puddles."}
-      : toward ? {q:"Puddles done. Where does the group stack?", zf:stackToward(toward), a:"From the third puddle, move toward the first weapon, out of the puddles."}
+          a:toward ? "Anywhere on the first weapon's side of the arena (the shaded area), out of the last puddle and not on a tank or melee spot."
+                   : "Any open spot. Healers and ranged have no fixed spread spot. Keep away from the tank and melee spots and out of the last puddle."}
+      : toward ? {q:"Puddles done. Where does the group stack?", zf:stackToward(toward), a:"From the third puddle, move toward the first weapon, out of that puddle."}
                : {q:"Puddles done. Where does the group stack?", zf:nextPuddle, a:"Just outside the third puddle, one more small step clockwise."}];
 }
 

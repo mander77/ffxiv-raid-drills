@@ -7,7 +7,7 @@
 // picture is built from that drill, so the two always agree.
 import { S, withSeed } from "../util";
 import { DEG, angOf, rotOverlay, unit, zoneCenter } from "../geometry";
-import { MAPS, BOSS, PUDDLE_R, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, cleave, type Run, type Weapon, type WeaponType } from "./drills";
+import { MAPS, BOSS, PUDDLE_R, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, cleave, type Run, type Weapon, type WeaponType } from "./drills";
 import type { Boss, Fig, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
 type Role = "T" | "D" | "H";
@@ -139,10 +139,12 @@ function ultPart(s: Slot, keep: (i: number) => boolean): Overlay[] {
 const spotTags = (list: Array<[number, string]>, jumps = true): Overlay[] =>
   [...(jumps ? path([atAngle(200), ...list.map(([a]) => atAngle(a))]).slice(1) : []), ...list.map(([a, l]) => tag(...at(a, 16), l))];
 
-/* Void Stardust: the three puddles at their usual spots, north of the boss and clockwise. */
-const PUDDLES: Point[] = [[50, 33], [58.8, 35.4], [64.9, 41.8]];
+/* Void Stardust: the three puddles at their usual spots, north of the boss and clockwise. The
+   drill's own rule (nextPuddle) places the second and third, so the sizes always agree. */
+const asDrops = (ps: Point[]): StepResult[] => ps.map(p => ({p, ok:true, z:{c:p, r:5}, drop:p}));
+const PUDDLES: Point[] = [1, 2].reduce((ps: Point[]) => [...ps, zoneCenter(nextPuddle(asDrops(ps)))], [[50, 33]]);
 const PUDDLE_PIECES = PUDDLES.map(p => puddle(p));
-const VOID_RESULTS: StepResult[] = PUDDLES.map(p => ({p, ok:true, z:{c:p, r:5}, drop:p}));
+const VOID_RESULTS = asDrops(PUDDLES);
 /** The party stacked past the third puddle, below waymark B. */
 const STACK_SPOT: Point = [75, 66];
 const stackedMarks = cluster(STACK_SPOT, ALL, 2);
@@ -198,8 +200,8 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
   "k-void": s => { const mine = ALL.findIndex(w => w[0] === s), edge = at(22.5 + mine * 45, 40), spread = ring(ALL, 40, 22.5, 45), stack = cluster([50, 36]);
     return {overlays:[], boss:BOSS, after:PUDDLES.map((p, i) => tag(p[0], p[1], String(i + 1))), answer:PUDDLES.map(p => circle(p, PUDDLE_R)), options:[
       show([...PUDDLE_PIECES, ...PUDDLES.map((p, i) => tag(p[0], p[1], String(i + 1)))]),
-      show([...spreadHits(spread), puddle(edge, 8), ...spread, say("3 PUDDLES ON ONE SPOT", 8)]),
-      show([puddle([50, 36], 9), stackHit(stack), ...stack, say("3 PUDDLES UNDER THE STACK", 94)]),
+      show([...spreadHits(spread), puddle(edge), ...spread, say("3 PUDDLES ON ONE SPOT", 8)]),
+      show([puddle([50, 36]), stackHit(stack), ...stack, say("3 PUDDLES UNDER THE STACK", 94)]),
       show([...([[50, 30], [68, 50], [50, 70]] as Point[]).flatMap((p, i) => [puddle(p), tag(p[0], p[1], String(i + 1))])])]}; },
   "k-void-target": s => { const me = inStack(s), stackOn = (l: string): Overlay[] => [aoe(inStack(l), 11), target(inStack(l))];
     return {overlays:[...PUDDLE_PIECES, ...stackedMarks], boss:BOSS, after:[...stackOn(s), tag(68, 83, "STACK ON A HEALER")], answer:[circle(me, 5)], options:[

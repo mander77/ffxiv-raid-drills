@@ -10,13 +10,13 @@ import type { Point, Slot } from "../types";
 
 /** A fixed sword example: the boss jumps west from the middle. The player's pocket is green. */
 export function swordDiagram(s: Slot): string {
-  const P: Point = [21, 50], d: Point = [-1, 0], L = leftOf(d), HW = 7, mine = S(s, 1, -1);
+  const P: Point = [21, 50], d: Point = [-1, 0], L = leftOf(d), HW = 12.5, mine = S(s, 1, -1);
   const pocket = (side: number): Point[] => {
     const sv: Point = [L[0] * side, L[1] * side], corner = vadd(vadd(P, d, -HW), sv, HW);
     return [corner, vadd(corner, d, -32), vadd(vadd(corner, d, -32), sv, 32), vadd(corner, sv, 32)];
   };
   const poly = (pts: Point[], cls: string): string => '<polygon class="zone ' + cls + '" points="' + pts.map(p => f1(p[0]) + "," + f1(p[1])).join(" ") + '"/>';
-  const label = (side: number, txt: string): string => { const p = vadd(P, unit(vadd([-d[0], -d[1]], [L[0] * side, L[1] * side])), 17);
+  const label = (side: number, txt: string): string => { const p = vadd(P, unit(vadd([-d[0], -d[1]], [L[0] * side, L[1] * side])), 29);
     return '<g class="zlabel' + (side === mine ? "" : " other") + '"><rect x="' + f1(p[0] - 8) + '" y="' + f1(p[1] - 2.3) + '" width="16" height="4.6" rx=".9"/><text x="' + f1(p[0]) + '" y="' + f1(p[1]) + '">' + txt + "</text></g>"; };
   let h = '<svg viewBox="-4 -6 108 110" role="img" aria-label="Sword example. The boss jumps west from the middle. G1 takes the pocket behind his left side, G2 the pocket behind his right side.">';
   h += floorSVG(false) + '<text class="compass" x="50" y="-2.2">N</text>';
@@ -52,7 +52,7 @@ export function renderSheet(): void {
     "<li><b>Ultimate Trophy Weapons:</b> watch the first spawn. South and slightly west means clockwise, south and slightly east means counterclockwise. The second is NW or NE, then the cardinals, ending north. He resolves them in spawn order.</li>" +
     "<li><b>Void Stardust:</b> start north of the boss. Drop each puddle just outside the last one, a small step clockwise. Then stack or spread. Before the puddles, find the first weapon of the second set. If it is a sword or scythe, stack or spread toward it, and use Expedient, Sprint or a movement ability if it is far.</li>" +
     "<li><b>Assault Evolved, second set (after Void Stardust):</b> the weapon with its flat side square to the boss goes first. Then clockwise, the same as the first set.</li>" +
-    "<li><b>Comet spread (after Void Stardust):</b> free for all for healers and ranged. Take any open spot, away from the tanks and melee and out of the puddles. Fixed spots: MT NW, OT NE, M1 SW, M2 SE.</li>" +
+    "<li><b>Comet spread (after Void Stardust):</b> free for all for healers and ranged. Take any open spot, away from the tanks and melee and out of the last puddle. Fixed spots: MT NW, OT NE, M1 SW, M2 SE.</li>" +
     "<li><b>Orbital Omen (Hector's dodge):</b> stay against the boss hitbox, at his side. Start where the #2 lines cross. After #1 and Fire and Fury, cross the hitbox to the opposite middle square. After #2, cross back and stay.</li>" +
     "<li><b>Meteorain, melee (1st set):</b> the melee step in close to the boss to take the first markers. M1 drops NE and M2 drops SW, both inside the boss hitbox. Everyone else stacks NW for the first line stack, with the tanks in front.</li>" +
     "<li><b>Meteorain, tanks:</b> the tanks stand in front of the first line stack. Then each set, tethers link to the two rocks closest to the boss: the MT takes the NE or NW tether, the OT takes the SW tether. Each tether is a tank buster (5:09, 5:19 and 5:29), so the tanks stay out of the party stack and you heal them after each one. After the third tether, they hide behind the rocks too.</li>" +
