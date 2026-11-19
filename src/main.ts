@@ -12,6 +12,7 @@ import { renderMap, nextStep, nextMap, openPattern } from "./views/map";
 import { renderQuiz, answer, nextQ } from "./views/quiz";
 import { renderPressureStart, startPressure } from "./views/pressure";
 import { renderSheet } from "./views/sheet";
+import { renderHome } from "./views/home";
 import { renderFight, togglePause, openFight, seekBy } from "./views/fight";
 import { parseChoices } from "./data/fight";
 import type { Slot } from "./types";
@@ -47,12 +48,14 @@ function go(tab: string): void {
   // #fight/<code> opens that fight in real time. #fight was a tab of its own before.
   const [name, a = "", b = ""] = tab.split("/");
   // TS note: `?.` and `??` work as in C#. If find() returns undefined, `?.id` is undefined,
-  // and `?? "map"` falls back to the map tab. Any text from the URL becomes a valid Tab.
-  const t: Tab = TABS.find(x => x.id === name)?.id ?? "map";
+  // and `?? "home"` falls back to the landing screen. Any text from the URL becomes a valid Tab.
+  const t: Tab = name === "fight" ? "map" : TABS.find(x => x.id === name)?.id ?? "home";
   if(t === "map" && a && isCode(b)){ setPlay("step"); openPattern(a, b.toUpperCase()); }
   // #fight/<code>/raw=axe,ult=cw: the code, then the fight pattern choices, if any.
   if(name === "fight"){ setPlay("time"); if(isCode(a)) openFight(a.toUpperCase(), b ? parseChoices(b) : undefined); }
   stopTimer();
+  // A new tab starts at the top, also when you open it from a card low on the landing screen.
+  if(t !== state.tab) window.scrollTo(0, 0);
   state.tab = t; state.pressure = null;
   renderTabs();
   if(location.hash !== "#" + t){ try { history.replaceState(null, "", "#" + t); } catch { /* sandboxed frame */ } }
@@ -62,6 +65,7 @@ function go(tab: string): void {
 function render(): void {
   stopTimer();
   switch(state.tab){
+    case "home": return renderHome();
     case "map": return state.play === "time" ? renderFight() : renderMap();
     case "pressure": return renderPressureStart();
     case "sheet": return renderSheet();
@@ -105,5 +109,5 @@ document.addEventListener("keydown", e => {
 window.addEventListener("hashchange", () => { const t = location.hash.slice(1); if(t && t !== state.tab) go(t); });
 
 showSlot();
-go(location.hash.slice(1) || "map");
+go(location.hash.slice(1) || "home");
 document.fonts?.ready.then(scrollActiveTab).catch(() => { /* fonts are optional */ });

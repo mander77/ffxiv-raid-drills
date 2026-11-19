@@ -9,7 +9,7 @@ import type { Job, MapDrill, Option, Question, QuizItem, Scene, Slot, StepResult
 // TS note: other files import these types with `import { state, type Deck } from "./core"`.
 // The `type` keyword inside the braces marks a type-only import next to normal value imports.
 export type QuizCat = "mech" | "next" | "death" | "job";
-export type Tab = "map" | QuizCat | "pressure" | "sheet";
+export type Tab = "home" | "map" | QuizCat | "pressure" | "sheet";
 /** How the "Where do I stand?" tab plays: one drill at a time, or all of them on the fight clock. */
 export type Play = "step" | "time";
 
@@ -23,7 +23,7 @@ export interface Deck<T> { items: T[]; i: number; right: number; done: number }
     Next step. */
 export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; code: string; results: StepResult[]; counted: boolean; waiting?: boolean; stop?: boolean; peek?: number; setupOpen?: boolean }
 export interface McqCur { kind: "mcq"; cat: QuizCat | "pressure"; item: QuizItem; q: Question; opts: Option[]; answered: boolean; pick: number; slow: boolean }
-export type Cur = MapCur | McqCur | { kind: "pstart" } | { kind: "pdone" } | { kind: "sheet" } | { kind: "fight" } | { kind: "ability"; i: number };
+export type Cur = MapCur | McqCur | { kind: "pstart" } | { kind: "pdone" } | { kind: "sheet" } | { kind: "home" } | { kind: "fight" } | { kind: "ability"; i: number };
 export interface PressureRun { queue: QuizItem[]; i: number; right: number; wrong: number; froze: number }
 
 interface Decks { map?: Deck<MapDrill>; mech?: Deck<QuizItem>; next?: Deck<QuizItem>; death?: Deck<QuizItem>; job?: Deck<QuizItem> }
@@ -57,6 +57,7 @@ export const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
 };
 
 export const TABS: Array<{id: Tab; label: string; lede: string}> = [
+  {id:"home", label:"Home", lede:"Practice drills for the healers in M11S, The Tyrant (Savage). You practice where to stand, what comes next, when to raise and which cooldown to press, away from the raid. The answers follow your group's strats: Hector (Toxic), Kindred No Buddies and Fixed (3CJ) Ecliptic."},
   {id:"map", label:"Where do I stand?", lede:"The list is the whole fight in cast order. Click an ability to see what it does, or a drill to practice it. Step by step has no timer. Real time runs the fight clock. Patterns turn as they do in the real fight, so read the boss and the floor."},
   {id:"mech", label:"Mechanics", lede:"What each mechanic does and what you do. Your answers follow your slot and your group's wtfdig link."},
   {id:"next", label:"What is next?", lede:"Knowing what comes next tells you how much time you have to raise. Times come from the fight timeline."},
