@@ -59,7 +59,7 @@ export function drawOverlay(o: Overlay): string {
     }
     case "band": return '<line class="aoeband" x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '" stroke-width="' + o.w + '"/>';
     case "lane": return '<rect class="' + (o.soft ? "lanesoft" : "aoe") + '" x="' + o.rect[0] + '" y="' + o.rect[1] + '" width="' + (o.rect[2] - o.rect[0]) + '" height="' + (o.rect[3] - o.rect[1]) + '"/>';
-    case "poly": return '<polygon class="' + (o.line ? "aoeline" : "aoe") + '" points="' + o.pts.map(pt).join(" ") + '"/>';
+    case "poly": return '<polygon class="aoe" points="' + o.pts.map(pt).join(" ") + '"/>';
     case "safe": return '<circle class="safe" cx="' + x + '" cy="' + y + '" r="' + o.r + '"/>';
     case "guide": return '<line class="guide" x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '"/>';
     case "portal": return '<g class="portal" transform="translate(' + x + " " + y + ')"><ellipse rx="' + (o.vert ? 6 : 2.2) + '" ry="' + (o.vert ? 2.2 : 6) + '"/><text>' + o.n + "</text></g>";
@@ -99,8 +99,8 @@ export function floorSVG(split = false): string {
 
 /** True for the filled area of an attack. */
 const isHit = (o: Overlay): boolean =>
-  o.t === "aoe" || o.t === "donut" || o.t === "band" || (o.t === "poly" && !o.line) || (o.t === "lane" && !o.soft);
-/** Overlays with the attacks first, then the rest (outlines, safe rings, weapons) on top, so an
+  o.t === "aoe" || o.t === "donut" || o.t === "band" || o.t === "poly" || (o.t === "lane" && !o.soft);
+/** Overlays with the attacks first, then the rest (safe rings, weapons, marks) on top, so an
     attack never covers a weapon icon. Each attack keeps its own see-through fill and edge, so
     where attacks overlap the colour gets darker. */
 export function hitsSVG(os: Overlay[]): string {

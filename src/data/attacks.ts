@@ -60,9 +60,7 @@ export const lineTo = (from: Point, to: Point, w = LINE_STACK_W): Overlay => {
 };
 
 /** A cone from c toward a (degrees clockwise from north), `half` degrees to each side, r units long. */
-// TS note: Extract keeps only the poly member of the Overlay union, so a caller can spread a
-// cone and add a poly-only field (line) without a type error.
-export function cleave(c: Point, a: number, half = 16, r = 80, r0 = 0): Extract<Overlay, {t: "poly"}> {
+export function cleave(c: Point, a: number, half = 16, r = 80, r0 = 0): Overlay {
   const at = (d: number, rr: number): Point => [c[0] + rr * Math.sin(d * DEG), c[1] - rr * Math.cos(d * DEG)];
   const outer = [at(a - half, r), at(a, r), at(a + half, r)];
   // With r0, the cone starts r0 out from c, so the ground closer in stays clear in the picture.

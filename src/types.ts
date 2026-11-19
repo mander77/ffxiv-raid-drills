@@ -61,8 +61,7 @@ type OverlayShape =
   | ({ t: "portal"; vert: boolean; n: number } & At)
   | ({ t: "scythe"; ux: number; uy: number; dx: number; dy: number } & At)
   | { t: "lane"; rect: RectBox; soft?: boolean }
-  // `line`: drawn as an outline only, for cones that would cover the picture (the scythe's proteans).
-  | { t: "poly"; pts: Point[]; line?: boolean }
+  | { t: "poly"; pts: Point[] }
   // A safe circle: the only ground an attack does not hit (inside the scythe's donut).
   | ({ t: "safe"; r: number } & At);
 /** `spawn` groups a weapon's pieces so the map can fade or animate them together. */
