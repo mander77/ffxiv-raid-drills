@@ -163,7 +163,7 @@ function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
   showRoute(fightRoute(fight));
   // The flash and the hit's name sit over the arena, outside #f-arena, so a new scene does not remove them.
   show('<div class="stage"><div class="arena">' + HUD + '<div class="fxbox"><div id="f-arena"></div>' +
-    '<div class="hitfx" id="f-fx" aria-hidden="true"></div><div class="hitlbl" id="f-hit" role="status"></div></div></div>' +
+    '<div class="hitlbl" id="f-hit" role="status"></div></div></div>' +
     '<div class="panel"><div id="f-panel"></div>' + controls(fight) + "</div></div>");
   const seek = el<HTMLInputElement>("f-seek");
   seek.addEventListener("pointerdown", () => { dragging = true; });
@@ -341,8 +341,11 @@ function frame(): void {
     if(fresh){
       el("f-arena").innerHTML = sceneSVG(sc, k);
       el("arena-svg").addEventListener("click", onClick);
-      // The countdown ring goes on top of everything and lets clicks through (see .tring).
-      el("arena-svg").insertAdjacentHTML("beforeend", '<circle id="tring" class="tring" r="16" pathLength="100" stroke-dasharray="100"/>');
+      // The flash for damage going out and the countdown ring go over the arena, but under the
+      // player marks. Both let clicks through (see .hitfx and .tring).
+      el("arena-svg").querySelector("#marks-layer")?.insertAdjacentHTML("beforebegin",
+        '<rect id="f-fx" class="hitfx" x="0" y="0" width="100" height="100" aria-hidden="true"/>' +
+        '<circle id="tring" class="tring" r="16" pathLength="100" stroke-dasharray="100"/>');
     }
     let boss: Boss | null = sc.bossAt ? sc.bossAt(res.length + (jumped ? 1 : 0)) : (sc.boss ? rotOverlay(sc.boss, k) : null);
     // In the middle, before his cast, he faces no weapon. When the cast starts he turns to the first one.
@@ -509,11 +512,12 @@ function buildHits(f: Fight): Hit[] {
 }
 
 /** Start a CSS animation again on an element that may still run it: drop the classes, make the
-    browser lay the page out (reading offsetWidth does that), then add them back. */
-function restart(n: HTMLElement, cls: string): void {
-  n.className = "";
-  void n.offsetWidth;
-  n.className = cls;
+    browser lay the page out (reading its size does that), then add them back. It works for HTML
+    and SVG elements. */
+function restart(n: Element, cls: string): void {
+  n.setAttribute("class", "");
+  void n.getBoundingClientRect();
+  n.setAttribute("class", cls);
 }
 
 function showHit(r: Run, h: Hit): void {
@@ -522,8 +526,9 @@ function showHit(r: Run, h: Hit): void {
   // The flash takes the category's colour (see .hitfx in styles.css).
   if(fx && (h.kind === "raid" || h.kind === "shared" || h.kind === "enrage")) restart(fx, "hitfx " + h.kind + " " + h.cat);
   if(h.kind === "tank"){
-    // The tanks, where they take the buster, and the hit on them. It removes itself when it has faded.
-    document.getElementById("arena-svg")?.insertAdjacentHTML("beforeend", '<g class="fx-buster">' + busterPieces(h.name, r.bossAt).map(drawOverlay).join("") + "</g>");
+    // The tanks, where they take the buster, and the hit on them, under the other player marks.
+    // It removes itself when it has faded.
+    document.querySelector("#arena-svg #marks-layer")?.insertAdjacentHTML("beforebegin", '<g class="fx-buster">' + busterPieces(h.name, r.bossAt).map(drawOverlay).join("") + "</g>");
     const hit = document.querySelector("#arena-svg .fx-buster:last-of-type");
     setTimeout(() => hit?.remove(), BUSTER_MS);
   }

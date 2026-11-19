@@ -47,7 +47,7 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
   const n = results.length, asking = showLast ? n - 1 : n;
   // The puddles dropped before the last step with clearDrops (up to the one asked) are gone.
   const kept = sc.steps.slice(0, asking + 1).reduce((from, st, i) => st.clearDrops ? i : from, 0);
-  let drops = "", fb = "", rev = "";
+  let drops = "", fb = "", rev = "", me = "";
   results.forEach((r, i) => {
     const step = sc.steps[i], z = r.z, ctr = zoneCenter(z);
     if(r.drop && i >= kept) drops +='<circle class="drop" cx="' + f1(r.drop[0]) + '" cy="' + f1(r.drop[1]) + '" r="' + PUDDLE_R + '"/>';
@@ -60,12 +60,14 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
       const bottom = "c" in z ? z.c[1] + z.r : "rect" in z ? z.rect[3] : ctr[1] - 1;
       const ly = "fn" in z ? ctr[1] : (top - 3 >= -3 ? top - 3 : bottom + 3);
       fb += '<g class="zlabel"><rect x="' + f1(ctr[0] - 3.2) + '" y="' + f1(ly - 2.1) + '" width="6.4" height="4.2" rx=".9"/><text x="' + f1(ctr[0]) + '" y="' + f1(ly) + '">' + state.slot + "</text></g>";
-      if(!r.missed) fb += '<g class="pick ' + cls + '" transform="translate(' + f1(r.p[0]) + " " + f1(r.p[1]) + ')"><circle class="halo" r="2.6"/><circle class="dot" r="1.1"/></g>';
+      if(!r.missed) me = '<g class="pick ' + cls + '" transform="translate(' + f1(r.p[0]) + " " + f1(r.p[1]) + ')"><circle class="halo" r="2.6"/><circle class="dot" r="1.1"/></g>';
     }
   });
   // Cues show with their step's question and stay. They go on top of the puddles so that
-  // a marker on an old puddle stays visible.
-  const cues = sc.steps.slice(0, asking + 1).flatMap(st => st.cue ?? []).map(o => drawOverlay(rotOverlay(o, k))).join("");
+  // a marker on an old puddle stays visible. Player marks in a cue go in the top layer.
+  const cues = sc.steps.slice(0, asking + 1).flatMap(st => st.cue ?? []).map(o => rotOverlay(o, k));
+  const cueMarks = cues.filter(o => o.t === "mark").map(drawOverlay).join("");
+  const cueRest = cues.filter(o => o.t !== "mark").map(drawOverlay).join("");
   if(boss === undefined){
     boss = sc.bossAt ? sc.bossAt(n) : (sc.boss ? rotOverlay(sc.boss, k) : null);
     // Asking the next weapon: he has already turned to face it.
@@ -73,9 +75,11 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
   }
   const layer = (id: string): Element => svg.querySelector("#" + id) as Element;
   layer("reveal-layer").innerHTML = rev;
-  layer("drops").innerHTML = drops + cues;
+  layer("drops").innerHTML = drops + cueRest;
   layer("boss-layer").innerHTML = boss ? drawBoss(boss) : "";
   layer("fb-layer").innerHTML = fb;
+  layer("cue-marks").innerHTML = cueMarks;
+  layer("me-layer").innerHTML = me;
   svg.classList.toggle("locked", n >= sc.steps.length);
   // Weapons that already resolved fade out. The one just answered stays until the next step.
   // With spawnAhead, each answered step also brings in the next weapon, with a short delay.

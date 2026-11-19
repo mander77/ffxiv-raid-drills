@@ -127,32 +127,40 @@ export function sceneSVG(sc: Scene, k: number): string {
     const later = sc.spawnAhead != null && i >= sc.spawnAhead ? " later" : "";
     return '<g class="spawn' + later + '" data-spawn="' + i + '"' + delay + ">" + g.map(o => drawOverlay(rotOverlay(o, k))).join("") + ord + "</g>";
   }).join("");
+  const isMark = (o: Overlay): boolean => o.t === "mark";
+  const base = sc.overlays.filter(o => o.spawn == null).map(o => rotOverlay(o, k));
   let h = '<svg id="arena-svg"' + (sc.spawnPlay ? ' class="play"' : "") + ' viewBox="-4 -6 108 110" role="img" aria-label="Arena map. Click to choose a spot.">';
   h += floorSVG(sc.split);
   h += '<text class="compass" x="50" y="-2.2">N</text>';
   // What an answer reveals (the attacks) goes under the weapons, so their icons stay sharp.
   h += '<g id="reveal-layer" clip-path="url(#arenaClip)"></g>';
-  h += '<g clip-path="url(#arenaClip)">' + hitsSVG(sc.overlays.filter(o => o.spawn == null).map(o => rotOverlay(o, k))) + spawned + "</g>";
+  h += '<g clip-path="url(#arenaClip)">' + hitsSVG(base.filter(o => !isMark(o))) + spawned + "</g>";
   h += '<g id="drops"></g>';
   h += drawWaymarks();
   h += '<g id="boss-layer"></g>';
-  h += '<g id="fb-layer"></g></svg>';
+  h += '<g id="fb-layer"></g>';
+  // Player marks go on top of everything else: the other players (the scene's marks, then the
+  // step cues), and over them your own click. Views that add effects put them before this layer.
+  h += '<g id="marks-layer">' + base.filter(isMark).map(drawOverlay).join("") + '<g id="cue-marks"></g></g>';
+  h += '<g id="me-layer"></g></svg>';
   return h;
 }
 
 /** A still arena picture for a quiz question. Until `answered`, it shows the setup, or the
     setup with one answer `preview` in the neutral colour. After the answer, it shows what the
-    mechanic does and the right spot in green. Labels (tags and role marks) go on top, so an
-    AoE or a zone never hides them. */
+    mechanic does and the right spot in green. Tags go over the attacks and zones, so an AoE
+    or a zone never hides them. Player marks go on top of everything, the waymarks and the boss
+    too. */
 export function figSVG(f: Fig, answered: boolean, label: string, preview?: Preview): string {
   const extra = answered ? f.after ?? [] : preview ? preview.pieces : f.before ?? [];
   const zones = answered ? (f.answer ?? []).map(z => zoneSVG(z, "ok")) : (preview?.zones ?? []).map(z => zoneSVG(z, "pick"));
   const pieces = [...f.overlays, ...extra];
   const isLabel = (o: Overlay): boolean => o.t === "tag" || o.t === "mark";
   const draw = (os: Overlay[]): string => os.map(drawOverlay).join("");
+  const marks = pieces.filter(o => o.t === "mark"), tags = pieces.filter(o => o.t === "tag");
   let h = '<svg class="qfig-svg" viewBox="-4 -6 108 110" role="img" aria-label="' + esc(label) + '">' + floorSVG(f.split) + '<text class="compass" x="50" y="-2.2">N</text>';
-  h += '<g clip-path="url(#arenaClip)">' + hitsSVG(pieces.filter(o => !isLabel(o))) + zones.join("") + draw(pieces.filter(isLabel)) + "</g>";
-  return h + drawWaymarks() + (f.boss ? drawBoss(f.boss) : "") + "</svg>";
+  h += '<g clip-path="url(#arenaClip)">' + hitsSVG(pieces.filter(o => !isLabel(o))) + zones.join("") + draw(tags) + "</g>";
+  return h + drawWaymarks() + (f.boss ? drawBoss(f.boss) : "") + draw(marks) + "</svg>";
 }
 
 export function zoneSVG(z: ZoneShape, cls: string): string {
