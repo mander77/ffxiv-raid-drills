@@ -12,6 +12,9 @@ export interface TLEvent { t: number; name: string; raidwide?: boolean }
 /** One stretch of the fight with a scene on the arena. `due[i]` is when step i resolves. */
 export interface FightSeg {
   title: string;
+  /** The "Where do I stand?" drills this stretch tests. A click on one in the drill list
+      moves the fight clock to `from`. */
+  drills: string[];
   scene: Scene;
   /** Quarter turns of the arena, for mechanics that turn (Dance of Domination). */
   k: number;
@@ -56,15 +59,16 @@ function fightFor(s: Slot, code: string): Fight {
   /* Each click is due when the hit that checks it lands, in seconds into the fight. A scene
      appears when its cast starts (cactbot's StartsUsing or the ability before it). */
   const segs: FightSeg[] = [
-    {title:"Raw Steel Trophy: " + w1, scene:drill("m-raw-" + w1, s), k:0, from:15.7, due:[25.1]},
-    {title:"Assault Evolved", scene:assault1, k:0, from:38.4, turn:face1 != null ? {at:48.2 - CAST, f:face1} : undefined, due:[50.4, 55.5, 60.6]},
-    {title:"Void Stardust into the second weapons", scene:voidIntoWeapons(s, !stackFirst, A2, true), k:0, from:72.7,
+    {title:"Raw Steel Trophy: " + w1, drills:["m-raw-" + w1], scene:drill("m-raw-" + w1, s), k:0, from:15.7, due:[25.1]},
+    {title:"Assault Evolved", drills:["m-assault"], scene:assault1, k:0, from:38.4, turn:face1 != null ? {at:48.2 - CAST, f:face1} : undefined, due:[50.4, 55.5, 60.6]},
+    // The second set of weapons spawns when this Void Stardust starts, so it covers both drills.
+    {title:"Void Stardust into the second weapons", drills:["m-void", "m-assault-2"], scene:voidIntoWeapons(s, !stackFirst, A2, true), k:0, from:72.7,
       turn:{at:92.7 - CAST, f:A2.W[0].a}, due:[79.8, 83.9, 85.9, 87.9, 89.9, 94.9, 100.0, 105.1]},
-    {title:"Void Stardust again", scene:voidAgain(s, stackFirst), k:0, from:106, due:[110.2, 112.2, 114.2, 116.2]},
-    {title:"Dance of Domination", scene:drill("m-dance", s), k:Math.floor(random() * 4), from:134.6, due:[150.5]},
-    {title:"Raw Steel Trophy: " + w2, scene:drill("m-raw-" + w2, s), k:0, from:156.4, due:[163.8]},
-    {title:"Ultimate Trophy Weapons", scene:drill("m-ultimate", s), k:0, from:184.6, due:[194.6, 199.7, 204.8, 209.9, 215.0, 220.1]},
-    {title:"Tornadoes", scene:drill("m-tornado", s), k:0, from:221.2, due:[226.3]}
+    {title:"Void Stardust again", drills:[], scene:voidAgain(s, stackFirst), k:0, from:106, due:[110.2, 112.2, 114.2, 116.2]},
+    {title:"Dance of Domination", drills:["m-dance"], scene:drill("m-dance", s), k:Math.floor(random() * 4), from:134.6, due:[150.5]},
+    {title:"Raw Steel Trophy: " + w2, drills:["m-raw-" + w2], scene:drill("m-raw-" + w2, s), k:0, from:156.4, due:[163.8]},
+    {title:"Ultimate Trophy Weapons", drills:["m-ultimate"], scene:drill("m-ultimate", s), k:0, from:184.6, due:[194.6, 199.7, 204.8, 209.9, 215.0, 220.1]},
+    {title:"Tornadoes", drills:["m-tornado"], scene:drill("m-tornado", s), k:0, from:221.2, due:[226.3]}
   ];
   /* The timeline lines, with cactbot's names. Where the arena is the test, the names stay as
      general as cactbot's before it syncs: "Comet/Crushing Comet", "Assault Evolved 1". */

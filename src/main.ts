@@ -7,7 +7,7 @@
 // in development and writes them to one CSS file in the build.
 import "./styles.css";
 import { LS, esc, el, isCode } from "./util";
-import { state, TABS, view, app, stopTimer, type Tab } from "./core";
+import { state, TABS, view, app, stopTimer, type Tab, type Play } from "./core";
 import { renderMap, nextStep, nextMap, openPattern } from "./views/map";
 import { renderQuiz, answer, nextQ } from "./views/quiz";
 import { renderPressureStart, startPressure } from "./views/pressure";
@@ -39,14 +39,17 @@ function setSlot(s: Slot): void {
   render();
 }
 
+function setPlay(p: Play): void { state.play = p; LS.set("play", p); }
+
 function go(tab: string): void {
-  // A link can name a pattern: #map/<drill id>/<code> or #fight/<code>.
+  // A link can name a pattern: #map/<drill id>/<code> opens that drill step by step, and
+  // #fight/<code> opens that fight in real time. #fight was a tab of its own before.
   const [name, a = "", b = ""] = tab.split("/");
   // TS note: `?.` and `??` work as in C#. If find() returns undefined, `?.id` is undefined,
   // and `?? "map"` falls back to the map tab. Any text from the URL becomes a valid Tab.
   const t: Tab = TABS.find(x => x.id === name)?.id ?? "map";
-  if(t === "map" && a && isCode(b)) openPattern(a, b.toUpperCase());
-  if(t === "fight" && isCode(a)) openFight(a.toUpperCase());
+  if(t === "map" && a && isCode(b)){ setPlay("step"); openPattern(a, b.toUpperCase()); }
+  if(name === "fight"){ setPlay("time"); if(isCode(a)) openFight(a.toUpperCase()); }
   stopTimer();
   state.tab = t; state.pressure = null;
   renderTabs();
@@ -57,8 +60,7 @@ function go(tab: string): void {
 function render(): void {
   stopTimer();
   switch(state.tab){
-    case "map": return renderMap();
-    case "fight": return renderFight();
+    case "map": return state.play === "time" ? renderFight() : renderMap();
     case "pressure": return renderPressureStart();
     case "sheet": return renderSheet();
     default: return renderQuiz(state.tab);
@@ -79,6 +81,9 @@ view.addEventListener("click", e => {
   const t = e.target as Element;
   const j = t.closest<HTMLElement>("[data-job]");
   if(j){ state.job = j.dataset.job === "sge" ? "sge" : "whm"; LS.set("job", state.job); delete state.decks.job; return render(); }
+  // A click on Real time while it is on goes back to the fight settings.
+  const m = t.closest<HTMLElement>("[data-play]");
+  if(m){ setPlay(m.dataset.play === "time" ? "time" : "step"); return render(); }
   const b = t.closest<HTMLElement>("[data-order]");
   if(!b) return;
   state.order = b.dataset.order === "weak" ? "weak" : "fight"; LS.set("order", state.order); state.decks = {}; render();

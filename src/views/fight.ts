@@ -1,4 +1,5 @@
-// The "Full fight" tab: the drills play in fight order on the fight clock, with the boss cast bar.
+// Real time, the second mode of the "Where do I stand?" tab: the drills play in fight order on
+// the fight clock, with the fight timeline.
 import { LS, esc, el } from "../util";
 import { state, view, stopTimer } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter } from "../geometry";
@@ -6,7 +7,7 @@ import { sceneSVG } from "../arena";
 import { paintArena } from "./map";
 import { tabHead } from "./common";
 import { buildFight, clock, type Fight, type FightSeg } from "../data/fight";
-import { BOSS } from "../data/drills";
+import { BOSS, MAPS } from "../data/drills";
 import type { Boss, Point, Scene, StepResult } from "../types";
 
 /** live = you click; demo = the right clicks play by themselves; replay = your clicks play back. */
@@ -48,6 +49,44 @@ function nextFight(): Fight {
 }
 const IDLE: Scene = {setup:"", rule:"", steps:[], overlays:[], boss:BOSS};
 
+/* ---------- the drill list ---------- */
+/* Every real-time screen sits beside the same drill list as Step by step, in fight order.
+   A drill the fight clock does not reach yet (Phase 2 and later) is greyed out. Every fight
+   covers the same drills, so one built fight tells which ones. */
+let covered: Set<string> | null = null;
+function fightNav(): string {
+  // TS note: `a ??= b` has a value, like an assignment in C#. Here its type is Set<string>,
+  // never null, so the map() callback below can use inFight without another check.
+  const inFight = (covered ??= new Set(buildFight(state.slot).segs.flatMap(g => g.drills)));
+  return '<nav class="drillnav" aria-label="Go to a mechanic"><ol>' + MAPS.slice().sort((a, b) => a.order - b.order).map(m =>
+    '<li><button type="button" data-fdrill="' + m.id + '"' + (inFight.has(m.id) ? "" : ' disabled title="Real time covers Phase 1 for now"') + ">" +
+    '<span class="dn-time">' + esc(m.time) + "</span>" + esc(m.title) + "</button></li>").join("") + "</ol></nav>";
+}
+
+function show(inner: string): void {
+  view.innerHTML = tabHead(false) + '<div class="mapwrap">' + fightNav() + inner + "</div>";
+  view.querySelectorAll<HTMLButtonElement>("[data-fdrill]").forEach(b => b.addEventListener("click", () => jumpTo(b.dataset.fdrill ?? "")));
+}
+
+/* A click in the drill list goes to the moment that mechanic starts. With no fight running it
+   starts one first, so the list is also a quick way in. Steps before it count as skipped. */
+function jumpTo(id: string): void {
+  if(!R) startRun("live", nextFight());
+  const g = R?.fight.segs.find(x => x.drills.includes(id));
+  if(g) seekTo(g.from);
+}
+
+/** Highlight the drills on the arena now, or none between mechanics. */
+function markNav(g: FightSeg | null): void {
+  view.querySelectorAll<HTMLButtonElement>("[data-fdrill]").forEach(b => {
+    if(g?.drills.includes(b.dataset.fdrill ?? "")) b.setAttribute("aria-current", "step");
+    else b.removeAttribute("aria-current");
+  });
+  // On narrow screens the list scrolls sideways, as in Step by step. Keep the mechanic in view.
+  const nav = view.querySelector<HTMLElement>(".drillnav"), now = nav?.querySelector<HTMLElement>("[aria-current]");
+  if(nav && now) nav.scrollLeft = now.offsetLeft - (nav.clientWidth - now.offsetWidth) / 2;
+}
+
 /* ---------- start screen ---------- */
 export function renderFight(): void {
   stopTimer(); R = null;
@@ -55,13 +94,13 @@ export function renderFight(): void {
   const row = (key: string, label: string, choices: Array<[string, string]>, cur: string): string =>
     '<div class="ctrl" style="margin-top:12px"><span id="' + key + '-lbl">' + label + '</span><div class="seg small" role="group" aria-labelledby="' + key + '-lbl">' +
     choices.map(([v, t]) => '<button type="button" data-set="' + key + '" data-val="' + v + '" aria-pressed="' + (v === cur) + '">' + t + "</button>").join("") + "</div></div>";
-  view.innerHTML = tabHead(false) + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Full fight</b><span>Phase 1: the pull to 4:01</span></div>' +
-    "<h2>Play the fight in order</h2><p>The drills from \"Where do I stand?\" play one after another on the fight clock. The timeline shows what the boss does next, like the cactbot overlay. Click your spot before each hit lands. Each run picks its own scenario: axe or scythe first, stack or spread first, and new weapon patterns.</p>" +
+  show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b><span>Phase 1: the pull to 4:01</span></div>' +
+    "<h2>Play the fight in order</h2><p>The drills play one after another on the fight clock. The timeline shows what the boss does next, like the cactbot overlay. Click your spot before each hit lands. Each run picks its own scenario: axe or scythe first, stack or spread first, and new weapon patterns. To start at one mechanic, click it in the drill list.</p>" +
     row("fskip", "Quiet stretches", [["yes", "Skip ahead"], ["no", "Real time"]], settings.skip ? "yes" : "no") +
     row("fspeed", "Speed", SPEEDS.map((n): [string, string] => [String(n), n + "x"]), String(settings.speed)) +
     row("fpause", "Missed spot", [["no", "Fight goes on"], ["yes", "Fight pauses"]], settings.pause ? "yes" : "no") +
     (wantedFight ? '<p class="hint" style="margin-top:12px">Fight code ' + esc(wantedFight) + " is ready: the next start uses it.</p>" : "") +
-    '<div class="actions"><button type="button" class="btn" id="f-start">Start the fight</button><button type="button" class="btn ghost" id="f-watch">Watch the right moves</button></div></div></div>';
+    '<div class="actions"><button type="button" class="btn" id="f-start">Start the fight</button><button type="button" class="btn ghost" id="f-watch">Watch the right moves</button></div></div></div>');
   view.querySelectorAll<HTMLButtonElement>("[data-set]").forEach(b => b.addEventListener("click", () => {
     const v = b.dataset.val ?? "";
     if(b.dataset.set === "fskip") settings.skip = v === "yes";
@@ -80,7 +119,7 @@ function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
   R = {mode, fight, t:settings.skip ? Math.max(0, fight.events[0].t - SOON) : 0, results:fight.segs.map(() => []),
        clicks:mode === "replay" ? clicks : [], next:0, hold:"", last:performance.now(), shown:""};
   state.cur = {kind:"fight"};
-  view.innerHTML = tabHead(false) + '<div class="stage"><div class="arena" id="f-arena"></div><div class="panel"><div id="f-panel"></div>' + controls(fight) + "</div></div>";
+  show('<div class="stage"><div class="arena" id="f-arena"></div><div class="panel"><div id="f-panel"></div>' + controls(fight) + "</div></div>");
   const seek = el<HTMLInputElement>("f-seek");
   seek.addEventListener("pointerdown", () => { dragging = true; });
   seek.addEventListener("pointerup", () => { dragging = false; });
@@ -98,7 +137,7 @@ function controls(f: Fight): string {
     '<input type="range" id="f-seek" min="0" max="' + f.end + '" step="0.1" value="0" list="f-marks" aria-label="Fight time">' +
     '<span class="ftime" id="f-time"></span></div>' +
     '<datalist id="f-marks">' + f.segs.map(g => '<option value="' + g.from + '"></option>').join("") + "</datalist>" +
-    '<p class="hint" style="margin-top:6px"><kbd>Space</kbd> play or pause &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 5 seconds &middot; the Full fight tab goes back to the settings</p>';
+    '<p class="hint" style="margin-top:6px"><kbd>Space</kbd> play or pause &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 5 seconds &middot; the Real time button goes back to the settings</p>';
 }
 
 /* Go to any moment. Back: the answers to hits after that moment are forgotten, so you can
@@ -136,7 +175,11 @@ function activeSeg(f: Fight, t: number): number {
 function tick(now: number): void {
   const r = R;
   if(!r) return;
-  const dt = Math.min(0.25, (now - r.last) / 1000);   // a long gap (a hidden tab) does not jump the fight
+  // A long gap (a hidden tab) does not jump the fight. The frame time `now` can be a little
+  // earlier than a performance.now() taken in a click handler during the same frame, so dt
+  // can come out below zero. The clock never runs back, or a jump to the start of a
+  // mechanic lands a hair before it.
+  const dt = Math.max(0, Math.min(0.25, (now - r.last) / 1000));
   r.last = now;
   if(!r.hold) r.t += dt * settings.speed;
   const f = r.fight;
@@ -219,6 +262,7 @@ function frame(): void {
     if(boss && g?.turn && boss.x === 50 && boss.y === 50) boss = {...boss, f:turned ? g.turn.f : null};
     paintArena(el("arena-svg"), sc, k, res, res.length > 0, boss);
     drawPanel(r, si);
+    markNav(g);
   }
   updateLive(r);
 }
@@ -230,7 +274,7 @@ function lastBox(g: FightSeg, i: number, x: StepResult): string {
 
 function drawPanel(r: Run, si: number): void {
   const f = r.fight, g = si >= 0 ? f.segs[si] : null, res = g ? r.results[si] : [];
-  const label = r.mode === "demo" ? "The right moves" : r.mode === "replay" ? "Your run, played back" : "Full fight";
+  const label = r.mode === "demo" ? "The right moves" : r.mode === "replay" ? "Your run, played back" : "Real time";
   let h = '<div class="eyebrow"><b>' + label + '</b><span id="f-clock"></span><span>' + settings.speed + "x</span><span>Fight " + f.code + "</span></div>";
   h += '<ol class="ftl" id="f-tl" aria-label="Fight timeline"></ol>';
   if(g){
@@ -297,9 +341,9 @@ function renderSummary(watched: Fight | null = null): void {
   state.cur = {kind:"fight"};
   const d = lastLive;
   if(!d || (watched && watched !== d.fight)){
-    view.innerHTML = tabHead(false) + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Full fight</b></div><h2>That was the right way through</h2>' +
+    show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b></div><h2>That was the right way through</h2>' +
       (watched ? "<p>" + esc(watched.summary) + "</p>" : "") +
-      '<div class="actions"><button type="button" class="btn" id="f-same">Play this fight</button><button type="button" class="btn ghost" id="f-back">Settings</button></div></div></div>';
+      '<div class="actions"><button type="button" class="btn" id="f-same">Play this fight</button><button type="button" class="btn ghost" id="f-back">Settings</button></div></div></div>');
     el("f-same").addEventListener("click", () => { if(watched) startRun("live", watched); });
     el("f-back").addEventListener("click", renderFight);
     return;
@@ -309,12 +353,12 @@ function renderSummary(watched: Fight | null = null): void {
   const rows = d.fight.segs.map((g, si) => '<li><span class="fs-time">' + clock(g.from) + "</span><span>" + esc(g.title) + '</span><span class="fs-chips">' +
     d.results[si].map(x => x.skipped ? '<span class="chip" title="Skipped">&raquo;</span>' :
       '<span class="chip ' + (x.ok ? "ok" : "bad") + '">' + (x.missed ? "&ndash;" : x.ok ? "&#10003;" : "&#10007;") + "</span>").join("") + "</span></li>").join("");
-  view.innerHTML = tabHead(false) + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Full fight</b><span>Phase 1 done</span><span>Fight ' + d.fight.code + "</span></div>" +
+  show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b><span>Phase 1 done</span><span>Fight ' + d.fight.code + "</span></div>" +
     "<h2>" + right + " of " + all.length + " spots right</h2><p>" + esc(d.fight.summary) + "</p>" +
     '<div class="tally"><div class="ok"><span>Right</span><div class="big">' + right + '</div></div><div class="bad"><span>Wrong</span><div class="big">' + wrong + '</div></div><div class="slow"><span>Missed</span><div class="big">' + missed + "</div></div></div>" +
     '<ol class="fsum">' + rows + "</ol>" +
     '<div class="actions"><button type="button" class="btn" id="f-steps">Step through my run</button><button type="button" class="btn ghost" id="f-play">Play back my run</button><button type="button" class="btn ghost" id="f-watch">Watch the right moves</button></div>' +
-    '<div class="actions"><button type="button" class="btn ghost" id="f-same">Same fight again</button><button type="button" class="btn ghost" id="f-new">New fight</button><button type="button" class="btn ghost" id="f-back">Settings</button></div></div></div>';
+    '<div class="actions"><button type="button" class="btn ghost" id="f-same">Same fight again</button><button type="button" class="btn ghost" id="f-new">New fight</button><button type="button" class="btn ghost" id="f-back">Settings</button></div></div></div>');
   el("f-steps").addEventListener("click", () => renderStep(0));
   el("f-play").addEventListener("click", () => startRun("replay", d.fight, d.clicks));
   el("f-watch").addEventListener("click", () => startRun("demo", d.fight));
@@ -331,9 +375,9 @@ function renderStep(i: number): void {
   if(!list.length) return renderSummary();
   i = Math.max(0, Math.min(i, list.length - 1));
   const {si, j} = list[i], g = d.fight.segs[si], res = d.results[si].slice(0, j + 1);
-  view.innerHTML = tabHead(false) + '<div class="stage"><div class="arena">' + sceneSVG(g.scene, g.k) + '</div><div class="panel"><div class="eyebrow"><b>Your run, step by step</b><span>' + clock(g.due[j]) + "</span><span>Step " + (i + 1) + " of " + list.length + "</span></div>" +
+  show('<div class="stage"><div class="arena">' + sceneSVG(g.scene, g.k) + '</div><div class="panel"><div class="eyebrow"><b>Your run, step by step</b><span>' + clock(g.due[j]) + "</span><span>Step " + (i + 1) + " of " + list.length + "</span></div>" +
     "<h2>" + esc(g.title) + "</h2>" + lastBox(g, j, res[j]) +
-    '<div class="actions"><button type="button" class="btn ghost" id="f-prev">Back</button><button type="button" class="btn" id="f-next">Next</button><button type="button" class="btn ghost" id="f-sum">Summary</button></div></div></div>';
+    '<div class="actions"><button type="button" class="btn ghost" id="f-prev">Back</button><button type="button" class="btn" id="f-next">Next</button><button type="button" class="btn ghost" id="f-sum">Summary</button></div></div></div>');
   paintArena(el("arena-svg"), g.scene, g.k, res, true);
   el("f-prev").addEventListener("click", () => renderStep(i - 1));
   el("f-next").addEventListener("click", () => i + 1 < list.length ? renderStep(i + 1) : renderSummary());

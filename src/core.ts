@@ -8,7 +8,9 @@ import type { Job, MapDrill, Option, Question, QuizItem, Scene, Slot, StepResult
 // TS note: other files import these types with `import { state, type Deck } from "./core"`.
 // The `type` keyword inside the braces marks a type-only import next to normal value imports.
 export type QuizCat = "mech" | "next" | "death" | "job";
-export type Tab = "map" | "fight" | QuizCat | "pressure" | "sheet";
+export type Tab = "map" | QuizCat | "pressure" | "sheet";
+/** How the "Where do I stand?" tab plays: one drill at a time, or all of them on the fight clock. */
+export type Play = "step" | "time";
 
 // TS note: a generic interface, like a C# generic class. Deck<MapDrill> holds map drills
 // and Deck<QuizItem> holds quiz cards.
@@ -27,6 +29,7 @@ interface AppState {
   slot: Slot;
   job: Job;
   order: "fight" | "weak";
+  play: Play;
   psecs: number;
   stats: Record<string, {s: number; r: number}>;
   tab: Tab;
@@ -52,8 +55,7 @@ export const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
 };
 
 export const TABS: Array<{id: Tab; label: string; lede: string}> = [
-  {id:"map", label:"Where do I stand?", lede:"Click the arena where you go. Patterns that turn in the real fight turn here too, so read the boss and the floor, not the screen."},
-  {id:"fight", label:"Full fight", lede:"The drills in fight order on the fight clock, with the fight timeline. Click your spot before each hit lands. Drag the slider to go to any moment."},
+  {id:"map", label:"Where do I stand?", lede:"Click the arena where you go. Step by step teaches one mechanic at a time, with no timer. Real time plays the drills in fight order on the fight clock. Patterns turn as they do in the real fight, so read the boss and the floor."},
   {id:"mech", label:"Mechanics", lede:"What each mechanic does and what you do. Your answers follow your slot and your group's wtfdig link."},
   {id:"next", label:"What is next?", lede:"Knowing what comes next tells you how much time you have to raise. Times come from the fight timeline."},
   {id:"death", label:"Someone died", lede:"The decisions from your talk with Andrew: who first, when to raise, when to wait."},
@@ -68,6 +70,7 @@ export const state: AppState = {
   slot: LS.get<string>("slot", "H1") === "H2" ? "H2" : "H1",
   job: LS.get<string>("job", "whm") === "sge" ? "sge" : "whm",
   order: LS.get<string>("order", "fight") === "weak" ? "weak" : "fight",
+  play: LS.get<string>("play", "step") === "time" ? "time" : "step",
   psecs: [4, 6, 8, 10].includes(savedSecs) ? savedSecs : 6,
   stats: LS.get<AppState["stats"]>("stats", {}) || {},
   tab: "map",

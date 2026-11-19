@@ -1,5 +1,6 @@
 import { test, assert } from "vitest";
 import { buildFight, sec, clock } from "../src/data/fight";
+import { MAPS } from "../src/data/drills";
 import { inZone, rotZone, zoneCenter } from "../src/geometry";
 import type { Slot, StepResult } from "../src/types";
 
@@ -45,6 +46,15 @@ test("the boss turns to the first weapon when his cast starts, at least 6 second
     assert.isAtLeast(set1.due[0] - set1.turn.at, 6, "time to react before the first hit");
     assert.isAtLeast(set2.due[5] - set2.turn.at, 6, "time to react before the first weapon of the second set");
     assert.equal(set1.turn.f, set1.scene.bossAt?.(0).f, "he faces the first weapon of the first set");
+  }
+});
+
+test("the drill list can reach every Phase 1 drill on the fight clock", () => {
+  const ids = new Set(MAPS.map(m => m.id)), phase1 = MAPS.find(m => m.id === "m-raw-axe")?.phase;
+  for(let i = 0; i < 20; i++){
+    const covered = new Set(buildFight("H1").segs.flatMap(g => g.drills));
+    for(const id of covered) assert.ok(ids.has(id), "the fight names a drill that does not exist: " + id);
+    for(const m of MAPS.filter(x => x.phase === phase1)) assert.ok(covered.has(m.id), m.title + " has no place in the fight");
   }
 });
 

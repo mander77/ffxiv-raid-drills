@@ -7,6 +7,11 @@ import type { Job } from "../types";
 export function tabHead(withOrder: boolean): string {
   const t = TABS.find(x => x.id === state.tab) ?? TABS[0];
   let h = '<div class="tabhead"><p class="lede">' + esc(t.lede) + "</p>";
+  if(state.tab === "map"){
+    h += '<div class="ctrl"><span id="play-lbl">Mode</span><div class="seg small" role="group" aria-labelledby="play-lbl">' +
+      '<button type="button" id="play-step" data-play="step" aria-pressed="' + (state.play === "step") + '">Step by step</button>' +
+      '<button type="button" id="play-time" data-play="time" aria-pressed="' + (state.play === "time") + '">Real time</button></div></div>';
+  }
   if(state.tab === "job"){
     h += '<div class="ctrl"><span id="job-lbl">Job</span><div class="seg small" role="group" aria-labelledby="job-lbl">' +
       (Object.keys(JOBS) as Job[]).map(j => '<button type="button" id="job-' + j + '" data-job="' + j + '" aria-pressed="' + (state.job === j) + '">' + JOBS[j] + "</button>").join("") + "</div></div>";
