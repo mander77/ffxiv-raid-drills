@@ -3,7 +3,7 @@
 import { LS, esc, el } from "../util";
 import { state, view, stopTimer, setChoices } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter } from "../geometry";
-import { sceneSVG, drawOverlay } from "../arena";
+import { sceneSVG, drawOverlay, zoneSVG } from "../arena";
 import { paintArena } from "./map";
 import { tabHead, hudPrompt, segRow } from "./common";
 import { patternRows, wirePattern } from "./pattern";
@@ -37,6 +37,7 @@ interface Run {
   nextHit: number;           // the first hit in `hits` that has not shown yet
   bossAt: Point;             // where the boss stands on the arena now, for the tank buster pulse
   route: Stop[] | null;      // demo and replay: the route the marker runs (see data/route.ts)
+  zoneKey: string;           // the target whose blue area is drawn ("si:j:answers"), so it redraws only on a change
 }
 /** A finished live run, for the summary and the replays. */
 interface Done { fight: Fight; clicks: Click[]; results: StepResult[][] }
@@ -155,7 +156,7 @@ function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
        clicks:mode === "replay" ? clicks : [], next:0, hold:"", review:-1, last:performance.now(), shown:"",
        hits:buildHits(fight), nextHit:0, bossAt:[50, 50],
        // In a live run you are the one who moves, so only the watched and played-back runs get a marker.
-       route:mode === "demo" ? rightRoute(fight) : mode === "replay" ? clickRoute(fight, clicks) : null};
+       route:mode === "demo" ? rightRoute(fight) : mode === "replay" ? clickRoute(fight, clicks) : null, zoneKey:""};
   state.cur = {kind:"fight"};
   showRoute(fightRoute(fight));
   // The flash and the hit's name sit over the arena, outside #f-arena, so a new scene does not remove them.
@@ -252,8 +253,9 @@ function tick(now: number): void {
   f.segs.forEach((g, si) => {
     const j = r.results[si].length;
     if(j >= g.due.length || r.t < g.from) return;
-    // Watch the right moves answers with the spots the marker runs to (see data/route.ts).
-    if(r.mode === "demo" && r.t >= g.due[j] - 1.5) return answer(si, r.route?.find(s => s.si === si && s.j === j)?.p ?? null);
+    // Watch the right moves answers at the hit, with the spot the marker ran to (see data/route.ts):
+    // the blue target turns green as the mechanic goes off.
+    if(r.mode === "demo" && r.t >= g.due[j]) return answer(si, r.route?.find(s => s.si === si && s.j === j)?.p ?? null);
     if(r.t < g.due[j]) return;
     if(r.mode === "live" && settings.pause){ r.t = g.due[j]; r.hold = "wait"; return; }
     answer(si, null, true);
@@ -321,7 +323,10 @@ function frame(): void {
   const turned = Boolean(g?.turn && r.t >= g.turn.at);
   // What the arena shows: a mechanic's scene, or the empty arena, whole or split.
   const where = g ? String(si) : r.t >= f.split[0] && r.t < f.split[1] ? "split" : "idle";
-  const key = where + ":" + res.length + ":" + turned + ":" + r.hold;
+  // In the watched run, the green answer and what the mechanic did show for GREEN_FOR seconds
+  // after the hit, then clear, so the next blue target is the only area on the floor.
+  const lastHit = g && res.length ? g.due[res.length - 1] : -Infinity, showAnswer = res.length > 0 && (r.mode !== "demo" || r.t - lastHit < GREEN_FOR);
+  const key = where + ":" + res.length + ":" + turned + ":" + r.hold + ":" + showAnswer;
   if(key !== r.shown){
     const fresh = r.shown.split(":")[0] !== where;   // a new scene: build the arena again
     r.shown = key;
@@ -335,7 +340,7 @@ function frame(): void {
     let boss: Boss | null = sc.bossAt ? sc.bossAt(res.length) : (sc.boss ? rotOverlay(sc.boss, k) : null);
     // In the middle, before his cast, he faces no weapon. When the cast starts he turns to the first one.
     if(boss && g?.turn && boss.x === 50 && boss.y === 50) boss = {...boss, f:turned ? g.turn.f : null};
-    paintArena(el("arena-svg"), sc, k, res, res.length > 0, boss);
+    paintArena(el("arena-svg"), sc, k, res, showAnswer, boss);
     // The ring sits around the boss, and moves with him when he jumps. It starts at the top.
     const c = boss ?? {x:50, y:50};
     r.bossAt = [c.x, c.y];
@@ -412,26 +417,47 @@ function updateLive(r: Run): void {
 }
 
 /* ---------- the moving marker ---------- */
+/** How long the watched run keeps a green answer on the floor after its hit, in seconds. */
+const GREEN_FOR = 1.5;
 /* In "Watch the right moves" and "Your run, played back", a marker with your role runs the route:
-   it waits on each spot until the hit lands, then runs to the next one at run speed. While it
-   waits or runs, a dotted line and an outlined circle show where it goes next. The arena is built
-   again for each mechanic, so the marker is added back when it is missing. */
+   it waits on each spot until the hit lands, then runs to the next one at run speed. Its target
+   (the spot for the next hit) shows in blue: a dotted line from the marker and a ring on the exact
+   spot, and in the watched run also the whole area that is right. At the hit, the answer turns that
+   area green (see frame). The arena is built again for each mechanic, so the marker is added back
+   when it is missing. */
 function drawRunner(r: Run): void {
   const svg = document.getElementById("arena-svg");
   if(!svg || !r.route) return;
   if(!document.getElementById("f-runner")){
-    svg.insertAdjacentHTML("beforeend", '<g id="f-runner" aria-hidden="true"><line class="runpath" id="f-runpath"/><circle class="runnext" id="f-runnext" r="3.6"/>' +
+    // The target area goes under the puddles, waymarks and boss; the marker, line and ring on top.
+    svg.querySelector("#reveal-layer")?.insertAdjacentHTML("afterend", '<g id="f-runzone" clip-path="url(#arenaClip)" aria-hidden="true"></g>');
+    svg.insertAdjacentHTML("beforeend", '<g id="f-runner" aria-hidden="true"><line class="runpath" id="f-runpath"/><circle class="runnext" id="f-runnext" r="2.6"/>' +
       '<g id="f-runme"><circle class="runhalo" r="4.2"/>' + drawOverlay({t:"mark", x:0, y:0, l:state.slot, r:"H"}) + "</g></g>");
+    r.zoneKey = "";
   }
-  const {at, to} = runnerAt(r.route, r.t), me = document.getElementById("f-runme"), path = document.getElementById("f-runpath"), next = document.getElementById("f-runnext");
+  const {at, target} = runnerAt(r.route, r.t), to = target?.p;
+  const me = document.getElementById("f-runme"), path = document.getElementById("f-runpath"), next = document.getElementById("f-runnext");
   me?.setAttribute("transform", "translate(" + at[0].toFixed(2) + " " + at[1].toFixed(2) + ")");
-  const show = Boolean(to) && Math.hypot((to?.[0] ?? 0) - at[0], (to?.[1] ?? 0) - at[1]) > 0.5;
-  path?.toggleAttribute("hidden", !show);
-  next?.toggleAttribute("hidden", !show);
-  if(show && to && path && next){
+  // The line shows while the marker still has to get there; the ring shows until the hit.
+  const away = Boolean(to) && Math.hypot((to?.[0] ?? 0) - at[0], (to?.[1] ?? 0) - at[1]) > 0.5;
+  path?.toggleAttribute("hidden", !away);
+  next?.toggleAttribute("hidden", !to);
+  if(to && path && next){
     path.setAttribute("x1", at[0].toFixed(2)); path.setAttribute("y1", at[1].toFixed(2));
     path.setAttribute("x2", to[0].toFixed(2)); path.setAttribute("y2", to[1].toFixed(2));
     next.setAttribute("cx", to[0].toFixed(2)); next.setAttribute("cy", to[1].toFixed(2));
+  }
+  // The right area for the target, in blue, in the watched run. It is drawn again only when the
+  // target changes. It needs the answers before it in that mechanic (a puddle depends on the last).
+  // The key holds the number of answers too: right after a jump with the slider, the watched run
+  // fills in the earlier answers on the next frame, and the area can only be drawn after that.
+  const key = r.mode === "demo" && target ? target.si + ":" + target.j + ":" + r.results[target.si].length : "";
+  if(key !== r.zoneKey){
+    r.zoneKey = key;
+    const layer = document.getElementById("f-runzone"), g = target ? r.fight.segs[target.si] : null;
+    const step = g && target ? g.scene.steps[target.j] : null, res = target ? r.results[target.si] : [];
+    const base = step && target && res.length === target.j ? (step.zf ? step.zf(res) : step.z) : undefined;
+    if(layer) layer.innerHTML = key && g && base ? zoneSVG(rotZone(base, g.k), "pick") : "";
   }
 }
 

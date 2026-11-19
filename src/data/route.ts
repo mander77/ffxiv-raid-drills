@@ -93,31 +93,34 @@ export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Po
   }).sort((a, b) => a.hit - b.hit);
 }
 
-/** Where the runner is at time t, and where it is going next (null when it has nowhere to go
-    yet). It waits on each spot until that spot's hit, plus REACT, then runs straight to the next
-    spot at RUN_SPEED. It leaves for the first spot of a mechanic LOOK seconds after the mechanic
-    appears. In a quiet stretch of REST_GAP seconds or more, it first goes home. While it waits,
-    `to` already shows the next spot, once that mechanic is on the arena. */
-export function runnerAt(route: Stop[], t: number): {at: Point; to: Point | null} {
+
+/** Where the runner is at time t, and its target: the stop for the next hit, once that mechanic is
+    on the arena (null before it shows, and at the end). The runner waits on each spot until that
+    spot's hit, plus REACT, then runs straight to the next spot at RUN_SPEED. It leaves for the
+    first spot of a mechanic LOOK seconds after the mechanic appears. In a quiet stretch of
+    REST_GAP seconds or more, it first goes home. Look-ahead stops are skipped: the player does
+    not move for them. */
+export function runnerAt(route: Stop[], t: number): {at: Point; target: Stop | null} {
+  const moves = route.filter(s => !s.look);
+  const target = moves.find(s => s.hit > t && s.show <= t) ?? null;
   let at = HOME, lastHit = -Infinity;
   /* One straight run from `at` to p, leaving at `leave`. Returns where the runner is at t if t
      falls before the end of this run, or null when the run is over by t. */
-  const leg = (p: Point, leave: number, to: Point | null): {at: Point; to: Point | null} | null => {
+  const leg = (p: Point, leave: number): Point | null => {
     const arrive = leave + dist(at, p) / RUN_SPEED;
-    if(t < leave) return {at, to};
-    if(t < arrive){ const k = (t - leave) / (arrive - leave); return {at:[at[0] + (p[0] - at[0]) * k, at[1] + (p[1] - at[1]) * k], to:p}; }
+    if(t < leave) return at;
+    if(t < arrive){ const k = (t - leave) / (arrive - leave); return [at[0] + (p[0] - at[0]) * k, at[1] + (p[1] - at[1]) * k]; }
     at = p;
     return null;
   };
-  for(const s of route){
-    if(s.look) continue;   // a look-ahead: the player stays put
+  for(const s of moves){
     if(s.show - lastHit >= REST_GAP && dist(at, HOME) > 0.5){
-      const home = leg(HOME, lastHit + REACT, HOME);
-      if(home) return home;
+      const home = leg(HOME, lastHit + REACT);
+      if(home) return {at:home, target};
     }
-    const step = leg(s.p, Math.max(lastHit + REACT, s.show + LOOK), t >= s.show ? s.p : null);
-    if(step) return step;
+    const step = leg(s.p, Math.max(lastHit + REACT, s.show + LOOK));
+    if(step) return {at:step, target};
     lastHit = s.hit;
   }
-  return {at, to:null};
+  return {at, target};
 }

@@ -35,23 +35,24 @@ test("every spot of the right route is a right answer, so the watched run scores
 
 test("the runner waits on a spot until its hit, then runs straight to the next spot", () => {
   const route: Stop[] = [{p:[50, 34], hit:10, show:5, si:0, j:0}, {p:[80, 34], hit:20, show:5, si:0, j:1}];
-  // Before the mechanic shows: at the start, with nowhere to go yet.
-  assert.deepEqual(runnerAt(route, 1), {at:START, to:null});
-  // The mechanic is on the arena: still waiting, but the next spot shows.
-  assert.deepEqual(runnerAt(route, 5.5), {at:START, to:[50, 34]});
+  // Before the mechanic shows: at the start, with no target yet.
+  assert.deepEqual(runnerAt(route, 1), {at:START, target:null});
+  // The mechanic is on the arena: still waiting, and the target is the spot for the first hit.
+  assert.deepEqual(runnerAt(route, 5.5), {at:START, target:route[0]});
   // It leaves LOOK seconds after the mechanic shows, and gets there at run speed.
   const leave = 5 + LOOK, arrive = leave + dist(START, [50, 34]) / RUN_SPEED;
   const mid = runnerAt(route, (leave + arrive) / 2);
   assert.isTrue(near(mid.at, [50, 49]), "halfway: " + mid.at);
-  // On the first spot until the hit lands, already showing the next spot.
-  const wait = runnerAt(route, 10 + REACT / 2);
+  // On the first spot, the target stays that spot until its hit lands.
+  const wait = runnerAt(route, 9.9);
   assert.isTrue(near(wait.at, [50, 34]));
-  assert.deepEqual(wait.to, [80, 34]);
-  // Right after the hit it runs to the next spot.
+  assert.equal(wait.target, route[0]);
+  // The hit lands: the target moves on to the next spot, and it runs there.
+  assert.equal(runnerAt(route, 10 + REACT / 2).target, route[1]);
   const run = runnerAt(route, 10 + REACT + 1);
   assert.isTrue(near(run.at, [50 + RUN_SPEED, 34]), "one second after leaving: " + run.at);
-  // At the end it stays on the last spot.
-  assert.deepEqual(runnerAt(route, 99), {at:[80, 34], to:null});
+  // At the end it stays on the last spot, with no target.
+  assert.deepEqual(runnerAt(route, 99), {at:[80, 34], target:null});
 });
 
 test("at run speed the runner reaches almost every right spot before its hit", () => {
@@ -90,12 +91,11 @@ test("a look-ahead step has an answer, but the runner does not go there", () => 
     if(!pick || !puddle) throw new Error("missing Void Stardust stops");
     assert.isTrue(pick.look, "the weapon pick is a look-ahead");
     // From the moment the mechanic shows until the first puddle drops, the runner never goes to
-    // the weapon: until it reaches the first puddle spot (north, by A), that is where it heads.
-    // Once there, it waits, and the line already shows the next puddle.
-    for(let t = pick.show; t <= puddle.hit; t += 0.25){
+    // the weapon, and its target is the first puddle spot (north, by A), never the weapon.
+    for(let t = pick.show; t < puddle.hit; t += 0.25){
       const r = runnerAt(route, t);
       assert.isAbove(dist(r.at, pick.p), 8, "at " + t.toFixed(2) + " s the runner is on the weapon");
-      if(r.to && !near(r.at, puddle.p)) assert.isTrue(near(r.to, puddle.p), "at " + t.toFixed(2) + " s it heads somewhere else than the first puddle");
+      assert.equal(r.target, puddle, "at " + t.toFixed(2) + " s the target is not the first puddle");
     }
     assert.isTrue(near(runnerAt(route, puddle.hit).at, puddle.p), "on the first puddle spot when it drops");
   }

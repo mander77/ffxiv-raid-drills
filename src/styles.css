@@ -178,12 +178,14 @@ main{padding-block:20px 56px}
 .hitlbl.tank,.hitlbl.shared{background:#9A4A00}
 @keyframes fxlabel{0%,70%{opacity:1}100%{opacity:0}}
 /* The moving marker in Watch the right moves and the played-back run: your role mark on a white
-   halo, a dotted line to the next spot, and that spot as an outlined circle. */
-#f-runner{pointer-events:none}
+   halo. Its target is blue, the same "planned, not yet happened" blue as the Mechanics previews:
+   a dotted line to it, a ring on the exact spot, and (in the watched run) the right area as a
+   .zone.pick. At the hit the answer turns the area green. */
+#f-runner,#f-runzone{pointer-events:none}
 #f-runner [hidden]{display:none}
 .runhalo{fill:#fff;opacity:.75}
-.runpath{stroke:var(--ink);stroke-width:.7;stroke-dasharray:1.4 1.1;stroke-linecap:round}
-.runnext{fill:rgba(255,255,255,.35);stroke:var(--ink);stroke-width:.6;stroke-dasharray:1.1 .8}
+.runpath{stroke:#1C6FC4;stroke-width:.7;stroke-dasharray:1.4 1.1;stroke-linecap:round}
+.runnext{fill:rgba(255,255,255,.4);stroke:#1C6FC4;stroke-width:.7}
 /* A tank buster: the tanks, the hit on them, then a fade. The view removes it after 1.5 s. */
 .fx-buster{pointer-events:none;animation:fxfade 1.5s ease-in forwards}
 @keyframes fxfade{0%,55%{opacity:1}100%{opacity:0}}
