@@ -33,7 +33,6 @@ interface AppState {
   psecs: number;
   stats: Record<string, {s: number; r: number}>;
   tab: Tab;
-  session: {right: number; total: number};
   decks: Decks;
   cur: Cur | null;
   pressure: PressureRun | null;
@@ -73,7 +72,6 @@ export const state: AppState = {
   psecs: [4, 6, 8, 10].includes(savedSecs) ? savedSecs : 6,
   stats: LS.get<AppState["stats"]>("stats", {}) || {},
   tab: "map",
-  session: {right: 0, total: 0},
   decks: {},
   cur: null,
   pressure: null,
@@ -84,13 +82,12 @@ export const state: AppState = {
 
 export const view = el("view");
 
+/** Save a right or wrong answer to the stats for that question or drill. They stay in this
+    browser, and the Pressure round uses them to ask missed questions more often. */
 export function record(id: string, ok: boolean): void {
   const st = state.stats[id] || {s: 0, r: 0};
   st.s++; if(ok) st.r++;
   state.stats[id] = st; LS.set("stats", state.stats);
-  state.session.total++; if(ok) state.session.right++;
-  const pct = Math.round(100 * state.session.right / state.session.total);
-  el("score").textContent = "This session: " + state.session.right + " / " + state.session.total + " (" + pct + "%)";
 }
 
 /** Missed and unseen items weigh more, so they come up sooner. */

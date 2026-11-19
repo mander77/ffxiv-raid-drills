@@ -1,4 +1,4 @@
-/* Layout: a sticky top bar (name, H1/H2 switch, session score, tabs), then one drill stage per tab.
+/* Layout: a sticky top bar (name, H1/H2 switch, tabs), then one drill stage per tab.
    Map drills put the arena on the left and the question on the right; they stack on phones.
    Light theme only, by request. */
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -57,7 +57,6 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background
 .seg button{font-family:var(--font-display);font-weight:700;font-size:19px;letter-spacing:.05em;padding:3px 15px;border:0;background:var(--card);color:var(--heal);cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--heal);color:#fff}
 .seg.small button{font-family:var(--font-body);font-weight:700;font-size:14px;letter-spacing:0;padding:5px 12px}
-.score{font-family:var(--font-mono);font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;padding:6px 10px;border:1px solid var(--line);border-radius:8px;white-space:nowrap}
 @media (max-width:640px){header.top{position:static}.brand h1{font-size:28px}}
 nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
 nav.tabs::-webkit-scrollbar{display:none}
