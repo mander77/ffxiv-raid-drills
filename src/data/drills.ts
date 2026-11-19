@@ -2,7 +2,7 @@
 import { S, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry";
-import { HITBOX, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, axeHit, cleave, swordCross } from "./attacks";
+import { HITBOX, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, axeHit, cleave, swordCross } from "./attacks";
 import type { Boss, MapDrill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
@@ -67,7 +67,7 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       // Proteans: a cone on every player, so each player takes a clock spot close around him.
       // The point and the butt (H2 and H1) are two of the eight spots, opposite each other.
       const pointAt = angOf(scytheAxis(w, i));
-      reveal = Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, PROTEAN_HALF, 32));
+      reveal = Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, PROTEAN_HALF, PROTEAN_LEN));
     } else {
       // Safe pocket: behind him (f < -HW) and on your side (sd > HW), outside both arms of the cross.
       const fn = (p: Point): boolean => { const v: Point = [p[0] - P[0], p[1] - P[1]], f = v[0] * d[0] + v[1] * d[1], sd = v[0] * sv[0] + v[1] * sv[1]; return inArena(p) && f < -HW && sd > HW && Math.hypot(v[0], v[1]) <= 40; };
@@ -380,7 +380,7 @@ export const changes = (m: MapDrill): boolean => Boolean(m.random || m.variants 
 /* ---------- map drills ---------- */
 export const BOSS: Boss = {x:50, y:50, f:0};
 /** Where the name of the weapon the boss holds goes, below the weapon. */
-export const HELD_TAG: Point = [66, 64.5];
+export const HELD_TAG: Point = [75, 58.5];   // below waymark B, clear of the M2 axe spread spot
 /** The weapon the boss holds for Raw Steel Trophy: the same icon as the weapons on the floor,
     upright at his east side just outside his hitbox, with the head or blade turned east. */
 export function heldWeapon(type: WeaponType): Overlay[] {
@@ -390,6 +390,12 @@ export function heldWeapon(type: WeaponType): Overlay[] {
   const icon: Overlay = type === "scythe" ? {t:"scythe", x, y, ux:0, uy:-1, dx:1, dy:0} : {t:type, x, y, ux:0, uy:-1};
   return [icon, {t:"tag", x:HELD_TAG[0], y:HELD_TAG[1], s:type.toUpperCase()}];
 }
+/* Raw Steel Trophy, axe: the tanks stack in front of the boss for a shared buster, and the other
+   six spread, as on wtfdig (Toxic): the melee just outside his hitbox SW and SE, the ranged at the
+   west and east walls, and the healers far out south-southwest and south-southeast. The drill and
+   the Mechanics pictures both use these spots. */
+export const AXE_TANKS: Point = [50, 35];
+export const AXE_SPREAD_SPOTS: Record<string, Point> = {M1:[37.5, 62.5], M2:[62.5, 62.5], R1:[9, 68.5], R2:[91, 68.5], H1:[34, 84.5], H2:[66, 84.5]};
 /* Raw Steel Trophy, scythe: three cleaves. One cone on each tank (MT at 317 degrees, OT at 43),
    and one cone behind him that the rest of the party shares. The party's spot is inside that
    shared cone, outside his hitbox. */
@@ -399,15 +405,15 @@ const SCYTHE_STACK: Zone = {
   label:[50, 69], show:[{poly:[...[164, 172, 180, 188, 196].map(a => POINT_AT(a, 11)), ...[196, 188, 180, 172, 164].map(a => POINT_AT(a, 34))]}]};
 // TS note: `(x): Overlay => (...)` gives the arrow function a return type. Without it,
 // TypeScript would type t as plain string, and "puddle" would not fit the Overlay union.
-export const NPUD = [22, 34, 46, 58, 70, 82].map((x): Overlay => ({t:"puddle", x, y:5, r:6}));
-export const SPUD = [18, 30, 42, 54, 66, 78].map((x): Overlay => ({t:"puddle", x, y:95, r:6}));
+export const NPUD = [22, 34, 46, 58, 70, 82].map((x): Overlay => ({t:"puddle", x, y:5, r:ATOMIC_R}));
+export const SPUD = [18, 30, 42, 54, 66, 78].map((x): Overlay => ({t:"puddle", x, y:95, r:ATOMIC_R}));
 // TS note: the `MapDrill[]` annotation is what checks every drill below. Each build function
 // must return a Scene, so a missing field or a misspelled one is a compile error.
 export const MAPS: MapDrill[] = [
   {id:"m-raw-axe", order:2, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: axe",
     build:s=>({setup:"The boss pulls out an axe. The two tanks stack for a shared buster. The other six players each get an AoE, so everyone else spreads.",
-      boss:BOSS, overlays:[...heldWeapon("axe"),{t:"mark",x:47,y:31,l:"MT",r:"T"},{t:"mark",x:53,y:31,l:"OT",r:"T"}],
-      steps:[{q:"Click your spread spot.", z:S(s,{c:[34,85],r:10},{c:[66,85],r:10}), a:S(s,"South-southwest, far out.","South-southeast, far out.")}],
+      boss:BOSS, overlays:[...heldWeapon("axe"),{t:"mark",x:AXE_TANKS[0] - 3,y:AXE_TANKS[1],l:"MT",r:"T"},{t:"mark",x:AXE_TANKS[0] + 3,y:AXE_TANKS[1],l:"OT",r:"T"}],
+      steps:[{q:"Click your spread spot.", z:{c:AXE_SPREAD_SPOTS[s], r:10}, a:S(s,"South-southwest, far out.","South-southeast, far out.")}],
       rule:"Axe: tanks stack, party spreads. Scythe: tanks spread, party stacks."})},
   {id:"m-raw-scythe", order:2.1, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: scythe",
     build:s=>({setup:"The boss pulls out a scythe and cleaves three times: one cone on each tank, and one cone that everyone else shares. So the tanks spread, and the rest of the party stacks.",
@@ -474,7 +480,7 @@ export const MAPS: MapDrill[] = [
   {id:"m-split-tower", order:19, phase:P3, time:"6:29", title:"Arena Split: first towers",
     build:s=>({setup:"Four towers appear, two on each platform. Every player takes a tower.",
       split:true, boss:BOSS, overlays:[{t:"tower",x:11,y:23},{t:"tower",x:89,y:23},{t:"tower",x:11,y:77},{t:"tower",x:89,y:77}],
-      steps:[{q:"Which tower do you take?", z:S(s,{c:[11,23],r:7.5},{c:[89,77],r:7.5}), a:S(s,"The NW tower, with the MT.","The SE tower, with the OT.")}],
+      steps:[{q:"Which tower do you take?", z:S(s,{c:[11,23],r:TOWER_R},{c:[89,77],r:TOWER_R}), a:S(s,"The NW tower, with the MT.","The SE tower, with the OT.")}],
       rule:"Tethered: get knocked to the other platform. Not tethered: get knocked to the same platform."})},
   {id:"m-ecl-start", order:26, phase:P4, time:"8:54", title:"Ecliptic Stampede: start",
     build:s=>({setup:"Ecliptic Stampede. The melee and tanks stack under the boss. The ranged and healers stay out to bait the markers.",

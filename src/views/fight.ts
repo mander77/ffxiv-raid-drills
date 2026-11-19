@@ -9,6 +9,7 @@ import { tabHead, hudPrompt, segRow } from "./common";
 import { patternRows, wirePattern } from "./pattern";
 import { buildFight, clock, choicesText, CHOICE_ROWS, RANDOM, type Choices, type Fight, type FightSeg } from "../data/fight";
 import { BOSS } from "../data/drills";
+import { WALL_W } from "../data/attacks";
 import { ABILITIES } from "../data/abilities";
 import { tlNav, wireNav, markNav } from "./tlnav";
 import { rightRoute, clickRoute, runnerAt, type Stop } from "../data/route";
@@ -513,17 +514,17 @@ function showHit(r: Run, h: Hit): void {
 const BUSTER_MS = 1500;
 /** The tanks for a buster, and what hits them. Great Wall of Fire is a line buster the two tanks
     share: they stand together in front of the boss (he faces north), and the line runs from him
-    through them. Foregone Fatality puts a buster on each tethered tank: the MT on the NE tether,
-    the OT on the SW tether, away from the party stack. */
+    through them. Foregone Fatality hits each tethered tank alone (single-target, no AoE): the MT
+    on the NE tether, the OT on the SW tether, away from the party stack. */
 function busterPieces(name: string, boss: Point): Overlay[] {
   const tank = (p: Point, l: string): Overlay[] => [{t:"target", x:p[0], y:p[1]}, {t:"mark", x:p[0], y:p[1], l, r:"T"}];
   if(name.startsWith("Great Wall of Fire")){
     const front: Point = [boss[0], boss[1] - 17];
-    return [{t:"band", x:boss[0], y:boss[1], x2:boss[0], y2:-20, w:10}, {t:"aoe", x:front[0], y:front[1], r:7},
+    return [{t:"band", x:boss[0], y:boss[1], x2:boss[0], y2:-20, w:WALL_W},
       ...tank([front[0] - 3, front[1]], "MT"), ...tank([front[0] + 3, front[1]], "OT")];
   }
   const mt: Point = [boss[0] + 14, boss[1] - 14], ot: Point = [boss[0] - 14, boss[1] + 14];
-  return [{t:"aoe", x:mt[0], y:mt[1], r:6}, {t:"aoe", x:ot[0], y:ot[1], r:6}, ...tank(mt, "MT"), ...tank(ot, "OT")];
+  return [...tank(mt, "MT"), ...tank(ot, "OT")];
 }
 
 /* ---------- the HUD ---------- */

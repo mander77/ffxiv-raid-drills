@@ -21,8 +21,19 @@ export const AXE_R = yalms(8);
 export const SPREAD_R = yalms(6);
 /** A Void Stardust puddle (Cometite, "range 6 circle"). */
 export const PUDDLE_R = yalms(6);
-/** Half the angle of each scythe protean cone, in degrees. */
-export const PROTEAN_HALF = 9;
+/** Each scythe protean cone: 30 degrees wide (half each side, in degrees), and it reaches across
+    the arena ("range 60 30-degree cone"). */
+export const PROTEAN_HALF = 15;
+export const PROTEAN_LEN = yalms(60);
+/** The Great Wall of Fire line buster: its full width ("range 60 width 6 rect"). */
+export const WALL_W = yalms(6);
+/** Every tower: the Arena Split towers (Explosion), the Ecliptic Stampede towers and Heartbreak
+    Kick ("range 4 circle"). */
+export const TOWER_R = yalms(4);
+/** A baited Meteorain meteor (Cosmic Kiss, "range 4 circle"). */
+export const METEOR_R = yalms(4);
+/** An Atomic Impact hit in Ecliptic Stampede, and the fire puddle it leaves ("range 5 circle"). */
+export const ATOMIC_R = yalms(5);
 
 /** A circle that hits everything inside it. */
 export const aoe = (c: Point, r: number): Overlay => ({t:"aoe", x:c[0], y:c[1], r});

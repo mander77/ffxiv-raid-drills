@@ -1,7 +1,7 @@
 // SVG drawing for the arena map.
 import { esc } from "./util";
 import { DEG, f1, vadd, unit, rotOverlay } from "./geometry";
-import { HITBOX } from "./data/attacks";
+import { HITBOX, TOWER_R } from "./data/attacks";
 import type { Boss, Fig, Overlay, Point, Preview, Scene, ZoneShape } from "./types";
 
 interface Waymark { id: string; x: number; y: number; c: "red" | "yellow" | "blue" | "purple"; sq: boolean }
@@ -26,7 +26,7 @@ export function drawOverlay(o: Overlay): string {
     case "lineaoe": return '<line class="lineaoe" x1="' + x + '" y1="' + y + '" x2="' + f1(o.x2) + '" y2="' + f1(o.y2) + '" stroke-width="' + (o.w || 1.3) + '"/>';
     case "tornado": return '<g class="tornado" transform="translate(' + x + " " + y + ')"><circle r="5.5"/><path d="M-3.4,-2.6 h6.8 M-2.7,-0.9 h5.4 M-2,0.8 h4 M-1.3,2.5 h2.6"/></g>';
     case "rock": return '<path class="rock" transform="translate(' + x + " " + y + ')" d="M-3,1 L-2.2,-2 L0.8,-3 L3,-1.2 L2.6,2 L-0.6,3 Z"/>';
-    case "tower": return '<g class="tower" transform="translate(' + x + " " + y + ')"><circle class="out" r="' + (o.r ?? 6) + '"/><circle class="in" r="1.1"/></g>';
+    case "tower": return '<g class="tower" transform="translate(' + x + " " + y + ')"><circle class="out" r="' + (o.r ?? TOWER_R) + '"/><circle class="in" r="1.1"/></g>';
     case "target": return '<circle class="target" cx="' + x + '" cy="' + y + '" r="4.2"/>';
     case "puddle": return '<circle class="puddle" cx="' + x + '" cy="' + y + '" r="' + o.r + '"/>';
     case "tag": { const w = o.s.length * 1.75 + 2.4; return '<g class="tag"><rect x="' + f1(o.x - w / 2) + '" y="' + f1(o.y - 1.9) + '" width="' + f1(w) + '" height="3.8" rx=".8"/><text x="' + x + '" y="' + y + '">' + esc(o.s) + "</text></g>"; }
