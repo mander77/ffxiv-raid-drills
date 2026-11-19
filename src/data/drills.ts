@@ -294,7 +294,9 @@ function voidSteps(s: Slot, spread: boolean, toward: Point | null): Step[] {
 export function voidIntoWeapons(s: Slot, spread: boolean, A: Run): Scene {
   const first = A.W[0], run = first.type !== "axe", where = COMPASS[Math.round(first.a / 45) % 8];
   const steps: Step[] = [
-    {q:"Before the puddles: which weapon goes first after Void Stardust? Click it.", z:{c:first.p, r:9},
+    // A look-ahead: you spot the first weapon now, so you know what to do when the puddles are
+    // done, but you go to A for the first puddle, not to the weapon.
+    {q:"Before the puddles: which weapon goes first after Void Stardust? Click it.", z:{c:first.p, r:9}, look:true,
       a:"The " + first.type + ", " + where + ": its flat side is square to the boss. " +
         (run ? "A sword or scythe first means a run, so the stack or spread moves toward it." : "An axe first means the party stacks in the middle, so the usual spots work.")},
     ...voidSteps(s, spread, run ? first.p : null),

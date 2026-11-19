@@ -86,6 +86,9 @@ export interface Step {
   z?: Zone;
   zf?: (results: StepResult[]) => Zone;
   drop?: boolean;
+  /** A look-ahead step: you click to show what you have spotted (a weapon, for example), but you
+      do not move there. The moving marker in Real time skips it. */
+  look?: boolean;
   /** Drawn after this step is answered. */
   reveal?: Overlay[];
   /** Drawn from the moment this step's question shows until the drill ends. */

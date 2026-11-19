@@ -27,8 +27,9 @@ const INSET = 1.5;
 
 /** One stop on the route: the spot `p`, the hit at `hit` (seconds into the fight) that the spot is
     for, and `show`, when that mechanic appears on the arena. `si` and `j` say which segment and
-    step of the fight it answers. */
-export interface Stop { p: Point; hit: number; show: number; si: number; j: number }
+    step of the fight it answers. A `look` stop is a look-ahead step: it has an answer (the click),
+    but the player does not move there, so the runner skips it. */
+export interface Stop { p: Point; hit: number; show: number; si: number; j: number; look?: boolean }
 
 const dist = (a: Point, b: Point): number => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const clamp = (v: number, lo: number, hi: number): number => lo > hi ? (lo + hi) / 2 : Math.min(hi, Math.max(lo, v));
@@ -72,8 +73,10 @@ export function rightRoute(f: Fight): Stop[] {
     g.scene.steps.forEach((st, j) => {
       const base = st.zf ? st.zf(res) : st.z;
       if(!base) return;
-      const z = rotZone(base, g.k), p = st.drop ? zoneCenter(z) : nearestIn(z, from);
+      // A look-ahead is answered at the middle of its area, and the player stays where they are.
+      const z = rotZone(base, g.k), p = st.drop || st.look ? zoneCenter(z) : nearestIn(z, from);
       res.push({p, ok:inZone(p, z), z, drop:st.drop ? p : null});
+      if(st.look){ stops.push({p, hit:g.due[j], show:g.from, si, j, look:true}); return; }
       stops.push({p, hit:g.due[j], show:g.from, si, j});
       from = p; lastHit = g.due[j];
     });
@@ -85,7 +88,7 @@ export function rightRoute(f: Fight): Stop[] {
 export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Point}>): Stop[] {
   return clicks.flatMap((c): Stop[] => {
     const g = f.segs[c.si], hit = g?.due[c.j];
-    return g && hit != null ? [{p:c.p, hit, show:g.from, si:c.si, j:c.j}] : [];
+    return g && hit != null ? [{p:c.p, hit, show:g.from, si:c.si, j:c.j, look:g.scene.steps[c.j]?.look}] : [];
   }).sort((a, b) => a.hit - b.hit);
 }
 
@@ -106,6 +109,7 @@ export function runnerAt(route: Stop[], t: number): {at: Point; to: Point | null
     return null;
   };
   for(const s of route){
+    if(s.look) continue;   // a look-ahead: the player stays put
     if(s.show - lastHit >= REST_GAP && dist(at, HOME) > 0.5){
       const home = leg(HOME, lastHit + REACT, HOME);
       if(home) return home;

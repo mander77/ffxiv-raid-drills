@@ -58,7 +58,8 @@ test("at run speed the runner reaches almost every right spot before its hit", (
   let stops = 0, late = 0;
   for(const s of SLOTS) for(let i = 0; i < 30; i++){
     const route = rightRoute(buildFight(s, newCode(), RANDOM));
-    for(const st of route){
+    // A look-ahead stop is never reached on purpose, so it does not count.
+    for(const st of route.filter(x => !x.look)){
       stops++;
       if(!near(runnerAt(route, st.hit).at, st.p)) late++;
     }
@@ -66,6 +67,24 @@ test("at run speed the runner reaches almost every right spot before its hit", (
   // The route takes the short way and goes home in quiet stretches, so nearly every spot is
   // reached in time. A spot that is not shows the run as it is: late.
   assert.isBelow(late / stops, 0.02, late + " of " + stops + " spots reached late");
+});
+
+test("a look-ahead step has an answer, but the runner does not go there", () => {
+  for(const s of SLOTS) for(let i = 0; i < 10; i++){
+    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f), si = f.segs.findIndex(g => g.drills.includes("m-void"));
+    const pick = route.find(st => st.si === si && st.j === 0), puddle = route.find(st => st.si === si && st.j === 1);
+    if(!pick || !puddle) throw new Error("missing Void Stardust stops");
+    assert.isTrue(pick.look, "the weapon pick is a look-ahead");
+    // From the moment the mechanic shows until the first puddle drops, the runner never goes to
+    // the weapon: until it reaches the first puddle spot (north, by A), that is where it heads.
+    // Once there, it waits, and the line already shows the next puddle.
+    for(let t = pick.show; t <= puddle.hit; t += 0.25){
+      const r = runnerAt(route, t);
+      assert.isAbove(dist(r.at, pick.p), 8, "at " + t.toFixed(2) + " s the runner is on the weapon");
+      if(r.to && !near(r.at, puddle.p)) assert.isTrue(near(r.to, puddle.p), "at " + t.toFixed(2) + " s it heads somewhere else than the first puddle");
+    }
+    assert.isTrue(near(runnerAt(route, puddle.hit).at, puddle.p), "on the first puddle spot when it drops");
+  }
 });
 
 test("a played-back run follows your clicks, each one at the hit of the step it answered", () => {
