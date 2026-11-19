@@ -7,6 +7,12 @@ import type { Job } from "../types";
 export function tabHead(withOrder: boolean): string {
   const t = TABS.find(x => x.id === state.tab) ?? TABS[0];
   let h = '<div class="tabhead"><p class="lede">' + esc(t.lede) + "</p>";
+  // Real time has no use for Order, but the tab keeps its place ("held": hidden, takes space),
+  // so the Mode switch and the text beside it do not move when you change modes.
+  const held = !withOrder && state.tab === "map";
+  const order = !(withOrder || held) ? "" : (held ? '<div class="ctrl held" aria-hidden="true">' : '<div class="ctrl">') + '<span id="order-lbl">Order</span><div class="seg small" role="group" aria-labelledby="order-lbl">' +
+    '<button type="button" id="order-fight" data-order="fight" aria-pressed="' + (state.order === "fight") + '">Fight order</button>' +
+    '<button type="button" id="order-weak" data-order="weak" aria-pressed="' + (state.order === "weak") + '">Weak spots first</button></div></div>';
   if(state.tab === "map"){
     h += '<div class="ctrl"><span id="play-lbl">Mode</span><div class="seg small" role="group" aria-labelledby="play-lbl">' +
       '<button type="button" id="play-step" data-play="step" aria-pressed="' + (state.play === "step") + '">Step by step</button>' +
@@ -16,12 +22,7 @@ export function tabHead(withOrder: boolean): string {
     h += '<div class="ctrl"><span id="job-lbl">Job</span><div class="seg small" role="group" aria-labelledby="job-lbl">' +
       (Object.keys(JOBS) as Job[]).map(j => '<button type="button" id="job-' + j + '" data-job="' + j + '" aria-pressed="' + (state.job === j) + '">' + JOBS[j] + "</button>").join("") + "</div></div>";
   }
-  if(withOrder){
-    h += '<div class="ctrl"><span id="order-lbl">Order</span><div class="seg small" role="group" aria-labelledby="order-lbl">' +
-      '<button type="button" id="order-fight" data-order="fight" aria-pressed="' + (state.order === "fight") + '">Fight order</button>' +
-      '<button type="button" id="order-weak" data-order="weak" aria-pressed="' + (state.order === "weak") + '">Weak spots first</button></div></div>';
-  }
-  return h + "</div>";
+  return h + order + "</div>";
 }
 
 export function renderRoundDone(cat: "map" | QuizCat, d: Deck<unknown>): void {

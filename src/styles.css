@@ -69,6 +69,7 @@ main{padding-block:20px 56px}
 .tabhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;margin-bottom:16px}
 .lede{margin:0;max-width:68ch;color:var(--ink-2);min-width:0;flex:1 1 360px}
 .ctrl{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
+.ctrl.held{visibility:hidden}
 
 .stage{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
 @media (max-width:860px){.stage{grid-template-columns:minmax(0,1fr)}}
