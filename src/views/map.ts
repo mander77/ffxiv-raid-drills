@@ -228,7 +228,6 @@ export function drawMapPanel(): void {
   const onArena = back ? peek : done ? n - 1 : n;   // the step the arena shows; its chip is pressed
   const keys = followedKeys(c.item);   // the fight pattern picks that fit this drill
   let h = '<div class="eyebrow"><b>' + esc(c.item.phase) + "</b><span>" + esc(c.item.time) + '</span><span class="progress">Drill ' + (d.i + 1) + " of " + d.items.length + "</span>" +
-    '<button type="button" class="sharebtn" id="map-share" title="Copy a link to this drill as it is now: the same pattern and your answers so far">Share</button>' +
     (picked(keys) ? '<span class="mypick" title="A fight pattern pick is set for this drill. Change it below.">Your pick</span>' : "") + "</div>";
   h += "<h2>" + esc(c.item.title) + "</h2>";
   if(n === 0) h += '<p class="setup">' + esc(sc.setup) + "</p>";
@@ -298,7 +297,6 @@ export function drawMapPanel(): void {
   document.getElementById("map-next")?.addEventListener("click", nextMap);
   document.getElementById("map-restart")?.addEventListener("click", restart);
   document.getElementById("map-new")?.addEventListener("click", () => renderMap(true));
-  document.getElementById("map-share")?.addEventListener("click", e => shareLink(e.currentTarget as HTMLButtonElement));
   // The address bar holds this drill as it is now: the pattern, the picks it follows and the
   // clicks so far, so a copied link opens the same map.
   showRoute({tab:"map", drill:c.item.id, code:c.code, picks:drillPicks(c.item) || undefined, at:c.results.length ? c.results.map(r => r.p) : undefined});
@@ -319,45 +317,6 @@ export function onArenaClick(e: MouseEvent): void {
     record(c.item.id, all); d.done++; if(all) d.right++;
   }
   drawFeedback(); drawMapPanel();
-}
-
-/* Share: the link in the address bar holds this drill as it is now (see drawMapPanel). On a phone
-   or tablet the system share sheet opens. Elsewhere the link goes to the clipboard, and the
-   button says so for two seconds. Some browsers and embedded views block the Clipboard API; then
-   the older copy from a hidden text field is tried, and if that fails too, a box shows the link. */
-async function shareLink(btn: HTMLButtonElement): Promise<void> {
-  const url = location.href, touch = window.matchMedia("(pointer: coarse)").matches;
-  const copied = (): void => {
-    btn.textContent = "Link copied";
-    setTimeout(() => { if(btn.isConnected) btn.textContent = "Share"; }, 2000);
-  };
-  try {
-    // TS note: `"share" in navigator` checks at run time; older browsers do not have it.
-    if(touch && "share" in navigator){ await navigator.share({title:document.title, url}); return; }
-    await navigator.clipboard.writeText(url);
-    copied();
-  } catch(err){
-    // Closing the share sheet without sharing is not an error to report.
-    if(err instanceof DOMException && err.name === "AbortError") return;
-    if(copyByField(url)) copied();
-    else window.prompt("Copy this link:", url);
-  }
-}
-
-/** The older way to copy: select the text in a hidden field and run the copy command. */
-function copyByField(text: string): boolean {
-  const field = document.createElement("textarea");
-  field.value = text;
-  field.setAttribute("readonly", "");
-  field.style.cssText = "position:fixed;top:0;left:0;opacity:0;pointer-events:none";
-  document.body.appendChild(field);
-  field.select();
-  let ok = false;
-  // TS note: execCommand is marked deprecated in the DOM types, but every browser still runs it,
-  // and it is the only copy that works where the Clipboard API is blocked.
-  try { ok = document.execCommand("copy"); } catch { ok = false; }
-  field.remove();
-  return ok;
 }
 
 /** Answer the next step with a click at p (arena units). A click on the arena and a link with

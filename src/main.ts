@@ -9,6 +9,7 @@ import "./styles.css";
 import { LS, esc, el } from "./util";
 import { state, TABS, view, app, stopTimer, type Tab, type Play } from "./core";
 import { parseRoute, currentRoute, showRoute, type Route } from "./router";
+import { shareLink } from "./share";
 import { renderMap, nextStep, nextMap, openPattern, openAbility } from "./views/map";
 import { renderQuiz, answer, nextQ, previews, pickOpt, lockIn, openQuestion } from "./views/quiz";
 import { renderPressureStart, startPressure } from "./views/pressure";
@@ -96,6 +97,8 @@ document.addEventListener("click", e => {
   go(parseRoute(a.getAttribute("href") ?? "/"), true);
 });
 document.querySelectorAll<HTMLElement>(".seg button[data-slot]").forEach(b => b.addEventListener("click", () => setSlot(b.dataset.slot === "H2" ? "H2" : "H1")));
+// Share in the header shares the address of the screen you are on (see share.ts).
+el<HTMLButtonElement>("share").addEventListener("click", e => shareLink(e.currentTarget as HTMLButtonElement));
 view.addEventListener("click", e => {
   const t = e.target as Element;
   const j = t.closest<HTMLElement>("[data-job]");
