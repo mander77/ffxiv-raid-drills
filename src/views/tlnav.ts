@@ -30,7 +30,9 @@ export function tlNav(o: NavOpts = {}): string {
   const key = (Object.keys(CATS) as Cat[]).map(c => "<span>" + marks([c]) + CATS[c] + "</span>").join("");
   let i = 0, h = '<nav class="drillnav tlnav" aria-label="Fight timeline"><div class="cmkey">' + key + "</div><ol>";
   for(const ph of PHASES){
-    h += '<li class="ph">' + esc(ph.name) + "</li>";
+    // "Phase 1: Trophy Weapons" shows as a band: the phase number above, the name below.
+    const [num, name = ""] = ph.name.split(": ");
+    h += '<li class="ph"><b>' + esc(num) + "</b><span>" + esc(name) + "</span></li>";
     for(const a of ph.rows){
       h += '<li><button type="button" class="ab" data-ab="' + i + '"' + (o.open === i ? ' aria-current="true"' : "") + ' title="' + esc(catNames(a.cats)) + '">' +
         marks(a.cats) + '<span class="dn-time">' + clock(a.t) + "</span><span>" + esc(a.name) + "</span></button></li>";
@@ -68,10 +70,11 @@ export function markNav(drills: string[], next: number): void {
 }
 
 /* Keep the highlighted row in view inside the list, without moving the page. On wide screens the
-   list scrolls down; on narrow screens it is a strip that scrolls sideways. */
+   rows scroll down under the colour key; on narrow screens the whole list is a strip that
+   scrolls sideways. */
 function scrollNav(): void {
-  const nav = view.querySelector<HTMLElement>(".tlnav"), now = nav?.querySelector<HTMLElement>("[aria-current], .next");
-  if(!nav || !now) return;
-  nav.scrollTop = now.offsetTop - nav.clientHeight / 3;
+  const nav = view.querySelector<HTMLElement>(".tlnav"), list = nav?.querySelector<HTMLElement>("ol"), now = nav?.querySelector<HTMLElement>("[aria-current], .next");
+  if(!nav || !list || !now) return;
+  list.scrollTop = now.offsetTop - list.clientHeight / 3;
   nav.scrollLeft = now.offsetLeft - (nav.clientWidth - now.offsetWidth) / 2;
 }
