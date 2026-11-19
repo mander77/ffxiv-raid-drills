@@ -11,12 +11,14 @@ import { buildFight, clock, choicesText, CHOICE_ROWS, RANDOM, type Choices, type
 import { BOSS } from "../data/drills";
 import { ABILITIES } from "../data/abilities";
 import { tlNav, wireNav, markNav } from "./tlnav";
+import { rightRoute, clickRoute, runnerAt, type Stop } from "../data/route";
 import { showRoute, type Route } from "../router";
 import type { Boss, Overlay, Point, Scene, StepResult } from "../types";
 
 /** live = you click; demo = the right clicks play by themselves; replay = your clicks play back. */
 type Mode = "live" | "demo" | "replay";
-interface Click { si: number; t: number; p: Point }
+/** A click in a live run: segment si, step j, fight time t, arena spot p. */
+interface Click { si: number; j: number; t: number; p: Point }
 /* One run of the fight clock. */
 interface Run {
   mode: Mode;
@@ -34,6 +36,7 @@ interface Run {
   hits: Hit[];               // every hit of this fight, in time order (see buildHits)
   nextHit: number;           // the first hit in `hits` that has not shown yet
   bossAt: Point;             // where the boss stands on the arena now, for the tank buster pulse
+  route: Stop[] | null;      // demo and replay: the route the marker runs (see data/route.ts)
 }
 /** A finished live run, for the summary and the replays. */
 interface Done { fight: Fight; clicks: Click[]; results: StepResult[][] }
@@ -150,7 +153,9 @@ function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
   stopTimer();
   R = {mode, fight, t:0, results:fight.segs.map(() => []),
        clicks:mode === "replay" ? clicks : [], next:0, hold:"", review:-1, last:performance.now(), shown:"",
-       hits:buildHits(fight), nextHit:0, bossAt:[50, 50]};
+       hits:buildHits(fight), nextHit:0, bossAt:[50, 50],
+       // In a live run you are the one who moves, so only the watched and played-back runs get a marker.
+       route:mode === "demo" ? rightRoute(fight) : mode === "replay" ? clickRoute(fight, clicks) : null};
   state.cur = {kind:"fight"};
   showRoute(fightRoute(fight));
   // The flash and the hit's name sit over the arena, outside #f-arena, so a new scene does not remove them.
@@ -247,7 +252,8 @@ function tick(now: number): void {
   f.segs.forEach((g, si) => {
     const j = r.results[si].length;
     if(j >= g.due.length || r.t < g.from) return;
-    if(r.mode === "demo" && r.t >= g.due[j] - 1.5) return answer(si, null);
+    // Watch the right moves answers with the spots the marker runs to (see data/route.ts).
+    if(r.mode === "demo" && r.t >= g.due[j] - 1.5) return answer(si, r.route?.find(s => s.si === si && s.j === j)?.p ?? null);
     if(r.t < g.due[j]) return;
     if(r.mode === "live" && settings.pause){ r.t = g.due[j]; r.hold = "wait"; return; }
     answer(si, null, true);
@@ -268,7 +274,7 @@ function answer(si: number, p: Point | null, missed = false, skipped = false): v
   const zone = rotZone(base, g.k), at: Point = p ?? zoneCenter(zone);
   const ok = !missed && inZone(at, zone);
   res.push({p:at, ok, z:zone, drop:step.drop ? (ok ? at : zoneCenter(zone)) : null, missed, skipped});
-  if(r.mode === "live" && p) r.clicks.push({si, t:r.t, p});
+  if(r.mode === "live" && p) r.clicks.push({si, j:res.length - 1, t:r.t, p});
 }
 
 function onClick(e: MouseEvent): void {
@@ -402,6 +408,31 @@ function updateLive(r: Run): void {
   const key = drills.join(",") + ":" + nextAb;
   if(key !== navKey){ navKey = key; markNav(drills, nextAb); }
   updateHud(r, si);
+  drawRunner(r);
+}
+
+/* ---------- the moving marker ---------- */
+/* In "Watch the right moves" and "Your run, played back", a marker with your role runs the route:
+   it waits on each spot until the hit lands, then runs to the next one at run speed. While it
+   waits or runs, a dotted line and an outlined circle show where it goes next. The arena is built
+   again for each mechanic, so the marker is added back when it is missing. */
+function drawRunner(r: Run): void {
+  const svg = document.getElementById("arena-svg");
+  if(!svg || !r.route) return;
+  if(!document.getElementById("f-runner")){
+    svg.insertAdjacentHTML("beforeend", '<g id="f-runner" aria-hidden="true"><line class="runpath" id="f-runpath"/><circle class="runnext" id="f-runnext" r="3.6"/>' +
+      '<g id="f-runme"><circle class="runhalo" r="4.2"/>' + drawOverlay({t:"mark", x:0, y:0, l:state.slot, r:"H"}) + "</g></g>");
+  }
+  const {at, to} = runnerAt(r.route, r.t), me = document.getElementById("f-runme"), path = document.getElementById("f-runpath"), next = document.getElementById("f-runnext");
+  me?.setAttribute("transform", "translate(" + at[0].toFixed(2) + " " + at[1].toFixed(2) + ")");
+  const show = Boolean(to) && Math.hypot((to?.[0] ?? 0) - at[0], (to?.[1] ?? 0) - at[1]) > 0.5;
+  path?.toggleAttribute("hidden", !show);
+  next?.toggleAttribute("hidden", !show);
+  if(show && to && path && next){
+    path.setAttribute("x1", at[0].toFixed(2)); path.setAttribute("y1", at[1].toFixed(2));
+    path.setAttribute("x2", to[0].toFixed(2)); path.setAttribute("y2", to[1].toFixed(2));
+    next.setAttribute("cx", to[0].toFixed(2)); next.setAttribute("cy", to[1].toFixed(2));
+  }
 }
 
 /* ---------- damage going out ---------- */
