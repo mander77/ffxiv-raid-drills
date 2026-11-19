@@ -6,7 +6,7 @@ import { rotZone, rotOverlay, inZone, zoneCenter } from "../geometry";
 import { sceneSVG } from "../arena";
 import { paintArena } from "./map";
 import { tabHead, hudPrompt } from "./common";
-import { buildFight, clock, type Fight, type FightSeg } from "../data/fight";
+import { buildFight, clock, cleanChoices, choicesText, CHOICE_ROWS, RANDOM, type Choices, type Fight, type FightSeg } from "../data/fight";
 import { BOSS } from "../data/drills";
 import { ABILITIES } from "../data/abilities";
 import { tlNav, wireNav, markNav } from "./tlnav";
@@ -43,14 +43,27 @@ const settings = {
 // for example `const r = R; if(!r) return;`. After that check TypeScript knows r is a Run.
 let R: Run | null = null;
 let lastLive: Done | null = null;
-/* A fight code asked for by a link, such as #fight/K3PZ. The next start uses it. */
+/* The parts of the fight the player picked (the rest stay random). The app keeps them. */
+let choices: Choices = cleanChoices(LS.get<unknown>("fchoices", null));
+function saveChoices(c: Choices): void { choices = c; LS.set("fchoices", c); }
+/* A fight code asked for by a link, such as #fight/K3PZ or #fight/K3PZ/raw=axe,ult=cw.
+   The next start uses the code, and the link's choices replace the saved ones. */
 let wantedFight: string | null = null;
-export function openFight(code: string): void { wantedFight = code; }
+export function openFight(code: string, picked?: Choices): void {
+  wantedFight = code;
+  if(picked) saveChoices(picked);
+}
 function nextFight(): Fight {
-  const f = buildFight(state.slot, wantedFight ?? undefined);
+  const f = buildFight(state.slot, wantedFight ?? undefined, choices);
   wantedFight = null;
   return f;
 }
+/* While a fight runs, the address bar holds its link, so you can copy it to share the exact
+   fight and choices. Back on the start screen it shows the tab again. */
+function setLink(hash: string): void {
+  try { history.replaceState(null, "", hash); } catch { /* sandboxed frame */ }
+}
+const fightLink = (f: Fight): string => "#fight/" + f.code + (choicesText(f.choices) ? "/" + choicesText(f.choices) : "");
 /* Between mechanics the arena is empty, but it is two platforms from Flatliner until the
    Crown of Arcadia that joins them again. */
 const IDLE: Scene = {setup:"", rule:"", steps:[], overlays:[], boss:BOSS};
@@ -85,14 +98,33 @@ function jumpToAbility(i: number): void {
 }
 
 /* ---------- settings ---------- */
+/** One row of toggle buttons. `attr` is the data attribute the click handler looks for. */
+function segRow(attr: string, key: string, label: string, options: Array<[string, string]>, cur: string): string {
+  return '<div class="ctrl" style="margin-top:12px"><span id="' + key + '-lbl">' + label + '</span><div class="seg small" role="group" aria-labelledby="' + key + '-lbl">' +
+    options.map(([v, t]) => '<button type="button" data-' + attr + '="' + key + '" data-val="' + v + '" aria-pressed="' + (v === cur) + '">' + t + "</button>").join("") + "</div></div>";
+}
+
 /* Speed and Missed spot. The start screen shows them, and so does a running fight, under the
    slider: the clock reads both on every tick, so a change works at once. */
 function settingRows(): string {
-  const row = (key: string, label: string, choices: Array<[string, string]>, cur: string): string =>
-    '<div class="ctrl" style="margin-top:12px"><span id="' + key + '-lbl">' + label + '</span><div class="seg small" role="group" aria-labelledby="' + key + '-lbl">' +
-    choices.map(([v, t]) => '<button type="button" data-set="' + key + '" data-val="' + v + '" aria-pressed="' + (v === cur) + '">' + t + "</button>").join("") + "</div></div>";
-  return row("fspeed", "Speed", SPEEDS.map((n): [string, string] => [String(n), n + "x"]), String(settings.speed)) +
-    row("fpause", "Missed spot", [["no", "Fight goes on"], ["yes", "Fight pauses"]], settings.pause ? "yes" : "no");
+  return segRow("set", "fspeed", "Speed", SPEEDS.map((n): [string, string] => [String(n), n + "x"]), String(settings.speed)) +
+    segRow("set", "fpause", "Missed spot", [["no", "Fight goes on"], ["yes", "Fight pauses"]], settings.pause ? "yes" : "no");
+}
+
+/* The fight pattern: each random part of the fight, Random or a pick. Only the start screen
+   shows these, because a pick changes the fight that gets built. */
+function pickRows(): string {
+  return '<h3 class="fpick">Fight pattern</h3><p class="hint">Pick a part to practice it on purpose. Parts left on Random still come from the fight code.</p>' +
+    CHOICE_ROWS.map(r => segRow("pick", "fc-" + r.key, r.label, [["random", "Random"] as [string, string]].concat(r.options), choices[r.key])).join("") +
+    (choicesText(choices) ? '<p style="margin-top:10px"><button type="button" class="linkbtn" id="f-allrandom">Set all to Random</button></p>' : "");
+}
+function wirePicks(): void {
+  view.querySelectorAll<HTMLButtonElement>("[data-pick]").forEach(b => b.addEventListener("click", () => {
+    // cleanChoices checks the value, so only a known pick goes into the saved choices.
+    saveChoices(cleanChoices({...choices, [(b.dataset.pick ?? "").replace("fc-", "")]: b.dataset.val}));
+    renderFight();
+  }));
+  document.getElementById("f-allrandom")?.addEventListener("click", () => { saveChoices({...RANDOM}); renderFight(); });
 }
 
 /** Save a setting when its button is clicked, then call `after` so the screen can show it. */
@@ -110,12 +142,14 @@ function wireSettings(after: () => void): void {
 export function renderFight(): void {
   stopTimer(); R = null;
   state.cur = {kind:"fight"};
+  setLink("#map");
   show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Real time</b><span>The pull to the enrage at 10:59</span></div>' +
-    "<h2>Play the fight in order</h2><p>The drills play one after another on the fight clock. The timeline shows what the boss does next, like the cactbot overlay. Click your spot before each hit lands. Each run picks its own scenario: axe or scythe first, stack or spread first, and new weapon patterns. To start at one moment, click an ability or a drill in the fight list.</p>" +
-    settingRows() +
+    "<h2>Play the fight in order</h2><p>The drills play one after another on the fight clock. The timeline shows what the boss does next, like the cactbot overlay. Click your spot before each hit lands. Each run picks a new scenario for every part you leave on Random. To start at one moment, click an ability or a drill in the fight list.</p>" +
+    settingRows() + pickRows() +
     (wantedFight ? '<p class="hint" style="margin-top:12px">Fight code ' + esc(wantedFight) + " is ready: the next start uses it.</p>" : "") +
     '<div class="actions"><button type="button" class="btn" id="f-start">Start the fight</button><button type="button" class="btn ghost" id="f-watch">Watch the right moves</button></div></div></div>');
   wireSettings(renderFight);
+  wirePicks();
   el("f-start").addEventListener("click", () => startRun("live", nextFight()));
   el("f-watch").addEventListener("click", () => startRun("demo", nextFight()));
 }
@@ -126,6 +160,7 @@ function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
   R = {mode, fight, t:0, results:fight.segs.map(() => []),
        clicks:mode === "replay" ? clicks : [], next:0, hold:"", review:-1, last:performance.now(), shown:""};
   state.cur = {kind:"fight"};
+  setLink(fightLink(fight));
   show('<div class="stage"><div class="arena">' + HUD + '<div id="f-arena"></div></div><div class="panel"><div id="f-panel"></div>' + controls(fight) + "</div></div>");
   const seek = el<HTMLInputElement>("f-seek");
   seek.addEventListener("pointerdown", () => { dragging = true; });

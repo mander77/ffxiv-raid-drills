@@ -13,6 +13,7 @@ import { renderQuiz, answer, nextQ } from "./views/quiz";
 import { renderPressureStart, startPressure } from "./views/pressure";
 import { renderSheet } from "./views/sheet";
 import { renderFight, togglePause, openFight, seekBy } from "./views/fight";
+import { parseChoices } from "./data/fight";
 import type { Slot } from "./types";
 
 function renderTabs(): void {
@@ -49,7 +50,8 @@ function go(tab: string): void {
   // and `?? "map"` falls back to the map tab. Any text from the URL becomes a valid Tab.
   const t: Tab = TABS.find(x => x.id === name)?.id ?? "map";
   if(t === "map" && a && isCode(b)){ setPlay("step"); openPattern(a, b.toUpperCase()); }
-  if(name === "fight"){ setPlay("time"); if(isCode(a)) openFight(a.toUpperCase()); }
+  // #fight/<code>/raw=axe,ult=cw: the code, then the fight pattern choices, if any.
+  if(name === "fight"){ setPlay("time"); if(isCode(a)) openFight(a.toUpperCase(), b ? parseChoices(b) : undefined); }
   stopTimer();
   state.tab = t; state.pressure = null;
   renderTabs();

@@ -75,13 +75,14 @@ function buildRun(s: Slot, W: Weapon[]): Run {
   return {W, states, steps, overlays};
 }
 
-/* Assault Evolved: three weapons. The boss faces the first, then goes clockwise. */
-export function buildAssault(s: Slot): Run {
-  return buildRun(s, assaultWeapons());
+/* Assault Evolved: three weapons. The boss faces the first, then goes clockwise.
+   `first` forces the type of the first weapon (Real time choices); without it, it is random. */
+export function buildAssault(s: Slot, first?: WeaponType): Run {
+  return buildRun(s, assaultWeapons(first));
 }
 
 /** Three weapons at least 90 degrees apart, in the order he takes them: the first, then clockwise. */
-function assaultWeapons(): Weapon[] {
+function assaultWeapons(first?: WeaponType): Weapon[] {
   const spots = [0,45,90,135,180,225,270,315];
   let pick = [0,135,225];
   for(let t = 0; t < 60; t++){
@@ -91,14 +92,17 @@ function assaultWeapons(): Weapon[] {
   const a0 = pick[0];
   const order = [a0].concat(pick.slice(1).sort((x, y) => ((x - a0 + 360) % 360) - ((y - a0 + 360) % 360)));
   const types = shuffle([...WEAPON_TYPES]);
+  // A forced first weapon swaps places after the shuffle, so the random calls stay the same and
+  // a fight code still rebuilds every other part the same way.
+  if(first){ const i = types.indexOf(first); [types[0], types[i]] = [types[i], types[0]]; }
   return order.map((a, i): Weapon => ({a, p:atAngle(a), type:types[i]}));
 }
 
 /* Assault Evolved, second set (1:33, after Void Stardust). The boss does not face a weapon
    yet. Every weapon is turned. The first one lies square across the line to the boss, with
    its flat side toward him. The other two are turned 30 to 60 degrees. Then clockwise. */
-export function buildAssault2(s: Slot): Run {
-  const W = assaultWeapons().map((w, i): Weapon => {
+export function buildAssault2(s: Slot, first?: WeaponType): Run {
+  const W = assaultWeapons(first).map((w, i): Weapon => {
     const turn = i === 0 ? 0 : (30 + random() * 30) * (random() < 0.5 ? 1 : -1);
     const flip = random() < 0.5 ? 0 : 180;   // which end points which way
     const t = (w.a + 90 + turn + flip) * DEG;     // w.a + 90 is across the line to the boss
@@ -113,8 +117,9 @@ export function buildAssault2(s: Slot): Run {
    The first spawns south, slightly west (then clockwise) or slightly east (then counterclockwise).
    The second spawns northwest or northeast. The rest sit on cardinals, and the last is north.
    The first three are all different, and so are the last three. The last four leave tornadoes. */
-export function buildUltimate(s: Slot): Run & {cw: boolean} {
-  const cw = random() < 0.5;
+export function buildUltimate(s: Slot, forceCw?: boolean): Run & {cw: boolean} {
+  // The coin is always tossed, so a forced direction leaves the other random calls in place.
+  const toss = random() < 0.5, cw = forceCw ?? toss;
   const angles = cw ? [200, 315, 90, 180, 270, 0] : [160, 45, 270, 180, 90, 0];
   const names = cw ? ["south, slightly west", "northwest", "east", "south", "west", "north"]
                    : ["south, slightly east", "northeast", "west", "south", "east", "north"];
@@ -122,6 +127,23 @@ export function buildUltimate(s: Slot): Run & {cw: boolean} {
   const run = buildRun(s, angles.map((a, i): Weapon => ({a, p:atAngle(a), type:types[i], where:names[i], tornado:i >= 2})));
   run.states[0].f = null;   // no facing arrow, so the spawn order is the only clue
   return {...run, cw};
+}
+
+/* The scenes around a weapon run. The drill list and the Real time fight both use them, so a
+   fight can pass in a run built with the player's choices. */
+export function assaultScene(A: Run, s: Slot): Scene {
+  return {
+    setup:"Three weapons are on the floor. The boss is in the middle, and the red arrow points at the weapon he faces. He jumps to that one first, then goes clockwise. For the sword, watch where he jumps from. For the scythe, read the weapon: the butt has the round knob, the point is the blade end.",
+    overlays:A.overlays,
+    bossAt:n => A.states[Math.min(n, A.states.length - 1)],
+    steps:A.steps,
+    rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ". Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: stack in the middle."};
+}
+export function ultimateScene(U: Run): Scene {
+  return {
+    setup:"Everyone is at 1 HP after Charybdistopia. Six weapons spawn one after another, and the boss resolves them in spawn order. He starts on the first weapon before the last ones spawn: three show now, and each hit brings in the next one. Watch where the first one spawns: south and slightly west means clockwise, south and slightly east means counterclockwise. The last one is always north.",
+    spawnPlay:true, spawnAhead:3, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,
+    rule:"First weapon south: slightly west = clockwise, slightly east = counterclockwise. The second is NW or NE, then the cardinals, ending north. Use the normal rule for each weapon."};
 }
 
 /* Void Stardust: each puddle goes just outside the previous one, one small step clockwise.
@@ -308,12 +330,7 @@ export const MAPS: MapDrill[] = [
       steps:[{q:"Click where the party stacks.", z:{c:[50,69],r:9}, a:"South, right behind the boss."}],
       rule:"Scythe: tanks spread to the front, the party stacks behind."})},
   {id:"m-assault", order:3, random:true, phase:P1, time:"0:48", title:"Assault Evolved: three weapons",
-    build:s=>{ const A = buildAssault(s); return {
-      setup:"Three weapons are on the floor. The boss is in the middle, and the red arrow points at the weapon he faces. He jumps to that one first, then goes clockwise. For the sword, watch where he jumps from. For the scythe, read the weapon: the butt has the round knob, the point is the blade end.",
-      overlays:A.overlays,
-      bossAt:n => A.states[Math.min(n, A.states.length - 1)],
-      steps:A.steps,
-      rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ". Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: stack in the middle."}; }},
+    build:s=>assaultScene(buildAssault(s), s)},
   {id:"m-void", order:4, variants:["stack","spread"], phase:P1, time:"1:13 to 1:35", title:"Void Stardust into the second weapons",
     build:(s, v)=>voidIntoWeapons(s, v === "spread", buildAssault2(s))},
   {id:"m-assault-2", order:5, random:true, phase:P1, time:"1:33", title:"Assault Evolved: second set",
@@ -331,10 +348,7 @@ export const MAPS: MapDrill[] = [
       steps:[{q:"Click your pair spot.", z:S(s,{c:[33,91],r:8},{c:[67,91],r:8}), a:S(s,"Relative southwest, the outer spot, with R1.","Relative southeast, the outer spot, with R2.")}],
       rule:"Open side = new south. H1 and R1 relative SW, H2 and R2 relative SE."})},
   {id:"m-ultimate", order:11.5, random:true, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: six weapons",
-    build:s=>{ const U = buildUltimate(s); return {
-      setup:"Everyone is at 1 HP after Charybdistopia. Six weapons spawn one after another, and the boss resolves them in spawn order. He starts on the first weapon before the last ones spawn: three show now, and each hit brings in the next one. Watch where the first one spawns: south and slightly west means clockwise, south and slightly east means counterclockwise. The last one is always north.",
-      spawnPlay:true, spawnAhead:3, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,
-      rule:"First weapon south: slightly west = clockwise, slightly east = counterclockwise. The second is NW or NE, then the cardinals, ending north. Use the normal rule for each weapon."}; }},
+    build:s=>ultimateScene(buildUltimate(s))},
   {id:"m-tornado", order:12, phase:P1, time:"3:46", title:"Ultimate Trophy Weapons: tornadoes",
     build:s=>({setup:"The sixth weapon resolved (it is always north). Four tornadoes sit on the cardinals. Each one cones its two closest players.",
       boss:BOSS, overlays:[{t:"tornado",x:50,y:16},{t:"tornado",x:20,y:50},{t:"tornado",x:80,y:50},{t:"tornado",x:50,y:84}],

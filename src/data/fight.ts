@@ -2,7 +2,7 @@
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6).
-import { MAPS, buildAssault2, voidIntoWeapons, voidAgain } from "./drills";
+import { MAPS, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, type WeaponType } from "./drills";
 import { newCode, random, withSeed } from "../util";
 import type { Scene, Slot } from "../types";
 
@@ -28,8 +28,43 @@ export interface FightSeg {
 
 /** `code` rebuilds the same fight: the same weapons, the same stack or spread, and so on.
     `split` is when the arena is two platforms, from Flatliner to the Crown of Arcadia that
-    joins it again, in seconds. */
-export interface Fight { segs: FightSeg[]; events: TLEvent[]; end: number; split: [number, number]; summary: string; code: string }
+    joins it again, in seconds. `picks` says how each random part came out; `choices` is what
+    the player asked for, so a link can carry it. */
+export interface Fight { segs: FightSeg[]; events: TLEvent[]; end: number; split: [number, number]; summary: string; code: string; picks: Picks; choices: Choices }
+
+/** How each random part of a fight comes out. `set1` and `set2` are the first weapon of the
+    Assault Evolved sets at 0:48 and 1:33. */
+export interface Picks { raw: "axe" | "scythe"; void: "stack" | "spread"; set1: WeaponType; set2: WeaponType; ult: "cw" | "ccw"; fireball: "two" | "four"; wall: "north" | "south" }
+// TS note: Choices is a mapped type. `[K in keyof Picks]` walks every field of Picks, so Choices
+// has the same fields, and each one takes the same values or "random". Add a field to Picks and
+// Choices gets it too. C# has no direct match; you would write the second class by hand.
+export type Choices = { [K in keyof Picks]: Picks[K] | "random" };
+export const RANDOM: Choices = {raw:"random", void:"random", set1:"random", set2:"random", ult:"random", fireball:"random", wall:"random"};
+
+/** The choices on the Real time settings screen, in fight order, with the text for each value. */
+const WEAPONS: Array<[string, string]> = [["sword", "Sword"], ["axe", "Axe"], ["scythe", "Scythe"]];
+export const CHOICE_ROWS: Array<{key: keyof Picks; label: string; options: Array<[string, string]>}> = [
+  {key:"raw", label:"First Raw Steel Trophy", options:[["axe", "Axe"], ["scythe", "Scythe"]]},
+  {key:"set1", label:"First weapon at 0:48", options:WEAPONS},
+  {key:"void", label:"First Void Stardust ends in", options:[["stack", "Stack"], ["spread", "Spread"]]},
+  {key:"set2", label:"First weapon at 1:33", options:WEAPONS},
+  {key:"ult", label:"Ultimate Trophy Weapons", options:[["cw", "Clockwise"], ["ccw", "Counterclockwise"]]},
+  {key:"fireball", label:"Ecliptic Fireball", options:[["two", "Two-way"], ["four", "Four-way"]]},
+  {key:"wall", label:"Your Ecliptic puddles", options:[["north", "North wall"], ["south", "South wall"]]}
+];
+
+/** Choices from saved settings or a link. Anything unknown becomes "random". */
+export function cleanChoices(x: unknown): Choices {
+  const c: Choices = {...RANDOM};
+  if(x && typeof x === "object") for(const row of CHOICE_ROWS){
+    const v = (x as Record<string, unknown>)[row.key];
+    if(typeof v === "string" && row.options.some(([o]) => o === v)) (c as Record<string, string>)[row.key] = v;
+  }
+  return c;
+}
+/** For a link: "raw=axe,ult=cw". Choices left on "random" are left out. */
+export const choicesText = (c: Choices): string => CHOICE_ROWS.filter(r => c[r.key] !== "random").map(r => r.key + "=" + c[r.key]).join(",");
+export const parseChoices = (text: string): Choices => cleanChoices(Object.fromEntries(text.split(",").map(p => p.split("="))));
 
 /** "1:24" to 84. */
 export const sec = (t: string): number => { const [m, s] = t.split(":").map(Number); return m * 60 + s; };
@@ -43,17 +78,22 @@ function drill(id: string, s: Slot, variant: string | null = null): Scene {
 }
 
 /* One fight. The random parts stay consistent: the second Raw Steel Trophy uses the other
-   weapon, and the second Void Stardust ends the other way from the first. The same code
-   always builds the same fight. */
-export function buildFight(s: Slot, code = newCode()): Fight {
-  return withSeed(code, () => fightFor(s, code));
+   weapon, and the second Void Stardust ends the other way from the first. The same code and
+   choices always build the same fight. */
+export function buildFight(s: Slot, code = newCode(), choices: Choices = RANDOM): Fight {
+  return withSeed(code, () => fightFor(s, code, choices));
 }
 
-function fightFor(s: Slot, code: string): Fight {
-  const axeFirst = random() < 0.5, stackFirst = random() < 0.5;
-  const w1 = axeFirst ? "axe" : "scythe", w2 = axeFirst ? "scythe" : "axe";
+/* A choice replaces a random result, but the random call still happens first. So the parts
+   left on "random" come out the same as without the choice, and a code keeps its meaning. */
+const choose = <T extends string>(choice: T | "random", rolled: T): T => choice === "random" ? rolled : choice;
+const forced = <T extends string>(choice: T | "random"): T | undefined => choice === "random" ? undefined : choice;
+
+function fightFor(s: Slot, code: string, c: Choices): Fight {
+  const w1 = choose(c.raw, random() < 0.5 ? "axe" : "scythe"), w2 = w1 === "axe" ? "scythe" : "axe";
+  const stackFirst = choose(c.void, random() < 0.5 ? "stack" : "spread") === "stack";
   // Built in this order on purpose: a fight code replays the same random calls in the same order.
-  const assault1 = drill("m-assault", s), A2 = buildAssault2(s);
+  const A1 = buildAssault(s, forced(c.set1)), assault1 = assaultScene(A1, s), A2 = buildAssault2(s, forced(c.set2));
   /* Assault Evolved (ability B417) has a 6.0-second cast, so the boss turns to the first weapon
      6.0 seconds before cactbot's line: at 0:42.2 for the first set (line 0:48.2) and 1:26.7 for
      the second (line 1:32.7). That leaves about 8 seconds before the first hit. */
@@ -68,16 +108,20 @@ function fightFor(s: Slot, code: string): Fight {
       turn:{at:92.7 - CAST, f:A2.W[0].a}, due:[79.8, 83.9, 85.9, 87.9, 89.9, 94.9, 100.0, 105.1]},
     {title:"Void Stardust again", drills:[], scene:voidAgain(s, stackFirst), k:0, from:106, due:[110.2, 112.2, 114.2, 116.2]},
     {title:"Dance of Domination", drills:["m-dance"], scene:drill("m-dance", s), k:Math.floor(random() * 4), from:134.6, due:[150.5]},
-    {title:"Raw Steel Trophy: " + w2, drills:["m-raw-" + w2], scene:drill("m-raw-" + w2, s), k:0, from:156.4, due:[163.8]},
-    {title:"Ultimate Trophy Weapons", drills:["m-ultimate"], scene:drill("m-ultimate", s), k:0, from:184.6, due:[194.6, 199.7, 204.8, 209.9, 215.0, 220.1]},
-    {title:"Tornadoes", drills:["m-tornado"], scene:drill("m-tornado", s), k:0, from:221.2, due:[226.3]}
+    {title:"Raw Steel Trophy: " + w2, drills:["m-raw-" + w2], scene:drill("m-raw-" + w2, s), k:0, from:156.4, due:[163.8]}
   ];
+  // Ultimate Trophy Weapons is built here, after the Dance of Domination turn, as it always was.
+  const U = buildUltimate(s, c.ult === "random" ? undefined : c.ult === "cw");
+  segs.push(
+    {title:"Ultimate Trophy Weapons", drills:["m-ultimate"], scene:ultimateScene(U), k:0, from:184.6, due:[194.6, 199.7, 204.8, 209.9, 215.0, 220.1]},
+    {title:"Tornadoes", drills:["m-tornado"], scene:drill("m-tornado", s), k:0, from:221.2, due:[226.3]}
+  );
   /* Phases 2 to 4. They are built after Phase 1 on purpose, so a fight code made before they
      existed still replays the same Phase 1. At 9:31 the boss casts Two-way or Four-way Fireball,
      and your Ecliptic Stampede puddles went down along the north or the south wall.
      Orbital Omen checks you before the #1 lines (with Fire and Fury), the #2 lines and the #3 line.
      The meteor you bait in Meteorain is due when it lands (Cosmic Kiss). */
-  const four = random() < 0.5, wall = random() < 0.5 ? "north" : "south";
+  const four = choose(c.fireball, random() < 0.5 ? "four" : "two") === "four", wall = choose(c.wall, random() < 0.5 ? "north" : "south");
   const fireball = four ? "Four-way Fireball" : "Two-way Fireball", ecl = four ? "m-ecl-four" : "m-ecl-two";
   segs.push(
     {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:266.1, due:[275.2, 276.8, 278.4]},
@@ -141,8 +185,11 @@ function fightFor(s: Slot, code: string): Fight {
     [659.6, "Heartbreaker (Enrage)"]
   ];
   const events = lines.map(([t, name]): TLEvent => ({t, name, raidwide:RAIDWIDE.has(name)}));
-  const summary = "Raw Steel Trophy: " + w1 + " first, then " + w2 + ". Void Stardust: " +
-    (stackFirst ? "stack first, then spread." : "spread first, then stack.") +
+  const picks: Picks = {raw:w1, void:stackFirst ? "stack" : "spread", set1:A1.W[0].type, set2:A2.W[0].type,
+    ult:U.cw ? "cw" : "ccw", fireball:four ? "four" : "two", wall};
+  const summary = "Raw Steel Trophy: " + w1 + " first, then " + w2 + ". Assault Evolved: " + picks.set1 + " first at 0:48, " +
+    picks.set2 + " first at 1:33. Void Stardust: " + (stackFirst ? "stack first, then spread." : "spread first, then stack.") +
+    " Ultimate Trophy Weapons: " + (U.cw ? "clockwise." : "counterclockwise.") +
     " Ecliptic Stampede: " + fireball + ", with your puddles along the " + wall + " wall.";
-  return {segs, events, end:662, split:[361.8, 479.4], summary, code};
+  return {segs, events, end:662, split:[361.8, 479.4], summary, code, picks, choices:c};
 }
