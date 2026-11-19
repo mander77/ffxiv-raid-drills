@@ -34,7 +34,9 @@ export function renderAbout(): void {
   }).join("");
   const across = ACROSS.map(a => "<li><b>" + esc(a.name) + "</b>: " + a.html + "</li>").join("");
   view.innerHTML = tabHead() + '<div class="about">' +
-    '<section><h2>About me</h2><p>' + esc(ABOUT_ME) + "</p></section>" +
+    // The picture is a static file: public/nydori.jpeg, served at /nydori.jpeg.
+    '<section><h2>About me</h2><div class="me"><p>' + esc(ABOUT_ME) + "</p>" +
+    '<img src="/nydori.jpeg" width="480" height="848" alt="My character in Final Fantasy XIV, in a green hooded robe, holding up a card" loading="lazy"></div></section>' +
     '<section><h2>What the tool does</h2><ul class="features">' + tabs + "</ul>" +
     '<h3>Across the tool</h3><ul class="features">' + across + "</ul></section></div>";
   state.cur = {kind:"about"};
