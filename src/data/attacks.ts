@@ -12,6 +12,9 @@ const yalms = (n: number): number => n * 2.5;
 
 /** The boss's hitbox radius, drawn as his target ring (BossMod: R5.000). */
 export const HITBOX = yalms(5);
+/** Melee range, from the boss's center: his hitbox, 3 yalms of melee reach and the player's own
+    0.5 (BossMod's melee hint is 8.5 yalms). */
+export const MELEE_R = yalms(8.5);
 /** Half the width of each arm of the sword cross ("range 40 width 10 cross"). */
 export const SWORD_HALF = yalms(5);
 /** The axe circle ("range 8 circle"). */

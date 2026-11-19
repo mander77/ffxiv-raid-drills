@@ -2,7 +2,7 @@
 import { S, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry";
-import { HITBOX, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
+import { HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
 import type { Boss, MapDrill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
@@ -271,22 +271,26 @@ export function cometSpread(s: Slot, toward: Point | null = null, c: Point = CEN
   };
 }
 
-/* The stack after the third puddle when a sword or scythe goes first next: the group moves
-   from the third puddle toward that weapon. Any spot out of the third puddle and the hitbox,
-   within a short move of the third puddle and clearly closer to the weapon, is right, right
-   up to the weapon itself. The spot shown is the one in reach that is closest to the weapon,
-   but it stops short of the weapon, so it does not hide under the weapon's icon. */
-export function stackToward(w: Point): (results: StepResult[]) => Zone {
+/* The stack after the third puddle when a sword or scythe goes first next. The group can stack
+   anywhere between the boss at c and that weapon: in his melee range on the weapon's side, or
+   farther out toward the weapon, up to just past it. The band is as wide as his melee range
+   and shows as one shaded area. A spot in it is right if it is out of the third puddle. The
+   spot shown, where the moving marker runs, is on the line from him to the weapon, just inside
+   his melee range. */
+export function stackToward(w: Point, c: Point = CENTER): (results: StepResult[]) => Zone {
+  const len = dist(c, w), u: Point = [(w[0] - c[0]) / len, (w[1] - c[1]) / len], side: Point = [-u[1], u[0]], end = len + 5;
+  // `a` units from c toward the weapon, and `s` units to the side.
+  const at = (a: number, s: number): Point => [c[0] + u[0] * a + side[0] * s, c[1] + u[1] * a + side[1] * s];
+  const poly = [at(0, -MELEE_R), at(end, -MELEE_R), at(end, MELEE_R), at(0, MELEE_R)];
   return results => {
     const q: Point = results[results.length - 1].drop ?? [50, 33];
-    const fn = (p: Point): boolean => inArena(p) && far(p, [50, 50], HITBOX + 1.5) && far(p, q, PUDDLE_R) &&
-      dist(p, q) <= PUDDLE_R + 16 && dist(p, w) <= dist(q, w) - 4;
-    let label: Point = q, best = Infinity;
-    for(let x = 0; x <= 100; x += 1.5) for(let y = 0; y <= 100; y += 1.5){
-      const p: Point = [x, y];
-      if(dist(p, q) <= PUDDLE_R + 10 && fn(p) && far(p, w, 8) && dist(p, w) < best){ best = dist(p, w); label = p; }
-    }
-    return {fn, label, show:[{c:label, r:5}]};
+    const fn = (p: Point): boolean => {
+      const a = (p[0] - c[0]) * u[0] + (p[1] - c[1]) * u[1], s = (p[0] - c[0]) * side[0] + (p[1] - c[1]) * side[1];
+      return inArena(p) && a >= 0 && a <= end && Math.abs(s) <= MELEE_R && far(p, q, PUDDLE_R);
+    };
+    // If the third puddle covers that spot, the next one along the line, then the nearest right one.
+    const label = [0, 4, -4, 8, -8].map(d => at(Math.min(MELEE_R + d, len), 0)).find(fn) ?? nearestTo(at(MELEE_R, 0), fn) ?? q;
+    return {fn, label, show:[{poly}]};
   };
 }
 
@@ -349,7 +353,8 @@ function voidSteps(s: Slot, spread: boolean, toward: Point | null, c: Point = CE
           zf:cometSpread(s, toward, c), cue:spreadMarks(c),
           a:toward ? "Anywhere on the first weapon's side of the arena (the shaded area), out of the last puddle and not on a tank or melee spot."
                    : "Any open spot. Healers and ranged have no fixed spread spot. Keep away from the tank and melee spots and out of the last puddle."}
-      : toward ? {q:"Puddles done. Where does the group stack?", zf:stackToward(toward), a:"From the third puddle, move toward the first weapon, out of that puddle."}
+      : toward ? {q:"Puddles done. Where does the group stack?", zf:stackToward(toward, c),
+          a:"Anywhere between the boss and the first weapon (the shaded area): in his melee range on the weapon's side, or farther out toward the weapon. Stay out of the third puddle."}
                : {q:"Puddles done. Where does the group stack?", zf:next, a:"Just outside the third puddle, one more small step clockwise."}];
 }
 

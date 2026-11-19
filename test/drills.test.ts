@@ -266,6 +266,18 @@ test("Void Stardust stack toward the first weapon: a spot right next to the weap
   assert.notOk(inZone(q, z), "inside the last puddle");
 });
 
+test("Void Stardust stack toward the first weapon: anywhere in melee range on the weapon's side", () => {
+  // From a report: the scythe southwest, the third puddle east of the boss.
+  const w: Point = [29.5, 70.5], q: Point = [66.5, 52];
+  const z = stackToward(w)([VOID_RESULTS[0], ...asDrops([[50, 27], [61, 37], q])]);
+  if(!("fn" in z)) throw new Error("the stack zone is a rule zone");
+  assert.ok(inZone(z.label, z), "the shown spot");
+  for(const p of [[38.7, 67.7], [45, 57], [32, 66], [36, 58]] as Point[]) assert.ok(inZone(p, z), "between the boss and the scythe: " + p);
+  assert.notOk(inZone([60, 40], z), "in melee range, but on the far side from the scythe");
+  assert.notOk(inZone([56, 60], z), "beside the boss, away from the scythe");
+  assert.notOk(inZone(q, z), "inside the last puddle");
+});
+
 test("Dance of Domination: every pair spot is clear of the 10-yalm Hurricane Explosion lines", () => {
   // Distance from p to the line through a and b.
   const off = (p: Point, a: Point, b: Point): number => Math.abs((b[0] - a[0]) * (a[1] - p[1]) - (a[0] - p[0]) * (b[1] - a[1])) / Math.hypot(b[0] - a[0], b[1] - a[1]);
