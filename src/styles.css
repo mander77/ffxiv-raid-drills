@@ -364,11 +364,6 @@ td.n .cmline{margin-top:4px;gap:6px;font-size:12px;font-weight:400}
 .edge{fill:none;stroke:#B49C6C;stroke-width:.6}
 .voidr{fill:var(--void)}
 .aoe{fill:var(--aoe-fill);stroke:var(--aoe);stroke-width:.4}
-/* All of a step's attacks as one flat layer: solid shapes in a see-through group, so overlaps
-   do not get darker (see hitsSVG). */
-.hits{opacity:.32}
-.hits .aoe{fill:var(--aoe);stroke:none}
-.hits .aoeband{opacity:1}
 /* An attack drawn as an outline only, and the safe ground inside an attack (green, dashed). */
 .aoeline{fill:none;stroke:var(--aoe);stroke-width:.45;opacity:.9}
 .safe{fill:rgba(27,116,72,.1);stroke:var(--heal);stroke-width:.6;stroke-dasharray:1.4 .9}

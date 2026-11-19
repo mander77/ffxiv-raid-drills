@@ -100,12 +100,11 @@ export function floorSVG(split = false): string {
 /** True for the filled area of an attack. */
 const isHit = (o: Overlay): boolean =>
   o.t === "aoe" || o.t === "donut" || o.t === "band" || (o.t === "poly" && !o.line) || (o.t === "lane" && !o.soft);
-/** Overlays with the attacks first, as one flat layer: the group has one opacity and the shapes
-    inside are solid, so where two attacks overlap the colour does not get darker. Then the rest
-    (outlines, safe rings, weapons) on top, at full strength. */
+/** Overlays with the attacks first, then the rest (outlines, safe rings, weapons) on top, so an
+    attack never covers a weapon icon. Each attack keeps its own see-through fill and edge, so
+    where attacks overlap the colour gets darker. */
 export function hitsSVG(os: Overlay[]): string {
-  const hits = os.filter(isHit), rest = os.filter(o => !isHit(o));
-  return (hits.length ? '<g class="hits">' + hits.map(drawOverlay).join("") + "</g>" : "") + rest.map(drawOverlay).join("");
+  return os.filter(isHit).map(drawOverlay).join("") + os.filter(o => !isHit(o)).map(drawOverlay).join("");
 }
 
 /** The full arena for a scene, turned k quarter turns. Feedback layers stay empty until an answer. */
