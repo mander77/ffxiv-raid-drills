@@ -182,6 +182,10 @@ main{padding-block:20px 56px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 20px 22px;min-width:0}
 .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 12px}
 .eyebrow b{color:var(--heal);font-weight:500}
+/* The Share link in a drill's eyebrow: the eyebrow's small capitals, as a link. */
+.sharebtn{border:0;background:none;padding:0;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--heal-ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.sharebtn:hover{color:var(--heal)}
+.sharebtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:2px}
 .panel h2{font-family:var(--font-display);font-weight:700;font-size:30px;line-height:1.05;letter-spacing:.01em;margin:6px 0 10px;text-wrap:balance}
 .setup{margin:0 0 14px}
 .setup.folded{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:2px}
