@@ -276,9 +276,9 @@ function voidSteps(s: Slot, spread: boolean, toward: Point | null): Step[] {
 
 /* The first Void Stardust runs straight into the second weapon set: the weapons are already
    out, so the party finds the first one early. A sword or scythe first means a run, so the
-   stack or spread moves toward it. An axe first keeps the usual spots. With `allWeapons`, the
-   scene goes on through the second and third weapons too (the full-fight tab). */
-export function voidIntoWeapons(s: Slot, spread: boolean, A: Run, allWeapons = false): Scene {
+   stack or spread moves toward it. An axe first keeps the usual spots. Then the scene goes on
+   through all three weapons of this second set, so one drill covers the whole stretch. */
+export function voidIntoWeapons(s: Slot, spread: boolean, A: Run): Scene {
   const first = A.W[0], run = first.type !== "axe", where = COMPASS[Math.round(first.a / 45) % 8];
   const steps: Step[] = [
     {q:"Before the puddles: which weapon goes first after Void Stardust? Click it.", z:{c:first.p, r:9},
@@ -287,15 +287,15 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: Run, allWeapons = f
     ...voidSteps(s, spread, run ? first.p : null),
     {...A.steps[0], q:"The " + (spread ? "spread" : "stack") + " went off. The boss goes to the first weapon. Click where you go.",
       a:A.steps[0].a + " If you cannot make it in time, use Sprint. A scholar can use Expedient for the whole party."}];
-  if(allWeapons) steps.push(...A.steps.slice(1));
+  steps.push(...A.steps.slice(1));
   return {
     setup:"The second set of weapons is out, each one turned, and Void Stardust starts. Three puddles drop under every player, one after another. After the third one, this time it is " +
-      (spread ? "a spread marker on every player (Comet)." : "a stack on a healer (Crushing Comet).") + " Then the boss goes to the first weapon.",
+      (spread ? "a spread marker on every player (Comet)." : "a stack on a healer (Crushing Comet).") + " Then the boss goes to the first weapon, and on clockwise to the other two.",
     overlays:A.overlays.map(o => ({...o, spawn:undefined})),   // no fading: these steps are not one per weapon
     // The boss stays in the middle for the pick, the puddles and the stack or spread (5 steps).
     bossAt:n => A.states[Math.max(0, Math.min(n - 5, A.states.length - 1))],
     steps,
-    rule:"Find the first weapon before the puddles: flat side square to the boss. Puddles start north, each just outside the last, clockwise. Sword or scythe first: stack or spread toward it, and use Sprint or Expedient if it is far." +
+    rule:"Find the first weapon before the puddles: flat side square to the boss. Puddles start north, each just outside the last, clockwise. Sword or scythe first: stack or spread toward it, and use Sprint or Expedient if it is far. Then the other two weapons go clockwise, with the normal rule for each." +
       (spread ? " Comet spread fixed spots: MT NW, OT NE, M1 SW, M2 SE." : "")};
 }
 
@@ -331,15 +331,10 @@ export const MAPS: MapDrill[] = [
       rule:"Scythe: tanks spread to the front, the party stacks behind."})},
   {id:"m-assault", order:3, random:true, phase:P1, time:"0:48", title:"Assault Evolved: three weapons",
     build:s=>assaultScene(buildAssault(s), s)},
-  {id:"m-void", order:4, variants:["stack","spread"], phase:P1, time:"1:13 to 1:35", title:"Void Stardust into the second weapons",
+  // One drill for the whole stretch: the weapons spawn at 1:13, Void Stardust runs, then the boss
+  // takes the same three weapons. A separate drill for the weapons would show a different set.
+  {id:"m-void", order:4, random:true, variants:["stack","spread"], phase:P1, time:"1:13 to 1:45", title:"Void Stardust into the second weapons",
     build:(s, v)=>voidIntoWeapons(s, v === "spread", buildAssault2(s))},
-  {id:"m-assault-2", order:5, random:true, phase:P1, time:"1:33", title:"Assault Evolved: second set",
-    build:s=>{ const A = buildAssault2(s); return {
-      setup:"Void Stardust is over. The three weapons from 1:13 are around the boss, each one turned, and he does not face one yet. The weapon that lies square across the line to him, with its flat side toward him, goes first. Then he goes clockwise, the same as the first set.",
-      overlays:A.overlays,
-      bossAt:n => A.states[Math.min(n, A.states.length - 1)],
-      steps:A.steps,
-      rule:"Second set: the weapon with its flat side square to the boss goes first, then clockwise. Then the normal rule for each weapon."}; }},
   {id:"m-dance", order:8.1, rotate:true, phase:P1, time:"2:31", title:"Dance of Domination: pairs",
     build:s=>({setup:"The seven hits are over and the lines are on the floor. Find the side with no outer line. That open side is new south.",
       boss:{x:50, y:50, f:null}, overlays:[

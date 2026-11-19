@@ -153,7 +153,8 @@ test("Void Stardust into the second weapons: every right spot is inside its zone
   if(!drill) throw new Error("missing drill m-void");
   for(let i = 0; i < RUNS; i++) for(const s of SLOTS) for(const v of ["stack", "spread"]){
     const sc = drill.build(s, v);
-    assert.equal(sc.steps.length, 6, "pick, three puddles, stack or spread, first weapon");
+    assert.equal(sc.steps.length, 8, "pick, three puddles, stack or spread, then all three weapons");
+    assert.deepEqual(sc.steps.slice(6).map(st => st.q), ["Second weapon: click where you go.", "Third weapon: click where you go."]);
     const pick = sc.steps[0].z, end = sc.steps[4].zf;
     if(!pick || !end) throw new Error("missing zone");
     const z = end(VOID_RESULTS);

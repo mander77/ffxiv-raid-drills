@@ -103,8 +103,8 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   const segs: FightSeg[] = [
     {title:"Raw Steel Trophy: " + w1, drills:["m-raw-" + w1], scene:drill("m-raw-" + w1, s), k:0, from:15.7, due:[25.1]},
     {title:"Assault Evolved", drills:["m-assault"], scene:assault1, k:0, from:38.4, turn:face1 != null ? {at:48.2 - CAST, f:face1} : undefined, due:[50.4, 55.5, 60.6]},
-    // The second set of weapons spawns when this Void Stardust starts, so it covers both drills.
-    {title:"Void Stardust into the second weapons", drills:["m-void", "m-assault-2"], scene:voidIntoWeapons(s, !stackFirst, A2, true), k:0, from:72.7,
+    // The second set of weapons spawns when this Void Stardust starts, and the drill runs through all three.
+    {title:"Void Stardust into the second weapons", drills:["m-void"], scene:voidIntoWeapons(s, !stackFirst, A2), k:0, from:72.7,
       turn:{at:92.7 - CAST, f:A2.W[0].a}, due:[79.8, 83.9, 85.9, 87.9, 89.9, 94.9, 100.0, 105.1]},
     {title:"Void Stardust again", drills:[], scene:voidAgain(s, stackFirst), k:0, from:106, due:[110.2, 112.2, 114.2, 116.2]},
     {title:"Dance of Domination", drills:["m-dance"], scene:drill("m-dance", s), k:Math.floor(random() * 4), from:134.6, due:[150.5]},

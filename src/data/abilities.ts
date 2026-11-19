@@ -82,7 +82,7 @@ export const PHASES: Array<{name: string; rows: Ability[]}> = [
     [50.4, "Assault Evolved #1", ["mech"], N.assault],
     [55.5, "Assault Evolved #2", ["mech"], N.assault],
     [60.6, "Assault Evolved #3", ["mech"], N.assault],
-    [72.7, "Trophy Weapons", ["mech"], N.trophy, ["m-void", "m-assault-2"]],
+    [72.7, "Trophy Weapons", ["mech"], N.trophy, ["m-void"]],
     [79.8, "Void Stardust", ["dodge"], N.voidCast],
     [83.9, "Void Stardust baits x3", ["dodge"], N.voidBaits],
     [89.9, "Void Stardust spread or stack", ["target"], N.voidEnd],
