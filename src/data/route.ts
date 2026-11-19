@@ -30,8 +30,9 @@ export const REST_GAP = 8;
     for, and `show`, when that mechanic appears on the arena. `si` and `j` say which segment and
     step of the fight it answers. `pre` is the segment's own pre-position, when it has one: a
     first move known in advance. A `look` stop is a look-ahead step: it has an answer (the
-    click), but the player does not move there, so the runner skips it. */
-export interface Stop { p: Point; hit: number; show: number; si: number; j: number; pre?: Point; look?: boolean }
+    click), but the player does not move there, so the runner skips it. `click` is when you
+    clicked the spot, for a route made of your own clicks: the runner goes there only then. */
+export interface Stop { p: Point; hit: number; show: number; si: number; j: number; pre?: Point; look?: boolean; click?: number }
 
 const dist = (a: Point, b: Point): number => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
@@ -71,18 +72,21 @@ export function rightRoute(f: Fight): Stop[] {
   }).sort((a, b) => a.hit - b.hit);
 }
 
-/** Your own clicks as a route, for the played-back run. `j` is the step each click answered. */
-export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Point}>): Stop[] {
+/** Your own clicks as a route, for live play and the played-back run. `j` is the step each click
+    answered, and `t` is when you clicked. Only your clicks move the marker, so it takes no
+    pre-position of its own: that could show where a mechanic starts before you click. */
+export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Point; t?: number}>): Stop[] {
   return clicks.flatMap((c): Stop[] => {
     const g = f.segs[c.si], hit = g?.due[c.j];
-    return g && hit != null ? [{p:c.p, hit, show:showOf(g, c.j), si:c.si, j:c.j, ...(g.pre ? {pre:g.pre} : {}), look:g.scene.steps[c.j]?.look}] : [];
+    return g && hit != null ? [{p:c.p, hit, show:showOf(g, c.j), si:c.si, j:c.j, ...(c.t != null ? {click:c.t} : {}), look:g.scene.steps[c.j]?.look}] : [];
   }).sort((a, b) => a.hit - b.hit);
 }
 
 /** Where the runner is at time t, and its target: the stop for the next hit, once that mechanic is
     on the arena (null before it shows, and at the end). The runner waits on each spot until that
     spot's hit, plus REACT, then runs straight to the next spot at RUN_SPEED. It leaves for the
-    first spot of a mechanic LOOK seconds after the mechanic appears. Before a mechanic with its
+    first spot of a mechanic LOOK seconds after the mechanic appears, or, for your own click, right
+    when you clicked (but not before the hit of the spot it stands on). Before a mechanic with its
     own pre-position (Stop.pre), it goes there right after the last hit. Before any other
     mechanic, after a quiet stretch of REST_GAP seconds or more, it goes to HOME. Look-ahead
     stops are skipped: the player does not move for them. */
@@ -106,7 +110,7 @@ export function runnerAt(route: Stop[], t: number): {at: Point; target: Stop | n
       const go = pre && dist(at, pre) > 0.5 ? leg(pre, lastHit + REACT) : null;
       if(go) return {at:go, target};
     }
-    const step = leg(s.p, Math.max(lastHit + REACT, s.show + LOOK));
+    const step = leg(s.p, Math.max(lastHit + REACT, s.click ?? s.show + LOOK));
     if(step) return {at:step, target};
     lastHit = s.hit;
   }

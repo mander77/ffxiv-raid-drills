@@ -37,7 +37,7 @@ interface Run {
   hits: Hit[];               // every hit of this fight, in time order (see buildHits)
   nextHit: number;           // the first hit in `hits` that has not shown yet
   bossAt: Point;             // where the boss stands on the arena now, for the tank buster pulse
-  route: Stop[] | null;      // demo and replay: the route the marker runs (see data/route.ts)
+  route: Stop[] | null;      // the route the marker runs: the right spots (demo) or your clicks (live and replay)
   zoneKey: string;           // the target whose blue area is drawn ("si:j:answers"), so it redraws only on a change
 }
 /** A finished live run, for the summary and the replays. */
@@ -158,7 +158,7 @@ function startRun(mode: Mode, fight: Fight, clicks: Click[] = []): void {
        clicks:mode === "replay" ? clicks : [], next:0, hold:"", review:-1, last:performance.now(), shown:"",
        hits:buildHits(fight), nextHit:0, bossAt:[50, 50],
        // In a live run you are the one who moves, so only the watched and played-back runs get a marker.
-       route:mode === "demo" ? rightRoute(fight) : mode === "replay" ? clickRoute(fight, clicks) : null, zoneKey:""};
+       route:mode === "demo" ? rightRoute(fight) : clickRoute(fight, mode === "replay" ? clicks : []), zoneKey:""};
   state.cur = {kind:"fight"};
   showRoute(fightRoute(fight));
   // The flash and the hit's name sit over the arena, outside #f-arena, so a new scene does not remove them.
@@ -213,7 +213,7 @@ export function seekTo(to: number): void {
   to = Math.max(0, Math.min(f.end, to));
   if(to < r.t){
     f.segs.forEach((g, si) => { const res = r.results[si]; while(res.length && g.due[res.length - 1] > to) res.pop(); });
-    if(r.mode === "live") r.clicks = r.clicks.filter(c => c.t <= to);
+    if(r.mode === "live"){ r.clicks = r.clicks.filter(c => c.t <= to); r.route = clickRoute(r.fight, r.clicks); }
     if(r.mode === "replay"){ const i = r.clicks.findIndex(c => c.t > to); r.next = i < 0 ? r.clicks.length : i; }
   } else if(r.mode === "live"){
     f.segs.forEach((g, si) => { while(r.results[si].length < g.due.length && g.due[r.results[si].length] <= to) answer(si, null, true, true); });
@@ -278,7 +278,8 @@ function answer(si: number, p: Point | null, missed = false, skipped = false): v
   const zone = rotZone(base, g.k), at: Point = p ?? zoneCenter(zone);
   const ok = !missed && inZone(at, zone);
   res.push({p:at, ok, z:zone, drop:step.drop ? (ok ? at : zoneCenter(zone)) : null, missed, skipped});
-  if(r.mode === "live" && p) r.clicks.push({si, j:res.length - 1, t:r.t, p});
+  // Live play: your marker runs to each spot you click, from the moment you click it.
+  if(r.mode === "live" && p){ r.clicks.push({si, j:res.length - 1, t:r.t, p}); r.route = clickRoute(r.fight, r.clicks); }
 }
 
 function onClick(e: MouseEvent): void {
@@ -435,8 +436,10 @@ const TURN_AFTER = 1.0;
 /** How long before a weapon hits the boss lands on it, in seconds: cactbot's "--jump N--" lines
     come 2.0 seconds before each "Assault Evolved N" hit, in both sets. */
 const JUMP_LEAD = 2.0;
-/* In "Watch the right moves" and "Your run, played back", a marker with your role runs the route:
-   it waits on each spot until the hit lands, then runs to the next one at run speed. Its target
+/* In every Real-time run, a marker with your role runs a route: the right spots in "Watch the
+   right moves", and your own clicks in live play and "Your run, played back" (it goes to a spot
+   when you click it). It waits on each spot until the hit lands, then runs to the next one at run
+   speed. Its target
    (the spot for the next hit) shows in blue: a dotted line from the marker and a ring on the exact
    spot, and in the watched run also the whole area that is right. At the hit, the answer turns that
    area green (see frame). The arena is built again for each mechanic, so the marker is added back

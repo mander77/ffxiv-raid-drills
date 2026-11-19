@@ -163,3 +163,15 @@ test("the watched run shows no weapon spot before the boss turns to the first we
     });
   }
 });
+
+test("your own click: the marker runs to the spot when you click it, not before", () => {
+  const f = buildFight("H1", "K3PZ", RANDOM), g = f.segs[1];   // the first Assault Evolved set
+  const tClick = g.due[0] - 4, p: Point = [30, 30];
+  const route = clickRoute(f, [{si:1, j:0, p, t:tClick}]);
+  assert.equal(route[0].click, tClick);
+  assert.isUndefined(route[0].pre, "your own route takes no pre-position");
+  assert.isTrue(near(runnerAt(route, tClick - 0.1).at, START), "before the click it stands still");
+  // Half a second after the click it is half a second of running on its way.
+  assert.closeTo(dist(runnerAt(route, tClick + 0.5).at, START), RUN_SPEED * 0.5, 1e-6);
+  assert.isTrue(near(runnerAt(route, g.due[0]).at, p), "on the spot when the weapon hits");
+});
