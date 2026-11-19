@@ -8,10 +8,10 @@ import { paintArena } from "./map";
 import { tabHead, hudPrompt, segRow } from "./common";
 import { patternRows, wirePattern } from "./pattern";
 import { buildFight, clock, choicesText, CHOICE_ROWS, RANDOM, type Choices, type Fight, type FightSeg } from "../data/fight";
-import { BOSS } from "../data/drills";
+import { BOSS, facingNext } from "../data/drills";
 import { WALL_W } from "../data/attacks";
-import { ABILITIES } from "../data/abilities";
-import { tlNav, wireNav, markNav } from "./tlnav";
+import { ABILITIES, CATS, catsAt, type Cat } from "../data/abilities";
+import { tlNav, wireNav, markNav, marks } from "./tlnav";
 import { rightRoute, clickRoute, runnerAt, type Stop } from "../data/route";
 import { showRoute, type Route } from "../router";
 import type { Boss, Overlay, Point, Scene, StepResult } from "../types";
@@ -328,7 +328,9 @@ function frame(): void {
   // In the watched run, the green answer and what the mechanic did show for GREEN_FOR seconds
   // after the hit, then clear, so the next blue target is the only area on the floor.
   const lastHit = g && res.length ? g.due[res.length - 1] : -Infinity, showAnswer = res.length > 0 && (r.mode !== "demo" || r.t - lastHit < GREEN_FOR);
-  const key = where + ":" + res.length + ":" + turned + ":" + r.hold + ":" + showAnswer;
+  // After a weapon hits, he turns to face the next weapon before he jumps to it.
+  const facing = res.length > 0 && r.t >= lastHit + TURN_AFTER;
+  const key = where + ":" + res.length + ":" + turned + ":" + facing + ":" + r.hold + ":" + showAnswer;
   if(key !== r.shown){
     const fresh = r.shown.split(":")[0] !== where;   // a new scene: build the arena again
     r.shown = key;
@@ -342,6 +344,7 @@ function frame(): void {
     let boss: Boss | null = sc.bossAt ? sc.bossAt(res.length) : (sc.boss ? rotOverlay(sc.boss, k) : null);
     // In the middle, before his cast, he faces no weapon. When the cast starts he turns to the first one.
     if(boss && g?.turn && boss.x === 50 && boss.y === 50) boss = {...boss, f:turned ? g.turn.f : null};
+    if(boss && facing) boss = facingNext(sc, res.length, boss);
     paintArena(el("arena-svg"), sc, k, res, showAnswer, boss);
     // The ring sits around the boss, and moves with him when he jumps. It starts at the top.
     const c = boss ?? {x:50, y:50};
@@ -401,8 +404,9 @@ function updateLive(r: Run): void {
     const next = f.events.find(e => e.t > r.t);
     tl.innerHTML = rows.length ? rows.map(e => {
       const left = e.t - r.t, fill = Math.max(0, Math.min(1, 1 - left / SHOW_AT));
-      const cls = (left <= 0 ? "now" : left <= SOON ? "soon" : "") + (e.raidwide ? " rw" : "");
-      return '<li class="' + cls + '"><i style="width:' + (fill * 100).toFixed(1) + '%"></i><span>' + esc(e.name) + "</span><b>" + (left > 0 ? left.toFixed(1) : "") + "</b></li>";
+      const cls = (left <= 0 ? "now" : left <= SOON ? "soon" : "") + (e.raidwide ? " rw" : ""), cats = catsAt(e.t);
+      // A line that is a fight-list ability gets its colour marks, as in the fight list.
+      return '<li class="' + cls + '"><i style="width:' + (fill * 100).toFixed(1) + '%"></i><span>' + (cats.length ? marks(cats) : "") + esc(e.name) + "</span><b>" + (left > 0 ? left.toFixed(1) : "") + "</b></li>";
     }).join("") : '<li class="idle"><span>' + (next ? "Next: " + esc(next.name) + " in " + Math.round(next.t - r.t) + " s" : "No more lines") + "</span></li>";
   }
   const si = activeSeg(f, r.t);
@@ -421,6 +425,10 @@ function updateLive(r: Run): void {
 /* ---------- the moving marker ---------- */
 /** How long the watched run keeps a green answer on the floor after its hit, in seconds. */
 const GREEN_FOR = 1.5;
+/** How long after a weapon hits the boss turns to face the next one, in seconds. No source
+    gives this time: cactbot has only the jump itself, about 2 seconds before the next hit, and
+    the hits are about 5 seconds apart. So this is an estimate, and he turns well before he jumps. */
+const TURN_AFTER = 1.0;
 /* In "Watch the right moves" and "Your run, played back", a marker with your role runs the route:
    it waits on each spot until the hit lands, then runs to the next one at run speed. Its target
    (the spot for the next hit) shows in blue: a dotted line from the marker and a ring on the exact
@@ -467,27 +475,27 @@ function drawRunner(r: Run): void {
 /* Every hit of the fight, so Real time shows damage going out also where no drill runs. A raidwide
    flashes the arena floor, a tank buster draws the tanks and the hit on them, shared hits (a
    stack or a tower the party shares) flash softer, and the enrage flashes long and dark. Every
-   hit, the other AoEs too, shows its name over the arena for a moment. */
+   hit, the other AoEs too, shows its name over the arena for a moment, with the fight list's
+   category: its colour mark and name, the same as in the colour key. */
 type HitKind = "raid" | "tank" | "shared" | "enrage" | "aoe";
-interface Hit { t: number; name: string; kind: HitKind }
-const HIT_LABEL: Record<HitKind, string> = {raid:"Raidwide", tank:"Tank buster", shared:"Shared hits", enrage:"Enrage", aoe:"AoE"};
+interface Hit { t: number; name: string; kind: HitKind; cat: Cat }
 /** Dance of Domination hits seven times, from the first hit to the last on the timeline. */
 const DANCE_HITS = 7, DANCE_GAP = 0.7;
 
 function buildHits(f: Fight): Hit[] {
   const hits: Hit[] = [];
   for(const a of ABILITIES){
-    if(a.cats.includes("enrage")) hits.push({t:a.t, name:a.name, kind:"enrage"});
+    if(a.cats.includes("enrage")) hits.push({t:a.t, name:a.name, kind:"enrage", cat:"enrage"});
     else if(a.name === "Dance of Domination hits"){
-      for(let i = 0; i < DANCE_HITS; i++) hits.push({t:a.t + i * DANCE_GAP, name:"Dance of Domination " + (i + 1), kind:"raid"});
+      for(let i = 0; i < DANCE_HITS; i++) hits.push({t:a.t + i * DANCE_GAP, name:"Dance of Domination " + (i + 1), kind:"raid", cat:"raid"});
     }
-    else if(a.cats.includes("raid")) hits.push({t:a.t, name:a.name, kind:"raid"});
-    else if(a.cats.includes("tank")) hits.push({t:a.t, name:a.name, kind:"tank"});
-    else if(a.name === "Massive Meteor") hits.push({t:a.t, name:a.name, kind:"shared"});
-    else if(a.cats.includes("target") || a.cats.includes("dodge")) hits.push({t:a.t, name:a.name, kind:"aoe"});
+    else if(a.cats.includes("raid")) hits.push({t:a.t, name:a.name, kind:"raid", cat:"raid"});
+    else if(a.cats.includes("tank")) hits.push({t:a.t, name:a.name, kind:"tank", cat:"tank"});
+    else if(a.name === "Massive Meteor") hits.push({t:a.t, name:a.name, kind:"shared", cat:a.cats[0] ?? "target"});
+    else if(a.cats.includes("target") || a.cats.includes("dodge")) hits.push({t:a.t, name:a.name, kind:"aoe", cat:a.cats.includes("target") ? "target" : "dodge"});
   }
   // Each Heartbreak Kick hit is its own line on the timeline: one flash per hit on the shared tower.
-  for(const e of f.events) if(/^Heartbreak Kick \d/.test(e.name)) hits.push({t:e.t, name:e.name, kind:"shared"});
+  for(const e of f.events) if(/^Heartbreak Kick \d/.test(e.name)) hits.push({t:e.t, name:e.name, kind:"shared", cat:"spot"});
   return hits.sort((a, b) => a.t - b.t);
 }
 
@@ -501,8 +509,9 @@ function restart(n: HTMLElement, cls: string): void {
 
 function showHit(r: Run, h: Hit): void {
   const fx = document.getElementById("f-fx"), label = document.getElementById("f-hit");
-  if(label){ label.textContent = HIT_LABEL[h.kind] + " · " + h.name; restart(label, "hitlbl show " + h.kind); }
-  if(fx && (h.kind === "raid" || h.kind === "shared" || h.kind === "enrage")) restart(fx, "hitfx " + h.kind);
+  if(label){ label.innerHTML = marks([h.cat]) + "<span>" + esc(CATS[h.cat] + " · " + h.name) + "</span>"; restart(label, "hitlbl show"); }
+  // The flash takes the category's colour (see .hitfx in styles.css).
+  if(fx && (h.kind === "raid" || h.kind === "shared" || h.kind === "enrage")) restart(fx, "hitfx " + h.kind + " " + h.cat);
   if(h.kind === "tank"){
     // The tanks, where they take the buster, and the hit on them. It removes itself when it has faded.
     document.getElementById("arena-svg")?.insertAdjacentHTML("beforeend", '<g class="fx-buster">' + busterPieces(h.name, r.bossAt).map(drawOverlay).join("") + "</g>");

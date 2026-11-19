@@ -2,7 +2,7 @@
 import { S, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry";
-import { HITBOX, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, axeHit, cleave, swordCross } from "./attacks";
+import { HITBOX, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, axeHit, cleave, swordCross } from "./attacks";
 import type { Boss, MapDrill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
@@ -155,6 +155,13 @@ export function buildUltimate(s: Slot, forceCw?: boolean): Run & {cw: boolean} {
 /** A picked weapon order ("sword-axe-scythe") as weapon types, or undefined for Random.
     The picks were checked against the known orders when they were saved. */
 const orderFrom = (pick?: string): WeaponType[] | undefined => pick ? pick.split("-") as WeaponType[] : undefined;
+
+/** The boss before a jump: he turns to face the weapon he jumps to next. `n` steps of the scene
+    are done. He stays as he is when no jump comes next. */
+export function facingNext(sc: Scene, n: number, boss: Boss): Boss {
+  const next = sc.bossAt?.(n + 1);
+  return next && next.f != null && (next.x !== boss.x || next.y !== boss.y) ? {...boss, f:next.f} : boss;
+}
 
 /* The scenes around a weapon run. The drill list and the Real time fight both use them, so a
    fight can pass in a run built with the player's choices. */
@@ -409,13 +416,14 @@ export const AXE_TANKS: Point = [50, 35];
     BossMod's preset. The tanks are front and back, and the healers are on his sides. */
 export const CLOCK: Record<string, number> = {MT:0, R2:45, H2:90, M2:135, OT:180, M1:225, H1:270, R1:315};
 export const AXE_SPREAD_SPOTS: Record<string, Point> = {M1:[37.5, 62.5], M2:[62.5, 62.5], R1:[9, 68.5], R2:[91, 68.5], H1:[34, 84.5], H2:[66, 84.5]};
-/* Raw Steel Trophy, scythe: three cleaves. One cone on each tank (MT at 317 degrees, OT at 43),
-   and one cone behind him that the rest of the party shares. The party's spot is inside that
-   shared cone, outside his hitbox. */
-export const SCYTHE_CLEAVES: Overlay[] = [cleave([50, 50], 317), cleave([50, 50], 43), cleave([50, 50], 180)];
+/* Raw Steel Trophy, scythe: three cleaves. A 90-degree cone on each tank (MT at 317 degrees, OT
+   at 43), and a 45-degree cone behind him that the rest of the party shares. The party's spot is
+   inside that shared cone, outside his hitbox. */
+export const SCYTHE_CLEAVES: Overlay[] = [cleave([50, 50], 317, RAW_TANK_HALF), cleave([50, 50], 43, RAW_TANK_HALF), cleave([50, 50], 180, RAW_STACK_HALF)];
+const STACK_EDGE = [-1, -0.5, 0, 0.5, 1].map(k => 180 + k * RAW_STACK_HALF);
 const SCYTHE_STACK: Zone = {
-  fn:p => { const v: Point = [p[0] - 50, p[1] - 50], r = Math.hypot(v[0], v[1]); return r >= 11 && r <= 40 && Math.abs(angOf(v) - 180) <= 16; },
-  label:[50, 69], show:[{poly:[...[164, 172, 180, 188, 196].map(a => POINT_AT(a, 11)), ...[196, 188, 180, 172, 164].map(a => POINT_AT(a, 34))]}]};
+  fn:p => { const v: Point = [p[0] - 50, p[1] - 50], r = Math.hypot(v[0], v[1]); return r >= 11 && r <= 40 && Math.abs(angOf(v) - 180) <= RAW_STACK_HALF; },
+  label:[50, 69], show:[{poly:[...STACK_EDGE.map(a => POINT_AT(a, 11)), ...[...STACK_EDGE].reverse().map(a => POINT_AT(a, 34))]}]};
 // TS note: `(x): Overlay => (...)` gives the arrow function a return type. Without it,
 // TypeScript would type t as plain string, and "puddle" would not fit the Overlay union.
 export const NPUD = [22, 34, 46, 58, 70, 82].map((x): Overlay => ({t:"puddle", x, y:5, r:ATOMIC_R}));

@@ -1,6 +1,6 @@
 import { test, assert } from "vitest";
-import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, changes, type Run } from "../src/data/drills";
-import { inZone, zoneCenter } from "../src/geometry";
+import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, changes, assaultScene, ultimateScene, facingNext, type Run } from "../src/data/drills";
+import { angOf, inZone, zoneCenter } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, StepResult, Zone } from "../src/types";
 
 const RUNS = 300;
@@ -228,5 +228,21 @@ test("Void Stardust into the weapons: the puddles are gone when the weapons star
     assert.equal(first, steps.length - 3, "the first weapon clears the puddles");
     assert.ok(steps.slice(0, first).some(st => st.drop), "the puddles drop before the weapons");
     assert.notOk(steps.slice(first).some(st => st.drop), "no puddle drops during the weapons");
+  }
+});
+
+test("weapon runs: before each jump, the boss turns to face the weapon he jumps to next", () => {
+  for(let i = 0; i < 50; i++){
+    const A = buildAssault("H1"), U = buildUltimate("H1");
+    for(const [name, R, sc] of [["first set", A, assaultScene(A, "H1")], ["Ultimate", U, ultimateScene(U)]] as const){
+      // n weapons have hit: he stands on weapon n and turns to face weapon n + 1.
+      for(let n = 1; n < R.states.length - 1; n++){
+        const now = R.states[n], next = R.states[n + 1], b = facingNext(sc, n, now);
+        assert.deepEqual([b.x, b.y], [now.x, now.y], name + ": he turns where he stands");
+        assert.closeTo(b.f ?? -1, angOf([next.x - now.x, next.y - now.y]), 1e-9, name + " after weapon " + n);
+      }
+      const last = R.states[R.states.length - 1];
+      assert.equal(facingNext(sc, R.states.length - 1, last), last, name + ": no jump after the last weapon");
+    }
   }
 });

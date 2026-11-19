@@ -1,7 +1,9 @@
 // The cheat sheet: rules, positions, timeline and the suggested job plan on one page.
 import { S, esc, LS, el } from "../util";
 import { state, view, QUIZ_POOLS } from "../core";
-import { TL, KIND } from "../data/timeline";
+import { TL } from "../data/timeline";
+import { tlCats } from "../data/abilities";
+import { marks, catNames, catKey } from "./tlnav";
 import { JOBS } from "../data/jobs";
 import { f1, vadd, unit, leftOf } from "../geometry";
 import { floorSVG, drawOverlay, drawWaymarks, drawBoss } from "../arena";
@@ -29,7 +31,9 @@ export function swordDiagram(s: Slot): string {
 }
 export function renderSheet(): void {
   const s = state.slot;
-  const rows = TL.map(e => '<tr><td class="t">' + e.t + '</td><td class="n">' + esc(e.n) + '<br><span class="chip k-' + e.k + '">' + KIND[e.k] + "</span></td><td>" + esc(e.job(s)) + "</td></tr>").join("");
+  // Each row shows the fight list's marks for what it covers, with the same colour key.
+  const rows = TL.map((e, i) => { const cats = tlCats(i);
+    return '<tr><td class="t">' + e.t + '</td><td class="n">' + esc(e.n) + '<div class="cmline">' + marks(cats) + esc(catNames(cats)) + "</div></td><td>" + esc(e.job(s)) + "</td></tr>"; }).join("");
   const seen = Object.keys(state.stats).length;
   view.innerHTML = tabHead() + '<div class="sheet">' +
     '<div class="cols"><section><h2>Someone died</h2><ol>' +
@@ -61,7 +65,7 @@ export function renderSheet(): void {
     "<li><b>Meteorain, ranged (3rd set):</b> the ranged step in close to the boss to take the markers. R1 drops SW near the edge, at the end of the SW line, and leaves room behind it to hide. R2 drops NE, inside the boss hitbox.</li>" +
     '</ul></div><figure class="mini">' + swordDiagram(s) +
     "<figcaption>Example: he jumps west from the middle. The pockets on the side he came from are the two stack spots. Yours is green.</figcaption></figure></div></section>" +
-    "<section><h2>Your timeline as " + s + '</h2><div class="tablebox"><table><thead><tr><th>Time</th><th>Mechanic</th><th>Your job</th></tr></thead><tbody>' + rows + "</tbody></table></div>" +
+    "<section><h2>Your timeline as " + s + "</h2>" + catKey() + '<div class="tablebox"><table><thead><tr><th>Time</th><th>Mechanic</th><th>Your job</th></tr></thead><tbody>' + rows + "</tbody></table></div>" +
     '<p class="hint">Times are from the cactbot fight timeline. Some phase 1 times move by a second or two with the axe or scythe opener.</p></section>' +
     "<section><h2>Suggested " + JOBS[state.job] + ' plan</h2><div class="tablebox"><table><thead><tr><th>Time</th><th>When</th><th>Press</th></tr></thead><tbody>' +
     QUIZ_POOLS.job().slice().sort((a, b) => a.order - b.order).map(it => { const q = it.build(s), right = q.options.find(o => o.ok); return '<tr><td class="t">' + esc(it.time) + '</td><td class="n">' + esc(q.rule) + "</td><td>" + esc(right?.t ?? "") + "</td></tr>"; }).join("") +

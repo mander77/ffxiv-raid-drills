@@ -161,5 +161,5 @@ export interface QuizItem {
 
 /* ---------- timeline ---------- */
 
-export type Kind = "raidwide" | "buster" | "heal" | "mech" | "enrage";
-export interface TimelineEvent { t: string; n: string; k: Kind; job: (s: Slot) => string }
+/** One row of the cheat-sheet timeline. Its categories come from the fight list (tlCats). */
+export interface TimelineEvent { t: string; n: string; job: (s: Slot) => string }

@@ -128,7 +128,7 @@ main{padding-block:20px 56px}
   .drillnav button{white-space:nowrap}
   /* The fight list becomes one long strip that scrolls sideways and follows the highlight. */
   .tlnav{position:relative;top:auto;max-height:none;display:block}
-  .cmkey{display:none}
+  .tlnav .cmkey{display:none}
   .tlnav ol{align-items:center;overflow:visible}
   .tlnav .ph{position:static;flex-direction:row;gap:6px;align-items:baseline;margin:0 4px 0 10px;padding:4px 9px;white-space:nowrap}
   .tlnav .ph:first-child{margin-left:0}
@@ -168,14 +168,19 @@ main{padding-block:20px 56px}
    The flashes stay under three a second: Dance of Domination, the fastest, hits every 0.7 s. */
 .fxbox{position:relative;max-width:600px;margin:0 auto}
 .hitfx{position:absolute;inset:5.45% 3.7% 3.6% 3.7%;pointer-events:none;opacity:0}
+/* The flash colours are the category colours (--c-raid, --c-target, --c-spot, --c-enrage). */
 .hitfx.raid{background:rgba(210,54,43,.5);animation:fxflash .7s ease-out forwards}
-.hitfx.shared{background:rgba(224,120,0,.38);animation:fxflash .6s ease-out forwards}
+.hitfx.shared{animation:fxflash .6s ease-out forwards}
+.hitfx.shared.target{background:rgba(28,126,214,.35)}
+.hitfx.shared.spot{background:rgba(194,154,0,.4)}
 .hitfx.enrage{background:rgba(110,14,10,.75);animation:fxflash 1.6s ease-out forwards}
 @keyframes fxflash{from{opacity:1}to{opacity:0}}
-.hitlbl{position:absolute;left:50%;top:8%;transform:translateX(-50%);max-width:94%;overflow:hidden;text-overflow:ellipsis;padding:3px 10px;border-radius:6px;background:var(--ink);color:#fff;font-size:13px;font-weight:700;white-space:nowrap;pointer-events:none;opacity:0}
+/* The hit's name over the arena, after the category's colour mark (with a white ring, so the
+   dark marks show on the dark label). */
+.hitlbl{position:absolute;left:50%;top:8%;transform:translateX(-50%);max-width:94%;display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:6px;background:var(--ink);color:#fff;font-size:13px;font-weight:700;white-space:nowrap;pointer-events:none;opacity:0}
+.hitlbl span{overflow:hidden;text-overflow:ellipsis}
+.hitlbl .cm{width:10px;height:10px;box-shadow:0 0 0 1.5px #fff}
 .hitlbl.show{animation:fxlabel 1.6s ease-out forwards}
-.hitlbl.raid,.hitlbl.enrage{background:#B3261E}
-.hitlbl.tank,.hitlbl.shared{background:#9A4A00}
 @keyframes fxlabel{0%,70%{opacity:1}100%{opacity:0}}
 /* The moving marker in Watch the right moves and the played-back run: your role mark on a white
    halo. Its target is blue, the same "planned, not yet happened" blue as the Mechanics previews:
@@ -216,12 +221,14 @@ button.chip{cursor:pointer}
 .lastans.ok .tag{color:var(--heal-ink)} .lastans.bad .tag{color:var(--miss)}
 .ftl{list-style:none;margin:10px 0 12px;padding:4px;display:grid;gap:3px;align-content:start;min-height:calc(6 * 27px + 8px);border:1.5px solid var(--line);border-radius:8px}
 .ftl li{position:relative;display:flex;justify-content:space-between;gap:8px;height:24px;align-items:center;padding:0 8px;border-radius:5px;background:var(--paper);font-size:13.5px;overflow:hidden}
-.ftl li i{position:absolute;inset:0 auto 0 0;background:var(--tank);opacity:.3}
+.ftl li > i{position:absolute;inset:0 auto 0 0;background:var(--tank);opacity:.3}
+.ftl li .cms{margin-right:6px;vertical-align:middle}
+.ftl li > span{display:inline-flex;align-items:center}
 .ftl li span,.ftl li b{position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ftl li b{font-family:var(--font-mono);font-weight:500;flex:none}
-.ftl li.soon i{background:var(--miss);opacity:.45}
+.ftl li.soon > i{background:var(--miss);opacity:.45}
 .ftl li.now{box-shadow:inset 0 0 0 2px var(--ink)}
-.ftl li.now i{background:var(--miss);opacity:.6}
+.ftl li.now > i{background:var(--miss);opacity:.6}
 .ftl li.rw span{font-weight:700}
 .ftl li.idle{background:none;color:var(--ink-2)}
 .fctl{display:flex;align-items:center;gap:10px;margin-top:16px;padding-top:12px;border-top:1.5px solid var(--line)}
@@ -314,11 +321,9 @@ th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-trans
 td.t{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 td.n{font-weight:700;min-width:170px}
 .chip{display:inline-block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:99px;margin-top:4px;white-space:nowrap}
-.k-raidwide{background:var(--warn-soft);color:var(--warn)}
-.k-buster{background:#E4EBF8;color:var(--tank)}
-.k-heal{background:var(--heal-soft);color:var(--heal-ink)}
-.k-mech{background:var(--paper);color:var(--ink-2)}
-.k-enrage{background:var(--miss-soft);color:var(--miss)}
+/* The cheat-sheet timeline: each row's colour marks and category names, as in the fight list. */
+td.n .cmline{margin-top:4px;gap:6px;font-size:12px;font-weight:400}
+.sheet .cmkey{border-bottom:0;padding:0 0 8px;font-size:12px}
 .sheet ul.rules{margin:0;padding-left:20px;display:grid;gap:10px;max-width:72ch}
 .mini{margin:0;min-width:0}
 .mini svg{display:block;width:100%;max-width:340px;height:auto;margin:0 auto}

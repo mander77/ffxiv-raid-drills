@@ -25,6 +25,10 @@ export const PUDDLE_R = yalms(6);
     the arena ("range 60 30-degree cone"). */
 export const PROTEAN_HALF = 15;
 export const PROTEAN_LEN = yalms(60);
+/** Raw Steel Trophy, scythe: half the angle of the cone on each tank ("range 60 90-degree
+    cone") and of the cone the party shares ("range 60 45-degree cone"), in degrees. */
+export const RAW_TANK_HALF = 45;
+export const RAW_STACK_HALF = 22.5;
 /** The Great Wall of Fire line buster: its full width ("range 60 width 6 rect"). */
 export const WALL_W = yalms(6);
 /** Every tower: the Arena Split towers (Explosion), the Ecliptic Stampede towers and Heartbreak

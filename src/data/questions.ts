@@ -1,6 +1,7 @@
 // Quiz questions: mechanics, raise decisions, and questions made from the timeline.
 import { S, shuffle } from "../util";
 import { P1, P2, P3, P4, TL } from "./timeline";
+import { tlAbilities } from "./abilities";
 import type { Question, QuizItem, Slot, TimelineEvent } from "../types";
 
 export const ANDREW = "Andrew's rule";
@@ -255,8 +256,10 @@ export const DEATH: QuizItem[] = [
 ];
 
 /* ---------- generated timeline questions ---------- */
+/** A raidwide row: the mechanic the row is named for (its first fight-list ability) is raid damage. */
+const isRaidwide = (i: number): boolean => tlAbilities(i)[0]?.cats.includes("raid") ?? false;
 // Each raidwide name once. Crown of Arcadia happens six times, so the Set removes the repeats.
-const RAIDWIDE_NAMES = [...new Set(TL.filter(e => e.k === "raidwide").map(e => e.n))];
+const RAIDWIDE_NAMES = [...new Set(TL.filter((_e, i) => isRaidwide(i)).map(e => e.n))];
 export const NEXT_ITEMS: QuizItem[] = [];
 TL.slice(0, -1).forEach((ev, i) => {
   NEXT_ITEMS.push({id:"n-" + i, order:i, phase:"Timeline", time:ev.t, build:s => {
@@ -271,7 +274,7 @@ TL.slice(0, -1).forEach((ev, i) => {
   }});
   /* The next raidwide, by name only. Knowing which one comes next and whether it is soon is
      enough to plan a mitigation. The exact time is not asked. */
-  const j = TL.findIndex((e, x) => x > i && e.k === "raidwide");
+  const j = TL.findIndex((_e, x) => x > i && isRaidwide(x));
   if(j > i){
     NEXT_ITEMS.push({id:"r-" + i, order:i + 0.5, phase:"Timeline", time:ev.t, build:s => {
       const right = TL[j], between = TL.slice(i + 1, j);

@@ -5,7 +5,7 @@
 // sheet runs up to 3 seconds later in the later phases. Where a sheet row has no colour (a row
 // with two abilities, for example), it takes the colours of the abilities it names.
 // The notes are written for this app.
-import { P1, P2, P3, P4 } from "./timeline";
+import { P1, P2, P3, P4, TL } from "./timeline";
 
 /** The sheet's colour codes. "spot" is the sheet's "Positioning Required". */
 export type Cat = "raid" | "tank" | "spot" | "dodge" | "target" | "mech" | "enrage";
@@ -127,7 +127,7 @@ export const PHASES: Array<{name: string; rows: Ability[]}> = [
     [342.9, "Triple Tyrannhilation", ["raid", "spot"], N.triple]
   ])},
   {name:P3, rows:rows([
-    [361.8, "Flatliner", ["spot"], N.flatliner, ["m-split-line"]],
+    [361.8, "Flatliner", ["raid", "spot"], N.flatliner, ["m-split-line"]],
     [375.9, "Majestic Meteor", ["mech"], N.majestic],
     [389.0, "Meteor towers", ["spot"], N.towers, ["m-split-tower"]],
     [400.0, "Meteor baits x3", [], N.meteorBaits],
@@ -164,3 +164,20 @@ export const PHASES: Array<{name: string; rows: Ability[]}> = [
 
 /** Every row in one list, with its phase. The fight list numbers its rows by this order. */
 export const ABILITIES: Array<Ability & {phase: string}> = PHASES.flatMap(p => p.rows.map(a => ({...a, phase:p.name})));
+
+/** The categories of the abilities at t seconds, for a line of the fight timeline. */
+export const catsAt = (t: number): Cat[] => [...new Set(ABILITIES.filter(a => Math.abs(a.t - t) < 0.05).flatMap(a => a.cats))];
+
+/** The fight-list abilities that one row of the cheat-sheet timeline (TL) covers: from its time
+    to the next row's time. TL times are rounded cast starts, so each bound is a second early. */
+export function tlAbilities(i: number): Ability[] {
+  const sec = (m: string): number => { const [a, b] = m.split(":").map(Number); return a * 60 + b; };
+  const t0 = sec(TL[i].t) - 1, t1 = i + 1 < TL.length ? sec(TL[i + 1].t) - 1 : Infinity;
+  return ABILITIES.filter(a => a.t >= t0 && a.t < t1);
+}
+/** A TL row's categories, in the order of the colour key, so it shows the same marks as the
+    fight list. */
+export function tlCats(i: number): Cat[] {
+  const found = new Set(tlAbilities(i).flatMap(a => a.cats));
+  return (Object.keys(CATS) as Cat[]).filter(c => found.has(c));
+}

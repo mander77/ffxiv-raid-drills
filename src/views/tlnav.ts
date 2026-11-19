@@ -25,10 +25,13 @@ export function marks(cats: Cat[]): string {
   return '<span class="cms" aria-hidden="true">' + (cats.length ? cats : ["none"]).map(c => '<i class="cm ' + c + '"></i>').join("") + "</span>";
 }
 export const catNames = (cats: Cat[]): string => cats.map(c => CATS[c]).join(", ") || "No category";
+/** The colour key: every category with its mark. The fight list, the cheat sheet and Real time
+    all use these colours. */
+export const catKey = (): string =>
+  '<div class="cmkey">' + (Object.keys(CATS) as Cat[]).map(c => "<span>" + marks([c]) + CATS[c] + "</span>").join("") + "</div>";
 
 export function tlNav(o: NavOpts = {}): string {
-  const key = (Object.keys(CATS) as Cat[]).map(c => "<span>" + marks([c]) + CATS[c] + "</span>").join("");
-  let i = 0, h = '<nav class="drillnav tlnav" aria-label="Fight timeline"><div class="cmkey">' + key + "</div><ol>";
+  let i = 0, h = '<nav class="drillnav tlnav" aria-label="Fight timeline">' + catKey() + "<ol>";
   for(const ph of PHASES){
     // "Phase 1: Trophy Weapons" shows as a band: the phase number above, the name below.
     const [num, name = ""] = ph.name.split(": ");

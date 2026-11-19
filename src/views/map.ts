@@ -3,7 +3,7 @@ import { esc, el, newCode, random, withSeed } from "../util";
 import { state, getDeck, record, view, setChoices, type MapCur } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter, f1 } from "../geometry";
 import { sceneSVG, drawOverlay, drawBoss, zoneSVG } from "../arena";
-import { BOSS, MAPS, changes } from "../data/drills";
+import { BOSS, MAPS, changes, facingNext } from "../data/drills";
 import { PUDDLE_R } from "../data/attacks";
 import { ABILITIES } from "../data/abilities";
 import { clock, choicesText, parseChoices, RANDOM, type Choices, type Picks } from "../data/fight";
@@ -66,7 +66,11 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
   // Cues show with their step's question and stay. They go on top of the puddles so that
   // a marker on an old puddle stays visible.
   const cues = sc.steps.slice(0, asking + 1).flatMap(st => st.cue ?? []).map(o => drawOverlay(rotOverlay(o, k))).join("");
-  if(boss === undefined) boss = sc.bossAt ? sc.bossAt(n) : (sc.boss ? rotOverlay(sc.boss, k) : null);
+  if(boss === undefined){
+    boss = sc.bossAt ? sc.bossAt(n) : (sc.boss ? rotOverlay(sc.boss, k) : null);
+    // Asking the next weapon: he has already turned to face it.
+    if(boss && n > 0 && !showLast) boss = facingNext(sc, n, boss);
+  }
   const layer = (id: string): Element => svg.querySelector("#" + id) as Element;
   layer("reveal-layer").innerHTML = rev;
   layer("drops").innerHTML = drops + cues;

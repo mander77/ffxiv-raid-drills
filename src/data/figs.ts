@@ -8,7 +8,7 @@
 import { S, withSeed } from "../util";
 import { DEG, angOf, rotOverlay, unit, zoneCenter } from "../geometry";
 import { MAPS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, type Run, type Weapon, type WeaponType } from "./drills";
-import { PUDDLE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, aoe, axeHit, cleave, swordCross } from "./attacks";
+import { PUDDLE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, swordCross } from "./attacks";
 import type { Boss, Fig, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
 type Role = "T" | "D" | "H";
@@ -175,7 +175,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
       show([...SCYTHE_CLEAVES, ...TANKS_APART, ...cluster([50, 66], NONTANK, 3)]),
       show([...AXE_HITS, ...TANKS_TOGETHER, ...AXE_SPREAD]),
       show([...proteans(CENTER, all), ...all]),
-      show([cleave(CENTER, 317), cleave(CENTER, 43), cleave(CENTER, 0), ...TANKS_APART, ...north])]}; },
+      show([cleave(CENTER, 317, RAW_TANK_HALF), cleave(CENTER, 43, RAW_TANK_HALF), cleave(CENTER, 0, RAW_STACK_HALF), ...TANKS_APART, ...north])]}; },
   "k-raw-second": s => { const d = fromDrill("m-raw-scythe", s);
     return {overlays:[tag(50, 8, "0:18 WAS AXE")], boss:BOSS, before:[tag(...HELD_TAG, "?")], after:[...d.overlays, ...SCYTHE_CLEAVES], answer:d.answer, options:[
       show([...SCYTHE_CLEAVES, ...heldWeapon("scythe"), ...TANKS_APART]),
