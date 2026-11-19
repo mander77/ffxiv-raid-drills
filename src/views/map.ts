@@ -187,7 +187,15 @@ export function drawMapPanel(): void {
   const p = el("map-panel");
   p.innerHTML = h;
   // The same prompt above the arena, where your eyes are when you click.
-  el("m-hud").innerHTML = done ? hudPrompt("✓", "Done. Press Enter for the next drill.", true) : hudPrompt((n + 1) + "/" + sc.steps.length, sc.steps[n].q);
+  // When the drill is done, the HUD shows the result and the Next drill button. On a phone the
+  // panel is below the arena, so this keeps the button in view without scrolling.
+  if(done){
+    const right = c.results.filter(x => x.ok).length, all = right === sc.steps.length;
+    const result = all ? (multi ? "All steps right" : "Right") : multi ? right + " of " + sc.steps.length + " right" : "Not there";
+    el("m-hud").innerHTML = '<div class="hud"><div class="hq done ' + (all ? "ok" : "bad") + '"><b class="hcount">' + (all ? "&#10003;" : "&#10007;") + "</b><span>" + result +
+      '</span><button type="button" class="btn" id="hud-next">Next drill</button></div></div>';
+    el("hud-next").addEventListener("click", nextMap);
+  } else el("m-hud").innerHTML = hudPrompt((n + 1) + "/" + sc.steps.length, sc.steps[n].q);
   document.getElementById("setup-toggle")?.addEventListener("click", () => { c.setupOpen = !c.setupOpen; drawMapPanel(); });
   p.querySelectorAll<HTMLButtonElement>("[data-peek]").forEach(b => b.addEventListener("click", () => { c.peek = Number(b.dataset.peek); drawMapPanel(); }));
   document.getElementById("map-replay")?.addEventListener("click", replaySpawns);
