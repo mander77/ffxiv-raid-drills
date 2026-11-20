@@ -37,6 +37,12 @@ make sure that each one still matches the code before you start it.
     fight's per-frame updates stay direct DOM changes.
   - Shared state uses `@preact/signals`. Phase 7 (#10) adds Biome and knip.
   - Keep the `TS note:` comments, and add notes for the Preact features too.
+- Issue #11: make the repository self-contained. A new person should get Node 24, the GitHub CLI
+  and the other tools in one step after the clone.
+- Issue #12: shared helpers, from a second code review. Do it before Phase 5 (#8).
+- Issue #13: party slot types. A slot has two parts, the light party (1 or 2) and the role (Tank,
+  Healer, Melee, Ranged). Casters count as Ranged. The role switch gets the same two parts.
+  Saved settings and links keep the short names (H1, H2).
 
 ## What the reviews say must not change
 

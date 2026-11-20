@@ -186,6 +186,15 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
   questions are open for the owner. Ask them before you build it.
 - Issues #3 to #10 (label "preact"): move the views to Preact, one phase per issue and per branch,
   in order. Start with phase 0 (#3). `docs/decisions.md` has the decisions behind the plan.
+- Issue #11: make the repository self-contained, so a clone plus one step gives every tool. Three
+  questions are open for the owner.
+- Issue #12: shared helpers for logic that is written several times (`polar`, `stepZone`, the
+  time helpers). Do it before Phase 5 (#8) splits `fight.ts`.
+- Issue #13: party slot types, built from two parts: the light party (1 or 2) and the role (Tank,
+  Healer, Melee, Ranged). It also passes the route into `render` and gives Practice one `phase`.
+  If it is not done before Phase 6 (#9), fold its state changes into #9.
+- Issues #3, #4, #12 and #13 hold findings from a second code review. #3 has two open questions
+  for the owner: the fight end time, and the attack sizes in `figs.ts`.
 - The issues were written before some later changes. Before you start one, make sure that it
   still matches the code.
 
