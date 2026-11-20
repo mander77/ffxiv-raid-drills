@@ -133,6 +133,13 @@ main{padding-block:20px 56px}
 }
 .arena{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:10px}
 .arena svg{display:block;width:100%;max-width:600px;height:auto;margin:0 auto;aspect-ratio:108/110;cursor:crosshair;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+/* Practice: the map is the main thing on the screen. The text panel gets a narrow column, and the
+   map grows until the whole arena fits in the window height (but never below 420px). */
+.mapwrap .stage{grid-template-columns:minmax(0,1fr) 280px;gap:16px}
+.mapwrap .arena svg{max-width:min(100%,max(420px,calc((100vh - 270px) * 108 / 110)))}
+/* At this width the mechanic list is a strip above the map, so the map starts lower. */
+@media (max-width:1100px){.mapwrap .arena svg{max-width:min(100%,max(420px,calc((100vh - 360px) * 108 / 110)))}}
+@media (max-width:860px){.mapwrap .stage{grid-template-columns:minmax(0,1fr)}}
 /* The HUD right above the arena floor: the boss cast bar, the prompt and the time left, so your
    eyes stay on the field, as they do in the game. */
 .hud{display:grid;gap:6px;max-width:600px;margin:0 auto 8px}
