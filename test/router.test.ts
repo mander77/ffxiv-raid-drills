@@ -7,7 +7,7 @@ import { ABILITIES } from "../src/data/abilities";
 
 test("every card in every tab has a path that reads back to the same card", () => {
   const routes: Route[] = [
-    {tab:"home"}, {tab:"pressure"}, {tab:"sheet"}, {tab:"about"}, {tab:"map"}, {tab:"fight"},
+    {tab:"home"}, {tab:"pressure"}, {tab:"sheet"}, {tab:"map"}, {tab:"fight"},
     ...MECH.map((q): Route => ({tab:"mech", card:q.id})),
     ...NEXT_ITEMS.map((q): Route => ({tab:"next", card:q.id})),
     ...DEATH.map((q): Route => ({tab:"death", card:q.id})),
