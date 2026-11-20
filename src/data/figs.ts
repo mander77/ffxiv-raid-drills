@@ -87,13 +87,16 @@ const youAt = (s: Slot, p: Point, r = 5, more: Overlay[] = []): Preview => show(
 /** You in zone z: at `p` when the zone has a best spot (see Step.stand), else at its shown spot. */
 const youIn = (s: Slot, z: Zone, p?: Point): Preview => show([you(s, p ?? zoneCenter(z))], [z]);
 
-/** One step of a map drill as a picture: its floor, boss and pieces, then what it hits and its answer zone. */
-function fromDrill(id: string, s: Slot, v: string | null = null, k = 0): Fig & {zone: Zone} {
+/** One step of a map drill as a picture: its floor, boss and pieces, then what it hits and its
+    answer zone, with you on your spot (on top of the boss's ring, which can cover a close spot). */
+function fromDrill(id: string, s: Slot, v: string | null = null, k = 0): Fig & {zone: Zone; hits: Overlay[]} {
   const m = MAPS.find(x => x.id === id);
   if(!m) throw new Error("missing drill " + id);
   const sc = m.build(s, v), st = sc.steps[k];
   if(!st.z) throw new Error(id + " step " + k + " has no fixed zone");
-  return {overlays:sc.overlays, boss:sc.boss ?? sc.bossAt?.(k), split:sc.split, after:st.reveal, answer:[st.z], zone:st.z};
+  // `hits` is what the step hits, without you, for previews that draw their own players.
+  const hits = st.reveal ?? [];
+  return {overlays:sc.overlays, boss:sc.boss ?? sc.bossAt?.(k), split:sc.split, after:[...hits, you(s, st.stand ?? zoneCenter(st.z))], answer:[st.z], zone:st.z, hits};
 }
 
 /** The boss jumps from the middle to one weapon. `zone` is your spot, `zoneOther` your co-healer's,
@@ -169,13 +172,13 @@ const AXE_HITS = [stackHit(TANKS_TOGETHER, 4), ...spreadHits(AXE_SPREAD)];
 // the function or undefined, and the caller must check before it calls it.
 export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
   "k-raw-first": s => { const d = fromDrill("m-raw-scythe", s), north = cluster([50, 35], NONTANK, 3), all = clockRing(33);
-    return {overlays:heldWeapon("scythe"), boss:BOSS, after:[...TANKS_APART, ...SCYTHE_CLEAVES], answer:d.answer, options:[
+    return {overlays:heldWeapon("scythe"), boss:BOSS, after:[...TANKS_APART, ...SCYTHE_CLEAVES, ...cluster([50, 66], NONTANK, 3)], answer:d.answer, options:[
       show([...SCYTHE_CLEAVES, ...TANKS_APART, ...cluster([50, 66], NONTANK, 3)]),
       show([...AXE_HITS, ...TANKS_TOGETHER, ...AXE_SPREAD]),
       show([...proteans(CENTER, all), ...all]),
       show([cleave(CENTER, 317, RAW_TANK_HALF), cleave(CENTER, 43, RAW_TANK_HALF), cleave(CENTER, 0, RAW_STACK_HALF), ...TANKS_APART, ...north])]}; },
   "k-raw-second": s => { const d = fromDrill("m-raw-scythe", s);
-    return {overlays:[tag(50, 8, "0:18 WAS AXE")], boss:BOSS, before:[tag(...HELD_TAG, "?")], after:[...d.overlays, ...SCYTHE_CLEAVES], answer:d.answer, options:[
+    return {overlays:[tag(50, 8, "0:18 WAS AXE")], boss:BOSS, before:[tag(...HELD_TAG, "?")], after:[...d.overlays, ...SCYTHE_CLEAVES, ...cluster([50, 66], NONTANK, 3)], answer:d.answer, options:[
       show([...SCYTHE_CLEAVES, ...heldWeapon("scythe"), ...TANKS_APART]),
       show([...AXE_HITS, ...heldWeapon("axe"), ...TANKS_TOGETHER, ...AXE_SPREAD]),
       show([tag(...HELD_TAG, "AXE OR SCYTHE")]),
@@ -210,12 +213,12 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
       show([...stackOn("R1"), tag(68, 83, "STACK, RANDOM DPS")]),
       show([...spreadHits(stackedMarks), ...ALL.map(([l]) => target(inStack(l))), tag(68, 83, "8 STACKS")])]}; },
   "k-void-spread": s => { const gaps = cometSpread(s)(VOID_RESULTS), spreadWith = (p: Point): Overlay[] => spreadHits([...FIXED_SPREAD_MARKS, you(s, p)]);
-    return {overlays:[...PUDDLE_PIECES, ...FIXED_SPREAD_MARKS], boss:BOSS, answer:[gaps], options:[
+    return {overlays:[...PUDDLE_PIECES, ...FIXED_SPREAD_MARKS], boss:BOSS, after:[...spreadWith(zoneCenter(gaps)), you(s, zoneCenter(gaps))], answer:[gaps], options:[
       hit(youIn(s, gaps), spreadWith(zoneCenter(gaps))), hit(youAt(s, [37, 71]), spreadWith([37, 71])),
       show([stackHit(stackedMarks), ...stackedMarks]), hit(youAt(s, [50, 58], 9), [donut(CENTER, 11)])]}; },
   "k-void-run": s => { const R = buildRun(s, faceApproach(weapons([[270, "scythe"]]))), toward = cometSpread(s, R.W[0].p)(VOID_RESULTS), lb = zoneCenter(toward);
     const waitAt = S<Point>(s, [83, 50], [50, 83]);
-    return {overlays:[...PUDDLE_PIECES, ...named(R), ...FIXED_SPREAD_MARKS], boss:STILL, answer:[toward],
+    return {overlays:[...PUDDLE_PIECES, ...named(R), ...FIXED_SPREAD_MARKS], boss:STILL, after:[aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], answer:[toward],
       note:"Example: the first weapon of the second set is a scythe in the west.", options:[
         show([aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], [toward]),
         show([aoe(waitAt, SPREAD_R), you(s, waitAt), say("WAIT FOR HIS FACING", 8)], [cometSpread(s)(VOID_RESULTS)]),
@@ -228,7 +231,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
       show(inOrder(W, [2, 1, 0]), [circle(W[2].p, 9)]),
       show([you(s, [24, 33]), ...path([W[1].p]), numAt(W[1], "1")], [circle(W[1].p, 9)])]}; },
   "k-void-2": s => { const gaps = cometSpread(s)(VOID_RESULTS), pairs = pairsAt(GAPS), me = you(s, zoneCenter(gaps));
-    return {overlays:[...PUDDLE_PIECES, tag(50, 8, "1ST ENDED: STACK")], boss:BOSS, after:[tag(50, 94, "2ND ENDS: SPREAD"), ...FIXED_SPREAD_MARKS], answer:[gaps], options:[
+    return {overlays:[...PUDDLE_PIECES, tag(50, 8, "1ST ENDED: STACK")], boss:BOSS, after:[tag(50, 94, "2ND ENDS: SPREAD"), ...spreadHits([...FIXED_SPREAD_MARKS, me]), ...FIXED_SPREAD_MARKS, me], answer:[gaps], options:[
       show([...spreadHits([...FIXED_SPREAD_MARKS, me]), ...FIXED_SPREAD_MARKS, me], [gaps]),
       show([stackHit(stackedMarks), ...stackedMarks]),
       show([...pairs.map(p => stackHit(p)), ...pairs.flat()]),
@@ -237,8 +240,8 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
   // show as their stack only, and the waymarks stay readable.
   "k-dance": s => { const d = fromDrill("m-dance", s), pairs = [cluster(DANCE_PAIRS.H1, PAIRED.slice(4, 6), 2), cluster(DANCE_PAIRS.H2, PAIRED.slice(6, 8), 2)];
     const tankPairs = [aoe(DANCE_PAIRS.MT, SPREAD_R), aoe(DANCE_PAIRS.OT, SPREAD_R)];
-    return {overlays:[tag(50, 8, "DANCE OF DOMINATION")], boss:d.boss, after:[RAIDWIDE, ...d.overlays, tag(50, 16, "7 HITS, THEN PAIRS")], answer:d.answer, options:[
-      show([RAIDWIDE, ...d.after ?? [], ...tankPairs, ...pairs.map(p => stackHit(p)), ...pairs.flat(), tag(50, 16, "7 RAIDWIDES, THEN PAIRS")]),
+    return {overlays:[tag(50, 8, "DANCE OF DOMINATION")], boss:d.boss, after:[RAIDWIDE, ...d.overlays, ...S(s, pairs[0], pairs[1]), tag(50, 16, "7 HITS, THEN PAIRS")], answer:d.answer, options:[
+      show([RAIDWIDE, ...d.hits, ...tankPairs, ...pairs.map(p => stackHit(p)), ...pairs.flat(), tag(50, 16, "7 RAIDWIDES, THEN PAIRS")]),
       show([aoe([50, 36], 7), mark(50, 36, "MT", "T"), target([50, 36]), tag(50, 16, "ONE TANK BUSTER")]),
       show([RAIDWIDE, tag(50, 16, "EVERYONE TO 1 HP")]),
       show([...d.overlays, tag(50, 16, "NO DAMAGE")])]}; },
@@ -286,7 +289,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
         show([...proteans(CENTER, [...tankMarks, ...spread]), ...spread])]}; },
   "k-orbital": s => { const sides = [{poly:[[50, 50], [0, 0], [0, 100]] as Point[]}, {poly:[[50, 50], [100, 0], [100, 100]] as Point[]}];
     const frontBack: Overlay[] = [{t:"poly", pts:[[50, 50], [0, 0], [100, 0]]}, {t:"poly", pts:[[50, 50], [0, 100], [100, 100]]}];
-    return {overlays:[], boss:BOSS, after:frontBack, answer:sides, options:[
+    return {overlays:[], boss:BOSS, after:[...frontBack, you(s, S<Point>(s, [36, 52], [64, 52]))], answer:sides, options:[
       show([...frontBack, you(s, S<Point>(s, [36, 52], [64, 52]))], sides),
       hit(youAt(s, [50, 64]), [half("north")]), hit(youAt(s, [50, 36]), [half("south")]), hit(youAt(s, [50, 94]), [aoe(CENTER, 35)])]}; },
   "k-orbital-move": s => {
@@ -353,7 +356,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
         hit(youAt(s, middle, 6), [breath(middle)])]}; },
   "k-split-towers23": s => { const d = fromDrill("m-split-tower", s), last = S<Point>(s, [19, 88], [81, 12]);
     const answer = S(s, TOWER_SW, TOWER_NE), first = S(s, TOWER_NW, TOWER_SE), odd = S(s, TOWER_NE, TOWER_SW);
-    return {overlays:[...d.overlays, you(s, last)], split:true, boss:BOSS, answer:[circle(answer, TOWER_R)],
+    return {overlays:[...d.overlays, you(s, last)], split:true, boss:BOSS, after:[guide(last, answer)], answer:[circle(answer, TOWER_R)],
       note:"Example: your last tether or marker was in the " + S(s, "southwest", "northeast") + " quadrant.", options:[
         show([guide(last, answer)], [circle(answer, TOWER_R)]),
         show([guide(last, first)], [circle(first, TOWER_R)]),
@@ -374,7 +377,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
       show([...apart, ...ROWS.flatMap(y => [guide([12, y], [3, y]), guide([88, y], [97, y])]), say("KNOCKBACK", 8)])]}; },
   // He grabs the platform he faces. Each answer draws the grab where that answer expects it.
   "k-slab": s => { const grab = (r: [number, number, number, number]): Overlay => ({t:"lane", rect:r}), west = grab([0, 0, 25.5, 100]), east = grab([74.5, 0, 100, 100]);
-    return {overlays:[], split:true, boss:{x:50, y:50, f:270}, after:[west, tag(13, 50, "GRABBED")],
+    return {overlays:[], split:true, boss:{x:50, y:50, f:270}, after:[west, tag(13, 50, "GRABBED"), you(s, [87, 40])],
       answer:[EAST], note:"Example: he faces the west platform.", options:[
         show([west, you(s, [87, 40])], [EAST]), show([east, you(s, [13, 40])], [WEST]),
         hit(youAt(s, [50, 62], 10), [west, east]), show([east, you(s, [13, 40]), guide([87, 40], [13, 40])], [WEST])]}; },
@@ -414,7 +417,7 @@ export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
   // Two-way Fireball is two line stacks from the boss, east and west. Four-way is four line stacks
   // of two players each, NW, NE, SW and SE. Both are 6 yalms wide (BossMod).
   "k-ecl-two": s => { const d = fromDrill("m-ecl-two", s, "north");
-    return {...d, options:[
+    return {...d, after:[...d.hits, you(s, [32, 50])], options:[
       show([lineTo(CENTER, [0, 50]), you(s, [32, 50])], [d.zone]), show([lineTo(CENTER, [100, 50]), you(s, [68, 50])], [rect(60, 43, 84, 57)]),
       hit(youAt(s, [43, 43], 5.5), [lineTo(CENTER, [43, 43])]), show([aoe(CENTER, 9), you(s, [50, 58])], [circle(CENTER, 9)])]}; },
   "k-ecl-four": s => { const d = fromDrill("m-ecl-four", s, "south");
