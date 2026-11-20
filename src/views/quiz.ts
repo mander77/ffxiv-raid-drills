@@ -6,6 +6,7 @@ import { showRoute } from "../router";
 import { showPressureQ } from "./pressure";
 import { MECH_FIGS } from "../data/figs";
 import { figSVG } from "../arena";
+import { timelineFig } from "./tlfig";
 import type { Fig, QuizItem } from "../types";
 
 /** The card on screen. Only call this while a multiple-choice card shows. */
@@ -80,6 +81,8 @@ function showPicked(): void {
 
 export function drawMCQ(): void {
   const c = card(), item = c.item, q = c.q, p = el("q-panel"), fig = figOf(c), pv = previews(c);
+  // A Timeline question has a picture of the fight timeline at that moment instead.
+  const tl = fig ? null : timelineFig(item, c.answered, q.options.find(o => o.ok)?.t ?? "");
   let prog = "";
   if(c.cat === "pressure"){ const pr = state.pressure; if(pr) prog = "Question " + (pr.i + 1) + " of " + pr.queue.length; }
   else { const d = getDeck(c.cat); prog = "Card " + (d.i + 1) + " of " + d.items.length; }
@@ -91,6 +94,7 @@ export function drawMCQ(): void {
   // A Mechanics question has an arena picture beside the answers (above them on a phone).
   // The Pressure round shows it too, because it asks the same questions.
   if(fig) h += '<div class="qgrid"><figure class="qfig" id="q-fig">' + figHTML(c, fig, c.sel) + '</figure><div class="qmain">';
+  else if(tl) h += '<div class="qgrid"><figure class="qfig qtl">' + tl + '</figure><div class="qmain">';
   h += '<div class="opts" role="group" aria-label="Answers">';
   c.opts.forEach((o, i) => {
     let cls = "opt";
@@ -116,9 +120,9 @@ export function drawMCQ(): void {
   } else {
     h += '<p class="hint" style="margin-top:12px">Press <kbd>1</kbd> to <kbd>' + c.opts.length + "</kbd> or click an answer.</p>";
   }
-  if(fig) h += "</div></div>";
+  if(fig || tl) h += "</div></div>";
   p.innerHTML = h;
-  p.parentElement?.classList.toggle("wide", Boolean(fig));
+  p.parentElement?.classList.toggle("wide", Boolean(fig || tl));
   p.querySelectorAll<HTMLElement>(".opt").forEach(b => {
     const i = Number(b.dataset.i);
     if(!pv){ b.addEventListener("click", () => answer(i)); return; }
