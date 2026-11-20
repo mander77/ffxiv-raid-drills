@@ -235,7 +235,8 @@ button.chip{cursor:pointer}
 .arena .fctl{margin-top:10px;padding-top:10px}
 .fgear[aria-pressed="true"]{background:var(--heal-soft)}
 .fbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:8px}
-.fbar .linkbtn{display:inline;margin:0}
+.fbar .fbtns{display:flex;gap:8px}
+.fbar .btn{font-size:14px;padding:3.5px 14px}
 .fbar .hint{margin:0;font-size:12px}
 /* On a phone the slider gets its own row under the buttons, so it is wide enough to drag. */
 @media (max-width:560px){.arena .fctl{flex-wrap:wrap}.arena .fctl input[type=range]{order:5;flex-basis:100%}.arena .fctl .ftime{margin-right:auto}}

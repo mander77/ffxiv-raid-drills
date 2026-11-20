@@ -266,7 +266,7 @@ function playBar(f: Fight): string {
     '<datalist id="f-marks">' + f.segs.map(g => '<option value="' + g.from + '"></option>').join("") + "</datalist>" +
     '<div class="fbar" id="f-bar"><div class="seg small" role="group" aria-label="Speed">' +
     SPEEDS.map(n => '<button type="button" data-set="fspeed" data-val="' + n + '" aria-pressed="' + (n === settings.speed) + '">' + n + "x</button>").join("") + "</div>" +
-    '<button type="button" class="linkbtn" id="f-restart">Start over</button><button type="button" class="linkbtn" id="f-new">New fight</button>' +
+    '<span class="fbtns"><button type="button" class="btn ghost" id="f-restart">Start over</button><button type="button" class="btn ghost" id="f-new">New fight</button></span>' +
     '<span class="hint"><kbd>Space</kbd> play or pause &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 5 seconds</span></div>';
 }
 
