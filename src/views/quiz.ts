@@ -96,26 +96,26 @@ export function drawMCQ(): void {
   if(fig) h += '<div class="qgrid"><figure class="qfig" id="q-fig">' + figHTML(c, fig, c.sel) + '</figure><div class="qmain">';
   else if(tl) h += '<div class="qgrid"><figure class="qfig qtl">' + tl + '</figure><div class="qmain">';
   h += '<div class="opts" role="group" aria-label="Answers">';
+  // After the answer, the right answer holds its own explanation, and a wrong pick is tagged.
+  const okPick = c.answered && c.pick >= 0 && c.opts[c.pick].ok;
   c.opts.forEach((o, i) => {
-    let cls = "opt";
-    if(c.answered){ if(o.ok) cls += " ok"; else if(i === c.pick) cls += " bad"; else cls += " dim"; }
+    let cls = "opt", more = "";
+    if(c.answered){
+      if(o.ok){ cls += " ok"; more = '<span class="optwhy"><b>Right answer.</b> ' + esc(q.why) + "</span>"; }
+      else if(i === c.pick){ cls += " bad"; more = ' <span class="opttag">Your pick</span>'; }
+      else cls += " dim";
+    }
     else if(pv && i === c.sel) cls += " sel";
     const pressed = pv && !c.answered ? ' aria-pressed="' + (i === c.sel) + '"' : "";
-    h += '<button type="button" class="' + cls + '" data-i="' + i + '"' + pressed + (c.answered ? " disabled" : "") + '><span class="key">' + (i + 1) + "</span><span>" + esc(o.t) + "</span></button>";
+    h += '<button type="button" class="' + cls + '" data-i="' + i + '"' + pressed + (c.answered ? " disabled" : "") + '><span class="key">' + (i + 1) + "</span><span>" + esc(o.t) + more + "</span></button>";
   });
   h += "</div>";
   if(c.answered){
-    // A right answer gets one green card with the explanation. A wrong or a missed one gets a
-    // short card that says so, then the green card names the right answer and explains it, so
-    // the explanation never reads as if it were about your pick.
-    const ok = c.pick >= 0 && c.opts[c.pick].ok, right = c.opts.find(o => o.ok);
-    if(ok) h += '<div class="fb ok" role="status"><h3>Right</h3><p>' + esc(q.why) + "</p></div>";
-    else {
-      h += c.slow
-        ? '<div class="fb slow" role="status"><h3>Too slow</h3><p>In the fight, this is the moment you would stand still. Any action beats freezing.</p></div>'
-        : '<div class="fb bad" role="status"><h3>Not this one</h3><p>You picked: ' + esc(c.opts[c.pick]?.t ?? "") + "</p></div>";
-      h += '<div class="fb ok"><h3>Right answer</h3><p class="fbans">' + esc(right?.t ?? "") + "</p><p>" + esc(q.why) + "</p></div>";
-    }
+    // The colours on the answers say how it went. A screen reader hears it, and a timeout gets
+    // its own card: freezing is what the quick round trains you out of.
+    h += c.slow
+      ? '<div class="fb slow" role="status"><h3>Too slow</h3><p>In the fight, this is the moment you would stand still. Any action beats freezing.</p></div>'
+      : '<p class="sr" role="status">' + (okPick ? "Right." : "Not this one.") + "</p>";
     h += '<div class="rule"><span>Rule</span><strong>' + esc(q.rule) + "</strong></div>";
     if(q.src) h += '<p class="src">Source: ' + esc(q.src) + "</p>";
     h += '<div class="actions"><button type="button" class="btn" id="q-next">Next</button><span class="hint"><kbd>Enter</kbd> next</span></div>';

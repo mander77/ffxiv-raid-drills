@@ -303,8 +303,11 @@ button.chip{cursor:pointer}
 .fb h3{margin:0 0 4px;font-family:var(--font-display);font-size:22px;letter-spacing:.02em;text-transform:uppercase}
 .fb.ok h3{color:var(--heal-ink)} .fb.bad h3{color:var(--miss)} .fb.slow h3{color:var(--warn)}
 .fb p{margin:6px 0 0}
-.fb + .fb{margin-top:8px}
-.fb .fbans{font-weight:700}
+/* After an answer: the right answer holds its explanation, and a wrong pick has a tag. */
+.optwhy{display:block;margin-top:8px;padding-top:8px;border-top:1px solid rgba(27,116,72,.25);font-size:14px;color:var(--heal-ink)}
+.optwhy b{color:var(--heal)}
+.opttag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--miss);color:#fff;font-size:11px;font-weight:700;vertical-align:1px}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .rule{margin-top:14px;padding:12px 14px;border-radius:8px;background:var(--paper);display:grid;gap:2px}
 .rule span{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
 .rule strong{font-size:16px}
