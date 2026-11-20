@@ -31,7 +31,6 @@ interface Run {
   fight: Fight;
   slot: Slot;                // the role the fight was built for; another role builds a new fight
   t: number;                 // fight time in seconds
-  count: number;             // the run: seconds left in the 3-2-1 before the fight clock starts
   answeredAt: number;        // the run: fight time of your last answer, so its result shows for a moment
   results: StepResult[][];   // one list per segment
   clicks: Click[];           // the run: your clicks, for the route your marker runs
@@ -168,13 +167,12 @@ function wireSpeed(root: Element): void {
 }
 
 /* ---------- the run and the player ---------- */
-/** How long the 3-2-1 before the run takes, in seconds. */
-const COUNTDOWN = 3;
 function startRun(mode: Mode, fight: Fight, paused = false, settingsOpen = false): void {
   stopTimer();
-  // The run starts LEAD seconds before the first mechanic, as after each skip.
+  // The run starts LEAD seconds before the first mechanic, as after each skip, so it opens with
+  // the 3-2-1 of the first mechanic.
   const t = mode === "run" ? Math.max(0, fight.segs[0].from - LEAD) : 0, hits = buildHits(fight), after = hits.findIndex(h => h.t > t);
-  R = {mode, fight, slot:state.slot, t, count:mode === "run" ? COUNTDOWN : 0, answeredAt:-Infinity, results:fight.segs.map(() => []), clicks:[], paused,
+  R = {mode, fight, slot:state.slot, t, answeredAt:-Infinity, results:fight.segs.map(() => []), clicks:[], paused,
        last:performance.now(), shown:"", hits, nextHit:after < 0 ? hits.length : after, bossAt:[50, 50],
        // In the run the marker runs to your clicks; on the player it shows the right moves.
        route:mode === "watch" ? rightRoute(fight) : clickRoute(fight, []), zoneKey:"",
@@ -195,7 +193,7 @@ function mount(): void {
   const box = '<div class="fxbox"><div id="f-arena"></div><div class="hitlbl" id="f-hit" role="status"></div>';
   if(r.mode === "run"){
     view.innerHTML = tabHead() + '<div class="runwrap"><div class="arena">' + HUD + box +
-      '<div class="runfb" id="f-fb" role="status"></div><div class="runcount" id="f-count"></div>' +
+      '<div class="runfb" id="f-fb" role="status"></div><div class="runcount" id="f-count" hidden><b id="f-count-n"></b><span id="f-count-name"></span></div>' +
       '<div class="runpause" id="f-pause" hidden><button type="button" class="btn" id="f-resume">Resume</button></div></div>' +
       '<div class="runbar"><span id="f-prog"></span><button type="button" class="btn ghost" id="f-play">Pause</button>' +
       '<button type="button" class="btn ghost" id="f-quit">Quit</button></div></div></div>';
@@ -304,41 +302,37 @@ function tick(now: number): void {
   const dt = Math.max(0, Math.min(0.25, (now - r.last) / 1000));
   r.last = now;
   const f = r.fight;
-  if(r.count > 0){
-    // The 3-2-1 before the run: the fight clock waits.
-    if(!r.paused) r.count -= dt;
-  } else {
-    // The run is at real speed. The player runs at the speed you picked.
-    if(!r.paused) r.t += dt * (r.mode === "run" ? 1 : speed);
-    // The run skips the waits. After your last click on a mechanic, its last hit lands at once.
-    // Once its result has shown for RESULT_HOLD seconds, or with nothing on the floor, the run
-    // goes on to a moment before the next mechanic, and it ends after the last one.
-    if(r.mode === "run" && !r.paused){
-      const si = activeSeg(f, r.t), g = si >= 0 ? f.segs[si] : null, last = g ? g.due[g.due.length - 1] : 0;
-      const done = g != null && r.results[si].length >= g.due.length;
-      if(done && r.t < last - 0.05) jump(r, last - 0.05);
-      else if(!g || (done && r.t >= last + RESULT_HOLD)){
-        const nx = f.segs.find(x => x.from > r.t);
-        if(!nx) return finish();
-        if(nx.from - r.t > LEAD) jump(r, nx.from - LEAD);
-      }
+  // The run is at real speed. The player runs at the speed you picked.
+  if(!r.paused) r.t += dt * (r.mode === "run" ? 1 : speed);
+  // The run skips the waits. After your last click on a mechanic, its last hit lands at once.
+  // Once its result has shown for RESULT_HOLD seconds, or with nothing on the floor, the run
+  // goes on to LEAD seconds before the next mechanic (its 3-2-1, see countdown), and it ends
+  // after the last one.
+  if(r.mode === "run" && !r.paused){
+    const si = activeSeg(f, r.t), g = si >= 0 ? f.segs[si] : null, last = g ? g.due[g.due.length - 1] : 0;
+    const done = g != null && r.results[si].length >= g.due.length;
+    if(done && r.t < last - 0.05) jump(r, last - 0.05);
+    else if(!g || (done && r.t >= last + RESULT_HOLD)){
+      const nx = f.segs.find(x => x.from > r.t);
+      if(!nx) return finish();
+      if(nx.from - r.t > LEAD) jump(r, nx.from - LEAD);
     }
-    // Damage going out: each hit shows once, on the frame the clock passes it.
-    while(r.nextHit < r.hits.length && r.hits[r.nextHit].t <= r.t) showHit(r, r.hits[r.nextHit++]);
-    f.segs.forEach((g, si) => {
-      const j = r.results[si].length;
-      if(j >= g.due.length || r.t < g.from) return;
-      // The player answers at the hit, with the spot the marker ran to (see data/route.ts):
-      // the blue target turns green as the mechanic goes off. A look-ahead step (which weapon is
-      // first) has no hit, and the next step follows it closely, so the player answers it
-      // LOOK_SHOW seconds early: the right weapon then stays on the floor before the next question.
-      const at = r.mode === "watch" && g.scene.steps[j].look ? Math.max(g.from, g.due[j] - LOOK_SHOW) : g.due[j];
-      if(r.mode === "watch" && r.t >= at) return answer(si, r.route?.find(s => s.si === si && s.j === j)?.p ?? null);
-      if(r.t < g.due[j]) return;
-      answer(si, null, true);
-    });
-    if(r.t >= f.end) return finish();
   }
+  // Damage going out: each hit shows once, on the frame the clock passes it.
+  while(r.nextHit < r.hits.length && r.hits[r.nextHit].t <= r.t) showHit(r, r.hits[r.nextHit++]);
+  f.segs.forEach((g, si) => {
+    const j = r.results[si].length;
+    if(j >= g.due.length || r.t < g.from) return;
+    // The player answers at the hit, with the spot the marker ran to (see data/route.ts):
+    // the blue target turns green as the mechanic goes off. A look-ahead step (which weapon is
+    // first) has no hit, and the next step follows it closely, so the player answers it
+    // LOOK_SHOW seconds early: the right weapon then stays on the floor before the next question.
+    const at = r.mode === "watch" && g.scene.steps[j].look ? Math.max(g.from, g.due[j] - LOOK_SHOW) : g.due[j];
+    if(r.mode === "watch" && r.t >= at) return answer(si, r.route?.find(s => s.si === si && s.j === j)?.p ?? null);
+    if(r.t < g.due[j]) return;
+    answer(si, null, true);
+  });
+  if(r.t >= f.end) return finish();
   frame();
   state.raf = requestAnimationFrame(tick);
 }
@@ -390,7 +384,7 @@ function onClick(e: MouseEvent): void {
   // On the player, a click on the map pauses it or plays it again, like a video.
   if(r.mode === "watch") return togglePause();
   // The run takes your spots, but not during the 3-2-1 or a pause.
-  if(r.paused || r.count > 0) return;
+  if(r.paused) return;
   const si = activeSeg(r.fight, r.t), g = si >= 0 ? r.fight.segs[si] : null, j = g ? r.results[si].length : 0;
   // No answer before the question shows (a weapon only once the boss turns to the first one),
   // or while the last result shows.
@@ -526,8 +520,13 @@ function updateLive(r: Run): void {
   const f = r.fight, set = (id: string, s: string): void => { const n = document.getElementById(id); if(n && n.textContent !== s) n.textContent = s; };
   const si = activeSeg(f, r.t), play = document.getElementById("f-play");
   if(r.mode === "run"){
-    // The 3-2-1, the pause screen, the Pause button and your progress.
-    set("f-count", r.count > 0 ? String(Math.ceil(r.count)) : "");
+    // The 3-2-1 before each mechanic: in the last LEAD seconds before it, while no step is asked.
+    // It runs on the fight clock, so a pause stops it too.
+    const g = si >= 0 ? f.segs[si] : null, asking = g != null && r.results[si].length < g.due.length;
+    const nx = asking ? null : f.segs.find(x => x.from > r.t), left = nx ? nx.from - r.t : 0;
+    document.getElementById("f-count")?.toggleAttribute("hidden", !(nx && left > 0 && left <= LEAD));
+    if(nx && left > 0 && left <= LEAD){ set("f-count-n", String(Math.ceil(left))); set("f-count-name", nx.title); }
+    // The pause screen, the Pause button and your progress.
     document.getElementById("f-pause")?.toggleAttribute("hidden", !r.paused);
     if(play) set("f-play", r.paused ? "Resume" : "Pause");
     const i = si >= 0 ? si : f.segs.findIndex(x => x.from > r.t);
