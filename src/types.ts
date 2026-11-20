@@ -76,9 +76,8 @@ export interface Boss { x: number; y: number; f: number | null; d?: Point }
 
 /* ---------- map drills ---------- */
 
-/** One answered step. In the full-fight tab, `missed` means time ran out with no click, and
-    `skipped` means the slider jumped past it (it does not count in the score). */
-export interface StepResult { p: Point; ok: boolean; z: Zone; drop: Point | null; missed?: boolean; skipped?: boolean }
+/** One answered step. In the full fight, `missed` means time ran out with no click. */
+export interface StepResult { p: Point; ok: boolean; z: Zone; drop: Point | null; missed?: boolean }
 
 export interface Step {
   q: string;
@@ -88,7 +87,7 @@ export interface Step {
   zf?: (results: StepResult[]) => Zone;
   drop?: boolean;
   /** A look-ahead step: you click to show what you have spotted (a weapon, for example), but you
-      do not move there. The moving marker in Real time skips it. */
+      do not move there. The moving marker in "Watch the right moves" skips it. */
   look?: boolean;
   /** The best spot to stand when the zone has one, for example a few steps in from the
       sword pocket's inner corner. The moving marker goes there instead of

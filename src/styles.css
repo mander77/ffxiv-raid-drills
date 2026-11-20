@@ -177,7 +177,7 @@ main{padding-block:20px 56px}
 .hitlbl .cm{width:10px;height:10px;box-shadow:0 0 0 1.5px #fff}
 .hitlbl.show{animation:fxlabel 1.6s ease-out forwards}
 @keyframes fxlabel{0%,70%{opacity:1}100%{opacity:0}}
-/* The moving marker in Watch the right moves and the played-back run: your role mark on a white
+/* The moving marker in Watch the right moves and in the run: your role mark on a white
    halo. Its target is blue, the same "planned, not yet happened" blue as the Mechanics previews:
    a dotted line to it, a ring on the exact spot, and (in the watched run) the right area as a
    .zone.pick. At the hit the answer turns the area green. */
@@ -240,11 +240,26 @@ button.chip{cursor:pointer}
 .fbar .hint{margin:0;font-size:12px}
 /* On a phone the slider gets its own row under the buttons, so it is wide enough to drag. */
 @media (max-width:560px){.arena .fctl{flex-wrap:wrap}.arena .fctl input[type=range]{order:5;flex-basis:100%}.arena .fctl .ftime{margin-right:auto}}
-.fsum{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:6px}
-.fsum li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:14.5px}
-.fsum .fs-time{font-family:var(--font-mono);font-size:12px;color:var(--ink-2);min-width:3.2em}
-.fsum .fs-chips{display:flex;gap:4px}
-.fsum .chip{height:24px;min-width:26px;font-size:12px;padding:0 6px}
+/* The run: as on Practice, the map is the main thing on the screen, and it grows until the
+   whole arena fits in the window height. Over it: the 3-2-1, your result for a moment, and the
+   pause screen. Under it: your progress, Pause and Quit. */
+.runwrap{max-width:calc(max(420px,(100vh - 350px) * 108 / 110) + 22px);margin:0 auto}
+.runwrap .hud,.runwrap .fxbox,.runwrap .arena svg{max-width:none}
+.runbar{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1.5px solid var(--line)}
+.runbar span{margin-right:auto;font-family:var(--font-mono);font-size:13px;color:var(--ink-2)}
+.runbar .btn{font-size:14px;padding:6px 16px}
+.runcount{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-size:min(120px,30vw);font-weight:700;line-height:1;color:var(--ink);background:rgba(255,255,255,.6);pointer-events:none}
+.runcount:empty{display:none}
+.runpause{position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,255,255,.75)}
+.runpause[hidden]{display:none}
+.runfb{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);padding:5px 14px;border-radius:999px;color:#fff;font-size:15px;font-weight:700;white-space:nowrap;pointer-events:none;opacity:0}
+.runfb.ok{background:var(--heal)} .runfb.bad{background:var(--miss)} .runfb.slow{background:var(--warn)}
+.runfb.show{animation:fxlabel 1.4s ease-out forwards}
+/* The end of the run: each mechanic with a wrong or missed spot, and its link to Practice. */
+.fmiss-h{margin:18px 0 4px;font-size:18px}
+.fmiss{list-style:none;margin:0;padding:0}
+.fmiss li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+.fmiss .btn{flex:none;font-size:14px;padding:5px 12px;text-decoration:none}
 
 .qwrap{max-width:780px;margin:0 auto}
 /* The Pressure start screen: the quick round and the full fight, one under the other. */
@@ -332,7 +347,7 @@ button.chip{cursor:pointer}
 
 .big{font-family:var(--font-display);font-weight:700;font-size:46px;line-height:1;font-variant-numeric:tabular-nums}
 .tally{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
-.tally div{flex:1 1 120px;border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.tally>div{flex:1 1 120px;border:1px solid var(--line);border-radius:8px;padding:12px 14px}
 .tally span{display:block;font-size:13px;color:var(--ink-2)}
 .tally .ok .big{color:var(--heal)} .tally .bad .big{color:var(--miss)} .tally .slow .big{color:var(--warn)}
 

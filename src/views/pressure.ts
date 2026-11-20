@@ -5,7 +5,7 @@ import { state, view, weighted, record, stopTimer } from "../core";
 import { MECH, NEXT_ITEMS } from "../data/questions";
 import { tabHead } from "./common";
 import { prepMCQ, drawMCQ } from "./quiz";
-import { fightWanted, fightNeedsSlot, renderFight, startFullFight } from "./fight";
+import { fightWanted, fightNeedsSlot, renderFight, startFightRun, watchFight } from "./fight";
 
 /** A link to a fight opens it, and a new role (H1 or H2) keeps the fight on screen. Otherwise the
     start screen shows. */
@@ -20,15 +20,16 @@ export function renderPressureStart(): void {
     '<div class="ctrl" style="margin-top:14px"><span id="secs-lbl">Seconds to decide</span><div class="seg small" role="group" aria-labelledby="secs-lbl">' +
     [4, 6, 8, 10].map(n => '<button type="button" id="secs-' + n + '" data-secs="' + n + '" aria-pressed="' + (state.psecs === n) + '">' + n + "</button>").join("") +
     '</div></div><div class="actions"><button type="button" class="btn" id="p-start">Start</button><span class="hint"><kbd>Enter</kbd> start</span></div></div>' +
-    '<div class="panel"><div class="eyebrow"><b>Full fight</b><span>To the enrage at 10:59</span></div>' +
-    "<h2>The whole fight on the clock</h2><p>Every mechanic in order. Click your spot before each hit lands.</p>" +
-    '<div class="actions"><button type="button" class="btn" id="p-fight">Start the full fight</button></div></div></div>';
+    '<div class="panel"><div class="eyebrow"><b>Full fight</b><span>Every mechanic in order</span></div>' +
+    "<h2>The whole fight on the clock</h2><p>Click your spot before each hit lands. The quiet time between mechanics is skipped.</p>" +
+    '<div class="actions"><button type="button" class="btn" id="p-fight">Start the run</button><button type="button" class="btn ghost" id="p-watch">Watch the right moves</button></div></div></div>';
   state.cur = {kind:"pstart"};
   view.querySelectorAll<HTMLElement>("[data-secs]").forEach(b => b.addEventListener("click", () => {
     state.psecs = Number(b.dataset.secs); LS.set("psecs", state.psecs); renderPressureStart();
   }));
   el("p-start").addEventListener("click", startPressure);
-  el("p-fight").addEventListener("click", startFullFight);
+  el("p-fight").addEventListener("click", startFightRun);
+  el("p-watch").addEventListener("click", watchFight);
 }
 
 export function startPressure(): void {

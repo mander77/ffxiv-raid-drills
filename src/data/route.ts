@@ -1,5 +1,5 @@
-// The route a player runs in Real time: from spot to spot, leaving each spot right after its hit.
-// "Watch the right moves" runs the right spots, and "Your run, played back" runs your own clicks.
+// The route your marker runs in the full fight: from spot to spot, leaving each spot right after
+// its hit. "Watch the right moves" runs the right spots, and the run goes to your own clicks.
 // The position comes from the fight time, so pausing, the slider and the speed setting stay in
 // step with it.
 //

@@ -1,5 +1,4 @@
-// Painting the answer layers on an arena: Practice, the full fight under Pressure, and its
-// "Step through my run" screen all use it.
+// Painting the answer layers on an arena: Practice and the full fight under Pressure use it.
 import { rotOverlay, zoneCenter, f1 } from "../geometry";
 import { drawOverlay, paintBoss, zoneSVG, hitsSVG } from "../arena";
 import { facingNext } from "../data/drills";
