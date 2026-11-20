@@ -1,7 +1,7 @@
 // Multiple-choice cards, used by the quiz tabs and the pressure round.
 import { esc, shuffle, el } from "../util";
 import { state, getDeck, record, view, stopTimer, type McqCur, type QuizCat } from "../core";
-import { tabHead, renderRoundDone } from "./common";
+import { tabHead, renderRoundDone, fadeEdges } from "./common";
 import { showRoute } from "../router";
 import { showPressureQ } from "./pressure";
 import { MECH_FIGS } from "../data/figs";
@@ -117,9 +117,11 @@ export function drawMCQ(): void {
     h += '<div class="tphase" id="timer-lbl">Read</div><div class="timer reading" id="timer" aria-hidden="true"><i style="width:0"></i></div>';
   h += "<h2>" + esc(q.prompt) + "</h2>";
   // A Mechanics question has an arena picture beside the answers (above them on a phone).
-  // The Pressure round shows it too, because it asks the same questions.
-  if(fig) h += '<div class="qgrid"><figure class="qfig" id="q-fig">' + figHTML(c, fig, c.sel) + '</figure><div class="qmain">';
-  else if(tl) h += '<div class="qgrid"><figure class="qfig qtl">' + tl + '</figure><div class="qmain">';
+  // The Pressure round shows it too, because it asks the same questions. There the timer runs,
+  // so on a phone the answers come first ("qfirst") and are all on screen when it starts.
+  const grid = '<div class="qgrid' + (c.cat === "pressure" ? " qfirst" : "") + '">';
+  if(fig) h += grid + '<figure class="qfig" id="q-fig">' + figHTML(c, fig, c.sel) + '</figure><div class="qmain">';
+  else if(tl) h += grid + '<figure class="qfig qtl">' + tl + '</figure><div class="qmain">';
   h += '<div class="opts" role="group" aria-label="Answers">';
   // After the answer, the right answer holds its own explanation, and a wrong pick is tagged.
   const okPick = c.answered && c.pick >= 0 && c.opts[c.pick].ok;
@@ -143,12 +145,14 @@ export function drawMCQ(): void {
       : '<p class="sr" role="status">' + (okPick ? "Right." : "Not this one.") + "</p>";
     h += '<div class="rule"><span>Rule</span><strong>' + esc(q.rule) + "</strong></div>";
     if(q.src) h += '<p class="src">Source: ' + esc(q.src) + "</p>";
-    h += '<div class="actions"><button type="button" class="btn" id="q-next">Next</button><span class="hint"><kbd>Enter</kbd> next</span></div>';
+    h += '<div class="actions"><button type="button" class="btn" id="q-next">Next</button><span class="hint keys"><kbd>Enter</kbd> next</span></div>';
   } else if(pv){
-    h += '<div class="actions"><button type="button" class="btn" id="q-lock"' + (c.sel < 0 ? " disabled" : "") + ">Lock in answer</button>" +
-      '<span class="hint">Pick an answer to see it on the map. <kbd>1</kbd> to <kbd>' + c.opts.length + "</kbd> pick, <kbd>Enter</kbd> lock in.</span></div>";
+    // On a phone the answers are below the picture, so once you pick one, Lock in answer stays
+    // in a bar at the bottom of the screen ("lockbar on", see pickOpt).
+    h += '<div class="actions lockbar' + (c.sel >= 0 ? " on" : "") + '" id="q-actions"><button type="button" class="btn" id="q-lock"' + (c.sel < 0 ? " disabled" : "") + ">Lock in answer</button>" +
+      '<span class="hint">Pick an answer to see it on the map.<span class="keys"> <kbd>1</kbd> to <kbd>' + c.opts.length + "</kbd> pick, <kbd>Enter</kbd> lock in.</span></span></div>";
   } else {
-    h += '<p class="hint" style="margin-top:12px">Press <kbd>1</kbd> to <kbd>' + c.opts.length + "</kbd> or click an answer.</p>";
+    h += '<p class="hint keys" style="margin-top:12px">Press <kbd>1</kbd> to <kbd>' + c.opts.length + "</kbd> or click an answer.</p>";
   }
   if(fig || tl) h += "</div></div>";
   p.innerHTML = h;
@@ -176,6 +180,7 @@ export function drawMCQ(): void {
     // On a phone the chips are one row that scrolls sideways. Scroll the current chip to the middle.
     const row = p.querySelector<HTMLElement>(".qchips"), on = row?.querySelector<HTMLElement>('[aria-current="true"]');
     if(row && on && row.scrollWidth > row.clientWidth) row.scrollLeft = on.offsetLeft - (row.clientWidth - on.offsetWidth) / 2;
+    if(row) fadeEdges(row);
   }
   const nx = document.getElementById("q-next");
   if(nx){ nx.addEventListener("click", nextQ); nx.focus({preventScroll:true}); }
@@ -197,6 +202,7 @@ export function pickOpt(i: number): void {
   // gives HTMLButtonElement instead, which has the `disabled` property.
   const lock = document.querySelector<HTMLButtonElement>("#q-lock");
   if(lock) lock.disabled = false;
+  document.getElementById("q-actions")?.classList.add("on");
   showFig(i);
 }
 

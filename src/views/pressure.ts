@@ -19,9 +19,9 @@ export function renderPressureStart(): void {
     "<h2>Timed questions</h2><p>Questions from Learn and Timeline. Time to read, then a short timer to decide. Aim for zero freezes.</p>" +
     '<div class="ctrl" style="margin-top:14px"><span id="secs-lbl">Seconds to decide</span><div class="seg small" role="group" aria-labelledby="secs-lbl">' +
     [4, 6, 8, 10].map(n => '<button type="button" id="secs-' + n + '" data-secs="' + n + '" aria-pressed="' + (state.psecs === n) + '">' + n + "</button>").join("") +
-    '</div></div><div class="actions"><button type="button" class="btn" id="p-start">Start</button><span class="hint"><kbd>Enter</kbd> start</span></div></div>' +
+    '</div></div><div class="actions"><button type="button" class="btn" id="p-start">Start</button><span class="hint keys"><kbd>Enter</kbd> start</span></div></div>' +
     '<div class="panel"><div class="eyebrow"><b>Full fight</b><span>Every mechanic in order</span></div>' +
-    "<h2>The whole fight on the clock</h2><p>Click your spot before each hit lands. The quiet time between mechanics is skipped.</p>" +
+    "<h2>The whole fight on the clock</h2><p>The run: click your spot before each hit lands. About 5 minutes, with your score at the end. Watch: the whole fight plays with the right moves.</p>" +
     '<div class="actions"><button type="button" class="btn" id="p-fight">Start the run</button><button type="button" class="btn ghost" id="p-watch">Watch the right moves</button></div></div></div>';
   state.cur = {kind:"pstart"};
   view.querySelectorAll<HTMLElement>("[data-secs]").forEach(b => b.addEventListener("click", () => {

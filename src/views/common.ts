@@ -10,6 +10,17 @@ export function tabHead(): string {
   return '<div class="tabhead"><p class="lede">' + esc(t.lede) + "</p></div>";
 }
 
+/** A row that scrolls sideways: mark each edge that has more past it ("fl" left, "fr" right),
+    now and after each scroll, so the CSS can fade that edge. */
+export function fadeEdges(row: HTMLElement): void {
+  const mark = (): void => {
+    row.classList.toggle("fl", row.scrollLeft > 2);
+    row.classList.toggle("fr", row.scrollLeft + row.clientWidth < row.scrollWidth - 2);
+  };
+  mark();
+  row.addEventListener("scroll", mark, {passive:true});
+}
+
 /** One row of toggle buttons with a label. `attr` names the data attribute that the click
     handler looks for (data-set, data-pick); `cur` is the value shown as pressed. */
 export function segRow(attr: string, key: string, label: string, options: Array<[string, string]>, cur: string): string {

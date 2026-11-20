@@ -41,7 +41,8 @@ export function timelineFig(item: QuizItem, answered: boolean, rightName: string
   const i = Number(m[1]), now = toSec(TL[i].t);
   const right = TL.findIndex((e, x) => x > i && e.n === rightName);
   const last = Math.min(TL.length - 1, i + MAX_ROWS, Math.max(i + MIN_ROWS, right));
-  let h = strip(now) + '<ol class="ftl tlq" aria-label="Fight timeline">' +
+  // Before the answer, a short line says why the coming rows read "? ? ?".
+  let h = strip(now) + (answered ? "" : '<p class="tlnote">Coming up: the names show after you answer.</p>') + '<ol class="ftl tlq" aria-label="Fight timeline">' +
     '<li class="now"><i style="width:100%"></i><span>' + marks(tlCats(i)) + esc(TL[i].n) + "</span><b>" + TL[i].t + "</b></li>";
   for(let x = i + 1; x <= last; x++){
     const left = toSec(TL[x].t) - now, fill = Math.max(0, Math.min(1, 1 - left / FILL_AT));

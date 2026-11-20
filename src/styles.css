@@ -69,6 +69,10 @@ nav.tabs::-webkit-scrollbar{display:none}
 nav.tabs button{flex:0 0 auto;font:inherit;font-size:15px;padding:10px 13px 9px;border:0;border-bottom:3px solid transparent;background:none;color:var(--ink-2);cursor:pointer;white-space:nowrap}
 nav.tabs button:hover{color:var(--ink)}
 nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--heal);font-weight:700}
+/* On a phone the six tabs do not fit in one row, so they show as two rows of three. */
+@media (max-width:520px){nav.tabs{display:grid;grid-template-columns:repeat(3,1fr);overflow:visible}nav.tabs button{padding:8px 4px 7px;text-align:center}}
+/* Keyboard hints are no use on a touch screen. */
+@media (hover:none) and (pointer:coarse){.keys{display:none}}
 
 main{padding-block:20px 56px}
 .tabhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;margin-bottom:16px}
@@ -283,7 +287,14 @@ button.chip{cursor:pointer}
 .qnav .btn{padding:5px 12px;font-size:14px}
 .qnav .btn:disabled{opacity:.4;cursor:default}
 .qchips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px;position:relative}
-@media (max-width:640px){.qchips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px}.qchips::-webkit-scrollbar{display:none}.qchip{flex:none;white-space:nowrap}}
+/* On a phone a long chip row is one line that scrolls sideways. An edge with more chips past it
+   fades out ("fl" left, "fr" right, set by fadeEdges in common.ts), so you can see it scrolls. */
+@media (max-width:640px){
+  .qchips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.qchips::-webkit-scrollbar{display:none}.qchip{flex:none;white-space:nowrap}
+  .qchips.fl{-webkit-mask-image:linear-gradient(to right,transparent,#000 32px);mask-image:linear-gradient(to right,transparent,#000 32px)}
+  .qchips.fr{-webkit-mask-image:linear-gradient(to left,transparent,#000 32px);mask-image:linear-gradient(to left,transparent,#000 32px)}
+  .qchips.fl.fr{-webkit-mask-image:linear-gradient(to right,transparent,#000 32px,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(to right,transparent,#000 32px,#000 calc(100% - 32px),transparent)}
+}
 .qchip{font:inherit;font-size:13px;padding:4px 11px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink-2);cursor:pointer}
 .qchip:hover{border-color:var(--heal);color:var(--ink)}
 .qchip[aria-current="true"]{background:var(--heal);border-color:var(--heal);color:#fff;font-weight:700}
@@ -292,12 +303,19 @@ button.chip{cursor:pointer}
 .qfig{grid-area:fig;margin:0}
 .qfig svg{display:block;width:100%;height:auto}
 .qfig figcaption{margin-top:6px;font-size:13px;color:var(--ink-2)}
-@media (max-width:760px){.qgrid{grid-template-columns:minmax(0,1fr);grid-template-areas:"fig" "main";gap:12px}.qfig{width:100%;max-width:210px;margin:0 auto}.qfig.qtl{max-width:none}}
+@media (max-width:760px){.qgrid{grid-template-columns:minmax(0,1fr);grid-template-areas:"fig" "main";gap:12px}.qfig{width:100%;max-width:210px;margin:0 auto}.qfig.qtl{max-width:none}
+  /* The quick round: the answers first, so all of them are on screen when the timer starts. */
+  .qgrid.qfirst{grid-template-areas:"main" "fig"}
+  /* Learn: once you pick an answer, Lock in answer stays in a bar at the bottom of the screen. */
+  .lockbar.on{position:sticky;bottom:0;z-index:2;margin:16px -20px -22px;padding:12px 20px;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -6px 14px rgba(19,26,43,.08)}
+  .lockbar.on .hint{display:none}
+}
 /* A Timeline card's picture: the phase strip with where you are, then the timeline as the cactbot
    overlay shows it. The coming names stay hidden until you answer. */
 .tlfig{display:grid;gap:10px}
 .tlwhere{margin:0;font-size:12.5px;color:var(--ink-2)}
 .tlwhere b{color:var(--ink)}
+.tlnote{margin:10px 0 4px;font-size:12.5px;color:var(--ink-2)}
 .tlstrip{position:relative;display:flex;height:24px;border-radius:6px;overflow:visible;font-size:10.5px;font-weight:700;line-height:1.1}
 .tlstrip span{display:flex;align-items:center;justify-content:center;padding:0 3px;color:#fff;background:var(--ink-2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .tlstrip span:nth-child(odd){background:var(--ink)}
@@ -378,6 +396,7 @@ td.n{font-weight:700;min-width:170px}
 td.n .cmline{margin-top:4px;gap:6px;font-size:12px;font-weight:400}
 .sheet .cmkey{border-bottom:0;padding:0 0 8px;font-size:12px}
 .sheet ul.rules{margin:0;padding-left:20px;display:grid;gap:10px;max-width:72ch}
+.sheet ul.rules .more{font-size:13px;font-weight:700;color:var(--heal-ink);white-space:nowrap}
 .mini{margin:0;min-width:0}
 .mini svg{display:block;width:100%;max-width:340px;height:auto;margin:0 auto}
 .mini figcaption{font-size:13px;color:var(--ink-2);margin:6px auto 0;max-width:340px}

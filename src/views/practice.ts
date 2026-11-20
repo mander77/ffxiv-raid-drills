@@ -47,7 +47,7 @@ function mechSteps(): string {
   const starts = d.items.flatMap((x, i) => i === 0 || x.phase !== d.items[i - 1].phase ? [i] : []);
   const chips = starts.map(i => {
     const ph = d.items[i].phase;
-    return '<button type="button" class="qchip" data-drill-id="' + d.items[i].id + '" title="' + esc(ph) + '"' + (ph === m.phase ? ' aria-current="true"' : "") + ">P" + (ph.match(/\d+/)?.[0] ?? "") + "</button>";
+    return '<button type="button" class="qchip" data-drill-id="' + d.items[i].id + '" title="' + esc(ph) + '"' + (ph === m.phase ? ' aria-current="true"' : "") + ">Phase " + (ph.match(/\d+/)?.[0] ?? "") + "</button>";
   }).join("");
   return '<nav class="mechnav" aria-label="Mechanics"><div class="eyebrow"><b>' + esc(m.phase) + '</b><span class="progress">' + (d.i + 1) + " of " + d.items.length + "</span></div>" +
     '<div class="mn-row"><p class="mn-name">' + esc(m.title) + '</p><div class="qnav">' +
@@ -120,12 +120,15 @@ function drawMapPanel(): void {
   }).join("");
   if(multi) h += '<ol class="chips" aria-label="Steps">' + chips + "</ol>";
   if(!done) h += '<div class="nowq">' + (multi ? "<span>Step " + (n + 1) + " of " + sc.steps.length + "</span>" : "") + esc(sc.steps[n].q) + "</div>";
+  // The rule says why the spot is right: at the end, and with Show me, which gives where.
+  const rule = '<div class="rule"><span>Rule</span><strong>' + esc(sc.rule) + "</strong></div>";
+  if(!done && c.shown) h += rule;
   const r = c.results[n - 1];
   if(r) h += '<div class="lastans ' + (r.ok ? "ok" : "bad") + '"><span class="tag">' + (r.ok ? "Right" : "Not there") + "</span><b>" + esc(sc.steps[n - 1].q) + "</b> " + esc(sc.steps[n - 1].a) + "</div>";
   // A mechanic with nothing random would look the same again, so it gets no new-pattern button.
   const newBtn = changes(c.item) ? '<button type="button" class="btn ghost" id="map-new">New pattern</button>' : "";
   if(done){
-    h += '<div class="rule"><span>Rule</span><strong>' + esc(sc.rule) + "</strong></div>";
+    h += rule;
     h += '<div class="actions"><button type="button" class="btn" id="map-next">Next mechanic</button><button type="button" class="btn ghost" id="map-restart">Again</button>' + newBtn + "</div>";
   } else {
     const row = (sc.spawnPlay ? '<button type="button" class="btn ghost" id="map-replay">Watch the spawns again</button>' : "") + newBtn;

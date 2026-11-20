@@ -32,6 +32,7 @@ interface Run {
   slot: Slot;                // the role the fight was built for; another role builds a new fight
   t: number;                 // fight time in seconds
   count: number;             // the run: seconds left in the 3-2-1 before the fight clock starts
+  answeredAt: number;        // the run: fight time of your last answer, so its result shows for a moment
   results: StepResult[][];   // one list per segment
   clicks: Click[];           // the run: your clicks, for the route your marker runs
   paused: boolean;
@@ -173,7 +174,7 @@ function startRun(mode: Mode, fight: Fight, paused = false, settingsOpen = false
   stopTimer();
   // The run starts LEAD seconds before the first mechanic, as after each skip.
   const t = mode === "run" ? Math.max(0, fight.segs[0].from - LEAD) : 0, hits = buildHits(fight), after = hits.findIndex(h => h.t > t);
-  R = {mode, fight, slot:state.slot, t, count:mode === "run" ? COUNTDOWN : 0, results:fight.segs.map(() => []), clicks:[], paused,
+  R = {mode, fight, slot:state.slot, t, count:mode === "run" ? COUNTDOWN : 0, answeredAt:-Infinity, results:fight.segs.map(() => []), clicks:[], paused,
        last:performance.now(), shown:"", hits, nextHit:after < 0 ? hits.length : after, bossAt:[50, 50],
        // In the run the marker runs to your clicks; on the player it shows the right moves.
        route:mode === "watch" ? rightRoute(fight) : clickRoute(fight, []), zoneKey:"",
@@ -242,7 +243,7 @@ function playBar(f: Fight): string {
     '<div class="fbar" id="f-bar"><div class="seg small" role="group" aria-label="Speed">' +
     SPEEDS.map(n => '<button type="button" data-set="fspeed" data-val="' + n + '" aria-pressed="' + (n === speed) + '">' + n + "x</button>").join("") + "</div>" +
     '<span class="fbtns"><button type="button" class="btn ghost" id="f-restart">Start over</button><button type="button" class="btn ghost" id="f-new">New fight</button></span>' +
-    '<span class="hint">Click the map or <kbd>Space</kbd>: play or pause &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 5 seconds</span></div>';
+    '<span class="hint">Click the map<span class="keys"> or <kbd>Space</kbd></span>: play or pause<span class="keys"> &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 5 seconds</span></span></div>';
 }
 
 /** The address bar on the player holds the fight, its picks and, while paused, the moment, so a
@@ -354,6 +355,7 @@ function answer(si: number, p: Point | null, missed = false): void {
   const ok = !missed && inZone(at, zone);
   res.push({p:at, ok, z:zone, drop:step.drop ? (ok ? at : zoneCenter(zone)) : null, missed});
   if(r.mode !== "run") return;
+  r.answeredAt = r.t;
   // Your marker runs to each spot you click, from the moment you click it.
   if(p){ r.clicks.push({si, j:res.length - 1, t:r.t, p}); r.route = clickRoute(r.fight, r.clicks); }
   if(res.length === g.due.length && g.drills[0]) record(g.drills[0], res.every(x => x.ok));
@@ -368,6 +370,20 @@ function result(kind: "ok" | "bad" | "slow"): void {
   restart(n, "runfb show " + kind);
 }
 
+/** The run: how long the result of a step shows before the next question, in seconds. */
+const RESULT_SHOW = 1.2;
+/** How long "Watch the boss" stays after he starts to turn, so you see the arrow swing, in seconds. */
+const TELL_HOLD = 1;
+/** When step j of segment g can be answered: when it shows (see showOf in data/route.ts). A
+    weapon that waits for the boss's turn waits TELL_HOLD seconds more. */
+function askFrom(g: FightSeg, j: number): number {
+  const s = showOf(g, j);
+  return s > g.from ? s + TELL_HOLD : s;
+}
+/** The run, after you answer a step that is not the last of its mechanic (n steps answered): its
+    result shows for RESULT_SHOW seconds, then it clears and the next question comes. */
+const showingResult = (r: Run, g: FightSeg, n: number): boolean => r.mode === "run" && n > 0 && n < g.due.length && r.t < r.answeredAt + RESULT_SHOW;
+
 function onClick(e: MouseEvent): void {
   const r = R;
   if(!r) return;
@@ -376,8 +392,9 @@ function onClick(e: MouseEvent): void {
   // The run takes your spots, but not during the 3-2-1 or a pause.
   if(r.paused || r.count > 0) return;
   const si = activeSeg(r.fight, r.t), g = si >= 0 ? r.fight.segs[si] : null, j = g ? r.results[si].length : 0;
-  // No answer before the question shows: a weapon only once the boss turns to the first one.
-  if(!g || j >= g.due.length || r.t < showOf(g, j)) return;
+  // No answer before the question shows (a weapon only once the boss turns to the first one),
+  // or while the last result shows.
+  if(!g || j >= g.due.length || r.t < askFrom(g, j) || showingResult(r, g, j)) return;
   const svg = e.currentTarget as SVGSVGElement, ctm = svg.getScreenCTM();
   if(!ctm) return;
   const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
@@ -407,7 +424,10 @@ function frame(): void {
   const where = g ? String(si) : r.t >= f.split[0] && r.t < f.split[1] ? "split" : "idle";
   // On the player, the green answer and what the mechanic did show for GREEN_FOR seconds after
   // the hit, then clear, so the next blue target is the only area on the floor.
-  const lastHit = g && res.length ? g.due[res.length - 1] : -Infinity, showAnswer = res.length > 0 && (r.mode !== "watch" || r.t - lastHit < GREEN_FOR);
+  // In the run, the green answer shows with its result for RESULT_SHOW seconds, then clears so
+  // it is not taken for the answer to the next question. At the end of a mechanic it stays.
+  const lastHit = g && res.length ? g.due[res.length - 1] : -Infinity;
+  const showAnswer = res.length > 0 && (r.mode === "watch" ? r.t - lastHit < GREEN_FOR : res.length >= (g?.due.length ?? 0) || r.t < r.answeredAt + RESULT_SHOW);
   // After a weapon hits, he turns to face the next weapon. He lands on it JUMP_LEAD seconds
   // before it hits.
   const facing = res.length > 0 && r.t >= lastHit + TURN_AFTER;
@@ -478,7 +498,7 @@ function drawPanel(r: Run, si: number): void {
       const nx = nextSeg(f, si);
       if(g.scene.rule) h += '<div class="rule"><span>Rule</span><strong>' + esc(g.scene.rule) + "</strong></div>";
       h += '<div class="actions">' + (nx ? '<button type="button" class="btn" id="f-nextseg">Next: ' + esc(nx.title) + "</button>" : "") +
-        '<button type="button" class="btn ghost" id="f-again">Watch it again</button>' + (nx && r.paused ? '<span class="hint"><kbd>Enter</kbd> next</span>' : "") + "</div>";
+        '<button type="button" class="btn ghost" id="f-again">Watch it again</button>' + (nx && r.paused ? '<span class="hint keys"><kbd>Enter</kbd> next</span>' : "") + "</div>";
     } else if(g.scene.spawnPlay) h += '<div class="actions"><button type="button" class="btn ghost" id="f-spawns">Watch the spawns again</button></div>';
   } else {
     const nx = f.segs.find(x => x.from > r.t), a = ABILITIES.find(x => x.t >= r.t);
@@ -705,7 +725,14 @@ function updateHud(r: Run, si: number): void {
   } else { cast.classList.add("idle"); fill.style.width = "0%"; put("h-name", "No more casts"); put("h-left", ""); }
   // Your prompt and the time left (the step number while paused), or the next mechanic.
   const g = si >= 0 ? f.segs[si] : null, j = g ? r.results[si].length : 0, held = lookHold(r, si);
-  if(g && held >= 0){
+  if(g && showingResult(r, g, j)){
+    // The run: the result of the step you just answered, before the next question.
+    const x = r.results[si][j - 1];
+    box.className = "hq done " + (x.ok ? "ok" : "bad");
+    put("h-count", x.ok ? "✓" : "✗");
+    put("h-text", x.ok ? "Right" : x.missed ? "Too slow" : "Not there. The green area was right.");
+    if(ring) ring.style.display = "none";
+  } else if(g && held >= 0){
     // The look-ahead answer up to its first colon or full stop ("The sword, north: its flat
     // side ..."), shown as saved for later: "Saved for later: the sword, north."
     const a = g.scene.steps[held].a, cut = a.search(/[:.]/), what = cut > 0 ? a.slice(0, cut) : a;
@@ -713,11 +740,11 @@ function updateHud(r: Run, si: number): void {
     put("h-count", "✓");
     put("h-text", "Saved for later: " + what.charAt(0).toLowerCase() + what.slice(1) + ".");
     if(ring) ring.style.display = "none";
-  } else if(g && j < g.due.length && r.t < showOf(g, j)){
+  } else if(g && j < g.due.length && r.t < askFrom(g, j)){
     // A weapon question waits for the tell: the boss turns to face the first weapon.
     box.className = "hq idle";
     put("h-count", "");
-    put("h-text", "Watch the boss: he turns to face the first weapon.");
+    put("h-text", "Watch the boss: the arrow on his ring turns to the first weapon.");
     if(ring) ring.style.display = "none";
   } else if(g && j < g.due.length){
     const left = Math.max(0, g.due[j] - r.t), start = j ? g.due[j - 1] : g.from;
