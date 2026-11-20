@@ -1,14 +1,36 @@
 // Painting the answer layers on an arena: Practice and the full fight under Pressure use it.
-import { rotOverlay, zoneCenter, f1 } from "../geometry";
+import { rotOverlay, rotZone, zoneCenter, f1 } from "../geometry";
 import { drawOverlay, paintBoss, zoneSVG, hitsSVG } from "../arena";
 import { facingNext } from "../data/drills";
 import { PUDDLE_R } from "../data/attacks";
-import type { Boss, Scene, StepResult } from "../types";
+import type { Boss, Scene, StepResult, Zone } from "../types";
 
-/** The tag on the answer area, and its width in arena units. A look-ahead step (spot the first
-    weapon) is not a spot to go to: it is a mechanic saved for later, so it gets its own tag and
-    colour. */
-const TAG = {right:{text:"Right spot", w:17}, later:{text:"Saved for later", w:24}};
+/** The tags on an area, with their width in arena units and their colour class: the answer, a
+    mechanic saved for later, and the hint of Show me in Practice. A look-ahead step (spot the
+    first weapon) is not a spot to go to, so it gets its own tag and colour. */
+const TAG = {right:{text:"Right spot", w:17, cls:""}, later:{text:"Saved for later", w:24, cls:" later"}, go:{text:"Go here", w:14, cls:" pick"}};
+type Tag = typeof TAG.right;
+
+/** A tag over zone z: above it when there is room, else below it, and always inside the picture.
+    It does not name your slot: the moving marker is you, so a slot name would look like a second you. */
+function tagSVG(z: Zone, tag: Tag): string {
+  const ctr = zoneCenter(z);
+  const top = "c" in z ? z.c[1] - z.r : "rect" in z ? z.rect[1] : ctr[1] + 1;
+  const bottom = "c" in z ? z.c[1] + z.r : "rect" in z ? z.rect[3] : ctr[1] - 1;
+  const ly = "fn" in z ? ctr[1] : (top - 3 >= -3 ? top - 3 : bottom + 3);
+  const lx = Math.max(-4 + tag.w / 2, Math.min(104 - tag.w / 2, ctr[0]));
+  return '<g class="zlabel' + tag.cls + '"><rect x="' + f1(lx - tag.w / 2) + '" y="' + f1(ly - 2.1) + '" width="' + tag.w + '" height="4.2" rx=".9"/><text x="' + f1(lx) + '" y="' + f1(ly) + '">' + tag.text + "</text></g>";
+}
+
+/** Show me in Practice: the right area for the next step, in blue with "Go here" (purple with
+    "Saved for later" for a look-ahead step), on top of what paintArena drew. It is not an answer. */
+export function paintHint(svg: Element, sc: Scene, k: number, results: StepResult[]): void {
+  const st = sc.steps[results.length], base = st ? (st.zf ? st.zf(results) : st.z) : undefined;
+  if(!st || !base) return;
+  const z = rotZone(base, k);
+  svg.querySelector("#fb-layer")?.insertAdjacentHTML("beforeend", zoneSVG(z, st.look ? "later" : "pick"));
+  svg.querySelector("#label-layer")?.insertAdjacentHTML("beforeend", tagSVG(z, st.look ? TAG.later : TAG.go));
+}
 
 /* Draw the answer layers on an arena: dropped puddles, cues, the boss, and, with showLast,
    the zone and the click of the last answer. `boss` replaces the scene's boss, for example to
@@ -23,7 +45,7 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
   const kept = sc.steps.slice(0, asking + 1).reduce((from, st, i) => st.clearDrops ? i : from, 0);
   let drops = "", fb = "", rev = "", zlabel = "", me = "";
   results.forEach((r, i) => {
-    const step = sc.steps[i], z = r.z, ctr = zoneCenter(z);
+    const step = sc.steps[i], z = r.z;
     if(r.drop && i >= kept){
       const off = wentOff?.(i) ?? false;
       if(off) goneNow.push(i);
@@ -31,16 +53,10 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
     }
     if(step.leave) drops += drawOverlay(step.leave);
     if(i === n - 1 && showLast){
-      const cls = r.ok ? "ok" : "bad", tag = step.look ? TAG.later : TAG.right;
+      const cls = r.ok ? "ok" : "bad";
       if(step.reveal) rev = hitsSVG(step.reveal.map(o => rotOverlay(o, k)));
       fb = zoneSVG(z, step.look ? "later" : cls);
-      const top = "c" in z ? z.c[1] - z.r : "rect" in z ? z.rect[1] : ctr[1] + 1;
-      const bottom = "c" in z ? z.c[1] + z.r : "rect" in z ? z.rect[3] : ctr[1] - 1;
-      const ly = "fn" in z ? ctr[1] : (top - 3 >= -3 ? top - 3 : bottom + 3);
-      // The tag says what the green area is. It does not name your slot: the moving marker
-      // is you, so a slot name here would look like a second you. It stays inside the picture.
-      const lx = Math.max(-4 + tag.w / 2, Math.min(104 - tag.w / 2, ctr[0]));
-      if(step.look || rightTag) zlabel = '<g class="zlabel' + (step.look ? " later" : "") + '"><rect x="' + f1(lx - tag.w / 2) + '" y="' + f1(ly - 2.1) + '" width="' + tag.w + '" height="4.2" rx=".9"/><text x="' + f1(lx) + '" y="' + f1(ly) + '">' + tag.text + "</text></g>";
+      if(step.look || rightTag) zlabel = tagSVG(z, step.look ? TAG.later : TAG.right);
       if(!r.missed) me = '<g class="pick ' + cls + '" transform="translate(' + f1(r.p[0]) + " " + f1(r.p[1]) + ')"><circle class="halo" r="2.6"/><circle class="dot" r="1.1"/></g>';
     }
   });

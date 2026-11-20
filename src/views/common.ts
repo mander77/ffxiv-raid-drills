@@ -17,10 +17,10 @@ export function segRow(attr: string, key: string, label: string, options: Array<
     options.map(([v, t]) => '<button type="button" data-' + attr + '="' + key + '" data-val="' + v + '" aria-pressed="' + (v === cur) + '">' + t + "</button>").join("") + "</div></div>";
 }
 
-/** The prompt row of the HUD above the arena: a short value on the left (a step count or a time)
-    and the text to read. Real time adds a cast bar and a live countdown above it. */
-export function hudPrompt(count: string, text: string, idle = false): string {
-  return '<div class="hud"><div class="hq' + (idle ? " idle" : "") + '"><b class="hcount">' + esc(count) + "</b><span>" + esc(text) + "</span></div></div>";
+/** The prompt row of the HUD above the Practice arena: the step count on the left, the text to
+    read, and an optional button (HTML) on the right. */
+export function hudPrompt(count: string, text: string, button = ""): string {
+  return '<div class="hud"><div class="hq"><b class="hcount">' + esc(count) + "</b><span>" + esc(text) + "</span>" + button + "</div></div>";
 }
 
 export function renderRoundDone(cat: "map" | QuizCat, d: Deck<unknown>): void {

@@ -17,7 +17,7 @@ import { BOSS, facingNext, jumpsNext } from "../data/drills";
 import { WALL_W, PUDDLE_LIFE } from "../data/attacks";
 import { ABILITIES, CATS, catsAt, type Cat } from "../data/abilities";
 import { marks, catNames } from "./tlnav";
-import { rightRoute, clickRoute, runnerAt, type Stop } from "../data/route";
+import { rightRoute, clickRoute, runnerAt, showOf, type Stop } from "../data/route";
 import { showRoute } from "../router";
 import type { Boss, Overlay, Point, Scene, Slot, StepResult } from "../types";
 
@@ -290,6 +290,8 @@ function activeSeg(f: Fight, t: number): number {
 
 /** With nothing on the floor, the run skips to this many seconds before the next mechanic. */
 const LEAD = 3;
+/** The run: how long the result of a finished mechanic shows after its last hit, in seconds. */
+const RESULT_HOLD = 2;
 
 function tick(now: number): void {
   const r = R;
@@ -307,12 +309,18 @@ function tick(now: number): void {
   } else {
     // The run is at real speed. The player runs at the speed you picked.
     if(!r.paused) r.t += dt * (r.mode === "run" ? 1 : speed);
-    // The run skips the quiet time: with nothing on the floor, it goes on to a moment before
-    // the next mechanic, and it ends after the last one.
-    if(r.mode === "run" && !r.paused && activeSeg(f, r.t) < 0){
-      const nx = f.segs.find(x => x.from > r.t);
-      if(!nx) return finish();
-      if(nx.from - r.t > LEAD) jump(r, nx.from - LEAD);
+    // The run skips the waits. After your last click on a mechanic, its last hit lands at once.
+    // Once its result has shown for RESULT_HOLD seconds, or with nothing on the floor, the run
+    // goes on to a moment before the next mechanic, and it ends after the last one.
+    if(r.mode === "run" && !r.paused){
+      const si = activeSeg(f, r.t), g = si >= 0 ? f.segs[si] : null, last = g ? g.due[g.due.length - 1] : 0;
+      const done = g != null && r.results[si].length >= g.due.length;
+      if(done && r.t < last - 0.05) jump(r, last - 0.05);
+      else if(!g || (done && r.t >= last + RESULT_HOLD)){
+        const nx = f.segs.find(x => x.from > r.t);
+        if(!nx) return finish();
+        if(nx.from - r.t > LEAD) jump(r, nx.from - LEAD);
+      }
     }
     // Damage going out: each hit shows once, on the frame the clock passes it.
     while(r.nextHit < r.hits.length && r.hits[r.nextHit].t <= r.t) showHit(r, r.hits[r.nextHit++]);
@@ -367,8 +375,9 @@ function onClick(e: MouseEvent): void {
   if(r.mode === "watch") return togglePause();
   // The run takes your spots, but not during the 3-2-1 or a pause.
   if(r.paused || r.count > 0) return;
-  const si = activeSeg(r.fight, r.t);
-  if(si < 0 || r.results[si].length >= r.fight.segs[si].due.length) return;
+  const si = activeSeg(r.fight, r.t), g = si >= 0 ? r.fight.segs[si] : null, j = g ? r.results[si].length : 0;
+  // No answer before the question shows: a weapon only once the boss turns to the first one.
+  if(!g || j >= g.due.length || r.t < showOf(g, j)) return;
   const svg = e.currentTarget as SVGSVGElement, ctm = svg.getScreenCTM();
   if(!ctm) return;
   const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
@@ -517,8 +526,10 @@ function updateLive(r: Run): void {
   }
   const tl = document.getElementById("f-tl");
   if(tl){
-    const rows = f.events.filter(e => e.t >= r.t - KEEP && e.t - r.t <= SHOW_AT).slice(0, ROWS);
-    const next = f.events.find(e => e.t > r.t);
+    // cactbot's "--sync--" lines (like "--middle--") are markers, not attacks, so they do not show.
+    const lines = f.events.filter(e => !e.name.startsWith("--"));
+    const rows = lines.filter(e => e.t >= r.t - KEEP && e.t - r.t <= SHOW_AT).slice(0, ROWS);
+    const next = lines.find(e => e.t > r.t);
     tl.innerHTML = rows.length ? rows.map(e => {
       const left = e.t - r.t, fill = Math.max(0, Math.min(1, 1 - left / SHOW_AT));
       const cls = (left <= 0 ? "now" : left <= SOON ? "soon" : "") + (e.raidwide ? " rw" : ""), cats = catsAt(e.t);
@@ -702,6 +713,12 @@ function updateHud(r: Run, si: number): void {
     put("h-count", "✓");
     put("h-text", "Saved for later: " + what.charAt(0).toLowerCase() + what.slice(1) + ".");
     if(ring) ring.style.display = "none";
+  } else if(g && j < g.due.length && r.t < showOf(g, j)){
+    // A weapon question waits for the tell: the boss turns to face the first weapon.
+    box.className = "hq idle";
+    put("h-count", "");
+    put("h-text", "Watch the boss: he turns to face the first weapon.");
+    if(ring) ring.style.display = "none";
   } else if(g && j < g.due.length){
     const left = Math.max(0, g.due[j] - r.t), start = j ? g.due[j - 1] : g.from;
     box.className = "hq" + (left <= URGENT && !r.paused ? " urgent" : "");
@@ -716,7 +733,7 @@ function updateHud(r: Run, si: number): void {
     const nx = f.segs.find(x => x.from > r.t);
     box.className = "hq idle";
     put("h-count", "");
-    put("h-text", g ? "Done. " + (nx ? "Next: " + nx.title : "No more mechanics") : nx ? "Next: " + nx.title + " in " + Math.round(nx.from - r.t) + " s" : "No more mechanics");
+    put("h-text", g ? "Done. " + (nx ? "Next: " + nx.title : "No more mechanics") : nx ? "Next: " + nx.title + " in " + Math.ceil(nx.from - r.t) + " s" : "No more mechanics");
     if(ring) ring.style.display = "none";
   }
 }

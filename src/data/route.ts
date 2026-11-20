@@ -38,7 +38,7 @@ const dist = (a: Point, b: Point): number => Math.hypot(a[0] - b[0], a[1] - b[1]
 
 /** When step j of a mechanic appears for the player: when the mechanic does, but a weapon only
     once the boss turns to the first one. Before that, nobody can know where to go. */
-const showOf = (g: FightSeg, j: number): number =>
+export const showOf = (g: FightSeg, j: number): number =>
   g.turn && j >= g.scene.steps.length - g.turn.weapons ? Math.max(g.from, g.turn.at) : g.from;
 
 /** The middle of the spot to stand on in zone z, coming from `from`. Mostly the middle of the

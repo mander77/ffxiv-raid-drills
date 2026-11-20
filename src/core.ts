@@ -17,7 +17,9 @@ export interface Deck<T> { items: T[]; i: number; right: number; done: number }
 // before it touches map-only fields such as `c.results`.
 /** The Practice mechanic on screen. `code` rebuilds its pattern; `setupOpen` unfolds the setup;
     `stop` holds it after a wrong spot until you press Next step. */
-export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; code: string; results: StepResult[]; counted: boolean; waiting?: boolean; stop?: boolean; setupOpen?: boolean }
+/** One Practice mechanic on screen. `shown` is true while Show me draws the right spot for the
+    step asked; `helped` is true once Show me was used, so this try does not count in your score. */
+export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; code: string; results: StepResult[]; counted: boolean; waiting?: boolean; stop?: boolean; setupOpen?: boolean; shown?: boolean; helped?: boolean }
 /** A multiple-choice card. `opts` are the answers in the order shown; `k` is each one's place in
     the question's own list, which the answer previews follow. `sel` is the answer picked for a
     preview but not locked in yet (-1 for none), and `pick` the one locked in. */

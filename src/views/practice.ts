@@ -7,7 +7,7 @@ import { rotZone, inZone, zoneCenter } from "../geometry";
 import { sceneSVG } from "../arena";
 import { changes } from "../data/drills";
 import { tabHead, renderRoundDone, hudPrompt } from "./common";
-import { paintArena } from "./map";
+import { paintArena, paintHint } from "./map";
 import { showRoute } from "../router";
 import type { Point } from "../types";
 
@@ -65,6 +65,7 @@ function drawFeedback(): void {
   if(!c || c.kind !== "map" || !svg) return;
   const n = c.results.length, showLast = Boolean(c.waiting) || n >= c.scene.steps.length;
   paintArena(svg, c.scene, c.k, c.results, showLast, undefined, i => i <= n - 2);
+  if(c.shown && !c.stop) paintHint(svg, c.scene, c.k, c.results);
 }
 
 export function renderMap(fresh = true): void {
@@ -131,21 +132,30 @@ function drawMapPanel(): void {
     if(row) h += '<div class="actions">' + row + "</div>";
   }
   el("map-panel").innerHTML = h;
-  // Above the arena: the question, or why a spot was wrong with Next step, or the result.
+  // Above the arena: the question with Show me, or why a spot was wrong with Next step, or the
+  // result with Next mechanic and Again.
   if(done){
     const right = c.results.filter(x => x.ok).length, all = right === sc.steps.length;
     el("m-hud").innerHTML = '<div class="hud"><div class="hq done ' + (all ? "ok" : "bad") + '"><b class="hcount">' + (all ? "&#10003;" : "&#10007;") + "</b><span>" +
-      (all ? (multi ? "All steps right" : "Right") : multi ? right + " of " + sc.steps.length + " right" : "Not there") + '</span><button type="button" class="btn" id="hud-next">Next mechanic</button></div></div>';
+      (all ? (multi ? "All steps right" : "Right") : multi ? right + " of " + sc.steps.length + " right" : "Not there") +
+      '</span><span class="hbtns"><button type="button" class="btn" id="hud-next">Next mechanic</button><button type="button" class="btn ghost" id="hud-again">Again</button></span></div></div>';
     el("hud-next").addEventListener("click", nextMap);
+    el("hud-again").addEventListener("click", again);
   } else if(c.stop){
     el("m-hud").innerHTML = '<div class="hud"><div class="hq done bad"><b class="hcount">&#10007;</b><span><b>Not there.</b> ' + esc(sc.steps[n - 1].a) +
       '</span><button type="button" class="btn" id="hud-step">Next step</button></div></div>';
     el("hud-step").addEventListener("click", nextStep);
-  } else el("m-hud").innerHTML = hudPrompt((n + 1) + "/" + sc.steps.length, sc.steps[n].q);
+  } else {
+    // Show me: the right spot for this step, and its answer in place of the question. Your next
+    // click still answers, and this try does not count in your score.
+    el("m-hud").innerHTML = hudPrompt((n + 1) + "/" + sc.steps.length, c.shown ? sc.steps[n].a : sc.steps[n].q,
+      '<button type="button" class="btn ghost" id="hud-show" aria-pressed="' + Boolean(c.shown) + '">' + (c.shown ? "Hide" : "Show me") + "</button>");
+    el("hud-show").addEventListener("click", () => { c.shown = !c.shown; if(c.shown) c.helped = true; drawFeedback(); drawMapPanel(); });
+  }
   document.getElementById("setup-toggle")?.addEventListener("click", () => { c.setupOpen = !c.setupOpen; drawMapPanel(); });
   document.getElementById("map-replay")?.addEventListener("click", () => renderMap(false));
   document.getElementById("map-next")?.addEventListener("click", nextMap);
-  document.getElementById("map-restart")?.addEventListener("click", () => { c.results = []; c.waiting = false; c.stop = false; c.setupOpen = false; renderMap(false); });
+  document.getElementById("map-restart")?.addEventListener("click", again);
   document.getElementById("map-new")?.addEventListener("click", () => renderMap(true));
   // The address bar holds this mechanic and its pattern, so a copied link opens the same one.
   showRoute({tab:"map", drill:c.item.id, code:c.code});
@@ -160,12 +170,21 @@ function onArenaClick(e: MouseEvent): void {
   if(!ctm) return;
   const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
   answerAt(c, [q.x, q.y]);
-  if(c.results.length >= c.scene.steps.length && !c.counted){
+  c.shown = false;
+  // A try with Show me was learning, not a test, so it does not count in your score.
+  if(c.results.length >= c.scene.steps.length && !c.counted && !c.helped){
     c.counted = true;
     const all = c.results.every(r => r.ok), d = getDeck("map");
     record(c.item.id, all); d.done++; if(all) d.right++;
   }
   drawFeedback(); drawMapPanel();
+}
+
+/** Again: the same pattern from its first step, with no help on. */
+function again(): void {
+  const c = run();
+  c.results = []; c.waiting = false; c.stop = false; c.setupOpen = false; c.shown = false; c.helped = false;
+  renderMap(false);
 }
 
 /** Answer the next step with a click at p (arena units). */
