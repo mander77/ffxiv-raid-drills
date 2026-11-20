@@ -1,0 +1,6 @@
+# A personal repository. The global mise config loads a work GitHub token in every folder.
+# Unset it here, so the GitHub CLI and git use the personal account (mander77): the GitHub
+# CLI's stored default account, and git through the repository's credential helper (gh).
+[env]
+GH_TOKEN = false
+GITHUB_TOKEN = false
