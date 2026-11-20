@@ -32,6 +32,9 @@ interface Run {
   slot: Slot;                // the role the fight was built for; another role builds a new fight
   t: number;                 // fight time in seconds
   answeredAt: number;        // the run: fight time of your last answer, so its result shows for a moment
+  stops: boolean;            // the run: stop at each new mechanic, so you can look before the clock runs
+  stoppedAt: number;         // the run: the last segment it stopped at
+  look: boolean;             // the run: stopped at a new mechanic, waiting for Go
   results: StepResult[][];   // one list per segment
   clicks: Click[];           // the run: your clicks, for the route your marker runs
   paused: boolean;
@@ -172,7 +175,8 @@ function startRun(mode: Mode, fight: Fight, paused = false, settingsOpen = false
   // The run starts LEAD seconds before the first mechanic, as after each skip, so it opens with
   // the 3-2-1 of the first mechanic.
   const t = mode === "run" ? Math.max(0, fight.segs[0].from - LEAD) : 0, hits = buildHits(fight), after = hits.findIndex(h => h.t > t);
-  R = {mode, fight, slot:state.slot, t, answeredAt:-Infinity, results:fight.segs.map(() => []), clicks:[], paused,
+  R = {mode, fight, slot:state.slot, t, answeredAt:-Infinity, stops:mode === "run" && LS.get("fstops", false), stoppedAt:-1, look:false,
+       results:fight.segs.map(() => []), clicks:[], paused,
        last:performance.now(), shown:"", hits, nextHit:after < 0 ? hits.length : after, bossAt:[50, 50],
        // In the run the marker runs to your clicks; on the player it shows the right moves.
        route:mode === "watch" ? rightRoute(fight) : clickRoute(fight, []), zoneKey:"",
@@ -194,12 +198,15 @@ function mount(): void {
   if(r.mode === "run"){
     view.innerHTML = tabHead() + '<div class="runwrap"><div class="arena">' + HUD + box +
       '<div class="runfb" id="f-fb" role="status"></div><div class="runcount" id="f-count" hidden><b id="f-count-n"></b><span id="f-count-name"></span></div>' +
-      '<div class="runpause" id="f-pause" hidden><button type="button" class="btn" id="f-resume">Resume</button></div></div>' +
+      '<div class="runpause" id="f-pause" hidden><button type="button" class="btn" id="f-resume">Resume</button></div>' +
+      // With "stop at each new mechanic": a bar at the bottom of the arena, which leaves the floor in view.
+      '<div class="runlook" id="f-look" hidden><span>New mechanic: <b id="f-look-name"></b>. Look at the floor, then press Go.</span><button type="button" class="btn" id="f-go">Go</button></div></div>' +
       '<div class="runbar"><span id="f-prog"></span><button type="button" class="btn ghost" id="f-play">Pause</button>' +
       '<button type="button" class="btn ghost" id="f-quit">Quit</button></div></div></div>';
     el("f-play").addEventListener("click", togglePause);
     el("f-resume").addEventListener("click", togglePause);
     el("f-quit").addEventListener("click", quit);
+    el("f-go").addEventListener("click", togglePause);
   } else {
     // Paused, a badge shows in the row above the arena floor, beside the N.
     view.innerHTML = tabHead() + '<div class="stage"><div class="arena">' + HUD + box +
@@ -222,10 +229,12 @@ function mount(): void {
   state.raf = requestAnimationFrame(tick);
 }
 
-/** Quit the run: back to the start screen of Pressure. */
+/** Quit the run: your score so far, or the start screen of Pressure when you answered nothing. */
 function quit(): void {
+  const r = R;
   stopTimer();
   R = null;
+  if(r && r.results.some(x => x.length)) return renderResult(r, true);
   app.render();
 }
 
@@ -234,14 +243,15 @@ function quit(): void {
    time, Settings, then the speed and the buttons to start over or get a new fight. */
 let dragging = false;
 function playBar(f: Fight): string {
-  return '<div class="fctl"><button type="button" class="btn fplay" id="f-play" aria-label="Play">&#9654;</button>' +
+  // The bar sticks to the bottom of the screen while the arena is in view (.fplaybar).
+  return '<div class="fplaybar"><div class="fctl"><button type="button" class="btn fplay" id="f-play" aria-label="Play">&#9654;</button>' +
     '<input type="range" id="f-seek" min="0" max="' + f.end + '" step="0.1" value="0" list="f-marks" aria-label="Fight time">' +
     '<span class="ftime" id="f-time"></span><button type="button" class="btn ghost fgear" id="f-gear" aria-pressed="false">Settings</button></div>' +
     '<datalist id="f-marks">' + f.segs.map(g => '<option value="' + g.from + '"></option>').join("") + "</datalist>" +
     '<div class="fbar" id="f-bar"><div class="seg small" role="group" aria-label="Speed">' +
     SPEEDS.map(n => '<button type="button" data-set="fspeed" data-val="' + n + '" aria-pressed="' + (n === speed) + '">' + n + "x</button>").join("") + "</div>" +
     '<span class="fbtns"><button type="button" class="btn ghost" id="f-restart">Start over</button><button type="button" class="btn ghost" id="f-new">New fight</button></span>' +
-    '<span class="hint">Click the map<span class="keys"> or <kbd>Space</kbd></span>: play or pause<span class="keys"> &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 5 seconds</span></span></div>';
+    '<span class="hint">Click the map<span class="keys"> or <kbd>Space</kbd></span>: play or pause<span class="keys"> &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 5 seconds</span></span></div></div>';
 }
 
 /** The address bar on the player holds the fight, its picks and, while paused, the moment, so a
@@ -333,6 +343,11 @@ function tick(now: number): void {
     answer(si, null, true);
   });
   if(r.t >= f.end) return finish();
+  // "Stop at each new mechanic": when a mechanic appears on the floor, the run waits for Go.
+  if(r.stops && !r.paused){
+    const si = activeSeg(f, r.t);
+    if(si > r.stoppedAt && r.results[si].length === 0){ r.stoppedAt = si; r.paused = true; r.look = true; r.shown = ""; }
+  }
   frame();
   state.raf = requestAnimationFrame(tick);
 }
@@ -401,6 +416,7 @@ export function togglePause(): void {
   const r = R;
   if(!r) return;
   r.paused = !r.paused;
+  r.look = false;   // Go after a stop at a new mechanic works the same way
   r.last = performance.now();
   r.shown = "";
   frame();
@@ -471,7 +487,7 @@ function lastBox(g: FightSeg, i: number, x: StepResult): string {
 function drawPanel(r: Run, si: number): void {
   if(r.settings) return drawSettings(r);
   const f = r.fight, g = si >= 0 ? f.segs[si] : null, res = g ? r.results[si] : [];
-  let h = '<div class="eyebrow"><b>The right moves</b><span id="f-clock"></span><span>' + speed + "x</span><span>Fight " + f.code + "</span></div>";
+  let h = '<div class="eyebrow"><b>The right moves</b><span id="f-clock"></span><span>' + speed + "x</span></div>";
   h += '<ol class="ftl" id="f-tl" aria-label="Fight timeline"></ol>';
   if(g){
     const j = res.length, n = g.due.length, done = j >= n;
@@ -527,8 +543,11 @@ function updateLive(r: Run): void {
     document.getElementById("f-count")?.toggleAttribute("hidden", !(nx && left > 0 && left <= LEAD));
     if(nx && left > 0 && left <= LEAD){ set("f-count-n", String(Math.ceil(left))); set("f-count-name", nx.title); }
     // The pause screen, the Pause button and your progress.
-    document.getElementById("f-pause")?.toggleAttribute("hidden", !r.paused);
-    if(play) set("f-play", r.paused ? "Resume" : "Pause");
+    // A stop at a new mechanic shows the Go bar, which leaves the floor in view; Pause covers it.
+    document.getElementById("f-pause")?.toggleAttribute("hidden", !r.paused || r.look);
+    document.getElementById("f-look")?.toggleAttribute("hidden", !r.look);
+    if(r.look && si >= 0) set("f-look-name", f.segs[si].title);
+    if(play) set("f-play", r.look ? "Go" : r.paused ? "Resume" : "Pause");
     const i = si >= 0 ? si : f.segs.findIndex(x => x.from > r.t);
     set("f-prog", "Mechanic " + (i < 0 ? f.segs.length : i + 1) + " of " + f.segs.length);
   } else {
@@ -729,7 +748,9 @@ function updateHud(r: Run, si: number): void {
     const x = r.results[si][j - 1];
     box.className = "hq done " + (x.ok ? "ok" : "bad");
     put("h-count", x.ok ? "✓" : "✗");
-    put("h-text", x.ok ? "Right" : x.missed ? "Too slow" : "Not there. The green area was right.");
+    // A look-ahead answer (which weapon is first) is drawn in purple, saved for later.
+    const look = Boolean(g.scene.steps[j - 1].look);
+    put("h-text", x.ok ? "Right" : x.missed ? "Too slow" : look ? "Not that one. The purple one is the weapon to save for later." : "Not there. The green area was right.");
     if(ring) ring.style.display = "none";
   } else if(g && held >= 0){
     // The look-ahead answer up to its first colon or full stop ("The sword, north: its flat
@@ -747,12 +768,15 @@ function updateHud(r: Run, si: number): void {
     if(ring) ring.style.display = "none";
   } else if(g && j < g.due.length){
     const left = Math.max(0, g.due[j] - r.t), start = j ? g.due[j - 1] : g.from;
-    box.className = "hq" + (left <= URGENT && !r.paused ? " urgent" : "");
+    // On the player you watch, so the HUD gives the right move instead of a question to click,
+    // and nothing turns red: no one is timing you.
+    const watch = r.mode === "watch";
+    box.className = "hq" + (left <= URGENT && !r.paused && !watch ? " urgent" : "");
     put("h-count", r.paused ? (j + 1) + "/" + g.due.length : left.toFixed(1));
-    put("h-text", g.scene.steps[j].q);
+    put("h-text", watch ? g.scene.steps[j].a : g.scene.steps[j].q);
     if(ring){
       ring.style.display = r.paused ? "none" : "";
-      ring.classList.toggle("urgent", left <= URGENT);
+      ring.classList.toggle("urgent", left <= URGENT && !watch);
       ring.setAttribute("stroke-dashoffset", (100 * (1 - Math.min(1, left / Math.max(0.1, g.due[j] - start)))).toFixed(1));
     }
   } else {
@@ -776,14 +800,16 @@ function finish(): void {
 
 /* After the run: your score, and each mechanic with a wrong or missed spot, with a link to
    practice it on its own. */
-function renderResult(r: Run): void {
+function renderResult(r: Run, stopped = false): void {
   state.cur = {kind:"fight"};
   const f = r.fight, all = r.results.flat(), right = all.filter(x => x.ok).length, slow = all.filter(x => x.missed).length, wrong = all.length - right - slow;
   const misses = f.segs.filter((_g, si) => r.results[si].some(x => !x.ok));
+  // After Quit: how far you got, counted in mechanics you answered at least once.
+  const reached = r.results.filter(x => x.length).length;
   const list = misses.length ? '<h3 class="fmiss-h">Practice these</h3><ul class="fmiss">' + misses.map(g => "<li><span>" + esc(g.title) + "</span>" +
     (g.drills[0] ? '<a class="btn ghost" href="/map/' + g.drills[0] + '">Practice it</a>' : "") + "</li>").join("") + "</ul>"
-    : "<p>Every spot right. Each run gets a new pattern, so run it again.</p>";
-  show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Full fight</b><span>Done</span></div>' +
+    : stopped ? "<p>Every spot right so far.</p>" : "<p>Every spot right. Each run gets a new pattern, so run it again.</p>";
+  show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Full fight</b><span>' + (stopped ? "Stopped at mechanic " + reached + " of " + f.segs.length : "Done") + "</span></div>" +
     "<h2>" + right + " of " + all.length + " spots right</h2>" +
     '<div class="tally"><div class="ok"><span>Right</span><div class="big">' + right + '</div></div><div class="bad"><span>Wrong</span><div class="big">' + wrong + '</div></div><div class="slow"><span>Too slow</span><div class="big">' + slow + "</div></div></div>" +
     list + '<div class="actions"><button type="button" class="btn" id="f-again">Run again</button><button type="button" class="btn ghost" id="f-watch">Watch the right moves</button></div></div></div>');

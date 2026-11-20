@@ -179,7 +179,7 @@ export function assaultScene(A: Run, s: Slot): Scene {
     overlays:A.overlays,
     bossAt:n => A.states[Math.min(n, A.states.length - 1)],
     steps:A.steps,
-    rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ", a few steps in from its inner corner. Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: stack in the middle."};
+    rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ", a few steps in from its inner corner. Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: the whole party stacks in the middle (not like Raw Steel Trophy's axe, where the party spreads)."};
 }
 export function ultimateScene(U: Run): Scene {
   return {
@@ -501,7 +501,7 @@ export const MAPS: MapDrill[] = [
     build:s=>({setup:"The boss pulls out an axe. The two tanks stack for a shared buster. The other six players each get an AoE, so everyone else spreads.",
       boss:BOSS, overlays:[...heldWeapon("axe"),{t:"mark",x:AXE_TANKS[0] - 3,y:AXE_TANKS[1],l:"MT",r:"T"},{t:"mark",x:AXE_TANKS[0] + 3,y:AXE_TANKS[1],l:"OT",r:"T"}],
       steps:[{q:"Click your spread spot.", z:{c:AXE_SPREAD_SPOTS[s], r:10}, a:S(s,"South-southwest, far out.","South-southeast, far out.")}],
-      rule:"Axe: tanks stack, party spreads. Scythe: tanks spread, party stacks."})},
+      rule:"Raw Steel Trophy (he holds the weapon). Axe: tanks stack, party spreads. Scythe: tanks spread, party stacks."})},
   {id:"m-raw-scythe", order:2.1, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: scythe",
     build:s=>({setup:"The boss pulls out a scythe and cleaves three times: one cone on each tank, and one cone that everyone else shares. So the tanks spread, and the rest of the party stacks.",
       boss:BOSS, overlays:[...heldWeapon("scythe"),{t:"mark",x:37,y:36,l:"MT",r:"T"},{t:"mark",x:63,y:36,l:"OT",r:"T"}],

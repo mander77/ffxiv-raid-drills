@@ -22,6 +22,8 @@ export function renderPressureStart(): void {
     '</div></div><div class="actions"><button type="button" class="btn" id="p-start">Start</button><span class="hint keys"><kbd>Enter</kbd> start</span></div></div>' +
     '<div class="panel"><div class="eyebrow"><b>Full fight</b><span>Every mechanic in order</span></div>' +
     "<h2>The whole fight on the clock</h2><p>The run: click your spot before each hit lands. About 5 minutes, with your score at the end. Watch: the whole fight plays with the right moves.</p>" +
+    // A first run can stop at each new mechanic, so you can look before the clock runs.
+    '<label class="pstops"><input type="checkbox" id="p-stops"' + (LS.get("fstops", false) ? " checked" : "") + "> Stop at each new mechanic, so I can look first</label>" +
     '<div class="actions"><button type="button" class="btn" id="p-fight">Start the run</button><button type="button" class="btn ghost" id="p-watch">Watch the right moves</button></div></div></div>';
   state.cur = {kind:"pstart"};
   view.querySelectorAll<HTMLElement>("[data-secs]").forEach(b => b.addEventListener("click", () => {
@@ -30,6 +32,7 @@ export function renderPressureStart(): void {
   el("p-start").addEventListener("click", startPressure);
   el("p-fight").addEventListener("click", startFightRun);
   el("p-watch").addEventListener("click", watchFight);
+  el<HTMLInputElement>("p-stops").addEventListener("change", e => LS.set("fstops", (e.target as HTMLInputElement).checked));
 }
 
 export function startPressure(): void {

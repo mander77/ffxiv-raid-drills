@@ -156,6 +156,8 @@ main{padding-block:20px 56px}
 .hq .btn{margin-left:auto;flex:none;padding:7px 14px}
 .hq .hbtns{margin-left:auto;display:flex;gap:6px;flex:none}
 .hq .hbtns .btn{margin-left:0}
+/* On a phone the buttons go to a second line when the text and buttons do not fit. */
+@media (max-width:560px){.hq{flex-wrap:wrap}}
 /* The step chips in the HUD: only when the panel is below the arena (phones), where its own
    chips are off screen. */
 .hud .hchips{display:none;margin:0}
@@ -246,6 +248,9 @@ button.chip{cursor:pointer}
 /* The play bar under the arena: play or pause, the fight time and Settings, then the speed, the
    run buttons and the keys. */
 .arena .fctl{margin-top:10px;padding-top:10px}
+/* The player's controls stick to the bottom of the screen while the arena is in view, so play,
+   the slider and the speeds are always at hand, as on a video player. */
+.fplaybar{position:sticky;bottom:0;z-index:3;margin:0 -10px -10px;padding:0 10px 10px;background:var(--card);border-radius:0 0 var(--r) var(--r)}
 .fgear[aria-pressed="true"]{background:var(--heal-soft)}
 .fbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:8px}
 .fbar .fbtns{display:flex;gap:8px}
@@ -268,6 +273,11 @@ button.chip{cursor:pointer}
 .runcount span{font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:.02em;text-transform:uppercase}
 .runpause{position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,255,255,.75)}
 .runpause[hidden]{display:none}
+/* "Stop at each new mechanic": a bar at the bottom of the arena with Go, so the floor stays in view. */
+.runlook{position:absolute;left:8px;right:8px;bottom:8px;display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);box-shadow:0 4px 14px rgba(19,26,43,.18);font-size:14.5px}
+.runlook span{flex:1;min-width:0}
+.runlook .btn{flex:none}
+.runlook[hidden]{display:none}
 .runfb{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);padding:5px 14px;border-radius:999px;color:#fff;font-size:15px;font-weight:700;white-space:nowrap;pointer-events:none;opacity:0}
 .runfb.ok{background:var(--heal)} .runfb.bad{background:var(--miss)} .runfb.slow{background:var(--warn)}
 .runfb.show{animation:fxlabel 1.4s ease-out forwards}
@@ -280,6 +290,8 @@ button.chip{cursor:pointer}
 .qwrap{max-width:780px;margin:0 auto}
 /* The Pressure start screen: the quick round and the full fight, one under the other. */
 .pchoices{display:grid;gap:20px}
+.pstops{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14.5px;cursor:pointer}
+.pstops input{width:18px;height:18px;accent-color:var(--heal);margin:0}
 /* A question with an arena picture: the answers on the left, the picture on the right.
    On a phone the picture goes above the answers, at a size that leaves them close by. */
 .qwrap.wide{max-width:1000px}

@@ -14,7 +14,7 @@ export const MECH: QuizItem[] = [
   mq("k-raw-first", 1, P1, "0:18", s=>({prompt:"Raw Steel Trophy: the boss pulls out a scythe. What happens?",
     options:[{t:"Tanks spread, and the party stacks south behind the boss.", ok:true},{t:"Tanks stack, and the party spreads."},{t:"Everyone spreads on their clock spot."},{t:"The party stacks north, in front of the boss."}],
     why:"The scythe cleaves three times: one cone on each tank, and one cone that the rest of the party shares behind him. The axe is the reverse: a shared tank buster and six spread hits.",
-    rule:"Axe: tanks stack, party spreads. Scythe: tanks spread, party stacks."})),
+    rule:"Raw Steel Trophy (he holds the weapon). Axe: tanks stack, party spreads. Scythe: tanks spread, party stacks."})),
   mq("k-raw-second", 9, P1, "2:36", s=>({prompt:"The first Raw Steel Trophy was an axe. What is the second one, at 2:36?",
     options:[{t:"A scythe. It is always the other weapon.", ok:true},{t:"An axe again."},{t:"It is random."},{t:"A sword."}],
     why:"The second Raw Steel Trophy always uses the weapon you did not see first.",
@@ -32,7 +32,7 @@ export const MECH: QuizItem[] = [
   mq("k-axe", 3.2, P1, "0:50 to 1:45", s=>({prompt:"The boss jumps to the AXE. Where do you go?",
     options:[{t:"Stack with the whole party in the middle, out of the axe AoE.", ok:true},{t:"Spread out on your clock spot."},{t:"Light party stacks, left and right."},{t:"Inside the axe AoE, next to the boss."}],
     why:"The axe is a point-blank AoE where it lands, and a party stack on a random healer. If the stack is on you, stay with the group.",
-    rule:"Axe: the whole party stacks in the middle, out of the AoE."})),
+    rule:"He jumps to the axe: the whole party stacks in the middle, out of the AoE. This is not Raw Steel Trophy's axe, where the party spreads."})),
   mq("k-scythe", 3.3, P1, "0:50 to 1:45", s=>({prompt:"The boss jumps to the SCYTHE. Where do you go?",
     options:[{t:S(s,"Close in, at the butt (handle end) of the scythe.","Close in, at the point (blade end) of the scythe."), ok:true},
       {t:S(s,"Close in, at the point (blade end) of the scythe.","Close in, at the butt (handle end) of the scythe.")},
@@ -218,8 +218,10 @@ TL.slice(0, -1).forEach((ev, i) => {
       const when = between.length === 0 ? right.n + " is next, and it comes soon. Have a mitigation ready for it."
         : between.length <= 2 ? right.n + " is the next raidwide, but first comes " + between.map(e => e.n).join(", then ") + "."
         : right.n + " is the next raidwide, but " + between.length + " mechanics come first, starting with " + between[0].n + ".";
+      // Crown of Arcadia often comes again. "again" says the same raidwide repeats, so the
+      // answer does not read as the one that just happened.
       return {prompt:"It is just after " + ev.n + " (" + ev.t + "). Which raidwide comes next, so you can plan a mitigation for it?",
-        options:[{t:right.n, ok:true}, ...others.map(n => ({t:n}))],
+        options:[{t:right.n + (right.n === ev.n ? " again" : ""), ok:true}, ...others.map(n => ({t:n}))],
         why:when + " " + right.job(s),
         rule:"Know the next raidwide and whether it is soon, so your mitigation is ready."};
     }});

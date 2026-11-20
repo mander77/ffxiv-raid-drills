@@ -145,7 +145,8 @@ export function drawMCQ(): void {
       : '<p class="sr" role="status">' + (okPick ? "Right." : "Not this one.") + "</p>";
     h += '<div class="rule"><span>Rule</span><strong>' + esc(q.rule) + "</strong></div>";
     if(q.src) h += '<p class="src">Source: ' + esc(q.src) + "</p>";
-    h += '<div class="actions"><button type="button" class="btn" id="q-next">Next</button><span class="hint keys"><kbd>Enter</kbd> next</span></div>';
+    // On a phone the explanation pushes Next down, so it stays in the bar at the bottom of the screen.
+    h += '<div class="actions lockbar on"><button type="button" class="btn" id="q-next">Next</button><span class="hint keys"><kbd>Enter</kbd> next</span></div>';
   } else if(pv){
     // On a phone the answers are below the picture, so once you pick one, Lock in answer stays
     // in a bar at the bottom of the screen ("lockbar on", see pickOpt).
@@ -156,6 +157,14 @@ export function drawMCQ(): void {
   }
   if(fig || tl) h += "</div></div>";
   p.innerHTML = h;
+  // A new card starts at its top. On a phone the page can still be scrolled down from the last
+  // card, which hides the question number and the timer. The header sticks on a wide screen, so
+  // the card goes just under it.
+  if(!c.answered){
+    const head = document.querySelector("header.top"), off = head && getComputedStyle(head).position === "sticky" ? head.getBoundingClientRect().height : 0;
+    const top = p.getBoundingClientRect().top;
+    if(top < off) window.scrollTo(0, window.scrollY + top - off - 8);
+  }
   p.parentElement?.classList.toggle("wide", Boolean(fig || tl));
   p.querySelectorAll<HTMLElement>(".opt").forEach(b => {
     const i = Number(b.dataset.i);

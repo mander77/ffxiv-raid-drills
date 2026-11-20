@@ -42,8 +42,10 @@ test("next-raidwide questions ask for the name, not the exact time", () => {
   for(const item of raidwide){
     const q = item.build("H1");
     for(const o of q.options) assert.notMatch(o.t, /\d+:\d\d/, item.id + ": " + o.t);
-    // The right answer is a row named for raid damage in the fight list.
-    assert.ok(TL.some((e, i) => tlAbilities(i)[0]?.cats.includes("raid") && e.n === q.options.find(o => o.ok)?.t), item.id);
+    // The right answer is a row named for raid damage in the fight list. When it is the same
+    // raidwide as the one that just happened, it ends with " again".
+    const right = (q.options.find(o => o.ok)?.t ?? "").replace(/ again$/, "");
+    assert.ok(TL.some((e, i) => tlAbilities(i)[0]?.cats.includes("raid") && e.n === right), item.id);
   }
 });
 
