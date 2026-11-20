@@ -1,12 +1,11 @@
 import { test, assert } from "vitest";
-import { MECH, DEATH, NEXT_ITEMS } from "../src/data/questions";
-import { JOB } from "../src/data/jobs";
+import { MECH, NEXT_ITEMS } from "../src/data/questions";
 import { TL } from "../src/data/timeline";
 import { tlAbilities } from "../src/data/abilities";
 import { readingMs } from "../src/util";
 import type { Slot } from "../src/types";
 
-const ALL = [...MECH, ...DEATH, ...NEXT_ITEMS, ...JOB];
+const ALL = [...MECH, ...NEXT_ITEMS];
 const SLOTS: Slot[] = ["H1", "H2"];
 const toSec = (t: string): number => { const [m, s] = t.split(":").map(Number); return m * 60 + s; };
 
@@ -46,19 +45,4 @@ test("next-raidwide questions ask for the name, not the exact time", () => {
     // The right answer is a row named for raid damage in the fight list.
     assert.ok(TL.some((e, i) => tlAbilities(i)[0]?.cats.includes("raid") && e.n === q.options.find(o => o.ok)?.t), item.id);
   }
-});
-
-test("Someone died questions say the time now, and the countdowns add up", () => {
-  let checked = 0;
-  for(const d of DEATH){
-    if(d.time === "Any time") continue;
-    assert.match(d.time, /^Now \d+:\d\d$/, d.id);
-    const now = d.time.slice(4), prompt = d.build("H1").prompt;
-    assert.ok(prompt.startsWith("It is " + now), d.id);
-    for(const [, at, secs] of prompt.matchAll(/(\d+:\d\d)(?:,| \() ?(\d+) seconds from now/g)){
-      assert.equal(Number(secs), toSec(at) - toSec(now), d.id + ": " + at);
-      checked++;
-    }
-  }
-  assert.isAtLeast(checked, 10, "only " + checked + " countdowns found");
 });

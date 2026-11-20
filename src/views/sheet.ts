@@ -1,10 +1,9 @@
-// The cheat sheet: rules, positions, timeline and the suggested job plan on one page.
+// The cheat sheet: the panic reset, the positions and your timeline on one page.
 import { S, esc, LS, el } from "../util";
-import { state, view, QUIZ_POOLS } from "../core";
+import { state, view } from "../core";
 import { TL } from "../data/timeline";
 import { tlCats } from "../data/abilities";
 import { marks, catNames, catKey } from "./tlnav";
-import { JOBS } from "../data/jobs";
 import { f1, vadd, unit, leftOf } from "../geometry";
 import { arenaSVG, drawOverlay, drawBoss } from "../arena";
 import { swordCross, swordPocket } from "../data/attacks";
@@ -33,19 +32,11 @@ export function renderSheet(): void {
     return '<tr><td class="t">' + e.t + '</td><td class="n">' + esc(e.n) + '<div class="cmline">' + marks(cats) + esc(catNames(cats)) + "</div></td><td>" + esc(e.job(s)) + "</td></tr>"; }).join("");
   const seen = Object.keys(state.stats).length;
   view.innerHTML = tabHead() + '<div class="sheet">' +
-    '<div class="cols"><section><h2>Someone died</h2><ol>' +
-    "<li>Are you about to die? Heal yourself first.</li>" +
-    "<li>Did Andrew call “let's get them up”? Raise now and say “I got it.”</li>" +
-    "<li>Did someone else say “I got it”? Do not raise. Heal the party.</li>" +
-    "<li>Did a raidwide just land, with more damage soon? Heal the party first, then raise.</li>" +
-    "<li>Is a scythe or a bait about to resolve? Raise right after it.</li>" +
-    "<li>Otherwise, raise now with Swiftcast. 5 to 8 seconds is the limit.</li></ol>" +
-    "<p>In the nados (Ultimate Trophy Weapons), the dead player must be up by the 3rd weapon. They stand up where you are, so raise from a safe spot.</p></section>" +
     "<section><h2>Panic reset</h2><ol>" +
     "<li>Feet: go to your spot for the next mechanic.</li>" +
     "<li>Self: if you are low, heal or shield yourself.</li>" +
-    "<li>Team: a hit soon? Heal the party. Quiet? Raise, and say “I got it.”</li></ol>" +
-    "<p>Say it in your head: feet, self, team. If you are not sure, any of these beats standing still.</p></section></div>" +
+    "<li>Team: a hit soon? Heal the party.</li></ol>" +
+    "<p>Say it in your head: feet, self, team. If you are not sure, any of these beats standing still.</p></section>" +
     '<section><h2>Positions to remember</h2><div class="cols"><div><ul class="rules">' +
     "<li><b>Weapon order:</b> the first weapon is the one he faces. Then he goes clockwise.</li>" +
     "<li><b>Sword:</b> the cross lines up with the way he jumped. Stand in the pocket behind him, on the side he jumped from: G1 on his left, G2 on his right. Stand a few steps in from its inner corner, where the arms of the cross meet. There you can see that you are clear of both arms. As " + s + ", you take the " + S(s, "left", "right") + " pocket, and your light party stacks on you.</li>" +
@@ -62,11 +53,8 @@ export function renderSheet(): void {
     "<li><b>Meteorain, ranged (3rd set):</b> the ranged step in close to the boss to take the markers. R1 drops SW near the edge, at the end of the SW line, and leaves room behind it to hide. R2 drops NE, inside the boss hitbox.</li>" +
     '</ul></div><figure class="mini">' + swordDiagram(s) +
     "<figcaption>Example: he jumps west from the middle. The pockets on the side he came from are the two stack spots. Yours is green.</figcaption></figure></div></section>" +
-    "<section><h2>Your timeline as " + s + "</h2>" + catKey() + '<div class="tablebox"><table><thead><tr><th>Time</th><th>Mechanic</th><th>Your job</th></tr></thead><tbody>' + rows + "</tbody></table></div>" +
+    "<section><h2>Your timeline as " + s + "</h2>" + catKey() + '<div class="tablebox"><table><thead><tr><th>Time</th><th>Mechanic</th><th>What you do</th></tr></thead><tbody>' + rows + "</tbody></table></div>" +
     '<p class="hint">Times are from the cactbot fight timeline. Some phase 1 times move by a second or two with the axe or scythe opener.</p></section>' +
-    "<section><h2>Suggested " + JOBS[state.job] + ' plan</h2><div class="tablebox"><table><thead><tr><th>Time</th><th>When</th><th>Press</th></tr></thead><tbody>' +
-    QUIZ_POOLS.job().slice().sort((a, b) => a.order - b.order).map(it => { const q = it.build(s), right = q.options.find(o => o.ok); return '<tr><td class="t">' + esc(it.time) + '</td><td class="n">' + esc(q.rule) + "</td><td>" + esc(right?.t ?? "") + "</td></tr>"; }).join("") +
-    '</tbody></table></div><p class="hint">Switch jobs on the My job tab. This plan uses only your own buttons. Agree with your co-healer who covers each raidwide.</p></section>' +
     '<section><h2>Sources</h2><ul class="links">' +
     '<li><a href="' + WTFDIG + '" target="_blank" rel="noopener">wtfdig M11S</a> <span>Your strats: Hector (Toxic), Kindred No Buddies, Fixed (3CJ)</span></li>' +
     '<li><a href="https://www.youtube.com/watch?v=w1uuwzhyf5A" target="_blank" rel="noopener">Hector\'s video guide</a></li>' +
@@ -74,8 +62,7 @@ export function renderSheet(): void {
     '<li><a href="https://raidplan.io/plan/hvbysrfwvrc55ahz" target="_blank" rel="noopener">Kindred raidplan</a> <span>Arena Split</span></li>' +
     '<li><a href="https://raidplan.io/plan/KXVlSGwV3zqON3CJ" target="_blank" rel="noopener">Fixed Stampede raidplan</a> <span>Ecliptic Stampede</span></li>' +
     '<li><a href="https://www.icy-veins.com/ffxiv/aac-heavyweight-m3-savage-raid-guide" target="_blank" rel="noopener">Icy Veins M11S guide</a> <span>Mechanic details, enrage at 11:00</span></li>' +
-    '<li><a href="https://github.com/OverlayPlugin/cactbot/blob/main/ui/raidboss/data/07-dt/raid/r11s.txt" target="_blank" rel="noopener">cactbot r11s timeline</a> <span>Times</span></li>' +
-    '<li><a href="https://ffxiv.consolegameswiki.com/wiki/Resurrect" target="_blank" rel="noopener">consolegameswiki: Resurrect</a> <span>Raised players appear at the caster</span></li></ul></section>' +
+    '<li><a href="https://github.com/OverlayPlugin/cactbot/blob/main/ui/raidboss/data/07-dt/raid/r11s.txt" target="_blank" rel="noopener">cactbot r11s timeline</a> <span>Times</span></li></ul></section>' +
     "<section><h2>Your progress</h2><p>You answered " + seen + " different items so far. Progress stays in this browser only.</p>" +
     '<div class="actions"><button type="button" class="btn ghost" id="reset">' + (state.confirmReset ? "Click again to erase progress" : "Reset my progress") + "</button></div></section></div>";
   state.cur = {kind:"sheet"};

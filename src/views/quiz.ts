@@ -1,9 +1,8 @@
 // Multiple-choice cards, used by the quiz tabs and the pressure round.
-import { esc, shuffle, el, LS } from "../util";
+import { esc, shuffle, el } from "../util";
 import { state, getDeck, record, view, stopTimer, type McqCur, type QuizCat } from "../core";
 import { tabHead, renderRoundDone } from "./common";
 import { showRoute } from "../router";
-import { JOB } from "../data/jobs";
 import { showPressureQ } from "./pressure";
 import { MECH_FIGS } from "../data/figs";
 import { figSVG } from "../arena";
@@ -32,9 +31,6 @@ export function openQuestion(cat: QuizCat, id: string): void { wanted = {cat, id
 export function renderQuiz(cat: QuizCat): void {
   const ask = wanted?.cat === cat ? wanted.id : null;
   wanted = null;
-  // A My job card belongs to one job. A link to the other job's card switches the job.
-  const jobCard = cat === "job" && ask ? JOB.find(x => x.id === ask) : undefined;
-  if(jobCard?.job && jobCard.job !== state.job){ state.job = jobCard.job; LS.set("job", state.job); delete state.decks.job; }
   const d = getDeck(cat);
   if(ask){ const i = d.items.findIndex(x => x.id === ask); if(i >= 0) d.i = i; }
   if(d.i >= d.items.length){ showRoute({tab:cat}); return renderRoundDone(cat, d); }
@@ -58,8 +54,8 @@ function jumpList(cat: QuizCat): string {
 /** The arena picture of a card, when its question has one (the Mechanics questions). */
 const figOf = (c: McqCur): Fig | undefined => MECH_FIGS[c.item.id]?.(state.slot);
 
-/** True when you pick an answer, see it on the picture, and then lock it in: the Mechanics tab.
-    The Pressure round stays one click per answer, because it trains fast decisions. */
+/** True when you pick an answer, see it on the picture, and then lock it in: the Learn tab.
+    The quick round under Pressure stays one click per answer, because it trains fast decisions. */
 export const previews = (c: McqCur): boolean => c.cat === "mech" && Boolean(figOf(c)?.options);
 
 /** The picture and its caption. `show` is the answer to draw (its place on screen), or -1. */

@@ -1,25 +1,38 @@
-// The pressure round: 12 mixed questions, each on a timer.
+// The Pressure tab: the same questions, fast. A quick round of 12 timed questions from Learn and
+// What is next?, or the full fight on the fight clock (fight.ts).
 import { LS, el, readingMs } from "../util";
-import { state, view, weighted, record, stopTimer, QUIZ_POOLS } from "../core";
-import { MECH, DEATH, NEXT_ITEMS } from "../data/questions";
+import { state, view, weighted, record, stopTimer } from "../core";
+import { MECH, NEXT_ITEMS } from "../data/questions";
 import { tabHead } from "./common";
 import { prepMCQ, drawMCQ } from "./quiz";
+import { fightWanted, fightNeedsSlot, renderFight, startFullFight } from "./fight";
+
+/** A link to a fight opens it, and a new role (H1 or H2) keeps the fight on screen. Otherwise the
+    start screen shows. */
+export function renderPressure(): void {
+  if(fightWanted() || fightNeedsSlot()) return renderFight();
+  renderPressureStart();
+}
 
 export function renderPressureStart(): void {
-  view.innerHTML = tabHead() + '<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Pressure round</b><span>12 questions</span></div>' +
-    "<h2>Practice deciding fast</h2><p>Each question first gives you time to read it. The longer the question, the more time you get. Then a short timer runs while you decide. When it runs out, the round counts a freeze and shows you the answer. You can answer at any time. Aim for zero freezes first. Correct answers come with practice.</p>" +
+  view.innerHTML = tabHead() + '<div class="qwrap pchoices"><div class="panel"><div class="eyebrow"><b>Quick round</b><span>12 questions</span></div>' +
+    "<h2>Timed questions</h2><p>Questions from Learn and What is next?. Time to read, then a short timer to decide. Aim for zero freezes.</p>" +
     '<div class="ctrl" style="margin-top:14px"><span id="secs-lbl">Seconds to decide</span><div class="seg small" role="group" aria-labelledby="secs-lbl">' +
     [4, 6, 8, 10].map(n => '<button type="button" id="secs-' + n + '" data-secs="' + n + '" aria-pressed="' + (state.psecs === n) + '">' + n + "</button>").join("") +
-    '</div></div><div class="actions"><button type="button" class="btn" id="p-start">Start</button><span class="hint"><kbd>Enter</kbd> start</span></div></div></div>';
+    '</div></div><div class="actions"><button type="button" class="btn" id="p-start">Start</button><span class="hint"><kbd>Enter</kbd> start</span></div></div>' +
+    '<div class="panel"><div class="eyebrow"><b>Full fight</b><span>To the enrage at 10:59</span></div>' +
+    "<h2>The whole fight on the clock</h2><p>Every mechanic in order. Click your spot before each hit lands.</p>" +
+    '<div class="actions"><button type="button" class="btn" id="p-fight">Start the full fight</button></div></div></div>';
   state.cur = {kind:"pstart"};
   view.querySelectorAll<HTMLElement>("[data-secs]").forEach(b => b.addEventListener("click", () => {
     state.psecs = Number(b.dataset.secs); LS.set("psecs", state.psecs); renderPressureStart();
   }));
   el("p-start").addEventListener("click", startPressure);
+  el("p-fight").addEventListener("click", startFullFight);
 }
 
 export function startPressure(): void {
-  const pool = [...MECH, ...DEATH, ...NEXT_ITEMS, ...QUIZ_POOLS.job()];
+  const pool = [...MECH, ...NEXT_ITEMS];
   state.pressure = {queue:weighted(pool).slice(0, 12), i:0, right:0, wrong:0, froze:0};
   showPressureQ();
 }

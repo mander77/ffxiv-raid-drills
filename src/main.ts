@@ -7,14 +7,15 @@
 // in development and writes them to one CSS file in the build.
 import "./styles.css";
 import { LS, esc, el } from "./util";
-import { state, TABS, view, app, stopTimer } from "./core";
+import { state, TABS, app, stopTimer } from "./core";
 import { parseRoute, currentRoute, showRoute, type Route } from "./router";
 import { shareLink } from "./share";
 import { renderQuiz, answer, nextQ, previews, pickOpt, lockIn, openQuestion } from "./views/quiz";
-import { renderPressureStart, startPressure } from "./views/pressure";
+import { renderPressure, startPressure } from "./views/pressure";
+import { renderMap, openPattern, nextStep, nextMap } from "./views/practice";
 import { renderSheet } from "./views/sheet";
 import { renderHome } from "./views/home";
-import { renderFight, togglePause, openFight, seekBy, enterKey } from "./views/fight";
+import { togglePause, openFight, seekBy, enterKey } from "./views/fight";
 import { parseChoices } from "./data/fight";
 import type { Slot } from "./types";
 
@@ -46,9 +47,11 @@ function setSlot(s: Slot): void {
     move gets a history entry, so the Back button returns to the screen before. */
 function go(r: Route, push = false): void {
   if(push) showRoute(r, true);
-  // A link can open one fight in the player (/map/<code>[/<picks>][?t=s]) or one quiz card
-  // (/mech/<card>). A fight link with no picks had them all on Random.
-  if(r.tab === "map" && r.code) openFight(r.code, parseChoices(r.picks ?? ""), r.t);
+  // A link can open one Practice mechanic (/map/<mechanic>[/<code>]), the full fight under
+  // Pressure (/pressure/<code>[/<picks>][?t=s]) or one quiz card (/mech/<card>). A fight link with
+  // no picks had them all on Random.
+  if(r.tab === "map" && r.drill) openPattern(r.drill, r.code);
+  if(r.tab === "pressure" && r.code) openFight(r.code, parseChoices(r.picks ?? ""), r.t);
   // TS note: `"card" in r` narrows r to the quiz member of Route, so r.tab is a QuizCat here.
   if("card" in r && r.card) openQuestion(r.tab, r.card);
   const t = r.tab;
@@ -66,8 +69,8 @@ function render(): void {
   showRoute({tab:state.tab});
   switch(state.tab){
     case "home": return renderHome();
-    case "map": return renderFight();
-    case "pressure": return renderPressureStart();
+    case "map": return renderMap();
+    case "pressure": return renderPressure();
     case "sheet": return renderSheet();
     default: return renderQuiz(state.tab);
   }
@@ -94,11 +97,6 @@ document.addEventListener("click", e => {
 document.querySelectorAll<HTMLElement>(".seg button[data-slot]").forEach(b => b.addEventListener("click", () => setSlot(b.dataset.slot === "H2" ? "H2" : "H1")));
 // Share in the header shares the address of the screen you are on (see share.ts).
 el<HTMLButtonElement>("share").addEventListener("click", e => shareLink(e.currentTarget as HTMLButtonElement));
-view.addEventListener("click", e => {
-  const t = e.target as Element;
-  const j = t.closest<HTMLElement>("[data-job]");
-  if(j){ state.job = j.dataset.job === "sge" ? "sge" : "whm"; LS.set("job", state.job); delete state.decks.job; return render(); }
-});
 document.addEventListener("keydown", e => {
   if(e.altKey || e.ctrlKey || e.metaKey) return;
   // In the "Go to question" list, number keys and Enter belong to the list.
@@ -113,6 +111,9 @@ document.addEventListener("keydown", e => {
     if(!c.answered && /^[1-9]$/.test(e.key)){ const i = Number(e.key) - 1; if(i < c.opts.length){ e.preventDefault(); if(pv) pickOpt(i); else answer(i); } }
     else if(!c.answered && pv && e.key === "Enter" && c.sel >= 0 && (!onButton || onPicked)){ e.preventDefault(); lockIn(); }
     else if(c.answered && (e.key === "Enter" || e.key === " ") && !onButton){ e.preventDefault(); nextQ(); }
+  } else if(c.kind === "map" && e.key === "Enter" && !onButton){
+    if(c.waiting){ e.preventDefault(); nextStep(); }
+    else if(c.results.length >= c.scene.steps.length){ e.preventDefault(); nextMap(); }
   } else if(c.kind === "fight" && e.key === "Enter" && !onButton){ if(enterKey()) e.preventDefault(); }
   else if(c.kind === "pstart" && e.key === "Enter" && !onButton){ e.preventDefault(); startPressure(); }
   else if(c.kind === "fight" && e.key === " " && !onButton){ e.preventDefault(); togglePause(); }

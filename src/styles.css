@@ -248,6 +248,8 @@ button.chip{cursor:pointer}
 .fsum .chip{height:24px;min-width:26px;font-size:12px;padding:0 6px}
 
 .qwrap{max-width:780px;margin:0 auto}
+/* The Pressure start screen: the quick round and the full fight, one under the other. */
+.pchoices{display:grid;gap:20px}
 /* A question with an arena picture: the answers on the left, the picture on the right.
    On a phone the picture goes above the answers, at a size that leaves them close by. */
 .qwrap.wide{max-width:1000px}

@@ -1,5 +1,5 @@
-// Painting the answer layers on a "Where do I stand?" arena. The player (fight.ts) and its
-// "Step through my run" screen both use it.
+// Painting the answer layers on an arena: Practice, the full fight under Pressure, and its
+// "Step through my run" screen all use it.
 import { rotOverlay, zoneCenter, f1 } from "../geometry";
 import { drawOverlay, paintBoss, zoneSVG, hitsSVG } from "../arena";
 import { facingNext } from "../data/drills";

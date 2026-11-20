@@ -1,4 +1,4 @@
-// Quiz questions: mechanics, raise decisions, and questions made from the timeline.
+// Quiz questions: the mechanics (Learn), and questions made from the timeline (What is next?).
 import { S, shuffle } from "../util";
 import { P1, P2, P3, P4, TL } from "./timeline";
 import { tlAbilities } from "./abilities";
@@ -191,70 +191,6 @@ export const MECH: QuizItem[] = [
     rule:"Heartbreak Kick: keep the tanks alive between hits."}))
 ];
 
-/* ---------- someone died: recovery decisions ---------- */
-export const DEATH: QuizItem[] = [
-  mq("d-freeze", 0, "Panic reset", "Any time", s=>({prompt:"You notice you froze. What is the first thing to do?",
-    options:[{t:"Move to your spot for the next mechanic. Then heal.", ok:true},{t:"Stand still until you are sure."},{t:"Spam your strongest heal where you stand."},{t:"Wait for someone to tell you."}],
-    why:"Being in the right place keeps you alive. From there, use the order: yourself, then the raise, then the party. (This reset is the drill's own advice, built on Andrew's order.)",
-    rule:"Feet first. Then yourself, the raise, the party."})),
-  mq("d-quiet", 2, P1, "Now 0:26", s=>({prompt:"It is 0:26. R2 just died to the axe spread, and everyone else is healthy. The next damage is the first weapon at 0:50, 24 seconds from now. Nobody called anything.",
-    options:[{t:"Swiftcast Raise on R2 now, and say “I got it.”", ok:true},{t:"Heal the party first."},{t:"Wait until after the three weapons."},{t:"Wait for Andrew to call it."}],
-    why:"Nothing hits for over 20 seconds. Andrew: if nothing is coming, raise first, then heal.",
-    rule:"Quiet window = raise now.", src:ANDREW})),
-  mq("d-scythe", 3.5, P1, "Now 0:52", s=>({prompt:"It is 0:52. A player just died to the first weapon. The next weapon is the SCYTHE at 0:55, 3 seconds from now, with a protean on every player. No call.",
-    options:[{t:"Wait until the scythe resolves, then raise.", ok:true},{t:"Raise right now."},{t:"Raise so it lands during the scythe."},{t:"Wait until the next phase."}],
-    why:"A player in the raise animation still gets a protean cone, and it can hit someone else. Andrew: if Scythe is coming up, you can wait until after it.",
-    rule:"Protean or bait about to resolve? Raise right after it.", src:ANDREW})),
-  mq("d-called", 15.5, P2, "Now 4:44", s=>({prompt:"It is 4:44, and Orbital Omen just ended. The next damage is the first Meteorain line stack at 5:00, 16 seconds from now. Andrew calls: “Let's get them up!” You planned to wait until after that stack.",
-    options:[{t:"Raise right now, and say “I got it.”", ok:true},{t:"Keep your plan and raise later."},{t:"Ask him which player he means."},{t:"Heal the party first."}],
-    why:"When Andrew calls for a raise, he means that moment. If he does not call it, you can choose the timing.",
-    rule:"A call = raise now.", src:ANDREW})),
-  mq("d-taken", 25.5, P4, "Now 8:46", s=>({prompt:"It is 8:46. The next damage is the first Ecliptic Stampede puddle at 9:01, 15 seconds from now. Andrew calls for a raise, and Diamond says “I got it.” What do you do?",
-    options:[{t:"Do not raise. Keep the party healthy while the raise goes out.", ok:true},{t:"Raise the same player too, to be safe."},{t:"Raise a different dead player."},{t:"Stop healing and watch."}],
-    why:"Andrew: all he cares about is who says they got it. Two raises on one player waste a Swiftcast and leave the party without heals.",
-    rule:"Someone said “I got it”? You heal.", src:ANDREW})),
-  mq("d-raidwide", 7, P1, "Now 2:03", s=>({prompt:"It is 2:03. Crown of Arcadia just hit, the party is at about half HP, and M1 died. Dance of Domination's seven hits start at 2:21, 18 seconds from now.",
-    options:[{t:"Heal and mitigate the party first, then raise M1.", ok:true},{t:"Raise M1 first, then heal."},{t:"Heal only yourself."},{t:"Wait until Dance of Domination is over."}],
-    why:"Andrew: if we just took a raidwide and something is coming up, help the team first, because that also helps you. Then raise.",
-    rule:"Raidwide just hit and more is coming = party first, then raise.", src:ANDREW})),
-  mq("d-charyb", 10, P1, "Now 2:59", s=>({prompt:"It is 2:59. Charybdistopia just set every player to 1 HP. Nobody is dead. The first weapon hits at 3:14, 15 seconds from now. What first?",
-    options:[{t:"AoE heals and regens on the whole party now, yourself included.", ok:true},{t:"Single-target heal the tank."},{t:"Do damage. The weapons are not here yet."},{t:"Wait for the first weapon, then heal."}],
-    why:"At 1 HP any hit kills. Fifteen seconds is enough to get everyone safe if you start at once.",
-    rule:"1 HP party = AoE heals right now."})),
-  mq("d-nados", 11.5, P1, "Now 3:15", s=>({prompt:"It is 3:15. A melee just died to the 1st weapon of Ultimate Trophy Weapons (the nados). The 2nd weapon hits at 3:20 (5 seconds from now), the 3rd at 3:25 (10 seconds), and the tornadoes at 3:46. By when must they be up?",
-    options:[{t:"By the 3rd weapon, about 3:25.", ok:true},{t:"Before One and Only at 4:00."},{t:"After the tornadoes."},{t:"It does not matter."}],
-    why:"Andrew: the dead player must be up by the 3rd set, or we die. Later than that, the raise animation will not finish in time for them to take their tornado cleave, and the cone lands on someone else.",
-    rule:"In the nados, raise before the 3rd weapon.", src:ANDREW})),
-  mq("d-self-low", 12.5, P1, "Now 3:55", s=>({prompt:"It is 3:55. You are at 20% HP, and a DPS is dead. One and Only, a heavy raidwide, hits at 4:00, 5 seconds from now.",
-    options:[{t:"Heal yourself first: a self heal, a shield, or an AoE heal that covers you.", ok:true},{t:"Raise the DPS."},{t:"Single-target heal the tank."},{t:"Run to the edge of the arena."}],
-    why:"Andrew's order: help yourself, then raise, then the party. If you die, there is one more player to raise and one less healer to do it.",
-    rule:"Yourself first.", src:ANDREW})),
-  mq("d-tank", 13.5, P2, "Now 4:01", s=>({prompt:"It is 4:01. One and Only just hit, the party is low, and the OT died. Great Wall of Fire, two shared tank busters, hits at 4:13, 12 seconds from now.",
-    options:[{t:"A quick party heal, then raise the OT right away and shield both tanks.", ok:true},{t:"Raise the OT before you heal anyone."},{t:"Do not raise until after Orbital Omen."},{t:"Heal only the main tank."}],
-    why:"A raidwide just hit and a big hit is coming, so the team comes first. But the busters need both tanks, so the raise goes out right after that heal.",
-    rule:"Raidwide just hit and more is coming = party first, then raise.", src:ANDREW})),
-  mq("d-where", 16.5, P2, "Any time", s=>({prompt:"Where does a raised player stand up?",
-    options:[{t:"Where you stood when you cast the raise.", ok:true},{t:"Where they died."},{t:"At their waymark."},{t:"Next to the boss."}],
-    why:"The raised player is moved to your position. So raise from a spot that is safe and useful for the next mechanic. This is what Andrew means by getting them raised in the right spot.",
-    rule:"They appear where you are. Raise from a safe spot.", src:"consolegameswiki: Resurrect"})),
-  mq("d-hide", 17, P2, "Now 5:37", s=>({prompt:"It is 5:37. A player is dead, and the party is healthy. Triple Tyrannhilation hits at 5:43, 6 seconds from now.",
-    options:[{t:"Get behind the SW rocks first, then raise from there.", ok:true},{t:"Raise first, from where you stand at NE."},{t:"Wait until all three hits are done."},{t:"Raise from under the boss."}],
-    why:"Feet first. And because the raised player appears where you are, raising from behind the rocks puts them in the safe spot too.",
-    rule:"Get to safety, then raise from the safe spot."})),
-  mq("d-swift", 20.5, P3, "Now 7:05", s=>({prompt:"It is 7:05. Someone just died, and your Swiftcast is on cooldown. A raise without it takes 8 seconds to cast. The next puddles start at 7:12, 7 seconds from now, and you must move for them.",
-    options:[{t:"Say “Swift is down” so Diamond or Andy can take it, and keep healing.", ok:true},{t:"Hardcast the raise in the middle of a mechanic."},{t:"Stand still until Swiftcast is back."},{t:"Say nothing."}],
-    why:"An 8-second cast during a mechanic usually means a second death. Andrew listens for who says they have it, so tell the group you cannot.",
-    rule:"Cannot raise now? Say so, then heal."})),
-  mq("d-long", 5, P1, "Now 1:08", s=>({prompt:"It is 1:08. Someone died at 1:00, 8 seconds ago, and nobody called it. You are topping off the party. The next damage is the first Void Stardust puddle at 1:24, 16 seconds from now.",
-    options:[{t:"Raise now.", ok:true},{t:"Keep topping off."},{t:"Wait for a call."},{t:"Wait for the next phase."}],
-    why:"Andrew: if it has been more than 8 seconds, or even 5, it has been too long.",
-    rule:"5 to 8 seconds is the limit.", src:ANDREW})),
-  mq("d-healer", 2.5, P1, "Now 0:30", s=>({prompt:"It is 0:30. Your co-healer and a DPS are both dead, and the party is healthy. The next damage is the first weapon at 0:50, 20 seconds from now. Who do you raise first?",
-    options:[{t:"Your co-healer.", ok:true},{t:"The DPS."},{t:"Whoever died first."},{t:"Nobody until the next phase."}],
-    why:"A healer back up can heal and raise too, so the recovery goes twice as fast. This is common raid practice.",
-    rule:"Raise the other healer first."}))
-];
-
 /* ---------- generated timeline questions ---------- */
 /** A raidwide row: the mechanic the row is named for (its first fight-list ability) is raid damage. */
 const isRaidwide = (i: number): boolean => tlAbilities(i)[0]?.cats.includes("raid") ?? false;
@@ -285,7 +221,7 @@ TL.slice(0, -1).forEach((ev, i) => {
       return {prompt:"It is just after " + ev.n + " (" + ev.t + "). Which raidwide comes next, so you can plan a mitigation for it?",
         options:[{t:right.n, ok:true}, ...others.map(n => ({t:n}))],
         why:when + " " + right.job(s),
-        rule:"Know the next raidwide and whether it is soon. A raidwide soon after a death? Heal the party first, then raise."};
+        rule:"Know the next raidwide and whether it is soon, so your mitigation is ready."};
     }});
   }
 });

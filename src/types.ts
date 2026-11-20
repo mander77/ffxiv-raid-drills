@@ -8,7 +8,6 @@
 // TS note: a union of string literals. A Slot can only be the text "H1" or "H2".
 // It works like a small C# enum, but the values are plain strings at run time.
 export type Slot = "H1" | "H2";
-export type Job = "whm" | "sge";
 
 // TS note: a tuple type. A Point is an array of exactly two numbers, [x, y].
 // The closest C# match is a value tuple: (double X, double Y).
@@ -157,7 +156,6 @@ export interface QuizItem {
   order: number;
   phase: string;
   time: string;
-  job?: Job;
   build: (s: Slot) => Question;
 }
 

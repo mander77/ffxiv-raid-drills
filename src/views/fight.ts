@@ -1,9 +1,8 @@
-// "Where do I stand?": the whole fight in one player. The play bar under the arena is always
-// there. Paused, it is step by step: a click on a drill or an ability in the fight list moves the
-// fight clock there, and you answer each step with no timer. After each answer the hit lands,
-// and then the clock moves on to the next question. Playing, the fight runs on the fight clock
-// with a timeline like cactbot's. Settings holds the missed-spot rule, the moving marker and the
-// fight pattern picks.
+// The full fight, under Pressure: every mechanic in fight order on the fight clock, with a
+// timeline like cactbot's. Click your spot before each hit lands. The play bar under the arena
+// pauses it; paused, you can answer with no timer, and after each answer the hit lands and the
+// clock moves on to the next question. Settings holds the missed-spot rule, the moving marker and
+// the fight pattern picks.
 import { LS, esc, el } from "../util";
 import { state, view, stopTimer, setChoices, record } from "../core";
 import { rotZone, rotOverlay, inZone, zoneCenter } from "../geometry";
@@ -15,7 +14,7 @@ import { buildFight, clock, choicesText, CHOICE_ROWS, RANDOM, type Choices, type
 import { BOSS, facingNext, jumpsNext } from "../data/drills";
 import { WALL_W, PUDDLE_LIFE } from "../data/attacks";
 import { ABILITIES, CATS, catsAt, type Cat } from "../data/abilities";
-import { tlNav, wireNav, markNav, marks, catNames } from "./tlnav";
+import { marks, catNames } from "./tlnav";
 import { rightRoute, clickRoute, runnerAt, type Stop } from "../data/route";
 import { showRoute } from "../router";
 import type { Boss, Overlay, Point, Scene, Slot, StepResult } from "../types";
@@ -76,10 +75,16 @@ export function openFight(code: string, picked: Choices, t?: number): void {
 const IDLE: Scene = {setup:"", rule:"", steps:[], overlays:[], boss:BOSS};
 const IDLE_SPLIT: Scene = {...IDLE, split:true};
 
-/* ---------- opening the tab ---------- */
-/* The tab opens the player, paused at the pull, with a new fight. Back on the tab, the fight you
-   were on is still there, paused. A link opens its own fight, at its moment. Another role (H1 or
-   H2) gets the same fight, at the same moment, with its own spots. */
+/* ---------- opening the full fight ---------- */
+/** True when a link asked for a fight that has not opened yet. */
+export const fightWanted = (): boolean => wanted != null;
+/** True when the full fight is on screen and was built for the other role (H1 or H2). */
+export const fightNeedsSlot = (): boolean => R != null && state.cur?.kind === "fight" && R.slot !== state.slot;
+/** The Full fight button: a new fight, playing from the pull. */
+export function startFullFight(): void { startRun("live", buildFight(state.slot, undefined, state.choices)); }
+/* A link opens its own fight, paused at its moment. Another role (H1 or H2) gets the same fight,
+   at the same moment, with its own spots. Back on screen, the fight you were on is still there,
+   paused. */
 export function renderFight(): void {
   stopTimer();
   const ask = wanted, was = R;
@@ -96,38 +101,9 @@ export function renderFight(): void {
   }
 }
 
-/* ---------- the fight list ---------- */
-let navKey = "";   // what the list highlights, so it updates only when that changes
-
-/** A screen beside the fight list: the summary and the step-through. */
+/** A screen of the full fight that is not the player: the summary and the step-through. */
 function show(inner: string): void {
-  view.innerHTML = tabHead() + '<div class="mapwrap">' + tlNav() + inner + "</div>";
-  navKey = "";
-  wireNav(jumpToAbility, jumpTo);
-}
-
-/* A click on a drill goes to that mechanic. Paused, it goes to the moment its first question
-   can be answered (for the weapons, once the boss has turned to the first one), so you can
-   answer it at once. Playing, it goes to the start of the mechanic. Orbital Omen and Raw Steel
-   Trophy happen twice, so it goes to the one nearest the row clicked. */
-function jumpTo(id: string, row: number): void {
-  if(!R) startRun("live", buildFight(state.slot, undefined, state.choices), [], true);
-  const r = R;
-  if(!r) return;
-  const near = ABILITIES[row]?.t ?? 0, gap = (g: FightSeg): number => Math.abs(g.from - near);
-  const g = r.fight.segs.filter(x => x.drills.includes(id)).sort((a, b) => gap(a) - gap(b))[0];
-  if(g) goToSeg(r, g);
-}
-
-/* A click on an ability goes to a few seconds before it hits, so it shows as "soon" first. */
-function jumpToAbility(i: number): void {
-  const a = ABILITIES[i];
-  if(!a) return;
-  if(!R) startRun("live", buildFight(state.slot, undefined, state.choices), [], true);
-  const r = R;
-  if(!r) return;
-  r.settings = false;
-  seekTo(Math.max(0, a.t - SOON));
+  view.innerHTML = tabHead() + inner;
 }
 
 function goToSeg(r: Run, g: FightSeg): void {
@@ -259,11 +235,9 @@ function mount(): void {
   const r = R;
   if(!r) return;
   state.cur = {kind:"fight"};
-  view.innerHTML = tabHead() + '<div class="mapwrap">' + tlNav() + '<div class="stage"><div class="arena">' + HUD +
+  view.innerHTML = tabHead() + '<div class="stage"><div class="arena">' + HUD +
     '<div class="fxbox"><div id="f-arena"></div><div class="hitlbl" id="f-hit" role="status"></div></div>' + playBar(r.fight) + "</div>" +
-    '<div class="panel" id="f-panel"></div></div></div>';
-  navKey = "";
-  wireNav(jumpToAbility, jumpTo);
+    '<div class="panel" id="f-panel"></div></div>';
   const seek = el<HTMLInputElement>("f-seek");
   seek.addEventListener("pointerdown", () => { dragging = true; });
   seek.addEventListener("pointerup", () => { dragging = false; });
@@ -301,7 +275,7 @@ function playBar(f: Fight): string {
 function syncRoute(): void {
   const r = R;
   if(!r) return;
-  showRoute({tab:"map", code:r.fight.code, picks:choicesText(r.fight.choices) || undefined, t:r.paused && r.t > 0 ? Math.round(r.t * 10) / 10 : undefined});
+  showRoute({tab:"pressure", code:r.fight.code, picks:choicesText(r.fight.choices) || undefined, t:r.paused && r.t > 0 ? Math.round(r.t * 10) / 10 : undefined});
 }
 
 /* Go to any moment. Back: the answers to hits after that moment are forgotten, so you can
@@ -490,7 +464,7 @@ function lastBox(g: FightSeg, i: number, x: StepResult): string {
 function drawPanel(r: Run, si: number): void {
   if(r.settings) return drawSettings(r);
   const f = r.fight, g = si >= 0 ? f.segs[si] : null, res = g ? r.results[si] : [];
-  const label = r.mode === "demo" ? "The right moves" : r.mode === "replay" ? "Your run, played back" : r.paused ? "Paused: step by step" : "Playing: real time";
+  const label = r.mode === "demo" ? "The right moves" : r.mode === "replay" ? "Your run, played back" : r.paused ? "Paused" : "Playing";
   let h = '<div class="eyebrow"><b>' + label + '</b><span id="f-clock"></span><span>' + settings.speed + "x</span><span>Fight " + f.code + "</span></div>";
   h += '<ol class="ftl" id="f-tl" aria-label="Fight timeline"></ol>';
   if(g){
@@ -510,7 +484,7 @@ function drawPanel(r: Run, si: number): void {
       h += '<div class="nowq"><span>Step ' + (j + 1) + " of " + n + (r.paused ? " &middot; no timer while paused" : ' &middot; hits in <b id="f-due"></b>') + "</span>" + esc(g.scene.steps[j].q) + "</div>";
       if(r.hold === "wait") h += '<p class="hint" style="margin-top:10px">The fight is paused. Click your spot.</p>';
       else if(r.hold === "review") h += '<p class="hint" style="margin-top:10px">Not there. Press Next step above the arena, or Enter, to go on.</p>';
-      else if(r.paused && r.mode === "live") h += '<p class="hint" style="margin-top:10px">Click your spot on the arena. After each answer the hit lands and the next question comes. Press Play, or Space, to run the fight clock.</p>';
+      else if(r.paused && r.mode === "live") h += '<p class="hint" style="margin-top:10px">Paused. Click your spot with no timer, or press Play.</p>';
     }
     if(j > 0) h += lastBox(g, j - 1, res[j - 1]);
     if(done){
@@ -524,7 +498,7 @@ function drawPanel(r: Run, si: number): void {
     h += "<h2>Between mechanics</h2>";
     if(nx) h += '<p class="setup">Next mechanic: ' + esc(nx.title) + " at " + clock(nx.from) + '.</p><div class="actions"><button type="button" class="btn" id="f-goto">Go to ' + esc(nx.title) + "</button></div>";
     if(a) h += '<div class="lastans"><span class="tag">Next ability &middot; ' + clock(a.t) + "</span><b>" + esc(a.name) + '</b><p class="cmline">' + marks(a.cats) + esc(catNames(a.cats)) + "</p>" + esc(a.note) + "</div>";
-    if(r.paused) h += '<p class="hint" style="margin-top:10px">Paused. Click a drill or an ability in the fight list to go there, or press Play, or Space, to run the fight clock.</p>';
+    if(r.paused) h += '<p class="hint" style="margin-top:10px">Paused. Press Play to run the fight clock.</p>';
   }
   el("f-panel").innerHTML = h;
   document.getElementById("setup-toggle")?.addEventListener("click", () => { r.setupOpen = !r.setupOpen; frame(); });
@@ -568,10 +542,6 @@ function updateLive(r: Run): void {
     const g = f.segs[si], j = r.results[si].length;
     if(j < g.due.length) set("f-due", Math.max(0, g.due[j] - r.t).toFixed(1) + " s");
   }
-  // The fight list follows the clock: the drills on the arena now, and the next ability to hit.
-  const drills = si >= 0 ? f.segs[si].drills : [], nextAb = ABILITIES.findIndex(a => a.t >= r.t);
-  const key = drills.join(",") + ":" + nextAb;
-  if(key !== navKey){ navKey = key; markNav(drills, nextAb); }
   updateHud(r, si);
   drawRunner(r);
 }

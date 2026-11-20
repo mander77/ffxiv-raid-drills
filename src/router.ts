@@ -6,9 +6,11 @@
 //
 //   /                              the landing screen
 //   /mech/<card id>                a Mechanics card (/next, /death and /job work the same way)
-//   /map[/<CODE>[/<picks>]][?t=s]  the fight player, with a fight code, the fight pattern picks
+//   /map[/<mechanic>[/<CODE>]]     Practice: a mechanic, with its pattern code if given
+//   /pressure[/<CODE>[/<picks>]][?t=s]
+//                                  Pressure; with a code, the full fight, its fight pattern picks
 //                                  (raw=axe,set2=...) and, if paused, the moment in seconds
-//   /pressure, /sheet              the Pressure round and the Cheat sheet
+//   /sheet                         the Cheat sheet
 //
 // Anything else opens the landing screen. Old links put the route after a # (/#mech/k-sword).
 // They still open the same screen, and the address bar then shows the real path.
@@ -19,13 +21,14 @@ import { isCode } from "./util";
 import type { QuizCat } from "./core";
 
 // TS note: Route is a discriminated union on `tab`, like Overlay in types.ts. After a check such
-// as `r.tab === "map"`, TypeScript knows that r has `code` and `t`.
+// as `r.tab === "map"`, TypeScript knows that r has `drill` and `code`.
 export type Route =
-  | { tab: "home" | "pressure" | "sheet" }
+  | { tab: "home" | "sheet" }
   | { tab: QuizCat; card?: string }
-  | { tab: "map"; code?: string; picks?: string; t?: number };
+  | { tab: "map"; drill?: string; code?: string }
+  | { tab: "pressure"; code?: string; picks?: string; t?: number };
 
-const QUIZ_TABS: readonly string[] = ["mech", "next", "death", "job"];
+const QUIZ_TABS: readonly string[] = ["mech", "next"];
 // TS note: a type predicate (`name is QuizCat`). Where it returns true, TypeScript narrows
 // `name` from string to QuizCat.
 const isQuiz = (name: string): name is QuizCat => QUIZ_TABS.includes(name);
@@ -37,7 +40,7 @@ function only<T extends object>(r: T): T {
   return Object.fromEntries(Object.entries(r).filter(([, v]) => v !== undefined && v !== "")) as T;
 }
 
-/** The moment in a player link, "?t=48.2", in seconds. Anything that is not a time in the fight
+/** The moment in a full-fight link, "?t=48.2", in seconds. Anything that is not a time in the fight
     (0 to 11 minutes) is left out. */
 function parseT(query: string): number | undefined {
   const t = Number(new URLSearchParams(query).get("t") ?? "");
@@ -49,10 +52,12 @@ export function parseRoute(link: string): Route {
   const [path = "", query = ""] = link.split("?");
   const parts = path.replace(/^[#/]+/, "").replace(/\/+$/, "").split("/").map(p => { try { return decodeURIComponent(p); } catch { return p; } });
   const [name = "", a = "", b = ""] = parts;
-  // The picks and the moment only mean something with the exact fight, so they need the code.
-  if(name === "map") return isCode(a) ? only({tab:"map" as const, code:a.toUpperCase(), picks:b, t:parseT(query)}) : {tab:"map"};
+  // A pattern code only means something with its mechanic. The picks and the moment only mean
+  // something with the exact fight, so they need the fight code.
+  if(name === "map") return a && !isCode(a) ? only({tab:"map" as const, drill:a, code:isCode(b) ? b.toUpperCase() : undefined}) : {tab:"map"};
+  if(name === "pressure") return isCode(a) ? only({tab:"pressure" as const, code:a.toUpperCase(), picks:b, t:parseT(query)}) : {tab:"pressure"};
   if(isQuiz(name)) return only({tab:name, card:a});
-  if(name === "pressure" || name === "sheet") return {tab:name};
+  if(name === "sheet") return {tab:name};
   return {tab:"home"};
 }
 
@@ -67,8 +72,9 @@ export function routeLink(r: Route): string {
   const add = (...parts: Array<string | undefined>): string => parts.filter(Boolean).map(p => "/" + p).join("");
   switch(r.tab){
     case "home": return "/";
-    case "map": return "/map" + add(r.code, r.code ? r.picks : undefined) + (r.code && r.t ? "?t=" + r.t : "");
-    case "pressure": case "sheet": return "/" + r.tab;
+    case "map": return "/map" + add(r.drill, r.drill ? r.code : undefined);
+    case "pressure": return "/pressure" + add(r.code, r.code ? r.picks : undefined) + (r.code && r.t ? "?t=" + r.t : "");
+    case "sheet": return "/" + r.tab;
     default: return "/" + r.tab + add(r.card);
   }
 }

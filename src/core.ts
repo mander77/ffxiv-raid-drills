@@ -1,14 +1,13 @@
 // Shared app state, decks and scoring.
 import { LS, el } from "./util";
 import { MAPS } from "./data/drills";
-import { MECH, DEATH, NEXT_ITEMS } from "./data/questions";
-import { JOB } from "./data/jobs";
+import { MECH, NEXT_ITEMS } from "./data/questions";
 import { cleanChoices, type Choices } from "./data/fight";
-import type { Job, MapDrill, Option, Question, QuizItem, Scene, Slot, StepResult } from "./types";
+import type { MapDrill, Option, Question, QuizItem, Scene, Slot, StepResult } from "./types";
 
 // TS note: other files import these types with `import { state, type Deck } from "./core"`.
 // The `type` keyword inside the braces marks a type-only import next to normal value imports.
-export type QuizCat = "mech" | "next" | "death" | "job";
+export type QuizCat = "mech" | "next";
 export type Tab = "home" | "map" | QuizCat | "pressure" | "sheet";
 
 // TS note: a generic interface, like a C# generic class. Deck<MapDrill> holds map drills
@@ -16,21 +15,19 @@ export type Tab = "home" | "map" | QuizCat | "pressure" | "sheet";
 export interface Deck<T> { items: T[]; i: number; right: number; done: number }
 // TS note: Cur is a discriminated union on `kind`. Code checks `c.kind === "map"`
 // before it touches map-only fields such as `c.results`.
-/** The map drill on screen. `code` rebuilds its pattern; `peek` is the answered step whose answer
-    shows; `setupOpen` unfolds the setup; `stop` holds the drill after a wrong spot until you press
-    Next step. */
-export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; code: string; results: StepResult[]; counted: boolean; waiting?: boolean; stop?: boolean; peek?: number; setupOpen?: boolean }
+/** The Practice mechanic on screen. `code` rebuilds its pattern; `setupOpen` unfolds the setup;
+    `stop` holds it after a wrong spot until you press Next step. */
+export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; code: string; results: StepResult[]; counted: boolean; waiting?: boolean; stop?: boolean; setupOpen?: boolean }
 /** A multiple-choice card. `opts` are the answers in the order shown; `k` is each one's place in
     the question's own list, which the answer previews follow. `sel` is the answer picked for a
     preview but not locked in yet (-1 for none), and `pick` the one locked in. */
 export interface McqCur { kind: "mcq"; cat: QuizCat | "pressure"; item: QuizItem; q: Question; opts: Array<Option & {k: number}>; answered: boolean; pick: number; sel: number; slow: boolean }
-export type Cur = MapCur | McqCur | { kind: "pstart" } | { kind: "pdone" } | { kind: "sheet" } | { kind: "home" } | { kind: "fight" } | { kind: "ability"; i: number };
+export type Cur = MapCur | McqCur | { kind: "pstart" } | { kind: "pdone" } | { kind: "sheet" } | { kind: "home" } | { kind: "fight" };
 export interface PressureRun { queue: QuizItem[]; i: number; right: number; wrong: number; froze: number }
 
-interface Decks { map?: Deck<MapDrill>; mech?: Deck<QuizItem>; next?: Deck<QuizItem>; death?: Deck<QuizItem>; job?: Deck<QuizItem> }
+interface Decks { map?: Deck<MapDrill>; mech?: Deck<QuizItem>; next?: Deck<QuizItem> }
 interface AppState {
   slot: Slot;
-  job: Job;
   /** The fight pattern picks, set in the player's Settings panel. */
   choices: Choices;
   psecs: number;
@@ -51,21 +48,18 @@ export const app = { render: (): void => {} };
 // except that the compiler requires an entry for every QuizCat value. Leave one out and it is an error.
 export const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
   mech: () => MECH,
-  next: () => NEXT_ITEMS,
-  death: () => DEATH,
-  job: () => JOB.filter(x => x.job === state.job)
+  next: () => NEXT_ITEMS
 };
 
-/** In the order a player learns the fight: the mechanics, the spots, the timeline, the cooldowns,
-    the raises, then a timed test. The cheat sheet comes last because it sums up the rest. */
+/** In the order a player learns the fight: what each mechanic does, where you stand, what comes
+    next, then all of it fast. The cheat sheet comes last because it sums up the rest. Each intro
+    is one short line: the screen itself shows what to do. */
 export const TABS: Array<{id: Tab; label: string; lede: string}> = [
-  {id:"home", label:"Home", lede:"Practice drills for the healers in M11S, The Tyrant (Savage). You practice where to stand, what comes next, when to raise and which cooldown to press, away from the raid. The answers follow your group's strats: Hector (Toxic), Kindred No Buddies and Fixed (3CJ) Ecliptic."},
-  {id:"mech", label:"Mechanics", lede:"Read your group's wtfdig guide first, then test yourself here. The answers follow the guide and your slot. After you answer, the arena picture shows the right spot."},
-  {id:"map", label:"Where do I stand?", lede:"The whole fight in cast order. Paused, you go step by step with no timer: click a drill or an ability in the list to go there, then click your spot. Press Play to run the fight clock. Patterns turn as they do in the real fight, so read the boss and the floor."},
-  {id:"next", label:"What is next?", lede:"Knowing what comes next tells you how much time you have to raise. Times come from the fight timeline."},
-  {id:"job", label:"My job", lede:"A suggested plan for your job, built from the current ability recasts. It is not your group's plan, so agree with your co-healer who uses what, and do not stack the same 10% on the same hit."},
-  {id:"death", label:"Someone died", lede:"The decisions from your talk with Andrew: who first, when to raise, when to wait."},
-  {id:"pressure", label:"Pressure round", lede:"Mixed questions on a timer. The goal is to pick something every time. A wrong answer beats a freeze."},
+  {id:"home", label:"Home", lede:"Practice M11S, The Tyrant (Savage), as a healer, away from the raid."},
+  {id:"mech", label:"Learn", lede:"What each mechanic does, and what you do in it. Pick an answer to see it on the picture."},
+  {id:"map", label:"Practice", lede:"Click where you stand. One mechanic at a time, no timer."},
+  {id:"next", label:"What is next?", lede:"Which mechanic comes next in the fight."},
+  {id:"pressure", label:"Pressure", lede:"The same questions, fast: timed questions, or the whole fight on the clock."},
   {id:"sheet", label:"Cheat sheet", lede:"The rules and your timeline on one page."}
 ];
 
@@ -73,7 +67,6 @@ const savedSecs = LS.get("psecs", 6);
 export const state: AppState = {
   // LS.get<string> reads any saved string. Each ternary then turns it into one of the allowed values.
   slot: LS.get<string>("slot", "H1") === "H2" ? "H2" : "H1",
-  job: LS.get<string>("job", "whm") === "sge" ? "sge" : "whm",
   choices: cleanChoices(LS.get<unknown>("fchoices", null)),
   psecs: [4, 6, 8, 10].includes(savedSecs) ? savedSecs : 6,
   stats: LS.get<AppState["stats"]>("stats", {}) || {},
