@@ -24,6 +24,9 @@ export const AXE_R = yalms(8);
 export const SPREAD_R = yalms(6);
 /** A Void Stardust puddle (Cometite, "range 6 circle"). */
 export const PUDDLE_R = yalms(6);
+/** How long a puddle stays on the floor after it drops, in seconds: Cometite is a 3.0 s cast
+    that goes off once. Then it is gone. */
+export const PUDDLE_LIFE = 3;
 /** Each scythe protean cone: 30 degrees wide (half each side, in degrees), and it reaches across
     the arena ("range 60 30-degree cone"). */
 export const PROTEAN_HALF = 15;

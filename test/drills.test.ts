@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, stackToward, changes, assaultScene, ultimateScene, facingNext, jumpsNext, DANCE_LINES, DANCE_PAIRS, type Run } from "../src/data/drills";
+import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, stackNear, changes, assaultScene, ultimateScene, facingNext, jumpsNext, DANCE_LINES, DANCE_PAIRS, type Run } from "../src/data/drills";
 import { angOf, inZone, zoneCenter } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, StepResult, Zone } from "../src/types";
 
@@ -213,9 +213,10 @@ test("Void Stardust into the second weapons: every right spot is inside its zone
     assert.ok(inZone(z.label, z), v + ": the shown spot is right");
     // The pick answer starts "The axe, ..." when the axe goes first.
     if(v === "stack" && "c" in pick && !sc.steps[0].a.startsWith("The axe")){
-      // In max melee range (8.5 yalms), on the first weapon's side of the boss.
+      // In max melee range (8.5 yalms), out of the last puddle. It gets as close as it can to
+      // your safe spot for the first weapon, which can be off to the weapon's side.
       assert.isAtMost(dist(z.label, [50, 50]), 21.25, "the stack is in max melee range");
-      assert.isAtMost(dist(z.label, pick.c), dist([50, 50], pick.c), "the stack is on the first weapon's side");
+      assert.isAtLeast(dist(z.label, PUDDLES[2]), 15, "the stack is out of the last puddle");
     }
   }
 });
@@ -273,27 +274,43 @@ test("weapon runs: before each jump, the boss turns to face the weapon he jumps 
   }
 });
 
-test("Void Stardust stack toward the first weapon: a curved band in max melee range, out of the third puddle", () => {
-  // From a report: the scythe southwest, the third puddle east of the boss.
-  const w: Point = [29.5, 70.5], q: Point = [66.5, 52];
-  const z = stackToward(w)([VOID_RESULTS[0], ...asDrops([[50, 27], [61, 37], q])]);
-  if(!("fn" in z)) throw new Error("the stack zone is a rule zone");
-  assert.ok(inZone(z.label, z), "the shown spot");
-  for(const p of [[38.7, 67.7], [36, 58], [50, 66], [33, 48]] as Point[]) assert.ok(inZone(p, z), "in max melee range on the scythe's side: " + p);
-  assert.notOk(inZone([32, 66], z), "toward the scythe, but past max melee range");
-  assert.notOk(inZone([45, 57], z), "inside his hitbox ring");
-  assert.notOk(inZone([40, 36], z), "in max melee range, but on the far side from the scythe");
-  assert.notOk(inZone([59.75, 63.93], z), "in the band, but inside the third puddle");
-  assert.notOk(inZone(q, z), "inside the last puddle");
-  // The picture matches the rule: away from the band's edge, a point is inside the drawn band
-  // exactly when the drill accepts it.
+/** Away from the edge of the drawn area, a point is inside it exactly when the drill accepts it. */
+function drawnMatchesRule(z: Zone): void {
+  if(!("fn" in z)) throw new Error("a rule zone");
   const polys = z.show.flatMap(sh => "poly" in sh ? [sh.poly] : []);
-  assert.isAbove(polys.length, 0, "the band is drawn");
+  assert.isAbove(polys.length, 0, "the area is drawn");
   for(let x = 0; x <= 100; x++) for(let y = 0; y <= 100; y++){
     const pt: Point = [x, y];
     if(polys.some(pl => nearEdge(pt, pl, 0.8))) continue;
-    assert.equal(polys.some(pl => inPoly(pt, pl)), inZone(pt, z), "drawn band and rule disagree at " + pt);
+    assert.equal(polys.some(pl => inPoly(pt, pl)), inZone(pt, z), "drawn area and rule disagree at " + pt);
   }
+}
+
+test("Void Stardust stack: in max melee range, out of the last puddle, close to where you go next", () => {
+  // From a report: the scythe southwest (the spot to get close to), the third puddle east of the boss.
+  const T: Point = [29.5, 70.5], q: Point = [66.5, 52];
+  const z = stackNear(T)([VOID_RESULTS[0], ...asDrops([[50, 27], [61, 37], q])]);
+  if(!("fn" in z)) throw new Error("the stack zone is a rule zone");
+  assert.ok(inZone(z.label, z), "the shown spot");
+  assert.isAtMost(dist(z.label, [50, 50]), 21.25, "the shown spot is in max melee range");
+  for(const p of [[38.7, 67.7], [36, 58], [37, 62]] as Point[]) assert.ok(inZone(p, z), "in max melee range, toward the scythe: " + p);
+  assert.notOk(inZone([32, 66], z), "toward the scythe, but past max melee range");
+  assert.notOk(inZone([45, 57], z), "inside his hitbox ring");
+  assert.notOk(inZone([50, 66], z), "in max melee range, but much farther from the scythe than the closest spot");
+  assert.notOk(inZone([40, 36], z), "on the far side from the scythe");
+  assert.notOk(inZone(q, z), "inside the last puddle");
+  drawnMatchesRule(z);
+});
+
+test("Void Stardust stack: the first two puddles are gone, so their ground is free", () => {
+  // From a report: the sword north, the usual puddles north, northeast and east-southeast. The
+  // first puddle went off 3 seconds after it dropped, so the group stacks straight toward the sword.
+  const z = stackNear([50, 17])(VOID_RESULTS);
+  if(!("fn" in z)) throw new Error("the stack zone is a rule zone");
+  assert.isAtMost(dist(z.label, [50, 31.25]), 1.5, "the shown spot: north, a yalm inside max melee range");
+  assert.ok(inZone([50, 30], z), "where the first puddle was");
+  assert.notOk(inZone(PUDDLES[2], z), "inside the last puddle");
+  drawnMatchesRule(z);
 });
 
 test("Dance of Domination: every pair spot is clear of the 10-yalm Hurricane Explosion lines", () => {

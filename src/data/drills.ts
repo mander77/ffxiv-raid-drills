@@ -1,7 +1,7 @@
 // Map drills: the arena scenes and the rules that decide each answer zone.
 import { S, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
-import { DEG, unit, vadd, leftOf, angOf, inArena, COMPASS } from "../geometry";
+import { DEG, unit, vadd, leftOf, angOf, inArena, zoneCenter, COMPASS } from "../geometry";
 import { HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
 import type { Boss, MapDrill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
@@ -222,8 +222,10 @@ function nearestTo(t: Point, fn: (p: Point) => boolean): Point | null {
 
 /* Comet, the spread that can end Void Stardust. Only the tanks and melee have fixed spots,
    at the intercardinals just outside the hitbox. Healers and ranged take any open spot.
-   Each puddle goes off once, 3 seconds after it drops, so by the stack or spread all three are
-   gone. Only the last one matters: you leave it as it goes off, on the way to your spot. */
+   Nobody stands on a puddle that is still there (Amanda). Each one goes off PUDDLE_LIFE (3)
+   seconds after it drops (BossMod: Cometite, 3.0 s cast) and then it is gone, and they drop 2
+   seconds apart. So by the stack or spread only the last one is still on the floor: you leave
+   it as it goes off, on the way to your spot. The first two have faded from the map. */
 const FIXED_SPREAD: {l: string; r: "T" | "D"; off: Point}[] = [
   {l:"MT", r:"T", off:[-15, -15]}, {l:"OT", r:"T", off:[15, -15]}, {l:"M1", r:"D", off:[-15, 15]}, {l:"M2", r:"D", off:[15, 15]}];
 /** The tank and melee spread spots around a boss at c. */
@@ -271,48 +273,65 @@ export function cometSpread(s: Slot, toward: Point | null = null, c: Point = CEN
   };
 }
 
-/* The stack after the third puddle when a sword or scythe goes first next. The group stacks in
-   the boss's max melee range, so the melee keep their uptime, on that weapon's side of him (up
-   to 90 degrees either way from it), and out of the third puddle. The area is a curved band
-   from his hitbox ring out to max melee range, with the third puddle cut out of it. The spot
-   shown, where the moving marker runs, is in the middle of the band, toward the weapon. If the
-   puddle covers that, it is the free part of the band nearest to the weapon. */
-const STACK_HALF = 90;
-export function stackToward(w: Point, c: Point = CENTER): (results: StepResult[]) => Zone {
-  const aw = angOf([w[0] - c[0], w[1] - c[1]]), mid = (HITBOX + MELEE_R) / 2;
+/* The stack after the puddles, from Amanda's three rules:
+   1. In the boss's max melee range, so the melee keep their uptime.
+   2. Off every puddle that is still there: only the last one (see the Comet note above; the
+      first two went off and faded, so their ground is free again).
+   3. As close as you can get to where you go next: your safe spot for the first weapon, or,
+      with no weapon next, one more small step clockwise.
+   The area is the band from his hitbox ring out to max melee range, less the last puddle, and of
+   that only the part within STACK_SLACK of the spot that is closest to the target. It is drawn
+   one degree at a time, so its outline follows the puddle's edge. The spot shown, where the
+   moving marker runs, is the one closest to the target that is a yalm inside max melee range
+   and a yalm clear of the puddle, so it is not on the area's edge. */
+const STACK_SLACK = 10;   // units (4 yalms): how much farther than the closest spot still counts
+export function stackNear(target: Point | ((results: StepResult[]) => Point), c: Point = CENTER): (results: StepResult[]) => Zone {
+  const ray = (deg: number): Point => [Math.sin(deg * DEG), -Math.cos(deg * DEG)];
   const at = (deg: number, r: number): Point => [c[0] + r * Math.sin(deg * DEG), c[1] - r * Math.cos(deg * DEG)];
-  const off = (p: Point): number => { const d = Math.abs(angOf([p[0] - c[0], p[1] - c[1]]) - aw) % 360; return Math.min(d, 360 - d); };
+  /** Where the ray at `deg` is inside the circle around q with radius rad: from b - h to b + h
+      units along the ray (from solving |c + r * ray - q| = rad for r), or null if it misses. */
+  const cross = (deg: number, q: Point, rad: number): [number, number] | null => {
+    const u = ray(deg), v: Point = [q[0] - c[0], q[1] - c[1]], b = u[0] * v[0] + u[1] * v[1], disc = b * b - (v[0] * v[0] + v[1] * v[1] - rad * rad);
+    return disc > 0 ? [b - Math.sqrt(disc), b + Math.sqrt(disc)] : null;
+  };
+  const longest = (parts: Array<[number, number]>): Array<[number, number]> => parts.filter(([lo, hi]) => hi - lo > 0.3).sort((x, y) => (y[1] - y[0]) - (x[1] - x[0]));
   return results => {
-    const q: Point = results[results.length - 1].drop ?? [50, 33];
-    const fn = (p: Point): boolean => { const r = dist(p, c); return inArena(p) && r >= HITBOX && r <= MELEE_R && off(p) <= STACK_HALF && far(p, q, PUDDLE_R); };
-    /* The free part of the band on the ray at `deg` degrees: from the hitbox ring to max melee,
-       less the part inside the puddle. On the ray, the puddle covers b - h to b + h (from solving
-       |c + r * ray - q| = PUDDLE_R for r). If the puddle splits the ray's part in two, the
-       longer part is used. */
-    const free = (deg: number): [number, number] | null => {
-      const ray: Point = [Math.sin(deg * DEG), -Math.cos(deg * DEG)], v: Point = [q[0] - c[0], q[1] - c[1]];
-      const b = ray[0] * v[0] + ray[1] * v[1], disc = b * b - (v[0] * v[0] + v[1] * v[1] - PUDDLE_R * PUDDLE_R);
-      if(disc <= 0) return [HITBOX, MELEE_R];
-      const h = Math.sqrt(disc), parts: Array<[number, number]> = [[HITBOX, Math.min(MELEE_R, b - h)], [Math.max(HITBOX, b + h), MELEE_R]];
-      const ok = parts.filter(([lo, hi]) => hi - lo > 0.3).sort((x, y) => (y[1] - y[0]) - (x[1] - x[0]));
-      return ok[0] ?? null;
+    const T = typeof target === "function" ? target(results) : target;
+    // The puddles still on the floor: the last one.
+    const drops = results.flatMap(r => r.drop ? [r.drop] : []).slice(-1);
+    // Rules 1 and 2 on one ray: the parts of the band that are off that puddle.
+    const free = (deg: number): Array<[number, number]> => drops.reduce((parts: Array<[number, number]>, q) => {
+      const x = cross(deg, q, PUDDLE_R);
+      return x ? longest(parts.flatMap(([lo, hi]): Array<[number, number]> => [[lo, Math.min(hi, x[0])], [Math.max(lo, x[1]), hi]])) : parts;
+    }, [[HITBOX, MELEE_R]]);
+    // Rule 3: how close to the target the band gets, then everything within STACK_SLACK of that.
+    const rays = Array.from({length:360}, (_x, d) => d);
+    let best = Infinity;
+    for(const d of rays) for(const [lo, hi] of free(d)){
+      const u = ray(d), r = Math.max(lo, Math.min(hi, u[0] * (T[0] - c[0]) + u[1] * (T[1] - c[1])));
+      best = Math.min(best, dist(at(d, r), T));
+    }
+    const limit = best + STACK_SLACK;
+    const fn = (p: Point): boolean => { const r = dist(p, c); return inArena(p) && r >= HITBOX && r <= MELEE_R && drops.every(q => far(p, q, PUDDLE_R)) && dist(p, T) <= limit; };
+    // The area on one ray: its longest free part, cut to what is close enough to the target.
+    const area = (deg: number): [number, number] | null => {
+      const near = cross(deg, T, limit);
+      return near ? longest(free(deg).map(([lo, hi]): [number, number] => [Math.max(lo, near[0]), Math.min(hi, near[1])]))[0] ?? null : null;
     };
-    // The band's outline, one degree at a time: each run of rays with a free part is one piece.
+    // The outline, one degree at a time from a ray outside the area, so no piece is cut in two.
     const pieces: Point[][] = [];
     let inner: Point[] = [], outer: Point[] = [];
     const flush = (): void => { if(inner.length > 1) pieces.push([...inner, ...outer.reverse()]); inner = []; outer = []; };
-    for(let d = -STACK_HALF; d <= STACK_HALF; d++){
-      const f = free(aw + d);
+    const from = rays.find(d => !area(d)) ?? 0;
+    for(const d of rays.map(x => x + from)){
+      const f = area(d);
       if(!f){ flush(); continue; }
-      inner.push(at(aw + d, f[0])); outer.push(at(aw + d, f[1]));
+      inner.push(at(d, f[0])); outer.push(at(d, f[1]));
     }
     flush();
-    // The spot shown: toward the weapon, or the first free ray next to it, then 8 degrees farther
-    // from the puddle so it is not on the band's edge.
-    const turns = Array.from({length:STACK_HALF + 1}, (_x, i) => i).flatMap(i => i ? [i, -i] : [0]);
-    const first = turns.find(d => fn(at(aw + d, mid))) ?? 0;
-    const away = first === 0 ? 0 : first + Math.sign(first) * 8;
-    const label = fn(at(aw + away, mid)) ? at(aw + away, mid) : at(aw + first, mid);
+    const ring = rays.map(d => at(d, MELEE_R - 2.5)), byNear = (a: Point, b: Point): number => dist(a, T) - dist(b, T);
+    const roomy = (p: Point): boolean => fn(p) && drops.every(q => far(p, q, PUDDLE_R + 2.5));
+    const label = ring.filter(roomy).sort(byNear)[0] ?? ring.filter(fn).sort(byNear)[0] ?? at(angOf([T[0] - c[0], T[1] - c[1]]), MELEE_R - 2.5);
     return {fn, label, show:pieces.map(poly => ({poly}))};
   };
 }
@@ -361,11 +380,12 @@ export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
 }
 
 /* Void Stardust: three puddles, then the spread (Comet) or the stack (Crushing Comet).
-   `toward` is the first weapon of the next set when it is a sword or scythe: the stack or
-   spread then moves toward it. The second Void Stardust has no weapons after it.
-   `c` is where the boss stands, and `start` is the first puddle spot with its answer. */
+   `toward` is the first weapon of the next set when it is a sword or scythe: the spread then
+   moves toward it. `safe` is your safe spot for the first weapon of the next set, which the
+   stack gets as close to as it can (see stackNear). The second Void Stardust has no weapons
+   after it. `c` is where the boss stands, and `start` is the first puddle spot with its answer. */
 const NORTH_START = {p:FIRST_PUDDLE, a:"North of the boss, just outside the hitbox."};
-function voidSteps(s: Slot, spread: boolean, toward: Point | null, c: Point = CENTER, start = NORTH_START): Step[] {
+function voidSteps(s: Slot, spread: boolean, toward: Point | null, c: Point = CENTER, start = NORTH_START, safe: Point | null = null): Step[] {
   const next = puddleAfter(c);
   return [
     {q:"Where do you drop the first puddle?", z:{c:start.p, r:9}, a:start.a, drop:true},
@@ -376,10 +396,14 @@ function voidSteps(s: Slot, spread: boolean, toward: Point | null, c: Point = CE
           zf:cometSpread(s, toward, c), cue:spreadMarks(c),
           a:toward ? "Anywhere on the first weapon's side of the arena (the shaded area), out of the last puddle and not on a tank or melee spot."
                    : "Any open spot. Healers and ranged have no fixed spread spot. Keep away from the tank and melee spots and out of the last puddle."}
-      : toward ? {q:"Puddles done. Where does the group stack?", zf:stackToward(toward, c),
-          a:"Anywhere in his max melee range on the first weapon's side (the shaded band), out of the third puddle. The melee keep their uptime."}
-               : {q:"Puddles done. Where does the group stack?", zf:next, a:"Just outside the third puddle, one more small step clockwise."}];
+      : safe ? {q:"Puddles done. Where does the group stack?", zf:stackNear(safe, c),
+          a:"In his max melee range, out of the third puddle (the first two are gone), as close as you can get to your spot for the first weapon (the shaded area)."}
+             : {q:"Puddles done. Where does the group stack?", zf:stackNear(res => zoneCenter(next(res)), c),
+          a:"In his max melee range, out of the third puddle (the first two are gone), one more small step clockwise (the shaded area)."}];
 }
+
+/** Where a step's zone is: the shown spot, for a weapon your safe spot. */
+const safeSpot = (st: Step): Point | null => { const z = st.z ?? st.zf?.([]); return z ? zoneCenter(z) : null; };
 
 /* The first Void Stardust runs straight into the second weapon set: the weapons are already
    out, so the party finds the first one early. A sword or scythe first means a run, so the
@@ -393,7 +417,7 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: Run): Scene {
     {q:"Before the puddles: which weapon goes first after Void Stardust? Click it.", z:{c:first.p, r:9}, look:true,
       a:"The " + first.type + ", " + where + ": its flat side is square to the boss. " +
         (run ? "A sword or scythe first means a run, so the stack or spread moves toward it." : "An axe first means the party stacks in the middle, so the usual spots work.")},
-    ...voidSteps(s, spread, run ? first.p : null),
+    ...voidSteps(s, spread, run ? first.p : null, CENTER, NORTH_START, safeSpot(A.steps[0])),
     // The weapons start here, and the puddles are gone.
     {...A.steps[0], clearDrops:true, q:"The " + (spread ? "spread" : "stack") + " went off. The boss goes to the first weapon. Click where you go.",
       a:A.steps[0].a + " If you cannot make it in time, use Sprint or a movement ability. A scholar can use Expedient for the whole party."}];

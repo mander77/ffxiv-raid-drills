@@ -9,15 +9,22 @@ import type { Boss, Scene, StepResult } from "../types";
 
 /* Draw the answer layers on an arena: dropped puddles, cues, the boss, and, with showLast,
    the zone and the click of the last answer. `boss` replaces the scene's boss, for example to
-   hide his facing before he turns. */
-export function paintArena(svg: Element, sc: Scene, k: number, results: StepResult[], showLast: boolean, boss?: Boss | null): void {
+   hide his facing before he turns. `wentOff(i)` is true once the puddle dropped at step i has gone
+   off: it fades out the first time, and after that it is not drawn. */
+export function paintArena(svg: Element, sc: Scene, k: number, results: StepResult[], showLast: boolean, boss?: Boss | null, wentOff?: (i: number) => boolean): void {
+  const layer = (id: string): Element => svg.querySelector("#" + id) as Element;
+  const dropLayer = layer("drops") as SVGGElement, faded = new Set((dropLayer.dataset.gone ?? "").split(",").filter(Boolean).map(Number)), goneNow: number[] = [];
   const n = results.length, asking = showLast ? n - 1 : n;
   // The puddles dropped before the last step with clearDrops (up to the one asked) are gone.
   const kept = sc.steps.slice(0, asking + 1).reduce((from, st, i) => st.clearDrops ? i : from, 0);
   let drops = "", fb = "", rev = "", zlabel = "", me = "";
   results.forEach((r, i) => {
     const step = sc.steps[i], z = r.z, ctr = zoneCenter(z);
-    if(r.drop && i >= kept) drops +='<circle class="drop" cx="' + f1(r.drop[0]) + '" cy="' + f1(r.drop[1]) + '" r="' + PUDDLE_R + '"/>';
+    if(r.drop && i >= kept){
+      const off = wentOff?.(i) ?? false;
+      if(off) goneNow.push(i);
+      if(!off || !faded.has(i)) drops += '<circle class="drop' + (off ? " fading" : "") + '" cx="' + f1(r.drop[0]) + '" cy="' + f1(r.drop[1]) + '" r="' + PUDDLE_R + '"/>';
+    }
     if(step.leave) drops += drawOverlay(step.leave);
     if(i === n - 1 && showLast){
       const cls = r.ok ? "ok" : "bad";
@@ -40,9 +47,9 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
     // Asking the next weapon: he has already turned to face it.
     if(boss && n > 0 && !showLast) boss = facingNext(sc, n, boss);
   }
-  const layer = (id: string): Element => svg.querySelector("#" + id) as Element;
   layer("reveal-layer").innerHTML = rev;
-  layer("drops").innerHTML = drops + cueRest;
+  dropLayer.innerHTML = drops + cueRest;
+  dropLayer.dataset.gone = goneNow.join(",");
   paintBoss(layer("boss-layer"), boss ?? null);
   layer("fb-layer").innerHTML = fb;
   layer("label-layer").innerHTML = zlabel;

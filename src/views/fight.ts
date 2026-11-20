@@ -13,7 +13,7 @@ import { tabHead, hudPrompt, segRow } from "./common";
 import { patternRows, wirePattern } from "./pattern";
 import { buildFight, clock, choicesText, CHOICE_ROWS, RANDOM, type Choices, type Fight, type FightSeg } from "../data/fight";
 import { BOSS, facingNext, jumpsNext } from "../data/drills";
-import { WALL_W } from "../data/attacks";
+import { WALL_W, PUDDLE_LIFE } from "../data/attacks";
 import { ABILITIES, CATS, catsAt, type Cat } from "../data/abilities";
 import { tlNav, wireNav, markNav, marks, catNames } from "./tlnav";
 import { rightRoute, clickRoute, runnerAt, type Stop } from "../data/route";
@@ -445,7 +445,10 @@ function frame(): void {
   // before it hits.
   const facing = res.length > 0 && r.t >= lastHit + TURN_AFTER;
   const jumped = Boolean(g && res.length < g.due.length && r.t >= g.due[res.length] - JUMP_LEAD && jumpsNext(g.scene, res.length));
-  const key = [where, res.length, turned, facing, jumped, r.hold, showAnswer, r.paused, r.settings, r.setupOpen, settings.speed].join(":");
+  // A puddle goes off PUDDLE_LIFE seconds after it drops, and then fades from the floor.
+  const gone = (i: number): boolean => Boolean(g && res[i]?.drop && r.t >= g.due[i] + PUDDLE_LIFE);
+  const goneN = res.filter((_x, i) => gone(i)).length;
+  const key = [where, res.length, turned, facing, jumped, r.hold, showAnswer, r.paused, r.settings, r.setupOpen, settings.speed, goneN].join(":");
   if(key !== r.shown){
     const fresh = r.shown.split(":")[0] !== where;   // a new scene: build the arena again
     r.shown = key;
@@ -464,7 +467,7 @@ function frame(): void {
     if(boss && g?.turn && boss.x === 50 && boss.y === 50) boss = {...boss, f:turned ? g.turn.f : null};
     // Once he has landed, he faces the way he jumped.
     if(boss && facing && !jumped) boss = facingNext(sc, res.length, boss);
-    paintArena(el("arena-svg"), sc, k, res, showAnswer, boss);
+    paintArena(el("arena-svg"), sc, k, res, showAnswer, boss, gone);
     // The ring sits around the boss, and moves with him when he jumps. It starts at the top.
     const c = boss ?? {x:50, y:50};
     r.bossAt = [c.x, c.y];
