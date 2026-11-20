@@ -5,8 +5,10 @@ import { facingNext } from "../data/drills";
 import { PUDDLE_R } from "../data/attacks";
 import type { Boss, Scene, StepResult } from "../types";
 
-/** The width of the tag on the answer area, in arena units. */
-const LABEL_W = 17;
+/** The tag on the answer area, and its width in arena units. A look-ahead step (spot the first
+    weapon) is not a spot to go to: it is a mechanic saved for later, so it gets its own tag and
+    colour. */
+const TAG = {right:{text:"Right spot", w:17}, later:{text:"Saved for later", w:24}};
 
 /* Draw the answer layers on an arena: dropped puddles, cues, the boss, and, with showLast,
    the zone and the click of the last answer. `boss` replaces the scene's boss, for example to
@@ -28,16 +30,16 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
     }
     if(step.leave) drops += drawOverlay(step.leave);
     if(i === n - 1 && showLast){
-      const cls = r.ok ? "ok" : "bad";
+      const cls = r.ok ? "ok" : "bad", tag = step.look ? TAG.later : TAG.right;
       if(step.reveal) rev = hitsSVG(step.reveal.map(o => rotOverlay(o, k)));
-      fb = zoneSVG(z, cls);
+      fb = zoneSVG(z, step.look ? "later" : cls);
       const top = "c" in z ? z.c[1] - z.r : "rect" in z ? z.rect[1] : ctr[1] + 1;
       const bottom = "c" in z ? z.c[1] + z.r : "rect" in z ? z.rect[3] : ctr[1] - 1;
       const ly = "fn" in z ? ctr[1] : (top - 3 >= -3 ? top - 3 : bottom + 3);
       // The tag says what the green area is. It does not name your slot: the moving marker
       // is you, so a slot name here would look like a second you. It stays inside the picture.
-      const lx = Math.max(-4 + LABEL_W / 2, Math.min(104 - LABEL_W / 2, ctr[0]));
-      zlabel = '<g class="zlabel"><rect x="' + f1(lx - LABEL_W / 2) + '" y="' + f1(ly - 2.1) + '" width="' + LABEL_W + '" height="4.2" rx=".9"/><text x="' + f1(lx) + '" y="' + f1(ly) + '">Right spot</text></g>';
+      const lx = Math.max(-4 + tag.w / 2, Math.min(104 - tag.w / 2, ctr[0]));
+      zlabel = '<g class="zlabel' + (step.look ? " later" : "") + '"><rect x="' + f1(lx - tag.w / 2) + '" y="' + f1(ly - 2.1) + '" width="' + tag.w + '" height="4.2" rx=".9"/><text x="' + f1(lx) + '" y="' + f1(ly) + '">' + tag.text + "</text></g>";
       if(!r.missed) me = '<g class="pick ' + cls + '" transform="translate(' + f1(r.p[0]) + " " + f1(r.p[1]) + ')"><circle class="halo" r="2.6"/><circle class="dot" r="1.1"/></g>';
     }
   });

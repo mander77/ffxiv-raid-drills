@@ -318,8 +318,11 @@ function tick(now: number): void {
       const j = r.results[si].length;
       if(j >= g.due.length || r.t < g.from) return;
       // The player answers at the hit, with the spot the marker ran to (see data/route.ts):
-      // the blue target turns green as the mechanic goes off.
-      if(r.mode === "watch" && r.t >= g.due[j]) return answer(si, r.route?.find(s => s.si === si && s.j === j)?.p ?? null);
+      // the blue target turns green as the mechanic goes off. A look-ahead step (which weapon is
+      // first) has no hit, and the next step follows it closely, so the player answers it
+      // LOOK_SHOW seconds early: the right weapon then stays on the floor before the next question.
+      const at = r.mode === "watch" && g.scene.steps[j].look ? Math.max(g.from, g.due[j] - LOOK_SHOW) : g.due[j];
+      if(r.mode === "watch" && r.t >= at) return answer(si, r.route?.find(s => s.si === si && s.j === j)?.p ?? null);
       if(r.t < g.due[j]) return;
       answer(si, null, true);
     });
@@ -530,6 +533,16 @@ function updateLive(r: Run): void {
 /* ---------- the moving marker ---------- */
 /** How long the player keeps a green answer on the floor after its hit, in seconds. */
 const GREEN_FOR = 1.5;
+/** How long before its due time the player answers a look-ahead step, in seconds. */
+const LOOK_SHOW = 4;
+/** On the player, from the early answer of a look-ahead step until its due time, the answer holds
+    the screen: the HUD shows it, and the next step's question and blue area wait. Returns the
+    look-ahead step, or -1. */
+function lookHold(r: Run, si: number): number {
+  if(r.mode !== "watch" || si < 0) return -1;
+  const g = r.fight.segs[si], j = r.results[si].length - 1;
+  return j >= 0 && g.scene.steps[j].look && r.t < g.due[j] ? j : -1;
+}
 /** How long after a weapon hits the boss turns to face the next one, in seconds. No source
     gives this time: cactbot has only the jump itself, about 2 seconds before the next hit, and
     the hits are about 5 seconds apart. So this is an estimate, and he turns well before he jumps. */
@@ -570,7 +583,7 @@ function drawRunner(r: Run): void {
   // target changes. It needs the answers before it in that mechanic (a puddle depends on the last).
   // The key holds the number of answers too: right after a jump with the slider, the player
   // fills in the earlier answers on the next frame, and the area can only be drawn after that.
-  const key = r.mode === "watch" && target ? target.si + ":" + target.j + ":" + r.results[target.si].length : "";
+  const key = r.mode === "watch" && target && lookHold(r, target.si) < 0 ? target.si + ":" + target.j + ":" + r.results[target.si].length : "";
   if(key !== r.zoneKey){
     r.zoneKey = key;
     const layer = document.getElementById("f-runzone"), g = target ? r.fight.segs[target.si] : null;
@@ -676,8 +689,16 @@ function updateHud(r: Run, si: number): void {
     put("h-left", left > 0 ? (casting ? left.toFixed(1) : Math.round(left) + " s") : "");
   } else { cast.classList.add("idle"); fill.style.width = "0%"; put("h-name", "No more casts"); put("h-left", ""); }
   // Your prompt and the time left (the step number while paused), or the next mechanic.
-  const g = si >= 0 ? f.segs[si] : null, j = g ? r.results[si].length : 0;
-  if(g && j < g.due.length){
+  const g = si >= 0 ? f.segs[si] : null, j = g ? r.results[si].length : 0, held = lookHold(r, si);
+  if(g && held >= 0){
+    // The look-ahead answer up to its first colon or full stop ("The sword, north: its flat
+    // side ..."), shown as saved for later: "Saved for later: the sword, north."
+    const a = g.scene.steps[held].a, cut = a.search(/[:.]/), what = cut > 0 ? a.slice(0, cut) : a;
+    box.className = "hq done later";
+    put("h-count", "✓");
+    put("h-text", "Saved for later: " + what.charAt(0).toLowerCase() + what.slice(1) + ".");
+    if(ring) ring.style.display = "none";
+  } else if(g && j < g.due.length){
     const left = Math.max(0, g.due[j] - r.t), start = j ? g.due[j - 1] : g.from;
     box.className = "hq" + (left <= URGENT && !r.paused ? " urgent" : "");
     put("h-count", r.paused ? (j + 1) + "/" + g.due.length : left.toFixed(1));

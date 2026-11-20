@@ -445,6 +445,11 @@ td.n .cmline{margin-top:4px;gap:6px;font-size:12px;font-weight:400}
 .zone.pick{fill:rgba(28,111,196,.2);stroke:#1C6FC4}
 .zone.bad{fill:rgba(27,116,72,.16);stroke:var(--heal)}
 .zlabel rect{fill:var(--heal)} .zlabel text{fill:#fff;font-family:var(--font-display);font-weight:700;font-size:3.2px;text-anchor:middle;dominant-baseline:central}
+/* A look-ahead answer (the first weapon) is saved for later, not a spot to go to: purple, the
+   colour of a mechanic in the timeline key. */
+.zone.later{fill:rgba(112,72,232,.16);stroke:var(--c-mech)}
+.zlabel.later rect{fill:var(--c-mech)}
+.hq.done.later .hcount{color:var(--c-mech)}
 .pick .dot{fill:var(--ink)} .pick .halo{fill:none;stroke:var(--ink);stroke-width:.55}
 .pick.bad .dot{fill:var(--miss)} .pick.bad .halo{stroke:var(--miss)}
 .drop{fill:var(--aoe-fill);stroke:var(--aoe);stroke-width:.35}

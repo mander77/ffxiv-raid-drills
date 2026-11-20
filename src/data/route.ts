@@ -72,7 +72,7 @@ export function rightRoute(f: Fight): Stop[] {
   }).sort((a, b) => a.hit - b.hit);
 }
 
-/** Your own clicks as a route, for live play and the played-back run. `j` is the step each click
+/** Your own clicks as a route, for the run. `j` is the step each click
     answered, and `t` is when you clicked. Only your clicks move the marker, so it takes no
     pre-position of its own: that could show where a mechanic starts before you click. */
 export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Point; t?: number}>): Stop[] {
