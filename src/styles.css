@@ -79,7 +79,6 @@ main{padding-block:20px 56px}
 .lede{margin:0;max-width:68ch;color:var(--ink-2);min-width:0;flex:1 1 360px}
 .ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
 .fpick{margin:22px 0 2px;font-size:18px}
-.mypick{padding:0 6px;border-radius:4px;background:var(--heal-soft);color:var(--heal-ink);font-weight:700}
 /* Weapon cards: drag them into the order the boss takes them. Dashed with "?" while on Random. */
 .wcards{display:flex;gap:6px;list-style:none;margin:0;padding:0}
 .wcard{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1.5px solid var(--heal);border-radius:8px;background:var(--card);color:var(--ink);font-size:14px;font-weight:700;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -160,13 +159,11 @@ main{padding-block:20px 56px}
 @media (max-width:560px){.hq{flex-wrap:wrap}}
 /* The step chips in the HUD: only when the panel is below the arena (phones), where its own
    chips are off screen. */
-.hud .hchips{display:none;margin:0}
-@media (max-width:860px){.hud .hchips{display:flex}}
 /* The countdown ring around the boss: it empties as your hit comes closer. */
 .tring{fill:none;stroke:var(--heal);stroke-width:1.3;stroke-linecap:round;pointer-events:none}
 .tring.urgent{stroke:var(--miss)}
 .arena svg.locked{cursor:default}
-/* Real time: damage going out. A flash over the arena floor (a rect in the arena picture, under
+/* The full fight: damage going out. A flash over the arena floor (a rect in the arena picture, under
    the player marks), a ring pulse at the boss for a tank buster, and the hit's name for a moment.
    The flashes stay under three a second: Dance of Domination, the fastest, hits every 0.7 s. */
 .fxbox{position:relative;max-width:600px;margin:0 auto}
@@ -206,8 +203,6 @@ main{padding-block:20px 56px}
 @keyframes fxfade{0%,55%{opacity:1}100%{opacity:0}}
 /* With reduced motion: no flashes, and the tank buster shows without the fade. The names still show. */
 @media (prefers-reduced-motion:reduce){.hitfx{display:none}.fx-buster{animation:none}}
-.arena .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--ink-2);margin:8px 4px 2px}
-.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 20px 22px;min-width:0}
 .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 12px}
@@ -407,7 +402,7 @@ th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-trans
 td.t{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 td.n{font-weight:700;min-width:170px}
 .chip{display:inline-block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:99px;margin-top:4px;white-space:nowrap}
-/* The cheat-sheet timeline: each row's colour marks and category names, as in the fight list. */
+/* The cheat-sheet timeline: each row's colour marks and category names, as in the ability list. */
 td.n .cmline{margin-top:4px;gap:6px;font-size:12px;font-weight:400}
 .sheet .cmkey{border-bottom:0;padding:0 0 8px;font-size:12px}
 .sheet ul.rules{margin:0;padding-left:20px;display:grid;gap:10px;max-width:72ch}

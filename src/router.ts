@@ -5,7 +5,7 @@
 // and the app reads the path itself. Vite's dev server does the same.
 //
 //   /                              the landing screen
-//   /mech/<card id>                a Mechanics card (/next, /death and /job work the same way)
+//   /mech/<card id>                a Mechanics card (/next works the same way)
 //   /map[/<mechanic>[/<CODE>]]     Practice: a mechanic, with its pattern code if given
 //   /pressure[/<CODE>[/<picks>]][?t=s]
 //                                  Pressure; with a code, the full fight, its fight pattern picks
@@ -17,6 +17,7 @@
 //
 // TS note: this file imports only types from core.ts (`import type`), so it has no code that
 // needs a page and the tests can run it.
+import { FIGHT_END } from "./data/abilities";
 import { isCode } from "./util";
 import type { QuizCat } from "./core";
 
@@ -41,10 +42,10 @@ function only<T extends object>(r: T): T {
 }
 
 /** The moment in a full-fight link, "?t=48.2", in seconds. Anything that is not a time in the fight
-    (0 to 11 minutes) is left out. */
+    (after the pull, up to the end of the fight clock) is left out. */
 function parseT(query: string): number | undefined {
   const t = Number(new URLSearchParams(query).get("t") ?? "");
-  return Number.isFinite(t) && t > 0 && t <= 660 ? t : undefined;
+  return Number.isFinite(t) && t > 0 && t <= FIGHT_END ? t : undefined;
 }
 
 /** Read a link into a route: a path (/mech/k-sword), with a query if any, or an old # link (#mech/k-sword). */

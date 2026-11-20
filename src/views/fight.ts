@@ -12,14 +12,14 @@ import { sceneSVG, drawOverlay, zoneSVG, layerIn } from "../arena";
 import { paintArena } from "./map";
 import { tabHead } from "./common";
 import { patternRows, wirePattern } from "./pattern";
-import { buildFight, clock, choicesText, CHOICE_ROWS, RANDOM, type Choices, type Fight, type FightSeg } from "../data/fight";
+import { buildFight, buildHits, clock, choicesText, CHOICE_ROWS, RANDOM, type Choices, type Fight, type FightSeg, type Hit } from "../data/fight";
 import { BOSS, facingNext, jumpsNext } from "../data/drills";
-import { WALL_W, PUDDLE_LIFE } from "../data/attacks";
-import { ABILITIES, CATS, catsAt, type Cat } from "../data/abilities";
+import { PUDDLE_LIFE, busterPieces } from "../data/attacks";
+import { ABILITIES, CATS, catsAt } from "../data/abilities";
 import { marks, catNames } from "./tlnav";
 import { rightRoute, clickRoute, runnerAt, showOf, type Stop } from "../data/route";
-import { showRoute } from "../router";
-import type { Boss, Overlay, Point, Scene, Slot, StepResult } from "../types";
+import { routeLink, showRoute } from "../router";
+import type { Boss, Point, Scene, Slot, StepResult } from "../types";
 
 /** run = you click, like a game; watch = the right moves play by themselves on the player. */
 type Mode = "run" | "watch";
@@ -265,7 +265,7 @@ function syncRoute(): void {
 
 /* Go to any moment on the player. Back: the answers to hits after that moment are forgotten.
    Forward: the player fills in the right moves it jumped over by itself. */
-export function seekTo(to: number): void {
+function seekTo(to: number): void {
   const r = R;
   if(!r) return;
   const f = r.fight;
@@ -571,7 +571,7 @@ function updateLive(r: Run): void {
     tl.innerHTML = rows.length ? rows.map(e => {
       const left = e.t - r.t, fill = Math.max(0, Math.min(1, 1 - left / SHOW_AT));
       const cls = (left <= 0 ? "now" : left <= SOON ? "soon" : "") + (e.raidwide ? " rw" : ""), cats = catsAt(e.t);
-      // A line that is a fight-list ability gets its colour marks, as in the fight list.
+      // A line that names an ability in the ability list gets its colour marks.
       return '<li class="' + cls + '"><i style="width:' + (fill * 100).toFixed(1) + '%"></i><span>' + (cats.length ? marks(cats) : "") + esc(e.name) + "</span><b>" + (left > 0 ? left.toFixed(1) : "") + "</b></li>";
     }).join("") : '<li class="idle"><span>' + (next ? "Next: " + esc(next.name) + " in " + Math.round(next.t - r.t) + " s" : "No more lines") + "</span></li>";
   }
@@ -647,32 +647,8 @@ function drawRunner(r: Run): void {
 }
 
 /* ---------- damage going out ---------- */
-/* Every hit of the fight, so the arena shows damage going out also where no drill runs. A
-   raidwide flashes the arena floor, a tank buster draws the tanks and the hit on them, shared
-   hits (a stack or a tower the party shares) flash softer, and the enrage flashes long and
-   dark. Every hit, the other AoEs too, shows its name over the arena for a moment, with the
-   fight list's category: its colour mark and name, the same as in the colour key. */
-type HitKind = "raid" | "tank" | "shared" | "enrage" | "aoe";
-interface Hit { t: number; name: string; kind: HitKind; cat: Cat }
-/** Dance of Domination hits seven times, from the first hit to the last on the timeline. */
-const DANCE_HITS = 7, DANCE_GAP = 0.7;
-
-function buildHits(f: Fight): Hit[] {
-  const hits: Hit[] = [];
-  for(const a of ABILITIES){
-    if(a.cats.includes("enrage")) hits.push({t:a.t, name:a.name, kind:"enrage", cat:"enrage"});
-    else if(a.name === "Dance of Domination hits"){
-      for(let i = 0; i < DANCE_HITS; i++) hits.push({t:a.t + i * DANCE_GAP, name:"Dance of Domination " + (i + 1), kind:"raid", cat:"raid"});
-    }
-    else if(a.cats.includes("raid")) hits.push({t:a.t, name:a.name, kind:"raid", cat:"raid"});
-    else if(a.cats.includes("tank")) hits.push({t:a.t, name:a.name, kind:"tank", cat:"tank"});
-    else if(a.name === "Massive Meteor") hits.push({t:a.t, name:a.name, kind:"shared", cat:a.cats[0] ?? "target"});
-    else if(a.cats.includes("target") || a.cats.includes("dodge")) hits.push({t:a.t, name:a.name, kind:"aoe", cat:a.cats.includes("target") ? "target" : "dodge"});
-  }
-  // Each Heartbreak Kick hit is its own line on the timeline: one flash per hit on the shared tower.
-  for(const e of f.events) if(/^Heartbreak Kick \d/.test(e.name)) hits.push({t:e.t, name:e.name, kind:"shared", cat:"spot"});
-  return hits.sort((a, b) => a.t - b.t);
-}
+/* Each hit (buildHits in data/fight.ts) shows over the arena for a moment, with the ability
+   list's category: its colour mark and name, the same as in the colour key. */
 
 /** Start a CSS animation again on an element that may still run it: drop the classes, make the
     browser lay the page out (reading its size does that), then add them back. It works for HTML
@@ -699,21 +675,6 @@ function showHit(r: Run, h: Hit): void {
 }
 
 const BUSTER_MS = 1500;
-/** The tanks for a buster, and what hits them. Great Wall of Fire is a line buster the two tanks
-    share: they stand together in front of the boss (he faces north), and the line runs from him
-    through them. Foregone Fatality hits each tethered tank alone (single-target, no AoE): the MT
-    on the NE tether, the OT on the SW tether, away from the party stack. */
-function busterPieces(name: string, boss: Point): Overlay[] {
-  const tank = (p: Point, l: string): Overlay[] => [{t:"target", x:p[0], y:p[1]}, {t:"mark", x:p[0], y:p[1], l, r:"T"}];
-  if(name.startsWith("Great Wall of Fire")){
-    const front: Point = [boss[0], boss[1] - 17];
-    return [{t:"band", x:boss[0], y:boss[1], x2:boss[0], y2:-20, w:WALL_W},
-      ...tank([front[0] - 3, front[1]], "MT"), ...tank([front[0] + 3, front[1]], "OT")];
-  }
-  const mt: Point = [boss[0] + 14, boss[1] - 14], ot: Point = [boss[0] - 14, boss[1] + 14];
-  return [...tank(mt, "MT"), ...tank(ot, "OT")];
-}
-
 /* ---------- the HUD ---------- */
 /* In the game, the boss cast bar and the floor are in the middle of the screen. The HUD puts
    the same things right above the arena floor: a cast bar for the next timeline line, your
@@ -807,7 +768,7 @@ function renderResult(r: Run, stopped = false): void {
   // After Quit: how far you got, counted in mechanics you answered at least once.
   const reached = r.results.filter(x => x.length).length;
   const list = misses.length ? '<h3 class="fmiss-h">Practice these</h3><ul class="fmiss">' + misses.map(g => "<li><span>" + esc(g.title) + "</span>" +
-    (g.drills[0] ? '<a class="btn ghost" href="/map/' + g.drills[0] + '">Practice it</a>' : "") + "</li>").join("") + "</ul>"
+    (g.drills[0] ? '<a class="btn ghost" href="' + routeLink({tab:"map", drill:g.drills[0]}) + '">Practice it</a>' : "") + "</li>").join("") + "</ul>"
     : stopped ? "<p>Every spot right so far.</p>" : "<p>Every spot right. Each run gets a new pattern, so run it again.</p>";
   show('<div class="qwrap"><div class="panel"><div class="eyebrow"><b>Full fight</b><span>' + (stopped ? "Stopped at mechanic " + reached + " of " + f.segs.length : "Done") + "</span></div>" +
     "<h2>" + right + " of " + all.length + " spots right</h2>" +

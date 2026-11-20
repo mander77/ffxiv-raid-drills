@@ -15,17 +15,17 @@ export type Tab = "home" | "map" | QuizCat | "pressure" | "sheet";
 export interface Deck<T> { items: T[]; i: number; right: number; done: number }
 // TS note: Cur is a discriminated union on `kind`. Code checks `c.kind === "map"`
 // before it touches map-only fields such as `c.results`.
-/** The Practice mechanic on screen. `code` rebuilds its pattern; `setupOpen` unfolds the setup;
-    `stop` holds it after a wrong spot until you press Next step. */
-/** One Practice mechanic on screen. `shown` is true while Show me draws the right spot for the
-    step asked; `helped` is true once Show me was used, so this try does not count in your score. */
+/** One Practice mechanic on screen. `code` rebuilds its pattern; `setupOpen` unfolds the setup;
+    `stop` holds it after a wrong spot until you press Next step. `shown` is true while Show me
+    draws the right spot for the step asked; `helped` is true once Show me was used, so this try
+    does not count in your score. */
 export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; code: string; results: StepResult[]; counted: boolean; waiting?: boolean; stop?: boolean; setupOpen?: boolean; shown?: boolean; helped?: boolean }
 /** A multiple-choice card. `opts` are the answers in the order shown; `k` is each one's place in
     the question's own list, which the answer previews follow. `sel` is the answer picked for a
     preview but not locked in yet (-1 for none), and `pick` the one locked in. */
 export interface McqCur { kind: "mcq"; cat: QuizCat | "pressure"; item: QuizItem; q: Question; opts: Array<Option & {k: number}>; answered: boolean; pick: number; sel: number; slow: boolean }
 export type Cur = MapCur | McqCur | { kind: "pstart" } | { kind: "pdone" } | { kind: "sheet" } | { kind: "home" } | { kind: "fight" };
-export interface PressureRun { queue: QuizItem[]; i: number; right: number; wrong: number; froze: number }
+interface PressureRun { queue: QuizItem[]; i: number; right: number; wrong: number; froze: number }
 
 interface Decks { map?: Deck<MapDrill>; mech?: Deck<QuizItem>; next?: Deck<QuizItem> }
 interface AppState {
@@ -48,7 +48,7 @@ export const app = { render: (): void => {} };
 
 // TS note: Record<QuizCat, () => QuizItem[]> is like Dictionary<QuizCat, Func<List<QuizItem>>>,
 // except that the compiler requires an entry for every QuizCat value. Leave one out and it is an error.
-export const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
+const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
   mech: () => MECH,
   next: () => NEXT_ITEMS
 };

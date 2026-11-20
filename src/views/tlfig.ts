@@ -2,14 +2,14 @@
 // cactbot overlay shows it, and a strip of the four phases with where you are in the fight.
 import { esc } from "../util";
 import { TL } from "../data/timeline";
-import { PHASES, tlCats } from "../data/abilities";
+import { ENRAGE, PHASES, tlCats } from "../data/abilities";
 import { marks } from "./tlnav";
 import type { QuizItem } from "../types";
 
 const toSec = (t: string): number => { const [m, s] = t.split(":").map(Number); return m * 60 + s; };
-const mmss = (s: number): string => Math.floor(s / 60) + ":" + String(Math.round(s % 60)).padStart(2, "0");
-/** The enrage, in seconds: the end of the phase strip. */
-const END = 660;
+const mmss = (s: number): string => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+/** The end of the phase strip: the enrage. */
+const END = ENRAGE;
 /** At least this many rows show after the one that just happened, and at most MAX_ROWS. */
 const MIN_ROWS = 5, MAX_ROWS = 8;
 /** A row's bar fills as its time comes closer: empty a minute out, full at its time. */

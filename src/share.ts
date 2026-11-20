@@ -1,6 +1,6 @@
 // The Share button in the header (index.html, with the usual share icon: a box with an arrow
 // pointing up out of it). Every screen keeps its state in the address bar (see router.ts):
-// a quiz card, a drill with its pattern and your answers so far, a fight with its code and picks.
+// a quiz card, a drill with its pattern code, a fight with its code, picks and moment.
 // So sharing the current address shares exactly what is on screen.
 
 /* On a phone or tablet the system share sheet opens. Elsewhere the link goes to the clipboard,

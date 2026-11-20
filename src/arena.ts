@@ -14,7 +14,7 @@ export const WAYMARKS: Waymark[] = [
 
 const pt = (p: Point): string => f1(p[0]) + "," + f1(p[1]);
 
-export function circlePath(cx: number, cy: number, r: number): string {
+function circlePath(cx: number, cy: number, r: number): string {
   return "M" + f1(cx - r) + "," + f1(cy) + " a" + r + "," + r + " 0 1,0 " + (2 * r) + ",0 a" + r + "," + r + " 0 1,0 " + (-2 * r) + ",0";
 }
 
@@ -121,13 +121,13 @@ export function paintBoss(layer: Element, b: Boss | null): void {
   if(ring && Math.abs(turn) >= 0.01) ring.style.transform = "rotate(" + d.f + "deg)";
 }
 
-export function drawWaymarks(): string {
+function drawWaymarks(): string {
   return WAYMARKS.map(w => '<g class="wm wm-' + w.c + '">' +
     (w.sq ? '<rect x="' + (w.x - 3) + '" y="' + (w.y - 3) + '" width="6" height="6" rx=".6"/>' : '<circle cx="' + w.x + '" cy="' + w.y + '" r="3.2"/>') +
     '<text x="' + w.x + '" y="' + (w.y + 0.2) + '">' + w.id + "</text></g>").join("");
 }
 
-export function floorSVG(split = false): string {
+function floorSVG(split = false): string {
   let h = '<defs><clipPath id="arenaClip"><rect x="0" y="0" width="100" height="100"/></clipPath>' +
     '<pattern id="tiles" width="12.5" height="12.5" patternUnits="userSpaceOnUse"><path class="tileline" d="M12.5 0H0V12.5"/></pattern></defs>' +
     '<rect class="floor" x="0" y="0" width="100" height="100"/><rect x="0" y="0" width="100" height="100" fill="url(#tiles)"/>';
@@ -147,17 +147,17 @@ export function hitsSVG(os: Overlay[]): string {
 }
 
 /* ---------- one layer order for every arena picture ---------- */
-/** The layers of an arena picture, from the bottom up. The Mechanics pictures, the drills, Real
-    time and the cheat sheet all draw in this order, so a piece looks the same everywhere.
+/** The layers of an arena picture, from the bottom up. The Learn card pictures, Practice, the full
+    fight and the cheat sheet all draw in this order, so a piece looks the same everywhere.
     ground: the attacks, then the weapons and other pieces on the floor (clipped to the arena).
     drops: puddles and other pieces that stay on the floor after a step.
     zones: where to stand, as the right answer, a preview or a target (clipped to the arena).
     waymarks, then boss: the boss and his ring.
     labels: name tags for weapons and zones, over the boss so they stay readable.
-    effects: what Real time adds over the arena (the flash, the countdown ring, a tank buster).
+    effects: what the full fight adds over the arena (the flash, the countdown ring, a tank buster).
     marks: the other players. me: your own click and your moving marker, on top of everything. */
 const LAYERS = ["ground", "drops", "zones", "waymarks", "boss", "labels", "effects", "marks", "me"] as const;
-export type Layer = typeof LAYERS[number];
+type Layer = typeof LAYERS[number];
 const CLIPPED: ReadonlySet<Layer> = new Set<Layer>(["ground", "zones"]);
 
 /** An arena picture: the floor, then one group for each layer, in LAYERS order. `attrs` goes on
@@ -172,7 +172,7 @@ export function arenaSVG(attrs: string, layers: Partial<Record<Layer, string>>, 
 export const layerIn = (svg: Element, l: Layer): Element | null => svg.querySelector('[data-layer="' + l + '"]');
 
 /** Overlays sorted into their layers: tags are labels, role marks are marks, the rest is ground. */
-export function piecesSVG(os: Overlay[]): Pick<Record<Layer, string>, "ground" | "labels" | "marks"> {
+function piecesSVG(os: Overlay[]): Pick<Record<Layer, string>, "ground" | "labels" | "marks"> {
   const draw = (t: Overlay["t"]): string => os.filter(o => o.t === t).map(drawOverlay).join("");
   return {ground:hitsSVG(os.filter(o => o.t !== "tag" && o.t !== "mark")), labels:draw("tag"), marks:draw("mark")};
 }

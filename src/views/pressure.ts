@@ -14,7 +14,7 @@ export function renderPressure(): void {
   renderPressureStart();
 }
 
-export function renderPressureStart(): void {
+function renderPressureStart(): void {
   view.innerHTML = tabHead() + '<div class="qwrap pchoices"><div class="panel"><div class="eyebrow"><b>Quick round</b><span>12 questions</span></div>' +
     "<h2>Timed questions</h2><p>Questions from Learn and Timeline. Time to read, then a short timer to decide. Aim for zero freezes.</p>" +
     '<div class="ctrl" style="margin-top:14px"><span id="secs-lbl">Seconds to decide</span><div class="seg small" role="group" aria-labelledby="secs-lbl">' +
@@ -56,7 +56,7 @@ export function showPressureQ(): void {
    An answer counts in either phase. Only the end of the decision time counts as a freeze.
    A timeout ends the question even when the tab is in the background.
    The animation frame loop only moves the bar. */
-export function startTimer(): void {
+function startTimer(): void {
   stopTimer();
   const cur = state.cur;
   if(!cur || cur.kind !== "mcq") return;
@@ -86,7 +86,7 @@ export function timeout(): void {
   drawMCQ();
 }
 
-export function renderPressureDone(): void {
+function renderPressureDone(): void {
   const pr = state.pressure;
   if(!pr) return;
   const msg = pr.froze === 0 ? "No freezes. You made a choice every time, which is the habit you want in the fight." :

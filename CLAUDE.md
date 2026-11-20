@@ -170,7 +170,14 @@ test/                Vitest tests
 - Positions follow the owner's static, which uses the wtfdig guide:
   https://wtfdig.info/74/m11s#hector:nobuddies:fixed (Hector/Toxic, Kindred No Buddies split,
   Fixed (3CJ) Ecliptic).
-- Attack sizes come from BossMod. Times come from the cactbot r11s timeline.
+- Every fight time and attack size must come from a source that anyone can check: fight times
+  from the cactbot timeline (`r11s.txt`), attack sizes and shapes from the BossMod module
+  (`RM11STheTyrant`). `src/data/sources.ts` links both. Never guess, round or invent one, and
+  never take one from a video, a guide's picture or memory. Name the source line or shape in a
+  comment next to the number. When a source is missing or unclear, ask the owner.
+- A number the app chooses for itself is not a fight time. Examples: how long the clock runs past
+  the enrage (`AFTER_ENRAGE`), and the made-up attacks in wrong answers (`FAKE` in
+  `src/data/figs.ts`). Give it a name and a comment that says it is the app's choice.
 - Never change a strat, a position or a rule without the owner. When a source and the owner
   disagree, ask.
 - Words: "pattern", not "layout". "Saved for later" is a mechanic that the boss shows early and

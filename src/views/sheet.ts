@@ -7,12 +7,13 @@ import { marks, catNames, catKey } from "./tlnav";
 import { f1, vadd, unit, leftOf } from "../geometry";
 import { arenaSVG, drawOverlay, drawBoss } from "../arena";
 import { swordCross, swordPocket } from "../data/attacks";
-import { tabHead, WTFDIG } from "./common";
+import { tabHead } from "./common";
+import { CACTBOT_TIMELINE, WTFDIG } from "../data/sources";
 import { routeLink } from "../router";
 import type { Point, Slot } from "../types";
 
 /** A fixed sword example: the boss jumps west from the middle. The player's pocket is green. */
-export function swordDiagram(s: Slot): string {
+function swordDiagram(s: Slot): string {
   const P: Point = [21, 50], d: Point = [-1, 0], L = leftOf(d), mine = S(s, 1, -1);
   const pocket = (side: number): Point[] => swordPocket(P, d, [L[0] * side, L[1] * side]);
   const poly = (pts: Point[], cls: string): string => '<polygon class="zone ' + cls + '" points="' + pts.map(p => f1(p[0]) + "," + f1(p[1])).join(" ") + '"/>';
@@ -33,7 +34,7 @@ const rule = (name: string, text: string, card: string): string =>
 
 export function renderSheet(): void {
   const s = state.slot;
-  // Each row shows the fight list's marks for what it covers, with the same colour key.
+  // Each row shows the ability list's marks for what it covers, with the same colour key.
   const rows = TL.map((e, i) => { const cats = tlCats(i);
     return '<tr><td class="t">' + e.t + '</td><td class="n">' + esc(e.n) + '<div class="cmline">' + marks(cats) + esc(catNames(cats)) + "</div></td><td>" + esc(e.job(s)) + "</td></tr>"; }).join("");
   const seen = Object.keys(state.stats).length;
@@ -67,7 +68,7 @@ export function renderSheet(): void {
     '<li><a href="https://raidplan.io/plan/hvbysrfwvrc55ahz" target="_blank" rel="noopener">Kindred raidplan</a> <span>Arena Split</span></li>' +
     '<li><a href="https://raidplan.io/plan/KXVlSGwV3zqON3CJ" target="_blank" rel="noopener">Fixed Stampede raidplan</a> <span>Ecliptic Stampede</span></li>' +
     '<li><a href="https://www.icy-veins.com/ffxiv/aac-heavyweight-m3-savage-raid-guide" target="_blank" rel="noopener">Icy Veins M11S guide</a> <span>Mechanic details, enrage at 11:00</span></li>' +
-    '<li><a href="https://github.com/OverlayPlugin/cactbot/blob/main/ui/raidboss/data/07-dt/raid/r11s.txt" target="_blank" rel="noopener">cactbot r11s timeline</a> <span>Times</span></li></ul></section>' +
+    '<li><a href="' + CACTBOT_TIMELINE + '" target="_blank" rel="noopener">cactbot r11s timeline</a> <span>Times</span></li></ul></section>' +
     "<section><h2>Your progress</h2><p>You answered " + seen + " different items so far. Progress stays in this browser only.</p>" +
     '<div class="actions"><button type="button" class="btn ghost" id="reset">' + (state.confirmReset ? "Click again to erase progress" : "Reset my progress") + "</button></div></section></div>";
   state.cur = {kind:"sheet"};

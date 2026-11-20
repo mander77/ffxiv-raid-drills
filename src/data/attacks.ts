@@ -1,5 +1,5 @@
-// The size and shape of the boss's attacks, in one place. The drills ("Where do I stand?" and
-// Real time), the Mechanics pictures, the cheat sheet and the arena all use these, so a size
+// The size and shape of the boss's attacks, in one place. Practice, the full fight,
+// the Learn card pictures, the cheat sheet and the arena all use these, so a size
 // changes everywhere at once.
 //
 // Sizes come from BossMod's M11S module (awgil/ffxiv_bossmod, RM11STheTyrant), which lists each
@@ -50,6 +50,9 @@ export const WALL_W = yalms(6);
 export const TOWER_R = yalms(4);
 /** A baited Meteorain meteor (Cosmic Kiss, "range 4 circle"). */
 export const METEOR_R = yalms(4);
+/** A raidwide hits the whole arena, so BossMod gives it no shape. A circle this big reaches the
+    corners of the square arena (half its diagonal is about 71 units). */
+export const RAIDWIDE_R = 72;
 /** An Atomic Impact hit in Ecliptic Stampede, and the fire puddle it leaves ("range 5 circle"). */
 export const ATOMIC_R = yalms(5);
 
@@ -88,4 +91,19 @@ export function swordPocket(c: Point, d: Point, sv: Point): Point[] {
 export function swordCross(c: Point, d: Point): Overlay[] {
   const arm = (v: Point): Overlay => ({t:"band", x:c[0] - v[0] * 150, y:c[1] - v[1] * 150, x2:c[0] + v[0] * 150, y2:c[1] + v[1] * 150, w:SWORD_HALF * 2});
   return [arm(d), arm(leftOf(d))];
+}
+
+/** The tanks for a buster, and what hits them. Great Wall of Fire is a line buster the two tanks
+    share: they stand together in front of the boss (he faces north), and the line runs from him
+    through them. Foregone Fatality hits each tethered tank alone (single-target, no AoE): the MT
+    on the NE tether, the OT on the SW tether, away from the party stack. */
+export function busterPieces(name: string, boss: Point): Overlay[] {
+  const tank = (p: Point, l: string): Overlay[] => [{t:"target", x:p[0], y:p[1]}, {t:"mark", x:p[0], y:p[1], l, r:"T"}];
+  if(name.startsWith("Great Wall of Fire")){
+    const front: Point = [boss[0], boss[1] - 17];
+    return [{t:"band", x:boss[0], y:boss[1], x2:boss[0], y2:-20, w:WALL_W},
+      ...tank([front[0] - 3, front[1]], "MT"), ...tank([front[0] + 3, front[1]], "OT")];
+  }
+  const mt: Point = [boss[0] + 14, boss[1] - 14], ot: Point = [boss[0] - 14, boss[1] + 14];
+  return [...tank(mt, "MT"), ...tank(ot, "OT")];
 }

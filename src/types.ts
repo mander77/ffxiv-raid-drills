@@ -12,7 +12,7 @@ export type Slot = "H1" | "H2";
 // TS note: a tuple type. A Point is an array of exactly two numbers, [x, y].
 // The closest C# match is a value tuple: (double X, double Y).
 export type Point = [number, number];
-export type RectBox = [number, number, number, number];
+type RectBox = [number, number, number, number];
 
 /* ---------- answer zones ---------- */
 
@@ -21,7 +21,7 @@ export type RectBox = [number, number, number, number];
 // The `?` in `cls?` means the field is optional. Its type is `string | undefined`.
 export interface CircleZone { c: Point; r: number; cls?: string }
 export interface RectZone { rect: RectBox; cls?: string }
-export interface PolyShape { poly: Point[]; cls?: string }
+interface PolyShape { poly: Point[]; cls?: string }
 /** A zone decided by a rule. `show` is what the map draws after an answer. */
 // TS note: `(p: Point) => boolean` is a function type, like Func<Point, bool> in C#.
 export interface RuleZone { fn: (p: Point) => boolean; label: Point; show: Array<CircleZone | RectZone | PolyShape> }
@@ -160,5 +160,5 @@ export interface QuizItem {
 
 /* ---------- timeline ---------- */
 
-/** One row of the cheat-sheet timeline. Its categories come from the fight list (tlCats). */
+/** One row of the cheat-sheet timeline. Its categories come from the ability list (tlCats). */
 export interface TimelineEvent { t: string; n: string; job: (s: Slot) => string }

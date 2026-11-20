@@ -2,7 +2,7 @@
 import { esc } from "../util";
 import { routeLink } from "../router";
 import { state, TABS, view, type Tab } from "../core";
-import { WTFDIG } from "./common";
+import { BOSSMOD, CACTBOT, WTFDIG } from "../data/sources";
 import { MAPS } from "../data/drills";
 import { MECH, NEXT_ITEMS } from "../data/questions";
 import { MECH_FIGS } from "../data/figs";
@@ -14,8 +14,6 @@ const HERO_CARD = "k-raw-first";
 
 interface Card { kind: string; about: string; count: () => string }
 
-const BOSSMOD = "https://github.com/awgil/ffxiv_bossmod";
-const CACTBOT = "https://github.com/OverlayPlugin/cactbot";
 const out = (href: string, text: string): string => '<a href="' + href + '" target="_blank" rel="noopener">' + esc(text) + "</a>";
 
 /** Why the tool exists, in the author's words, shown at the bottom of the screen. */

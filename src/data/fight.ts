@@ -1,19 +1,20 @@
 // The full-fight run-through: one random scenario, laid out on the fight clock.
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
-// It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6).
+// It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6, `ENRAGE`).
 import { MAPS, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
+import { ABILITIES, ENRAGE, FIGHT_END, type Cat } from "./abilities";
 import { newCode, random, withSeed } from "../util";
 import type { Point, Scene, Slot } from "../types";
 
 /** One line on the fight timeline: `name` happens at `t`, in seconds into the fight. */
-export interface TLEvent { t: number; name: string; raidwide?: boolean }
+interface TLEvent { t: number; name: string; raidwide?: boolean }
 
 /** One stretch of the fight with a scene on the arena. `due[i]` is when step i resolves. */
 export interface FightSeg {
   title: string;
-  /** The "Where do I stand?" drills this stretch tests. A click on one in the fight list
-      moves the fight clock to `from`. */
+  /** The Practice drills this stretch tests. Its result counts toward the first one's score,
+      and the end screen links to it with "Practice it". */
   drills: string[];
   scene: Scene;
   /** Quarter turns of the arena, for mechanics that turn (Dance of Domination). */
@@ -43,7 +44,7 @@ export interface Fight { segs: FightSeg[]; events: TLEvent[]; end: number; split
 // interpolated string builds a value. A WeaponOrder is three weapon names joined by "-",
 // for example "sword-axe-scythe".
 /** The weapons of one Assault Evolved set, in the order the boss takes them. */
-export type WeaponOrder = `${WeaponType}-${WeaponType}-${WeaponType}`;
+type WeaponOrder = `${WeaponType}-${WeaponType}-${WeaponType}`;
 
 /** How each random part of a fight comes out. `set1` and `set2` are the weapon orders of the
     Assault Evolved sets at 0:48 and 1:33. */
@@ -55,7 +56,7 @@ export type Choices = { [K in keyof Picks]: Picks[K] | "random" };
 export const RANDOM: Choices = {raw:"random", void:"random", set1:"random", set2:"random", ult:"random", fireball:"random", wall:"random"};
 
 /** The six weapon orders, as [value, text]: "sword-axe-scythe" shows as "Sword, axe, scythe". */
-export const orderText = (o: string): string => { const s = o.split("-").join(", "); return s.charAt(0).toUpperCase() + s.slice(1); };
+const orderText = (o: string): string => { const s = o.split("-").join(", "); return s.charAt(0).toUpperCase() + s.slice(1); };
 const ORDERS: Array<[string, string]> = ["sword-axe-scythe", "sword-scythe-axe", "axe-sword-scythe", "axe-scythe-sword", "scythe-sword-axe", "scythe-axe-sword"]
   .map((o): [string, string] => [o, orderText(o)]);
 
@@ -211,7 +212,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     [566.8, "Majestic Meteowrath x4"], [571.1, fireball],
     [579.4, "Crown of Arcadia"], [584.6, "--middle--"],
     ...kicks(593.3, 5), ...kicks(612.4, 6), ...kicks(633.5, 7),
-    [659.6, "Heartbreaker (Enrage)"]
+    [ENRAGE, "Heartbreaker (Enrage)"]
   ];
   const events = lines.map(([t, name]): TLEvent => ({t, name, raidwide:RAIDWIDE.has(name)}));
   const picks: Picks = {raw:w1, void:stackFirst ? "stack" : "spread", set1:orderIn(A1), set2:orderIn(A2),
@@ -220,5 +221,34 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     ". At 1:33: " + orderText(picks.set2).toLowerCase() + ". Void Stardust: " + (stackFirst ? "stack first, then spread." : "spread first, then stack.") +
     " Ultimate Trophy Weapons: " + (U.cw ? "clockwise." : "counterclockwise.") +
     " Ecliptic Stampede: " + fireball + ", with your puddles along the " + wall + " wall.";
-  return {segs, events, end:662, split:[361.8, 479.4], summary, code, picks, choices:c};
+  return {segs, events, end:FIGHT_END, split:[361.8, 479.4], summary, code, picks, choices:c};
+}
+
+/* ---------- damage going out ---------- */
+/** How the full fight shows a hit: a raidwide flashes the arena floor, a tank buster draws the
+    tanks and the hit on them, a shared hit (a stack or a tower the party shares) flashes softer,
+    the enrage flashes long and dark, and any other AoE only shows its name. */
+export type HitKind = "raid" | "tank" | "shared" | "enrage" | "aoe";
+export interface Hit { t: number; name: string; kind: HitKind; cat: Cat }
+
+/** Every hit of the fight, in time order, from the ability list and its hit rules. */
+export function buildHits(f: Fight): Hit[] {
+  const hits: Hit[] = [];
+  ABILITIES.forEach((a, i) => {
+    const rule = a.hit ?? {}, next = ABILITIES[i + 1]?.t ?? Infinity;
+    if(rule.lines){
+      const prefix = rule.lines + " ", isHit = (name: string): boolean => name.startsWith(prefix) && /^\d+$/.test(name.slice(prefix.length));
+      for(const e of f.events) if(e.t >= a.t && e.t < next && isHit(e.name)) hits.push({t:e.t, name:e.name, kind:"shared", cat:a.cats[0] ?? "spot"});
+    }
+    else if(a.cats.includes("enrage")) hits.push({t:a.t, name:a.name, kind:"enrage", cat:"enrage"});
+    else if(rule.times){
+      const {n, gap, name} = rule.times, cat = a.cats[0] ?? "raid";
+      for(let k = 0; k < n; k++) hits.push({t:a.t + k * gap, name:name + " " + (k + 1), kind:cat === "raid" ? "raid" : "aoe", cat});
+    }
+    else if(a.cats.includes("raid")) hits.push({t:a.t, name:a.name, kind:"raid", cat:"raid"});
+    else if(a.cats.includes("tank")) hits.push({t:a.t, name:a.name, kind:"tank", cat:"tank"});
+    else if(rule.shared) hits.push({t:a.t, name:a.name, kind:"shared", cat:a.cats[0] ?? "target"});
+    else if(a.cats.includes("target") || a.cats.includes("dodge")) hits.push({t:a.t, name:a.name, kind:"aoe", cat:a.cats.includes("target") ? "target" : "dodge"});
+  });
+  return hits.sort((a, b) => a.t - b.t);
 }

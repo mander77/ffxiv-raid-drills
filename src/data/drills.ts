@@ -92,7 +92,7 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
 }
 
 /* Assault Evolved: three weapons. The boss faces the first, then goes clockwise.
-   `order` forces the weapon types in the order he takes them (Real time choices); without it,
+   `order` forces the weapon types in the order he takes them (the fight pattern picks); without it,
    the order is random. */
 export function buildAssault(s: Slot, order?: WeaponType[]): Run {
   return buildRun(s, assaultWeapons(order));
@@ -171,7 +171,7 @@ export function facingNext(sc: Scene, n: number, boss: Boss): Boss {
   return next && next.f != null && (next.x !== boss.x || next.y !== boss.y) ? {...boss, f:next.f} : boss;
 }
 
-/* The scenes around a weapon run. The drill list and the Real time fight both use them, so a
+/* The scenes around a weapon run. Practice and the full fight both use them, so a
    fight can pass in a run built with the player's choices. */
 export function assaultScene(A: Run, s: Slot): Scene {
   return {
@@ -191,7 +191,7 @@ export function ultimateScene(U: Run): Scene {
 /* Void Stardust: each puddle goes just outside the previous one, one small step clockwise
    around the boss at c. The next spot is judged from where the last puddle actually dropped. */
 const CENTER: Point = [50, 50];
-export function puddleAfter(c: Point = CENTER): (results: StepResult[]) => Zone {
+function puddleAfter(c: Point = CENTER): (results: StepResult[]) => Zone {
   const rel = (p: Point): Point => [p[0] - c[0], p[1] - c[1]];
   return results => {
     const q: Point = results[results.length - 1].drop ?? [c[0], c[1] - OUTSIDE];
@@ -230,7 +230,7 @@ const FIXED_SPREAD: {l: string; r: "T" | "D"; off: Point}[] = [
   {l:"MT", r:"T", off:[-15, -15]}, {l:"OT", r:"T", off:[15, -15]}, {l:"M1", r:"D", off:[-15, 15]}, {l:"M2", r:"D", off:[15, 15]}];
 /** The tank and melee spread spots around a boss at c. */
 const fixedAround = (c: Point): Array<{l: string; r: "T" | "D"; p: Point}> => FIXED_SPREAD.map(m => ({...m, p:vadd(c, m.off)}));
-export const spreadMarks = (c: Point = CENTER): Overlay[] => fixedAround(c).map((m): Overlay => ({t:"mark", x:m.p[0], y:m.p[1], l:m.l, r:m.r}));
+const spreadMarks = (c: Point = CENTER): Overlay[] => fixedAround(c).map((m): Overlay => ({t:"mark", x:m.p[0], y:m.p[1], l:m.l, r:m.r}));
 export const FIXED_SPREAD_MARKS = spreadMarks();
 /** The open ground north, east, south and west of a boss at c, between the fixed spots. Any of
     them is a good spread spot. */
@@ -471,7 +471,7 @@ export function heldWeapon(type: WeaponType): Overlay[] {
 /* Raw Steel Trophy, axe: the tanks stack in front of the boss for a shared buster, and the other
    six spread, as on wtfdig (Toxic): the melee just outside his hitbox SW and SE, the ranged at the
    west and east walls, and the healers far out south-southwest and south-southeast. The drill and
-   the Mechanics pictures both use these spots. */
+   the Learn card pictures both use these spots. */
 export const AXE_TANKS: Point = [50, 35];
 /* Dance of Domination, with the open side south: the cuts in the floor, and the four pair spots
    from wtfdig (Toxic), all clear of the 10-yalm Hurricane Explosion lines along the cuts. */
@@ -492,8 +492,8 @@ const SCYTHE_STACK: Zone = {
   label:[50, 69], show:[{poly:[...STACK_EDGE.map(a => POINT_AT(a, 11)), ...[...STACK_EDGE].reverse().map(a => POINT_AT(a, 34))]}]};
 // TS note: `(x): Overlay => (...)` gives the arrow function a return type. Without it,
 // TypeScript would type t as plain string, and "puddle" would not fit the Overlay union.
-export const NPUD = [22, 34, 46, 58, 70, 82].map((x): Overlay => ({t:"puddle", x, y:5, r:ATOMIC_R}));
-export const SPUD = [18, 30, 42, 54, 66, 78].map((x): Overlay => ({t:"puddle", x, y:95, r:ATOMIC_R}));
+const NPUD = [22, 34, 46, 58, 70, 82].map((x): Overlay => ({t:"puddle", x, y:5, r:ATOMIC_R}));
+const SPUD = [18, 30, 42, 54, 66, 78].map((x): Overlay => ({t:"puddle", x, y:95, r:ATOMIC_R}));
 // TS note: the `MapDrill[]` annotation is what checks every drill below. Each build function
 // must return a Scene, so a missing field or a misspelled one is a compile error.
 export const MAPS: MapDrill[] = [

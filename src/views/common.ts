@@ -2,9 +2,6 @@
 import { esc, el } from "../util";
 import { state, TABS, view, app, type Deck, type QuizCat } from "../core";
 
-/** Your group's guide on wtfdig, opened with your strats picked: Hector (Toxic), Kindred No Buddies, Fixed (3CJ). */
-export const WTFDIG = "https://wtfdig.info/74/m11s#hector:nobuddies:fixed";
-
 export function tabHead(): string {
   const t = TABS.find(x => x.id === state.tab) ?? TABS[0];
   return '<div class="tabhead"><p class="lede">' + esc(t.lede) + "</p></div>";

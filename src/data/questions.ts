@@ -4,10 +4,8 @@ import { P1, P2, P3, P4, TL } from "./timeline";
 import { tlAbilities } from "./abilities";
 import type { Question, QuizItem, Slot, TimelineEvent } from "../types";
 
-export const ANDREW = "Andrew's rule";
-
 /* ---------- mechanic questions ---------- */
-export function mq(id: string, order: number, phase: string, time: string, build: (s: Slot) => Question): QuizItem {
+function mq(id: string, order: number, phase: string, time: string, build: (s: Slot) => Question): QuizItem {
   return {id, order, phase, time, build};
 }
 export const MECH: QuizItem[] = [
@@ -192,7 +190,7 @@ export const MECH: QuizItem[] = [
 ];
 
 /* ---------- generated timeline questions ---------- */
-/** A raidwide row: the mechanic the row is named for (its first fight-list ability) is raid damage. */
+/** A raidwide row: the mechanic the row is named for (its first ability in the ability list) is raid damage. */
 const isRaidwide = (i: number): boolean => tlAbilities(i)[0]?.cats.includes("raid") ?? false;
 // Each raidwide name once. Crown of Arcadia happens six times, so the Set removes the repeats.
 const RAIDWIDE_NAMES = [...new Set(TL.filter((_e, i) => isRaidwide(i)).map(e => e.n))];
