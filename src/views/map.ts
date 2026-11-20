@@ -13,8 +13,9 @@ const TAG = {right:{text:"Right spot", w:17}, later:{text:"Saved for later", w:2
 /* Draw the answer layers on an arena: dropped puddles, cues, the boss, and, with showLast,
    the zone and the click of the last answer. `boss` replaces the scene's boss, for example to
    hide his facing before he turns. `wentOff(i)` is true once the puddle dropped at step i has gone
-   off: it fades out the first time, and after that it is not drawn. */
-export function paintArena(svg: Element, sc: Scene, k: number, results: StepResult[], showLast: boolean, boss?: Boss | null, wentOff?: (i: number) => boolean): void {
+   off: it fades out the first time, and after that it is not drawn. With `rightTag` false, the
+   answer area has no "Right spot" tag (the "Saved for later" tag still shows). */
+export function paintArena(svg: Element, sc: Scene, k: number, results: StepResult[], showLast: boolean, boss?: Boss | null, wentOff?: (i: number) => boolean, rightTag = true): void {
   const layer = (id: string): Element => svg.querySelector("#" + id) as Element;
   const dropLayer = layer("drops") as SVGGElement, faded = new Set((dropLayer.dataset.gone ?? "").split(",").filter(Boolean).map(Number)), goneNow: number[] = [];
   const n = results.length, asking = showLast ? n - 1 : n;
@@ -39,7 +40,7 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
       // The tag says what the green area is. It does not name your slot: the moving marker
       // is you, so a slot name here would look like a second you. It stays inside the picture.
       const lx = Math.max(-4 + tag.w / 2, Math.min(104 - tag.w / 2, ctr[0]));
-      zlabel = '<g class="zlabel' + (step.look ? " later" : "") + '"><rect x="' + f1(lx - tag.w / 2) + '" y="' + f1(ly - 2.1) + '" width="' + tag.w + '" height="4.2" rx=".9"/><text x="' + f1(lx) + '" y="' + f1(ly) + '">' + tag.text + "</text></g>";
+      if(step.look || rightTag) zlabel = '<g class="zlabel' + (step.look ? " later" : "") + '"><rect x="' + f1(lx - tag.w / 2) + '" y="' + f1(ly - 2.1) + '" width="' + tag.w + '" height="4.2" rx=".9"/><text x="' + f1(lx) + '" y="' + f1(ly) + '">' + tag.text + "</text></g>";
       if(!r.missed) me = '<g class="pick ' + cls + '" transform="translate(' + f1(r.p[0]) + " " + f1(r.p[1]) + ')"><circle class="halo" r="2.6"/><circle class="dot" r="1.1"/></g>';
     }
   });

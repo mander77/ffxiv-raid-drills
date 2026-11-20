@@ -423,7 +423,8 @@ function frame(): void {
     if(boss && g?.turn && boss.x === 50 && boss.y === 50) boss = {...boss, f:turned ? g.turn.f : null};
     // Once he has landed, he faces the way he jumped.
     if(boss && facing && !jumped) boss = facingNext(sc, res.length, boss);
-    paintArena(el("arena-svg"), sc, k, res, showAnswer, boss, gone);
+    // On the player your marker walks into each spot, so the green area needs no "Right spot" tag.
+    paintArena(el("arena-svg"), sc, k, res, showAnswer, boss, gone, r.mode !== "watch");
     // The ring sits around the boss, and moves with him when he jumps. It starts at the top.
     const c = boss ?? {x:50, y:50};
     r.bossAt = [c.x, c.y];
