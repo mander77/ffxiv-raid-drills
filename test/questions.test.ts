@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { MECH, NEXT_ITEMS } from "../src/data/questions";
+import { MECH, NEXT_ITEMS, MECH_GROUPS } from "../src/data/questions";
 import { TL } from "../src/data/timeline";
 import { tlAbilities } from "../src/data/abilities";
 import { readingMs } from "../src/util";
@@ -45,4 +45,10 @@ test("next-raidwide questions ask for the name, not the exact time", () => {
     // The right answer is a row named for raid damage in the fight list.
     assert.ok(TL.some((e, i) => tlAbilities(i)[0]?.cats.includes("raid") && e.n === q.options.find(o => o.ok)?.t), item.id);
   }
+});
+
+test("every Learn card is in exactly one mechanic chip", () => {
+  const grouped = MECH_GROUPS.flatMap(g => g.ids);
+  assert.sameMembers(grouped, MECH.map(q => q.id), "the chips cover each Learn card");
+  assert.equal(new Set(grouped).size, grouped.length, "no card is in two chips");
 });

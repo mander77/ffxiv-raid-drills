@@ -5,6 +5,8 @@ import { tabHead, renderRoundDone } from "./common";
 import { showRoute } from "../router";
 import { showPressureQ } from "./pressure";
 import { MECH_FIGS } from "../data/figs";
+import { MECH_GROUPS } from "../data/questions";
+import { PHASES } from "../data/abilities";
 import { figSVG } from "../arena";
 import { timelineFig } from "./tlfig";
 import type { Fig, QuizItem } from "../types";
@@ -41,15 +43,38 @@ export function renderQuiz(cat: QuizCat): void {
   drawMCQ();
 }
 
-/** The "Go to question" list: every card of the tab in fight order, grouped by phase. */
-function jumpList(cat: QuizCat): string {
-  const d = getDeck(cat), cut = (s: string): string => s.length <= 58 ? s : s.slice(0, s.lastIndexOf(" ", 56)) + "…";
-  let h = '<label class="qjump"><span>Go to question</span><select id="q-jump">', phase = "";
-  d.items.forEach((it, i) => {
-    if(it.phase !== phase){ h += (phase ? "</optgroup>" : "") + '<optgroup label="' + esc(it.phase) + '">'; phase = it.phase; }
-    h += '<option value="' + i + '"' + (i === d.i ? " selected" : "") + ">" + (i + 1) + ". " + esc(it.time) + " · " + esc(cut(it.build(state.slot).prompt)) + "</option>";
+/* ---------- moving between cards ---------- */
+/** When each phase starts, in seconds, for the Timeline chips. */
+const PHASE_STARTS = PHASES.map((p, k) => k === 0 ? 0 : Math.min(...p.rows.map(a => a.t)));
+const PHASE_CHIPS = PHASES.map((p, k) => "P" + (k + 1) + " · " + (p.name.split(": ")[1] ?? p.name));
+const toSec = (t: string): number => { const [m, s] = t.split(":").map(Number); return m * 60 + s; };
+
+/** The chips over a card: the Learn cards by mechanic, the Timeline cards by phase. Each chip
+    lists its cards (their places in the deck), in fight order. */
+function chipGroups(cat: QuizCat): Array<{name: string; idx: number[]}> {
+  const keyOf = (it: QuizItem): string => cat === "mech" ? MECH_GROUPS.find(g => g.ids.includes(it.id))?.name ?? ""
+    : PHASE_CHIPS[PHASE_STARTS.reduce((k, start, i) => toSec(it.time) >= start ? i : k, 0)];
+  const groups: Array<{name: string; idx: number[]}> = [];
+  getDeck(cat).items.forEach((it, i) => {
+    const name = keyOf(it);
+    if(!name) return;
+    const g = groups.find(x => x.name === name);
+    if(g) g.idx.push(i); else groups.push({name, idx:[i]});
   });
-  return h + "</optgroup></select></label>";
+  return groups;
+}
+
+/** Back and Next, then the chips: a chip goes to the first card it covers, and the chip of the
+    card on screen is lit. */
+function navHTML(cat: QuizCat): string {
+  const d = getDeck(cat);
+  return '<div class="qnav"><button type="button" class="btn ghost" id="q-prev"' + (d.i <= 0 ? " disabled" : "") + '>&lsaquo; Back</button>' +
+    '<button type="button" class="btn ghost" id="q-fwd"' + (d.i >= d.items.length - 1 ? " disabled" : "") + ">Next &rsaquo;</button></div>";
+}
+function chipsHTML(cat: QuizCat): string {
+  const d = getDeck(cat);
+  return '<div class="qchips" role="group" aria-label="' + (cat === "mech" ? "Go to a mechanic" : "Go to a phase") + '">' +
+    chipGroups(cat).map(g => '<button type="button" class="qchip" data-jump="' + g.idx[0] + '"' + (g.idx.includes(d.i) ? ' aria-current="true"' : "") + ">" + esc(g.name) + "</button>").join("") + "</div>";
 }
 
 /** The arena picture of a card, when its question has one (the Mechanics questions). */
@@ -87,7 +112,7 @@ export function drawMCQ(): void {
   if(c.cat === "pressure"){ const pr = state.pressure; if(pr) prog = "Question " + (pr.i + 1) + " of " + pr.queue.length; }
   else { const d = getDeck(c.cat); prog = "Card " + (d.i + 1) + " of " + d.items.length; }
   let h = '<div class="qtop"><div class="eyebrow"><b>' + esc(item.phase) + "</b><span>" + esc(item.time) + '</span><span class="progress">' + prog + "</span></div>" +
-    (c.cat !== "pressure" ? jumpList(c.cat) : "") + "</div>";
+    (c.cat !== "pressure" ? navHTML(c.cat) : "") + "</div>" + (c.cat !== "pressure" ? chipsHTML(c.cat) : "");
   if(c.cat === "pressure" && !c.answered)
     h += '<div class="tphase" id="timer-lbl">Read</div><div class="timer reading" id="timer" aria-hidden="true"><i style="width:0"></i></div>';
   h += "<h2>" + esc(q.prompt) + "</h2>";
@@ -139,11 +164,19 @@ export function drawMCQ(): void {
     b.addEventListener("blur", showPicked);
   });
   document.getElementById("q-lock")?.addEventListener("click", lockIn);
-  // TS note: querySelector<HTMLSelectElement> types the result, so `.value` is known to exist.
   // TS note: `cat` is a const narrowed to QuizCat by the check, and the arrow function keeps that
   // narrowing, because a const can never change after the check.
-  const jump = document.querySelector<HTMLSelectElement>("#q-jump"), cat = c.cat;
-  if(jump && cat !== "pressure") jump.addEventListener("change", () => { getDeck(cat).i = Number(jump.value); renderQuiz(cat); });
+  const cat = c.cat;
+  if(cat !== "pressure"){
+    const go = (i: number): void => { const d = getDeck(cat); d.i = Math.max(0, Math.min(d.items.length - 1, i)); renderQuiz(cat); };
+    document.getElementById("q-prev")?.addEventListener("click", () => go(getDeck(cat).i - 1));
+    document.getElementById("q-fwd")?.addEventListener("click", () => go(getDeck(cat).i + 1));
+    // TS note: querySelector<HTMLButtonElement> types the result, so `.dataset` is known to exist.
+    p.querySelectorAll<HTMLButtonElement>("[data-jump]").forEach(b => b.addEventListener("click", () => go(Number(b.dataset.jump))));
+    // On a phone the chips are one row that scrolls sideways. Scroll the current chip to the middle.
+    const row = p.querySelector<HTMLElement>(".qchips"), on = row?.querySelector<HTMLElement>('[aria-current="true"]');
+    if(row && on && row.scrollWidth > row.clientWidth) row.scrollLeft = on.offsetLeft - (row.clientWidth - on.offsetWidth) / 2;
+  }
   const nx = document.getElementById("q-next");
   if(nx){ nx.addEventListener("click", nextQ); nx.focus({preventScroll:true}); }
 }

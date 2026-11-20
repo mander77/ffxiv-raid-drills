@@ -255,11 +255,15 @@ button.chip{cursor:pointer}
 .qwrap.wide{max-width:1000px}
 /* The top of a quiz card: phase, time and card number on the left, the "Go to question" list on the right. */
 .qtop{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
-.qjump{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%;font-size:13px;color:var(--ink-2)}
-.qjump span{flex:none}
-.qjump select{min-width:0;max-width:340px;font:inherit;font-size:13px;color:var(--ink);padding:5px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--card)}
-.qjump select:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
-@media (max-width:560px){.qjump{width:100%}.qjump select{flex:1;max-width:none}}
+/* Moving between cards: Back and Next, then one chip per mechanic (Learn) or phase (Timeline). */
+.qnav{display:flex;gap:6px}
+.qnav .btn{padding:5px 12px;font-size:14px}
+.qnav .btn:disabled{opacity:.4;cursor:default}
+.qchips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px;position:relative}
+@media (max-width:640px){.qchips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px}.qchips::-webkit-scrollbar{display:none}.qchip{flex:none;white-space:nowrap}}
+.qchip{font:inherit;font-size:13px;padding:4px 11px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink-2);cursor:pointer}
+.qchip:hover{border-color:var(--heal);color:var(--ink)}
+.qchip[aria-current="true"]{background:var(--heal);border-color:var(--heal);color:#fff;font-weight:700}
 .qgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);grid-template-areas:"main fig";gap:22px;align-items:start}
 .qmain{grid-area:main;min-width:0}
 .qfig{grid-area:fig;margin:0}

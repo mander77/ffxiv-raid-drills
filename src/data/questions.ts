@@ -225,3 +225,21 @@ TL.slice(0, -1).forEach((ev, i) => {
     }});
   }
 });
+
+/* ---------- the chips over a Learn card ---------- */
+/** The Learn cards by mechanic, for the chips over a card: a chip jumps to the first card of its
+    mechanic. The tests check that every Learn card is in exactly one. */
+export const MECH_GROUPS: Array<{name: string; ids: string[]}> = [
+  {name:"Raw Steel", ids:["k-raw-first", "k-raw-second"]},
+  {name:"Weapons", ids:["k-first-weapon", "k-sword", "k-axe", "k-scythe", "k-assault-2"]},
+  {name:"Void Stardust", ids:["k-void", "k-void-target", "k-void-spread", "k-void-run", "k-void-2"]},
+  {name:"Dance", ids:["k-dance", "k-dance-north", "k-dance-pair"]},
+  {name:"Charybdistopia", ids:["k-charyb"]},
+  {name:"Ultimate", ids:["k-ult-spawn", "k-ult-tornado", "k-ult-touch"]},
+  {name:"Wall of Fire", ids:["k-gwof"]},
+  {name:"Orbital Omen", ids:["k-orbital", "k-orbital-move"]},
+  {name:"Meteorain", ids:["k-meteor-order", "k-meteor-drop", "k-meteor-stack", "k-triple"]},
+  {name:"Arena Split", ids:["k-split-side", "k-split-kb", "k-split-fb", "k-split-corner", "k-split-towers23", "k-massive", "k-slab"]},
+  {name:"Ecliptic", ids:["k-ecl-start", "k-ecl-adjust", "k-ecl-prio", "k-ecl-center", "k-ecl-tether", "k-ecl-two", "k-ecl-four"]},
+  {name:"Heartbreak", ids:["k-hb"]}
+];
