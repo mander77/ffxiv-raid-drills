@@ -271,26 +271,49 @@ export function cometSpread(s: Slot, toward: Point | null = null, c: Point = CEN
   };
 }
 
-/* The stack after the third puddle when a sword or scythe goes first next. The group can stack
-   anywhere between the boss at c and that weapon: in his melee range on the weapon's side, or
-   farther out toward the weapon, up to just past it. The band is as wide as his melee range
-   and shows as one shaded area. A spot in it is right if it is out of the third puddle. The
-   spot shown, where the moving marker runs, is on the line from him to the weapon, just inside
-   his melee range. */
+/* The stack after the third puddle when a sword or scythe goes first next. The group stacks in
+   the boss's max melee range, so the melee keep their uptime, on that weapon's side of him (up
+   to 90 degrees either way from it), and out of the third puddle. The area is a curved band
+   from his hitbox ring out to max melee range, with the third puddle cut out of it. The spot
+   shown, where the moving marker runs, is in the middle of the band, toward the weapon. If the
+   puddle covers that, it is the free part of the band nearest to the weapon. */
+const STACK_HALF = 90;
 export function stackToward(w: Point, c: Point = CENTER): (results: StepResult[]) => Zone {
-  const len = dist(c, w), u: Point = [(w[0] - c[0]) / len, (w[1] - c[1]) / len], side: Point = [-u[1], u[0]], end = len + 5;
-  // `a` units from c toward the weapon, and `s` units to the side.
-  const at = (a: number, s: number): Point => [c[0] + u[0] * a + side[0] * s, c[1] + u[1] * a + side[1] * s];
-  const poly = [at(0, -MELEE_R), at(end, -MELEE_R), at(end, MELEE_R), at(0, MELEE_R)];
+  const aw = angOf([w[0] - c[0], w[1] - c[1]]), mid = (HITBOX + MELEE_R) / 2;
+  const at = (deg: number, r: number): Point => [c[0] + r * Math.sin(deg * DEG), c[1] - r * Math.cos(deg * DEG)];
+  const off = (p: Point): number => { const d = Math.abs(angOf([p[0] - c[0], p[1] - c[1]]) - aw) % 360; return Math.min(d, 360 - d); };
   return results => {
     const q: Point = results[results.length - 1].drop ?? [50, 33];
-    const fn = (p: Point): boolean => {
-      const a = (p[0] - c[0]) * u[0] + (p[1] - c[1]) * u[1], s = (p[0] - c[0]) * side[0] + (p[1] - c[1]) * side[1];
-      return inArena(p) && a >= 0 && a <= end && Math.abs(s) <= MELEE_R && far(p, q, PUDDLE_R);
+    const fn = (p: Point): boolean => { const r = dist(p, c); return inArena(p) && r >= HITBOX && r <= MELEE_R && off(p) <= STACK_HALF && far(p, q, PUDDLE_R); };
+    /* The free part of the band on the ray at `deg` degrees: from the hitbox ring to max melee,
+       less the part inside the puddle. On the ray, the puddle covers b - h to b + h (from solving
+       |c + r * ray - q| = PUDDLE_R for r). If the puddle splits the ray's part in two, the
+       longer part is used. */
+    const free = (deg: number): [number, number] | null => {
+      const ray: Point = [Math.sin(deg * DEG), -Math.cos(deg * DEG)], v: Point = [q[0] - c[0], q[1] - c[1]];
+      const b = ray[0] * v[0] + ray[1] * v[1], disc = b * b - (v[0] * v[0] + v[1] * v[1] - PUDDLE_R * PUDDLE_R);
+      if(disc <= 0) return [HITBOX, MELEE_R];
+      const h = Math.sqrt(disc), parts: Array<[number, number]> = [[HITBOX, Math.min(MELEE_R, b - h)], [Math.max(HITBOX, b + h), MELEE_R]];
+      const ok = parts.filter(([lo, hi]) => hi - lo > 0.3).sort((x, y) => (y[1] - y[0]) - (x[1] - x[0]));
+      return ok[0] ?? null;
     };
-    // If the third puddle covers that spot, the next one along the line, then the nearest right one.
-    const label = [0, 4, -4, 8, -8].map(d => at(Math.min(MELEE_R + d, len), 0)).find(fn) ?? nearestTo(at(MELEE_R, 0), fn) ?? q;
-    return {fn, label, show:[{poly}]};
+    // The band's outline, one degree at a time: each run of rays with a free part is one piece.
+    const pieces: Point[][] = [];
+    let inner: Point[] = [], outer: Point[] = [];
+    const flush = (): void => { if(inner.length > 1) pieces.push([...inner, ...outer.reverse()]); inner = []; outer = []; };
+    for(let d = -STACK_HALF; d <= STACK_HALF; d++){
+      const f = free(aw + d);
+      if(!f){ flush(); continue; }
+      inner.push(at(aw + d, f[0])); outer.push(at(aw + d, f[1]));
+    }
+    flush();
+    // The spot shown: toward the weapon, or the first free ray next to it, then 8 degrees farther
+    // from the puddle so it is not on the band's edge.
+    const turns = Array.from({length:STACK_HALF + 1}, (_x, i) => i).flatMap(i => i ? [i, -i] : [0]);
+    const first = turns.find(d => fn(at(aw + d, mid))) ?? 0;
+    const away = first === 0 ? 0 : first + Math.sign(first) * 8;
+    const label = fn(at(aw + away, mid)) ? at(aw + away, mid) : at(aw + first, mid);
+    return {fn, label, show:pieces.map(poly => ({poly}))};
   };
 }
 
@@ -354,7 +377,7 @@ function voidSteps(s: Slot, spread: boolean, toward: Point | null, c: Point = CE
           a:toward ? "Anywhere on the first weapon's side of the arena (the shaded area), out of the last puddle and not on a tank or melee spot."
                    : "Any open spot. Healers and ranged have no fixed spread spot. Keep away from the tank and melee spots and out of the last puddle."}
       : toward ? {q:"Puddles done. Where does the group stack?", zf:stackToward(toward, c),
-          a:"Anywhere between the boss and the first weapon (the shaded area): in his melee range on the weapon's side, or farther out toward the weapon. Stay out of the third puddle."}
+          a:"Anywhere in his max melee range on the first weapon's side (the shaded band), out of the third puddle. The melee keep their uptime."}
                : {q:"Puddles done. Where does the group stack?", zf:next, a:"Just outside the third puddle, one more small step clockwise."}];
 }
 
