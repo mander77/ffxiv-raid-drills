@@ -22,10 +22,10 @@ const ABOUT_ME = [
 // every other tab, so a new tab in core.ts without a card here is a compile error.
 // `count` is a function so it reads the data when the screen draws, not when the file loads.
 const CARDS: Record<Exclude<Tab, "home">, Card> = {
-  mech: {kind:"1 · Learn", about:"What each mechanic does, with a picture.", count: () => MECH.length + " questions"},
-  map: {kind:"2 · Practice", about:"Click where you stand, one mechanic at a time.", count: () => MAPS.length + " mechanics"},
-  next: {kind:"3 · Order", about:"Which mechanic comes next.", count: () => NEXT_ITEMS.length + " questions"},
-  pressure: {kind:"4 · Pressure", about:"All of it fast: timed questions, or the whole fight on the clock.", count: () => "Quick round or full fight"},
+  mech: {kind:"Step 1", about:"What each mechanic does, with a picture.", count: () => MECH.length + " questions"},
+  map: {kind:"Step 2", about:"Click where you stand, one mechanic at a time.", count: () => MAPS.length + " mechanics"},
+  next: {kind:"Step 3", about:"Which mechanic comes next.", count: () => NEXT_ITEMS.length + " questions"},
+  pressure: {kind:"Step 4", about:"All of it fast: timed questions, or the whole fight on the clock.", count: () => "Quick round or full fight"},
   sheet: {kind:"Reference", about:"Everything on one page.", count: () => "One page"}
 };
 

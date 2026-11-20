@@ -58,7 +58,7 @@ export const TABS: Array<{id: Tab; label: string; lede: string}> = [
   {id:"home", label:"Home", lede:"Practice M11S, The Tyrant (Savage), as a healer, away from the raid."},
   {id:"mech", label:"Learn", lede:"What each mechanic does, and what you do in it. Pick an answer to see it on the picture."},
   {id:"map", label:"Practice", lede:"Click where you stand. One mechanic at a time, no timer."},
-  {id:"next", label:"What is next?", lede:"Which mechanic comes next in the fight."},
+  {id:"next", label:"Timeline", lede:"Which mechanic comes next in the fight."},
   {id:"pressure", label:"Pressure", lede:"The same questions, fast: timed questions, or the whole fight on the clock."},
   {id:"sheet", label:"Cheat sheet", lede:"The rules and your timeline on one page."}
 ];

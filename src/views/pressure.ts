@@ -1,5 +1,5 @@
 // The Pressure tab: the same questions, fast. A quick round of 12 timed questions from Learn and
-// What is next?, or the full fight on the fight clock (fight.ts).
+// Timeline, or the full fight on the fight clock (fight.ts).
 import { LS, el, readingMs } from "../util";
 import { state, view, weighted, record, stopTimer } from "../core";
 import { MECH, NEXT_ITEMS } from "../data/questions";
@@ -16,7 +16,7 @@ export function renderPressure(): void {
 
 export function renderPressureStart(): void {
   view.innerHTML = tabHead() + '<div class="qwrap pchoices"><div class="panel"><div class="eyebrow"><b>Quick round</b><span>12 questions</span></div>' +
-    "<h2>Timed questions</h2><p>Questions from Learn and What is next?. Time to read, then a short timer to decide. Aim for zero freezes.</p>" +
+    "<h2>Timed questions</h2><p>Questions from Learn and Timeline. Time to read, then a short timer to decide. Aim for zero freezes.</p>" +
     '<div class="ctrl" style="margin-top:14px"><span id="secs-lbl">Seconds to decide</span><div class="seg small" role="group" aria-labelledby="secs-lbl">' +
     [4, 6, 8, 10].map(n => '<button type="button" id="secs-' + n + '" data-secs="' + n + '" aria-pressed="' + (state.psecs === n) + '">' + n + "</button>").join("") +
     '</div></div><div class="actions"><button type="button" class="btn" id="p-start">Start</button><span class="hint"><kbd>Enter</kbd> start</span></div></div>' +

@@ -1,4 +1,4 @@
-// Quiz questions: the mechanics (Learn), and questions made from the timeline (What is next?).
+// Quiz questions: the mechanics (Learn), and questions made from the timeline (Timeline).
 import { S, shuffle } from "../util";
 import { P1, P2, P3, P4, TL } from "./timeline";
 import { tlAbilities } from "./abilities";
