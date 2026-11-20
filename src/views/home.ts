@@ -41,7 +41,7 @@ export function renderHome(): void {
   }).join("");
   view.innerHTML = '<div class="home">' +
     // The picture is a static file: public/nydori.jpeg, served at /nydori.jpeg.
-    '<section class="hero"><img src="/nydori.jpeg" width="480" height="848" alt="My character in Final Fantasy XIV, in a green hooded robe, holding up a card">' +
+    '<section class="hero"><img src="/nydori-banner.jpeg" width="436" height="800" alt="My character in Final Fantasy XIV, in a green hooded robe, holding up a card">' +
     '<div><p class="kicker">M11S · The Tyrant (Savage) · Healers</p><h2>Practice savage mechanics without a party</h2>' +
     "<p>Learn the mechanics, practice where you stand, then do it all fast. The answers follow Hector (Toxic), Kindred No Buddies and Fixed (3CJ) Ecliptic.</p>" +
     "<p>You are set as <b>" + state.slot + "</b>. Change it with the H1 / H2 switch at the top. Your progress stays in this browser.</p></div></section>" +
