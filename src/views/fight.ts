@@ -240,7 +240,7 @@ function playBar(f: Fight): string {
     '<div class="fbar" id="f-bar"><div class="seg small" role="group" aria-label="Speed">' +
     SPEEDS.map(n => '<button type="button" data-set="fspeed" data-val="' + n + '" aria-pressed="' + (n === speed) + '">' + n + "x</button>").join("") + "</div>" +
     '<span class="fbtns"><button type="button" class="btn ghost" id="f-restart">Start over</button><button type="button" class="btn ghost" id="f-new">New fight</button></span>' +
-    '<span class="hint"><kbd>Space</kbd> play or pause &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 5 seconds</span></div>';
+    '<span class="hint">Click the map or <kbd>Space</kbd>: play or pause &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> 5 seconds</span></div>';
 }
 
 /** The address bar on the player holds the fight, its picks and, while paused, the moment, so a
@@ -357,8 +357,11 @@ function result(kind: "ok" | "bad" | "slow"): void {
 
 function onClick(e: MouseEvent): void {
   const r = R;
-  // Only the run takes clicks, and not during the 3-2-1 or a pause.
-  if(!r || r.mode !== "run" || r.paused || r.count > 0) return;
+  if(!r) return;
+  // On the player, a click on the map pauses it or plays it again, like a video.
+  if(r.mode === "watch") return togglePause();
+  // The run takes your spots, but not during the 3-2-1 or a pause.
+  if(r.paused || r.count > 0) return;
   const si = activeSeg(r.fight, r.t);
   if(si < 0 || r.results[si].length >= r.fight.segs[si].due.length) return;
   const svg = e.currentTarget as SVGSVGElement, ctm = svg.getScreenCTM();

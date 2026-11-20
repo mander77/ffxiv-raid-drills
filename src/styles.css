@@ -162,6 +162,8 @@ main{padding-block:20px 56px}
    the player marks), a ring pulse at the boss for a tank buster, and the hit's name for a moment.
    The flashes stay under three a second: Dance of Domination, the fastest, hits every 0.7 s. */
 .fxbox{position:relative;max-width:600px;margin:0 auto}
+/* On the player, a click on the map plays or pauses it. */
+.stage .fxbox svg{cursor:pointer}
 .hitfx{fill:none;pointer-events:none;opacity:0}
 /* The flash colours are the category colours (--c-raid, --c-target, --c-spot, --c-enrage). */
 .hitfx.raid{fill:rgba(210,54,43,.5);animation:fxflash .7s ease-out forwards}
