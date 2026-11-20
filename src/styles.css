@@ -93,11 +93,10 @@ main{padding-block:20px 56px}
 .drillnav button:hover{background:var(--paper)}
 .drillnav button[aria-current]{background:var(--heal);color:#fff;font-weight:700}
 .dn-time{display:block;font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--ink-2)}
-.drillnav button[aria-current] .dn-time{color:#fff}/* The fight list: every ability in cast order, with drills under them. The colour marks follow
-   the timeline sheet's categories, toned for the light theme. On wide screens it stays beside
-   the arena and scrolls by itself. */
+.drillnav button[aria-current] .dn-time{color:#fff}
+/* The colour marks follow the timeline sheet's categories, toned for the light theme. */
 :root{--c-raid:#D2362B;--c-tank:#E07800;--c-spot:#C29A00;--c-dodge:#2F9E44;--c-target:#1C7ED6;--c-mech:#7048E8;--c-enrage:#6E0E0A;--c-none:#AAB2BF}
-/* The colour key stays at the top; only the rows below it scroll. */
+/* The Practice list stays beside the arena and scrolls by itself. */
 .tlnav{position:sticky;top:12px;max-height:calc(100vh - 24px);display:flex;flex-direction:column}
 .tlnav ol{position:relative;min-height:0;overflow-y:auto;scrollbar-width:thin}
 .cmkey{flex:none;display:flex;flex-wrap:wrap;gap:3px 10px;padding:2px 6px 8px;margin-bottom:6px;border-bottom:1px solid var(--line);font-size:11px;color:var(--ink-2)}
@@ -110,26 +109,18 @@ main{padding-block:20px 56px}
 .tlnav .ph{position:sticky;top:0;z-index:1;display:flex;flex-direction:column;gap:1px;margin:12px 0 4px;padding:6px 9px;border-radius:6px;background:var(--ink);color:#fff;font-size:13px;font-weight:700;line-height:1.2}
 .tlnav .ph:first-child{margin-top:0}
 .tlnav .ph b{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C9D1DD}
-.tlnav .ab{display:flex;align-items:center;gap:6px;font-size:12.5px;padding:4px 8px}
-.tlnav .ab .dn-time{display:inline;flex:none;width:2.7em}
-.tlnav .ab.next{box-shadow:inset 3px 0 0 var(--heal);background:var(--heal-soft)}
-.tlnav .dr{margin:1px 0 3px 18px;width:calc(100% - 18px);font-size:12.5px;font-weight:700;padding:5px 8px;border:1px solid var(--line)}
-.dtag{margin-right:6px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--heal)}
-.drillnav button[aria-current] .dtag{color:#fff}
 .cmline{display:flex;align-items:center;gap:8px;margin:6px 0 0;font-size:13.5px;color:var(--ink-2)}
 .cmline .cm{width:10px;height:10px}
+/* On a narrow screen the long list hides, and Back, Next and the phase chips take its place. */
+.mechnav{display:none;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
+.mechnav .mn-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
+.mechnav .mn-name{margin:0;min-width:0;font-size:16px;font-weight:700;line-height:1.25}
+.mechnav .qnav{flex:none}
+.mechnav .qchips{margin:8px 0 0}
 @media (max-width:1100px){
   .mapwrap{grid-template-columns:minmax(0,1fr);gap:12px}
-  .drillnav{overflow-x:auto;scrollbar-width:thin;padding:4px}
-  .drillnav ol{flex-direction:row}
-  .drillnav button{white-space:nowrap}
-  /* The fight list becomes one long strip that scrolls sideways and follows the highlight. */
-  .tlnav{position:relative;top:auto;max-height:none;display:block}
-  .tlnav .cmkey{display:none}
-  .tlnav ol{align-items:center;overflow:visible}
-  .tlnav .ph{position:static;flex-direction:row;gap:6px;align-items:baseline;margin:0 4px 0 10px;padding:4px 9px;white-space:nowrap}
-  .tlnav .ph:first-child{margin-left:0}
-  .tlnav .dr{margin:0;width:auto}
+  .mapwrap .drillnav{display:none}
+  .mechnav{display:block}
 }
 .arena{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:10px}
 .arena svg{display:block;width:100%;max-width:600px;height:auto;margin:0 auto;aspect-ratio:108/110;cursor:crosshair;touch-action:manipulation;user-select:none;-webkit-user-select:none}

@@ -1,5 +1,6 @@
 // The Practice tab: one mechanic at a time, with no timer. Click where you stand, and the arena
-// shows the right area. The list beside the arena has every mechanic in fight order.
+// shows the right area. On a wide screen, the list beside the arena has every mechanic in fight
+// order. On a narrow screen, Back, Next and phase chips take its place.
 import { esc, el, newCode, random, withSeed } from "../util";
 import { state, getDeck, record, view, type MapCur } from "../core";
 import { rotZone, inZone, zoneCenter } from "../geometry";
@@ -24,7 +25,7 @@ function run(): MapCur {
 let wanted: { id: string; code?: string } | null = null;
 export function openPattern(id: string, code?: string): void { wanted = {id, code}; }
 
-/** The list beside the arena: every mechanic in fight order, under its phase. */
+/** The list beside the arena on a wide screen: every mechanic in fight order, under its phase. */
 function mechList(current: string): string {
   let h = '<nav class="drillnav tlnav" aria-label="Mechanics"><ol>', phase = "";
   for(const m of getDeck("map").items){
@@ -36,6 +37,23 @@ function mechList(current: string): string {
     h += '<li><button type="button" data-drill-id="' + m.id + '"' + (m.id === current ? ' aria-current="step"' : "") + "><span class=\"dn-time\">" + esc(m.time) + "</span>" + esc(m.title) + "</button></li>";
   }
   return h + "</ol></nav>";
+}
+
+/** On a narrow screen the list is too long, so this shows in its place: the mechanic, Back and
+    Next, and one chip for each phase that opens the first mechanic of that phase. */
+function mechSteps(): string {
+  const d = getDeck("map"), m = d.items[d.i];
+  // TS note: flatMap with [] or [i] keeps only the indexes where a new phase starts.
+  const starts = d.items.flatMap((x, i) => i === 0 || x.phase !== d.items[i - 1].phase ? [i] : []);
+  const chips = starts.map(i => {
+    const ph = d.items[i].phase;
+    return '<button type="button" class="qchip" data-drill-id="' + d.items[i].id + '" title="' + esc(ph) + '"' + (ph === m.phase ? ' aria-current="true"' : "") + ">P" + (ph.match(/\d+/)?.[0] ?? "") + "</button>";
+  }).join("");
+  return '<nav class="mechnav" aria-label="Mechanics"><div class="eyebrow"><b>' + esc(m.phase) + '</b><span class="progress">' + (d.i + 1) + " of " + d.items.length + "</span></div>" +
+    '<div class="mn-row"><p class="mn-name">' + esc(m.title) + '</p><div class="qnav">' +
+    '<button type="button" class="btn ghost" id="mn-prev"' + (d.i <= 0 ? " disabled" : "") + ">&lsaquo; Back</button>" +
+    '<button type="button" class="btn ghost" id="mn-next"' + (d.i >= d.items.length - 1 ? " disabled" : "") + ">Next &rsaquo;</button></div></div>" +
+    '<div class="qchips" role="group" aria-label="Go to a phase">' + chips + "</div></nav>";
 }
 
 /* Draw the answers on the arena. A puddle goes off 3 seconds after it drops, and they drop 2
@@ -66,19 +84,22 @@ export function renderMap(fresh = true): void {
     state.cur = {kind:"map", item, scene:made.scene, k:made.k, code, results:[], counted:false};
   }
   const c = run();
-  view.innerHTML = tabHead() + '<div class="mapwrap">' + mechList(item.id) +
+  view.innerHTML = tabHead() + '<div class="mapwrap">' + mechList(item.id) + mechSteps() +
     '<div class="stage"><div class="arena"><div id="m-hud"></div>' + sceneSVG(c.scene, c.k) + "</div>" +
     '<div class="panel" id="map-panel"></div></div></div>';
   el("arena-svg").addEventListener("click", onArenaClick);
-  view.querySelectorAll<HTMLButtonElement>(".drillnav [data-drill-id]").forEach(b => b.addEventListener("click", () => openMech(b.dataset.drillId ?? "")));
+  view.querySelectorAll<HTMLButtonElement>("[data-drill-id]").forEach(b => b.addEventListener("click", () => openAt(d.items.findIndex(m => m.id === b.dataset.drillId))));
+  el("mn-prev").addEventListener("click", () => openAt(d.i - 1));
+  el("mn-next").addEventListener("click", () => openAt(d.i + 1));
   view.querySelector(".drillnav [aria-current]")?.scrollIntoView({block:"nearest", inline:"nearest"});
   drawFeedback();
   drawMapPanel();
 }
 
-function openMech(id: string): void {
-  const d = getDeck("map"), i = d.items.findIndex(m => m.id === id);
-  if(i < 0) return;
+/** Open mechanic i of the list with a new pattern. */
+function openAt(i: number): void {
+  const d = getDeck("map");
+  if(i < 0 || i >= d.items.length) return;
   d.i = i;
   renderMap(true);
 }
