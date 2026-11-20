@@ -202,7 +202,9 @@ function mount(): void {
     el("f-resume").addEventListener("click", togglePause);
     el("f-quit").addEventListener("click", quit);
   } else {
-    view.innerHTML = tabHead() + '<div class="stage"><div class="arena">' + HUD + box + "</div>" + playBar(r.fight) + "</div>" +
+    // Paused, a badge shows in the row above the arena floor, beside the N.
+    view.innerHTML = tabHead() + '<div class="stage"><div class="arena">' + HUD + box +
+      '<div class="fpaused" id="f-paused" hidden><b>&#10074;&#10074; Paused</b><span>&middot; click the map to play</span></div></div>' + playBar(r.fight) + "</div>" +
       '<div class="panel" id="f-panel"></div></div>';
     const seek = el<HTMLInputElement>("f-seek");
     seek.addEventListener("pointerdown", () => { dragging = true; });
@@ -510,6 +512,7 @@ function updateLive(r: Run): void {
       play.innerHTML = r.paused ? "&#9654;" : "&#10074;&#10074;";
       play.setAttribute("aria-label", r.paused ? "Play" : "Pause");
     }
+    document.getElementById("f-paused")?.toggleAttribute("hidden", !r.paused);
     document.getElementById("f-gear")?.setAttribute("aria-pressed", String(r.settings));
   }
   const tl = document.getElementById("f-tl");
