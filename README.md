@@ -40,23 +40,30 @@ npm run build
 ## Project layout
 
 ```text
-index.html             page shell
-src/main.ts            start-up, tabs and keyboard keys
-src/types.ts           shared types for drills, questions and overlays
-src/core.ts            shared state, decks and scoring
-src/util.ts            small shared helpers
-src/geometry.ts        arena geometry
-src/arena.ts           SVG drawing of the arena
-src/views/             one module for each tab
-src/data/timeline.ts   fight timeline
-src/data/drills.ts     map drills
-src/data/questions.ts  mechanic, raise and timeline questions
-src/data/jobs.ts       White Mage and Sage plans
-src/styles.css         all styles
-test/                  Vitest tests
-docs/                  guides
-scripts/publish.sh     push the current branch to GitHub
-wrangler.jsonc         Cloudflare deploy configuration
+index.html               page shell
+src/main.ts              start-up, tabs, links and keyboard keys
+src/router.ts            the address of each screen
+src/types.ts             shared types for drills, questions and overlays
+src/core.ts              shared state, decks and scoring
+src/util.ts              small shared helpers
+src/geometry.ts          arena geometry
+src/arena.ts             SVG drawing of the arena
+src/views/               one module for each tab, and the full fight
+src/data/drills.ts       Practice drills
+src/data/figs.ts         Learn card pictures
+src/data/questions.ts    Learn and Timeline cards
+src/data/fight.ts        the full fight
+src/data/route.ts        the moving marker's route
+src/data/timeline.ts     fight timeline
+src/data/abilities.ts    ability list and phases
+src/data/attacks.ts      attack sizes and shapes
+src/styles.css           all styles
+test/                    Vitest tests
+docs/                    guides, decisions and review prompts
+scripts/publish.sh       push the current branch to GitHub
+scripts/wait-deploy.sh   wait until a deploy is live
+CLAUDE.md                notes for a Claude session that works on the site
+wrangler.jsonc           Cloudflare deploy configuration
 ```
 
 ## Change a drill or a question
@@ -68,7 +75,7 @@ The data for the drills and the questions is in `src/data/`. Each item has a `bu
 3. Run `npm run typecheck` and `npm test`.
 4. Run `npm run dev` and try the drill.
 5. Commit the change, then run `sh scripts/publish.sh` to push the branch.
-6. Open the Cloudflare preview of the branch. If it is correct, merge the branch into `main` and publish again.
+6. Open the Cloudflare preview of the branch at `https://<branch>.test.ffxiv-raid-drills.app/`. If it is correct, merge the branch into `main` and publish again.
 
 ## Publish
 
@@ -91,4 +98,4 @@ sh scripts/publish.sh
 - Strategy: [wtfdig M11S](https://wtfdig.info/74/m11s#hector:nobuddies:fixed) and [Hector's video guide](https://www.youtube.com/watch?v=w1uuwzhyf5A)
 - Times: [cactbot r11s timeline](https://github.com/OverlayPlugin/cactbot/blob/main/ui/raidboss/data/07-dt/raid/r11s.txt)
 - Mechanics: [Icy Veins M11S guide](https://www.icy-veins.com/ffxiv/aac-heavyweight-m3-savage-raid-guide) and [Thaliak M11S](https://thaliak.com/raids/m11s/)
-- Job abilities: the official [White Mage](https://na.finalfantasyxiv.com/jobguide/whitemage/) and [Sage](https://na.finalfantasyxiv.com/jobguide/sage/) job guides
+- Attack sizes: the [BossMod](https://github.com/awgil/ffxiv_bossmod) M11S module

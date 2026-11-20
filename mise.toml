@@ -1,6 +1,15 @@
-# A personal repository. The global mise config loads a work GitHub token in every folder.
-# Unset it here, so the GitHub CLI and git use the personal account (mander77): the GitHub
-# CLI's stored default account, and git through the repository's credential helper (gh).
+# A personal repository. The global mise config on the author's work machine loads a work
+# GitHub token in every folder. Unset it here, so the GitHub CLI and git use the personal account
+# (mander77): the GitHub CLI's stored default account, and git through the repository's
+# credential helper (gh).
+#
+# That machine's shell also sets a git identity in environment variables, and those win over the
+# repository's git config (mander77, with the GitHub noreply address). Unset them too, so commits
+# here use the repository's identity.
 [env]
 GH_TOKEN = false
 GITHUB_TOKEN = false
+GIT_AUTHOR_NAME = false
+GIT_AUTHOR_EMAIL = false
+GIT_COMMITTER_NAME = false
+GIT_COMMITTER_EMAIL = false
