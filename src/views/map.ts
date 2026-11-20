@@ -1,11 +1,13 @@
 // Painting the answer layers on a "Where do I stand?" arena. The player (fight.ts) and its
 // "Step through my run" screen both use it.
-import { state } from "../core";
 import { rotOverlay, zoneCenter, f1 } from "../geometry";
 import { drawOverlay, paintBoss, zoneSVG, hitsSVG } from "../arena";
 import { facingNext } from "../data/drills";
 import { PUDDLE_R } from "../data/attacks";
 import type { Boss, Scene, StepResult } from "../types";
+
+/** The width of the tag on the answer area, in arena units. */
+const LABEL_W = 17;
 
 /* Draw the answer layers on an arena: dropped puddles, cues, the boss, and, with showLast,
    the zone and the click of the last answer. `boss` replaces the scene's boss, for example to
@@ -33,7 +35,10 @@ export function paintArena(svg: Element, sc: Scene, k: number, results: StepResu
       const top = "c" in z ? z.c[1] - z.r : "rect" in z ? z.rect[1] : ctr[1] + 1;
       const bottom = "c" in z ? z.c[1] + z.r : "rect" in z ? z.rect[3] : ctr[1] - 1;
       const ly = "fn" in z ? ctr[1] : (top - 3 >= -3 ? top - 3 : bottom + 3);
-      zlabel = '<g class="zlabel"><rect x="' + f1(ctr[0] - 3.2) + '" y="' + f1(ly - 2.1) + '" width="6.4" height="4.2" rx=".9"/><text x="' + f1(ctr[0]) + '" y="' + f1(ly) + '">' + state.slot + "</text></g>";
+      // The tag says what the green area is. It does not name your slot: the moving marker
+      // is you, so a slot name here would look like a second you. It stays inside the picture.
+      const lx = Math.max(-4 + LABEL_W / 2, Math.min(104 - LABEL_W / 2, ctr[0]));
+      zlabel = '<g class="zlabel"><rect x="' + f1(lx - LABEL_W / 2) + '" y="' + f1(ly - 2.1) + '" width="' + LABEL_W + '" height="4.2" rx=".9"/><text x="' + f1(lx) + '" y="' + f1(ly) + '">Right spot</text></g>';
       if(!r.missed) me = '<g class="pick ' + cls + '" transform="translate(' + f1(r.p[0]) + " " + f1(r.p[1]) + ')"><circle class="halo" r="2.6"/><circle class="dot" r="1.1"/></g>';
     }
   });
