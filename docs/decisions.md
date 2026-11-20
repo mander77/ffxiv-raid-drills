@@ -37,6 +37,14 @@ make sure that each one still matches the code before you start it.
     fight's per-frame updates stay direct DOM changes.
   - Shared state uses `@preact/signals`. Phase 7 (#10) adds Biome and knip.
   - Keep the `TS note:` comments, and add notes for the Preact features too.
+  - Use only Preact's core API: `preact`, `preact/hooks` and `@preact/signals`. Do not use
+    `preact/compat` or features that only Preact has. Then a later move to React is close to a
+    rename, and the owner does not have to learn a second model.
+  - A second review (November 20) checked the choice again, with a full rewrite in any language
+    allowed and "pick once, never relearn" as the main rule. It still picked Preact, with React as
+    the fallback. Blazor WebAssembly lost on download size and start time on phones, and on the
+    cost of porting the data and the seeded random numbers. Svelte 5 lost because its reactivity
+    already changed once (runes).
 - Issue #11: make the repository self-contained. A new person should get Node 24, the GitHub CLI
   and the other tools in one step after the clone.
 - Issue #12: shared helpers, from a second code review. Do it before Phase 5 (#8).
