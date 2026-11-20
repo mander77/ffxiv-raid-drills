@@ -13,11 +13,6 @@ export function tabHead(): string {
   if(state.tab === "mech"){
     h += '<a class="btn ghost guide" href="' + WTFDIG + '" target="_blank" rel="noopener">Read the wtfdig guide first <span aria-hidden="true">↗</span></a>';
   }
-  if(state.tab === "map"){
-    h += '<div class="ctrl"><span id="play-lbl">Mode</span><div class="seg small" role="group" aria-labelledby="play-lbl">' +
-      '<button type="button" id="play-step" data-play="step" aria-pressed="' + (state.play === "step") + '">Step by step</button>' +
-      '<button type="button" id="play-time" data-play="time" aria-pressed="' + (state.play === "time") + '">Real time</button></div></div>';
-  }
   if(state.tab === "job"){
     h += '<div class="ctrl"><span id="job-lbl">Job</span><div class="seg small" role="group" aria-labelledby="job-lbl">' +
       (Object.keys(JOBS) as Job[]).map(j => '<button type="button" id="job-' + j + '" data-job="' + j + '" aria-pressed="' + (state.job === j) + '">' + JOBS[j] + "</button>").join("") + "</div></div>";

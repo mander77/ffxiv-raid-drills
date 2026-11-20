@@ -59,7 +59,7 @@ export const orderText = (o: string): string => { const s = o.split("-").join(",
 const ORDERS: Array<[string, string]> = ["sword-axe-scythe", "sword-scythe-axe", "axe-sword-scythe", "axe-scythe-sword", "scythe-sword-axe", "scythe-axe-sword"]
   .map((o): [string, string] => [o, orderText(o)]);
 
-/** The choices on the Real time settings screen, in fight order, with the text for each value. */
+/** The choices in the player's Settings panel, in fight order, with the text for each value. */
 export const CHOICE_ROWS: Array<{key: keyof Picks; label: string; options: Array<[string, string]>}> = [
   {key:"raw", label:"First Raw Steel Trophy", options:[["axe", "Axe"], ["scythe", "Scythe"]]},
   {key:"set1", label:"Weapon order at 0:48", options:ORDERS},

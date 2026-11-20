@@ -10,8 +10,6 @@ import type { Job, MapDrill, Option, Question, QuizItem, Scene, Slot, StepResult
 // The `type` keyword inside the braces marks a type-only import next to normal value imports.
 export type QuizCat = "mech" | "next" | "death" | "job";
 export type Tab = "home" | "map" | QuizCat | "pressure" | "sheet";
-/** How the "Where do I stand?" tab plays: one drill at a time, or all of them on the fight clock. */
-export type Play = "step" | "time";
 
 // TS note: a generic interface, like a C# generic class. Deck<MapDrill> holds map drills
 // and Deck<QuizItem> holds quiz cards.
@@ -33,8 +31,7 @@ interface Decks { map?: Deck<MapDrill>; mech?: Deck<QuizItem>; next?: Deck<QuizI
 interface AppState {
   slot: Slot;
   job: Job;
-  play: Play;
-  /** The fight pattern picks. Real time and the Step by step drills that fit them share them. */
+  /** The fight pattern picks, set in the player's Settings panel. */
   choices: Choices;
   psecs: number;
   stats: Record<string, {s: number; r: number}>;
@@ -64,7 +61,7 @@ export const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
 export const TABS: Array<{id: Tab; label: string; lede: string}> = [
   {id:"home", label:"Home", lede:"Practice drills for the healers in M11S, The Tyrant (Savage). You practice where to stand, what comes next, when to raise and which cooldown to press, away from the raid. The answers follow your group's strats: Hector (Toxic), Kindred No Buddies and Fixed (3CJ) Ecliptic."},
   {id:"mech", label:"Mechanics", lede:"Read your group's wtfdig guide first, then test yourself here. The answers follow the guide and your slot. After you answer, the arena picture shows the right spot."},
-  {id:"map", label:"Where do I stand?", lede:"The list is the whole fight in cast order. Click an ability to see what it does, or a drill to practice it. Step by step has no timer. Real time runs the fight clock. Patterns turn as they do in the real fight, so read the boss and the floor."},
+  {id:"map", label:"Where do I stand?", lede:"The whole fight in cast order. Paused, you go step by step with no timer: click a drill or an ability in the list to go there, then click your spot. Press Play to run the fight clock. Patterns turn as they do in the real fight, so read the boss and the floor."},
   {id:"next", label:"What is next?", lede:"Knowing what comes next tells you how much time you have to raise. Times come from the fight timeline."},
   {id:"job", label:"My job", lede:"A suggested plan for your job, built from the current ability recasts. It is not your group's plan, so agree with your co-healer who uses what, and do not stack the same 10% on the same hit."},
   {id:"death", label:"Someone died", lede:"The decisions from your talk with Andrew: who first, when to raise, when to wait."},
@@ -77,7 +74,6 @@ export const state: AppState = {
   // LS.get<string> reads any saved string. Each ternary then turns it into one of the allowed values.
   slot: LS.get<string>("slot", "H1") === "H2" ? "H2" : "H1",
   job: LS.get<string>("job", "whm") === "sge" ? "sge" : "whm",
-  play: LS.get<string>("play", "step") === "time" ? "time" : "step",
   choices: cleanChoices(LS.get<unknown>("fchoices", null)),
   psecs: [4, 6, 8, 10].includes(savedSecs) ? savedSecs : 6,
   stats: LS.get<AppState["stats"]>("stats", {}) || {},

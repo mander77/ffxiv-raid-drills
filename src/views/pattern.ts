@@ -1,6 +1,5 @@
-// The fight pattern picks: each random part of the fight, Random or a pick. Real time shows all
-// of them on its start screen. A Step by step drill shows the ones that fit it. Both share the
-// same picks (state.choices), so a pick made in one place counts in the other.
+// The fight pattern picks: each random part of the fight, Random or a pick. The player's
+// Settings panel shows all of them. They are saved (state.choices) for the next visit.
 import { state, view, setChoices } from "../core";
 import { cleanChoices, CHOICE_ROWS, type Picks } from "../data/fight";
 import type { WeaponType } from "../data/drills";
@@ -30,7 +29,7 @@ function orderRow(key: "set1" | "set2", label: string): string {
 }
 
 /** Wire the pick buttons and weapon cards on the page. `after` redraws the screen once a pick
-    is saved: Real time redraws its start screen, Step by step builds the drill again. */
+    is saved: the player builds the same fight again with the new pick. */
 export function wirePattern(after: () => void): void {
   view.querySelectorAll<HTMLButtonElement>("[data-pick]").forEach(b => b.addEventListener("click", () => {
     // cleanChoices checks the value, so only a known pick goes into the saved choices.

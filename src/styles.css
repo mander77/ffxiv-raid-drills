@@ -75,9 +75,6 @@ main{padding-block:20px 56px}
 .lede{margin:0;max-width:68ch;color:var(--ink-2);min-width:0;flex:1 1 360px}
 .ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
 .fpick{margin:22px 0 2px;font-size:18px}
-/* A Step by step drill's own fight pattern picks, at the end of its panel. */
-.drillpick{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
-.drillpick .fpick{margin-top:0;font-size:16px}
 .mypick{padding:0 6px;border-radius:4px;background:var(--heal-soft);color:var(--heal-ink);font-weight:700}
 /* Weapon cards: drag them into the order the boss takes them. Dashed with "?" while on Random. */
 .wcards{display:flex;gap:6px;list-style:none;margin:0;padding:0}
@@ -235,6 +232,15 @@ button.chip{cursor:pointer}
 .fctl input[type=range]{flex:1;min-width:0;accent-color:var(--heal)}
 .fplay{min-width:44px;padding-left:0;padding-right:0;justify-content:center}
 .ftime{font-family:var(--font-mono);font-size:12px;color:var(--ink-2);white-space:nowrap}
+/* The play bar under the arena: play or pause, the fight time and Settings, then the speed, the
+   run buttons and the keys. */
+.arena .fctl{margin-top:10px;padding-top:10px}
+.fgear[aria-pressed="true"]{background:var(--heal-soft)}
+.fbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:8px}
+.fbar .linkbtn{display:inline;margin:0}
+.fbar .hint{margin:0;font-size:12px}
+/* On a phone the slider gets its own row under the buttons, so it is wide enough to drag. */
+@media (max-width:560px){.arena .fctl{flex-wrap:wrap}.arena .fctl input[type=range]{order:5;flex-basis:100%}.arena .fctl .ftime{margin-right:auto}}
 .fsum{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:6px}
 .fsum li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:14.5px}
 .fsum .fs-time{font-family:var(--font-mono);font-size:12px;color:var(--ink-2);min-width:3.2em}

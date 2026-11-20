@@ -1,6 +1,6 @@
 // The fight list beside the arena on "Where do I stand?": every ability in cast order, grouped by
-// phase, with the drills under the abilities they practice. Step by step and Real time both use
-// it. Only what a click does differs, so each mode passes its own handlers to wireNav().
+// phase, with the drills under the abilities they practice. The player passes its own click
+// handlers to wireNav(): a click moves the fight clock to that ability or drill.
 import { esc } from "../util";
 import { view } from "../core";
 import { MAPS } from "../data/drills";
@@ -39,7 +39,7 @@ export function tlNav(o: NavOpts = {}): string {
     for(const a of ph.rows){
       h += '<li><button type="button" class="ab" data-ab="' + i + '"' + (o.open === i ? ' aria-current="true"' : "") + ' title="' + esc(catNames(a.cats)) + '">' +
         marks(a.cats) + '<span class="dn-time">' + clock(a.t) + "</span><span>" + esc(a.name) + "</span></button></li>";
-      // data-row: the ability this drill sits under, so Real time can pick the nearer of two.
+      // data-row: the ability this drill sits under, so the player can pick the nearer of two.
       for(const id of a.drills ?? [])
         h += '<li><button type="button" class="dr" data-drill-id="' + id + '" data-row="' + i + '"' + (o.current?.includes(id) ? ' aria-current="step"' : "") +
           '><span class="dtag">Drill</span>' + esc(short(TITLE.get(id) ?? id)) + "</button></li>";
@@ -49,9 +49,7 @@ export function tlNav(o: NavOpts = {}): string {
   return h + "</ol></nav>";
 }
 
-/** Send clicks on the list to the mode's handlers. Call it after the list is on the page. */
-// TS note: Step by step passes an onDrill that takes only the id. That still fits this type,
-// because TypeScript, like JavaScript, lets a function ignore arguments it does not need.
+/** Send clicks on the list to the player's handlers. Call it after the list is on the page. */
 export function wireNav(onAbility: (i: number) => void, onDrill: (id: string, row: number) => void): void {
   view.querySelector(".tlnav")?.addEventListener("click", e => {
     const b = (e.target as Element).closest<HTMLButtonElement>("button");
@@ -62,7 +60,7 @@ export function wireNav(onAbility: (i: number) => void, onDrill: (id: string, ro
   scrollNav();
 }
 
-/** Real time: highlight the drills on the arena now, and the next ability to happen. */
+/** Highlight the drills on the arena now, and the next ability to happen. */
 export function markNav(drills: string[], next: number): void {
   view.querySelectorAll<HTMLButtonElement>(".tlnav .dr").forEach(b => {
     if(drills.includes(b.dataset.drillId ?? "")) b.setAttribute("aria-current", "step");
