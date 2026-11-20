@@ -7,11 +7,7 @@ export const WTFDIG = "https://wtfdig.info/74/m11s#hector:nobuddies:fixed";
 
 export function tabHead(): string {
   const t = TABS.find(x => x.id === state.tab) ?? TABS[0];
-  let h = '<div class="tabhead"><p class="lede">' + esc(t.lede) + "</p>";
-  if(state.tab === "mech"){
-    h += '<a class="btn ghost guide" href="' + WTFDIG + '" target="_blank" rel="noopener">Read the wtfdig guide first <span aria-hidden="true">↗</span></a>';
-  }
-  return h + "</div>";
+  return '<div class="tabhead"><p class="lede">' + esc(t.lede) + "</p></div>";
 }
 
 /** One row of toggle buttons with a label. `attr` names the data attribute that the click
