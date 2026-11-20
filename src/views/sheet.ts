@@ -8,6 +8,7 @@ import { f1, vadd, unit, leftOf } from "../geometry";
 import { arenaSVG, drawOverlay, drawBoss } from "../arena";
 import { swordCross, swordPocket } from "../data/attacks";
 import { tabHead, WTFDIG } from "./common";
+import { routeLink } from "../router";
 import type { Point, Slot } from "../types";
 
 /** A fixed sword example: the boss jumps west from the middle. The player's pocket is green. */
@@ -25,6 +26,11 @@ export function swordDiagram(s: Slot): string {
     labels:label(1, "G1 / H1") + label(-1, "G2 / H2"),
   });
 }
+/** One line of "Positions to remember": the mechanic, its rule in a sentence or two, and a link to
+    the Learn card with the detail. */
+const rule = (name: string, text: string, card: string): string =>
+  "<li><b>" + esc(name) + ":</b> " + esc(text) + ' <a class="more" href="' + routeLink({tab:"mech", card}) + '">Learn &rarr;</a></li>';
+
 export function renderSheet(): void {
   const s = state.slot;
   // Each row shows the fight list's marks for what it covers, with the same colour key.
@@ -37,20 +43,19 @@ export function renderSheet(): void {
     "<li>Self: if you are low, heal or shield yourself.</li>" +
     "<li>Team: a hit soon? Heal the party.</li></ol>" +
     "<p>Say it in your head: feet, self, team. If you are not sure, any of these beats standing still.</p></section>" +
+    // One short line per mechanic, written for your role. The detail lives on its Learn card.
     '<section><h2>Positions to remember</h2><div class="cols"><div><ul class="rules">' +
-    "<li><b>Weapon order:</b> the first weapon is the one he faces. Then he goes clockwise.</li>" +
-    "<li><b>Sword:</b> the cross lines up with the way he jumped. Stand in the pocket behind him, on the side he jumped from: G1 on his left, G2 on his right. Stand a few steps in from its inner corner, where the arms of the cross meet. There you can see that you are clear of both arms. As " + s + ", you take the " + S(s, "left", "right") + " pocket, and your light party stacks on you.</li>" +
-    "<li><b>Scythe:</b> proteans, so everyone takes a clock spot close around him. H1 at the butt, H2 at the point.</li>" +
-    "<li><b>Axe:</b> the whole party stacks in the middle, out of the axe AoE.</li>" +
-    "<li><b>Ultimate Trophy Weapons:</b> watch the first spawn. South and slightly west means clockwise, south and slightly east means counterclockwise. The second is NW or NE, then the cardinals. He resolves them in spawn order.</li>" +
-    "<li><b>Void Stardust:</b> start north of the boss. Drop each puddle just outside the last one, a small step clockwise. Then stack or spread. Before the puddles, find the first weapon of the second set. If it is a sword or scythe, stack or spread toward it, and use Expedient, Sprint or a movement ability if it is far.</li>" +
-    "<li><b>Assault Evolved, second set (after Void Stardust):</b> the weapon with its flat side square to the boss goes first. Then clockwise, the same as the first set.</li>" +
-    "<li><b>Comet spread (after Void Stardust):</b> free for all for healers and ranged. Take any open spot, away from the tanks and melee and out of the last puddle. Fixed spots: MT NW, OT NE, M1 SW, M2 SE.</li>" +
-    "<li><b>Orbital Omen (Hector's dodge):</b> stay against the boss hitbox, at his side. Start where the #2 lines cross. After #1 and Fire and Fury, cross the hitbox to the opposite middle square. After #2, cross back and stay.</li>" +
-    "<li><b>Meteorain, melee (1st set):</b> the melee step in close to the boss to take the first markers. M1 drops NE and M2 drops SW, both inside the boss hitbox. Everyone else stacks NW for the first line stack, with the tanks in front.</li>" +
-    "<li><b>Meteorain, tanks:</b> the tanks stand in front of the first line stack. Then each set, tethers link to the two rocks closest to the boss: the MT takes the NE or NW tether, the OT takes the SW tether. Each tether is a tank buster (5:09, 5:19 and 5:29), so the tanks stay out of the party stack and you heal them after each one. After the third tether, they hide behind the rocks too.</li>" +
-    "<li><b>Meteorain, your meteor:</b> " + S(s, "drop it NW, inside the boss hitbox.", "drop it SW, in line with the first SW rock, farther out.") + "</li>" +
-    "<li><b>Meteorain, ranged (3rd set):</b> the ranged step in close to the boss to take the markers. R1 drops SW near the edge, at the end of the SW line, and leaves room behind it to hide. R2 drops NE, inside the boss hitbox.</li>" +
+    rule("Weapon order", "The first weapon is the one he faces. Then clockwise.", "k-first-weapon") +
+    rule("Sword", "Stand in the pocket behind him, on the side he jumped from. Yours is his " + S(s, "left", "right") + ", and your light party stacks on you.", "k-sword") +
+    rule("Scythe", "Everyone stands close around him. You take the " + S(s, "handle end", "blade end") + ".", "k-scythe") +
+    rule("Axe", "The whole party stacks in the middle, out of the axe hit.", "k-axe") +
+    rule("Ultimate Trophy Weapons", "First spawn south and a bit west: clockwise. A bit east: counterclockwise.", "k-ult-spawn") +
+    rule("Void Stardust", "Start north of him. Drop each puddle just outside the last, a small step clockwise. Then stack or spread.", "k-void") +
+    rule("Second weapon set", "Spot it before the puddles: the first is the one with its flat side square to him. Sword or scythe first: stack or spread toward it.", "k-assault-2") +
+    rule("Comet spread", "Healers take any open spot, away from the tanks and melee and out of the last puddle.", "k-void-spread") +
+    rule("Orbital Omen", "Stay against his side, where the #2 lines cross. After #1, cross through him. After #2, cross back.", "k-orbital") +
+    rule("Meteorain, your meteor", S(s, "Drop it NW, inside his hitbox.", "Drop it SW, in line with the first SW rock, farther out."), "k-meteor-drop") +
+    rule("Meteorain, tanks", "Their tethers are tank busters at 5:09, 5:19 and 5:29. Heal them after each one.", "k-meteor-order") +
     '</ul></div><figure class="mini">' + swordDiagram(s) +
     "<figcaption>Example: he jumps west from the middle. The pockets on the side he came from are the two stack spots. Yours is green.</figcaption></figure></div></section>" +
     "<section><h2>Your timeline as " + s + "</h2>" + catKey() + '<div class="tablebox"><table><thead><tr><th>Time</th><th>Mechanic</th><th>What you do</th></tr></thead><tbody>' + rows + "</tbody></table></div>" +
