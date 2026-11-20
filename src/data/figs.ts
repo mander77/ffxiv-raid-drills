@@ -102,7 +102,9 @@ function fromDrill(id: string, s: Slot, v: string | null = null, k = 0): Fig & {
 function jump(s: Slot, type: WeaponType, a: number) {
   const W: Weapon[] = [{a, p:atAngle(a), type}], R = buildRun(s, W), st = R.steps[0], b = R.states[1], st2 = buildRun(other(s), W).steps[0];
   if(!st.z || !st2.z) throw new Error("a weapon step has no zone");
-  const fig: Fig = {overlays:[guide(CENTER, [b.x, b.y]), ...R.overlays.filter(o => o.t !== "tag")], boss:b, after:st.reveal, answer:[st.z]};
+  // The answer shows you on your spot, on top of the boss's ring: a close spot is under it.
+  const fig: Fig = {overlays:[guide(CENTER, [b.x, b.y]), ...R.overlays.filter(o => o.t !== "tag")], boss:b,
+    after:[...(st.reveal ?? []), you(s, st.stand ?? zoneCenter(st.z))], answer:[st.z]};
   return {fig, b, at:[b.x, b.y] as Point, zone:st.z, zoneOther:st2.z, hits:st.reveal ?? [], stand:st.stand, standOther:st2.stand};
 }
 
