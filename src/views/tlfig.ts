@@ -22,12 +22,14 @@ const STRIP = PHASES.map((p, k) => {
   return {name:p.name.split(": ")[1] ?? p.name, start, end};
 });
 
-/** The phase strip: each phase as wide as it lasts, and a mark where `now` is. */
+/** The phase strip: each phase as wide as it lasts, labelled P1 to P4 (the names do not fit in
+    the short phases), and a mark where `now` is. The line under it names the phase you are in. */
 function strip(now: number): string {
-  return '<div class="tlstrip" role="img" aria-label="Where this is in the fight: ' + mmss(now) + " of " + mmss(END) + '">' +
-    // A phone shows P1 to P4: the names do not fit there.
-    STRIP.map((p, k) => '<span style="width:' + ((p.end - p.start) / END * 100).toFixed(2) + '%" title="' + esc(p.name) + '"><em>' + esc(p.name) + "</em><b>P" + (k + 1) + "</b></span>").join("") +
-    '<i class="here" style="left:' + (now / END * 100).toFixed(2) + '%"></i></div>';
+  const k = Math.max(0, STRIP.findIndex(p => now >= p.start && now < p.end));
+  return '<div class="tlstrip" aria-hidden="true">' +
+    STRIP.map((p, x) => '<span style="width:' + ((p.end - p.start) / END * 100).toFixed(2) + '%" title="' + esc(p.name) + '">P' + (x + 1) + "</span>").join("") +
+    '<i class="here" style="left:' + (now / END * 100).toFixed(2) + '%"></i></div>' +
+    '<p class="tlwhere"><b>P' + (k + 1) + " · " + esc(STRIP[k].name) + "</b> " + mmss(now) + " of " + mmss(END) + "</p>";
 }
 
 /** The picture for a Timeline card (ids "n-<row>" and "r-<row>": row <row> just happened), or
