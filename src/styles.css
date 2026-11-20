@@ -303,6 +303,8 @@ button.chip{cursor:pointer}
 .fb h3{margin:0 0 4px;font-family:var(--font-display);font-size:22px;letter-spacing:.02em;text-transform:uppercase}
 .fb.ok h3{color:var(--heal-ink)} .fb.bad h3{color:var(--miss)} .fb.slow h3{color:var(--warn)}
 .fb p{margin:6px 0 0}
+.fb + .fb{margin-top:8px}
+.fb .fbans{font-weight:700}
 .rule{margin-top:14px;padding:12px 14px;border-radius:8px;background:var(--paper);display:grid;gap:2px}
 .rule span{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
 .rule strong{font-size:16px}

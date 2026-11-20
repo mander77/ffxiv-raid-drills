@@ -105,12 +105,17 @@ export function drawMCQ(): void {
   });
   h += "</div>";
   if(c.answered){
-    const ok = c.pick >= 0 && c.opts[c.pick].ok;
-    const cls = c.slow ? "slow" : (ok ? "ok" : "bad");
-    const head = c.slow ? "Too slow" : (ok ? "Right" : "Not this one");
-    h += '<div class="fb ' + cls + '" role="status"><h3>' + head + "</h3>";
-    if(c.slow) h += "<p>In the fight, this is the moment you would stand still. Any action beats freezing.</p>";
-    h += "<p>" + esc(q.why) + "</p></div>";
+    // A right answer gets one green card with the explanation. A wrong or a missed one gets a
+    // short card that says so, then the green card names the right answer and explains it, so
+    // the explanation never reads as if it were about your pick.
+    const ok = c.pick >= 0 && c.opts[c.pick].ok, right = c.opts.find(o => o.ok);
+    if(ok) h += '<div class="fb ok" role="status"><h3>Right</h3><p>' + esc(q.why) + "</p></div>";
+    else {
+      h += c.slow
+        ? '<div class="fb slow" role="status"><h3>Too slow</h3><p>In the fight, this is the moment you would stand still. Any action beats freezing.</p></div>'
+        : '<div class="fb bad" role="status"><h3>Not this one</h3><p>You picked: ' + esc(c.opts[c.pick]?.t ?? "") + "</p></div>";
+      h += '<div class="fb ok"><h3>Right answer</h3><p class="fbans">' + esc(right?.t ?? "") + "</p><p>" + esc(q.why) + "</p></div>";
+    }
     h += '<div class="rule"><span>Rule</span><strong>' + esc(q.rule) + "</strong></div>";
     if(q.src) h += '<p class="src">Source: ' + esc(q.src) + "</p>";
     h += '<div class="actions"><button type="button" class="btn" id="q-next">Next</button><span class="hint"><kbd>Enter</kbd> next</span></div>';
