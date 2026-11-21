@@ -46,9 +46,9 @@
   --later: #5b21b6;
   --later-soft: #f1ecfd;
   --cast: #fcd34d;
-  /* The Home banner's gradient: the palette's slate in light mode, a pale green in dark mode, where
+  /* The Home banner's gradient: the palette's sage in light mode, a pale green in dark mode, where
      it reads as light on the dark card. */
-  --banner: #5e7a97;
+  --banner: #4e7e5a;
 }
 
 /* Dark: a slate night page (not pure black), lighter panels, near-white ink, a deep slate header. */
