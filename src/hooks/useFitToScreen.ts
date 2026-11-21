@@ -17,8 +17,16 @@ export function useFitToScreen<T extends HTMLElement>(below = 0): [RefObject<T |
       setHeight(Math.max(0, window.innerHeight - top - below));
     }
     measure();
+    // The web fonts can load after the first measure and push the element down a little.
+    let live = true;
+    document.fonts?.ready.then(() => {
+      if (live) measure();
+    });
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+    return () => {
+      live = false;
+      window.removeEventListener("resize", measure);
+    };
   }, [below]);
   return [ref, height];
 }

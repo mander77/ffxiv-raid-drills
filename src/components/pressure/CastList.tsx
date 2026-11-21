@@ -2,19 +2,17 @@ import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useFightFrame } from "../../hooks/useFightFrame";
 import { CASTS_AHEAD, CASTS_SOON, type CastMark, castPositions, castsAhead } from "../../lib/fight";
-import { clock } from "../../time";
 import { CATEGORY_BG } from "../CategoryDots";
 
 /** Where the now mark sits from the top, the room under the line at the bottom, and how far apart
     two casts stay at least, in pixels. The app's choice. */
-const NOW_Y = 24;
+const NOW_Y = 40;
 const BOTTOM = 12;
 const ROW_H = 36;
 /** The seconds marked on the line. The app's choice. */
 const TICKS = [5, 10, 20] as const;
 
 export interface CastListProps {
-  speed: number;
   className?: string;
 }
 
@@ -24,9 +22,8 @@ export interface CastListProps {
     between casts, and in their last seconds a square grows and its name turns bold.
     shadcn/ui has no timeline, so this list is its own: it moves through refs on every frame
     (useFightFrame), and draws through React only when a cast comes into view or leaves it. */
-export function CastList({ speed, className }: CastListProps) {
+export function CastList({ className }: CastListProps) {
   const box = useRef<HTMLDivElement>(null);
-  const time = useRef<HTMLSpanElement>(null);
   /** The rows by cast, for the frame loop to move. */
   const rows = useRef(new Map<number, HTMLLIElement>());
   const [marks, setMarks] = useState<CastMark[]>([]);
@@ -35,8 +32,6 @@ export function CastList({ speed, className }: CastListProps) {
     const now = castsAhead(s);
     // Draw again only when the casts in view change.
     setMarks((was) => (was.length === now.length && was.every((m, k) => m.i === now[k].i) ? was : now));
-    const clockText = clock(s.t);
-    if (time.current && time.current.textContent !== clockText) time.current.textContent = clockText;
     const height = (box.current?.clientHeight ?? 0) - BOTTOM;
     const ys = castPositions(now, height, NOW_Y, ROW_H);
     now.forEach((m, k) => {
@@ -51,11 +46,8 @@ export function CastList({ speed, className }: CastListProps) {
   });
 
   return (
-    <section aria-label="Casts coming up" className={cn("flex min-h-0 flex-col gap-2", className)}>
-      <p className="flex gap-2 text-sm text-muted-foreground">
-        <span className="font-semibold text-foreground">Coming up</span>
-        <span ref={time} className="tabular-nums" /> · {speed}x
-      </p>
+    // The play bar above it shows the fight time and the speed.
+    <section aria-label="Casts coming up" className={cn("flex min-h-0 flex-col", className)}>
       <div ref={box} className="relative min-h-0 flex-1 overflow-hidden rounded-lg border bg-card">
         {/* The line, the now mark at its top, and the ticks. They sit by the box's height, in CSS. */}
         <div className="absolute left-7 w-0.5 bg-border" style={{ top: NOW_Y, bottom: BOTTOM }} aria-hidden="true" />

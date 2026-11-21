@@ -181,6 +181,12 @@ make sure that each one still matches the code before you start it.
   - The player has no prompt of its own (owner's choice): the mechanic's step box shows the
     question and, under it, "Right move:" with the answer, where the prompt used to repeat the
     answer in a box of its own. The run keeps its prompt, the live question.
+  - The play bar sits right on top of the casts coming up, on every screen (owner's choice): the
+    clock and the list that runs on it belong together. The arena stands alone in its column, so
+    it gets the room the bar took. The list lost its "Coming up" line (the play bar shows the time
+    and the speed), and its now mark sits a little lower, 40 px from the top.
+  - `useFitToScreen` measures again when the web fonts have loaded: they can push the arena down a
+    pixel or two after the first measure, and the page then scrolled.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what
