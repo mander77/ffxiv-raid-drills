@@ -27,7 +27,7 @@ make sure that each one still matches the code before you start it.
   questions are still open for the owner: does it live on the Cheat sheet or in a new tab, and is
   it one scrolling page or one mechanic at a time?
 - Issues #18 to #22, label "rebuild": rebuild the site in React, one step per issue and per
-  branch, in order. Each step replaces some old screens; the old screens keep working until then.
+  branch, in order. Each step brings its tabs back.
   - Why: the owner set new long-term goals. The site must be easy to maintain, simple, fast and
     the same in every browser, and it should use trusted standard libraries over home-made code.
     The owner was fine with a full rebuild, so React won as the most widely known choice.
@@ -35,46 +35,37 @@ make sure that each one still matches the code before you start it.
     Chromium, Firefox and WebKit check every browser.
   - November 21: the owner switched from the Preact plan to this rebuild. Pull request #17
     (Preact phase 2) was closed without a merge, and issues #5 to #10 were closed as not
-    planned. Phases 0 and 1 of the Preact plan were published; Rebuild 1 replaced phase 1's
-    Preact Cheat sheet with React. Svelte, Blazor WebAssembly and Elm were rejected earlier, and
-    that still stands: Blazor on download size and start time on phones, Svelte because its
-    reactivity already changed once (runes).
-  - The stack: React 19, TypeScript and Vite; Tailwind CSS v4 and shadcn/ui (Radix) for styling
-    and common controls; React Router for the routes; Zustand with `persist` for state kept in
-    the browser; Vitest and Testing Library for unit tests; Playwright on Chromium, Firefox and
-    WebKit for browser tests; Biome to lint and format. Hosting stays on Cloudflare.
+    planned. Phases 0 and 1 of the Preact plan were published. Svelte, Blazor WebAssembly and Elm
+    were rejected earlier, and that still stands: Blazor on download size and start time on
+    phones, Svelte because its reactivity already changed once (runes).
+  - November 21, later: the rebuild starts from scratch on its own branch, `rebuild`. The owner
+    dropped the old tabs there and chose the default Tailwind and shadcn/ui look over the old
+    site's look. Each step is a branch from `rebuild` and a pull request into it. The live site
+    stays on `main`, with the old version and all its tabs, until every tab is back. Then
+    `rebuild` merges into `main` in one go. The old code stays in git history on `main`.
+  - The stack: React 19, TypeScript and Vite; Tailwind CSS v4 and shadcn/ui (Radix) with its
+    standard theme; React Router for the routes; Zustand with `persist` for state kept in the
+    browser; Vitest and Testing Library for unit tests; Playwright on Chromium, Firefox and
+    WebKit for browser tests; Biome to lint and format; lucide-react for icons. Hosting stays on
+    Cloudflare.
   - Keep `src/data/` and `src/geometry.ts` as they are. They are checked against cactbot and
-    BossMod.
+    BossMod. `arena.ts` still draws the arena pictures as SVG text, styled by `arena.css`, until
+    Rebuild 2 (#19) turns them into components.
   - The arena stays SVG, drawn by React components, not a canvas or a game library. The full
     fight's per-frame parts run in a requestAnimationFrame loop that updates elements through refs.
-  - Rebuild 1 (#18): React draws the header and the Cheat sheet. Every other path shows an old
-    screen: `LegacyScreen` calls `showLegacy` in `src/views/legacy.ts`, which draws into
-    `<main id="view">` as before. The old screens change the card in the address bar with
-    `history.replaceState` and keep React Router's history state, so Back still works.
-  - Tailwind runs without its reset (preflight) while old screens remain, because they rely on the
-    browser's default styles. `app.css` puts the old stylesheet in a "legacy" cascade layer under
-    Tailwind's utilities, and a small reset for the React parts (`.rx`) takes the place of
-    preflight. Rebuild 5 turns preflight on when `styles.css` goes.
-  - The site's colours stay in `styles.css` (`:root`) while old screens use them. `app.css`
-    maps them to Tailwind names (`bg-card`, `text-ink-2`, `border-heal`) and to the names
-    shadcn/ui uses (`primary`, `accent`, `ring`).
-  - Use exact pixel sizes, such as `text-[14px]`, where a screen must match the old one. Tailwind's
-    named sizes (`text-sm`) also set a line height, and the old CSS let it inherit 1.5. A width
-    rule from the old CSS, `max-width:640px`, is `max-[641px]:` in Tailwind, because Tailwind's
-    `max-[640px]:` stops below 640.
-  - The slot is in a Zustand store (`src/stores/slot.ts`), saved under "raid-drills-slot". The
-    old screens read it through `state.slot`, which `legacy.ts` keeps in step. Scores and decks
-    stay in the old code until the step that rebuilds their screens.
-  - Biome checks only the rebuilt code (`files.includes` in `biome.json`). Each step adds its
-    new files, so the old code is never reformatted on its way out.
-  - The bundle grew from 61.5 kB to 174.6 kB (gzip). React DOM is 65 kB of that, the Radix and
-    floating-ui code behind the tooltip and the toggles about 35 kB, React Router 13 kB and
-    tailwind-merge 9 kB. The app's own code is about 60 kB, as before.
-  - Keep the `TS note:` comments, and add notes for the React features too.
+  - Rebuild 1 (#18): the header and the Cheat sheet, in the default look. Any other address opens
+    the Cheat sheet until its tab is back. The Cheat sheet lost its "Learn →" links and "Your
+    progress" box for now: Learn and the scores come back in later steps.
+  - The slot is in a Zustand store (`src/stores/slot.ts`), saved under "raid-drills-slot".
   - The React code follows the usual React layout, so a React developer finds things at once:
-    `pages/` (one per route), `components/` (shared parts), `components/ui/` (shadcn/ui, with the
-    site's looks as variants), `hooks/`, `stores/` and `lib/`. Click logic lives in handlers, not
-    in effects (React's "You might not need an effect").
+    `pages/` (one per route), `components/` (shared parts), `components/ui/` (shadcn/ui, as its
+    CLI writes them), `hooks/`, `stores/` and `lib/`. Click logic lives in handlers, not in
+    effects (React's "You might not need an effect").
+  - Biome checks the new code (`files.includes` in `biome.json`), not `src/data/` and the other
+    files kept from the old site.
+  - The bundle is 129 kB (gzip), from 61.5 kB for the old site with every tab. React DOM is about
+    65 kB of that, and Radix and floating-ui, behind the tooltip and the toggles, about 35 kB.
+  - Keep the `TS note:` comments, and add notes for the React features too.
 - Issue #11: make the repository self-contained. A new person should get Node 24, the GitHub CLI
   and the other tools in one step after the clone.
 - Party slots (#13, done). A slot has two parts, the light party (1 or 2) and the role (Tank,

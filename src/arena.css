@@ -1,0 +1,142 @@
+/* The arena pictures. arena.ts draws them as SVG text with these class names. The Rebuild 2 step
+   turns the pictures into React components, and these styles move with them. */
+:root {
+  --arena-sand: #f8f2e6;
+  --arena-sand-line: #e7dbc2;
+  --arena-edge: #b49c6c;
+  --arena-ring: #c2362b;
+  --arena-boss: #5b1a12;
+  --arena-aoe: #e9781c;
+  --arena-ok: #1b7448;
+  --arena-other: #465166;
+  --arena-text: #131a2b;
+  --arena-wm-red: #d2413b;
+  --arena-wm-yellow: #e0b21e;
+  --arena-wm-blue: #2e76b8;
+  --arena-wm-purple: #8350be;
+}
+
+.floor {
+  fill: var(--arena-sand);
+}
+.tileline {
+  fill: none;
+  stroke: var(--arena-sand-line);
+  stroke-width: 0.35;
+}
+.edge {
+  fill: none;
+  stroke: var(--arena-edge);
+  stroke-width: 0.6;
+}
+.ring {
+  fill: none;
+  stroke: var(--arena-ring);
+  stroke-width: 1.1;
+}
+.ringmark {
+  fill: none;
+  stroke: var(--arena-ring);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+}
+.compass {
+  font-family: ui-monospace, monospace;
+  font-size: 3px;
+  fill: var(--arena-other);
+  text-anchor: middle;
+}
+
+/* The boss: his body, the mark on the side he faces, his place before a jump, and the jump. */
+.bosscore {
+  fill: var(--arena-boss);
+}
+.face {
+  fill: var(--arena-ring);
+}
+.ghost {
+  fill: none;
+  stroke: var(--arena-boss);
+  stroke-width: 0.5;
+  stroke-dasharray: 1 1;
+}
+.jump {
+  stroke: var(--arena-ring);
+  stroke-width: 0.7;
+  stroke-dasharray: 1.6 1.2;
+}
+.turn {
+  transition: transform 0.5s ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .turn {
+    transition: none;
+  }
+}
+
+/* The waymarks A to D and 1 to 4. */
+.wm circle,
+.wm rect {
+  opacity: 0.88;
+}
+.wm text {
+  font-weight: 700;
+  font-size: 4.2px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.wm-red circle,
+.wm-red rect {
+  fill: var(--arena-wm-red);
+}
+.wm-yellow circle,
+.wm-yellow rect {
+  fill: var(--arena-wm-yellow);
+}
+.wm-blue circle,
+.wm-blue rect {
+  fill: var(--arena-wm-blue);
+}
+.wm-purple circle,
+.wm-purple rect {
+  fill: var(--arena-wm-purple);
+}
+.wm-red text,
+.wm-blue text,
+.wm-purple text {
+  fill: #fff;
+}
+.wm-yellow text {
+  fill: var(--arena-text);
+}
+
+/* Attacks, safe spots and their labels. Your spot is green; the other slot's is grey. */
+.aoeband {
+  stroke: var(--arena-aoe);
+  opacity: 0.4;
+}
+.zone {
+  stroke-width: 0.7;
+  stroke-dasharray: 1.6 1;
+}
+.zone.ok {
+  fill: rgb(27 116 72 / 0.22);
+  stroke: var(--arena-ok);
+}
+.zone.other {
+  fill: rgb(70 81 102 / 0.1);
+  stroke: var(--arena-other);
+}
+.zlabel rect {
+  fill: var(--arena-ok);
+}
+.zlabel.other rect {
+  fill: var(--arena-other);
+}
+.zlabel text {
+  fill: #fff;
+  font-weight: 700;
+  font-size: 3.2px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}

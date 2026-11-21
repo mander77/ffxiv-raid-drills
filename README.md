@@ -43,34 +43,20 @@ npm run build
 index.html               page shell
 src/main.tsx             start-up: draws the React app
 src/App.tsx              the header and the routes
-src/components/          React components (header, slot switch, tabs) and shadcn/ui
 src/pages/               React pages, one per route (the Cheat sheet)
+src/components/          React components (header, slot switch, tabs)
+src/components/ui/       shadcn/ui components
 src/hooks/               custom React hooks
 src/stores/              state kept in the browser (Zustand)
-src/router.ts            the address of each screen
+src/app.css              Tailwind CSS and the shadcn/ui theme
+src/arena.css            the styles of the arena pictures
 src/types.ts             shared types for drills, questions and overlays
-src/core.ts              shared state, decks and scoring
 src/util.ts              small shared helpers
 src/geometry.ts          arena geometry
 src/arena.ts             SVG drawing of the arena
-src/views/               the old screens, built as HTML text, until the React rebuild replaces them
-src/data/drills.ts       Practice drills
-src/data/figs.ts         Learn card pictures
-src/data/questions.ts    Learn and Timeline cards
-src/data/fight.ts        the full fight
-src/data/route.ts        the moving marker's route
-src/data/timeline.ts     fight timeline
-src/data/abilities.ts    ability list and phases
-src/data/attacks.ts      attack sizes and shapes
-src/app.css              Tailwind CSS and the site colours
-src/styles.css           the old screens' styles
-e2e/                     Playwright browser tests
+src/data/                the fight: drills, pictures, questions, timeline, attacks
 test/                    Vitest tests
-docs/                    guides, decisions and review prompts
-scripts/publish.sh       push the current branch to GitHub
-scripts/wait-deploy.sh   wait until a deploy is live
-CLAUDE.md                notes for a Claude session that works on the site
-wrangler.jsonc           Cloudflare deploy configuration
+e2e/                     Playwright browser tests
 ```
 
 ## Change a drill or a question

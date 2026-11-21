@@ -9,7 +9,7 @@ afterEach(cleanup);
 
 test("one link per tab, and the tab of the address is marked", () => {
   render(
-    <MemoryRouter initialEntries={["/mech/k-sword"]}>
+    <MemoryRouter initialEntries={["/sheet"]}>
       <TabNav />
     </MemoryRouter>,
   );
@@ -18,7 +18,7 @@ test("one link per tab, and the tab of the address is marked", () => {
     links.map((a) => a.textContent),
     TABS.map((t) => t.label),
   );
-  assert.equal(screen.getByRole("link", { name: "Home" }).getAttribute("href"), "/");
-  assert.equal(screen.getByRole("link", { name: "Learn" }).getAttribute("aria-current"), "page");
-  assert.isNull(screen.getByRole("link", { name: "Home" }).getAttribute("aria-current"));
+  const sheet = screen.getByRole("link", { name: "Cheat sheet" });
+  assert.equal(sheet.getAttribute("href"), "/sheet");
+  assert.equal(sheet.getAttribute("aria-current"), "page");
 });

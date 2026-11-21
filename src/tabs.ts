@@ -1,17 +1,15 @@
-// The tabs of the site, in the order a player learns the fight. The header and the old screens both
-// read them. This file has no code that needs a page, so tests can import it.
+// The tabs of the site, in the order a player learns the fight. Each rebuild step adds its tab
+// here, with its page in src/pages/ and its route in App.tsx.
 
-export type QuizCat = "mech" | "next";
-export type Tab = "home" | "map" | QuizCat | "pressure" | "sheet";
+export interface TabInfo {
+  /** The address of the tab, such as "/sheet". */
+  path: string;
+  label: string;
+  /** The tab's one-line intro, at the top of its page. */
+  lede: string;
+}
 
-/** In the order a player learns the fight: what each mechanic does, where you stand, what comes
-    next, then all of it fast. The cheat sheet comes last because it sums up the rest. Each intro
-    is one short line: the screen itself shows what to do. */
-export const TABS: readonly { id: Tab; label: string; lede: string }[] = [
-  { id: "home", label: "Home", lede: "Practice M11S, The Tyrant (Savage), as a healer, away from the raid." },
-  { id: "mech", label: "Learn", lede: "What each mechanic does, and what you do in it. Pick an answer to see it on the picture." },
-  { id: "map", label: "Practice", lede: "Click where you stand. One mechanic at a time, no timer." },
-  { id: "next", label: "Timeline", lede: "Which mechanic comes next in the fight." },
-  { id: "pressure", label: "Pressure", lede: "The same questions, fast: timed questions, or the whole fight on the clock." },
-  { id: "sheet", label: "Cheat sheet", lede: "The rules and your timeline on one page." },
-];
+export const TABS: readonly TabInfo[] = [{ path: "/sheet", label: "Cheat sheet", lede: "The rules and your timeline on one page." }];
+
+/** The tab of an address: "/sheet" is on the Cheat sheet tab. */
+export const tabOf = (pathname: string): TabInfo | undefined => TABS.find((t) => pathname === t.path || pathname.startsWith(`${t.path}/`));
