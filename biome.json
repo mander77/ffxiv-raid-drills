@@ -11,7 +11,6 @@
       "src/App.tsx",
       "src/tabs.ts",
       "src/app.css",
-      "src/arena.css",
       "src/components/**",
       "src/pages/**",
       "src/hooks/**",
@@ -21,7 +20,8 @@
       "test/pages/**",
       "e2e/**",
       "vite.config.ts",
-      "playwright.config.ts"
+      "playwright.config.ts",
+      "test/figs.test.tsx"
     ]
   },
   "formatter": {

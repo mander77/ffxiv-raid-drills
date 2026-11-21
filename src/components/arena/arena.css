@@ -1,0 +1,329 @@
+/* The arena pictures. Every rule sits under .arena, the class of the <svg>, so the short class
+   names inside (ring, tag, zone) never touch the rest of the page. */
+.arena {
+  --arena-sand: #f8f2e6;
+  --arena-sand-line: #e7dbc2;
+  --arena-edge: #b49c6c;
+  --arena-void: #2a2e35;
+  --arena-aoe: #e9781c;
+  --arena-aoe-fill: rgb(233 120 28 / 0.3);
+  --arena-line-aoe: #4f95cf;
+  --arena-boss: #5b1a12;
+  --arena-ring: #c2362b;
+  --arena-ok: #1b7448;
+  --arena-pick: #1c6fc4;
+  --arena-later: #7048e8;
+  --arena-text: #131a2b;
+  --arena-text-2: #465166;
+  --arena-tank: #2d58b0;
+  --arena-dps: #9c3535;
+  --arena-rock: #8c8f96;
+  --arena-tornado: #5e7489;
+  --arena-wm-red: #d2413b;
+  --arena-wm-yellow: #e0b21e;
+  --arena-wm-blue: #2e76b8;
+  --arena-wm-purple: #8350be;
+  --arena-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+/* The floor: sand tiles inside a brown edge. A split arena has a void strip down the middle. */
+.arena .floor {
+  fill: var(--arena-sand);
+}
+.arena .tileline {
+  fill: none;
+  stroke: var(--arena-sand-line);
+  stroke-width: 0.35;
+}
+.arena .edge {
+  fill: none;
+  stroke: var(--arena-edge);
+  stroke-width: 0.6;
+}
+.arena .voidr {
+  fill: var(--arena-void);
+}
+.arena .compass {
+  font-family: var(--arena-mono);
+  font-size: 3px;
+  fill: var(--arena-text-2);
+  text-anchor: middle;
+}
+
+/* The waymarks A to D and 1 to 4. */
+.arena .wm circle,
+.arena .wm rect {
+  opacity: 0.88;
+}
+.arena .wm text {
+  font-weight: 700;
+  font-size: 4.2px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.arena .wm-red circle,
+.arena .wm-red rect {
+  fill: var(--arena-wm-red);
+}
+.arena .wm-yellow circle,
+.arena .wm-yellow rect {
+  fill: var(--arena-wm-yellow);
+}
+.arena .wm-blue circle,
+.arena .wm-blue rect {
+  fill: var(--arena-wm-blue);
+}
+.arena .wm-purple circle,
+.arena .wm-purple rect {
+  fill: var(--arena-wm-purple);
+}
+.arena .wm-red text,
+.arena .wm-blue text,
+.arena .wm-purple text {
+  fill: #fff;
+}
+.arena .wm-yellow text {
+  fill: var(--arena-text);
+}
+
+/* The boss: his target ring, its flank ticks, his body and the mark on the side he faces. */
+.arena .ring {
+  fill: none;
+  stroke: var(--arena-ring);
+  stroke-width: 1.1;
+}
+.arena .ringmark {
+  fill: none;
+  stroke: var(--arena-ring);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+}
+.arena .bosscore {
+  fill: var(--arena-boss);
+}
+.arena .face {
+  fill: var(--arena-ring);
+}
+/* When he turns to a new facing, the ring turns; it does not jump. */
+.arena .turn {
+  transition: transform 0.5s ease-in-out;
+}
+.arena .ghost {
+  fill: none;
+  stroke: var(--arena-boss);
+  stroke-width: 0.5;
+  stroke-dasharray: 1 1;
+}
+.arena .jump {
+  stroke: var(--arena-ring);
+  stroke-width: 0.7;
+  stroke-dasharray: 1.6 1.2;
+}
+
+/* Attacks. Each one is see-through, so where attacks overlap the colour gets darker. */
+.arena .aoe {
+  fill: var(--arena-aoe-fill);
+  stroke: var(--arena-aoe);
+  stroke-width: 0.4;
+}
+.arena .aoeband {
+  stroke: var(--arena-aoe);
+  opacity: 0.4;
+}
+.arena .lanesoft {
+  fill: rgb(233 120 28 / 0.14);
+}
+.arena .lineaoe {
+  stroke: var(--arena-line-aoe);
+  stroke-linecap: butt;
+  opacity: 0.95;
+}
+.arena .target {
+  fill: none;
+  stroke: var(--arena-aoe);
+  stroke-width: 0.7;
+}
+.arena .puddle {
+  fill: rgb(194 54 43 / 0.38);
+  stroke: var(--arena-ring);
+  stroke-width: 0.3;
+}
+/* The inner edge of the scythe's donut: a green dashed outline, with no fill. */
+.arena .safe {
+  fill: none;
+  stroke: var(--arena-ok);
+  stroke-width: 0.6;
+  stroke-dasharray: 1.4 0.9;
+}
+.arena .guide {
+  stroke: #fff;
+  stroke-width: 0.6;
+  stroke-dasharray: 1.6 1.2;
+  opacity: 0.9;
+}
+
+/* Pieces on the floor: tornadoes, rocks, towers and portals. */
+.arena .tornado path {
+  fill: none;
+  stroke: var(--arena-tornado);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+}
+.arena .tornado circle {
+  fill: rgb(94 116 137 / 0.18);
+}
+.arena .rock {
+  fill: var(--arena-rock);
+  stroke: #5f636b;
+  stroke-width: 0.4;
+}
+.arena .tower circle.out {
+  fill: rgb(255 255 255 / 0.35);
+  stroke: var(--arena-text);
+  stroke-width: 0.45;
+  stroke-dasharray: 1.2 0.9;
+}
+.arena .tower circle.in {
+  fill: var(--arena-text);
+  opacity: 0.55;
+}
+.arena .portal ellipse {
+  fill: #fff;
+  stroke: var(--arena-text-2);
+  stroke-width: 0.35;
+}
+.arena .portal text {
+  fill: var(--arena-text);
+  font-family: var(--arena-mono);
+  font-size: 3px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* The weapons: a white halo under a dark icon, so they stay sharp over the attacks. */
+.arena .scy path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.arena .scy .halo {
+  stroke: #fff;
+  stroke-width: 3;
+  opacity: 0.9;
+}
+.arena .scy .ink {
+  stroke: var(--arena-boss);
+  stroke-width: 1.4;
+}
+.arena .scy .butt {
+  fill: var(--arena-boss);
+  stroke: #fff;
+  stroke-width: 0.5;
+}
+.arena .wpn path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.arena .wpn .halo {
+  fill: #fff;
+  stroke: #fff;
+  stroke-width: 3;
+  opacity: 0.9;
+}
+.arena .wpn .ink {
+  fill: var(--arena-boss);
+  stroke: var(--arena-boss);
+  stroke-width: 1.2;
+}
+.arena .wpn .knob {
+  fill: var(--arena-boss);
+  stroke: #fff;
+  stroke-width: 0.5;
+}
+
+/* Labels: name tags, and the other players' role marks. */
+.arena .tag rect {
+  fill: var(--arena-text);
+}
+.arena .tag text {
+  fill: #fff;
+  font-family: var(--arena-mono);
+  font-size: 2.6px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  letter-spacing: 0.1px;
+}
+.arena .mk rect {
+  stroke: #fff;
+  stroke-width: 0.35;
+}
+.arena .mk text {
+  fill: #fff;
+  font-family: var(--arena-mono);
+  font-size: 2.3px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.arena .mk.T rect {
+  fill: var(--arena-tank);
+}
+.arena .mk.H rect {
+  fill: var(--arena-ok);
+}
+.arena .mk.D rect {
+  fill: var(--arena-dps);
+}
+
+/* Where to stand: the right answer is green, a preview or "Go here" is blue, the other slot's spot
+   is grey, a spot saved for later is purple, and an area that gets hit is red. */
+.arena .zone {
+  stroke-width: 0.7;
+  stroke-dasharray: 1.6 1;
+}
+.arena .zone.ok {
+  fill: rgb(27 116 72 / 0.22);
+  stroke: var(--arena-ok);
+}
+.arena .zone.pick {
+  fill: rgb(28 111 196 / 0.2);
+  stroke: var(--arena-pick);
+}
+.arena .zone.other {
+  fill: rgb(70 81 102 / 0.1);
+  stroke: var(--arena-text-2);
+}
+.arena .zone.later {
+  fill: rgb(112 72 232 / 0.16);
+  stroke: var(--arena-later);
+}
+.arena .zone.hit {
+  fill: rgb(194 54 43 / 0.22);
+  stroke: var(--arena-ring);
+  stroke-dasharray: none;
+  stroke-width: 0.3;
+}
+.arena .zlabel rect {
+  fill: var(--arena-ok);
+}
+.arena .zlabel.other rect {
+  fill: var(--arena-text-2);
+}
+.arena .zlabel.later rect {
+  fill: var(--arena-later);
+}
+.arena .zlabel.pick rect {
+  fill: var(--arena-pick);
+}
+.arena .zlabel text {
+  fill: #fff;
+  font-weight: 700;
+  font-size: 3.2px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arena .turn {
+    transition: none;
+  }
+}

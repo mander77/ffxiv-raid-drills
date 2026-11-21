@@ -89,11 +89,14 @@ index.html           the page: React draws into #root
 src/main.tsx         start-up: draws the React app (App.tsx) into #root
 src/App.tsx          the header and the routes (React Router): one page per path
 src/app.css          Tailwind and the standard shadcn/ui theme, the ability category colours
-src/arena.css        the arena pictures' SVG styles
 src/tabs.ts          the tabs: path, label and one-line intro; tabOf
 src/share.ts         sharing the address of the page
 src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser
-src/components/      React components: Header, SlotSwitch, ShareButton, TabNav, Marks, CatKey
+src/components/      React components: Header, SlotSwitch, ShareButton, TabNav, Marks, CatKey,
+                     and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
+                     StepChips, SetupText, Tally, ChipRow, HudPrompt
+src/components/arena/  the arena pictures: Arena (floor, waymarks, layers), Shape (one attack,
+                     weapon or mark), BossMark, ZoneMark, FigPicture (a Learn picture), arena.css
 src/components/ui/   shadcn/ui components, as the shadcn CLI writes them
 src/pages/           React pages, one per route: CheatSheetPage (/sheet)
 src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab
@@ -102,7 +105,6 @@ src/types.ts         drills, steps, zones, overlays, questions
 src/party.ts         party slots: roles, light parties, slot names
 src/util.ts          helpers, LS (localStorage with the "m11s." prefix), seeded random
 src/geometry.ts      arena geometry: zones, rotation, inZone
-src/arena.ts         SVG drawing: arenaSVG with layers, drawBoss, figSVG, sceneSVG
 src/data/drills.ts   Practice drills (MAPS), scenes, safe spots, stack and spread rules
 src/data/figs.ts     Learn card pictures (MECH_FIGS)
 src/data/questions.ts  Learn cards (MECH, MECH_GROUPS) and Timeline cards (NEXT_ITEMS)
@@ -227,8 +229,8 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
 - Issue #2: a reference view of every mechanic in fight order, with the site's diagrams. Two
   questions are open for the owner. Ask them before you build it.
 - Issues #18 to #22 (label "rebuild"): rebuild the site in React on the `rebuild` branch, one
-  step per issue and per branch, in order. Rebuild 1 (#18) is done, so the next one is Rebuild 2
-  (#19). Each step brings its tabs back; the old code is in git history on `main`.
+  step per issue and per branch, in order. Rebuilds 1 (#18) and 2 (#19) are done, so the next one is
+  Rebuild 3 (#20). Each step brings its tabs back; the old code is in git history on `main`.
   `docs/decisions.md` has the decisions behind the plan.
 - Issue #11: make the repository self-contained, so a clone plus one step gives every tool. Three
   questions are open for the owner.

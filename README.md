@@ -44,16 +44,15 @@ index.html               page shell
 src/main.tsx             start-up: draws the React app
 src/App.tsx              the header and the routes
 src/pages/               React pages, one per route (the Cheat sheet)
-src/components/          React components (header, slot switch, tabs)
+src/components/          React components (header, slot switch, tabs, shared pieces)
+src/components/arena/    the arena pictures, drawn as SVG by React components
 src/components/ui/       shadcn/ui components
 src/hooks/               custom React hooks
 src/stores/              state kept in the browser (Zustand)
 src/app.css              Tailwind CSS and the shadcn/ui theme
-src/arena.css            the styles of the arena pictures
 src/types.ts             shared types for drills, questions and overlays
 src/util.ts              small shared helpers
 src/geometry.ts          arena geometry
-src/arena.ts             SVG drawing of the arena
 src/data/                the fight: drills, pictures, questions, timeline, attacks
 test/                    Vitest tests
 e2e/                     Playwright browser tests
