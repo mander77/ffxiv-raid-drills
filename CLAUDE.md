@@ -28,6 +28,9 @@ tokens or account details.
   build and the browser tests on every branch push. A ruleset on `main` takes only a commit on
   which both CI jobs passed, and blocks force pushes, deletion and merge commits. Only the owner
   may push to `main` directly; anyone else needs a pull request.
+- Merged branches: GitHub deletes a pull request's branch when the pull request merges (the
+  repository setting "Automatically delete head branches"). The publish script deletes the
+  branches that reach `main` by a direct push.
 
 ## The aim of the tool
 
