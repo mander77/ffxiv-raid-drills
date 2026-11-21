@@ -127,6 +127,8 @@ make sure that each one still matches the code before you start it.
     `TimerBar` passes `aria-valuenow` too. Biome's `useSemanticElements` rule is off for
     `src/components/ui/` only (`overrides` in `biome.json`), so the CLI's files stay as it writes
     them: its Item puts `role="list"` on a div.
+    The CLI also added `next-themes`, which shadcn's toast file uses to follow a dark theme. The
+    site has none, so it does nothing here; the owner chose to keep it, so the file stays standard.
   - `.gitattributes` keeps LF line endings in every text file, on every computer. Before it, a
     Windows checkout turned files into CRLF after a branch switch, and the lint failed.
   - November 21: the owner asked that every change be checked against the official best
