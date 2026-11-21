@@ -455,8 +455,17 @@ static wins.
   Settings > Build > Build watch paths) cover `main` only: a push to `main` that changes only
   files outside the app makes no live deploy. Branch builds ignore them (tested with two
   docs-only pushes to a test branch; others report the same), so Cloudflare's preview builds are
-  off (Settings > Build > Branch control > "Enable Preview Builds"), and CI makes the previews.
-  Cloudflare drops the changed files that match an exclude path first, then builds if any file
+  off, and GitHub Actions makes the previews.
+- Cloudflare's preview builds are off through its API, not the dashboard. Unticking "Enable
+  Preview Builds" (Settings > Build > Branch control) did not stop them: each new branch got
+  its own preview build anyway (cloudflare/developer-platform#75, open). The fix is an
+  undocumented field, set by the owner with a user API token that has Workers CI edit:
+  `PATCH https://api.cloudflare.com/client/v4/accounts/<account>/builds/workers/<worker tag>`
+  with `{"previews_enabled": false}`. A new docs-only branch then got no Cloudflare build;
+  `main` still builds. To undo it, send `true`. Cloudflare may change or drop the field: if
+  branch pushes get a "Workers Builds" check again, look here first. The fallback is to
+  disconnect the repository in Cloudflare and deploy `main` from GitHub Actions too.
+- Build watch paths, how they match: Cloudflare drops the changed files that match an exclude path first, then builds if any file
   left matches an include path. Its wildcard `*` may stand only alone or at the start or end of
   a path. Include: `*`. Exclude: `docs/*`, `*.md`, `.github/*`, `.claude/*`, `skills-lock.json`,
   `test/*`, `e2e/*`, `scripts/*`, `playwright.config.ts`, `biome.json`, `mise.toml`,
