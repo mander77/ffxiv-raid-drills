@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { ModeToggle } from "./ModeToggle";
 import { PageContainer } from "./PageContainer";
 import { ShareButton } from "./ShareButton";
@@ -14,9 +15,15 @@ export function Header() {
   return (
     <header className="sticky top-0 z-10 border-b-3 border-highlight bg-header text-header-foreground">
       <PageContainer className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 pt-3">
-        <h1 className="flex items-center gap-2 font-display text-2xl tracking-wide">
-          <TitleIcon />
-          FFXIV Raid Drills
+        {/* The site name is a link to Home, as on most sites. */}
+        <h1 className="font-display text-2xl tracking-wide">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 rounded-md hover:opacity-90 focus-visible:ring-3 focus-visible:ring-highlight focus-visible:outline-none"
+          >
+            <TitleIcon />
+            FFXIV Raid Drills
+          </Link>
         </h1>
         <div className="flex items-center justify-self-end">
           <ModeToggle className="hover:bg-white/10 hover:text-header-foreground" />
