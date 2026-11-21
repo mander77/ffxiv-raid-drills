@@ -139,8 +139,10 @@ export function HomePage() {
           </ol>
         </section>
 
-        {/* About me: the text, and my character beside it. On a phone the picture goes on top. */}
-        <section className="flex flex-col-reverse gap-6 rounded-xl border bg-card p-6 shadow-sm sm:flex-row sm:items-center">
+        {/* About me: the text, and my character beside it. On a phone the picture goes on top. It
+            matches the banner: the same gradient, from the picture's side (top right), and the
+            picture in the same frame. */}
+        <section className="flex flex-col-reverse gap-6 rounded-xl border bg-linear-225 from-banner/60 to-card to-60% p-6 shadow-sm sm:flex-row sm:items-center dark:from-banner">
           <div className="min-w-0 flex-1 space-y-3">
             <h2 className="font-display text-2xl tracking-wide">About me</h2>
             {ABOUT_ME.map((p) => (
@@ -156,13 +158,15 @@ export function HomePage() {
           </div>
           {/* My character: a static file in public/, cropped wide and aimed a fifth of the way down, so
               it shows the face, the card and both arms. */}
-          <img
-            src="/nydori-banner.jpeg"
-            width={436}
-            height={800}
-            alt="My character in Final Fantasy XIV, in a green hooded robe, holding up a card"
-            className="h-50 w-full shrink-0 rounded-lg object-cover object-[50%_20%] shadow-md sm:h-60 sm:w-[42%] sm:max-w-85"
-          />
+          <div className="w-full shrink-0 rounded-lg bg-white p-1.5 shadow-md sm:w-[42%] sm:max-w-85 dark:bg-card">
+            <img
+              src="/nydori-banner.jpeg"
+              width={436}
+              height={800}
+              alt="My character in Final Fantasy XIV, in a green hooded robe, holding up a card"
+              className="block h-50 w-full rounded-md object-cover object-[50%_20%] sm:h-60"
+            />
+          </div>
         </section>
       </PageContainer>
     </main>
