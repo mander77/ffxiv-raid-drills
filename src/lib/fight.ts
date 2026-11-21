@@ -478,6 +478,14 @@ export function castsAhead(s: FightState): CastMark[] {
   });
 }
 
+/** The hits among `marks` that went off since the last frame, when the clock was at `was`: those
+    whose time came after `was` and by now. None when the clock jumped (a seek, or more than a
+    second since the last frame), so only a playing fight shows them go off. */
+export function hitsGoneOff(marks: readonly CastMark[], was: number, t: number): CastMark[] {
+  if (t <= was || t - was > 1) return [];
+  return marks.filter((m) => !m.cast && m.left <= 0 && m.left > was - t);
+}
+
 /** Where each cast sits in a list `height` pixels tall, from its top: the now line is at `nowY`,
     and CASTS_AHEAD seconds away is the bottom, so the gaps show the time between casts. Casts that
     come close are pushed down to stay `rowH` apart, so their names never overlap. */

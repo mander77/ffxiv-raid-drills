@@ -11,6 +11,7 @@ import {
   castsAhead,
   clickTarget,
   countdownOf,
+  hitsGoneOff,
   LEAD,
   newFightState,
   promptOf,
@@ -174,6 +175,20 @@ describe("the HUD", () => {
       }
       for (let k = 1; k < marks.length; k++) expect(marks[k].left).toBeGreaterThanOrEqual(marks[k - 1].left);
     }
+  });
+
+  test("a hit goes off when a playing clock passes its time; a cast, a jump or a seek back does not", () => {
+    const s = newFightState("watch", fight());
+    s.t = 50.45;
+    // Assault Evolved 1 hits at 50.4; the frame before was at 50.38.
+    expect(hitsGoneOff(castsAhead(s), 50.38, 50.45).map((m) => m.name)).toEqual(["Assault Evolved 1"]);
+    // The boss's cast, Assault Evolved, ends at 48.2: no flash.
+    s.t = 48.25;
+    expect(hitsGoneOff(castsAhead(s), 48.18, 48.25)).toEqual([]);
+    // A jump of more than a second, or back in time, shows nothing go off.
+    s.t = 50.45;
+    expect(hitsGoneOff(castsAhead(s), 45, 50.45)).toEqual([]);
+    expect(hitsGoneOff(castsAhead(s), 52, 50.45)).toEqual([]);
   });
 
   test("a cast sits by its time, and close casts are pushed apart", () => {

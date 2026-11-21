@@ -220,6 +220,10 @@ make sure that each one still matches the code before you start it.
     BossMod: the abilities it lists as "Boss->self, N s cast, single-target", matched by the
     ability id on each cactbot line (`BOSS_CAST` in `src/data/fight.ts`). A Cometite puddle's
     "drops" line is the start of its cast, so it counts as a cast too.
+  - When a hit crosses the now mark in a playing fight, the mark flashes in the hit's category
+    colour (it glows and grows for 0.6 s) and the hit's square pops (owner's idea: show that it went
+    off). A boss's cast stays quiet, and a seek or a jump shows nothing (`hitsGoneOff`). With
+    reduced motion the mark only glows. The Web Animations API runs it from the frame loop.
   - `useFitToScreen` measures again when the web fonts have loaded: they can push the arena down a
     pixel or two after the first measure, and the page then scrolled.
   - November 21: the owner asked that every change be checked against the official best

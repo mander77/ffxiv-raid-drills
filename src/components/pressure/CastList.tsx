@@ -24,7 +24,7 @@ export interface CastListProps {
     square with its name in bold; the boss's own cast, which starts a mechanic, is outlined (CastSquare).
     shadcn/ui has no timeline, so this list is its own; useCastTimeline moves it. */
 export function CastList({ className }: CastListProps) {
-  const { box, marks, itemRef } = useCastTimeline({ axis: "y", nowAt: NOW_Y, end: BOTTOM, gap: ROW_H });
+  const { box, nowMark, marks, itemRef } = useCastTimeline({ axis: "y", nowAt: NOW_Y, end: BOTTOM, gap: ROW_H });
 
   return (
     // The play bar above it shows the fight time and the speed.
@@ -32,7 +32,12 @@ export function CastList({ className }: CastListProps) {
       <div ref={box} className="relative min-h-0 flex-1 overflow-hidden rounded-lg border bg-card">
         {/* The line, the now mark at its top, and the ticks. They sit by the box's height, in CSS. */}
         <div className="absolute left-7 w-0.5 bg-border" style={{ top: NOW_Y - ABOVE_NOW, bottom: BOTTOM }} aria-hidden="true" />
-        <div className="absolute left-3.5 z-10 h-1 w-8 rounded-full bg-destructive" style={{ top: NOW_Y - 2 }} aria-hidden="true" />
+        <div
+          ref={nowMark}
+          className="absolute left-3.5 z-10 h-1 w-8 rounded-full bg-destructive"
+          style={{ top: NOW_Y - 2 }}
+          aria-hidden="true"
+        />
         {TICKS.map((sec) => (
           <div
             key={sec}

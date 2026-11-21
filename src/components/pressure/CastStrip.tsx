@@ -22,7 +22,7 @@ export interface CastStripProps {
     and its name wrapped under it; the casts slide left toward the now mark as the fight clock
     runs, and a cast that went off fades out past it. useCastTimeline moves it. */
 export function CastStrip({ className }: CastStripProps) {
-  const { box, marks, itemRef } = useCastTimeline({ axis: "x", nowAt: NOW_X, end: END, gap: ITEM_W });
+  const { box, nowMark, marks, itemRef } = useCastTimeline({ axis: "x", nowAt: NOW_X, end: END, gap: ITEM_W });
 
   return (
     <section aria-label="Casts coming up" className={className}>
@@ -30,6 +30,7 @@ export function CastStrip({ className }: CastStripProps) {
         {/* The line through the squares, the now mark across it, and the ticks under it. */}
         <div className="absolute top-5.5 h-0.5 bg-border" style={{ left: NOW_X - BEFORE_NOW, right: END }} aria-hidden="true" />
         <div
+          ref={nowMark}
           className="absolute top-2 z-10 h-8 w-1 -translate-x-1/2 rounded-full bg-destructive"
           style={{ left: NOW_X }}
           aria-hidden="true"
