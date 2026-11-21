@@ -96,11 +96,9 @@ export function FightScreen({
   /** Counts "Watch the spawns again": the arena draws anew, so its spawns play again. */
   const [replays, setReplays] = useState(0);
   const score = useProgressStore((s) => s.score);
-  /** A wide screen: the cast bar, the mechanic or the prompt, and the controls sit beside the arena
-      (the lg breakpoint). */
+  /** A wide screen (lg, 1024 px and up): the run's cast bar, prompt and bar sit beside the arena,
+      and the player has three columns. */
   const wide = useMediaQuery("(min-width: 1024px)");
-  /** An extra-wide screen: the player's mechanic panel also gets a column, left of the arena (xl). */
-  const extraWide = useMediaQuery("(min-width: 1280px)");
   /** A medium screen (md, 768 px and up): the player's mechanic fits beside the arena. */
   const medium = useMediaQuery("(min-width: 768px)");
 
@@ -230,9 +228,9 @@ export function FightScreen({
   /** The arena, with what sits against its floor: columns before and beside it, and what sits under it. */
   const arenaWith = ({ before, beside, under, className }: ArenaSides = {}) => (
     // The whole arena fits on the screen, with room for what sits under it: the player's play bar
-    // and casts below an extra-wide screen, or the run's bar below a wide one.
+    // and casts below a wide screen, or the run's bar below a wide one.
     <ArenaFrame
-      below={mode === "watch" ? (extraWide ? 0 : UNDER_ROOM) : wide ? 0 : RUN_BAR_ROOM}
+      below={wide ? 0 : mode === "watch" ? UNDER_ROOM : RUN_BAR_ROOM}
       before={before}
       beside={beside}
       under={under}
@@ -312,7 +310,7 @@ export function FightScreen({
       <ScrollArea className="min-h-0 flex-1">{mechanicPanel}</ScrollArea>
     </div>
   );
-  /** Under the arena, below an extra-wide screen: the play bar over the casts coming up, sideways. */
+  /** Under the arena, below a wide screen: the play bar over the casts coming up, sideways. */
   const playAndCasts = (
     <div className="space-y-2">
       {playBar}
@@ -327,8 +325,8 @@ export function FightScreen({
           rise toward a now mark. The run, which has no mechanic panel, has a prompt instead, under
           the cast bar. */}
       {mode === "watch" ? (
-        extraWide ? (
-          // An extra-wide screen: three columns. The cast bar and the mechanic on the left, high up
+        wide ? (
+          // A wide screen: three columns. The cast bar and the mechanic on the left, high up
           // where you can read them; the arena in the middle, as large as the screen allows; the play
           // bar over the casts coming up on the right. Both side columns sit right against the floor
           // and are as tall as it, so the three read as one; in a row, the arena grows up to its size
@@ -346,7 +344,7 @@ export function FightScreen({
             })}
           </div>
         ) : medium ? (
-          // A medium screen: the mechanic against the floor on the left; the play bar and the casts
+          // A medium screen, below lg: the mechanic against the floor on the left; the play bar and the casts
           // coming up, sideways, under the arena.
           <div className="flex justify-center">
             {arenaWith({ before: mechanic, under: playAndCasts, className: "mx-0 ml-68 min-w-0 flex-1" })}
