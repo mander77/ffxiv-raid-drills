@@ -58,8 +58,9 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background
 .brand p{margin:5px 0 0;font-family:var(--font-mono);font-size:11.5px;color:var(--ink-2);letter-spacing:.02em}
 .brand p strong{color:var(--heal);font-weight:500}
 .topact{display:contents}
-.sharetop{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:14px;font-weight:700;color:var(--heal);background:var(--card);border:1.5px solid var(--heal);border-radius:8px;padding:6px 12px;cursor:pointer}
-.sharetop:hover{background:var(--heal-soft)}
+/* Share is a tool, not part of who you are, so it stays quiet: grey text, green on hover. */
+.sharetop{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:14px;font-weight:700;color:var(--ink-2);background:none;border:1.5px solid transparent;border-radius:8px;padding:6px 10px;cursor:pointer}
+.sharetop:hover{color:var(--heal);background:var(--heal-soft)}
 .sharetop:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .shareicon{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .slot .lbl{font-size:14px;color:var(--ink-2)}
@@ -537,19 +538,32 @@ td.n .cmline{margin-top:4px;gap:6px;font-size:12px;font-weight:400}
 .slot{grid-column:2;grid-row:2;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:8px 18px;max-width:100%}
 .sharetop{grid-column:2;grid-row:1;justify-self:end}
 .slotpart{display:flex;align-items:center;gap:8px}
-.seg button.soon{color:var(--ink-3);background:var(--paper);cursor:not-allowed}
+/* Role and Group look like one control: the same type and height. The only filled green in the
+   header is your own pick. */
+.slot .seg button{min-height:32px}
+#parties button{min-width:40px}
+.seg button.soon{color:var(--ink-3);background:var(--card);cursor:not-allowed}
+/* The line under the name breaks between its items, never inside one. */
+.brand p span{white-space:nowrap}
 .seg button .abbr{display:none}
 .soontip{position:fixed;transform:translateX(-50%);z-index:7;white-space:nowrap;font-size:13px;line-height:1.3;color:#fff;background:var(--ink);border-radius:6px;padding:5px 9px;pointer-events:none;visibility:hidden}
 .soontip.on{visibility:visible}
 /* On a phone the line under the name takes the full width, and the role and the group share their
-   own row. The role names turn into their letters, so that row still fits. */
+   own row. */
 @media (max-width:640px){
   .topin{align-items:center;gap:8px 12px}
   .brand p{grid-column:1/-1;margin:0}
   .slot{grid-column:1/-1;grid-row:3;flex-wrap:nowrap;justify-content:space-between}
 }
-@media (max-width:480px){
+/* Below 900 px the role names turn into their letters, so Role and Group stay on one line. */
+@media (max-width:899px){
   .seg button .full{display:none}
   .seg button .abbr{display:inline}
-  #parties button{padding-inline:11px}
+}
+/* On the smallest phones the switch packs a little tighter, so it still fits on one row. */
+@media (max-width:400px){
+  .slot{gap:8px}
+  .slotpart{gap:6px}
+  .slot .seg button{padding-inline:9px}
+  #parties button{min-width:34px}
 }

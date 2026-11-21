@@ -1,7 +1,7 @@
 // Party slots: the light party and the role, and the short name they make (see types.ts).
 import type { LightParty, MarkRole, PartySlot, Role, Slot, SlotName } from "./types";
 
-/** Every role in the header, in party list order. `short` is the letter a phone shows, the same
+/** Every role in the header, in party list order. `short` is the letter a narrow screen shows, the same
     letter as in the slot names. `ready` is true once its drills exist. */
 // TS note: `readonly` on an array type means the code cannot push to it or change its entries,
 // like IReadOnlyList<T> in C#.

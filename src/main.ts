@@ -38,7 +38,7 @@ function scrollActiveTab(): void {
    focus them or tap them. */
 function drawSlot(): void {
   const me = partyOf(state.slot);
-  // A phone shows the short letter in place of the word, so the role and the group fit on one row.
+  // Below 900 px the short letter shows in place of the word, so the role and the group fit on one row.
   el("roles").innerHTML = ROLES.map(({role, short, ready}) => '<button type="button"' + (ready ? "" : ' class="soon" aria-disabled="true"') +
     ' data-role="' + role + '" aria-label="' + role + '" aria-pressed="' + (ready && role === me.role) + '"><span class="full">' + role + '</span><span class="abbr">' + short + "</span></button>").join("");
   // TS note: `as const` keeps [1, 2] as the tuple type readonly [1, 2], so lp is a LightParty, not any number.
