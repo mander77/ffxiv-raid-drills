@@ -1,14 +1,15 @@
 // Party slots: the light party and the role, and the short name they make (see types.ts).
 import type { LightParty, MarkRole, PartySlot, Role, Slot, SlotName } from "./types";
 
-/** Every role in the header, in party list order. `ready` is true once its drills exist. */
+/** Every role in the header, in party list order. `short` is the letter a phone shows, the same
+    letter as in the slot names. `ready` is true once its drills exist. */
 // TS note: `readonly` on an array type means the code cannot push to it or change its entries,
 // like IReadOnlyList<T> in C#.
-export const ROLES: readonly {role: Role; ready: boolean}[] = [
-  {role:"Tank", ready:false},
-  {role:"Healer", ready:true},
-  {role:"Melee", ready:false},
-  {role:"Ranged", ready:false}
+export const ROLES: readonly {role: Role; short: string; ready: boolean}[] = [
+  {role:"Tank", short:"T", ready:false},
+  {role:"Healer", short:"H", ready:true},
+  {role:"Melee", short:"M", ready:false},
+  {role:"Ranged", short:"R", ready:false}
 ];
 
 // TS note: `satisfies` checks that the value fits the type, but keeps the value's own, narrower

@@ -38,9 +38,9 @@ function scrollActiveTab(): void {
    focus them or tap them. */
 function drawSlot(): void {
   const me = partyOf(state.slot);
-  el("roles").innerHTML = ROLES.map(({role, ready}) => ready
-    ? '<button type="button" data-role="' + role + '" aria-pressed="' + (role === me.role) + '">' + role + "</button>"
-    : '<button type="button" class="soon" data-role="' + role + '" aria-pressed="false" aria-disabled="true">' + role + "</button>").join("");
+  // A phone shows the short letter in place of the word, so the role and the group fit on one row.
+  el("roles").innerHTML = ROLES.map(({role, short, ready}) => '<button type="button"' + (ready ? "" : ' class="soon" aria-disabled="true"') +
+    ' data-role="' + role + '" aria-label="' + role + '" aria-pressed="' + (ready && role === me.role) + '"><span class="full">' + role + '</span><span class="abbr">' + short + "</span></button>").join("");
   // TS note: `as const` keeps [1, 2] as the tuple type readonly [1, 2], so lp is a LightParty, not any number.
   el("parties").innerHTML = ([1, 2] as const).map(lp => '<button type="button" data-lp="' + lp + '" aria-pressed="' + (lp === me.lp) + '" title="' +
     slotName({lp, role:me.role}) + '">' + lp + "</button>").join("");
@@ -57,9 +57,9 @@ function soonTip(b: HTMLElement | null, linger = false): void {
   tip.textContent = b.dataset.role + " drills: not yet available";
   tip.classList.add("on");
   // Centre it under the button, but keep it on the screen, 8 px from each side.
-  const r = b.getBoundingClientRect(), box = (b.closest(".topact") ?? b).getBoundingClientRect(), half = tip.offsetWidth / 2 + 8;
-  const mid = Math.min(Math.max(r.left + r.width / 2, half), window.innerWidth - half);
-  tip.style.left = (mid - box.left) + "px";
+  const r = b.getBoundingClientRect(), half = tip.offsetWidth / 2 + 8;
+  tip.style.left = Math.min(Math.max(r.left + r.width / 2, half), window.innerWidth - half) + "px";
+  tip.style.top = (r.bottom + 6) + "px";
   if(linger) soonTimer = setTimeout(() => soonTip(null), SOON_MS);
 }
 
@@ -129,6 +129,8 @@ el("roles").addEventListener("pointerover", e => { if(e.pointerType === "mouse")
 el("roles").addEventListener("pointerleave", e => { if(e.pointerType === "mouse") soonTip(null); });
 el("roles").addEventListener("focusin", e => soonTip(soonOf(e)));
 el("roles").addEventListener("focusout", () => soonTip(null));
+// The tip is placed on the screen, not in the page, so it goes when the page scrolls.
+window.addEventListener("scroll", () => soonTip(null), {passive:true});
 // Share in the header shares the address of the screen you are on (see share.ts).
 el<HTMLButtonElement>("share").addEventListener("click", e => shareLink(e.currentTarget as HTMLButtonElement));
 document.addEventListener("keydown", e => {
