@@ -46,10 +46,13 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .wrap{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--card);border-bottom:1px solid var(--line)}
-/* The header: the name on the left and Share in the top right corner at every width. The role
-   and group switch sits between them on a wide screen, and under the name on a narrow one. */
-.topin{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:10px 20px;padding-block:12px 4px}
-.brand{grid-column:1;grid-row:1;min-width:0}
+/* The header: the name and the line under it on the left. On the right, Share in the top corner
+   and the role and group switch under it. When the window narrows, Group wraps under Role, still on
+   the right. Only on a phone does the switch get its own row. */
+.topin{display:grid;grid-template-columns:minmax(min-content,1fr) fit-content(60%);align-items:start;gap:6px 20px;padding-block:12px 4px}
+.brand{display:contents}
+.brand h1{grid-column:1;grid-row:1;white-space:nowrap}
+.brand p{grid-column:1;grid-row:2;min-width:0}
 .brand h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:32px;letter-spacing:.03em;text-transform:uppercase;line-height:1}
 .brand h1 span{color:var(--heal)}
 .brand p{margin:5px 0 0;font-family:var(--font-mono);font-size:11.5px;color:var(--ink-2);letter-spacing:.02em}
@@ -531,22 +534,19 @@ td.n .cmline{margin-top:4px;gap:6px;font-size:12px;font-weight:400}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 /* The slot switch: the role, then the group (the light party). A role with no drills yet is
    greyed out, and a tip under it says so. */
-.slot{grid-column:1/-1;grid-row:2;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
-.sharetop{grid-column:-2;grid-row:1}
-@media (min-width:1000px){.topin{grid-template-columns:minmax(0,1fr) auto auto}.slot{grid-column:2;grid-row:1}}
+.slot{grid-column:2;grid-row:2;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:8px 18px;max-width:100%}
+.sharetop{grid-column:2;grid-row:1;justify-self:end}
 .slotpart{display:flex;align-items:center;gap:8px}
 .seg button.soon{color:var(--ink-3);background:var(--paper);cursor:not-allowed}
 .seg button .abbr{display:none}
 .soontip{position:fixed;transform:translateX(-50%);z-index:7;white-space:nowrap;font-size:13px;line-height:1.3;color:#fff;background:var(--ink);border-radius:6px;padding:5px 9px;pointer-events:none;visibility:hidden}
 .soontip.on{visibility:visible}
-/* On a narrow screen the line under the name takes the full width, under Share, and the role and
-   the group share one row. On a phone the role names turn into their letters, so that row still fits. */
+/* On a phone the line under the name takes the full width, and the role and the group share their
+   own row. The role names turn into their letters, so that row still fits. */
 @media (max-width:640px){
   .topin{align-items:center;gap:8px 12px}
-  .brand{display:contents}
-  .brand h1{grid-column:1;grid-row:1}
-  .brand p{grid-column:1/-1;grid-row:2;margin:0}
-  .slot{grid-row:3;flex-wrap:nowrap;justify-content:space-between}
+  .brand p{grid-column:1/-1;margin:0}
+  .slot{grid-column:1/-1;grid-row:3;flex-wrap:nowrap;justify-content:space-between}
 }
 @media (max-width:480px){
   .seg button .full{display:none}
