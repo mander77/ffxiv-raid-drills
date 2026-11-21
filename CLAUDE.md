@@ -331,3 +331,7 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
 - `docs/code-review.md`: the prompt for a TypeScript code review.
 - `docs/typescript-for-csharp.md`: TypeScript features mapped to C#.
 - `README.md`: set-up for a person.
+- `.claude/skills/shadcn/`: the official shadcn/ui skill for Claude Code (from
+  https://ui.shadcn.com/docs/skills). It loads by itself when you work on shadcn/ui parts and
+  reads the project's set-up with `npx shadcn@latest info`. `skills-lock.json` pins its version.
+  To update it: `npx skills update shadcn -p -y`. Keep its files as the tool writes them.
