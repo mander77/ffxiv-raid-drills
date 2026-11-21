@@ -49,7 +49,7 @@ make sure that each one still matches the code before you start it.
   and the other tools in one step after the clone.
 - Issue #12: shared helpers, from a second code review. Do it before Phase 5 (#8).
 - Party slots (#13, done). A slot has two parts, the light party (1 or 2) and the role (Tank,
-  Healer, Melee, Ranged). Casters count as Ranged. The header shows both parts. The owner chose
+  Healer, Melee, Ranged). Casters count as Ranged. The header shows both parts. The light party control is labelled "Group", with 1 and 2, as on wtfdig. The owner chose
   to show every role now: a role with no drills yet is greyed out, and pointing at it, focusing
   it or tapping it shows "not yet available". Saved settings and links keep the short names
   (H1, H2). `ROLES` in `src/party.ts` marks which roles are ready.

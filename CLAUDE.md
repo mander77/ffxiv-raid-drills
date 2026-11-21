@@ -43,7 +43,7 @@ claim on the live site before you act on it.
 | Cheat sheet | `/sheet` | One line per mechanic, the timeline for your role, and sources. |
 
 The slot switch is in the header: the role (only Healer works today; the others show "not yet
-available") and the light party (H1 or H2). Each drill and question builds its answer for the
+available") and the group, which is the light party (1 or 2, as wtfdig names it). Each drill and question builds its answer for the
 role.
 
 ## First time on a new computer

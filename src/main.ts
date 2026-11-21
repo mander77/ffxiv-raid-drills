@@ -33,8 +33,8 @@ function scrollActiveTab(): void {
   if(l < nav.scrollLeft || r > nav.scrollLeft + nav.clientWidth) nav.scrollLeft = Math.max(0, l - 12);
 }
 
-/* The slot switch in the header has two parts: the role, and the light party in it. Only the
-   healer drills exist so far. The other roles show greyed out, and say so when you point at them,
+/* The slot switch in the header has two parts: the role, and the light party, which wtfdig calls
+   the group (1 or 2). Only the healer drills exist so far. The other roles show greyed out, and say so when you point at them,
    focus them or tap them. */
 function drawSlot(): void {
   const me = partyOf(state.slot);
@@ -42,8 +42,8 @@ function drawSlot(): void {
     ? '<button type="button" data-role="' + role + '" aria-pressed="' + (role === me.role) + '">' + role + "</button>"
     : '<button type="button" class="soon" data-role="' + role + '" aria-pressed="false" aria-disabled="true">' + role + "</button>").join("");
   // TS note: `as const` keeps [1, 2] as the tuple type readonly [1, 2], so lp is a LightParty, not any number.
-  el("parties").innerHTML = ([1, 2] as const).map(lp => '<button type="button" data-lp="' + lp + '" aria-pressed="' + (lp === me.lp) + '">' +
-    slotName({lp, role:me.role}) + "</button>").join("");
+  el("parties").innerHTML = ([1, 2] as const).map(lp => '<button type="button" data-lp="' + lp + '" aria-pressed="' + (lp === me.lp) + '" title="' +
+    slotName({lp, role:me.role}) + '">' + lp + "</button>").join("");
 }
 
 /** How long the "not yet available" tip stays after a tap. */

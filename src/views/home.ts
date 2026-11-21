@@ -50,7 +50,7 @@ export function renderHome(): void {
     '<section class="hero">' + fig +
     '<div><p class="kicker">M11S · The Tyrant (Savage) · Healers</p><h2>Practice savage mechanics without a party</h2>' +
     "<p>Learn the mechanics, practice where you stand, then do it all fast. The answers follow Hector (Toxic), Kindred No Buddies and Fixed (3CJ) Ecliptic.</p>" +
-    "<p>You are set as <b>" + state.slot + "</b>. Change it with the light party switch at the top. Your progress stays in this browser.</p></div></section>" +
+    "<p>You are set as <b>" + state.slot + "</b>. Change it with the Group switch at the top. Your progress stays in this browser.</p></div></section>" +
     '<section class="pick"><h2>Start here</h2><p class="small">Go in order: learn, practice, then pressure.</p><ol class="tabcards">' + cards + "</ol></section>" +
     '<section class="me"><div class="me-text"><p class="kicker">About me</p>' + ABOUT_ME.map(p => "<p>" + esc(p) + "</p>").join("") +
     '<p class="soon">Today: M11S healers. Coming later: ranged, melee, tanks and more fights.</p>' +
