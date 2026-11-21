@@ -79,17 +79,6 @@ export const useProgressStore = create<ProgressState>()(
       storage: createJSONStorage(() => localStorage),
       // Keep the scores; a round starts again with each visit.
       partialize: (st) => ({ scores: st.scores }),
-      // Version 1 calls a correct answer `correct`; version 0 called it `right`. Scores saved before
-      // keep their counts.
-      // TS note: `as` tells the compiler the shape of the saved data, which it cannot check itself.
-      version: 1,
-      migrate: (saved, version) => {
-        const old = saved as { scores?: Record<string, { seen: number; right?: number; correct?: number }> };
-        if (version > 0 || !old.scores) return saved as Pick<ProgressState, "scores">;
-        const scores: Record<string, Score> = {};
-        for (const [id, s] of Object.entries(old.scores)) scores[id] = { seen: s.seen, correct: s.correct ?? s.right ?? 0 };
-        return { scores };
-      },
     },
   ),
 );

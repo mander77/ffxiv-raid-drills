@@ -1,4 +1,3 @@
-// @vitest-environment happy-dom
 import { assert, beforeEach, test } from "vitest";
 import { useProgressStore } from "../../src/stores/progress";
 
@@ -36,10 +35,4 @@ test("the quick round counts an answer in its score only", () => {
   st().score("k-sword", false);
   assert.deepEqual(st().scores["k-sword"], { seen: 1, correct: 0 });
   assert.include(st().rounds.learn, { done: 0 });
-});
-
-test("scores saved under the old name `right` keep their counts", async () => {
-  localStorage.setItem("raid-drills-progress", JSON.stringify({ state: { scores: { "k-sword": { seen: 3, right: 2 } } }, version: 0 }));
-  await useProgressStore.persist.rehydrate();
-  assert.deepEqual(st().scores["k-sword"], { seen: 3, correct: 2 });
 });
