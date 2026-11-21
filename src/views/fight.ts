@@ -20,6 +20,7 @@ import { ABILITIES, CATS, catsAt } from "../data/abilities";
 import { marks, catNames } from "./tlnav";
 import { rightRoute, clickRoute, runnerAt, showOf, type Stop } from "../data/route";
 import { routeLink, showRoute } from "../router";
+import { markRole, partyOf } from "../party";
 import type { Boss, Point, Scene, Slot, StepResult } from "../types";
 
 /** run = you click, like a game; watch = the right moves play by themselves on the player. */
@@ -59,21 +60,15 @@ let speed = SPEEDS.includes(savedSpeed) ? savedSpeed : 1;
 // TS note: module-level `let` with a `| null` type. Every function that reads R first checks it,
 // for example `const r = R; if(!r) return;`. After that check TypeScript knows r is a Run.
 let R: Run | null = null;
-/* A fight asked for by a link (/pressure/K3PZ/raw=axe?t=48.2): its code, and the moment to open
-   it at. The link's picks replace the saved ones, so the same code builds the same fight. */
-let wanted: { code: string; t?: number } | null = null;
-export function openFight(code: string, picked: Choices, t?: number): void {
-  wanted = {code, t};
-  setChoices(picked);
-}
+/** A fight asked for by a link (/pressure/K3PZ/raw=axe?t=48.2): its code, its pattern picks, and
+    the moment to open it at. */
+export interface FightLink { code: string; choices: Choices; t?: number }
 /* Between mechanics the arena is empty, but it is two platforms from Flatliner until the
    Crown of Arcadia that joins them again. */
 const IDLE: Scene = {setup:"", rule:"", steps:[], overlays:[], boss:BOSS};
 const IDLE_SPLIT: Scene = {...IDLE, split:true};
 
 /* ---------- opening the full fight ---------- */
-/** True when a link asked for a fight that has not opened yet. */
-export const fightWanted = (): boolean => wanted != null;
 /** True when the full fight is on screen and was built for the other role (H1 or H2). */
 export const fightNeedsSlot = (): boolean => R != null && state.cur?.kind === "fight" && R.slot !== state.slot;
 /** Start the run: a new fight, from the pull. */
@@ -82,10 +77,11 @@ export function startFightRun(): void { startRun("run", buildFight(state.slot, u
 export function watchFight(): void { startRun("watch", buildFight(state.slot, undefined, state.choices)); }
 /* A link opens its fight on the player, paused at its moment. Another role (H1 or H2) gets the
    same fight with its own spots: the player stays at the same moment, and a run starts again. */
-export function renderFight(): void {
+export function renderFight(ask?: FightLink): void {
   stopTimer();
-  const ask = wanted, was = R;
-  wanted = null;
+  const was = R;
+  // The link's picks replace the saved ones, so the same code builds the same fight.
+  if(ask) setChoices(ask.choices);
   if(ask || !was){
     startRun("watch", buildFight(state.slot, ask?.code, state.choices), true);
     if(ask?.t) seekTo(ask.t);
@@ -623,7 +619,7 @@ function drawRunner(r: Run): void {
     // ring go on top of everything, over your own click.
     layerIn(svg, "zones")?.insertAdjacentHTML("afterbegin", '<g id="f-runzone" aria-hidden="true"></g>');
     layerIn(svg, "me")?.insertAdjacentHTML("beforeend", '<g id="f-runner" aria-hidden="true"><line class="runpath" id="f-runpath"/><circle class="runnext" id="f-runnext" r="2.6"/>' +
-      '<g id="f-runme"><circle class="runhalo" r="4.2"/>' + drawOverlay({t:"mark", x:0, y:0, l:state.slot, r:"H"}) + "</g></g>");
+      '<g id="f-runme"><circle class="runhalo" r="4.2"/>' + drawOverlay({t:"mark", x:0, y:0, l:state.slot, r:markRole(partyOf(state.slot).role)}) + "</g></g>");
     r.zoneKey = "";
   }
   const {at, target} = runnerAt(r.route, r.t), to = target?.p;

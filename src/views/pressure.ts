@@ -5,12 +5,12 @@ import { state, view, weighted, record, stopTimer } from "../core";
 import { MECH, NEXT_ITEMS } from "../data/questions";
 import { tabHead } from "./common";
 import { prepMCQ, drawMCQ } from "./quiz";
-import { fightWanted, fightNeedsSlot, renderFight, startFightRun, watchFight } from "./fight";
+import { fightNeedsSlot, renderFight, startFightRun, watchFight, type FightLink } from "./fight";
 
 /** A link to a fight opens it, and a new role (H1 or H2) keeps the fight on screen. Otherwise the
     start screen shows. */
-export function renderPressure(): void {
-  if(fightWanted() || fightNeedsSlot()) return renderFight();
+export function renderPressure(ask?: FightLink): void {
+  if(ask || fightNeedsSlot()) return renderFight(ask);
   renderPressureStart();
 }
 

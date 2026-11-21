@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, stackNear, changes, assaultScene, ultimateScene, facingNext, jumpsNext, DANCE_LINES, DANCE_PAIRS, type Run } from "../src/data/drills";
+import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, stackNear, changes, assaultScene, ultimateScene, facingNext, jumpsNext, DANCE_LINES, DANCE_PAIRS, type WeaponRun } from "../src/data/drills";
 import { angOf, inZone, zoneCenter } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, StepResult, Zone } from "../src/types";
 
@@ -60,7 +60,7 @@ test("Assault Evolved, second set: each weapon faces where he jumps from, the fi
   }
 });
 
-const RUN_BUILDERS: Record<string, (s: Slot) => Run> = {buildAssault, buildAssault2, buildUltimate};
+const RUN_BUILDERS: Record<string, (s: Slot) => WeaponRun> = {buildAssault, buildAssault2, buildUltimate};
 
 test("weapon runs: H1 stands at the scythe butt, H2 at the blade end", () => {
   for(const [name, build] of Object.entries(RUN_BUILDERS)) for(let i = 0; i < RUNS; i++) for(const s of SLOTS){

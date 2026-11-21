@@ -1,4 +1,4 @@
-// Start-up: tabs, the H1/H2 switch, keyboard keys and the first render.
+// Start-up: tabs, the role and light party switch, keyboard keys and the first render.
 // TS note: this file is the entry point. index.html loads it with <script type="module" src="/src/main.ts">.
 // The browser cannot run TypeScript, so Vite compiles it: on the fly for `npm run dev`,
 // and into dist/assets/*.js for `npm run build`.
@@ -10,13 +10,14 @@ import { LS, esc, el } from "./util";
 import { state, TABS, app, stopTimer } from "./core";
 import { parseRoute, currentRoute, showRoute, type Route } from "./router";
 import { shareLink } from "./share";
-import { renderQuiz, answer, nextQ, previews, pickOpt, lockIn, openQuestion } from "./views/quiz";
+import { renderQuiz, answer, nextQ, previews, pickOpt, lockIn } from "./views/quiz";
 import { renderPressure, startPressure } from "./views/pressure";
-import { renderMap, openPattern, nextStep, nextMap } from "./views/practice";
+import { renderMap, nextStep, nextMap } from "./views/practice";
 import { renderSheet } from "./views/sheet";
 import { renderHome } from "./views/home";
-import { togglePause, openFight, seekBy, enterKey } from "./views/fight";
+import { togglePause, seekBy, enterKey } from "./views/fight";
 import { parseChoices } from "./data/fight";
+import { ROLES, healerOf, partyOf, slotName } from "./party";
 import type { Slot } from "./types";
 
 function renderTabs(): void {
@@ -32,13 +33,39 @@ function scrollActiveTab(): void {
   if(l < nav.scrollLeft || r > nav.scrollLeft + nav.clientWidth) nav.scrollLeft = Math.max(0, l - 12);
 }
 
-function showSlot(): void {
-  document.querySelectorAll<HTMLElement>(".seg button[data-slot]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.slot === state.slot)));
+/* The slot switch in the header has two parts: the role, and the light party in it. Only the
+   healer drills exist so far. The other roles show greyed out, and say so when you point at them,
+   focus them or tap them. */
+function drawSlot(): void {
+  const me = partyOf(state.slot);
+  el("roles").innerHTML = ROLES.map(({role, ready}) => ready
+    ? '<button type="button" data-role="' + role + '" aria-pressed="' + (role === me.role) + '">' + role + "</button>"
+    : '<button type="button" class="soon" data-role="' + role + '" aria-pressed="false" aria-disabled="true">' + role + "</button>").join("");
+  // TS note: `as const` keeps [1, 2] as the tuple type readonly [1, 2], so lp is a LightParty, not any number.
+  el("parties").innerHTML = ([1, 2] as const).map(lp => '<button type="button" data-lp="' + lp + '" aria-pressed="' + (lp === me.lp) + '">' +
+    slotName({lp, role:me.role}) + "</button>").join("");
+}
+
+/** How long the "not yet available" tip stays after a tap. */
+const SOON_MS = 2000;
+let soonTimer: ReturnType<typeof setTimeout> | undefined;
+/** Show the tip under a role that has no drills yet; with no button, hide it. */
+function soonTip(b: HTMLElement | null, linger = false): void {
+  const tip = el("soontip");
+  clearTimeout(soonTimer);
+  if(!b){ tip.classList.remove("on"); tip.textContent = ""; return; }
+  tip.textContent = b.dataset.role + " drills: not yet available";
+  tip.classList.add("on");
+  // Centre it under the button, but keep it on the screen, 8 px from each side.
+  const r = b.getBoundingClientRect(), box = (b.closest(".topact") ?? b).getBoundingClientRect(), half = tip.offsetWidth / 2 + 8;
+  const mid = Math.min(Math.max(r.left + r.width / 2, half), window.innerWidth - half);
+  tip.style.left = (mid - box.left) + "px";
+  if(linger) soonTimer = setTimeout(() => soonTip(null), SOON_MS);
 }
 
 function setSlot(s: Slot): void {
   state.slot = s; LS.set("slot", s);
-  showSlot();
+  drawSlot();
   state.decks = {};
   render();
 }
@@ -47,32 +74,30 @@ function setSlot(s: Slot): void {
     move gets a history entry, so the Back button returns to the screen before. */
 function go(r: Route, push = false): void {
   if(push) showRoute(r, true);
-  // A link can open one Practice mechanic (/map/<mechanic>[/<code>]), the full fight under
-  // Pressure (/pressure/<code>[/<picks>][?t=s]) or one quiz card (/mech/<card>). A fight link with
-  // no picks had them all on Random.
-  if(r.tab === "map" && r.drill) openPattern(r.drill, r.code);
-  if(r.tab === "pressure" && r.code) openFight(r.code, parseChoices(r.picks ?? ""), r.t);
-  // TS note: `"card" in r` narrows r to the quiz member of Route, so r.tab is a QuizCat here.
-  if("card" in r && r.card) openQuestion(r.tab, r.card);
   const t = r.tab;
   stopTimer();
   // A new tab starts at the top, also when you open it from a card low on the landing screen.
   if(t !== state.tab) window.scrollTo(0, 0);
   state.tab = t; state.pressure = null;
   renderTabs();
-  render();
+  render(r);
 }
 
-function render(): void {
+/** Draw the current tab. A route from a link can also name what to open on it: one Practice
+    mechanic (/map/<mechanic>[/<code>]), the full fight under Pressure (/pressure/<code>[/<picks>][?t=s])
+    or one quiz card (/mech/<card>). A fight link with no picks had them all on Random. */
+function render(r: Route = {tab:state.tab}): void {
   stopTimer();
   // The address bar shows the tab. A screen that shows one card then puts that card's link there.
   showRoute({tab:state.tab});
-  switch(state.tab){
+  // TS note: inside each case, TypeScript knows which member of Route r is, so r.drill or r.card
+  // can be read without a check.
+  switch(r.tab){
     case "home": return renderHome();
-    case "map": return renderMap();
-    case "pressure": return renderPressure();
+    case "map": return renderMap(true, r.drill ? {id:r.drill, code:r.code} : undefined);
+    case "pressure": return renderPressure(r.code ? {code:r.code, choices:parseChoices(r.picks ?? ""), t:r.t} : undefined);
     case "sheet": return renderSheet();
-    default: return renderQuiz(state.tab);
+    default: return renderQuiz(r.tab, r.card);
   }
 }
 app.render = render;
@@ -94,7 +119,16 @@ document.addEventListener("click", e => {
   e.preventDefault();
   go(parseRoute(a.getAttribute("href") ?? "/"), true);
 });
-document.querySelectorAll<HTMLElement>(".seg button[data-slot]").forEach(b => b.addEventListener("click", () => setSlot(b.dataset.slot === "H2" ? "H2" : "H1")));
+el("parties").addEventListener("click", e => {
+  const b = (e.target as Element).closest<HTMLElement>("[data-lp]");
+  if(b) setSlot(healerOf(b.dataset.lp === "2" ? 2 : 1));
+});
+const soonOf = (e: Event): HTMLElement | null => (e.target as Element).closest<HTMLElement>(".soon");
+el("roles").addEventListener("click", e => soonTip(soonOf(e), true));
+el("roles").addEventListener("pointerover", e => { if(e.pointerType === "mouse") soonTip(soonOf(e)); });
+el("roles").addEventListener("pointerleave", e => { if(e.pointerType === "mouse") soonTip(null); });
+el("roles").addEventListener("focusin", e => soonTip(soonOf(e)));
+el("roles").addEventListener("focusout", () => soonTip(null));
 // Share in the header shares the address of the screen you are on (see share.ts).
 el<HTMLButtonElement>("share").addEventListener("click", e => shareLink(e.currentTarget as HTMLButtonElement));
 document.addEventListener("keydown", e => {
@@ -112,7 +146,7 @@ document.addEventListener("keydown", e => {
     else if(!c.answered && pv && e.key === "Enter" && c.sel >= 0 && (!onButton || onPicked)){ e.preventDefault(); lockIn(); }
     else if(c.answered && (e.key === "Enter" || e.key === " ") && !onButton){ e.preventDefault(); nextQ(); }
   } else if(c.kind === "map" && e.key === "Enter" && !onButton){
-    if(c.waiting){ e.preventDefault(); nextStep(); }
+    if(c.phase !== "ask"){ e.preventDefault(); nextStep(); }
     else if(c.results.length >= c.scene.steps.length){ e.preventDefault(); nextMap(); }
   } else if(c.kind === "fight" && e.key === "Enter" && !onButton){ if(enterKey()) e.preventDefault(); }
   else if(c.kind === "pstart" && e.key === "Enter" && !onButton){ e.preventDefault(); startPressure(); }
@@ -124,6 +158,6 @@ document.addEventListener("keydown", e => {
 window.addEventListener("popstate", () => go(currentRoute()));
 window.addEventListener("hashchange", () => go(currentRoute()));
 
-showSlot();
+drawSlot();
 go(currentRoute());
 document.fonts?.ready.then(scrollActiveTab).catch(() => { /* fonts are optional */ });

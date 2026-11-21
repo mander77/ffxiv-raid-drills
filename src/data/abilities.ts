@@ -94,7 +94,7 @@ const DANCE: HitRule = {times:{n:7, gap:0.7, name:"Dance of Domination"}};
 const KICK: HitRule = {shared:true, lines:"Heartbreak Kick"};
 
 /** The ability list, one entry per phase. The phases use this app's names. */
-export const PHASES: Array<{name: string; rows: Ability[]}> = [
+export const PHASES: readonly {name: string; rows: Ability[]}[] = [
   {name:P1, rows:rows([
     [10.6, "Crown of Arcadia", ["raid"], N.crown],
     [17.7, "Raw Steel Trophy", ["mech"], N.rawTrophy],

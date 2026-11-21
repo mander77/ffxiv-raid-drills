@@ -26,11 +26,15 @@
           <span class="sharelbl">Share</span>
         </button>
         <div class="slot">
-          <span class="lbl" id="slot-lbl">Select Role</span>
-          <div class="seg" role="group" aria-labelledby="slot-lbl">
-            <button type="button" id="slot-H1" data-slot="H1" aria-pressed="true">H1</button>
-            <button type="button" id="slot-H2" data-slot="H2" aria-pressed="false">H2</button>
+          <div class="slotpart rolepart">
+            <span class="lbl" id="role-lbl">Role</span>
+            <div class="seg small" role="group" aria-labelledby="role-lbl" id="roles"></div>
           </div>
+          <div class="slotpart">
+            <span class="lbl" id="party-lbl">Light party</span>
+            <div class="seg" role="group" aria-labelledby="party-lbl" id="parties"></div>
+          </div>
+          <span class="soontip" id="soontip" role="status"></span>
         </div>
       </div>
     </div>

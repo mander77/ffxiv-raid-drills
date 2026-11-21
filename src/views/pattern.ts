@@ -8,7 +8,7 @@ import { segRow } from "./common";
 /** The rows for these picks, in fight order. */
 export function patternRows(keys: Array<keyof Picks>): string {
   return CHOICE_ROWS.filter(r => keys.includes(r.key)).map(r => r.key === "set1" || r.key === "set2" ? orderRow(r.key, r.label)
-    : segRow("pick", "fc-" + r.key, r.label, [["random", "Random"] as [string, string]].concat(r.options), state.choices[r.key])).join("");
+    : segRow("pick", "fc-" + r.key, r.label, [["random", "Random"], ...r.options], state.choices[r.key])).join("");
 }
 
 /** True when any of these picks is not Random. */

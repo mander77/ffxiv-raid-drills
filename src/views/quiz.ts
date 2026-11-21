@@ -26,15 +26,9 @@ export function prepMCQ(item: QuizItem, cat: QuizCat | "pressure"): void {
   state.cur = {kind:"mcq", cat, item, q, opts:shuffle(q.options.map((o, k) => ({...o, k}))), answered:false, pick:-1, sel:-1, slow:false};
 }
 
-/* Any card of a quiz tab can be opened directly: from the "Go to question" list on the card, or
-   with a link such as #mech/k-sword (see router.ts). While a card shows, the address bar holds
-   its link, so you can copy it. */
-let wanted: {cat: QuizCat; id: string} | null = null;
-export function openQuestion(cat: QuizCat, id: string): void { wanted = {cat, id}; }
-
-export function renderQuiz(cat: QuizCat): void {
-  const ask = wanted?.cat === cat ? wanted.id : null;
-  wanted = null;
+/** Draw a quiz tab. `ask` is a card asked for by a link such as /mech/k-sword (see router.ts).
+    While a card shows, the address bar holds its link, so you can copy it. */
+export function renderQuiz(cat: QuizCat, ask?: string): void {
   const d = getDeck(cat);
   if(ask){ const i = d.items.findIndex(x => x.id === ask); if(i >= 0) d.i = i; }
   if(d.i >= d.items.length){ showRoute({tab:cat}); return renderRoundDone(cat, d); }

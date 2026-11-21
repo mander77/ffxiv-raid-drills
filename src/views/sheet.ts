@@ -1,5 +1,5 @@
 // The cheat sheet: the panic reset, the positions and your timeline on one page.
-import { S, esc, LS, el } from "../util";
+import { bySlot, esc, LS, el } from "../util";
 import { state, view } from "../core";
 import { TL } from "../data/timeline";
 import { tlCats } from "../data/abilities";
@@ -14,7 +14,7 @@ import type { Point, Slot } from "../types";
 
 /** A fixed sword example: the boss jumps west from the middle. The player's pocket is green. */
 function swordDiagram(s: Slot): string {
-  const P: Point = [21, 50], d: Point = [-1, 0], L = leftOf(d), mine = S(s, 1, -1);
+  const P: Point = [21, 50], d: Point = [-1, 0], L = leftOf(d), mine = bySlot(s, {H1:1, H2:-1});
   const pocket = (side: number): Point[] => swordPocket(P, d, [L[0] * side, L[1] * side]);
   const poly = (pts: Point[], cls: string): string => '<polygon class="zone ' + cls + '" points="' + pts.map(p => f1(p[0]) + "," + f1(p[1])).join(" ") + '"/>';
   const label = (side: number, txt: string): string => { const p = vadd(P, unit(vadd([-d[0], -d[1]], [L[0] * side, L[1] * side])), 29);
@@ -47,15 +47,15 @@ export function renderSheet(): void {
     // One short line per mechanic, written for your role. The detail lives on its Learn card.
     '<section><h2>Positions to remember</h2><div class="cols"><div><ul class="rules">' +
     rule("Weapon order", "The first weapon is the one he faces. Then clockwise.", "k-first-weapon") +
-    rule("Sword", "Stand in the pocket behind him, on the side he jumped from. Yours is his " + S(s, "left", "right") + ", and your light party stacks on you.", "k-sword") +
-    rule("Scythe", "Everyone stands close around him. You take the " + S(s, "handle end", "blade end") + ".", "k-scythe") +
+    rule("Sword", "Stand in the pocket behind him, on the side he jumped from. Yours is his " + bySlot(s, {H1:"left", H2:"right"}) + ", and your light party stacks on you.", "k-sword") +
+    rule("Scythe", "Everyone stands close around him. You take the " + bySlot(s, {H1:"handle end", H2:"blade end"}) + ".", "k-scythe") +
     rule("Axe", "The whole party stacks in the middle, out of the axe hit.", "k-axe") +
     rule("Ultimate Trophy Weapons", "First spawn south and a bit west: clockwise. A bit east: counterclockwise.", "k-ult-spawn") +
     rule("Void Stardust", "Start north of him. Drop each puddle just outside the last, a small step clockwise. Then stack or spread.", "k-void") +
     rule("Second weapon set", "Spot it before the puddles: the first is the one with its flat side square to him. Sword or scythe first: stack or spread toward it.", "k-assault-2") +
     rule("Comet spread", "Healers take any open spot, away from the tanks and melee and out of the last puddle.", "k-void-spread") +
     rule("Orbital Omen", "Stay against his side, where the #2 lines cross. After #1, cross through him. After #2, cross back.", "k-orbital") +
-    rule("Meteorain, your meteor", S(s, "Drop it NW, inside his hitbox.", "Drop it SW, in line with the first SW rock, farther out."), "k-meteor-drop") +
+    rule("Meteorain, your meteor", bySlot(s, {H1:"Drop it NW, inside his hitbox.", H2:"Drop it SW, in line with the first SW rock, farther out."}), "k-meteor-drop") +
     rule("Meteorain, tanks", "Their tethers are tank busters at 5:09, 5:19 and 5:29. Heal them after each one.", "k-meteor-order") +
     '</ul></div><figure class="mini">' + swordDiagram(s) +
     "<figcaption>Example: he jumps west from the middle. The pockets on the side he came from are the two stack spots. Yours is green.</figcaption></figure></div></section>" +

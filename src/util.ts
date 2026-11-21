@@ -20,10 +20,11 @@ export const LS = {
   }
 };
 
-/** Pick the H1 or the H2 version of a value. */
-// TS note: an arrow function with a generic parameter. S(s, 1, -1) gives a number,
-// and S(s, "left", "right") gives a string. Both arguments must have the same type T.
-export const S = <T>(s: Slot, h1: T, h2: T): T => s === "H1" ? h1 : h2;
+/** Pick the H1 or the H2 version of a value: bySlot(s, {H1:"left", H2:"right"}). */
+// TS note: Record<Slot, T> needs an entry for every Slot. When a new slot joins Slot, each call
+// that misses it is a type error, so no slot falls back to another slot's value by accident.
+// The compiler infers T from the entries, so bySlot(s, {H1:1, H2:-1}) gives a number.
+export const bySlot = <T>(s: Slot, v: Record<Slot, T>): T => v[s];
 
 /* Random numbers for patterns. They come from Math.random, except inside withSeed(), which
    uses a seeded generator: the same seed always gives the same numbers, so a pattern code

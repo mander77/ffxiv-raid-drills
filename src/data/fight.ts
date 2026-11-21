@@ -57,11 +57,18 @@ export const RANDOM: Choices = {raw:"random", void:"random", set1:"random", set2
 
 /** The six weapon orders, as [value, text]: "sword-axe-scythe" shows as "Sword, axe, scythe". */
 const orderText = (o: string): string => { const s = o.split("-").join(", "); return s.charAt(0).toUpperCase() + s.slice(1); };
-const ORDERS: Array<[string, string]> = ["sword-axe-scythe", "sword-scythe-axe", "axe-sword-scythe", "axe-scythe-sword", "scythe-sword-axe", "scythe-axe-sword"]
-  .map((o): [string, string] => [o, orderText(o)]);
+const ORDER_LIST: readonly WeaponOrder[] = ["sword-axe-scythe", "sword-scythe-axe", "axe-sword-scythe", "axe-scythe-sword", "scythe-sword-axe", "scythe-axe-sword"];
+const ORDERS = ORDER_LIST.map(o => [o, orderText(o)] as const);
+
+/** One row of the Settings panel: a pick, its label, and each value it can take with its text. */
+// TS note: this mapped type makes one row type per key of Picks, then `[keyof Picks]` joins them
+// into a union. So a "raw" row can only list "axe" and "scythe" as its values.
+type ChoiceRow<K extends keyof Picks = keyof Picks> = { [P in K]: {key: P; label: string; options: readonly (readonly [Picks[P], string])[]} }[K];
 
 /** The choices in the player's Settings panel, in fight order, with the text for each value. */
-export const CHOICE_ROWS: Array<{key: keyof Picks; label: string; options: Array<[string, string]>}> = [
+// TS note: `as const` keeps every key and value as its exact text, and `satisfies` checks the
+// list against ChoiceRow without widening it. A value that a pick cannot take is a type error.
+export const CHOICE_ROWS = [
   {key:"raw", label:"First Raw Steel Trophy", options:[["axe", "Axe"], ["scythe", "Scythe"]]},
   {key:"set1", label:"Weapon order at 0:48", options:ORDERS},
   {key:"void", label:"First Void Stardust ends in", options:[["stack", "Stack"], ["spread", "Spread"]]},
@@ -69,15 +76,18 @@ export const CHOICE_ROWS: Array<{key: keyof Picks; label: string; options: Array
   {key:"ult", label:"Ultimate Trophy Weapons", options:[["cw", "Clockwise"], ["ccw", "Counterclockwise"]]},
   {key:"fireball", label:"Ecliptic Fireball", options:[["two", "Two-way"], ["four", "Four-way"]]},
   {key:"wall", label:"Your Ecliptic puddles", options:[["north", "North wall"], ["south", "South wall"]]}
-];
+] as const satisfies readonly ChoiceRow[];
 
 /** Choices from saved settings or a link. Anything unknown becomes "random". */
 export function cleanChoices(x: unknown): Choices {
   const c: Choices = {...RANDOM};
-  if(x && typeof x === "object") for(const row of CHOICE_ROWS){
-    const v = (x as Record<string, unknown>)[row.key];
-    if(typeof v === "string" && row.options.some(([o]) => o === v)) (c as Record<string, string>)[row.key] = v;
-  }
+  if(!x || typeof x !== "object") return c;
+  // Keep a value only when its row lists it. The generic K ties the row's key to its values.
+  const keep = <K extends keyof Picks>(row: ChoiceRow<K>): void => {
+    const found = row.options.find(([o]) => o === Reflect.get(x, row.key));
+    if(found) c[row.key] = found[0];
+  };
+  CHOICE_ROWS.forEach(keep);
   return c;
 }
 /** For a link: "raw=axe,ult=cw". Choices left on "random" are left out. */

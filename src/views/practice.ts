@@ -20,10 +20,6 @@ function run(): MapCur {
   return c;
 }
 
-/* A mechanic asked for by a link: /map/m-assault (a new pattern) or /map/m-assault/A7K2 (that
-   pattern). */
-let wanted: { id: string; code?: string } | null = null;
-export function openPattern(id: string, code?: string): void { wanted = {id, code}; }
 
 /** The list beside the arena on a wide screen: every mechanic in fight order, under its phase. */
 function mechList(current: string): string {
@@ -63,14 +59,15 @@ function mechSteps(): string {
 function drawFeedback(): void {
   const c = state.cur, svg = document.getElementById("arena-svg");
   if(!c || c.kind !== "map" || !svg) return;
-  const n = c.results.length, showLast = Boolean(c.waiting) || n >= c.scene.steps.length;
+  const n = c.results.length, showLast = c.phase !== "ask" || n >= c.scene.steps.length;
   paintArena(svg, c.scene, c.k, c.results, showLast, undefined, i => i <= n - 2);
-  if(c.shown && !c.stop) paintHint(svg, c.scene, c.k, c.results);
+  if(c.shown && c.phase !== "wrong") paintHint(svg, c.scene, c.k, c.results);
 }
 
-export function renderMap(fresh = true): void {
-  const d = getDeck("map"), ask = wanted;
-  wanted = null;
+/** Draw Practice. `fresh` builds a new pattern. `ask` is a mechanic asked for by a link:
+    /map/m-assault (a new pattern) or /map/m-assault/A7K2 (that pattern). */
+export function renderMap(fresh = true, ask?: {id: string; code?: string}): void {
+  const d = getDeck("map");
   if(ask){ const i = d.items.findIndex(m => m.id === ask.id); if(i >= 0) d.i = i; }
   if(d.i >= d.items.length){ showRoute({tab:"map"}); return renderRoundDone("map", d); }
   const item = d.items[d.i], cur = state.cur;
@@ -82,7 +79,7 @@ export function renderMap(fresh = true): void {
       const k = item.rotate ? Math.floor(random() * 4) : 0;
       return {scene:item.build(state.slot, v), k};
     });
-    state.cur = {kind:"map", item, scene:made.scene, k:made.k, code, results:[], counted:false};
+    state.cur = {kind:"map", item, scene:made.scene, k:made.k, code, results:[], phase:"ask", counted:false, setupOpen:false, shown:false, helped:false};
   }
   const c = run();
   view.innerHTML = tabHead() + '<div class="mapwrap">' + mechList(item.id) + mechSteps() +
@@ -144,7 +141,7 @@ function drawMapPanel(): void {
       '</span><span class="hbtns"><button type="button" class="btn" id="hud-next">Next mechanic</button><button type="button" class="btn ghost" id="hud-again">Again</button></span></div></div>';
     el("hud-next").addEventListener("click", nextMap);
     el("hud-again").addEventListener("click", again);
-  } else if(c.stop){
+  } else if(c.phase === "wrong"){
     el("m-hud").innerHTML = '<div class="hud"><div class="hq done bad"><b class="hcount">&#10007;</b><span><b>Not there.</b> ' + esc(sc.steps[n - 1].a) +
       '</span><button type="button" class="btn" id="hud-step">Next step</button></div></div>';
     el("hud-step").addEventListener("click", nextStep);
@@ -152,7 +149,7 @@ function drawMapPanel(): void {
     // Show me: the right spot for this step, and its answer in place of the question. Your next
     // click still answers, and this try does not count in your score.
     el("m-hud").innerHTML = hudPrompt((n + 1) + "/" + sc.steps.length, c.shown ? sc.steps[n].a : sc.steps[n].q,
-      '<button type="button" class="btn ghost" id="hud-show" aria-pressed="' + Boolean(c.shown) + '">' + (c.shown ? "Hide" : "Show me") + "</button>");
+      '<button type="button" class="btn ghost" id="hud-show" aria-pressed="' + c.shown + '">' + (c.shown ? "Hide" : "Show me") + "</button>");
     el("hud-show").addEventListener("click", () => { c.shown = !c.shown; if(c.shown) c.helped = true; drawFeedback(); drawMapPanel(); });
   }
   document.getElementById("setup-toggle")?.addEventListener("click", () => { c.setupOpen = !c.setupOpen; drawMapPanel(); });
@@ -168,7 +165,7 @@ function onArenaClick(e: MouseEvent): void {
   const c = state.cur;
   if(!c || c.kind !== "map" || c.results.length >= c.scene.steps.length) return;
   // After a wrong spot the mechanic waits for Next step, so a click here does not answer by accident.
-  if(c.stop) return;
+  if(c.phase === "wrong") return;
   const svg = e.currentTarget as SVGSVGElement, ctm = svg.getScreenCTM();
   if(!ctm) return;
   const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
@@ -186,7 +183,7 @@ function onArenaClick(e: MouseEvent): void {
 /** Again: the same pattern from its first step, with no help on. */
 function again(): void {
   const c = run();
-  c.results = []; c.waiting = false; c.stop = false; c.setupOpen = false; c.shown = false; c.helped = false;
+  c.results = []; c.phase = "ask"; c.setupOpen = false; c.shown = false; c.helped = false;
   renderMap(false);
 }
 
@@ -195,17 +192,16 @@ function answerAt(c: MapCur, p: Point): void {
   const step = c.scene.steps[c.results.length];
   const base = step ? stepZone(step, c.results) : undefined;
   if(!step || !base) return;
-  // After a right spot the answer stays on screen until the next click, which answers the next step.
-  c.waiting = false;
   const zone = rotZone(base, c.k), ok = inZone(p, zone);
   c.results.push({p, ok, z:zone, drop:step.drop ? (ok ? p : zoneCenter(zone)) : null});
-  if(c.results.length < c.scene.steps.length){ c.waiting = true; c.stop = !ok; }
+  // After a right spot the answer stays on screen until the next click, which answers the next step.
+  c.phase = c.results.length < c.scene.steps.length ? (ok ? "right" : "wrong") : "ask";
 }
 
 /** Next step (the HUD button, or Enter): clear the last answer and ask the next step. */
 export function nextStep(): void {
   const c = run();
-  c.waiting = false; c.stop = false;
+  c.phase = "ask";
   drawFeedback(); drawMapPanel();
 }
 export function nextMap(): void { getDeck("map").i++; renderMap(true); }

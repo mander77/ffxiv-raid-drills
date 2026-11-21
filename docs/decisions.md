@@ -48,9 +48,11 @@ make sure that each one still matches the code before you start it.
 - Issue #11: make the repository self-contained. A new person should get Node 24, the GitHub CLI
   and the other tools in one step after the clone.
 - Issue #12: shared helpers, from a second code review. Do it before Phase 5 (#8).
-- Issue #13: party slot types. A slot has two parts, the light party (1 or 2) and the role (Tank,
-  Healer, Melee, Ranged). Casters count as Ranged. The role switch gets the same two parts.
-  Saved settings and links keep the short names (H1, H2).
+- Party slots (#13, done). A slot has two parts, the light party (1 or 2) and the role (Tank,
+  Healer, Melee, Ranged). Casters count as Ranged. The header shows both parts. The owner chose
+  to show every role now: a role with no drills yet is greyed out, and pointing at it, focusing
+  it or tapping it shows "not yet available". Saved settings and links keep the short names
+  (H1, H2). `ROLES` in `src/party.ts` marks which roles are ready.
 
 ## What the reviews say must not change
 

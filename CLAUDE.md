@@ -42,7 +42,8 @@ claim on the live site before you act on it.
 | Pressure, player | `/pressure/<code>[/<picks>][?t=s]` | A shared link opens "Watch the right moves" at that fight pattern and moment. |
 | Cheat sheet | `/sheet` | One line per mechanic, the timeline for your role, and sources. |
 
-The role switch (H1 or H2) is in the header. Each drill and question builds its answer for the
+The slot switch is in the header: the role (only Healer works today; the others show "not yet
+available") and the light party (H1 or H2). Each drill and question builds its answer for the
 role.
 
 ## First time on a new computer
@@ -191,17 +192,13 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
 
 - Issue #2: a reference view of every mechanic in fight order, with the site's diagrams. Two
   questions are open for the owner. Ask them before you build it.
-- Issues #3 to #10 (label "preact"): move the views to Preact, one phase per issue and per branch,
-  in order. Start with phase 0 (#3). `docs/decisions.md` has the decisions behind the plan.
+- Issues #4 to #10 (label "preact"): move the views to Preact, one phase per issue and per branch,
+  in order. Phase 0 (#3) is done, so the next one is phase 1 (#4). `docs/decisions.md` has the
+  decisions behind the plan.
 - Issue #11: make the repository self-contained, so a clone plus one step gives every tool. Three
   questions are open for the owner.
-- Issue #12: shared helpers for logic that is written several times (`polar`, `stepZone`, the
-  time helpers). Do it before Phase 5 (#8) splits `fight.ts`.
-- Issue #13: party slot types, built from two parts: the light party (1 or 2) and the role (Tank,
-  Healer, Melee, Ranged). It also passes the route into `render` and gives Practice one `phase`.
-  If it is not done before Phase 6 (#9), fold its state changes into #9.
-- Issues #3, #4, #12 and #13 hold findings from a second code review. #3 has two open questions
-  for the owner: the fight end time, and the attack sizes in `figs.ts`.
+- Issue #4 holds findings from a second code review.
+- Issue #14: a script that imports fight times and attack sizes from cactbot and BossMod.
 - The issues were written before some later changes. Before you start one, make sure that it
   still matches the code.
 

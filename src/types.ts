@@ -5,9 +5,21 @@
 // so nothing here exists at run time. Other files bring these names in with
 // `import type { ... }`, which tells the compiler that the import is for type checking only.
 
-// TS note: a union of string literals. A Slot can only be the text "H1" or "H2".
-// It works like a small C# enum, but the values are plain strings at run time.
-export type Slot = "H1" | "H2";
+/* ---------- party slots ---------- */
+// A party slot has two parts: the light party (1 or 2) and the role in it. Its short name comes
+// from both: Tank 1 and 2 are MT and OT, Healer 1 and 2 are H1 and H2, Melee M1 and M2, Ranged
+// R1 and R2. Casters count as Ranged.
+// TS note: a union of number literals. A LightParty can only be the number 1 or 2.
+export type LightParty = 1 | 2;
+// TS note: a union of string literals, like a small C# enum whose values stay plain strings.
+export type Role = "Tank" | "Healer" | "Melee" | "Ranged";
+export interface PartySlot { lp: LightParty; role: Role }
+export type SlotName = "MT" | "OT" | "H1" | "H2" | "M1" | "M2" | "R1" | "R2";
+/** The slots that have drills today: the two healers. Saved settings and links use these names. */
+// TS note: Extract keeps the members of a union that fit the second type, so Slot is "H1" | "H2".
+export type Slot = Extract<SlotName, "H1" | "H2">;
+/** The colour of a player mark: tank, healer or DPS. */
+export type MarkRole = "T" | "H" | "D";
 
 // TS note: a tuple type. A Point is an array of exactly two numbers, [x, y].
 // The closest C# match is a value tuple: (double X, double Y).
@@ -56,7 +68,7 @@ type OverlayShape =
   | ({ t: "sword"; ux?: number; uy?: number } & At)
   | ({ t: "puddle"; r: number } & At)
   | ({ t: "tag"; s: string } & At)
-  | ({ t: "mark"; l: string; r: "T" | "D" | "H" } & At)
+  | ({ t: "mark"; l: string; r: MarkRole } & At)
   | ({ t: "portal"; vert: boolean; n: number } & At)
   | ({ t: "scythe"; ux: number; uy: number; dx: number; dy: number } & At)
   | { t: "lane"; rect: RectBox; soft?: boolean }

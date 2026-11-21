@@ -1,5 +1,5 @@
 // Map drills: the arena scenes and the rules that decide each answer zone.
-import { S, shuffle, random } from "../util";
+import { bySlot, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, vadd, leftOf, angOf, inArena, zoneCenter, COMPASS, polar, dist } from "../geometry";
 import { HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
@@ -10,7 +10,7 @@ export type WeaponType = "axe" | "sword" | "scythe";
     `axis`, when set, turns the icon: it is the long side, from the handle end to the tip. */
 export interface Weapon { a: number; p: Point; type: WeaponType; where?: string; tornado?: boolean; axis?: Point }
 /** Everything a jump-run drill needs: the weapons, where the boss stands after each jump, the steps and the drawing. */
-export interface Run { W: Weapon[]; states: Boss[]; steps: Step[]; overlays: Overlay[] }
+export interface WeaponRun { W: Weapon[]; states: Boss[]; steps: Step[]; overlays: Overlay[] }
 
 const WEAPON_TYPES: WeaponType[] = ["axe", "sword", "scythe"];
 const ORDINALS = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"];
@@ -23,7 +23,7 @@ export const FIRST_PUDDLE: Point = [50, 50 - OUTSIDE];
 
 /* A jump run: the boss starts in the middle and jumps to each weapon in order.
    He faces the way he jumped, so relative north at each weapon = his travel direction. */
-export function buildRun(s: Slot, W: Weapon[]): Run {
+export function buildRun(s: Slot, W: Weapon[]): WeaponRun {
   const states: Boss[] = [{x:50, y:50, f:W[0].a}];
   const dirs: Point[] = [];   // dirs[i] = the direction of the jump into weapon i
   let prev: Point = [50, 50];
@@ -51,7 +51,7 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       overlays.push({t:"tag", spawn:i, x:out[0], y:out[1], s:w.type.toUpperCase()}, {t:w.type, spawn:i, x:w.p[0], y:w.p[1], ...turn});
     }
   });
-  const HW = SWORD_HALF, side = S(s, 1, -1), own = S(s, "left", "right");
+  const HW = SWORD_HALF, side = bySlot(s, {H1:1, H2:-1}), own = bySlot(s, {H1:"left", H2:"right"});
   const steps = W.map((w, i): Step => {
     const st = states[i + 1], P: Point = [st.x, st.y], d = dirs[i], L = leftOf(d), sv: Point = [L[0] * side, L[1] * side];
     const where = w.where || COMPASS[Math.round(w.a / 45) % 8];
@@ -63,7 +63,7 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
     } else if(w.type === "scythe"){
       // H1 at the butt end, H2 at the point end, as the scythe is drawn.
       z = {c:vadd(P, scytheAxis(w, i), -9.5 * side), r:5};
-      a = "Scythe, " + where + ": close in at the " + S(s, "butt (the handle end)", "point (the blade end)") + " of the scythe.";
+      a = "Scythe, " + where + ": close in at the " + bySlot(s, {H1:"butt (the handle end)", H2:"point (the blade end)"}) + " of the scythe.";
       // Proteans: a cone on every player, so each player takes a clock spot close around him.
       // The point and the butt (H2 and H1) are two of the eight spots, opposite each other.
       const pointAt = angOf(scytheAxis(w, i));
@@ -82,7 +82,7 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
       const CLEAR = 5;
       stand = vadd(vadd(P, d, -(HW + CLEAR)), sv, HW + CLEAR);
       z = {fn, show:[{poly}], label:vadd(P, unit(vadd([-d[0], -d[1]], sv)), (HW + CLEAR) * Math.SQRT2 + 4)};
-      a = "Sword, " + where + ": the pocket behind him on his " + own + ", on the side he jumped from, a few steps in from its inner corner. " + S(s, "G1", "G2") + " stacks on you.";
+      a = "Sword, " + where + ": the pocket behind him on his " + own + ", on the side he jumped from, a few steps in from its inner corner. " + bySlot(s, {H1:"G1", H2:"G2"}) + " stacks on you.";
       reveal = swordCross(P, d);
     }
     const leave: Overlay | null = w.tornado ? {t:"tornado", x:P[0], y:P[1]} : null;
@@ -94,7 +94,7 @@ export function buildRun(s: Slot, W: Weapon[]): Run {
 /* Assault Evolved: three weapons. The boss faces the first, then goes clockwise.
    `order` forces the weapon types in the order he takes them (the fight pattern picks); without it,
    the order is random. */
-export function buildAssault(s: Slot, order?: WeaponType[]): Run {
+export function buildAssault(s: Slot, order?: WeaponType[]): WeaponRun {
   return buildRun(s, assaultWeapons(order));
 }
 
@@ -129,7 +129,7 @@ export function faceApproach(W: Weapon[]): Weapon[] {
 /* Assault Evolved, second set (1:33, after Void Stardust). The boss does not face a weapon until
    his cast starts, but the weapons show the order (cactbot reads it from their facing): the one
    that faces the middle, square to the boss, goes first. Then clockwise. */
-export function buildAssault2(s: Slot, order?: WeaponType[]): Run {
+export function buildAssault2(s: Slot, order?: WeaponType[]): WeaponRun {
   const W = faceApproach(assaultWeapons(order));
   // The weapons used to get a random turn and flip. Those random numbers are still drawn, so a
   // fight code made before this change builds the rest of the fight the same way.
@@ -143,7 +143,7 @@ export function buildAssault2(s: Slot, order?: WeaponType[]): Run {
    The first spawns south, slightly west (then clockwise) or slightly east (then counterclockwise).
    The second spawns northwest or northeast. The rest sit on cardinals.
    The first three are all different, and so are the last three. The last four leave tornadoes. */
-export function buildUltimate(s: Slot, forceCw?: boolean): Run & {cw: boolean} {
+export function buildUltimate(s: Slot, forceCw?: boolean): WeaponRun & {cw: boolean} {
   // The coin is always tossed, so a forced direction leaves the other random calls in place.
   const toss = random() < 0.5, cw = forceCw ?? toss;
   const angles = cw ? [200, 315, 90, 180, 270, 0] : [160, 45, 270, 180, 90, 0];
@@ -173,15 +173,15 @@ export function facingNext(sc: Scene, n: number, boss: Boss): Boss {
 
 /* The scenes around a weapon run. Practice and the full fight both use them, so a
    fight can pass in a run built with the player's choices. */
-export function assaultScene(A: Run, s: Slot): Scene {
+export function assaultScene(A: WeaponRun, s: Slot): Scene {
   return {
     setup:"Three weapons are on the floor. The boss is in the middle, and the red arrow points at the weapon he faces. He jumps to that one first, then goes clockwise. For the sword, watch where he jumps from. For the scythe, read the weapon: the butt has the round knob, the point is the blade end.",
     overlays:A.overlays,
     bossAt:n => A.states[Math.min(n, A.states.length - 1)],
     steps:A.steps,
-    rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + S(s, "G1 on his left", "G2 on his right") + ", a few steps in from its inner corner. Scythe: " + S(s, "H1 at the butt", "H2 at the point") + ", close in. Axe: the whole party stacks in the middle (not like Raw Steel Trophy's axe, where the party spreads)."};
+    rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + bySlot(s, {H1:"G1 on his left", H2:"G2 on his right"}) + ", a few steps in from its inner corner. Scythe: " + bySlot(s, {H1:"H1 at the butt", H2:"H2 at the point"}) + ", close in. Axe: the whole party stacks in the middle (not like Raw Steel Trophy's axe, where the party spreads)."};
 }
-export function ultimateScene(U: Run): Scene {
+export function ultimateScene(U: WeaponRun): Scene {
   return {
     setup:"Everyone is at 1 HP after Charybdistopia. Six weapons spawn one after another, and the boss resolves them in spawn order. He starts on the first weapon before the last ones spawn: three show now, and each hit brings in the next one. Watch where the first one spawns: south and slightly west means clockwise, south and slightly east means counterclockwise.",
     spawnPlay:true, spawnAhead:3, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,
@@ -254,7 +254,7 @@ export function cometSpread(s: Slot, toward: Point | null = null, c: Point = CEN
     if(!toward){
       // H1 shows the west gap first, H2 the east one. Next to a wall a gap can be off the arena,
       // and the last puddle can cover one, so only the open gaps show.
-      const pref = S(s, [3, 1, 0, 2], [1, 3, 0, 2]).map(i => gaps[i]), shown = gaps.filter(open);
+      const pref = bySlot(s, {H1:[3, 1, 0, 2], H2:[1, 3, 0, 2]}).map(i => gaps[i]), shown = gaps.filter(open);
       const label = pref.find(open) ?? nearestTo(pref[0], open) ?? pref[0];
       return {fn:open, label, show:(shown.length ? shown : [label]).map(g => ({c:g, r:6}))};
     }
@@ -408,7 +408,7 @@ const safeSpot = (st: Step): Point | null => { const z = st.z ?? st.zf?.([]); re
    out, so the party finds the first one early. A sword or scythe first means a run, so the
    stack or spread moves toward it. An axe first keeps the usual spots. Then the scene goes on
    through all three weapons of this second set, so one drill covers the whole stretch. */
-export function voidIntoWeapons(s: Slot, spread: boolean, A: Run): Scene {
+export function voidIntoWeapons(s: Slot, spread: boolean, A: WeaponRun): Scene {
   const first = A.W[0], run = first.type !== "axe", where = COMPASS[Math.round(first.a / 45) % 8];
   const steps: Step[] = [
     // A look-ahead: you spot the first weapon now, so you know what to do when the puddles are
@@ -495,11 +495,11 @@ const NPUD = [22, 34, 46, 58, 70, 82].map((x): Overlay => ({t:"puddle", x, y:5, 
 const SPUD = [18, 30, 42, 54, 66, 78].map((x): Overlay => ({t:"puddle", x, y:95, r:ATOMIC_R}));
 // TS note: the `MapDrill[]` annotation is what checks every drill below. Each build function
 // must return a Scene, so a missing field or a misspelled one is a compile error.
-export const MAPS: MapDrill[] = [
+export const MAPS: readonly MapDrill[] = [
   {id:"m-raw-axe", order:2, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: axe",
     build:s=>({setup:"The boss pulls out an axe. The two tanks stack for a shared buster. The other six players each get an AoE, so everyone else spreads.",
       boss:BOSS, overlays:[...heldWeapon("axe"),{t:"mark",x:AXE_TANKS[0] - 3,y:AXE_TANKS[1],l:"MT",r:"T"},{t:"mark",x:AXE_TANKS[0] + 3,y:AXE_TANKS[1],l:"OT",r:"T"}],
-      steps:[{q:"Click your spread spot.", z:{c:AXE_SPREAD_SPOTS[s], r:10}, a:S(s,"South-southwest, far out.","South-southeast, far out.")}],
+      steps:[{q:"Click your spread spot.", z:{c:AXE_SPREAD_SPOTS[s], r:10}, a:bySlot(s, {H1:"South-southwest, far out.", H2:"South-southeast, far out."})}],
       rule:"Raw Steel Trophy (he holds the weapon). Axe: tanks stack, party spreads. Scythe: tanks spread, party stacks."})},
   {id:"m-raw-scythe", order:2.1, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: scythe",
     build:s=>({setup:"The boss pulls out a scythe and cleaves three times: one cone on each tank, and one cone that everyone else shares. So the tanks spread, and the rest of the party stacks.",
@@ -515,7 +515,7 @@ export const MAPS: MapDrill[] = [
   {id:"m-dance", order:8.1, rotate:true, phase:P1, time:"2:31", title:"Dance of Domination: pairs",
     build:s=>({setup:"The seven hits are over and the lines are on the floor. Find the side with no outer line. That open side is new south.",
       boss:{x:50, y:50, f:null}, overlays:DANCE_LINES.map((l): Overlay => ({t:"lineaoe", ...l})),
-      steps:[{q:"Click your pair spot.", z:{c:DANCE_PAIRS[s], r:5}, a:S(s,"Relative southwest, the outer spot, with R1.","Relative southeast, the outer spot, with R2."),
+      steps:[{q:"Click your pair spot.", z:{c:DANCE_PAIRS[s], r:5}, a:bySlot(s, {H1:"Relative southwest, the outer spot, with R1.", H2:"Relative southeast, the outer spot, with R2."}),
         // The lines explode as the pairs land (Hurricane Explosion, 10 yalms wide).
         reveal:DANCE_LINES.map((l): Overlay => ({t:"band", ...l, w:HURRICANE_W}))}],
       rule:"Open side = new south. H1 and R1 relative SW, H2 and R2 relative SE."})},
@@ -524,7 +524,7 @@ export const MAPS: MapDrill[] = [
   {id:"m-tornado", order:12, phase:P1, time:"3:46", title:"Ultimate Trophy Weapons: tornadoes",
     build:s=>({setup:"The sixth weapon resolved. Four tornadoes sit on the cardinals. Each one cones its two closest players.",
       boss:BOSS, overlays:[{t:"tornado",x:50,y:16},{t:"tornado",x:20,y:50},{t:"tornado",x:80,y:50},{t:"tornado",x:50,y:84}],
-      steps:[{q:"Click your tornado bait spot.", z:S(s,{c:[12,42],r:6.5},{c:[88,58],r:6.5}), a:S(s,"West tornado, on its north side.","East tornado, on its south side.")}],
+      steps:[{q:"Click your tornado bait spot.", z:bySlot(s, {H1:{c:[12,42],r:6.5}, H2:{c:[88,58],r:6.5}}), a:bySlot(s, {H1:"West tornado, on its north side.", H2:"East tornado, on its south side."})}],
       rule:"Supports stand on the left, DPS on the right, as you face in from your tornado."})},
   {id:"m-orbital", order:15, random:true, phase:P2, time:"4:26 and 8:24", title:"Orbital Omen",
     build:s=>{ const O = buildOrbital(); return {
@@ -541,11 +541,10 @@ export const MAPS: MapDrill[] = [
       boss:BOSS, overlays:[{t:"rock",x:57,y:43},{t:"rock",x:43,y:57}],
       steps:[{q:"Where do you drop your meteor?",
         // S<Zone>: the H1 answer is a rule zone and the H2 answer is a circle, so name the shared type.
-        z:S<Zone>(s, {fn:p => { const r = Math.hypot(p[0] - 50, p[1] - 50), a = angOf([p[0] - 50, p[1] - 50]); return r >= 3 && r <= 11.5 && a >= 285 && a <= 345; },
-                label:[43, 43], show:[{poly:[[50, 50], ...[285, 300, 315, 330, 345].map((a): Point => polar(a, 11))]}]},
-               {c:[26, 74], r:8}),
-        a:S(s, "Inside the boss hitbox, on his NW side.", "SW, in line with the first SW rock, about halfway to the edge.")}],
-      rule:S(s, "H1 drops NW, inside the boss hitbox.", "H2 drops SW in line with the first rock. That rock already sits inside the hitbox, and two rocks too close together explode, so yours goes farther out.") + " Icy Veins swaps H1 and H2 here, so do not mix guides."})},
+        z:bySlot<Zone>(s, {H1:{fn:p => { const r = Math.hypot(p[0] - 50, p[1] - 50), a = angOf([p[0] - 50, p[1] - 50]); return r >= 3 && r <= 11.5 && a >= 285 && a <= 345; },
+                label:[43, 43], show:[{poly:[[50, 50], ...[285, 300, 315, 330, 345].map((a): Point => polar(a, 11))]}]}, H2:{c:[26, 74], r:8}}),
+        a:bySlot(s, {H1:"Inside the boss hitbox, on his NW side.", H2:"SW, in line with the first SW rock, about halfway to the edge."})}],
+      rule:bySlot(s, {H1:"H1 drops NW, inside the boss hitbox.", H2:"H2 drops SW in line with the first rock. That rock already sits inside the hitbox, and two rocks too close together explode, so yours goes farther out."}) + " Icy Veins swaps H1 and H2 here, so do not mix guides."})},
   {id:"m-meteor-3", order:16.2, phase:P2, time:"5:20", title:"Meteorain: third stack",
     build:s=>({setup:"The ranged bait the third set. The rocks are NW (from H1, inside the hitbox) and two SW in a line. Each stack breaks the rock in front of it.",
       boss:BOSS, overlays:[{t:"rock",x:43,y:43},{t:"rock",x:43,y:57},{t:"rock",x:26,y:74}],
@@ -561,17 +560,17 @@ export const MAPS: MapDrill[] = [
   {id:"m-split-line", order:18, phase:P3, time:"6:02", title:"Arena Split: line up",
     build:s=>({setup:"Flatliner knocks everyone back and splits the arena into two platforms.",
       split:true, boss:BOSS, overlays:[],
-      steps:[{q:"Click where you line up.", z:S(s,{rect:[0,8,26,48]},{rect:[74,52,100,92]}), a:S(s,"West platform (G1), north end. Supports go NW.","East platform (G2), south end. Supports go SE.")}],
+      steps:[{q:"Click where you line up.", z:bySlot(s, {H1:{rect:[0,8,26,48]}, H2:{rect:[74,52,100,92]}}), a:bySlot(s, {H1:"West platform (G1), north end. Supports go NW.", H2:"East platform (G2), south end. Supports go SE."})}],
       rule:"G1 west, G2 east. Supports NW and SE, DPS SW and NE. Hector's video puts tanks and ranged north, healers and melee south, so ask your lead which one you use."})},
   {id:"m-split-tower", order:19, phase:P3, time:"6:29", title:"Arena Split: first towers",
     build:s=>({setup:"Four towers appear, two on each platform. Every player takes a tower.",
       split:true, boss:BOSS, overlays:[{t:"tower",x:11,y:23},{t:"tower",x:89,y:23},{t:"tower",x:11,y:77},{t:"tower",x:89,y:77}],
-      steps:[{q:"Which tower do you take?", z:S(s,{c:[11,23],r:TOWER_R},{c:[89,77],r:TOWER_R}), a:S(s,"The NW tower, with the MT.","The SE tower, with the OT.")}],
+      steps:[{q:"Which tower do you take?", z:bySlot(s, {H1:{c:[11,23],r:TOWER_R}, H2:{c:[89,77],r:TOWER_R}}), a:bySlot(s, {H1:"The NW tower, with the MT.", H2:"The SE tower, with the OT."})}],
       rule:"Tethered: get knocked to the other platform. Not tethered: get knocked to the same platform."})},
   {id:"m-ecl-start", order:26, phase:P4, time:"8:54", title:"Ecliptic Stampede: start",
     build:s=>({setup:"Ecliptic Stampede. The melee and tanks stack under the boss. The ranged and healers stay out to bait the markers.",
       boss:BOSS, overlays:[{t:"mark",x:25,y:25,l:"R1",r:"D"},{t:"mark",x:75,y:25,l:"R2",r:"D"}],
-      steps:[{q:"Where do you stand?", z:S(s,{c:[25,74],r:9},{c:[75,74],r:9}), a:S(s,"Southwest, outside.","Southeast, outside.")}],
+      steps:[{q:"Where do you stand?", z:bySlot(s, {H1:{c:[25,74],r:9}, H2:{c:[75,74],r:9}}), a:bySlot(s, {H1:"Southwest, outside.", H2:"Southeast, outside."})}],
       rule:"Marked? Go to the safe corner on your wall. Two marked on one side? The one closer to the proximity AoE moves."})},
   {id:"m-ecl-two", order:26.5, variants:["north","south"], follows:{variant:"wall"}, phase:P4, time:"9:31", title:"Ecliptic Stampede: Two-way Fireball",
     build:(_s, v)=>({setup:"You were marked and dropped your puddles along the " + (v ?? "north").toUpperCase() + " wall. Now the boss casts Two-way Fireball: two line stacks, east and west.",

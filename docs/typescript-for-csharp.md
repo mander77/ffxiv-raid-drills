@@ -26,9 +26,12 @@ C# keeps type information at run time. TypeScript does not. When the code runs, 
 - Null in the type, such as `f: number | null`. With `"strict": true` in `tsconfig.json`, null is not a valid number. This works like C# nullable reference types with warnings treated as errors. See `Boss` in `src/types.ts`.
 - Function types, such as `(p: Point) => boolean`. The closest C# match is `Func<Point, bool>`. See `RuleZone` in `src/types.ts`.
 - Arrow functions, such as `(v: Point): Point => ...`. They are lambdas. The part after the second colon is the return type. See `src/geometry.ts`.
-- Generics, such as `S<T>(s: Slot, h1: T, h2: T): T`. They work like C# generics, and the compiler usually infers `T` from the arguments. See `src/util.ts`.
+- Generics, such as `bySlot<T>(s: Slot, v: Record<Slot, T>): T`. They work like C# generics, and the compiler usually infers `T` from the arguments. See `src/util.ts`.
+- `Extract<U, X>`, the members of union `U` that fit `X`. `Slot = Extract<SlotName, "H1" | "H2">` is the healer part of all eight slot names. C# has no direct match. See `src/types.ts`.
 - Generic constraints, such as `T extends HTMLElement`. The closest C# match is `where T : HTMLElement`. See `el()` in `src/util.ts`.
 - `ReturnType<typeof f>`, the type a function returns. `typeof` reads the type of a value, here a function, and `ReturnType` takes its result. C# has no direct match; you would write the type out. See the Share timer in `src/share.ts`.
+- `readonly T[]`. A list the code cannot change: no push, no new entries. The closest C# match is `IReadOnlyList<T>`. See `ROLES` in `src/party.ts` and `MAPS` in `src/data/drills.ts`.
+- `satisfies`. It checks that a value fits a type, but keeps the value's own, narrower type. With `as const` it checks a fixed list and keeps every exact value. C# has no direct match. See `NAMES` in `src/party.ts` and `CHOICE_ROWS` in `src/data/fight.ts`.
 - `Record<K, V>`. An object used as a map, like `Dictionary<K, V>`. When `K` is a union, the compiler requires an entry for every member. See `QUIZ_POOLS` in `src/core.ts`.
 - Overloads. Several signatures share one implementation, and that implementation must handle every case. See `getDeck()` in `src/core.ts`.
 - `?.`, `??` and `??=`. They work as in C#. See `go()` in `src/main.ts` and `getDeck()` in `src/core.ts`.

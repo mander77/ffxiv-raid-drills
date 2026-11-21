@@ -15,11 +15,17 @@ export type Tab = "home" | "map" | QuizCat | "pressure" | "sheet";
 export interface Deck<T> { items: T[]; i: number; right: number; done: number }
 // TS note: Cur is a discriminated union on `kind`. Code checks `c.kind === "map"`
 // before it touches map-only fields such as `c.results`.
-/** One Practice mechanic on screen. `code` rebuilds its pattern; `setupOpen` unfolds the setup;
-    `stop` holds it after a wrong spot until you press Next step. `shown` is true while Show me
-    draws the right spot for the step asked; `helped` is true once Show me was used, so this try
-    does not count in your score. */
-export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; code: string; results: StepResult[]; counted: boolean; waiting?: boolean; stop?: boolean; setupOpen?: boolean; shown?: boolean; helped?: boolean }
+/** Where a Practice mechanic is between clicks:
+    - "ask": a step is asked, and the floor shows no answer for it.
+    - "right": the last spot was right. It stays on the floor, and the next click answers the next step.
+    - "wrong": the last spot was wrong. The mechanic holds until you press Next step.
+    When every step is answered, the mechanic is done, whatever the phase. */
+export type MapPhase = "ask" | "right" | "wrong";
+/** One Practice mechanic on screen. `code` rebuilds its pattern; `setupOpen` unfolds the setup.
+    `shown` is true while Show me draws the right spot for the step asked; `helped` is true once
+    Show me was used, so this try does not count in your score. `counted` is true once this try is
+    in your score. */
+export interface MapCur { kind: "map"; item: MapDrill; scene: Scene; k: number; code: string; results: StepResult[]; phase: MapPhase; counted: boolean; setupOpen: boolean; shown: boolean; helped: boolean }
 /** A multiple-choice card. `opts` are the answers in the order shown; `k` is each one's place in
     the question's own list, which the answer previews follow. `sel` is the answer picked for a
     preview but not locked in yet (-1 for none), and `pick` the one locked in. */
@@ -56,7 +62,7 @@ const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
 /** In the order a player learns the fight: what each mechanic does, where you stand, what comes
     next, then all of it fast. The cheat sheet comes last because it sums up the rest. Each intro
     is one short line: the screen itself shows what to do. */
-export const TABS: Array<{id: Tab; label: string; lede: string}> = [
+export const TABS: readonly {id: Tab; label: string; lede: string}[] = [
   {id:"home", label:"Home", lede:"Practice M11S, The Tyrant (Savage), as a healer, away from the raid."},
   {id:"mech", label:"Learn", lede:"What each mechanic does, and what you do in it. Pick an answer to see it on the picture."},
   {id:"map", label:"Practice", lede:"Click where you stand. One mechanic at a time, no timer."},
@@ -112,7 +118,7 @@ export function weighted<T extends {id: string}>(list: T[]): T[] {
   return out;
 }
 
-function makeDeck<T extends {id: string; order: number}>(src: T[]): Deck<T> {
+function makeDeck<T extends {id: string; order: number}>(src: readonly T[]): Deck<T> {
   // Every deck runs in fight order.
   const items = src.slice().sort((a, b) => a.order - b.order);
   return {items, i: 0, right: 0, done: 0};
