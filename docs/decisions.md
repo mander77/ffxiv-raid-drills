@@ -159,6 +159,10 @@ make sure that each one still matches the code before you start it.
     fight and Settings; the keys are in the play button's tooltip. Beside the arena: the cast
     bar with the casts coming up under it, the prompt, then the mechanic, which scrolls in its
     own box when long. The page does not scroll at 1280 x 800.
+  - On an extra-wide screen (xl, 1280 px and up) the player has three columns: the mechanic on the
+    left, high up where you read it; the arena and its play bar in the middle; the cast bar, the
+    casts coming up and the prompt on the right. The page container widens there (max-w-7xl), on
+    every page, so the header lines up and the arena keeps its size.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what

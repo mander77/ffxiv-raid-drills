@@ -94,6 +94,8 @@ export function FightScreen({
   const score = useProgressStore((s) => s.score);
   /** A wide screen: the cast bar, prompt and controls sit beside the arena (the lg breakpoint). */
   const wide = useMediaQuery("(min-width: 1024px)");
+  /** An extra-wide screen: the player's mechanic panel also gets a column, left of the arena (xl). */
+  const extraWide = useMediaQuery("(min-width: 1280px)");
 
   /** Draw what changed: the view when its key changed, and every part that moves. */
   function refresh(): void {
@@ -289,7 +291,36 @@ export function FightScreen({
 
   return (
     <FightFrameContext value={frames}>
-      {wide ? (
+      {extraWide && mode === "watch" ? (
+        // An extra-wide screen: three columns. The mechanic on the left, high up where you can read
+        // it; the arena and its play bar in the middle; the cast bar, the casts coming up and the
+        // prompt on the right. The side columns are as tall as the middle one, and scroll inside.
+        <div className="grid grid-cols-[minmax(0,17rem)_minmax(0,1fr)_minmax(0,20rem)] gap-x-6">
+          <div className="relative min-w-0">
+            <div className="absolute inset-0 overflow-y-auto">
+              <FightPanel
+                view={view}
+                fight={fight}
+                speed={speed}
+                timeline={false}
+                onGoTo={goToSeg}
+                onSpawns={() => setReplays((n) => n + 1)}
+              />
+            </div>
+          </div>
+          <div className="min-w-0 space-y-3">
+            {arena}
+            {playBar}
+          </div>
+          <div className="relative min-w-0">
+            <div className="absolute inset-0 overflow-y-auto">
+              <FightHud>
+                <FightUpcoming speed={speed} />
+              </FightHud>
+            </div>
+          </div>
+        </div>
+      ) : wide ? (
         // A wide screen: the arena on the left, as large as the screen allows, with the player's slim
         // play bar under it. Beside it: the cast bar, the casts coming up and the prompt, then the
         // mechanic. The side column is as tall as the arena column, and only the mechanic scrolls
