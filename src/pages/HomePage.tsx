@@ -40,6 +40,13 @@ const START: readonly StartCard[] = [
     count: `${DRILLS.length} mechanics`,
   },
   { path: "/timeline", name: "Timeline", step: "Step 3", about: "Which mechanic comes next.", count: `${TIMELINE_CARDS.length} questions` },
+  {
+    path: "/pressure",
+    name: "Pressure",
+    step: "Step 4",
+    about: "All of it fast: timed questions, or the whole fight on the clock.",
+    count: "Quick round or full fight",
+  },
   { path: "/sheet", name: "Cheat sheet", step: "Reference", about: "Everything on one page.", count: "One page" },
 ];
 

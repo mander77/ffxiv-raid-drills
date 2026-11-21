@@ -44,11 +44,11 @@ On the `rebuild` branch:
 | Learn | `/learn/<card>` | Quiz cards with arena pictures. Pick an answer to see it, then Lock in. Back, Next and one chip per mechanic. |
 | Practice | `/practice/<mechanic>/<code>` | Click where you stand, one mechanic at a time. Show me, Again, New pattern. The code names the pattern. |
 | Timeline | `/timeline/<card>` | Which mechanic comes next, with a cactbot-style list. |
+| Pressure | `/pressure`, `/pressure/<code>[/<picks>][?t=<s>]` | A quick round of 12 timed cards, or the full fight: the run (you click) and Watch the right moves (the player). The player's address names its fight, its picks and, paused, its moment. |
 | Cheat sheet | `/sheet` | One line per mechanic, the timeline for your role, sources and your progress. |
 
-Any other address opens Home. Pressure, with the full fight, comes back in the last rebuild step
-(#22). The
-live site on `main` still has them all, and git history keeps their old code (`src/views/`).
+Any other address opens Home. Every tab of the live site is back; git history keeps the old code
+(`src/views/` on `main`).
 
 The slot switch is in the header: the role (only Healer works today; the others show "not yet
 available") and the group, which is the light party (1 or 2, as wtfdig names it). Each drill and question builds its answer for the
@@ -97,6 +97,7 @@ src/tabs.ts          the tabs: path, label and one-line intro; tabOf
 src/share.ts         sharing the address of the page
 src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser
 src/stores/progress.ts  your scores (kept in the browser) and the round of Learn, Practice and Timeline
+src/stores/pressure.ts  your Pressure settings: seconds to decide, stops, pattern picks, speed
 src/components/      React components: Header, PageContainer, SlotSwitch, ShareButton, TabNav,
                      CategoryDots and CategoryKey (the ability category colours), RoundDone,
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
@@ -104,20 +105,30 @@ src/components/      React components: Header, PageContainer, SlotSwitch, ShareB
 src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, clicks), Shape (one
                      attack, weapon or mark), BossMark, ZoneArea (a zone's coloured area),
                      ArenaLabel (a name tag), ZoneLabel (a label placed over a zone), LearnPicture
-                     (a Learn picture), PracticeArena (the live arena), TurningBoss, arena.css
+                     (a Learn picture), LiveArena (the live arena), TurningBoss, arena.css
 src/components/ui/   shadcn/ui components, as the shadcn CLI writes them
 src/pages/           React pages, one per route: HomePage (/), LearnPage (/learn), PracticePage
-                     (/practice), TimelinePage (/timeline), CheatSheetPage (/sheet)
+                     (/practice), TimelinePage (/timeline), PressurePage (/pressure),
+                     CheatSheetPage (/sheet)
 src/components/practice/  Practice: DrillList (wide screens), DrillNav (phones),
                      DrillRun (one mechanic's run: clicks, Show me, the prompt and panel)
 src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep, statusAfter, bossFor
+src/components/pressure/  Pressure: PressureStart, QuickRound, FightScreen (the run and the player:
+                     frame loop, clicks, keys), FightArena, FightHud (cast bar, prompt),
+                     FightTimeline, FightPanel, FightPlayBar, FightSettings (pattern picks),
+                     RunScore and WatchDone (the end screens)
+src/lib/fight.ts     the fight clock's rules as plain functions: newFightState, tickFight, seek,
+                     answerFightStep, viewOf, promptOf, castOf, timelineOf
+src/lib/pressure.ts  the quick round's rules (weighted cards, the timer) and playerLink
 src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round), QuestionCard
-                     (answers, previews, Lock in, keys), TimelinePicture
-src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab
+                     (answers, previews, Lock in, keys, the timer of a timed card), TimerBar,
+                     TimelinePicture
+src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useFightFrame (run code on
+                     each frame of the fight clock)
 src/lib/             cn() for class names
 src/types.ts         drills, steps, zones, overlays, questions
 src/party.ts         party slots: roles, light parties, slot names
-src/util.ts          helpers, LS (localStorage with the "m11s." prefix), seeded random
+src/util.ts          helpers: bySlot, seeded random, pattern codes, shuffle, readingMs
 src/geometry.ts      arena geometry: zones, rotation, inZone
 src/data/drills.ts   Practice drills (DRILLS), scenes, safe spots, stack and spread rules
 src/data/pictures.ts Learn card pictures (LEARN_PICTURES)
@@ -256,7 +267,15 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Category**: an ability category of the timeline (raid damage, tank damage...).
   `CategoryDots` draws its coloured dots.
 - **Picture**: an arena picture with its data (`Picture`, `LEARN_PICTURES`, `LearnPicture`).
-- **Round**: the answers so far on one tab, for one slot.
+- **Round**: the answers so far on one tab, for one slot. The **quick round** is Pressure's 12
+  timed cards (`QuickRound`).
+- **Fight**: the full fight on the clock (`Fight`, `FightScreen`), in two modes (`FightMode`):
+  **the run** (`"run"`), where you click your spots and get a score, and **Watch the right moves**
+  (`"watch"`), the player. A **frame** is one step of the fight clock (`tickFight`,
+  `useFightFrame`).
+- **Pick**: one random part of the full fight, such as the first weapon order. `Picks` are the
+  parts a fight has; `Choices` are your settings, a pick or Random each (`CHOICE_ROWS`). The
+  player's address calls them picks.
 
 ## Rules for the content
 
@@ -285,8 +304,9 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
 - Issue #2: a reference view of every mechanic in fight order, with the site's diagrams. Two
   questions are open for the owner. Ask them before you build it.
 - Issues #18 to #22 (label "rebuild"): rebuild the site in React on the `rebuild` branch, one
-  step per issue and per branch, in order. Rebuilds 1 to 4 (#18 to #21) are done, so the next one is
-  Rebuild 5 (#22). Each step brings its tabs back; the old code is in git history on `main`.
+  step per issue and per branch, in order. All five are done once Rebuild 5 (#22) merges. Then
+  `rebuild` merges into `main` (see "How to publish"), after the owner says so. The old code is in
+  git history on `main`.
   `docs/decisions.md` has the decisions behind the plan.
 - Issue #11: make the repository self-contained, so a clone plus one step gives every tool. Three
   questions are open for the owner.

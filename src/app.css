@@ -64,6 +64,21 @@
   --color-cat-none: #aab2bf;
 }
 
+/* The full fight: a label over the arena (the name of a hit, your result in the run) shows for a
+   moment, then fades. As a Tailwind name: animate-flash-label. */
+@theme {
+  --animate-flash-label: flash-label 1.6s ease-out forwards;
+  @keyframes flash-label {
+    0%,
+    70% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

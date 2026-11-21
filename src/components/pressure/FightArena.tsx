@@ -1,0 +1,164 @@
+import { useRef } from "react";
+import { cn } from "@/lib/utils";
+import { busterPieces } from "../../data/attacks";
+import type { Hit } from "../../data/fight";
+import { runnerAt } from "../../data/route";
+import { useFightFrame } from "../../hooks/useFightFrame";
+import type { FightView } from "../../lib/fight";
+import { promptOf } from "../../lib/fight";
+import { markRole, partyOf } from "../../party";
+import type { Point, Slot } from "../../types";
+import { LiveArena } from "../arena/LiveArena";
+import { Shape } from "../arena/Shape";
+
+/** A hit to show over the arena: `n` counts the hits, so each one draws (and animates) anew. */
+export interface ShownHit {
+  n: number;
+  hit: Hit;
+  /** Where the boss stood, for a tank buster. */
+  at: Point;
+}
+
+export interface FightArenaProps {
+  view: FightView;
+  slot: Slot;
+  /** The run: label the last right answer "Right spot". */
+  rightLabel: boolean;
+  /** The last hit, for its flash or tank buster. */
+  hit: ShownHit | null;
+  /** A new number draws the arena anew, so a mechanic's spawns play again. */
+  replay: number;
+  onPointClick: (p: Point) => void;
+  className?: string;
+}
+
+/** The arena of the full fight: the mechanic on the clock, with the flash of each hit, the
+    countdown ring around the boss and your moving marker. */
+export function FightArena({ view: v, slot, rightLabel, hit, replay, onPointClick, className }: FightArenaProps) {
+  const g = v.si;
+  const bossAt: Point = v.boss ? [v.boss.x, v.boss.y] : [50, 50];
+  return (
+    <LiveArena
+      // A new mechanic draws a new arena, so its weapons spawn in again.
+      key={`${g >= 0 ? g : v.scene.split ? "split" : "idle"}-${replay}`}
+      scene={v.scene}
+      k={v.k}
+      results={v.results}
+      showLast={v.showAnswer}
+      hint={false}
+      boss={v.boss}
+      wentOff={(i) => v.wentOff[i] ?? false}
+      rightLabel={rightLabel}
+      target={v.target}
+      onPointClick={onPointClick}
+      className={cn("cursor-pointer", className)}
+      effects={
+        <>
+          {hit && <HitEffect key={hit.n} hit={hit.hit} at={hit.at} />}
+          <CountdownRing at={bossAt} />
+        </>
+      }
+      runner={<Runner slot={slot} />}
+    />
+  );
+}
+
+interface HitEffectProps {
+  hit: Hit;
+  at: Point;
+}
+
+/** Damage going out: a flash over the floor in the category's colour, or for a tank buster, the
+    tanks and the hit on them. Its CSS animation fades it out. */
+function HitEffect({ hit, at }: HitEffectProps) {
+  if (hit.kind === "tank")
+    return (
+      <g className="buster">
+        {busterPieces(hit.name, at).map((o, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: a buster's pieces never change order.
+          <Shape key={i} overlay={o} />
+        ))}
+      </g>
+    );
+  if (hit.kind === "aoe") return null;
+  return <rect className={cn("hitfx", hit.kind, hit.cat)} x="0" y="0" width="100" height="100" />;
+}
+
+interface CountdownRingProps {
+  /** The middle of the boss. */
+  at: Point;
+}
+
+/** The ring around the boss: it empties as your hit comes closer, and turns red at the end. */
+function CountdownRing({ at }: CountdownRingProps) {
+  const ring = useRef<SVGCircleElement>(null);
+  useFightFrame((s) => {
+    const el = ring.current;
+    if (!el) return;
+    const r = promptOf(s).ring;
+    el.style.display = r ? "" : "none";
+    if (r) {
+      el.setAttribute("stroke-dashoffset", (100 * r.empty).toFixed(1));
+      el.style.stroke = r.urgent ? "var(--arena-miss)" : "";
+    }
+  });
+  // It starts at the top, so it turns -90 degrees round its middle.
+  return (
+    <circle
+      ref={ring}
+      className="tring"
+      cx={at[0]}
+      cy={at[1]}
+      r="16"
+      pathLength={100}
+      strokeDasharray="100"
+      transform={`rotate(-90 ${at[0]} ${at[1]})`}
+      style={{ display: "none" }}
+    />
+  );
+}
+
+interface RunnerProps {
+  slot: Slot;
+}
+
+/** Your marker: it runs the right spots on the player, and to your clicks in the run. It waits on
+    each spot until the hit lands, then runs to the next one. While it has to get there, a dotted
+    line goes to the spot, and a ring marks it. */
+function Runner({ slot }: RunnerProps) {
+  const me = useRef<SVGGElement>(null);
+  const path = useRef<SVGLineElement>(null);
+  const next = useRef<SVGCircleElement>(null);
+  useFightFrame((s) => {
+    const { at, target } = runnerAt(s.route, s.t);
+    const to = target?.p;
+    me.current?.setAttribute("transform", `translate(${at[0].toFixed(2)} ${at[1].toFixed(2)})`);
+    const away = to != null && Math.hypot(to[0] - at[0], to[1] - at[1]) > 0.5;
+    if (path.current) {
+      path.current.style.display = away ? "" : "none";
+      if (to) {
+        path.current.setAttribute("x1", at[0].toFixed(2));
+        path.current.setAttribute("y1", at[1].toFixed(2));
+        path.current.setAttribute("x2", to[0].toFixed(2));
+        path.current.setAttribute("y2", to[1].toFixed(2));
+      }
+    }
+    if (next.current) {
+      next.current.style.display = to ? "" : "none";
+      if (to) {
+        next.current.setAttribute("cx", to[0].toFixed(2));
+        next.current.setAttribute("cy", to[1].toFixed(2));
+      }
+    }
+  });
+  return (
+    <g className="runner">
+      <line ref={path} className="runpath" style={{ display: "none" }} />
+      <circle ref={next} className="runnext" r="2.6" style={{ display: "none" }} />
+      <g ref={me}>
+        <circle className="runhalo" r="4.2" />
+        <Shape overlay={{ t: "mark", x: 0, y: 0, l: slot, r: markRole(partyOf(slot).role) }} />
+      </g>
+    </g>
+  );
+}

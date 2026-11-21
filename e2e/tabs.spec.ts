@@ -1,5 +1,5 @@
 // The site in every browser: each tab opens, a Learn card and a Timeline card can be answered,
-// and the Group switch changes the slot.
+// the Group switch changes the slot, and Pressure runs a quick round and a shared link to the player.
 import { expect, test } from "@playwright/test";
 import { TABS } from "../src/tabs";
 
@@ -21,7 +21,7 @@ test("each tab opens from the header", async ({ page }) => {
 });
 
 test("an address with no page opens Home", async ({ page }) => {
-  await page.goto("/pressure");
+  await page.goto("/mech/k-sword");
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("heading", { name: "Start here" })).toBeVisible();
 });
@@ -88,4 +88,25 @@ test("Practice: a right click and a wrong click on the arena", async ({ page }) 
   await page.getByRole("button", { name: "Again" }).first().click();
   await clickAt([-3, -5]);
   await expect(page.getByRole("status")).toHaveText("Not there");
+});
+
+test("Pressure: a quick round asks timed cards", async ({ page }) => {
+  await page.goto("/pressure");
+  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await expect(page.getByText("Card 1 of 12")).toBeVisible();
+  await expect(page.getByText("Read", { exact: true })).toBeVisible();
+  await page.getByRole("group", { name: "Answers" }).getByRole("button").first().click();
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByText("Card 2 of 12")).toBeVisible();
+});
+
+test("Pressure: a shared link opens the player paused at its moment, and Space plays it", async ({ page }) => {
+  await page.goto("/pressure/K7Q2?t=46");
+  await expect(page.getByRole("heading", { name: "Assault Evolved" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
+  await expect(page.getByRole("slider", { name: "Fight time" })).toHaveValue("46");
+  await page.keyboard.press("Space");
+  await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+  // Playing, the address no longer holds a moment.
+  await expect(page).toHaveURL(/\/pressure\/K7Q2$/);
 });

@@ -93,6 +93,16 @@ make sure that each one still matches the code before you start it.
     status; `look` is a colour, so a look-ahead step is `Step.lookAhead`; the ability categories
     are spelled out (`Category`, `CategoryDots`); `f1` (which rounds to 2 decimals) is `round2`.
     Only names changed, never a value, in `src/data/` too, with the owner's OK.
+  - Rebuild 5 (#22): Pressure is back: the quick round, the run and Watch the right moves, with
+    shared player links (`/pressure/<code>[/<picks>][?t=<s>]`). The fight clock's rules (the skip
+    to 3 seconds before a mechanic, when a step can be answered, the result hold, the 3-2-1, the
+    look-ahead answer) moved from the old screen code into plain functions in `src/lib/fight.ts`,
+    with tests; the numbers are the same. The clock runs outside React, in a ref; one frame loop
+    moves it, and the parts that change every frame (cast bar, timeline, your marker, the ring)
+    update through refs (`useFightFrame`), so React draws the arena only when what it shows
+    changes. New picks or another slot build the same fight again at the same moment. The quick
+    round keeps its own counts and adds each answer to your scores, as before. `PracticeArena` is
+    `LiveArena`, since the fight uses it too. The unused `LS`, `esc` and `el` helpers are gone.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what

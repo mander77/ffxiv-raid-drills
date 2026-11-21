@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { answerStep, type Pattern, type StepStatus, statusAfter } from "../../lib/practice";
 import { cn } from "../../lib/utils";
 import type { Drill, Point, StepResult } from "../../types";
-import { PracticeArena } from "../arena/PracticeArena";
+import { LiveArena } from "../arena/LiveArena";
 import { HudPrompt } from "../HudPrompt";
 import { LastAnswer } from "../LastAnswer";
 import { RuleBox } from "../RuleBox";
@@ -137,7 +137,7 @@ export function DrillRun({
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="space-y-3">
         {hud}
-        <PracticeArena
+        <LiveArena
           scene={sc}
           k={k}
           results={results}

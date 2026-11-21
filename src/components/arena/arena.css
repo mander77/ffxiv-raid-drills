@@ -394,7 +394,71 @@
     font-weight: 500;
   }
 
+  /* The full fight. Damage going out: a flash over the floor in the category's colour, and for a
+     tank buster the tanks and the hit on them, which then fade. The flashes stay under three a
+     second: Dance of Domination, the fastest, hits every 0.7 seconds. */
+  .arena .hitfx {
+    fill: none;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .arena .hitfx.raid {
+    fill: rgb(210 54 43 / 0.5);
+    animation: arena-flash 0.7s ease-out forwards;
+  }
+  .arena .hitfx.shared {
+    animation: arena-flash 0.6s ease-out forwards;
+  }
+  .arena .hitfx.shared.target {
+    fill: rgb(28 126 214 / 0.35);
+  }
+  .arena .hitfx.shared.spot {
+    fill: rgb(194 154 0 / 0.4);
+  }
+  .arena .hitfx.enrage {
+    fill: rgb(110 14 10 / 0.75);
+    animation: arena-flash 1.6s ease-out forwards;
+  }
+  .arena .buster {
+    pointer-events: none;
+    animation: arena-buster 1.5s ease-in forwards;
+  }
+  /* The countdown ring around the boss: it empties as your hit comes closer. */
+  .arena .tring {
+    fill: none;
+    stroke: var(--arena-ok);
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    pointer-events: none;
+  }
+  /* Your moving marker on a white halo, and its target in blue: a dotted line to it and a ring on
+     the exact spot. */
+  .arena .runner {
+    pointer-events: none;
+  }
+  .arena .runhalo {
+    fill: #fff;
+    opacity: 0.75;
+  }
+  .arena .runpath {
+    stroke: var(--arena-pick);
+    stroke-width: 0.7;
+    stroke-dasharray: 1.4 1.1;
+    stroke-linecap: round;
+  }
+  .arena .runnext {
+    fill: rgb(255 255 255 / 0.4);
+    stroke: var(--arena-pick);
+    stroke-width: 0.7;
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .arena .hitfx {
+      display: none;
+    }
+    .arena .buster {
+      animation: none;
+    }
     .arena .turn {
       transition: none;
     }
@@ -411,6 +475,23 @@
   }
 }
 
+@keyframes arena-flash {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes arena-buster {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 @keyframes arena-drop-fade {
   to {
     opacity: 0;

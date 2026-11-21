@@ -30,3 +30,9 @@ test("a finished round opens again on a new card, and reset erases everything", 
   assert.deepEqual(st().scores, {});
   assert.include(st().rounds.learn, { done: 0, current: null, finished: false });
 });
+
+test("the quick round counts an answer in its score only", () => {
+  st().score("k-sword", false);
+  assert.deepEqual(st().scores["k-sword"], { seen: 1, right: 0 });
+  assert.include(st().rounds.learn, { done: 0 });
+});
