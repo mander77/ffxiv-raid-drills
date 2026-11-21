@@ -1,12 +1,13 @@
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useFightFrame } from "../../hooks/useFightFrame";
-import { CASTS_AHEAD, CASTS_SOON, type CastMark, castPositions, castsAhead } from "../../lib/fight";
+import { CASTS_AHEAD, CASTS_PAST, CASTS_SOON, type CastMark, castPositions, castsAhead } from "../../lib/fight";
 import { CATEGORY_BG } from "../CategoryDots";
 
-/** Where the now mark sits from the top, the room under the line at the bottom, and how far apart
-    two casts stay at least, in pixels. The app's choice. */
+/** Where the now mark sits from the top, how far the line goes on above it, the room under the
+    line at the bottom, and how far apart two casts stay at least, in pixels. The app's choice. */
 const NOW_Y = 40;
+const ABOVE_NOW = 24;
 const BOTTOM = 12;
 const ROW_H = 36;
 /** The seconds marked on the line. The app's choice. */
@@ -39,6 +40,8 @@ export function CastList({ className }: CastListProps) {
       if (!row) return;
       row.style.transform = `translateY(${ys[k].toFixed(1)}px) translateY(-50%)`;
       row.dataset.when = m.left < 0 ? "past" : m.left <= CASTS_SOON ? "soon" : "later";
+      // A cast that went off fades out as it rises past the now mark.
+      row.style.opacity = m.left < 0 ? String(Math.max(0, 1 + m.left / CASTS_PAST) * 0.6) : "";
       const secs = row.querySelector<HTMLElement>("[data-secs]");
       const text = m.left > 0 ? String(Math.ceil(m.left)) : "";
       if (secs && secs.textContent !== text) secs.textContent = text;
@@ -50,7 +53,7 @@ export function CastList({ className }: CastListProps) {
     <section aria-label="Casts coming up" className={cn("flex min-h-0 flex-col", className)}>
       <div ref={box} className="relative min-h-0 flex-1 overflow-hidden rounded-lg border bg-card">
         {/* The line, the now mark at its top, and the ticks. They sit by the box's height, in CSS. */}
-        <div className="absolute left-7 w-0.5 bg-border" style={{ top: NOW_Y, bottom: BOTTOM }} aria-hidden="true" />
+        <div className="absolute left-7 w-0.5 bg-border" style={{ top: NOW_Y - ABOVE_NOW, bottom: BOTTOM }} aria-hidden="true" />
         <div className="absolute left-3.5 z-10 h-1 w-8 rounded-full bg-destructive" style={{ top: NOW_Y - 2 }} aria-hidden="true" />
         {TICKS.map((sec) => (
           <div
@@ -71,7 +74,7 @@ export function CastList({ className }: CastListProps) {
                 if (el) rows.current.set(m.i, el);
                 else rows.current.delete(m.i);
               }}
-              className="group absolute top-0 right-2 left-3.5 flex items-center gap-2.5 text-sm data-[when=past]:opacity-40"
+              className="group absolute top-0 right-2 left-3.5 flex items-center gap-2.5 text-sm"
             >
               {/* The square on the line, in the category's colour, with the seconds inside. */}
               <span

@@ -185,6 +185,12 @@ make sure that each one still matches the code before you start it.
     clock and the list that runs on it belong together. The arena stands alone in its column, so
     it gets the room the bar took. The list lost its "Coming up" line (the play bar shows the time
     and the speed), and its now mark sits a little lower, 40 px from the top.
+  - The player's side column touches the arena (owner's choice): on a wide screen the play bar
+    and the casts coming up (and, below xl, the mechanic too) sit right against the floor's right
+    edge, from its top to its bottom, so they read as part of the arena. `ArenaFrame` places this
+    `beside` column by the floor's edges in the picture (`ARENA_VIEW`), as shares of the frame, so
+    it fits at any size; the frame keeps room on its right for it. The cast line runs on a little
+    above the now mark, and a cast that went off fades out as it rises past the mark.
   - `useFitToScreen` measures again when the web fonts have loaded: they can push the arena down a
     pixel or two after the first measure, and the page then scrolled.
   - November 21: the owner asked that every change be checked against the official best

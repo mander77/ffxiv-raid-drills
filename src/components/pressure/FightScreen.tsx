@@ -224,10 +224,11 @@ export function FightScreen({
     return () => window.removeEventListener("keydown", listener);
   }, []);
 
-  const arena = (
+  /** The arena. On a wide screen it can carry a column right against the floor's edge. */
+  const arenaWith = (beside?: ReactNode, className?: string) => (
     // The whole arena fits on the screen. On a narrower screen it keeps room for what sits under
     // it: the player's play bar, or the run's bar.
-    <ArenaFrame below={wide ? 0 : mode === "watch" ? PLAY_BAR_ROOM : RUN_BAR_ROOM}>
+    <ArenaFrame below={wide ? 0 : mode === "watch" ? PLAY_BAR_ROOM : RUN_BAR_ROOM} beside={beside} className={className}>
       <FightArena
         view={view}
         slot={slot}
@@ -266,6 +267,7 @@ export function FightScreen({
       )}
     </ArenaFrame>
   );
+  const arena = arenaWith();
 
   const runBar = (
     <div className="flex flex-wrap items-center gap-3">
@@ -302,9 +304,10 @@ export function FightScreen({
       {mode === "watch" && extraWide ? (
         // An extra-wide screen: three columns. The cast bar and the mechanic on the left, high up
         // where you can read them; the arena alone in the middle, as large as the screen allows;
-        // the play bar over the casts coming up on the right. The side columns are as tall as the
-        // middle one; the mechanic scrolls inside when it is long, and the cast list fills the rest.
-        <div className="grid grid-cols-[minmax(0,17rem)_minmax(0,1fr)_minmax(0,20rem)] gap-x-6">
+        // the play bar over the casts coming up right against it on the right, so they read as one.
+        // The side columns are as tall as the arena; the mechanic scrolls inside when it is long, and
+        // the cast list fills the rest.
+        <div className="grid grid-cols-[minmax(0,17rem)_minmax(0,1fr)] gap-x-6">
           <div className="relative min-w-0">
             <div className="absolute inset-0 flex flex-col gap-3">
               <CastBar />
@@ -313,39 +316,48 @@ export function FightScreen({
               </ScrollArea>
             </div>
           </div>
-          <div className="min-w-0">{arena}</div>
-          <div className="relative min-w-0">
-            <div className="absolute inset-0 flex flex-col gap-3">
-              {playBar}
-              <CastList className="flex-1" />
-            </div>
+          <div className="flex min-w-0 justify-center">
+            {arenaWith(
+              <div className="flex w-80 flex-col gap-2">
+                {playBar}
+                <CastList className="flex-1" />
+              </div>,
+              // In a row, the arena grows up to its size limit (mx-0: no margins to centre it), and
+              // keeps room on its right for the column.
+              "mx-0 mr-80 min-w-0 flex-1",
+            )}
           </div>
         </div>
       ) : wide ? (
-        // A wide screen: the arena on the left, as large as the screen allows. Beside it: the cast
-        // bar over the mechanic, then the play bar over the casts coming up (the run: the cast bar,
-        // the prompt and its bar). The side column is as tall as the arena column, so the page
-        // never scrolls.
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,22rem)] gap-x-6">
-          <div className="min-w-0">{arena}</div>
-          <div className="relative min-w-0">
-            {mode === "run" ? (
-              <div className="space-y-4">
-                <FightHud />
-                {runBar}
-              </div>
-            ) : (
-              <div className="absolute inset-0 flex flex-col gap-3">
+        // A wide screen: the arena, as large as the screen allows. The run: the cast bar, the prompt
+        // and its bar beside it. The player: a column right against the floor and as tall as it,
+        // with the cast bar over the mechanic, then the play bar over the casts coming up, so the
+        // page never scrolls.
+        mode === "run" ? (
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,22rem)] gap-x-6">
+            <div className="min-w-0">{arena}</div>
+            <div className="space-y-4">
+              <FightHud />
+              {runBar}
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            {arenaWith(
+              <div className="flex w-88 flex-col gap-3">
                 <CastBar />
                 <ScrollArea className="min-h-0 flex-1">
                   <FightPanel view={view} fight={fight} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />
                 </ScrollArea>
-                <div className="shrink-0">{playBar}</div>
-                <CastList className="h-2/5 shrink-0" />
-              </div>
+                <div className="flex h-2/5 shrink-0 flex-col gap-2">
+                  {playBar}
+                  <CastList className="flex-1" />
+                </div>
+              </div>,
+              "mx-0 mr-88 min-w-0 flex-1",
             )}
           </div>
-        </div>
+        )
       ) : mode === "run" ? (
         // A narrower screen, the run: the cast bar and the prompt over the arena, its bar under it.
         <div className="space-y-3">

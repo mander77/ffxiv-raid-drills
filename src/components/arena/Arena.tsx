@@ -50,8 +50,11 @@ function Waymarks() {
   ));
 }
 
-/** The picture's width over its height: its viewBox is 108 by 110 arena units. */
-export const ARENA_ASPECT = 108 / 110;
+/** The picture's viewBox, in arena units: the 100 by 100 floor, with room around it for the
+    compass (6 above, 4 on the other sides). */
+export const ARENA_VIEW = { x: -4, y: -6, width: 108, height: 110 } as const;
+/** The picture's width over its height. */
+export const ARENA_ASPECT = ARENA_VIEW.width / ARENA_VIEW.height;
 
 export interface ArenaProps {
   /** What the picture shows, for screen readers. */
@@ -80,7 +83,7 @@ export function Arena({ label, layers, split = false, className, onPointClick }:
     <svg
       className={cn("arena", className)}
       aria-label={label}
-      viewBox="-4 -6 108 110"
+      viewBox={`${ARENA_VIEW.x} ${ARENA_VIEW.y} ${ARENA_VIEW.width} ${ARENA_VIEW.height}`}
       role="img"
       onClick={onPointClick && ((e) => onPointClick(toArena(e)))}
     >

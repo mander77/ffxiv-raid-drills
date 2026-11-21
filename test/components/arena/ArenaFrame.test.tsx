@@ -35,3 +35,16 @@ test("it never gets larger than 720 or smaller than 360 pixels", () => {
   cleanup();
   assert.equal(frameAt(600, 700).style.maxWidth, "360px");
 });
+
+test("a column beside the arena sits against the floor's right edge, as tall as the floor", () => {
+  render(
+    <ArenaFrame beside={<p>controls</p>}>
+      <p>arena</p>
+    </ArenaFrame>,
+  );
+  const column = screen.getByText("controls").parentElement as HTMLElement;
+  // The floor ends at 104 of the picture's 108 units across, and runs from 6 to 106 of 110 down.
+  assert.equal(column.style.left, `calc(${(104 / 108) * 100}% + 0.5rem)`);
+  assert.equal(column.style.top, `${(6 / 110) * 100}%`);
+  assert.equal(column.style.bottom, `${(4 / 110) * 100}%`);
+});
