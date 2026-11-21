@@ -1,8 +1,9 @@
 import { cn } from "@/lib/utils";
 import { CATEGORIES, type Category } from "../data/abilities";
 
-/** The Tailwind colour of each category's mark. A row with no category gets grey. */
-const DOT: Record<Category | "none", string> = {
+/** The Tailwind background colour of each category, for its marks. A row with no category gets
+    grey. The cast list colours its icons with it too. */
+export const CATEGORY_BG: Record<Category | "none", string> = {
   raid: "bg-cat-raid",
   tank: "bg-cat-tank",
   spot: "bg-cat-spot",
@@ -31,7 +32,7 @@ export function CategoryDots({ cats, size = "sm" }: CategoryDotsProps) {
       {/* TS note: `{...}` inside JSX runs TypeScript. Each item of a list gets a `key`, so React can
           match it up when the list changes. */}
       {shown.map((c) => (
-        <span key={c} className={cn("block rounded-full", size === "md" ? "size-2.5" : "size-2", DOT[c])} />
+        <span key={c} className={cn("block rounded-full", size === "md" ? "size-2.5" : "size-2", CATEGORY_BG[c])} />
       ))}
     </span>
   );

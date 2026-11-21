@@ -168,8 +168,11 @@ make sure that each one still matches the code before you start it.
     left, the prompt and the casts coming up on the right. Wide: the prompt, the cast bar over
     the mechanic, then the casts coming up. Phone: the prompt over the arena, the play bar under
     it, then the cast bar over the mechanic. The run keeps the cast bar over the prompt.
-  - The casts coming up scroll up a list toward a now line (CastList), like cactbot's timeline in
-    motion: the gaps show the time between casts, close casts are pushed apart so names never
+  - The casts coming up (CastList) look like WoW Midnight's boss ability timeline, by the owner's
+    choice, but rise to a now mark at the top instead of falling to the bottom: a line, each cast a
+    square in its category's colour with its seconds inside and its name beside it, ticks at 5, 10
+    and 20 seconds, and a bigger square in the last 5 seconds. Before that it was a list moving
+    toward a now line: the gaps show the time between casts, close casts are pushed apart so names never
     overlap, the last 6 seconds are bold, and a cast fades above the line for 2 seconds. shadcn/ui
     has no timeline, and its ScrollArea is for content you scroll yourself, so the list is our
     own; ScrollArea holds the mechanic where it can run long. Narrow screens: the cast bar and the
