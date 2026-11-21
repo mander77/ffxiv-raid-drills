@@ -322,8 +322,8 @@ export function FightScreen({
         </div>
       ) : wide ? (
         // A wide screen: the arena on the left, as large as the screen allows, with the player's slim
-        // play bar under it. Beside it: the cast bar, the casts coming up and the prompt, then the
-        // mechanic. The side column is as tall as the arena column, and only the mechanic scrolls
+        // play bar under it. Beside it: the cast bar and the prompt, the mechanic, then the casts
+        // coming up. The side column is as tall as the arena column, and only the mechanic scrolls
         // when its text is long, so the page never does.
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,22rem)] gap-x-6">
           <div className="min-w-0 space-y-3">
@@ -332,7 +332,7 @@ export function FightScreen({
           </div>
           <div className="relative min-w-0">
             <div className="absolute inset-0 flex flex-col gap-4">
-              <FightHud>{mode === "watch" && <FightUpcoming speed={speed} />}</FightHud>
+              <FightHud />
               {mode === "run" ? (
                 runBar
               ) : (
@@ -345,6 +345,11 @@ export function FightScreen({
                     onGoTo={goToSeg}
                     onSpawns={() => setReplays((n) => n + 1)}
                   />
+                </div>
+              )}
+              {mode === "watch" && (
+                <div className="shrink-0">
+                  <FightUpcoming speed={speed} />
                 </div>
               )}
             </div>

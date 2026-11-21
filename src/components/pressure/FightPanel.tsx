@@ -26,19 +26,19 @@ export interface FightPanelProps {
   timeline?: boolean;
 }
 
-/** The panel beside the player: the clock, the fight timeline, then the mechanic on the arena.
+/** The panel beside the player: the mechanic on the arena, then the clock and the fight timeline.
     Its setup folds after the first hit, the steps show as chips, and at the end the rule shows
     with the way on to the next mechanic. Between mechanics: the next mechanic and the next ability. */
 export function FightPanel({ view: v, fight, speed, onGoTo, onSpawns, timeline = true }: FightPanelProps) {
   const g = v.si >= 0 ? fight.segs[v.si] : null;
   return (
     <section aria-label="The right moves" className="space-y-4">
-      {timeline && <FightUpcoming speed={speed} />}
       {g ? (
         <Mechanic view={v} fight={fight} g={g} onGoTo={onGoTo} onSpawns={onSpawns} />
       ) : (
         <Between paused={v.paused} fight={fight} onGoTo={onGoTo} />
       )}
+      {timeline && <FightUpcoming speed={speed} />}
     </section>
   );
 }
