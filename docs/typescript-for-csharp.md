@@ -11,7 +11,7 @@ Browsers run JavaScript only. TypeScript is JavaScript with type annotations. Th
 Two tools share the work in this project:
 
 1. `tsc`, the TypeScript compiler, checks the types. It writes no files. Run it with `npm run typecheck`.
-2. Vite compiles the TypeScript, bundles the modules and serves the site. Run it with `npm run dev` or `npm run build`.
+2. Vite compiles the TypeScript and the JSX, bundles the modules and serves the site. Run it with `npm run dev` or `npm run build`.
 
 C# keeps type information at run time. TypeScript does not. When the code runs, a type such as `Slot` does not exist. The code cannot ask "is this value a Slot?", so it checks the value itself, for example `s === "H1"`.
 
@@ -20,7 +20,7 @@ C# keeps type information at run time. TypeScript does not. When the code runs, 
 - String unions, such as `type Slot = "H1" | "H2"`. The closest C# match is an enum, but the values stay plain strings. See `src/types.ts`.
 - Tuples, such as `type Point = [number, number]`. The closest C# match is a value tuple, `(double X, double Y)`. See `src/types.ts`.
 - Labeled tuples, such as `[t: number, name: string, cats: Cat[], note: string, hit?: HitRule]`. The labels only name the positions for the reader. A `?` makes a position optional. See `Row` in `src/data/abilities.ts`.
-- `as const`. It keeps a literal value as narrow as possible: an array becomes a fixed, read-only tuple, and text keeps its exact value. `new Map(list.map(m => [m.id, m.title] as const))` needs it, because without it each pair is a plain `string[]`. See `src/views/tlnav.ts` and `COMPASS` in `src/geometry.ts`.
+- `as const`. It keeps a literal value as narrow as possible: an array becomes a fixed, read-only tuple, and text keeps its exact value. `new Map(list.map(m => [m.id, m.title] as const))` needs it, because without it each pair is a plain `string[]`. See `COMPASS` in `src/geometry.ts`.
 - Interfaces, such as `interface CircleZone { c: Point; r: number }`. They describe the shape of an object, like a C# interface or record. TypeScript compares shapes, not names: any object with the right fields fits. See `src/types.ts`.
 - Optional fields, such as `cls?: string`. The type is `string | undefined`, like `string? Cls` in C#. See `src/types.ts`.
 - Null in the type, such as `f: number | null`. With `"strict": true` in `tsconfig.json`, null is not a valid number. This works like C# nullable reference types with warnings treated as errors. See `Boss` in `src/types.ts`.
@@ -37,6 +37,9 @@ C# keeps type information at run time. TypeScript does not. When the code runs, 
 - `?.`, `??` and `??=`. They work as in C#. See `go()` in `src/main.ts` and `getDeck()` in `src/core.ts`.
 - `unknown` and `any`. `unknown` is like `object`: you must check the value before you use it. `any` is like `dynamic`: it turns checking off. This project does not use `any`. See `src/util.ts`.
 - Modules. Each file is a module. `export` makes a name public, and `import { name } from "./file"` brings it in. There are no namespaces. The closest C# match is a file-scoped namespace plus `using`.
+- JSX, the HTML-like tags in `.tsx` files, such as `<li><b>{name}:</b> {text}</li>`. The compiler turns each tag into a call to Preact and checks every tag and attribute. `{...}` inside a tag runs TypeScript. The closest C# match is a Razor component. See `src/views/sheet.tsx`.
+- Components and props. A Preact component is a function that takes one props object and returns JSX. An interface types the props, like a method's parameter list: `function Rule({name, text, card}: RuleProps)`. See `Rule` in `src/views/sheet.tsx` and `Marks` in `src/views/tlnav.tsx`.
+- Hooks, such as `const [confirm, setConfirm] = useState(false)`. A hook keeps a value between draws of a component, and calling the setter draws it again. The type comes from the first value. The closest C# match is a field in a Blazor component plus `StateHasChanged()`. See `Sheet` in `src/views/sheet.tsx`.
 - `import type`. It imports names that the compiler needs for checking only. C# has no equivalent, because C# types exist at run time. See the top of most files.
 
 ## Unions and narrowing

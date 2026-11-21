@@ -5,6 +5,6 @@ export default defineConfig({
   // so a relative path (./assets/...) would point inside that path and not find the files.
   base: "/",
   test: {
-    include: ["test/**/*.test.ts"]
+    include: ["test/**/*.test.{ts,tsx}"]
   }
 });

@@ -36,6 +36,13 @@ make sure that each one still matches the code before you start it.
   - The arena SVG stays as strings (`arenaSVG`, `paintArena`) inside the components for now. The
     fight's per-frame updates stay direct DOM changes.
   - Shared state uses `@preact/signals`. Phase 7 (#10) adds Biome and knip.
+  - Phase 1 (#4, done): Preact 11 with the JSX settings in tsconfig.json only. Vite compiles the
+    JSX itself, so there is no `@preact/preset-vite` and no Babel. The cost: no hot reload that
+    keeps component state (the page reloads), and no Preact devtools hook. `@preact/signals` is
+    not installed yet. The Cheat sheet keeps its one bit of state in `useState`, so the phase
+    that first shares state between screens adds it. A Preact screen draws into its own root
+    inside #view (`mountView` in `src/views/common.ts`), so the screens that still set
+    innerHTML cannot break it.
   - Keep the `TS note:` comments, and add notes for the Preact features too.
   - Use only Preact's core API: `preact`, `preact/hooks` and `@preact/signals`. Do not use
     `preact/compat` or features that only Preact has. Then a later move to React is close to a
