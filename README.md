@@ -71,7 +71,7 @@ The data for the drills and the questions is in `src/data/`. Each item has a `bu
 
 ## Publish
 
-Cloudflare Workers builds the site from this repository. For each push that changes the app, Cloudflare runs `npm run build`, then Wrangler uploads `dist/`. A push that changes only docs, tests or tooling does not build (the build watch paths in `docs/decisions.md`). `wrangler.jsonc` names the project and the `dist/` folder. A push to `main` updates the live site. A push to another branch makes a preview at its own address.
+Cloudflare Workers builds the site from this repository. For each push to `main`, Cloudflare runs `npm run build`, then Wrangler uploads `dist/` and updates the live site. A push that changes only docs, tests or tooling does not build (the build watch paths in `docs/decisions.md`). `wrangler.jsonc` names the project and the `dist/` folder. For another branch, CI makes a preview at its own address when the push changed the app, the checks passed and the owner approved it on GitHub.
 
 GitHub Actions runs the checks (lint, type check, unit tests, build, browser tests) on every push. `main` takes only a commit on which those checks passed, so push the branch first, wait for its checks, then push `main`.
 

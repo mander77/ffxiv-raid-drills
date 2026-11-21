@@ -451,7 +451,11 @@ static wins.
   the dashboard.
 - The repository merges by fast-forward push, not by pull requests. The publish script deletes
   merged branches on GitHub.
-- Build watch paths (Cloudflare dashboard: the Worker, then Settings > Build > Build watch paths).
+- Build watch paths (Cloudflare dashboard: the Worker, Production chosen at the top, then
+  Settings > Build > Build watch paths) cover `main` only: a push to `main` that changes only
+  files outside the app makes no live deploy. Branch builds ignore them (tested with two
+  docs-only pushes to a test branch; others report the same), so Cloudflare's preview builds are
+  off (Settings > Build > Branch control > "Enable Preview Builds"), and CI makes the previews.
   Cloudflare drops the changed files that match an exclude path first, then builds if any file
   left matches an include path. Its wildcard `*` may stand only alone or at the start or end of
   a path. Include: `*`. Exclude: `docs/*`, `*.md`, `.github/*`, `.claude/*`, `skills-lock.json`,
@@ -461,7 +465,7 @@ static wins.
   `tsconfig.json`, `wrangler.jsonc`, `.node-version`), and so does any new file, so a forgotten
   path costs a build, never a missed deploy. Cloudflare builds anyway for a push with 20 or more
   commits or 3000 or more changed files. When a new file outside the app comes in at the top
-  level, add it to the exclude list in the dashboard and here.
+  level, add it to the exclude list in the dashboard, here and in `scripts/app-changed.sh`.
 
 ## CI and the main ruleset
 
@@ -480,7 +484,22 @@ static wins.
   only. It is a ruleset of its own, because a bypass covers a whole ruleset, and the CI rule must
   bind the owner too.
 - GitHub checks the commit a push to `main` ends on, by the CI run on that same commit when its
-  branch was pushed. So push the branch, wait for CI, then push `main`. `scripts/publish.sh` waits for that run.
+  branch was pushed. So push the branch, wait for CI, then push `main`. `scripts/publish.sh` waits
+  for the two checks.
+- Branch previews come from CI, not from Cloudflare's builds. The "App changed" job runs
+  `scripts/app-changed.sh` on the files of the push (or, for a new or force-pushed branch, the
+  files since main). When the app changed and both checks passed, the "Preview" job waits for the
+  owner's approval, then runs `npx wrangler preview --name <branch>` (with "/" as "-"), at
+  `<branch>.test.ffxiv-raid-drills.app`. A docs-only push makes no preview; the last one stays.
+  Pushes to `main`, pull requests and Dependabot get no preview. A pull request from a fork
+  never gets the token.
+- The GitHub environment "preview" holds the token and asks for the owner's approval on each
+  run (required reviewer: the owner; admins cannot skip it). Secret `CLOUDFLARE_API_TOKEN`: a
+  Cloudflare account API token (Manage Account > API Tokens), only for this account, with
+  Workers Scripts edit and Account Settings read, and an end date; renew it before then.
+  Variable `CLOUDFLARE_ACCOUNT_ID`. Cloudflare has no keyless sign-in (OIDC) for GitHub
+  Actions yet; check again when the token is renewed.
+- wrangler is a dev dependency, because previews need wrangler 4.135 or later.
 - Dependabot (`.github/dependabot.yml`) opens a pull request each week for npm (minor and patch
   together, a major alone) and for the GitHub Actions, a week after a release. Merge one with
   "Rebase and merge" (linear history), or pull its branch and publish it as usual.

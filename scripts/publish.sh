@@ -1,9 +1,10 @@
 #!/bin/sh
 # Runs the type check and the tests, then pushes the current branch to GitHub.
-# GitHub runs CI on each push. Cloudflare builds main as the live site and every other branch
-# as a preview, and skips the build when only docs, tests or tooling changed.
+# GitHub runs CI on each push. Cloudflare builds main as the live site, and skips the build
+# when only docs, tests or tooling changed. For another branch, CI makes a preview when the
+# push changed the app, the checks passed and the owner approved it.
 # main takes only a commit on which CI already passed (when its branch was pushed). On main,
-# the script waits for that CI run, and stops if it failed or never ran.
+# the script waits for those checks, and stops if they failed or never ran.
 # On main, it then deletes every branch that main already contains, on GitHub and locally.
 # Pushes as the repository owner. Ignores any GH_TOKEN or GITHUB_TOKEN in the
 # shell, and switches the GitHub CLI back to the previous account at the end.
@@ -33,18 +34,33 @@ if [ "$who" != "$OWNER" ]; then
 fi
 
 if [ "$branch" = "main" ]; then
+  # Wait for the two CI checks that main requires, not for the whole run: its preview job may
+  # still wait for the owner's approval. Checks every 15 seconds, for up to 30 minutes.
   sha=$(git rev-parse HEAD)
-  run=$(gh run list --repo "$OWNER/ffxiv-raid-drills" --workflow CI --commit "$sha" --limit 1 \
-    --json databaseId --jq '.[0].databaseId // empty')
-  if [ -z "$run" ]; then
-    echo "Stopped: CI has not run on $sha. Publish its branch first, then main."
-    exit 1
-  fi
   echo "Waiting for CI on $sha..."
-  if ! gh run watch "$run" --repo "$OWNER/ffxiv-raid-drills" --exit-status --interval 20 >/dev/null; then
-    echo "Stopped: CI did not pass on $sha. See: gh run view $run --log-failed"
-    exit 1
-  fi
+  i=0
+  while :; do
+    state=$(gh api "repos/$OWNER/ffxiv-raid-drills/commits/$sha/check-runs" --jq '
+      [.check_runs[] | select(.app.slug == "github-actions")
+        | select(.name == "Lint, types, tests, build" or .name == "Browser tests")]
+      | if length < 2 then "missing"
+        elif any(.status != "completed") then "running"
+        elif all(.conclusion == "success") then "passed"
+        else "failed" end')
+    case "$state" in
+      passed) break ;;
+      failed)
+        echo "Stopped: CI failed on $sha. See: gh run list --commit $sha"
+        exit 1
+        ;;
+    esac
+    i=$((i + 1))
+    if [ "$i" -gt 120 ]; then
+      echo "Stopped: CI has not passed on $sha ($state). Publish its branch first, then main."
+      exit 1
+    fi
+    sleep 15
+  done
 fi
 
 # The empty credential.helper clears inherited helpers (macOS adds osxkeychain at the
@@ -52,8 +68,8 @@ fi
 gitgh() { git -c credential.helper= -c "credential.helper=!gh auth git-credential" "$@"; }
 gitgh push -u origin "$branch"
 if [ "$branch" != "main" ]; then
-  echo "Pushed $branch. CI runs on GitHub (gh run list --branch $branch), and Cloudflare builds"
-  echo "a preview of this branch in about a minute if the app changed."
+  echo "Pushed $branch. CI runs on GitHub: gh run list --branch $branch"
+  echo "If the app changed, approve its Preview job on GitHub once the checks pass."
   exit 0
 fi
 echo "Pushed main. Cloudflare deploys the live site in about a minute if the app changed."

@@ -1,7 +1,8 @@
 # The checks: lint, type check, unit tests, build and browser tests.
 # They run on every push to any branch, so a branch has its result before it goes on main,
 # and on pull requests to main. main accepts a commit only after both jobs passed on it.
-# Cloudflare builds and deploys on its own; this does not deploy.
+# Cloudflare builds and deploys main on its own. For any other branch whose push changed the
+# app, the preview job makes a Cloudflare preview once the checks pass and the owner approves.
 name: CI
 
 on:
@@ -63,3 +64,63 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+
+  changes:
+    name: App changed
+    # Previews are for branches. main deploys through Cloudflare's own build.
+    if: github.event_name == 'push' && github.ref_name != 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      app: ${{ steps.diff.outputs.app }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # The whole history, to compare with the last push or with main.
+          fetch-depth: 0
+      - id: diff
+        env:
+          BEFORE: ${{ github.event.before }}
+        # Compare with the commit before this push. A new branch, or one that was force-pushed,
+        # has no usable commit before, so compare with where it left main.
+        run: |
+          if git merge-base --is-ancestor "$BEFORE" HEAD 2>/dev/null; then
+            from=$BEFORE
+          else
+            from=$(git merge-base origin/main HEAD)
+          fi
+          echo "app=$(sh scripts/app-changed.sh "$from" HEAD)" >> "$GITHUB_OUTPUT"
+
+  preview:
+    name: Preview
+    needs: [check, e2e, changes]
+    # Only when the app changed, and only after the checks passed.
+    if: needs.changes.outputs.app == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The environment holds the Cloudflare token, and each run waits for the owner's approval.
+    environment:
+      name: preview
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          BRANCH: ${{ github.ref_name }}
+        # The preview's name is the branch name with "/" and other signs as "-" (chore/ci becomes
+        # chore-ci), as Cloudflare's own builds named it. Its address is <name>.test.ffxiv-raid-drills.app.
+        run: |
+          name=$(printf '%s' "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g')
+          npx wrangler preview --name "$name" --message "$GITHUB_SHA"
+          echo "url=https://$name.test.ffxiv-raid-drills.app/" >> "$GITHUB_OUTPUT"
