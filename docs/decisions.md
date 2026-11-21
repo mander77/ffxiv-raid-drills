@@ -194,6 +194,14 @@ make sure that each one still matches the code before you start it.
   - On an extra-wide screen the mechanic's column touches the arena too (owner's choice): it sits
     against the floor's left edge (`ArenaFrame`'s `before` column), from the floor's top to its
     bottom, so the arena and its two columns read as one piece in the middle of the page.
+  - The player has three layouts (owner's choice). Extra-wide (xl, 1280 px and up): the mechanic
+    against the floor on the left, the play bar over the casts coming up on the right. Medium (md,
+    768 to 1279 px): the mechanic against the floor on the left, and under the arena the play bar
+    over the casts coming up, sideways (`CastStrip`). Phone: the cast bar and the mechanic over the
+    arena, then the play bar and the sideways casts under it. The sideways line is CastList lying
+    down: the casts slide left to a now mark, their names wrapped under their squares, so a phone
+    keeps the casts coming up. `ArenaFrame`'s `under` lines them up with the floor's sides. The
+    arena is smaller on a medium screen (418 px at 1100 x 800), since the bars take room under it.
   - `useFitToScreen` measures again when the web fonts have loaded: they can push the arena down a
     pixel or two after the first measure, and the page then scrolled.
   - November 21: the owner asked that every change be checked against the official best

@@ -19,8 +19,11 @@ function pct(part: number, whole: number): string {
 
 export interface ArenaFrameProps {
   children: ReactNode;
-  /** Room to keep under the arena, in pixels, for what comes below it (the run's bar). */
+  /** Room to keep under the arena, in pixels, for what comes below it: the run's bar, or what
+      `under` holds. */
   below?: number;
+  /** What sits right under the floor, as wide as the floor. Count its height in `below`. */
+  under?: ReactNode;
   /** A column drawn right against the floor's right edge and as tall as the floor, so it reads as
       part of the arena. It gives itself a width; keep that much room to the right of the frame. */
   beside?: ReactNode;
@@ -36,13 +39,17 @@ const FLOOR_BOTTOM = pct(ARENA_VIEW.height + ARENA_VIEW.y - 100, ARENA_VIEW.heig
 /** How far the floor's right edge is from the frame's left, and its left edge from the frame's right. */
 const FLOOR_RIGHT = pct(-ARENA_VIEW.x + 100, ARENA_VIEW.width);
 const FLOOR_LEFT_FROM_RIGHT = pct(ARENA_VIEW.width + ARENA_VIEW.x, ARENA_VIEW.width);
+/** The room beside the floor and under it in the picture, as shares of the frame's width (a margin
+    in percent is a share of the width). The picture's room under the floor is as tall as the room
+    beside it is wide. */
+const FLOOR_SIDE = pct(-ARENA_VIEW.x, ARENA_VIEW.width);
 
 /** The size of every arena you play on, on Learn, Practice and Pressure: as large as its column,
     but never taller than the room from its top down to the bottom of the screen, so the whole
     arena is in view, and never wider than ARENA_MAX. On a short screen it keeps at least
     ARENA_MIN, so on a phone it fills the width. Things drawn over the arena (the 3-2-1,
     a result) can sit in it with absolute positions. */
-export function ArenaFrame({ children, below = 0, beside, before, className }: ArenaFrameProps) {
+export function ArenaFrame({ children, below = 0, under, beside, before, className }: ArenaFrameProps) {
   const [ref, height] = useFitToScreen<HTMLDivElement>(below + SCREEN_MARGIN);
   return (
     <div
@@ -50,22 +57,25 @@ export function ArenaFrame({ children, below = 0, beside, before, className }: A
       className={cn("relative mx-auto w-full", className)}
       style={{ maxWidth: height === undefined ? ARENA_MAX : Math.max(ARENA_MIN, Math.min(ARENA_MAX, height * ARENA_ASPECT)) }}
     >
-      {children}
-      {/* The side columns are placed by the floor's edges in the picture, as shares of the frame,
+      <div className="relative">
+        {children}
+        {/* The side columns are placed by the floor's edges in the picture, as shares of the frame,
           so they fit at any size. */}
-      {before && (
-        <div
-          className="absolute flex justify-end"
-          style={{ right: `calc(${FLOOR_LEFT_FROM_RIGHT} + 0.5rem)`, top: FLOOR_TOP, bottom: FLOOR_BOTTOM }}
-        >
-          {before}
-        </div>
-      )}
-      {beside && (
-        <div className="absolute flex" style={{ left: `calc(${FLOOR_RIGHT} + 0.5rem)`, top: FLOOR_TOP, bottom: FLOOR_BOTTOM }}>
-          {beside}
-        </div>
-      )}
+        {before && (
+          <div
+            className="absolute flex justify-end"
+            style={{ right: `calc(${FLOOR_LEFT_FROM_RIGHT} + 0.5rem)`, top: FLOOR_TOP, bottom: FLOOR_BOTTOM }}
+          >
+            {before}
+          </div>
+        )}
+        {beside && (
+          <div className="absolute flex" style={{ left: `calc(${FLOOR_RIGHT} + 0.5rem)`, top: FLOOR_TOP, bottom: FLOOR_BOTTOM }}>
+            {beside}
+          </div>
+        )}
+      </div>
+      {under && <div style={{ marginInline: FLOOR_SIDE, marginTop: `calc(0.5rem - ${FLOOR_SIDE})` }}>{under}</div>}
     </div>
   );
 }

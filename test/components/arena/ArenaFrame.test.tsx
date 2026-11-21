@@ -18,7 +18,8 @@ function frameAt(top: number, screenHeight: number, below = 0): HTMLElement {
       <p>arena</p>
     </ArenaFrame>,
   );
-  return screen.getByText("arena").parentElement as HTMLElement;
+  // The frame holds the picture box, which holds the arena.
+  return screen.getByText("arena").parentElement?.parentElement as HTMLElement;
 }
 
 test("the arena is as tall as the room down to the bottom of the screen", () => {
@@ -59,4 +60,14 @@ test("a column before the arena sits against the floor's left edge", () => {
   // The floor starts at 4 of the picture's 108 units across: 104 units from the frame's right.
   assert.equal(column.style.right, `calc(${(104 / 108) * 100}% + 0.5rem)`);
   assert.equal(column.style.top, `${(6 / 110) * 100}%`);
+});
+
+test("what sits under the arena lines up with the floor's sides", () => {
+  render(
+    <ArenaFrame under={<p>play bar</p>}>
+      <p>arena</p>
+    </ArenaFrame>,
+  );
+  const under = screen.getByText("play bar").parentElement as HTMLElement;
+  assert.equal(under.style.marginInline, `${(4 / 108) * 100}%`);
 });
