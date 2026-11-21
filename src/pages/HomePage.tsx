@@ -77,12 +77,12 @@ export function HomePage() {
   return (
     <main>
       <PageContainer className="space-y-10 py-6">
-        {/* The banner: a soft celery gradient from the top left (fainter in dark mode), with a Learn
-            card's answer picture in a white frame. On a phone the picture is a short strip from the
-            middle of the arena, and the frame still goes all the way around it. */}
-        <section className="flex flex-col gap-6 rounded-xl border bg-linear-135 from-highlight/60 to-card to-60% p-6 shadow-sm sm:flex-row sm:items-center dark:from-highlight/15">
+        {/* The banner: a green gradient from the top left, with a Learn card's answer picture in a
+            frame: white in light mode, dark in dark mode. On a phone the picture is a short strip
+            from the middle of the arena, and the frame still goes all the way around it. */}
+        <section className="flex flex-col gap-6 rounded-xl border bg-linear-135 from-green-100 to-card to-60% p-6 shadow-sm sm:flex-row sm:items-center">
           {fig && (
-            <div className="shrink-0 rounded-lg bg-white p-1.5 shadow-md sm:w-60">
+            <div className="shrink-0 rounded-lg bg-white p-1.5 shadow-md sm:w-60 dark:bg-card">
               <div className="overflow-hidden rounded-md max-sm:h-28">
                 <LearnPicture
                   fig={fig}
