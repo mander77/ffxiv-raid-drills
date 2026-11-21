@@ -22,7 +22,7 @@ export function Header() {
           <ModeToggle className="hover:bg-white/10 hover:text-header-foreground" />
           <ShareButton className="hover:bg-white/10 hover:text-header-foreground" />
         </div>
-        <ul aria-label="Fight and strats" className="flex flex-wrap gap-1.5 max-sm:col-span-2 max-sm:flex-nowrap max-sm:overflow-x-auto">
+        <ul aria-label="Fight and strats" className="flex flex-wrap gap-1.5 max-sm:col-span-2">
           {STRATS.map((s) => (
             // A darker fill on the band, so the text reads at 7:1.
             <li key={s} className="rounded-full bg-black/25 px-2.5 py-0.5 text-sm font-medium whitespace-nowrap">
