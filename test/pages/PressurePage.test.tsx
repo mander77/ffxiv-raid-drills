@@ -78,6 +78,7 @@ test("Start the run opens the run on /pressure, and Quit with no answer goes bac
   await user.click(screen.getByRole("button", { name: "Start the run" }));
   assert.equal(where(), "/pressure");
   assert.ok(await screen.findByText(/Mechanic 1 of \d+/), "the first frame shows your progress");
+  assert.ok(screen.getByRole("region", { name: "Casts coming up" }), "the casts coming up, as in the player");
   await user.click(screen.getByRole("button", { name: "Quit" }));
   assert.ok(screen.getByText("Timed questions"));
 });
