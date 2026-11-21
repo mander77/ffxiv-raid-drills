@@ -7,7 +7,7 @@ import { Navigate, useNavigate, useParams } from "react-router";
 import { PageContainer } from "../components/PageContainer";
 import { DrillList } from "../components/practice/DrillList";
 import { DrillNav } from "../components/practice/DrillNav";
-import { DrillRun } from "../components/practice/DrillRun";
+import { DrillScreen } from "../components/practice/DrillScreen";
 import { RoundDone } from "../components/RoundDone";
 import { changes, DRILLS } from "../data/drills";
 import { buildPattern } from "../lib/practice";
@@ -96,7 +96,7 @@ export function PracticePage() {
           <DrillList items={IN_ORDER} current={item.id} className="max-lg:hidden" />
           <div className="space-y-4">
             <DrillNav items={IN_ORDER} i={i} className="lg:hidden" />
-            <DrillRun
+            <DrillScreen
               key={`${item.id}-${okCode}-${slot}-${tries}`}
               item={item}
               pattern={pattern}

@@ -3,7 +3,7 @@ import { buildFight, CHOICE_ROWS, RANDOM, choicesText, parseChoices, type Choice
 import { newCode } from "../src/util";
 import { DRILLS } from "../src/data/drills";
 
-const RUNS = 40;
+const REPEATS = 40;
 const seg = (f: Fight, title: string) => {
   const g = f.segs.find(x => x.title.startsWith(title));
   if(!g) throw new Error("no stretch " + title);
@@ -36,7 +36,7 @@ const SHOWS: { [K in keyof Picks]: (f: Fight, v: string) => boolean } = {
 test("each choice gives the chosen pattern, in every run", () => {
   for(const row of CHOICE_ROWS) for(const [v] of row.options){
     const c: Choices = {...RANDOM, [row.key]: v};
-    for(let i = 0; i < RUNS; i++){
+    for(let i = 0; i < REPEATS; i++){
       const f = buildFight(i % 2 ? "H1" : "H2", newCode(), c);
       assert.equal(f.picks[row.key], v, row.label + " = " + v + ": the fight reports another pick");
       assert.ok(SHOWS[row.key](f, v), row.label + " = " + v + ": the arena does not show it");

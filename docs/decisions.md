@@ -103,6 +103,10 @@ make sure that each one still matches the code before you start it.
     changes. New picks or another slot build the same fight again at the same moment. The quick
     round keeps its own counts and adds each answer to your scores, as before. `PracticeArena` is
     `LiveArena`, since the fight uses it too. The unused `LS`, `esc` and `el` helpers are gone.
+    "Run" now means only the scored full fight, with the owner's OK: Practice's `DrillRun` is
+    `DrillScreen` (one go at a drill is a try), the quick round ends with Go again like the other
+    rounds, and a weapon run in `src/data/drills.ts` is a jump set (`JumpSet`, `buildJumpSet`).
+    Names only, never a value.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what

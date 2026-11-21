@@ -111,7 +111,7 @@ src/pages/           React pages, one per route: HomePage (/), LearnPage (/learn
                      (/practice), TimelinePage (/timeline), PressurePage (/pressure),
                      CheatSheetPage (/sheet)
 src/components/practice/  Practice: DrillList (wide screens), DrillNav (phones),
-                     DrillRun (one mechanic's run: clicks, Show me, the prompt and panel)
+                     DrillScreen (one drill's screen: clicks, Show me, the prompt and panel)
 src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep, statusAfter, bossFor
 src/components/pressure/  Pressure: PressureStart, QuickRound, FightScreen (the run and the player:
                      frame loop, clicks, keys), FightArena, FightHud (cast bar, prompt),
@@ -254,7 +254,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   are the tab's name in lower case: `/learn`, `/practice`, `/timeline`.
 - **Card**: one Learn or Timeline question (`QuizItem`; `LEARN_CARDS`, `TIMELINE_CARDS`).
 - **Drill**: one Practice mechanic (`Drill`, `DRILLS`). The screen says "mechanic"; the code says
-  drill. A **run** (`DrillRun`) is one try at a drill.
+  drill. A **try** is one go at a drill, on its screen (`DrillScreen`).
 - **Pattern**: the random parts of a drill, built from a **code** (`buildPattern`).
 - **Step**: one question of a drill. Its **status** (`StepStatus`) is ask, right or wrong.
 - **Phase**: a phase of the fight (Phase 1 to 4), and nothing else.
@@ -270,9 +270,11 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Round**: the answers so far on one tab, for one slot. The **quick round** is Pressure's 12
   timed cards (`QuickRound`).
 - **Fight**: the full fight on the clock (`Fight`, `FightScreen`), in two modes (`FightMode`):
-  **the run** (`"run"`), where you click your spots and get a score, and **Watch the right moves**
+  **the run** (`"run"`), where you click your spots and get a score ("run" means only this), and **Watch the right moves**
   (`"watch"`), the player. A **frame** is one step of the fight clock (`tickFight`,
   `useFightFrame`).
+- **Jump set**: the weapons the boss jumps to in order, in Assault Evolved and Ultimate Trophy
+  Weapons (`JumpSet`, `buildJumpSet`).
 - **Pick**: one random part of the full fight, such as the first weapon order. `Picks` are the
   parts a fight has; `Choices` are your settings, a pick or Random each (`CHOICE_ROWS`). The
   player's address calls them picks.

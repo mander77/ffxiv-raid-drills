@@ -12,7 +12,7 @@ import { RuleBox } from "../RuleBox";
 import { SetupText } from "../SetupText";
 import { StepChips } from "../StepChips";
 
-export interface DrillRunProps {
+export interface DrillScreenProps {
   item: Drill;
   pattern: Pattern;
   /** The place of the mechanic in the list, and how many there are. */
@@ -30,11 +30,11 @@ export interface DrillRunProps {
   onReplaySpawns: () => void;
 }
 
-/** One Practice mechanic: click where you stand on the arena, one step at a time. Above the arena:
+/** The screen of one Practice mechanic (a drill): click where you stand on the arena, one step at a time. Above the arena:
     the question with Show me, or why a spot was wrong, or the result. Beside it: the mechanic, its
     steps, the last answer and, at the end, the rule and the way on.
     Give it a `key` per mechanic, pattern and try, so each starts fresh. */
-export function DrillRun({
+export function DrillScreen({
   item,
   pattern,
   i,
@@ -45,7 +45,7 @@ export function DrillRun({
   onAgain,
   onNewPattern,
   onReplaySpawns,
-}: DrillRunProps) {
+}: DrillScreenProps) {
   const { scene: sc, k } = pattern;
   const [results, setResults] = useState<StepResult[]>([]);
   const [status, setStatus] = useState<StepStatus>("ask");

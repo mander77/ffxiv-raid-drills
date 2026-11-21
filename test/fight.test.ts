@@ -5,7 +5,7 @@ import { DRILLS } from "../src/data/drills";
 import { inZone, rotZone, zoneCenter } from "../src/geometry";
 import type { Slot, StepResult } from "../src/types";
 
-const RUNS = 200;
+const REPEATS = 200;
 const SLOTS: Slot[] = ["H1", "H2"];
 
 test("clock and sec turn fight times both ways", () => {
@@ -18,7 +18,7 @@ test("clock and sec turn fight times both ways", () => {
 });
 
 test("every mechanic has one hit time per step, in order, inside the fight", () => {
-  for(let i = 0; i < RUNS; i++) for(const s of SLOTS){
+  for(let i = 0; i < REPEATS; i++) for(const s of SLOTS){
     const f = buildFight(s);
     let prevFrom = -1;
     for(const g of f.segs){
@@ -70,7 +70,7 @@ test("the arena is split from Flatliner until the Crown of Arcadia that joins it
 });
 
 test("the second Raw Steel Trophy and the second Void Stardust go the other way", () => {
-  for(let i = 0; i < RUNS; i++){
+  for(let i = 0; i < REPEATS; i++){
     const f = buildFight("H1");
     const raw = f.segs.filter(g => g.title.startsWith("Raw Steel Trophy")).map(g => g.title.split(": ")[1]);
     assert.sameMembers(raw, ["axe", "scythe"]);
@@ -81,7 +81,7 @@ test("the second Raw Steel Trophy and the second Void Stardust go the other way"
 });
 
 test("Watch the right moves: the spot it clicks is right for every step", () => {
-  for(let i = 0; i < RUNS; i++) for(const s of SLOTS){
+  for(let i = 0; i < REPEATS; i++) for(const s of SLOTS){
     for(const g of buildFight(s).segs){
       const results: StepResult[] = [];
       g.scene.steps.forEach((st, j) => {

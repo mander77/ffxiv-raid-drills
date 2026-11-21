@@ -1,9 +1,9 @@
 import { test, assert } from "vitest";
-import { DRILLS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, stackNear, changes, assaultScene, ultimateScene, facingNext, jumpsNext, DANCE_LINES, DANCE_PAIRS, type WeaponRun } from "../src/data/drills";
+import { DRILLS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, stackNear, changes, assaultScene, ultimateScene, facingNext, jumpsNext, DANCE_LINES, DANCE_PAIRS, type JumpSet } from "../src/data/drills";
 import { angOf, inZone, zoneCenter } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, StepResult, Zone } from "../src/types";
 
-const RUNS = 300;
+const REPEATS = 300;
 const SLOTS: Slot[] = ["H1", "H2"];
 
 /** Narrow a step's zone to the fixed kind, failing the test when it is missing. */
@@ -31,7 +31,7 @@ test("drills with no random parts build the same pattern every time", () => {
 });
 
 test("Assault Evolved: the faced weapon goes first, then clockwise", () => {
-  for(let i = 0; i < RUNS; i++){
+  for(let i = 0; i < REPEATS; i++){
     const A = buildAssault("H1");
     const a = A.W.map(w => w.a);
     const d1 = (a[1] - a[0] + 360) % 360, d2 = (a[2] - a[0] + 360) % 360;
@@ -42,7 +42,7 @@ test("Assault Evolved: the faced weapon goes first, then clockwise", () => {
 });
 
 test("Assault Evolved, second set: each weapon faces where he jumps from, the first faces the middle", () => {
-  for(let i = 0; i < RUNS; i++){
+  for(let i = 0; i < REPEATS; i++){
     const A = buildAssault2("H1");
     assert.isNull(A.states[0].f, "the boss does not point at the first weapon");
     let prev: Point = [50, 50];
@@ -60,10 +60,10 @@ test("Assault Evolved, second set: each weapon faces where he jumps from, the fi
   }
 });
 
-const RUN_BUILDERS: Record<string, (s: Slot) => WeaponRun> = {buildAssault, buildAssault2, buildUltimate};
+const SET_BUILDERS: Record<string, (s: Slot) => JumpSet> = {buildAssault, buildAssault2, buildUltimate};
 
-test("weapon runs: H1 stands at the scythe butt, H2 at the blade end", () => {
-  for(const [name, build] of Object.entries(RUN_BUILDERS)) for(let i = 0; i < RUNS; i++) for(const s of SLOTS){
+test("jump sets: H1 stands at the scythe butt, H2 at the blade end", () => {
+  for(const [name, build] of Object.entries(SET_BUILDERS)) for(let i = 0; i < REPEATS; i++) for(const s of SLOTS){
     const R = build(s);
     R.W.forEach((w, k) => {
       if(w.type !== "scythe") return;
@@ -79,7 +79,7 @@ test("weapon runs: H1 stands at the scythe butt, H2 at the blade end", () => {
 });
 
 test("weapon runs: the sword pocket is behind the boss, never on him", () => {
-  for(const [name, build] of Object.entries(RUN_BUILDERS)) for(let i = 0; i < RUNS; i++) for(const s of SLOTS){
+  for(const [name, build] of Object.entries(SET_BUILDERS)) for(let i = 0; i < REPEATS; i++) for(const s of SLOTS){
     const R = build(s);
     R.W.forEach((w, k) => {
       if(w.type !== "sword") return;
@@ -99,7 +99,7 @@ test("weapon runs: the sword pocket is behind the boss, never on him", () => {
 });
 
 test("weapon runs: the sword's best spot is 2 yalms clear of both arms of the cross", () => {
-  for(const [name, build] of Object.entries(RUN_BUILDERS)) for(let i = 0; i < RUNS; i++) for(const s of SLOTS){
+  for(const [name, build] of Object.entries(SET_BUILDERS)) for(let i = 0; i < REPEATS; i++) for(const s of SLOTS){
     const R = build(s);
     R.W.forEach((w, k) => {
       if(w.type !== "sword") return;
@@ -128,7 +128,7 @@ test("weapon runs: the sword's best spot is 2 yalms clear of both arms of the cr
 });
 
 test("Ultimate Trophy Weapons: the first spawn sets the direction, and the last is north", () => {
-  for(let i = 0; i < RUNS; i++){
+  for(let i = 0; i < REPEATS; i++){
     const U = buildUltimate("H1"), a = U.W.map(w => w.a), t = U.W.map(w => w.type);
     assert.equal(a[5], 0, "the last weapon is north");
     assert.ok(U.cw ? a[0] > 180 && a[1] === 315 : a[0] < 180 && a[1] === 45, "first south of west or east, then NW or NE");
@@ -202,7 +202,7 @@ test("Void Stardust spread: any open spot, on the first weapon's side for a swor
 test("Void Stardust into the second weapons: every right spot is inside its zone", () => {
   const drill = DRILLS.find(m => m.id === "m-void");
   if(!drill) throw new Error("missing drill m-void");
-  for(let i = 0; i < RUNS; i++) for(const s of SLOTS) for(const v of ["stack", "spread"]){
+  for(let i = 0; i < REPEATS; i++) for(const s of SLOTS) for(const v of ["stack", "spread"]){
     const sc = drill.build(s, v);
     assert.equal(sc.steps.length, 8, "pick, three puddles, stack or spread, then all three weapons");
     assert.deepEqual(sc.steps.slice(6).map(st => st.q), ["Second weapon: click where you go.", "Third weapon: click where you go."]);
@@ -223,7 +223,7 @@ test("Void Stardust into the second weapons: every right spot is inside its zone
 
 test("Orbital Omen: Hector's dodge is safe for every pattern", () => {
   const spot = (c: number, r: number): Point => [c === 1 ? 38 : 62, r === 1 ? 44 : 56];
-  for(let i = 0; i < RUNS; i++){
+  for(let i = 0; i < REPEATS; i++){
     const O = buildOrbital(), V: number[] = [], H: number[] = [];
     for(const o of O.overlays) if(o.t === "portal") (o.vert ? V : H)[o.n - 1] = Math.floor((o.vert ? o.x : o.y) / 25);
     assert.ok([1, 2].includes(V[1]) && [1, 2].includes(H[1]), "the #2 lines cross in a middle square");
