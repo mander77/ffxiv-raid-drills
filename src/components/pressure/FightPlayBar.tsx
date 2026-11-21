@@ -48,16 +48,8 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
   });
 
   return (
-    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border bg-card p-1.5">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button size="icon" aria-label={paused ? "Play" : "Pause"} onClick={onPlay}>
-            {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
-          </Button>
-        </TooltipTrigger>
-        {/* The keys, for the keyboard: they show when you point at the button. */}
-        <TooltipContent>Space: play or pause. ← and →: 5 seconds back or on. Or click the map.</TooltipContent>
-      </Tooltip>
+    // Thin, like a video player's controls: the slider across the top, the buttons in one row under it.
+    <div className="rounded-lg border bg-card px-1.5 py-1">
       <input
         ref={slider}
         type="range"
@@ -67,7 +59,7 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
         defaultValue={0}
         list={ticks}
         aria-label="Fight time"
-        className="min-w-32 flex-1 accent-primary"
+        className="block h-5 w-full accent-primary"
         onPointerDown={() => {
           dragging.current = true;
         }}
@@ -81,8 +73,17 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
           <option key={t} value={t} />
         ))}
       </datalist>
-      <span ref={time} className="text-sm whitespace-nowrap tabular-nums" />
-      <div className="flex items-center">
+      <div className="flex items-center gap-1 pt-0.5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button size="icon-sm" aria-label={paused ? "Play" : "Pause"} onClick={onPlay}>
+              {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+            </Button>
+          </TooltipTrigger>
+          {/* The keys, for the keyboard: they show when you point at the button. */}
+          <TooltipContent>Space: play or pause. ← and →: 5 seconds back or on. Or click the map.</TooltipContent>
+        </Tooltip>
+        <span ref={time} className="mr-auto px-1 text-sm whitespace-nowrap tabular-nums" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" aria-label={`Speed: ${speed}x`} className="tabular-nums">
@@ -130,7 +131,7 @@ function IconButton({ label, onClick, children }: IconButtonProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={label} onClick={onClick}>
+        <Button variant="ghost" size="icon-sm" aria-label={label} onClick={onClick}>
           {children}
         </Button>
       </TooltipTrigger>

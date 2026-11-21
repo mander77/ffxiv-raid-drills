@@ -6,8 +6,8 @@ import { CATEGORY_BG } from "../CategoryDots";
 
 /** Where the now mark sits from the top, how far the line goes on above it, the room under the
     line at the bottom, and how far apart two casts stay at least, in pixels. The app's choice. */
-const NOW_Y = 40;
-const ABOVE_NOW = 24;
+const NOW_Y = 56;
+const ABOVE_NOW = 40;
 const BOTTOM = 12;
 const ROW_H = 36;
 /** The seconds marked on the line. The app's choice. */

@@ -154,7 +154,7 @@ make sure that each one still matches the code before you start it.
     the cast bar, the prompt and the controls sit beside it. The countdown ring stays on the
     arena, around the boss. At 1280 x 800 the arena went from 494 to about 600 px. Three columns
     were turned down: the height limits the arena, so a third column would only narrow it.
-  - The player's controls (owner's choice): one slim row under the arena, like a video player:
+  - The player's controls (owner's choice): a thin bar like a video player's, the slider across the top and the buttons in one row under it (64 px tall):
     play, the slider, the time, a speed menu, and icon buttons with tooltips for Start over, New
     fight and Settings; the keys are in the play button's tooltip. Beside the arena: the cast
     bar with the casts coming up under it, the prompt, then the mechanic, which scrolls in its
@@ -184,7 +184,7 @@ make sure that each one still matches the code before you start it.
   - The play bar sits right on top of the casts coming up, on every screen (owner's choice): the
     clock and the list that runs on it belong together. The arena stands alone in its column, so
     it gets the room the bar took. The list lost its "Coming up" line (the play bar shows the time
-    and the speed), and its now mark sits a little lower, 40 px from the top.
+    and the speed), and its now mark sits lower, 56 px from the top, with the line running on 40 px above it.
   - The player's side column touches the arena (owner's choice): on a wide screen the play bar
     and the casts coming up (and, below xl, the mechanic too) sit right against the floor's right
     edge, from its top to its bottom, so they read as part of the arena. `ArenaFrame` places this

@@ -38,7 +38,7 @@ export function FightSettings({ code, choices, onChange }: FightSettingsProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Settings">
+            <Button variant="ghost" size="icon-sm" aria-label="Settings">
               <Settings2 aria-hidden="true" />
             </Button>
           </SheetTrigger>
