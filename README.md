@@ -44,7 +44,7 @@ index.html               page shell
 src/main.tsx             start-up: draws the React app
 src/App.tsx              the header and the routes
 src/pages/               React pages, one per route (the Cheat sheet)
-src/components/          React components (header, slot switch, tabs, shared pieces)
+src/components/          React components (header, page container, slot switch, tabs, shared pieces)
 src/components/arena/    the arena pictures, drawn as SVG by React components
 src/components/ui/       shadcn/ui components
 src/hooks/               custom React hooks

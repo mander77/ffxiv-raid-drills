@@ -72,6 +72,12 @@ make sure that each one still matches the code before you start it.
     arena's own styles (`arena.css`) sit under the `.arena` class, so its short class names, such
     as `ring` and `tag`, never touch the rest of the page. The shared pieces (rule box, last
     answer, step chips, setup text, tally, chip row, HUD prompt) use shadcn/ui's Alert and Badge.
+  - November 21: the owner asked that every change be checked against the official best
+    practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
+    test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what
+    each check looks at. The first check moved the page width into a `PageContainer` component
+    (Tailwind advises a component over a string of classes), put the arena styles in the
+    "components" cascade layer, and turned a function that returned JSX into a component.
 - Issue #11: make the repository self-contained. A new person should get Node 24, the GitHub CLI
   and the other tools in one step after the clone.
 - Party slots (#13, done). A slot has two parts, the light party (1 or 2) and the role (Tank,
