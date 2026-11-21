@@ -7,9 +7,10 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Tailwind looks for class names in every file git tracks. The .claude folder holds notes for
-   Claude Code, full of example class names the site does not use, so leave it out. */
+/* Tailwind looks for class names in every file git tracks. The .claude and docs folders hold
+   notes, with class names the site does not use, so leave them out. */
 @source not "../.claude";
+@source not "../docs";
 
 /* Dark mode follows the "dark" class on <html>, which ThemeProvider sets. */
 @custom-variant dark (&:is(.dark *));
