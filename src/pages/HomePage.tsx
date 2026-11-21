@@ -66,7 +66,10 @@ export function HomePage() {
                   fig={fig}
                   answered
                   label="Raw Steel Trophy on the arena: your spot is the green area"
-                  className="block h-auto w-full max-sm:-mt-[38%]"
+                  // On a phone: the picture is 108 units wide, with 4 units of room each side of the
+                  // 100-unit arena. Make it 108% wide and move it 4% left, so the arena floor fills
+                  // the strip from edge to edge and the white frame is the same on every side.
+                  className="block h-auto w-full max-sm:-mt-[41%] max-sm:-ml-[4%] max-sm:w-[108%] max-sm:max-w-none"
                 />
               </div>
             </div>
