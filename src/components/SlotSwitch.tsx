@@ -7,15 +7,6 @@ import { healerOf, partyOf, ROLES, slotName } from "../party";
 import { useSlotStore } from "../stores/slot";
 import type { Role } from "../types";
 
-/** The colour of the role you picked, as in the game: tanks blue, healers green, DPS red. Complete
-    class names, so Tailwind finds them. */
-const ROLE_ON: Record<Role, string> = {
-  Tank: "data-[state=on]:bg-blue-700 data-[state=on]:text-white",
-  Healer: "data-[state=on]:bg-green-700 data-[state=on]:text-white",
-  Melee: "data-[state=on]:bg-red-700 data-[state=on]:text-white",
-  Ranged: "data-[state=on]:bg-red-700 data-[state=on]:text-white",
-};
-
 /** How long the "not yet available" tip stays after a tap. */
 const SOON_MS = 2000;
 
@@ -72,7 +63,7 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
             );
             if (ready)
               return (
-                <BandToggleItem key={role} value={role} aria-label={role} className={ROLE_ON[role]}>
+                <BandToggleItem key={role} value={role} aria-label={role}>
                   {text}
                 </BandToggleItem>
               );
@@ -109,12 +100,7 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
           onValueChange={(v) => v && setSlot(healerOf(v === "2" ? 2 : 1))}
         >
           {([1, 2] as const).map((lp) => (
-            <BandToggleItem
-              key={lp}
-              value={String(lp)}
-              title={slotName({ lp, role: me.role })}
-              className="min-w-9 data-[state=on]:bg-highlight data-[state=on]:text-highlight-foreground"
-            >
+            <BandToggleItem key={lp} value={String(lp)} title={slotName({ lp, role: me.role })} className="min-w-9">
               {lp}
             </BandToggleItem>
           ))}
@@ -124,11 +110,15 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
   );
 }
 
-/** A toggle item on the header's slate band: light lines and text, and a faint hover. */
+/** A toggle item on the header's slate band: light lines and text, a faint hover, and celery for the
+    one you picked, as for the tab you are on. */
 function BandToggleItem({ className, ...props }: ComponentProps<typeof ToggleGroupItem>) {
   return (
     <ToggleGroupItem
-      className={cn("border-header-foreground/40 text-header-foreground hover:bg-white/10 hover:text-header-foreground", className)}
+      className={cn(
+        "border-header-foreground/40 text-header-foreground hover:bg-white/10 hover:text-header-foreground data-[state=on]:bg-highlight data-[state=on]:text-highlight-foreground",
+        className,
+      )}
       {...props}
     />
   );

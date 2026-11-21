@@ -138,7 +138,8 @@ make sure that each one still matches the code before you start it.
     836996, 5E7A97, 4E7E5A); its mauve and green were left out, because purple means "saved for
     later" and green means right. The owner rejected an accent that follows the role (DPS red
     looks like "wrong"), and brighter accents (teal, magenta, yellow, coral) as too bright. The
-    selected Role shows its game colour; the rest of the chrome has none. Fonts: Saira Condensed
+    selected Role and Group are celery, like the tab you are on; the Role does not take its game
+    colour, so the header never changes colour. The chrome has no other colour. Fonts: Saira Condensed
     for names, tabs, headings and big numbers, Source Sans 3 for text, both bundled.
   - Light and dark mode with a Light / Dark / System menu, as in shadcn/ui's dark mode guide for
     Vite: our own ThemeProvider sets the class on <html> (next-themes renders a script tag that
