@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Fight, FightSeg } from "../../data/fight";
 import { FightFrameContext, type FrameFn, useFightFrame } from "../../hooks/useFightFrame";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 import {
   type Answered,
   activeSeg,
@@ -91,6 +92,8 @@ export function FightScreen({
   /** Counts "Watch the spawns again": the arena draws anew, so its spawns play again. */
   const [replays, setReplays] = useState(0);
   const score = useProgressStore((s) => s.score);
+  /** A wide screen: the cast bar, prompt and controls sit beside the arena (the lg breakpoint). */
+  const wide = useMediaQuery("(min-width: 1024px)");
 
   /** Draw what changed: the view when its key changed, and every part that moves. */
   function refresh(): void {
@@ -216,8 +219,9 @@ export function FightScreen({
   }, []);
 
   const arena = (
-    // The whole arena fits on the screen, with room for the run's bar under it.
-    <ArenaFrame below={mode === "run" ? RUN_BAR_ROOM : 0}>
+    // The whole arena fits on the screen, with room for the run's bar under it when the bar is
+    // under it (on a narrower screen).
+    <ArenaFrame below={mode === "run" && !wide ? RUN_BAR_ROOM : 0}>
       <FightArena
         view={view}
         slot={slot}
@@ -259,11 +263,16 @@ export function FightScreen({
 
   return (
     <FightFrameContext value={frames}>
-      {mode === "run" ? (
-        <div className="mx-auto max-w-xl space-y-3">
+      {/* On a wide screen the arena has the left column to itself, from the top, so it can use the
+          screen's whole height; the cast bar, the prompt and the controls sit beside it. On a
+          narrower screen they stack: the cast bar and prompt, the arena, then the controls. */}
+      <div className="grid grid-cols-1 gap-x-6 gap-y-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:grid-rows-[auto_1fr]">
+        <div className="min-w-0 lg:col-start-2 lg:row-start-1">
           <FightHud />
-          {arena}
-          <div className="flex items-center gap-3">
+        </div>
+        <div className="min-w-0 lg:col-start-1 lg:row-span-2 lg:row-start-1">{arena}</div>
+        {mode === "run" ? (
+          <div className="flex min-w-0 flex-wrap items-center gap-3 self-start lg:col-start-2">
             <RunProgress />
             <Button variant="outline" onClick={togglePause}>
               {view.look ? "Go" : view.paused ? "Resume" : "Pause"}
@@ -272,16 +281,8 @@ export function FightScreen({
               Quit
             </Button>
           </div>
-        </div>
-      ) : (
-        // On a wide screen the play bar goes beside the arena, at the top of the panel, so the arena
-        // can use the screen's whole height. On a phone it comes under the arena.
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
-          <div className="min-w-0 space-y-3">
-            <FightHud />
-            {arena}
-          </div>
-          <div className="min-w-0 space-y-4">
+        ) : (
+          <div className="min-w-0 space-y-4 lg:col-start-2">
             <FightPlayBar
               end={fight.end}
               marks={fight.segs.map((g) => g.from)}
@@ -296,8 +297,8 @@ export function FightScreen({
             />
             <FightPanel view={view} fight={fight} speed={speed} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </FightFrameContext>
   );
 }

@@ -150,6 +150,10 @@ make sure that each one still matches the code before you start it.
     is in view; at most 720 px, and at least 360 px, so it fills a phone's width. The header
     takes two rows on a wide screen (the strats beside the name, Role and Group beside the tabs),
     so the arena gets more room.
+  - Pressure on a wide screen (lg and up): the arena has the left column to itself, from the top;
+    the cast bar, the prompt and the controls sit beside it. The countdown ring stays on the
+    arena, around the boss. At 1280 x 800 the arena went from 494 to about 600 px. Three columns
+    were turned down: the height limits the arena, so a third column would only narrow it.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what
