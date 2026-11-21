@@ -24,6 +24,11 @@ export interface ArenaFrameProps {
   below?: number;
   /** What sits right under the floor, as wide as the floor. Count its height in `below`. */
   under?: ReactNode;
+  /** What sits right over the picture, as wide as the floor. */
+  over?: ReactNode;
+  /** The arena fills its column, up to ARENA_MAX, however tall the screen is: the page scrolls to
+      it, as on a phone. */
+  fill?: boolean;
   /** A column drawn right against the floor's right edge and as tall as the floor, so it reads as
       part of the arena. It gives itself a width; keep that much room to the right of the frame. */
   beside?: ReactNode;
@@ -49,14 +54,15 @@ const FLOOR_SIDE = pct(-ARENA_VIEW.x, ARENA_VIEW.width);
     arena is in view, and never wider than ARENA_MAX. On a short screen it keeps at least
     ARENA_MIN, so on a phone it fills the width. Things drawn over the arena (the 3-2-1,
     a result) can sit in it with absolute positions. */
-export function ArenaFrame({ children, below = 0, under, beside, before, className }: ArenaFrameProps) {
+export function ArenaFrame({ children, below = 0, over, under, beside, before, fill = false, className }: ArenaFrameProps) {
   const [ref, height] = useFitToScreen<HTMLDivElement>(below + SCREEN_MARGIN);
   return (
     <div
       ref={ref}
       className={cn("relative mx-auto w-full", className)}
-      style={{ maxWidth: height === undefined ? ARENA_MAX : Math.max(ARENA_MIN, Math.min(ARENA_MAX, height * ARENA_ASPECT)) }}
+      style={{ maxWidth: fill || height === undefined ? ARENA_MAX : Math.max(ARENA_MIN, Math.min(ARENA_MAX, height * ARENA_ASPECT)) }}
     >
+      {over && <div style={{ marginInline: FLOOR_SIDE }}>{over}</div>}
       <div className="relative">
         {children}
         {/* The side columns are placed by the floor's edges in the picture, as shares of the frame,

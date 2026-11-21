@@ -71,3 +71,17 @@ test("what sits under the arena lines up with the floor's sides", () => {
   const under = screen.getByText("play bar").parentElement as HTMLElement;
   assert.equal(under.style.marginInline, `${(4 / 108) * 100}%`);
 });
+
+test("a filling arena keeps its full size, however short the screen", () => {
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 600, 100, 100));
+  Object.defineProperty(window, "innerHeight", { configurable: true, value: 700 });
+  render(
+    <ArenaFrame fill over={<p>mechanic</p>}>
+      <p>arena</p>
+    </ArenaFrame>,
+  );
+  const frame = screen.getByText("arena").parentElement?.parentElement as HTMLElement;
+  assert.equal(frame.style.maxWidth, "720px");
+  // What sits over it lines up with the floor's sides.
+  assert.equal((screen.getByText("mechanic").parentElement as HTMLElement).style.marginInline, `${(4 / 108) * 100}%`);
+});

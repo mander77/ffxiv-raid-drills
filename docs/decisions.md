@@ -200,7 +200,9 @@ make sure that each one still matches the code before you start it.
     and the mechanic over the arena, then the play bar and the casts coming up, sideways
     (`CastStrip`), under it. The sideways line is CastList lying down: the casts slide left to a
     now mark, their names wrapped under their squares, so a phone keeps the casts coming up.
-    `ArenaFrame`'s `under` lines them up with the floor's sides. The owner turned down the mix (the
+    `ArenaFrame`'s `over` and `under` line the column up with the floor's sides. In one column the
+    arena keeps its full size (`fill`: up to 720 px, or the screen's width) and the page scrolls, as
+    on a phone (owner's choice): it does not shrink to make room for the mechanic and the bars. The owner turned down the mix (the
     mechanic on the left, the bars under the arena) as looking wrong. The three columns start at
     1024 px, not 1280: there the arena is larger beside its columns (528 px at 1209 x 732, a screen
     at 150% zoom).

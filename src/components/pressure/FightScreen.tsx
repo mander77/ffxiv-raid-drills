@@ -224,16 +224,11 @@ export function FightScreen({
   }, []);
 
   /** The arena, with what sits against its floor: columns before and beside it, and what sits under it. */
-  const arenaWith = ({ before, beside, under, className }: ArenaSides = {}) => (
-    // The whole arena fits on the screen, with room for what sits under it: the player's play bar
-    // and casts below a wide screen, or the run's bar below a wide one.
-    <ArenaFrame
-      below={wide ? 0 : mode === "watch" ? UNDER_ROOM : RUN_BAR_ROOM}
-      before={before}
-      beside={beside}
-      under={under}
-      className={className}
-    >
+  const arenaWith = ({ before, beside, over, under, fill, className }: ArenaSides = {}) => (
+    // On a wide screen the whole arena fits on the screen. Below that, the run keeps room for its
+    // bar under the arena, and the player's arena fills its column (`fill`): the page scrolls, as
+    // on a phone.
+    <ArenaFrame below={wide ? 0 : RUN_BAR_ROOM} before={before} beside={beside} over={over} under={under} fill={fill} className={className}>
       <FightArena
         view={view}
         slot={slot}
@@ -309,6 +304,13 @@ export function FightScreen({
     </div>
   );
   /** Under the arena, below a wide screen: the play bar over the casts coming up, sideways. */
+  /** Over the arena, below a wide screen: the cast bar over the mechanic. */
+  const castAndMechanic = (
+    <div className="space-y-3 pb-2">
+      <CastBar />
+      {mechanicPanel}
+    </div>
+  );
   const playAndCasts = (
     <div className="space-y-2">
       {playBar}
@@ -345,11 +347,7 @@ export function FightScreen({
           // A narrower screen: everything in one column. The cast bar over the mechanic first, then
           // the arena, with the play bar and the casts coming up, sideways, under it. Never half of
           // each (owner's choice): the columns sit either both beside the arena or above and below it.
-          <div className="space-y-3">
-            <CastBar />
-            {mechanicPanel}
-            {arenaWith({ under: playAndCasts })}
-          </div>
+          arenaWith({ over: castAndMechanic, under: playAndCasts, fill: true })
         )
       ) : wide ? (
         // A wide screen, the run: the arena as large as the screen allows, with the cast bar, the
@@ -376,15 +374,14 @@ export function FightScreen({
 /** The room under the arena for the run's bar or the player's play bar, with the gap above it, in
     pixels. The app's choice. */
 const RUN_BAR_ROOM = 48;
-/** The room under the arena for the play bar (76 px) and the sideways casts (96 px), with the gap
-    between them, in pixels. */
-const UNDER_ROOM = 180;
 
 /** What sits against the arena's floor; see ArenaFrame. */
 interface ArenaSides {
   before?: ReactNode;
   beside?: ReactNode;
+  over?: ReactNode;
   under?: ReactNode;
+  fill?: boolean;
   className?: string;
 }
 
