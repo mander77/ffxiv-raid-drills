@@ -18,6 +18,7 @@ fi
 
 npm run typecheck
 npm test
+npm run lint
 
 prev=$(gh api user --jq .login)
 trap 'gh auth switch --hostname github.com --user "$prev" >/dev/null 2>&1 || true' EXIT

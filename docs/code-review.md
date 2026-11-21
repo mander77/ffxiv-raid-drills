@@ -1,7 +1,8 @@
 # TypeScript code review
 
-The owner asked a fresh agent for a code review with the prompt below. The review led to the
-Preact plan in issues #3 to #10 (see `docs/decisions.md`). Run the prompt again after large
+The owner asked a fresh agent for a code review with the prompt below. The first review led to a
+Preact plan, which the owner later replaced with a React rebuild (issues #18 to #22, see
+`docs/decisions.md`). Run the prompt again after large
 changes. Change the repository path in it to your clone. The review only reads: it must not edit,
 commit or push.
 
@@ -17,11 +18,12 @@ THE APP
 - Repo: ~/repos/ffxiv-raid-drills (GitHub mander77/ffxiv-raid-drills, branch main).
   Other sessions can work in this checkout. Read only. Do not switch branches or touch
   uncommitted files.
-- A static single-page app: TypeScript (strict, noUnusedLocals), Vite, Vitest, Node 24, no
-  UI framework. Views build HTML strings and set innerHTML. Deployed on Cloudflare Workers.
-- Layout: src/{main,core,util,geometry,arena,router,share,types}.ts, src/views/*.ts,
-  src/data/*.ts, src/styles.css, test/*.test.ts.
-- Commands: npm run typecheck, npm test, npm run build. Run them to get a baseline.
+- A static single-page app: React 19, TypeScript (strict, noUnusedLocals), Vite, Tailwind CSS
+  and shadcn/ui, React Router, Zustand, Vitest, Playwright, Biome, Node 24. Deployed on
+  Cloudflare Workers.
+- Layout: see the code map in CLAUDE.md. Pages in src/pages/, components in src/components/,
+  hooks in src/hooks/, stores in src/stores/, fight data in src/data/, tests in test/ and e2e/.
+- Commands: npm run typecheck, npm test, npm run lint, npm run build. Run them to get a baseline.
 
 LONG-TERM DIRECTION
 The plan is to support many raid fights (M11S is the first) and every role: tanks, healers,

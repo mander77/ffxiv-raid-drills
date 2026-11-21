@@ -7,41 +7,10 @@
 <meta name="robots" content="noindex">
 <title>FFXIV Raid Drills &middot; M11S</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231B7448'/%3E%3Cpath d='M13 6h6v7h7v6h-7v7h-6v-7H6v-6h7z' fill='%23fff'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500&display=swap">
-<script type="module" src="/src/main.ts"></script>
+<script type="module" src="/src/main.tsx"></script>
 </head>
 <body>
-<header class="top">
-  <div class="wrap">
-    <div class="topin">
-      <div class="brand">
-        <h1>FFXIV <span>Raid</span> Drills</h1>
-        <p><span><strong>M11S</strong> &middot;</span> <span>The Tyrant (Savage) &middot;</span> <span>Hector/Toxic &middot;</span> <span>Kindred No Buddies split &middot;</span> <span>Fixed (3CJ) Ecliptic</span></p>
-      </div>
-      <div class="topact">
-        <button type="button" class="sharetop" id="share" title="Share a link to this screen as it is now">
-          <svg class="shareicon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M8 10H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-2"/></svg>
-          <span class="sharelbl">Share</span>
-        </button>
-        <div class="slot">
-          <div class="slotpart">
-            <span class="lbl" id="role-lbl">Role</span>
-            <div class="seg small" role="group" aria-labelledby="role-lbl" id="roles"></div>
-          </div>
-          <div class="slotpart">
-            <span class="lbl" id="party-lbl">Group</span>
-            <div class="seg small" role="group" aria-labelledby="party-lbl" id="parties"></div>
-          </div>
-          <span class="soontip" id="soontip" role="status"></span>
-        </div>
-      </div>
-    </div>
-    <nav class="tabs" id="tabs" role="tablist" aria-label="Drill types"></nav>
-  </div>
-</header>
-
-<main class="wrap" id="view" tabindex="-1"></main>
+<!-- React draws the whole site into #root (src/main.tsx). -->
+<div id="root"></div>
 </body>
 </html>

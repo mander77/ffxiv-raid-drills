@@ -13,7 +13,11 @@ tokens or account details.
   Today it has one fight and one role. More roles and fights can come later.
 - The owner is the GitHub account `mander77`. The owner plays a healer in a static and shares the
   live link with the static.
-- Live site: https://ffxiv-raid-drills.app (built from `main`).
+- Live site: https://ffxiv-raid-drills.app (built from `main`). It runs the old version of the
+  site until the React rebuild is done.
+- The rebuild happens on the `rebuild` branch (issues #18 to #22). Its preview is
+  https://rebuild.test.ffxiv-raid-drills.app. Each rebuild step is a branch from `rebuild` and a
+  pull request into `rebuild`. When every tab is back, `rebuild` merges into `main` in one go.
 - Branch previews: `https://<branch>.test.ffxiv-raid-drills.app/`. The bare `test.` host does not
   load.
 - Hosting: Cloudflare Workers Builds on the owner's personal Cloudflare account. Each push builds.
@@ -32,15 +36,15 @@ claim on the live site before you act on it.
 
 ## Tabs and routes
 
+On the `rebuild` branch:
+
 | Tab | Route | What it does |
 |-----|-------|--------------|
-| Home | `/` | "Start here" cards, an arena picture from a Learn card, and About me. |
-| Learn | `/mech/<card>` | Quiz cards with arena pictures. Pick an answer to see it, then Lock in. Back, Next and one chip per mechanic. |
-| Practice | `/map/<drill>[/<code>]` | Click where you stand, one mechanic at a time. Show me, Again, New pattern. |
-| Timeline | `/next/<card>` | Which mechanic comes next, with a cactbot-style list. |
-| Pressure | `/pressure` | A quick round of 12 timed questions, or the full fight: "Start the run" (scored) and "Watch the right moves" (a replay). |
-| Pressure, player | `/pressure/<code>[/<picks>][?t=s]` | A shared link opens "Watch the right moves" at that fight pattern and moment. |
 | Cheat sheet | `/sheet` | One line per mechanic, the timeline for your role, and sources. |
+
+Any other address opens the Cheat sheet for now. The other tabs come back one rebuild step at a
+time: Home, Learn and Timeline (#20), Practice (#21), and Pressure with the full fight (#22). The
+live site on `main` still has them all, and git history keeps their old code (`src/views/`).
 
 The slot switch is in the header: the role (only Healer works today; the others show "not yet
 available") and the group, which is the light party (1 or 2, as wtfdig names it). Each drill and question builds its answer for the
@@ -59,7 +63,8 @@ one worked before you go on:
    `git config user.name mander77` and
    `git config user.email 220622142+mander77@users.noreply.github.com`.
    Then run `git var GIT_AUTHOR_IDENT` and make sure that it shows this name and address.
-5. Run `npm ci`, then `npm run typecheck` and `npm test`.
+5. Run `npm ci`, then `npm run typecheck` and `npm test`. For the browser tests, run
+   `npx playwright install` once, then `npm run e2e`.
 6. If mise is installed, run `mise trust mise.toml` in the clone.
 
 ## Commands
@@ -70,21 +75,34 @@ You need Node.js 24 (the version in `.node-version`).
 npm ci              # install
 npm run dev         # local site; add -- --port 5174 --strictPort for a second checkout
 npm run typecheck   # tsc, strict
-npm test            # Vitest
+npm test            # Vitest: unit and component tests
+npm run e2e         # Playwright: browser tests in Chromium, Firefox and WebKit
+npm run lint        # Biome: lint and format check
+npm run format      # Biome: format and fix
 npm run build       # tsc, then Vite writes dist/
 ```
 
 ## Code map
 
 ```text
-src/main.ts          start-up, tabs, links, keyboard keys
-src/router.ts        routes: parseRoute, routeLink, showRoute
-src/core.ts          shared state, tabs, decks, scores, the MapCur and McqCur types
+index.html           the page: React draws into #root
+src/main.tsx         start-up: draws the React app (App.tsx) into #root
+src/App.tsx          the header and the routes (React Router): one page per path
+src/app.css          Tailwind and the standard shadcn/ui theme, the ability category colours
+src/arena.css        the arena pictures' SVG styles
+src/tabs.ts          the tabs: path, label and one-line intro; tabOf
+src/share.ts         sharing the address of the page
+src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser
+src/components/      React components: Header, SlotSwitch, ShareButton, TabNav, Marks, CatKey
+src/components/ui/   shadcn/ui components, as the shadcn CLI writes them
+src/pages/           React pages, one per route: CheatSheetPage (/sheet)
+src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab
+src/lib/             cn() for class names, WRAP for the page width
 src/types.ts         drills, steps, zones, overlays, questions
+src/party.ts         party slots: roles, light parties, slot names
 src/util.ts          helpers, LS (localStorage with the "m11s." prefix), seeded random
 src/geometry.ts      arena geometry: zones, rotation, inZone
 src/arena.ts         SVG drawing: arenaSVG with layers, drawBoss, figSVG, sceneSVG
-src/share.ts         the Share button
 src/data/drills.ts   Practice drills (MAPS), scenes, safe spots, stack and spread rules
 src/data/figs.ts     Learn card pictures (MECH_FIGS)
 src/data/questions.ts  Learn cards (MECH, MECH_GROUPS) and Timeline cards (NEXT_ITEMS)
@@ -93,29 +111,19 @@ src/data/route.ts    the moving marker's route (rightRoute, clickRoute, runnerAt
 src/data/timeline.ts the fight timeline and "what you do" per row
 src/data/abilities.ts  the ability list, phases and colour categories
 src/data/attacks.ts  attack sizes and shapes (from BossMod). Put new sizes here.
-src/views/home.ts    Home
-src/views/quiz.ts    Learn and Timeline cards, and the quick round's card
-src/views/practice.ts  Practice
-src/views/pressure.ts  Pressure start screen and the quick round
-src/views/fight.ts   the full fight: the run and the player
-src/views/map.ts     paintArena: the answer layers that Practice and the fight share
-src/views/sheet.tsx  Cheat sheet (the first screen built with Preact)
-src/views/tlfig.ts   the Timeline card picture
-src/views/tlnav.tsx  colour marks for the timeline categories (as text and as components)
-src/views/pattern.ts fight pattern picks (Settings on the player)
-src/views/common.ts  tab header, mountView (draws a Preact screen), HUD prompt, fadeEdges, round-done panel
-test/                Vitest tests
+test/                Vitest tests; test/components and test/pages for React
+e2e/                 Playwright browser tests
 ```
 
 ## How to work with the owner
 
-1. Make a branch from the latest `main`. When another session can use the main checkout, work in
-   a git worktree, for example
-   `git worktree add -b <branch> ../ffxiv-raid-drills-<name> origin/main`, and run `npm ci` there.
+1. Make a branch from the latest `rebuild` (for a rebuild step) or `main` (for a fix to the live
+   site). When another session can use the main checkout, work in a git worktree, for example
+   `git worktree add -b <branch> ../ffxiv-raid-drills-<name> origin/rebuild`, and run `npm ci` there.
    If mise is installed, run `mise trust <worktree>/mise.toml` once.
 2. Run the dev server and check the change in a browser at desktop width (1280 px) and phone width
    (375 px). Measure positions in the page. Do not guess.
-3. Run the type check and the tests.
+3. Run the type check, the tests (`npm test` and `npm run e2e`) and `npm run lint`.
 4. Commit. The header is a Conventional Commit (`feat:`, `fix:`, `chore:`). The body is plain,
    simple English: short sentences, active voice, what changed for the player and why. Write the
    message to a file and run `git commit -F <file>`.
@@ -123,6 +131,11 @@ test/                Vitest tests
    browser before a publish. Publish only after the owner says so.
 
 ## How to publish
+
+A rebuild step: run `sh scripts/publish.sh` from the step's branch (it checks, then pushes), and
+open a pull request into `rebuild` with `gh pr create --base rebuild`. The owner reviews it on the
+branch preview and merges it. The steps below are for `main`, the live site: a fix to the live
+site, and at the end, the merge of `rebuild` into `main`.
 
 1. `git fetch origin`, then make sure that the branch contains `origin/main`:
    `git merge-base --is-ancestor origin/main <branch>`. Another session can publish in between. If
@@ -161,6 +174,27 @@ test/                Vitest tests
 - Light theme only. No company branding.
 - Code comments: plain English. No ticket numbers, no history of old layouts.
 - Build the simplest shape for today's need. Do not add hooks for features nobody asked for.
+- The site is built with React, Tailwind CSS and shadcn/ui, in the usual React shape:
+  - A component used by more than one page gets its own file in `src/components/`, named after
+    it (`SlotSwitch.tsx` exports `SlotSwitch`). A page (one per route) goes in `src/pages/` and
+    is named `<Name>Page`. A custom hook goes in `src/hooks/` and its name starts with `use`. A
+    small part that only one page uses stays in that page's file.
+  - Function components with named exports. The props are a named interface, `<Name>Props`.
+  - State in hooks (`useState`), or in a Zustand store (`src/stores/`) when more than one page
+    needs it. Events are JSX props (`onClick`). Do not change a React element's classes or add
+    listeners to it by hand.
+  - What a click starts belongs in its click handler (`handleClick`), not in an effect. An effect
+    (`useEffect`) is only for keeping in step with something outside React, such as a window
+    event. A timer from a handler uses `useTimeout`.
+  - Use shadcn/ui for common controls (`npx shadcn@latest add <name>`) with its standard theme
+    and variants (`<Button variant="outline">`). Use Tailwind's standard sizes and colours
+    (`text-sm`, `text-muted-foreground`), not exact pixels. The owner chose the default look over
+    the old site's look.
+  - Each component and page has a test in `test/components/` or `test/pages/`. Find elements by role and
+    text, the way a player would.
+  - Add new files to `files.includes` in `biome.json`, so Biome checks them.
+- Leave `src/data/` and `src/geometry.ts` as they are when you rebuild a tab. They are checked
+  against cactbot and BossMod.
 - The player marks are always the top layer of an arena picture.
 - New attack sizes go in `src/data/attacks.ts`, not in a drill or a picture.
 - A drill pattern comes from a seeded code (`withSeed`), so the same code builds the same pattern.
@@ -192,8 +226,9 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
 
 - Issue #2: a reference view of every mechanic in fight order, with the site's diagrams. Two
   questions are open for the owner. Ask them before you build it.
-- Issues #5 to #10 (label "preact"): move the views to Preact, one phase per issue and per branch,
-  in order. Phases 0 (#3) and 1 (#4) are done, so the next one is phase 2 (#5).
+- Issues #18 to #22 (label "rebuild"): rebuild the site in React on the `rebuild` branch, one
+  step per issue and per branch, in order. Rebuild 1 (#18) is done, so the next one is Rebuild 2
+  (#19). Each step brings its tabs back; the old code is in git history on `main`.
   `docs/decisions.md` has the decisions behind the plan.
 - Issue #11: make the repository self-contained, so a clone plus one step gives every tool. Three
   questions are open for the owner.

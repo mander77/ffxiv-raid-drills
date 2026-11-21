@@ -26,35 +26,48 @@ make sure that each one still matches the code before you start it.
   the site's diagram for your role, a summary of one to three lines, and a link to wtfdig. Two
   questions are still open for the owner: does it live on the Cheat sheet or in a new tab, and is
   it one scrolling page or one mechanic at a time?
-- Issues #3 to #10, label "preact": move the views to Preact, one phase at a time. Each issue
-  depends on the one before it. Work one issue per branch, in order, in later sessions.
-  - The owner chose Preact to learn it while the app is small, and because the app will grow.
-    Svelte and a full rewrite (Blazor, Elm) were rejected. Only the view layer changes. The data
-    and the engine stay plain TypeScript.
-  - Phase 0 (#3) comes first: remove dead code, and move M11S names and the 660-second end time
-    out of the engine code.
-  - The arena SVG stays as strings (`arenaSVG`, `paintArena`) inside the components for now. The
-    fight's per-frame updates stay direct DOM changes.
-  - Shared state uses `@preact/signals`. Phase 7 (#10) adds Biome and knip.
-  - Phase 1 (#4, done): Preact 11 with the JSX settings in tsconfig.json only. Vite compiles the
-    JSX itself, so there is no `@preact/preset-vite` and no Babel. The cost: no hot reload that
-    keeps component state (the page reloads), and no Preact devtools hook. `@preact/signals` is
-    not installed yet. The Cheat sheet keeps its one bit of state in `useState`, so the phase
-    that first shares state between screens adds it. A Preact screen draws into its own root
-    inside #view (`mountView` in `src/views/common.ts`), so the screens that still set
-    innerHTML cannot break it.
-  - Keep the `TS note:` comments, and add notes for the Preact features too.
-  - Use only Preact's core API: `preact`, `preact/hooks` and `@preact/signals`. Do not use
-    `preact/compat` or features that only Preact has. Then a later move to React is close to a
-    rename, and the owner does not have to learn a second model.
-  - A second review (November 20) checked the choice again, with a full rewrite in any language
-    allowed and "pick once, never relearn" as the main rule. It still picked Preact, with React as
-    the fallback. Blazor WebAssembly lost on download size and start time on phones, and on the
-    cost of porting the data and the seeded random numbers. Svelte 5 lost because its reactivity
-    already changed once (runes).
+- Issues #18 to #22, label "rebuild": rebuild the site in React, one step per issue and per
+  branch, in order. Each step brings its tabs back.
+  - Why: the owner set new long-term goals. The site must be easy to maintain, simple, fast and
+    the same in every browser, and it should use trusted standard libraries over home-made code.
+    The owner was fine with a full rebuild, so React won as the most widely known choice.
+    Tailwind and shadcn/ui replace the hand-written CSS and controls, and Playwright tests in
+    Chromium, Firefox and WebKit check every browser.
+  - November 21: the owner switched from the Preact plan to this rebuild. Pull request #17
+    (Preact phase 2) was closed without a merge, and issues #5 to #10 were closed as not
+    planned. Phases 0 and 1 of the Preact plan were published. Svelte, Blazor WebAssembly and Elm
+    were rejected earlier, and that still stands: Blazor on download size and start time on
+    phones, Svelte because its reactivity already changed once (runes).
+  - November 21, later: the rebuild starts from scratch on its own branch, `rebuild`. The owner
+    dropped the old tabs there and chose the default Tailwind and shadcn/ui look over the old
+    site's look. Each step is a branch from `rebuild` and a pull request into it. The live site
+    stays on `main`, with the old version and all its tabs, until every tab is back. Then
+    `rebuild` merges into `main` in one go. The old code stays in git history on `main`.
+  - The stack: React 19, TypeScript and Vite; Tailwind CSS v4 and shadcn/ui (Radix) with its
+    standard theme; React Router for the routes; Zustand with `persist` for state kept in the
+    browser; Vitest and Testing Library for unit tests; Playwright on Chromium, Firefox and
+    WebKit for browser tests; Biome to lint and format; lucide-react for icons. Hosting stays on
+    Cloudflare.
+  - Keep `src/data/` and `src/geometry.ts` as they are. They are checked against cactbot and
+    BossMod. `arena.ts` still draws the arena pictures as SVG text, styled by `arena.css`, until
+    Rebuild 2 (#19) turns them into components.
+  - The arena stays SVG, drawn by React components, not a canvas or a game library. The full
+    fight's per-frame parts run in a requestAnimationFrame loop that updates elements through refs.
+  - Rebuild 1 (#18): the header and the Cheat sheet, in the default look. Any other address opens
+    the Cheat sheet until its tab is back. The Cheat sheet lost its "Learn →" links and "Your
+    progress" box for now: Learn and the scores come back in later steps.
+  - The slot is in a Zustand store (`src/stores/slot.ts`), saved under "raid-drills-slot".
+  - The React code follows the usual React layout, so a React developer finds things at once:
+    `pages/` (one per route), `components/` (shared parts), `components/ui/` (shadcn/ui, as its
+    CLI writes them), `hooks/`, `stores/` and `lib/`. Click logic lives in handlers, not in
+    effects (React's "You might not need an effect").
+  - Biome checks the new code (`files.includes` in `biome.json`), not `src/data/` and the other
+    files kept from the old site.
+  - The bundle is 129 kB (gzip), from 61.5 kB for the old site with every tab. React DOM is about
+    65 kB of that, and Radix and floating-ui, behind the tooltip and the toggles, about 35 kB.
+  - Keep the `TS note:` comments, and add notes for the React features too.
 - Issue #11: make the repository self-contained. A new person should get Node 24, the GitHub CLI
   and the other tools in one step after the clone.
-- Issue #12: shared helpers, from a second code review. Do it before Phase 5 (#8).
 - Party slots (#13, done). A slot has two parts, the light party (1 or 2) and the role (Tank,
   Healer, Melee, Ranged). Casters count as Ranged. The header shows both parts. The light party control is labelled "Group", with 1 and 2, as on wtfdig. The owner chose
   to show every role now: a role with no drills yet is greyed out, and pointing at it, focusing

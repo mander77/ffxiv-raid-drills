@@ -11,7 +11,7 @@ Browsers run JavaScript only. TypeScript is JavaScript with type annotations. Th
 Two tools share the work in this project:
 
 1. `tsc`, the TypeScript compiler, checks the types. It writes no files. Run it with `npm run typecheck`.
-2. Vite compiles the TypeScript and the JSX, bundles the modules and serves the site. Run it with `npm run dev` or `npm run build`.
+2. Vite compiles the TypeScript and the JSX (with its React plugin), bundles the modules and serves the site. Run it with `npm run dev` or `npm run build`.
 
 C# keeps type information at run time. TypeScript does not. When the code runs, a type such as `Slot` does not exist. The code cannot ask "is this value a Slot?", so it checks the value itself, for example `s === "H1"`.
 
@@ -32,14 +32,16 @@ C# keeps type information at run time. TypeScript does not. When the code runs, 
 - `ReturnType<typeof f>`, the type a function returns. `typeof` reads the type of a value, here a function, and `ReturnType` takes its result. C# has no direct match; you would write the type out. See the Share timer in `src/share.ts`.
 - `readonly T[]`. A list the code cannot change: no push, no new entries. The closest C# match is `IReadOnlyList<T>`. See `ROLES` in `src/party.ts` and `MAPS` in `src/data/drills.ts`.
 - `satisfies`. It checks that a value fits a type, but keeps the value's own, narrower type. With `as const` it checks a fixed list and keeps every exact value. C# has no direct match. See `NAMES` in `src/party.ts` and `CHOICE_ROWS` in `src/data/fight.ts`.
-- `Record<K, V>`. An object used as a map, like `Dictionary<K, V>`. When `K` is a union, the compiler requires an entry for every member. See `QUIZ_POOLS` in `src/core.ts`.
-- Overloads. Several signatures share one implementation, and that implementation must handle every case. See `getDeck()` in `src/core.ts`.
-- `?.`, `??` and `??=`. They work as in C#. See `go()` in `src/main.ts` and `getDeck()` in `src/core.ts`.
+- `Record<K, V>`. An object used as a map, like `Dictionary<K, V>`. When `K` is a union, the compiler requires an entry for every member. See `DOT` in `src/components/Marks.tsx`.
+- `?.`, `??` and `??=`. They work as in C#. See `sceneSVG()` in `src/arena.ts`.
 - `unknown` and `any`. `unknown` is like `object`: you must check the value before you use it. `any` is like `dynamic`: it turns checking off. This project does not use `any`. See `src/util.ts`.
 - Modules. Each file is a module. `export` makes a name public, and `import { name } from "./file"` brings it in. There are no namespaces. The closest C# match is a file-scoped namespace plus `using`.
-- JSX, the HTML-like tags in `.tsx` files, such as `<li><b>{name}:</b> {text}</li>`. The compiler turns each tag into a call to Preact and checks every tag and attribute. `{...}` inside a tag runs TypeScript. The closest C# match is a Razor component. See `src/views/sheet.tsx`.
-- Components and props. A Preact component is a function that takes one props object and returns JSX. An interface types the props, like a method's parameter list: `function Rule({name, text, card}: RuleProps)`. See `Rule` in `src/views/sheet.tsx` and `Marks` in `src/views/tlnav.tsx`.
-- Hooks, such as `const [confirm, setConfirm] = useState(false)`. A hook keeps a value between draws of a component, and calling the setter draws it again. The type comes from the first value. The closest C# match is a field in a Blazor component plus `StateHasChanged()`. See `Sheet` in `src/views/sheet.tsx`.
+- JSX, the HTML-like tags in `.tsx` files, such as `<li><b>{name}:</b> {text}</li>`. The compiler turns each tag into a call to React and checks every tag and attribute. `{...}` inside a tag runs TypeScript. A CSS class is `className`, not `class`. The closest C# match is a Razor component. See `src/pages/CheatSheetPage.tsx`.
+- Components and props. A React component is a function that takes one props object and returns JSX. An interface named `<Name>Props` types the props, like a method's parameter list: `function Rule({ name, text, card }: RuleProps)`. See `Rule` in `src/pages/CheatSheetPage.tsx` and `Marks` in `src/components/Marks.tsx`.
+- Hooks, such as `const [confirm, setConfirm] = useState(false)`. A hook keeps a value between draws of a component, and calling the setter draws it again. The type comes from the first value. The closest C# match is a field in a Blazor component plus `StateHasChanged()`. See `CheatSheetPage` in `src/pages/CheatSheetPage.tsx`.
+- `useEffect` runs code after a draw, and again when a value in its list changes. The function it returns cleans up, like `Dispose`. `useRef` holds a value, often an element, without drawing again. See `TabNav` in `src/components/` and `useTimeout` in `src/hooks/`.
+- Custom hooks, such as `useTimeout()`. A function whose name starts with `use` and that calls other hooks. It shares behaviour between components, like a small helper class with its own state. See `src/hooks/`.
+- A Zustand store, such as `useSlotStore`. It keeps state outside the components, like a singleton service in C# that raises a change event. A component reads it with `useSlotStore((s) => s.slot)` and draws again when that value changes. See `src/stores/slot.ts`.
 - `import type`. It imports names that the compiler needs for checking only. C# has no equivalent, because C# types exist at run time. See the top of most files.
 
 ## Unions and narrowing
