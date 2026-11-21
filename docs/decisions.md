@@ -507,5 +507,8 @@ static wins.
 ## Tips
 
 - Vitest hides `console.log` in a passing test. To see a value in a probe test, throw it.
+- A preview answers a deep link such as `/learn` with 404 to a bare `curl`, and with the page to
+  a browser. To test one with curl, send a browser's headers:
+  `curl -H 'Sec-Fetch-Mode: navigate' -H 'Sec-Fetch-Dest: document' <url>`.
 - An arena picture's view box is `-4 -6 108 110`. The row above the floor (y -6 to 0) holds only the
   "N", which is where the player's "Paused" badge sits.
