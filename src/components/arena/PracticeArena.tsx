@@ -7,15 +7,15 @@ import type { Overlay, Point, Scene, StepResult } from "../../types";
 import { Arena, pieceLayers } from "./Arena";
 import { hitsFirst, Shape } from "./Shape";
 import { TurningBoss } from "./TurningBoss";
+import { ZoneLabel } from "./ZoneLabel";
 import { ZoneMark } from "./ZoneMark";
-import { ZoneTag } from "./ZoneTag";
 
 export interface PracticeArenaProps {
   scene: Scene;
   /** How many quarter turns the arena is turned. */
   k: number;
   results: readonly StepResult[];
-  /** Show the last answer on the floor: its area, its tag and your click. */
+  /** Show the last answer on the floor: its area, its label and your click. */
   showLast: boolean;
   /** Show me: the right area for the step asked, in blue with "Go here". */
   hint: boolean;
@@ -134,8 +134,8 @@ export function PracticeArena({ scene: sc, k, results, showLast, hint, onPointCl
         labels: (
           <>
             {base.labels}
-            {last && lastStep && <ZoneTag zone={last.z} tag={lastStep.look ? "later" : "right"} />}
-            {hintZone && hintStep && <ZoneTag zone={hintZone} tag={hintStep.look ? "later" : "go"} />}
+            {last && lastStep && <ZoneLabel zone={last.z} kind={lastStep.look ? "later" : "right"} />}
+            {hintZone && hintStep && <ZoneLabel zone={hintZone} kind={hintStep.look ? "later" : "go"} />}
           </>
         ),
         marks: (

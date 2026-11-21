@@ -6,7 +6,7 @@ import { Arena, LAYERS, pieceLayers } from "../../../src/components/arena/Arena"
 import { ArenaLabel } from "../../../src/components/arena/ArenaLabel";
 import { BossMark } from "../../../src/components/arena/BossMark";
 import { FigPicture } from "../../../src/components/arena/FigPicture";
-import { ZoneTag } from "../../../src/components/arena/ZoneTag";
+import { ZoneLabel } from "../../../src/components/arena/ZoneLabel";
 import { MECH_FIGS } from "../../../src/data/figs";
 import { MECH } from "../../../src/data/questions";
 import type { Overlay } from "../../../src/types";
@@ -78,12 +78,12 @@ test("an arena label is a box with its text, centred on its spot, in its colour"
   assert.include(renderToStaticMarkup(<ArenaLabel at={[40, 20]} text="G1 / H1" w={16} h={4.6} look="ok" />), 'class="zlabel"');
 });
 
-test("a zone tag sits above its zone, or below it at the top edge, and inside the picture", () => {
-  const above = renderToStaticMarkup(<ZoneTag zone={{ c: [50, 50], r: 10 }} tag="right" />);
+test("a zone label sits above its zone, or below it at the top edge, and inside the picture", () => {
+  const above = renderToStaticMarkup(<ZoneLabel zone={{ c: [50, 50], r: 10 }} kind="right" />);
   // 3 units above the circle's top (40): the middle is at 37, so the 4.2-high box starts at 34.9.
   assert.include(above, '<rect x="41.5" y="34.9"');
   assert.include(above, '<text x="50" y="37">Right spot</text>');
-  const below = renderToStaticMarkup(<ZoneTag zone={{ c: [99, 1], r: 3 }} tag="go" />);
+  const below = renderToStaticMarkup(<ZoneLabel zone={{ c: [99, 1], r: 3 }} kind="go" />);
   assert.include(below, 'x="90"', "kept inside the picture on the right");
   assert.include(below, "Go here");
 });
