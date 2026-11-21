@@ -42,8 +42,7 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
   });
 
   return (
-    // The bar sticks to the bottom of the screen while the arena is in view.
-    <div className="sticky bottom-0 z-10 space-y-3 rounded-lg border bg-card p-3">
+    <div className="space-y-3 rounded-lg border bg-card p-3">
       <div className="flex items-center gap-3">
         <Button size="icon" aria-label={paused ? "Play" : "Pause"} onClick={onPlay}>
           {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
@@ -72,7 +71,6 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
           ))}
         </datalist>
         <span ref={time} className="text-sm whitespace-nowrap tabular-nums" />
-        {settings}
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <span id={speedLabel} className="sr-only">
@@ -101,6 +99,7 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
         <Button variant="outline" size="sm" onClick={onNewFight}>
           New fight
         </Button>
+        {settings}
         <span className="text-sm text-muted-foreground pointer-coarse:hidden">
           Click the map or <Kbd>Space</Kbd>: play or pause · <Kbd>←</Kbd> <Kbd>→</Kbd> 5 seconds
         </span>

@@ -23,7 +23,8 @@
       "playwright.config.ts",
       "test/pictures.test.tsx",
       "test/stores/**",
-      "test/lib/**"
+      "test/lib/**",
+      "test/hooks/**"
     ]
   },
   "formatter": {

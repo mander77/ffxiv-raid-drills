@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Fight, FightSeg } from "../../data/fight";
 import { FightFrameContext, type FrameFn, useFightFrame } from "../../hooks/useFightFrame";
+import { useFitToScreen } from "../../hooks/useFitToScreen";
 import {
   type Answered,
   activeSeg,
@@ -22,6 +23,7 @@ import {
 import type { Speed } from "../../stores/pressure";
 import { useProgressStore } from "../../stores/progress";
 import type { Point, Slot } from "../../types";
+import { ARENA_ASPECT } from "../arena/Arena";
 import { CategoryDots } from "../CategoryDots";
 import { FightArena, type ShownHit } from "./FightArena";
 import { FightHud } from "./FightHud";
@@ -90,6 +92,9 @@ export function FightScreen({
   /** Counts "Watch the spawns again": the arena draws anew, so its spawns play again. */
   const [replays, setReplays] = useState(0);
   const score = useProgressStore((s) => s.score);
+  // The whole arena fits on the screen: it is never taller than the room from its top to the
+  // bottom of the screen (less the run's bar under it).
+  const [fit, fitHeight] = useFitToScreen<HTMLDivElement>(mode === "run" ? RUN_BAR_ROOM : SCREEN_MARGIN);
 
   /** Draw what changed: the view when its key changed, and every part that moves. */
   function refresh(): void {
@@ -215,7 +220,11 @@ export function FightScreen({
   }, []);
 
   const arena = (
-    <div className="relative mx-auto w-full max-w-lg">
+    <div
+      ref={fit}
+      className="relative mx-auto w-full max-w-2xl"
+      style={fitHeight === undefined ? undefined : { maxWidth: Math.min(ARENA_MAX, fitHeight * ARENA_ASPECT) }}
+    >
       <FightArena
         view={view}
         slot={slot}
@@ -272,10 +281,14 @@ export function FightScreen({
           </div>
         </div>
       ) : (
+        // On a wide screen the play bar goes beside the arena, at the top of the panel, so the arena
+        // can use the screen's whole height. On a phone it comes under the arena.
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
           <div className="min-w-0 space-y-3">
             <FightHud />
             {arena}
+          </div>
+          <div className="min-w-0 space-y-4">
             <FightPlayBar
               end={fight.end}
               marks={fight.segs.map((g) => g.from)}
@@ -288,8 +301,6 @@ export function FightScreen({
               onRestart={restart}
               onNewFight={() => onNewFight?.(sim.current.t)}
             />
-          </div>
-          <div className="min-w-0">
             <FightPanel view={view} fight={fight} speed={speed} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />
           </div>
         </div>
@@ -297,6 +308,13 @@ export function FightScreen({
     </FightFrameContext>
   );
 }
+
+/** The room for the run's bar under the arena, and the margin at the bottom of the screen, in
+    pixels. The app's choice. */
+const RUN_BAR_ROOM = 64;
+const SCREEN_MARGIN = 16;
+/** The widest the arena gets, in pixels. The app's choice: wider only adds scrolling. */
+const ARENA_MAX = 672;
 
 interface HitLabelProps {
   hit: ShownHit;

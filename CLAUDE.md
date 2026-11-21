@@ -125,7 +125,7 @@ src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round)
                      (answers, previews, Lock in, keys, the timer of a timed card), TimerBar,
                      TimelinePicture
 src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useFightFrame (run code on
-                     each frame of the fight clock), useMediaQuery
+                     each frame of the fight clock), useMediaQuery, useFitToScreen
 src/lib/             cn() for class names
 src/types.ts         drills, steps, zones, overlays, questions
 src/party.ts         party slots: roles, light parties, slot names

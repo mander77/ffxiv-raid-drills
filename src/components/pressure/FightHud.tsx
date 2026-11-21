@@ -54,6 +54,8 @@ function CastBar() {
 /** Your prompt: the question (the right move on the player), its result in the run, or the next
     mechanic. The seconds left change on every frame. */
 function FightPrompt() {
+  // It is two lines tall even for one line of text, so a longer prompt does not push the arena
+  // down past the bottom of the screen.
   const count = useRef<HTMLSpanElement>(null);
   const [prompt, setPrompt] = useState<{ look: Prompt["look"]; text: string; counts: boolean }>({ look: "idle", text: "", counts: false });
   useFightFrame((s) => {
@@ -65,7 +67,7 @@ function FightPrompt() {
     );
   });
   return (
-    <div className={cn("flex min-h-11 items-center gap-3 rounded-lg border px-3 py-2", PROMPT_LOOK[prompt.look])}>
+    <div className={cn("flex min-h-16 items-center gap-3 rounded-lg border px-3 py-2", PROMPT_LOOK[prompt.look])}>
       <Badge variant="secondary" className={cn("min-w-10 font-mono tabular-nums", !prompt.counts && "hidden")}>
         <span ref={count} />
       </Badge>
