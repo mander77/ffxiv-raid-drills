@@ -51,8 +51,9 @@ export function useCastTimeline({ axis, nowAt, end, gap }: CastTimelineLayout): 
       if (!item) return;
       item.style.transform = `${move}(${places[k].toFixed(1)}px) ${move}(-50%)`;
       item.dataset.when = m.left < 0 ? "past" : m.left <= CASTS_SOON ? "soon" : "later";
-      // A cast that went off fades out as it moves past the now mark.
-      item.style.opacity = m.left < 0 ? String(Math.max(0, 1 + m.left / CASTS_PAST) * 0.6) : "";
+      // A cast that went off fades out as it moves past the now mark, from full colour to nothing,
+      // so it does not jump as it crosses.
+      item.style.opacity = m.left < 0 ? String(Math.max(0, 1 + m.left / CASTS_PAST)) : "";
       const secs = item.querySelector<HTMLElement>("[data-secs]");
       const text = m.left > 0 ? String(Math.ceil(m.left)) : "";
       if (secs && secs.textContent !== text) secs.textContent = text;

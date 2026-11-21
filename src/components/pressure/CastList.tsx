@@ -53,7 +53,11 @@ export function CastList({ className }: CastListProps) {
           {marks.map((m) => (
             <li key={m.i} ref={itemRef(m.i)} className="group absolute top-0 right-2 left-3.5 flex items-center gap-2.5 text-sm">
               {/* The square on the line, with the seconds inside: filled for a hit, outlined for a cast. */}
-              <CastSquare mark={m} className="group-data-[when=soon]:size-8 group-data-[when=soon]:text-base" />
+              {/* It keeps the size of its last seconds as it goes past the now mark, so it does not jump. */}
+              <CastSquare
+                mark={m}
+                className="group-data-[when=past]:size-8 group-data-[when=past]:text-base group-data-[when=soon]:size-8 group-data-[when=soon]:text-base"
+              />
               <span
                 className={cn(
                   "min-w-0 truncate rounded px-1",
