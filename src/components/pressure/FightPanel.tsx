@@ -80,7 +80,12 @@ function Mechanic({ view: v, fight, g, onGoTo, onSpawns }: MechanicProps) {
         <>
           {g.scene.rule && <RuleBox rule={g.scene.rule} />}
           <div className="flex flex-wrap items-center gap-3">
-            {nx && <Button onClick={() => onGoTo(nx)}>Next: {nx.title}</Button>}
+            {nx && (
+              // A mechanic's name can be longer than the column: the button wraps, which shadcn's does not.
+              <Button className="h-auto min-h-9 py-2 text-left whitespace-normal" onClick={() => onGoTo(nx)}>
+                Next: {nx.title}
+              </Button>
+            )}
             <Button variant="outline" onClick={() => onGoTo(g)}>
               Watch it again
             </Button>
@@ -141,7 +146,9 @@ function Between({ paused, fight, onGoTo }: BetweenProps) {
           <p className="text-sm">
             Next mechanic: {nx.title} at {clock(nx.from)}.
           </p>
-          <Button onClick={() => onGoTo(nx)}>Go to {nx.title}</Button>
+          <Button className="h-auto min-h-9 py-2 text-left whitespace-normal" onClick={() => onGoTo(nx)}>
+            Go to {nx.title}
+          </Button>
         </>
       )}
       {a && (
