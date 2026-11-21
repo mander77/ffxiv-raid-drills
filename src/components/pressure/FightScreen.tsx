@@ -99,8 +99,6 @@ export function FightScreen({
   /** A wide screen (lg, 1024 px and up): the run's cast bar, prompt and bar sit beside the arena,
       and the player has three columns. */
   const wide = useMediaQuery("(min-width: 1024px)");
-  /** A medium screen (md, 768 px and up): the player's mechanic fits beside the arena. */
-  const medium = useMediaQuery("(min-width: 768px)");
 
   /** Draw what changed: the view when its key changed, and every part that moves. */
   function refresh(): void {
@@ -343,15 +341,10 @@ export function FightScreen({
               className: "mx-0 ml-68 mr-80 min-w-0 flex-1",
             })}
           </div>
-        ) : medium ? (
-          // A medium screen, below lg: the mechanic against the floor on the left; the play bar and the casts
-          // coming up, sideways, under the arena.
-          <div className="flex justify-center">
-            {arenaWith({ before: mechanic, under: playAndCasts, className: "mx-0 ml-68 min-w-0 flex-1" })}
-          </div>
         ) : (
-          // A phone: the cast bar over the mechanic first, then the arena, with the play bar and the
-          // casts coming up, sideways, under it.
+          // A narrower screen: everything in one column. The cast bar over the mechanic first, then
+          // the arena, with the play bar and the casts coming up, sideways, under it. Never half of
+          // each (owner's choice): the columns sit either both beside the arena or above and below it.
           <div className="space-y-3">
             <CastBar />
             {mechanicPanel}

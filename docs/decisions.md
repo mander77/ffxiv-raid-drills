@@ -194,15 +194,16 @@ make sure that each one still matches the code before you start it.
   - On an extra-wide screen the mechanic's column touches the arena too (owner's choice): it sits
     against the floor's left edge (`ArenaFrame`'s `before` column), from the floor's top to its
     bottom, so the arena and its two columns read as one piece in the middle of the page.
-  - The player has three layouts (owner's choice). Wide (lg, 1024 px and up): the mechanic
-    against the floor on the left, the play bar over the casts coming up on the right. Medium (md,
-    768 to 1023 px): the mechanic against the floor on the left, and under the arena the play bar
-    over the casts coming up, sideways (`CastStrip`). Phone: the cast bar and the mechanic over the
-    arena, then the play bar and the sideways casts under it. The sideways line is CastList lying
-    down: the casts slide left to a now mark, their names wrapped under their squares, so a phone
-    keeps the casts coming up. `ArenaFrame`'s `under` lines them up with the floor's sides. The
-    three columns start at 1024 px, not 1280: from there the arena is larger beside its columns
-    than with the bars under it (528 px against about 345 at 1209 x 732, a screen at 150% zoom).
+  - The player has two layouts, never a mix (owner's choice: the columns sit either both beside the
+    arena or above and below it). Wide (lg, 1024 px and up): the mechanic against the floor on the
+    left, the play bar over the casts coming up on the right. Narrower: one column, the cast bar
+    and the mechanic over the arena, then the play bar and the casts coming up, sideways
+    (`CastStrip`), under it. The sideways line is CastList lying down: the casts slide left to a
+    now mark, their names wrapped under their squares, so a phone keeps the casts coming up.
+    `ArenaFrame`'s `under` lines them up with the floor's sides. The owner turned down the mix (the
+    mechanic on the left, the bars under the arena) as looking wrong. The three columns start at
+    1024 px, not 1280: there the arena is larger beside its columns (528 px at 1209 x 732, a screen
+    at 150% zoom).
   - `useFitToScreen` measures again when the web fonts have loaded: they can push the arena down a
     pixel or two after the first measure, and the page then scrolled.
   - November 21: the owner asked that every change be checked against the official best
