@@ -82,8 +82,10 @@ export function useCastTimeline({ axis, nowAt, end, gap }: CastTimelineLayout): 
   return { box, nowMark, marks, itemRef };
 }
 
-/** How long the flash and the pop last, in milliseconds. The app's choice. */
+/** How long the flash and the pop last, in milliseconds, and when in that time they are largest
+    (a share of it). The app's choice. */
 const FLASH_MS = 600;
+const PEAK = 0.25;
 
 /** True when the player's system asks for less motion: the flash keeps its glow but does not grow. */
 function lessMotion(): boolean {
@@ -95,17 +97,19 @@ function lessMotion(): boolean {
 function wentOff(mark: HTMLElement | null, hit: CastMark): void {
   const colour = `var(--color-cat-${hit.cats[0] ?? "none"})`;
   const grow = lessMotion() ? {} : { scale: "1.8" };
+  // It grows in and settles back, from its own look to the hit's and back, so nothing snaps.
   mark?.animate?.(
     [
-      { backgroundColor: colour, boxShadow: `0 0 14px 5px ${colour}`, ...grow },
+      { backgroundColor: "var(--destructive)", boxShadow: "0 0 0 0 transparent", scale: "1" },
+      { backgroundColor: colour, boxShadow: `0 0 14px 5px ${colour}`, ...grow, offset: PEAK },
       { backgroundColor: "var(--destructive)", boxShadow: "0 0 0 0 transparent", scale: "1" },
     ],
-    { duration: FLASH_MS, easing: "ease-out" },
+    { duration: FLASH_MS, easing: "ease-in-out" },
   );
 }
 
-/** A hit's square swells for a moment as it goes off. */
+/** A hit's square swells for a moment as it goes off, and settles back. */
 function pop(square: HTMLElement | null | undefined): void {
   if (lessMotion()) return;
-  square?.animate?.([{ scale: "1.35" }, { scale: "1" }], { duration: FLASH_MS, easing: "ease-out" });
+  square?.animate?.([{ scale: "1" }, { scale: "1.3", offset: PEAK }, { scale: "1" }], { duration: FLASH_MS, easing: "ease-in-out" });
 }
