@@ -9,12 +9,12 @@ import { afterEach, assert, beforeAll, test } from "vitest";
 import { useSlotStore } from "../../src/stores/slot";
 
 // core.ts looks up the #view element when it loads, so the page needs one before the import.
-let CheatSheet: ComponentType;
+let CheatSheetPage: ComponentType;
 let TL: readonly unknown[];
 let state: { stats: Record<string, { s: number; r: number }> };
 beforeAll(async () => {
   document.body.innerHTML = '<main id="view"></main>';
-  ({ CheatSheet } = await import("../../src/screens/CheatSheet"));
+  ({ CheatSheetPage } = await import("../../src/pages/CheatSheetPage"));
   ({ TL } = await import("../../src/data/timeline"));
   ({ state } = await import("../../src/core"));
 });
@@ -25,7 +25,7 @@ function draw(slot: "H1" | "H2"): void {
   useSlotStore.setState({ slot });
   render(
     <MemoryRouter>
-      <CheatSheet />
+      <CheatSheetPage />
     </MemoryRouter>,
   );
 }

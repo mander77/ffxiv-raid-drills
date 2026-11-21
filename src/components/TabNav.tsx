@@ -13,10 +13,9 @@ export function TabNav() {
   const nav = useRef<HTMLElement>(null);
 
   // Keep the current tab in view when the strip scrolls sideways.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: the effect runs on each new tab on purpose.
   useEffect(() => {
     const strip = nav.current;
-    const on = strip?.querySelector<HTMLElement>('[aria-current="page"]');
+    const on = strip?.querySelector<HTMLElement>(`[data-tab="${current}"]`);
     if (!strip || !on) return;
     const left = on.offsetLeft - strip.offsetLeft;
     if (left < strip.scrollLeft || left + on.offsetWidth > strip.scrollLeft + strip.clientWidth) strip.scrollLeft = Math.max(0, left - 12);
@@ -32,6 +31,7 @@ export function TabNav() {
         <Link
           key={t.id}
           to={tabLink(t.id)}
+          data-tab={t.id}
           aria-current={t.id === current ? "page" : undefined}
           className={cn(
             "flex-none border-b-[3px] border-transparent px-[13px] pt-2.5 pb-[9px] text-[15px] whitespace-nowrap text-ink-2 no-underline hover:text-ink",

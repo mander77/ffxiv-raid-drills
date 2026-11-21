@@ -31,7 +31,7 @@ export function Marks({ cats, size = "sm" }: MarksProps) {
       {/* TS note: `{...}` inside JSX runs TypeScript. Each item of a list gets a `key`, so React can
           match it up when the list changes. */}
       {shown.map((c) => (
-        <i key={c} className={cn("block rounded-full", size === "md" ? "size-2.5" : "size-2", DOT[c])} />
+        <span key={c} className={cn("block rounded-full", size === "md" ? "size-2.5" : "size-2", DOT[c])} />
       ))}
     </span>
   );

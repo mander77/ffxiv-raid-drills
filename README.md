@@ -44,7 +44,8 @@ index.html               page shell
 src/main.tsx             start-up: draws the React app
 src/App.tsx              the header and the routes
 src/components/          React components (header, slot switch, tabs) and shadcn/ui
-src/screens/             React screens (the Cheat sheet)
+src/pages/               React pages, one per route (the Cheat sheet)
+src/hooks/               custom React hooks
 src/stores/              state kept in the browser (Zustand)
 src/router.ts            the address of each screen
 src/types.ts             shared types for drills, questions and overlays

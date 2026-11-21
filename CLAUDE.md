@@ -83,7 +83,7 @@ npm run build       # tsc, then Vite writes dist/
 ```text
 index.html           the page: #root for React, #view for the old screens
 src/main.tsx         start-up: draws the React app (App.tsx) into #root
-src/App.tsx          the header, the routes (React Router), links from the old screens
+src/App.tsx          the header and the routes (React Router): one page per path
 src/app.css          Tailwind, the site colours as Tailwind names, the cascade layers
 src/tabs.ts          the tabs: id, label and one-line intro
 src/router.ts        paths and routes: parseRoute, routeLink, tabOf, showRoute
@@ -91,8 +91,10 @@ src/share.ts         sharing the address of the screen
 src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser
 src/components/      React components: Header, SlotSwitch, ShareButton, TabNav, Marks, CatKey,
                      LegacyScreen (shows an old screen)
-src/components/ui/   shadcn/ui components (button, toggle, toggle-group, tooltip)
-src/screens/         React screens: CheatSheet
+src/components/ui/   shadcn/ui components (button, toggle, toggle-group, tooltip), with the
+                     site's looks as variants: <Button variant="outline">
+src/pages/           React pages, one per route: CheatSheetPage (/sheet)
+src/hooks/           custom hooks: useTimeout, useInAppLinks, useScrollToTopOnNewTab
 src/lib/             cn() for class names, WRAP for the page width
 src/core.ts          old screens: shared state, decks, scores, the MapCur and McqCur types
 src/types.ts         drills, steps, zones, overlays, questions
@@ -121,7 +123,7 @@ src/views/tlnav.ts   colour marks for the timeline categories, as text
 src/views/pattern.ts fight pattern picks (Settings on the player)
 src/views/common.ts  tab header, HUD prompt, fadeEdges, round-done panel
 src/styles.css       the old screens' styles, and the site colours (:root)
-test/                Vitest tests; test/components and test/screens for React
+test/                Vitest tests; test/components and test/pages for React
 e2e/                 Playwright browser tests
 ```
 
@@ -182,15 +184,20 @@ e2e/                 Playwright browser tests
 - The site is being rebuilt in React (issues #18 to #22). New screens and parts are React
   components with Tailwind classes, in the usual React shape:
   - A component used by more than one screen gets its own file in `src/components/`, named after
-    it (`SlotSwitch.tsx` exports `SlotSwitch`). A screen goes in `src/screens/`. A small part that
+    it (`SlotSwitch.tsx` exports `SlotSwitch`). A page (one per route) goes in `src/pages/` and is named `<Name>Page`. A custom hook goes in
+    `src/hooks/` and its name starts with `use`. A small part that
     only one screen uses stays in that screen's file.
   - Function components with named exports. The props are a named interface, `<Name>Props`.
   - State in hooks (`useState`), or in a Zustand store (`src/stores/`) when more than one screen
     needs it. Events are JSX props (`onClick`). Do not change a React element's classes or add
     listeners to it by hand.
-  - Use shadcn/ui for common controls (`npx shadcn@latest add <name>`), and style them with the
-    site's Tailwind colours (`bg-card`, `text-ink-2`, `border-heal`).
-  - Each component has a test in `test/components/` or `test/screens/`. Find elements by role and
+  - What a click starts belongs in its click handler (`handleClick`), not in an effect. An effect
+    (`useEffect`) is only for keeping in step with something outside React, such as a window
+    event or the old screens. A timer from a handler uses `useTimeout`.
+  - Use shadcn/ui for common controls (`npx shadcn@latest add <name>`). The site's looks are
+    variants in `src/components/ui/` (Button: default, outline, ghost; Toggle: segment). A new
+    look gets a new variant there, not a long className at each use.
+  - Each component and page has a test in `test/components/` or `test/pages/`. Find elements by role and
     text, the way a player would.
   - Add new files to `files.includes` in `biome.json`, so Biome checks them.
 - Leave `src/data/` and `src/geometry.ts` as they are when you rebuild a screen. They are checked

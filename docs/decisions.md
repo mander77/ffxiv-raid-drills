@@ -71,6 +71,10 @@ make sure that each one still matches the code before you start it.
     floating-ui code behind the tooltip and the toggles about 35 kB, React Router 13 kB and
     tailwind-merge 9 kB. The app's own code is about 60 kB, as before.
   - Keep the `TS note:` comments, and add notes for the React features too.
+  - The React code follows the usual React layout, so a React developer finds things at once:
+    `pages/` (one per route), `components/` (shared parts), `components/ui/` (shadcn/ui, with the
+    site's looks as variants), `hooks/`, `stores/` and `lib/`. Click logic lives in handlers, not
+    in effects (React's "You might not need an effect").
 - Issue #11: make the repository self-contained. A new person should get Node 24, the GitHub CLI
   and the other tools in one step after the clone.
 - Party slots (#13, done). A slot has two parts, the light party (1 or 2) and the role (Tank,

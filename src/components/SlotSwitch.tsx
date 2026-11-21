@@ -1,6 +1,7 @@
-import { useEffect, useId, useState } from "react";
+import { type MouseEvent, useEffect, useId, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTimeout } from "@/hooks/useTimeout";
 import { cn } from "@/lib/utils";
 import { healerOf, partyOf, ROLES, slotName } from "../party";
 import { useSlotStore } from "../stores/slot";
@@ -9,13 +10,8 @@ import type { Role } from "../types";
 /** How long the "not yet available" tip stays after a tap. */
 const SOON_MS = 2000;
 
-/** Role and Group look like one control: a green outline, and the same type and height. The only
-    filled green in the header is your own pick. */
-const GROUP = "gap-0 overflow-hidden rounded-lg border-[1.5px] border-heal shadow-none";
-const ITEM = cn(
-  "h-auto min-h-8 rounded-none bg-card px-3 py-[5px] text-[14px] leading-normal font-bold text-heal max-[401px]:px-[9px]",
-  "hover:bg-card hover:text-heal data-[state=on]:bg-heal data-[state=on]:text-white data-[state=on]:hover:bg-heal data-[state=on]:hover:text-white",
-);
+/** On the smallest phones the switch packs a little tighter, so it still fits on one row. */
+const ITEM = "max-[401px]:px-[9px]";
 
 export interface SlotSwitchProps {
   className?: string;
@@ -35,14 +31,18 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
   const roleLabel = useId();
   const groupLabel = useId();
 
-  // The role whose tip shows, if any. A tap keeps it for SOON_MS.
+  // The role whose tip shows, if any.
   const [tip, setTip] = useState<Role | null>(null);
-  const [tapped, setTapped] = useState(0);
-  useEffect(() => {
-    if (!tapped) return;
-    const timer = setTimeout(() => setTip(null), SOON_MS);
-    return () => clearTimeout(timer);
-  }, [tapped]);
+  const later = useTimeout();
+
+  // A tap has no hover, so a click keeps the tip for a while.
+  function handleSoonClick(e: MouseEvent, role: Role): void {
+    // Keep the pick as it is: Healer is the only role that is ready.
+    e.preventDefault();
+    setTip(role);
+    later(() => setTip(null), SOON_MS);
+  }
+
   // The tip sits on the screen, not in the page, so it goes when the page scrolls.
   useEffect(() => {
     const hide = (): void => setTip(null);
@@ -61,8 +61,7 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
         <span id={roleLabel} className="text-[14px] text-ink-2">
           Role
         </span>
-        {/* Only a role that is ready can be picked, and only Healer is, so a pick changes nothing. */}
-        <ToggleGroup type="single" value={me.role} aria-labelledby={roleLabel} className={GROUP}>
+        <ToggleGroup type="single" variant="segment" size="segment" value={me.role} aria-labelledby={roleLabel}>
           {ROLES.map(({ role, short, ready }) => {
             const text = (
               <>
@@ -83,13 +82,8 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
                     value={role}
                     aria-label={role}
                     aria-disabled="true"
-                    className={cn(ITEM, "cursor-not-allowed text-ink-3 hover:text-ink-3")}
-                    onClick={(e) => {
-                      // Keep the pick as it is, and keep the tip open for a while (a tap has no hover).
-                      e.preventDefault();
-                      setTip(role);
-                      setTapped((n) => n + 1);
-                    }}
+                    className={ITEM}
+                    onClick={(e) => handleSoonClick(e, role)}
                   >
                     {text}
                   </ToggleGroupItem>
@@ -108,9 +102,10 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
         </span>
         <ToggleGroup
           type="single"
+          variant="segment"
+          size="segment"
           value={String(me.lp)}
           aria-labelledby={groupLabel}
-          className={GROUP}
           // A click on the group you have already picked gives "", which keeps it.
           onValueChange={(v) => v && setSlot(healerOf(v === "2" ? 2 : 1))}
         >

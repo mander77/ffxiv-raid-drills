@@ -1,4 +1,4 @@
-// The Cheat sheet: the panic reset, the positions and your timeline on one page.
+// The Cheat sheet page (/sheet): the panic reset, the positions and your timeline on one page.
 // TS note: a .tsx file is TypeScript that may hold JSX, the HTML-like tags below. Each tag compiles
 // to a call to React, so the compiler checks every tag and attribute.
 import type { ReactNode } from "react";
@@ -65,7 +65,12 @@ function swordDiagram(s: Slot): string {
 }
 
 /** One white box of the sheet, with its heading. */
-function Section({ title, children }: { title: string; children: ReactNode }) {
+interface SectionProps {
+  title: string;
+  children: ReactNode;
+}
+
+function Section({ title, children }: SectionProps) {
   return (
     <section className="min-w-0 rounded-lg border border-line bg-card p-5">
       <h2 className="mt-0 mb-2.5 font-display text-[26px] tracking-[.02em] uppercase">{title}</h2>
@@ -122,11 +127,11 @@ function Source({ href, label, note }: SourceProps) {
 const CELL = "border-b border-line px-2.5 py-2 text-left align-top";
 
 /** The whole cheat sheet, for the slot picked in the header. */
-export function CheatSheet() {
+export function CheatSheetPage() {
   const slot = useSlotStore((st) => st.slot);
   // "Reset my progress" asks once before it erases: the first click sets this.
   const [confirm, setConfirm] = useState(false);
-  const reset = (): void => {
+  function handleReset(): void {
     if (!confirm) {
       setConfirm(true);
       return;
@@ -135,7 +140,9 @@ export function CheatSheet() {
     LS.del("stats");
     state.decks = {};
     setConfirm(false);
-  };
+  }
+  // The scores still live in the old code (core.ts), which React does not watch. The page reads
+  // them on each draw, and the reset above draws it again. They move to a store in a later step.
   const seen = Object.keys(state.stats).length;
   const lede = TABS.find((t) => t.id === "sheet")?.lede;
 
@@ -285,12 +292,7 @@ export function CheatSheet() {
         <Section title="Your progress">
           <p>You answered {seen} different items so far. Progress stays in this browser only.</p>
           <div className="mt-4 flex flex-wrap items-center gap-2.5">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={reset}
-              className="h-auto rounded-lg border-[1.5px] border-heal bg-card px-[18px] py-2.5 text-[15px] font-bold text-heal shadow-none hover:bg-heal-soft hover:text-heal"
-            >
+            <Button variant="outline" onClick={handleReset}>
               {confirm ? "Click again to erase progress" : "Reset my progress"}
             </Button>
           </div>
