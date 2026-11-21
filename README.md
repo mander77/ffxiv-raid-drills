@@ -71,7 +71,9 @@ The data for the drills and the questions is in `src/data/`. Each item has a `bu
 
 ## Publish
 
-Cloudflare Workers builds the site from this repository. For each push, Cloudflare runs `npm run build`, then Wrangler uploads `dist/`. `wrangler.jsonc` names the project and the `dist/` folder. A push to `main` updates the live site. A push to another branch makes a preview at its own address.
+Cloudflare Workers builds the site from this repository. For each push that changes the app, Cloudflare runs `npm run build`, then Wrangler uploads `dist/`. A push that changes only docs, tests or tooling does not build (the build watch paths in `docs/decisions.md`). `wrangler.jsonc` names the project and the `dist/` folder. A push to `main` updates the live site. A push to another branch makes a preview at its own address.
+
+GitHub Actions runs the checks (lint, type check, unit tests, build, browser tests) on every push. `main` takes only a commit on which those checks passed, so push the branch first, wait for its checks, then push `main`.
 
 To test the Wrangler configuration without a deploy, run `npm run build`, then run this command:
 
@@ -79,7 +81,7 @@ To test the Wrangler configuration without a deploy, run `npm run build`, then r
 npx wrangler deploy --dry-run
 ```
 
-The publish script runs the type check and the tests, then pushes the current branch as the repository owner. The script ignores a `GH_TOKEN` or `GITHUB_TOKEN` in your shell. At the end, the script switches the GitHub CLI back to the account that was active before.
+The publish script runs the type check and the tests, then pushes the current branch as the repository owner. On `main`, it first waits for the branch's checks on that commit. The script ignores a `GH_TOKEN` or `GITHUB_TOKEN` in your shell. At the end, the script switches the GitHub CLI back to the account that was active before.
 
 ```sh
 sh scripts/publish.sh

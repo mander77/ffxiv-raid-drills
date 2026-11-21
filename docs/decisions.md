@@ -441,6 +441,34 @@ static wins.
   the dashboard.
 - The repository merges by fast-forward push, not by pull requests. The publish script deletes
   merged branches on GitHub.
+- Build watch paths (Cloudflare dashboard: the Worker, then Settings > Build > Build watch paths).
+  Cloudflare drops the changed files that match an exclude path first, then builds if any file
+  left matches an include path. Its wildcard `*` may stand only alone or at the start or end of
+  a path. Include: `*`. Exclude: `docs/*`, `*.md`, `.github/*`, `.claude/*`, `skills-lock.json`,
+  `test/*`, `e2e/*`, `scripts/*`, `playwright.config.ts`, `biome.json`, `mise.toml`,
+  `components.json`, `.gitignore`, `.gitattributes`, `.nojekyll`. Everything else counts as the
+  app (`src/`, `public/`, `index.html`, `package.json`, `package-lock.json`, `vite.config.ts`,
+  `tsconfig.json`, `wrangler.jsonc`, `.node-version`), and so does any new file, so a forgotten
+  path costs a build, never a missed deploy. Cloudflare builds anyway for a push with 20 or more
+  commits or 3000 or more changed files. When a new file outside the app comes in at the top
+  level, add it to the exclude list in the dashboard and here.
+
+## CI and the main ruleset
+
+- GitHub Actions, `.github/workflows/ci.yml`, on every branch push and on pull requests to
+  `main`. Two jobs: "Lint, types, tests, build" and "Browser tests" (Chromium, Firefox and WebKit;
+  the Playwright report is kept for 14 days when a test fails). Actions are pinned to a commit,
+  the token can only read, and a newer push cancels an older run of the same branch. CI does not
+  skip any path, because `main` needs its result on every commit.
+- A repository ruleset, "main", on the default branch, with no bypass (the owner too): the two CI
+  jobs must have passed on the commit, no force push, no deletion, linear history (no merge
+  commits). The owner chose this over pull requests, so the fast-forward publish stays. In an
+  emergency, turn the ruleset off in Settings > Rules > Rulesets, and back on after.
+- GitHub checks the commit a push to `main` ends on, by the CI run on that same commit when its
+  branch was pushed. So push the branch, wait for CI, then push `main`. `scripts/publish.sh` waits for that run.
+- Dependabot (`.github/dependabot.yml`) opens a pull request each week for npm (minor and patch
+  together, a major alone) and for the GitHub Actions, a week after a release. Merge one with
+  "Rebase and merge" (linear history), or pull its branch and publish it as usual.
 
 ## Tips
 

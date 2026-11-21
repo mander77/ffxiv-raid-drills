@@ -19,8 +19,12 @@ tokens or account details.
   keeps the old code (`src/views/`).
 - Branch previews: `https://<branch>.test.ffxiv-raid-drills.app/`. The bare `test.` host does not
   load.
-- Hosting: Cloudflare Workers Builds on the owner's personal Cloudflare account. Each push builds.
+- Hosting: Cloudflare Workers Builds on the owner's personal Cloudflare account. A push builds
+  when it changes the app; a push of only docs, tests or tooling does not (build watch paths).
   See `docs/decisions.md` for the hosting details.
+- CI: GitHub Actions (`.github/workflows/ci.yml`) runs lint, the type check, the unit tests, the
+  build and the browser tests on every branch push. A ruleset on `main` takes only a commit on
+  which both CI jobs passed, and blocks force pushes, deletion and merge commits.
 
 ## The aim of the tool
 
@@ -179,14 +183,19 @@ These steps put a branch on `main`, the live site.
 3. From the branch checkout, run `sh scripts/publish.sh`. With mise installed, run it through mise
    so the repository's `mise.toml` applies:
    `mise -C <checkout> exec -- sh <checkout>/scripts/publish.sh`. The script runs the type check
-   and the tests, then pushes the branch as `mander77`.
+   and the tests, then pushes the branch as `mander77`. The push starts CI on GitHub.
 4. Run `sh scripts/wait-deploy.sh https://<branch>.test.ffxiv-raid-drills.app index-<hash>.js`,
-   then test the preview in a browser.
+   then test the preview in a browser. When the branch changes only files outside the app (docs,
+   tests, `.github/`, `.claude/`, scripts), Cloudflare builds no preview: skip this step.
 5. In the main checkout, make sure that it is on `main` and has no changes. Run
-   `git merge --ff-only <branch>`, then run the publish script there. On `main` the script also
-   deletes every branch on GitHub that `main` already contains.
+   `git merge --ff-only <branch>`, then run the publish script there. On `main` the script first
+   waits for the branch's CI run on that commit and stops if it failed: GitHub refuses a commit on
+   `main` that has not passed CI. Then it pushes and deletes every branch on GitHub that `main`
+   already contains. A branch that merged `main` into itself must be rebased first, because `main`
+   takes no merge commits.
 6. Run `sh scripts/wait-deploy.sh https://ffxiv-raid-drills.app index-<hash>.js` and check the
-   live site. Then remove the worktree and delete the local branch.
+   live site (again, only when the app changed). Then remove the worktree and delete the local
+   branch.
 
 ## Accounts and identity
 

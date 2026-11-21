@@ -1,0 +1,30 @@
+# Dependabot opens a pull request each week with updates for the npm packages and the
+# GitHub Actions. Each pull request runs CI and gets a Cloudflare preview.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    # Wait a week after a release, so a broken or bad release is likely pulled first.
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: chore
+    # Minor and patch updates come together in one pull request. A major update gets its own.
+    groups:
+      npm:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: chore
+    groups:
+      actions:
+        patterns: ["*"]
