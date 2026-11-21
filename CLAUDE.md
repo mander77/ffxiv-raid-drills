@@ -127,7 +127,7 @@ src/lib/pressure.ts  the quick round's rules (weighted cards, the timer) and pla
 src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round), QuestionCard
                      (answers, previews, Lock in, keys, the timer of a timed card), TimerBar,
                      TimelinePicture
-src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useFightFrame (run code on
+src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useCastTimeline (the casts coming up, moving with the fight clock), useFightFrame (run code on
                      each frame of the fight clock), useMediaQuery, useFitToScreen, useTheme
 src/lib/             cn() for class names
 src/types.ts         drills, steps, zones, overlays, questions

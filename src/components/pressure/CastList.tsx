@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { useFightFrame } from "../../hooks/useFightFrame";
-import { CASTS_AHEAD, CASTS_PAST, CASTS_SOON, type CastMark, castPositions, castsAhead } from "../../lib/fight";
+import { useCastTimeline } from "../../hooks/useCastTimeline";
+import { CASTS_AHEAD } from "../../lib/fight";
 import { CATEGORY_BG } from "../CategoryDots";
 
 /** Where the now mark sits from the top, how far the line goes on above it, the room under the
@@ -21,32 +20,9 @@ export interface CastListProps {
     square in its category's colour, its seconds inside, and its name beside it. The squares rise
     toward the now mark at the top as the fight clock runs; the gaps between them show the time
     between casts, and in their last seconds a square grows and its name turns bold.
-    shadcn/ui has no timeline, so this list is its own: it moves through refs on every frame
-    (useFightFrame), and draws through React only when a cast comes into view or leaves it. */
+    shadcn/ui has no timeline, so this list is its own; useCastTimeline moves it. */
 export function CastList({ className }: CastListProps) {
-  const box = useRef<HTMLDivElement>(null);
-  /** The rows by cast, for the frame loop to move. */
-  const rows = useRef(new Map<number, HTMLLIElement>());
-  const [marks, setMarks] = useState<CastMark[]>([]);
-
-  useFightFrame((s) => {
-    const now = castsAhead(s);
-    // Draw again only when the casts in view change.
-    setMarks((was) => (was.length === now.length && was.every((m, k) => m.i === now[k].i) ? was : now));
-    const height = (box.current?.clientHeight ?? 0) - BOTTOM;
-    const ys = castPositions(now, height, NOW_Y, ROW_H);
-    now.forEach((m, k) => {
-      const row = rows.current.get(m.i);
-      if (!row) return;
-      row.style.transform = `translateY(${ys[k].toFixed(1)}px) translateY(-50%)`;
-      row.dataset.when = m.left < 0 ? "past" : m.left <= CASTS_SOON ? "soon" : "later";
-      // A cast that went off fades out as it rises past the now mark.
-      row.style.opacity = m.left < 0 ? String(Math.max(0, 1 + m.left / CASTS_PAST) * 0.6) : "";
-      const secs = row.querySelector<HTMLElement>("[data-secs]");
-      const text = m.left > 0 ? String(Math.ceil(m.left)) : "";
-      if (secs && secs.textContent !== text) secs.textContent = text;
-    });
-  });
+  const { box, marks, itemRef } = useCastTimeline({ axis: "y", nowAt: NOW_Y, end: BOTTOM, gap: ROW_H });
 
   return (
     // The play bar above it shows the fight time and the speed.
@@ -68,14 +44,7 @@ export function CastList({ className }: CastListProps) {
         ))}
         <ol className="absolute inset-x-0 top-0">
           {marks.map((m) => (
-            <li
-              key={m.i}
-              ref={(el) => {
-                if (el) rows.current.set(m.i, el);
-                else rows.current.delete(m.i);
-              }}
-              className="group absolute top-0 right-2 left-3.5 flex items-center gap-2.5 text-sm"
-            >
+            <li key={m.i} ref={itemRef(m.i)} className="group absolute top-0 right-2 left-3.5 flex items-center gap-2.5 text-sm">
               {/* The square on the line, in the category's colour, with the seconds inside. */}
               <span
                 data-secs

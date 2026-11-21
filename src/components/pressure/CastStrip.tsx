@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { useFightFrame } from "../../hooks/useFightFrame";
-import { CASTS_AHEAD, CASTS_PAST, CASTS_SOON, type CastMark, castPositions, castsAhead } from "../../lib/fight";
+import { useCastTimeline } from "../../hooks/useCastTimeline";
+import { CASTS_AHEAD } from "../../lib/fight";
 import { CATEGORY_BG } from "../CategoryDots";
 
 /** Where the now mark sits from the left, how far the line goes on before it, the room after the
@@ -20,32 +19,9 @@ export interface CastStripProps {
 /** The casts coming up, sideways, for a screen with no room beside the arena: the same line as
     CastList, lying down. Each cast is a square in its category's colour with its seconds inside
     and its name wrapped under it; the casts slide left toward the now mark as the fight clock
-    runs, and a cast that went off fades out past it. It moves through refs on every frame
-    (useFightFrame), and draws through React only when a cast comes into view or leaves it. */
+    runs, and a cast that went off fades out past it. useCastTimeline moves it. */
 export function CastStrip({ className }: CastStripProps) {
-  const box = useRef<HTMLDivElement>(null);
-  /** The items by cast, for the frame loop to move. */
-  const items = useRef(new Map<number, HTMLLIElement>());
-  const [marks, setMarks] = useState<CastMark[]>([]);
-
-  useFightFrame((s) => {
-    const now = castsAhead(s);
-    // Draw again only when the casts in view change.
-    setMarks((was) => (was.length === now.length && was.every((m, k) => m.i === now[k].i) ? was : now));
-    const width = (box.current?.clientWidth ?? 0) - END;
-    const xs = castPositions(now, width, NOW_X, ITEM_W);
-    now.forEach((m, k) => {
-      const item = items.current.get(m.i);
-      if (!item) return;
-      item.style.transform = `translateX(${xs[k].toFixed(1)}px) translateX(-50%)`;
-      item.dataset.when = m.left < 0 ? "past" : m.left <= CASTS_SOON ? "soon" : "later";
-      // A cast that went off fades out as it slides past the now mark.
-      item.style.opacity = m.left < 0 ? String(Math.max(0, 1 + m.left / CASTS_PAST) * 0.6) : "";
-      const secs = item.querySelector<HTMLElement>("[data-secs]");
-      const text = m.left > 0 ? String(Math.ceil(m.left)) : "";
-      if (secs && secs.textContent !== text) secs.textContent = text;
-    });
-  });
+  const { box, marks, itemRef } = useCastTimeline({ axis: "x", nowAt: NOW_X, end: END, gap: ITEM_W });
 
   return (
     <section aria-label="Casts coming up" className={className}>
@@ -69,14 +45,7 @@ export function CastStrip({ className }: CastStripProps) {
         ))}
         <ol className="absolute inset-y-0 left-0">
           {marks.map((m) => (
-            <li
-              key={m.i}
-              ref={(el) => {
-                if (el) items.current.set(m.i, el);
-                else items.current.delete(m.i);
-              }}
-              className="group absolute top-2 left-0 flex w-18 flex-col items-center gap-1 text-xs"
-            >
+            <li key={m.i} ref={itemRef(m.i)} className="group absolute top-2 left-0 flex w-18 flex-col items-center gap-1 text-xs">
               {/* The square on the line, in the category's colour, with the seconds inside. */}
               <span
                 data-secs

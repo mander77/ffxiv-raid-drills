@@ -144,7 +144,7 @@ function Tick({ mark, left, onSeek }: TickProps) {
         <button
           type="button"
           tabIndex={-1}
-          aria-label={`Go to ${mark.name}`}
+          aria-label={`Jump to ${mark.name}`}
           className="group absolute inset-y-0 flex w-2 -translate-x-1/2 cursor-pointer justify-center"
           style={{ left }}
           onClick={() => onSeek(mark.t)}

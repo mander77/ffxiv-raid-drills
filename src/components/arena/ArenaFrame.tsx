@@ -52,8 +52,10 @@ const FLOOR_SIDE = pct(-ARENA_VIEW.x, ARENA_VIEW.width);
 /** The size of every arena you play on, on Learn, Practice and Pressure: as large as its column,
     but never taller than the room from its top down to the bottom of the screen, so the whole
     arena is in view, and never wider than ARENA_MAX. On a short screen it keeps at least
-    ARENA_MIN, so on a phone it fills the width. Things drawn over the arena (the 3-2-1,
-    a result) can sit in it with absolute positions. */
+    ARENA_MIN, so on a phone it fills the width; with `fill` it fills its column, and the page
+    scrolls. Things drawn over the arena (the 3-2-1, a result) can sit in it with absolute
+    positions. What sits against the floor (`over`, `under`, `before`, `beside`) lines up with
+    the floor's edges in the picture, not with the picture's room for the compass. */
 export function ArenaFrame({ children, below = 0, over, under, beside, before, fill = false, className }: ArenaFrameProps) {
   const [ref, height] = useFitToScreen<HTMLDivElement>(below + SCREEN_MARGIN);
   return (
