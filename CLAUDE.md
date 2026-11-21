@@ -101,8 +101,8 @@ src/views/fight.ts   the full fight: the run and the player
 src/views/map.ts     paintArena: the answer layers that Practice and the fight share
 src/views/sheet.tsx  Cheat sheet (the first screen built with Preact)
 src/views/tlfig.ts   the Timeline card picture
-src/views/tlnav.tsx  colour marks for the timeline categories (as text and as components)
-src/views/parts.tsx  shared components: RuleBox, LastAnswer, StepChips, SetupText, Tally, ChipRow, HudPrompt
+src/views/tlnav.ts   colour marks for the timeline categories, as text
+src/components/      shared Preact components, one per file (RuleBox.tsx, ChipRow.tsx, Marks.tsx, ...)
 src/views/pattern.ts fight pattern picks (Settings on the player)
 src/views/common.ts  tab header, mountView (draws a Preact screen), HUD prompt, fadeEdges, round-done panel
 test/                Vitest tests
@@ -163,6 +163,17 @@ test/                Vitest tests
 - Code comments: plain English. No ticket numbers, no history of old layouts.
 - Build the simplest shape for today's need. Do not add hooks for features nobody asked for.
 - The player marks are always the top layer of an arena picture.
+- Preact components follow the usual Preact and React shape, so a Preact developer feels at home:
+  - A component used by more than one screen gets its own file in `src/components/`, named
+    after it (`RuleBox.tsx` exports `RuleBox`). A small part that only one screen uses stays in
+    that screen's file.
+  - Function components with named exports. The props are a named interface, `<Name>Props`,
+    with a doc comment on each prop that needs one.
+  - State in hooks (`useState`), events as JSX props (`onClick`, `onScroll`), and classes from
+    state. Do not change an element's classes or add listeners by hand.
+  - Each component has a test in `test/components/<Name>.test.tsx`. Find elements by role and
+    text, the way a player would. A test may also compare the markup with the text version a
+    screen still uses, so the screen looks the same when it moves.
 - New attack sizes go in `src/data/attacks.ts`, not in a drill or a picture.
 - A drill pattern comes from a seeded code (`withSeed`), so the same code builds the same pattern.
   Keep every random choice inside `random()`, or old codes change.
