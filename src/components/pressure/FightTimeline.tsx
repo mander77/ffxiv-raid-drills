@@ -7,7 +7,7 @@ import { CategoryDots } from "../CategoryDots";
 /** The look of a row: the line that just happened, a line in its last seconds, and the rest. */
 const ROW_LOOK: Record<TimelineRow["look"], string> = {
   now: "border-primary font-semibold",
-  soon: "border-amber-500",
+  soon: "border-warning",
   later: "",
 };
 
@@ -29,7 +29,7 @@ export function FightTimeline() {
           <li
             // biome-ignore lint/suspicious/noArrayIndexKey: a line's name can come twice, so its place in the list is its key.
             key={i}
-            className={cn("relative overflow-hidden rounded-md border bg-card", ROW_LOOK[r.look], r.raidwide && "bg-red-50")}
+            className={cn("relative overflow-hidden rounded-md border bg-card", ROW_LOOK[r.look], r.raidwide && "bg-danger-soft")}
           >
             <div className="absolute inset-y-0 left-0 bg-muted" style={{ width: `${(r.fill * 100).toFixed(1)}%` }} aria-hidden="true" />
             <div className="relative flex items-center gap-2 px-2 py-1">

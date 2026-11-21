@@ -5,6 +5,10 @@
 // TS note: importing a CSS file is a Vite feature, not TypeScript. Vite adds the styles to the page
 // in development and writes them to one CSS file in the build.
 import "./app.css";
+// The fonts, bundled with the site so no request goes to a font service: the body text, and the
+// condensed face for names, tabs and headings in one weight.
+import "@fontsource-variable/source-sans-3";
+import "@fontsource/saira-condensed/600.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";

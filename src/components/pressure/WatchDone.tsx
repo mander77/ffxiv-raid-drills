@@ -15,7 +15,7 @@ export function WatchDone({ summary, onRun, onWatch }: WatchDoneProps) {
     <Card className="mx-auto max-w-lg">
       <CardHeader>
         <CardDescription>The right moves · Done</CardDescription>
-        <CardTitle className="text-2xl">That was the right way through</CardTitle>
+        <CardTitle className="font-display text-2xl tracking-wide">That was the right way through</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm">{summary}</p>

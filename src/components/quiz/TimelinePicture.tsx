@@ -116,12 +116,12 @@ function TimelineRow({ fill, name, cats, when, now = false, right = false }: Tim
       className={cn(
         "relative flex items-center justify-between gap-3 overflow-hidden rounded-md border px-2 py-1",
         now && "font-semibold",
-        right && "ring-2 ring-green-600",
+        right && "ring-2 ring-success",
       )}
     >
       <i
         aria-hidden="true"
-        className={cn("absolute inset-y-0 left-0", now ? "bg-muted" : "bg-sky-100")}
+        className={cn("absolute inset-y-0 left-0", now ? "bg-muted" : "bg-sky-100 dark:bg-sky-950")}
         style={{ width: `${fill * 100}%` }}
       />
       <span className="relative flex items-center gap-2">

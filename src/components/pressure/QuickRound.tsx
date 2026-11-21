@@ -56,7 +56,7 @@ export function QuickRound({ onBack }: QuickRoundProps) {
       <Card className="mx-auto max-w-md">
         <CardHeader>
           <CardDescription>Round done</CardDescription>
-          <CardTitle className="text-2xl">
+          <CardTitle className="font-display text-2xl tracking-wide">
             {counts.right} of {cards.length} right
           </CardTitle>
         </CardHeader>

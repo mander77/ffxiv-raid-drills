@@ -131,6 +131,19 @@ make sure that each one still matches the code before you start it.
     site has none, so it does nothing here; the owner chose to keep it, so the file stays standard.
   - `.gitattributes` keeps LF line endings in every text file, on every computer. Before it, a
     Windows checkout turned files into CRLF after a branch switch, and the lint failed.
+  - The theme (after many palettes with the owner): quiet, so the arena stays the focus. Ink
+    text and buttons, a slate header band (`536E8B`, a little darker than the palette's `5E7A97`
+    so white text reads at 4.9:1), and celery (`DAEAAE`) for where you are: the active tab and the
+    line under the header. The palette came from the Figma color palette generator (DAEAAE,
+    836996, 5E7A97, 4E7E5A); its mauve and green were left out, because purple means "saved for
+    later" and green means right. The owner rejected an accent that follows the role (DPS red
+    looks like "wrong"), and brighter accents (teal, magenta, yellow, coral) as too bright. The
+    selected Role shows its game colour; the rest of the chrome has none. Fonts: Saira Condensed
+    for names, tabs, headings and big numbers, Source Sans 3 for text, both bundled.
+  - Light and dark mode with a Light / Dark / System menu, as in shadcn/ui's dark mode guide for
+    Vite: our own ThemeProvider sets the class on <html> (next-themes renders a script tag that
+    React 19 warns about), and a script in index.html sets it before the page draws. The arena
+    stays sand in dark mode, so it is the brightest thing on the page.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what

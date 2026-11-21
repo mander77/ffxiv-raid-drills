@@ -32,7 +32,7 @@ export function RunScore({ fight, results, stopped, onAgain, onWatch }: RunScore
     <Card className="mx-auto max-w-lg">
       <CardHeader>
         <CardDescription>Full fight · {stopped ? `Stopped at mechanic ${reached} of ${fight.segs.length}` : "Done"}</CardDescription>
-        <CardTitle className="text-2xl">
+        <CardTitle className="font-display text-2xl tracking-wide">
           {right} of {all.length} spots right
         </CardTitle>
       </CardHeader>

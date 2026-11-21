@@ -99,10 +99,10 @@ export function DrillScreen({
     <div
       className={cn(
         "flex flex-wrap items-center gap-3 rounded-lg border px-3 py-2",
-        allRight ? "border-green-600 bg-green-50" : "border-destructive bg-red-50",
+        allRight ? "border-success bg-success-soft" : "border-destructive bg-danger-soft",
       )}
     >
-      {allRight ? <Check aria-hidden="true" className="text-green-700" /> : <X aria-hidden="true" className="text-destructive" />}
+      {allRight ? <Check aria-hidden="true" className="text-success" /> : <X aria-hidden="true" className="text-destructive" />}
       <p className="flex-1 text-sm font-semibold" role="status">
         {allRight ? (multi ? "All steps right" : "Right") : multi ? `${right} of ${sc.steps.length} right` : "Not there"}
       </p>
@@ -114,7 +114,7 @@ export function DrillScreen({
       </Button>
     </div>
   ) : status === "wrong" && last ? (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-destructive bg-red-50 px-3 py-2">
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-destructive bg-danger-soft px-3 py-2">
       <X aria-hidden="true" className="text-destructive" />
       <p className="flex-1 text-sm" role="status">
         <span className="font-semibold">Not there.</span> {sc.steps[n - 1].a}
@@ -152,7 +152,7 @@ export function DrillScreen({
           <CardDescription>
             {item.phase} · {i + 1} of {count}
           </CardDescription>
-          <CardTitle className="text-xl">{item.title}</CardTitle>
+          <CardTitle className="font-display text-xl tracking-wide">{item.title}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <SetupText text={sc.setup} folded={n > 0} />

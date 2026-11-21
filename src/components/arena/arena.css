@@ -50,10 +50,11 @@
   .arena .voidr {
     fill: var(--arena-void);
   }
+  /* The N sits above the floor, on the page, so it takes the page's muted text colour (light or dark). */
   .arena .compass {
     font-family: var(--arena-mono);
     font-size: 3px;
-    fill: var(--arena-text-2);
+    fill: var(--muted-foreground);
     text-anchor: middle;
   }
 

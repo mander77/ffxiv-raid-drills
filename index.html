@@ -7,6 +7,15 @@
 <meta name="robots" content="noindex">
 <title>FFXIV Raid Drills &middot; M11S</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231B7448'/%3E%3Cpath d='M13 6h6v7h7v6h-7v7h-6v-7H6v-6h7z' fill='%23fff'/%3E%3C/svg%3E">
+<!-- Light or dark mode before the page draws, so it never flashes light. ThemeProvider
+     keeps the choice under the same name; "system" follows the computer. -->
+<script>
+  try {
+    var mode = localStorage.getItem("raid-drills-theme") || "system";
+    if (mode === "system") mode = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.classList.add(mode);
+  } catch (e) {}
+</script>
 <script type="module" src="/src/main.tsx"></script>
 </head>
 <body>

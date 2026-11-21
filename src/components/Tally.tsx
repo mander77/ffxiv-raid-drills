@@ -12,16 +12,16 @@ export interface TallyProps {
 export function Tally({ right, wrong, missed, missedLabel }: TallyProps) {
   // Each count's colour is a complete Tailwind class, so Tailwind finds it when it scans the code.
   const items = [
-    { label: "Right", n: right, color: "text-green-700" },
+    { label: "Right", n: right, color: "text-success" },
     { label: "Wrong", n: wrong, color: "text-destructive" },
-    { label: missedLabel, n: missed, color: "text-amber-700" },
+    { label: missedLabel, n: missed, color: "text-warning" },
   ];
   return (
     <dl className="grid grid-cols-3 gap-3">
       {items.map((it) => (
         <div key={it.label} className="rounded-lg border p-3 text-center">
           <dt className="text-sm text-muted-foreground">{it.label}</dt>
-          <dd className={cn("text-3xl font-semibold tabular-nums", it.color)}>{it.n}</dd>
+          <dd className={cn("font-display text-4xl tabular-nums", it.color)}>{it.n}</dd>
         </div>
       ))}
     </dl>

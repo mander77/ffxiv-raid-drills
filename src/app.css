@@ -1,29 +1,93 @@
-/* The site's styles: Tailwind CSS with the standard shadcn/ui theme. Light theme only. */
+/* The site's styles: Tailwind CSS with the shadcn/ui theme, light and dark. The look is quiet:
+   ink text and buttons on a soft page, a slate header band, and a pale celery mark for where you
+   are (the active tab, the line under the header). The arena keeps its own sand colours in both
+   modes (arena.css), so it is the one warm, bright thing on the page. Green, red, blue and purple
+   stay free for right, wrong, the arena's hints and the roles. */
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* The shadcn/ui theme colours (its "neutral" base colour). The components read them through the
-   Tailwind names below: bg-background, text-muted-foreground, border-border and so on. */
+/* Dark mode follows the "dark" class on <html>, which ThemeProvider sets. */
+@custom-variant dark (&:is(.dark *));
+
+/* The theme colours. The components read them through the Tailwind names in @theme inline below:
+   bg-background, text-muted-foreground, bg-header and so on. */
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --background: #f4f6f2;
+  --foreground: #1e2a36;
+  --card: #ffffff;
+  --card-foreground: #1e2a36;
+  --popover: #ffffff;
+  --popover-foreground: #1e2a36;
+  --primary: #2a3441;
+  --primary-foreground: #ffffff;
+  --secondary: #e8ece6;
+  --secondary-foreground: #1e2a36;
+  --muted: #edf0ea;
+  --muted-foreground: #566174;
+  --accent: #e8ece6;
+  --accent-foreground: #1e2a36;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: #d8ded6;
+  --input: #cfd6ce;
+  --ring: #536e8b;
+  /* The header band: slate, a little darker than the palette's 5E7A97, so its text reads at 4.9:1. */
+  --header: #536e8b;
+  --header-foreground: #f4f7ec;
+  /* Celery: where you are, such as the active tab and the line under the header. */
+  --highlight: #daeaae;
+  --highlight-foreground: #1e2a36;
+  /* What an answer was: right (green), wrong (the destructive red, on a soft red), too slow
+     (amber), saved for later (violet, as on the arena). The fill of the boss's cast bar. */
+  --success: #1b7448;
+  --success-soft: #e3f1e8;
+  --danger-soft: #fbe9e7;
+  --warning: #b45309;
+  --later: #5b21b6;
+  --later-soft: #f1ecfd;
+  --cast: #fcd34d;
+}
+
+/* Dark: a slate night page (not pure black), lighter panels, near-white ink, a deep slate header. */
+.dark {
+  color-scheme: dark;
+  --background: #12171d;
+  --foreground: #e9eee0;
+  --card: #19202a;
+  --card-foreground: #e9eee0;
+  --popover: #1d2531;
+  --popover-foreground: #e9eee0;
+  --primary: #e9eee0;
+  --primary-foreground: #12171d;
+  --secondary: #232c37;
+  --secondary-foreground: #e9eee0;
+  --muted: #1e2630;
+  --muted-foreground: #9aa4b4;
+  --accent: #26303c;
+  --accent-foreground: #e9eee0;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: #2b3542;
+  --input: #35404e;
+  --ring: #8aa2bd;
+  --header: #2c3b4b;
+  --header-foreground: #e9eee0;
+  --highlight: #daeaae;
+  --highlight-foreground: #1e2a36;
+  --success: #7fd3a3;
+  --success-soft: #173a2a;
+  --danger-soft: #3a1d1b;
+  --warning: #f0b35a;
+  --later: #c9bbfa;
+  --later-soft: #2a2150;
+  --cast: #8a6a1c;
+}
+
+/* The fonts, bundled with the site (src/main.tsx imports them). Source Sans 3 for text, Saira
+   Condensed for the site name, tabs, headings and big numbers: as Tailwind names, font-sans and
+   font-display. */
+@theme {
+  --font-sans: "Source Sans 3 Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Saira Condensed", ui-sans-serif, system-ui, sans-serif;
 }
 
 @theme inline {
@@ -49,6 +113,17 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-header: var(--header);
+  --color-header-foreground: var(--header-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-later: var(--later);
+  --color-later-soft: var(--later-soft);
+  --color-cast: var(--cast);
 }
 
 /* The colours of the fight's ability categories (the marks in the timeline), as Tailwind names:

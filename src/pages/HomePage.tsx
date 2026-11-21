@@ -18,36 +18,37 @@ const HERO_CARD = "k-raw-first";
 interface StartCard {
   path: string;
   name: string;
-  step: string;
+  /** Its place in the order; the cheat sheet is a reference, with no step. */
+  step?: number;
   about: string;
   count: string;
 }
 
-/** The tabs to start with, in order. Each rebuild step adds its tab. */
+/** The tabs to start with, in order, then the cheat sheet. */
 const START: readonly StartCard[] = [
   {
     path: "/learn",
     name: "Learn",
-    step: "Step 1",
+    step: 1,
     about: "What each mechanic does, with a picture.",
     count: `${LEARN_CARDS.length} questions`,
   },
   {
     path: "/practice",
     name: "Practice",
-    step: "Step 2",
+    step: 2,
     about: "Click where you stand, one mechanic at a time.",
     count: `${DRILLS.length} mechanics`,
   },
-  { path: "/timeline", name: "Timeline", step: "Step 3", about: "Which mechanic comes next.", count: `${TIMELINE_CARDS.length} questions` },
+  { path: "/timeline", name: "Timeline", step: 3, about: "Which mechanic comes next.", count: `${TIMELINE_CARDS.length} questions` },
   {
     path: "/pressure",
     name: "Pressure",
-    step: "Step 4",
+    step: 4,
     about: "All of it fast: timed questions, or the whole fight on the clock.",
     count: "Quick round or full fight",
   },
-  { path: "/sheet", name: "Cheat sheet", step: "Reference", about: "Everything on one page.", count: "One page" },
+  { path: "/sheet", name: "Cheat sheet", about: "Everything on one page.", count: "One page" },
 ];
 
 /** Why the tool exists, in the author's words. */
@@ -76,12 +77,12 @@ export function HomePage() {
   return (
     <main>
       <PageContainer className="space-y-10 py-6">
-        {/* The banner: a soft green gradient from the top left, with a Learn card's answer picture in
-            a white frame. On a phone the picture is a short strip from the middle of the arena, and
-            the frame still goes all the way around it. */}
-        <section className="flex flex-col gap-6 rounded-xl border bg-linear-135 from-green-100 to-card to-60% p-6 shadow-sm sm:flex-row sm:items-center">
+        {/* The banner: a soft celery gradient from the top left (fainter in dark mode), with a Learn
+            card's answer picture in a white frame. On a phone the picture is a short strip from the
+            middle of the arena, and the frame still goes all the way around it. */}
+        <section className="flex flex-col gap-6 rounded-xl border bg-linear-135 from-highlight/60 to-card to-60% p-6 shadow-sm sm:flex-row sm:items-center dark:from-highlight/15">
           {fig && (
-            <div className="shrink-0 rounded-lg bg-card p-1.5 shadow-md sm:w-60">
+            <div className="shrink-0 rounded-lg bg-white p-1.5 shadow-md sm:w-60">
               <div className="overflow-hidden rounded-md max-sm:h-28">
                 <LearnPicture
                   fig={fig}
@@ -96,8 +97,7 @@ export function HomePage() {
             </div>
           )}
           <div className="space-y-3">
-            <p className="text-xs font-semibold tracking-wider text-green-700 uppercase">M11S · The Tyrant (Savage) · Healers</p>
-            <h2 className="text-2xl font-semibold tracking-tight text-balance">Practice savage mechanics without a party</h2>
+            <h2 className="font-display text-3xl tracking-wide text-balance">Practice savage mechanics without a party</h2>
             <p>
               Learn the mechanics, practice where you stand, then do it all fast. The answers follow Hector (Toxic), Kindred No Buddies and
               Fixed (3CJ) Ecliptic.
@@ -110,7 +110,7 @@ export function HomePage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold">Start here</h2>
+          <h2 className="font-display text-2xl tracking-wide">Start here</h2>
           <p className="text-sm text-muted-foreground">Go in order.</p>
           <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {START.map((c) => (
@@ -121,8 +121,13 @@ export function HomePage() {
                 >
                   <Card className="h-full transition-colors hover:bg-accent">
                     <CardHeader>
-                      <Badge variant="secondary">{c.step}</Badge>
-                      <CardTitle>{c.name}</CardTitle>
+                      {/* The step's number, large, in the condensed face; the cheat sheet has none. */}
+                      {c.step ? (
+                        <span className="font-display text-4xl leading-none text-muted-foreground">{c.step}</span>
+                      ) : (
+                        <Badge variant="secondary">Reference</Badge>
+                      )}
+                      <CardTitle className="font-display text-xl tracking-wide">{c.name}</CardTitle>
                       <CardDescription>{c.about}</CardDescription>
                     </CardHeader>
                     <CardFooter className="mt-auto text-xs text-muted-foreground">{c.count}</CardFooter>
@@ -136,7 +141,7 @@ export function HomePage() {
         {/* About me: the text, and my character beside it. On a phone the picture goes on top. */}
         <section className="flex flex-col-reverse gap-6 rounded-xl border bg-card p-6 shadow-sm sm:flex-row sm:items-center">
           <div className="min-w-0 flex-1 space-y-3">
-            <h2 className="text-xl font-semibold">About me</h2>
+            <h2 className="font-display text-2xl tracking-wide">About me</h2>
             {ABOUT_ME.map((p) => (
               <p key={p}>{p}</p>
             ))}

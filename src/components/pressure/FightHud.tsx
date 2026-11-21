@@ -11,11 +11,11 @@ import { castOf, type Prompt, promptOf } from "../../lib/fight";
 /** The border and background of the prompt, per look. Complete class names, so Tailwind finds them. */
 const PROMPT_LOOK: Record<Prompt["look"], string> = {
   ask: "bg-card",
-  urgent: "border-destructive bg-red-50 text-destructive",
+  urgent: "border-destructive bg-danger-soft text-destructive",
   idle: "bg-card text-muted-foreground",
-  ok: "border-green-600 bg-green-50 text-green-800",
-  bad: "border-destructive bg-red-50 text-destructive",
-  later: "border-violet-500 bg-violet-50 text-violet-800",
+  ok: "border-success bg-success-soft text-success",
+  bad: "border-destructive bg-danger-soft text-destructive",
+  later: "border-later bg-later-soft text-later",
 };
 
 /** The cast bar and the prompt over the arena. */
@@ -42,7 +42,7 @@ function CastBar() {
   });
   return (
     <div className="relative h-7 overflow-hidden rounded-md border bg-muted text-sm">
-      <div ref={fill} className="absolute inset-y-0 left-0 w-0 bg-amber-300" aria-hidden="true" />
+      <div ref={fill} className="absolute inset-y-0 left-0 w-0 bg-cast" aria-hidden="true" />
       <div className={cn("relative flex h-full items-center justify-between gap-2 px-2", !cast.casting && "text-muted-foreground")}>
         <span className="truncate font-medium">{cast.name}</span>
         <span ref={left} className="tabular-nums" />

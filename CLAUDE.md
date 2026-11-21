@@ -88,14 +88,17 @@ npm run build       # tsc, then Vite writes dist/
 index.html           the page: React draws into #root
 src/main.tsx         start-up: draws the React app (App.tsx) into #root
 src/App.tsx          the header and the routes (React Router): one page per path
-src/app.css          Tailwind and the standard shadcn/ui theme, the ability category colours
+src/app.css          Tailwind and the shadcn/ui theme colours, light and dark (ink, slate header,
+                     celery highlight; success, danger-soft, warning, later), the fonts, the
+                     ability category colours
 src/tabs.ts          the tabs: path, label and one-line intro; tabOf
 src/share.ts         sharing the address of the page
 src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser
 src/stores/progress.ts  your scores (kept in the browser) and the round of Learn, Practice and Timeline
 src/stores/pressure.ts  your Pressure settings: seconds to decide, stops, pattern picks, speed
 src/components/      React components: Header, PageContainer, SlotSwitch, ShareButton (a toast
-                     says the link was copied), TabNav,
+                     says the link was copied), TabNav, ThemeProvider and ModeToggle (light and
+                     dark mode),
                      CategoryDots and CategoryKey (the ability category colours), RoundDone,
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
                      StepChips, SetupText, Tally, ChipRow, HudPrompt
@@ -122,7 +125,7 @@ src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round)
                      (answers, previews, Lock in, keys, the timer of a timed card), TimerBar,
                      TimelinePicture
 src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useFightFrame (run code on
-                     each frame of the fight clock), useMediaQuery, useFitToScreen
+                     each frame of the fight clock), useMediaQuery, useFitToScreen, useTheme
 src/lib/             cn() for class names
 src/types.ts         drills, steps, zones, overlays, questions
 src/party.ts         party slots: roles, light parties, slot names
@@ -199,7 +202,12 @@ These steps put a branch on `main`, the live site.
 - The owner knows C# and basic JavaScript, and is new to TypeScript. Add a short `// TS note:`
   comment where the code uses a TypeScript feature for the first time. Keep
   `docs/typescript-for-csharp.md` current.
-- Light theme only. No company branding.
+- Light and dark mode. Colours come from the theme in `src/app.css` (`bg-header`,
+  `text-success`, `bg-danger-soft`...), each with a light and a dark value, not from fixed
+  Tailwind colours such as `bg-green-50`. Keep the chrome quiet (ink, gray, the slate header and
+  the celery highlight), so the arena stays the focus: green, red, blue and purple mean right,
+  wrong, the arena's hints and the roles. The arena keeps its own colours in both modes. No
+  company branding.
 - Code comments: plain English. No ticket numbers, no history of old layouts.
 - Build the simplest shape for today's need. Do not add hooks for features nobody asked for.
 - Follow the official best practices of each framework and language, so the code looks the way

@@ -71,7 +71,7 @@ function Mechanic({ view: v, fight, g, onGoTo, onSpawns }: MechanicProps) {
   const nx = nextSeg(fight, v.si);
   return (
     <div className="space-y-3">
-      <h2 className="text-lg font-semibold">{g.title}</h2>
+      <h2 className="font-display text-xl tracking-wide">{g.title}</h2>
       {g.scene.setup && <SetupText key={v.si} text={g.scene.setup} folded={j > 0} />}
       {n > 1 && <StepChips count={n} results={res} />}
       {!done && (
@@ -148,7 +148,7 @@ function Between({ paused, fight, onGoTo }: BetweenProps) {
   const a = next.ability >= 0 ? ABILITIES[next.ability] : null;
   return (
     <div className="space-y-3">
-      <h2 className="text-lg font-semibold">Between mechanics</h2>
+      <h2 className="font-display text-xl tracking-wide">Between mechanics</h2>
       {nx && (
         <>
           <p className="text-sm">

@@ -1,4 +1,4 @@
-import { type MouseEvent, useEffect, useId, useState } from "react";
+import { type ComponentProps, type MouseEvent, useEffect, useId, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTimeout } from "@/hooks/useTimeout";
@@ -6,6 +6,15 @@ import { cn } from "@/lib/utils";
 import { healerOf, partyOf, ROLES, slotName } from "../party";
 import { useSlotStore } from "../stores/slot";
 import type { Role } from "../types";
+
+/** The colour of the role you picked, as in the game: tanks blue, healers green, DPS red. Complete
+    class names, so Tailwind finds them. */
+const ROLE_ON: Record<Role, string> = {
+  Tank: "data-[state=on]:bg-blue-700 data-[state=on]:text-white",
+  Healer: "data-[state=on]:bg-green-700 data-[state=on]:text-white",
+  Melee: "data-[state=on]:bg-red-700 data-[state=on]:text-white",
+  Ranged: "data-[state=on]:bg-red-700 data-[state=on]:text-white",
+};
 
 /** How long the "not yet available" tip stays after a tap. */
 const SOON_MS = 2000;
@@ -50,7 +59,7 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
   return (
     <div className={cn("flex flex-wrap items-center justify-end gap-x-4 gap-y-2 max-sm:justify-between", className)}>
       <div className="flex items-center gap-2">
-        <span id={roleLabel} className="text-sm text-muted-foreground">
+        <span id={roleLabel} className="text-sm">
           Role
         </span>
         <ToggleGroup type="single" variant="outline" size="sm" value={me.role} aria-labelledby={roleLabel}>
@@ -63,22 +72,22 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
             );
             if (ready)
               return (
-                <ToggleGroupItem key={role} value={role} aria-label={role}>
+                <BandToggleItem key={role} value={role} aria-label={role} className={ROLE_ON[role]}>
                   {text}
-                </ToggleGroupItem>
+                </BandToggleItem>
               );
             return (
               <Tooltip key={role} open={tip === role} onOpenChange={(open) => setTip(open ? role : null)}>
                 <TooltipTrigger asChild>
-                  <ToggleGroupItem
+                  <BandToggleItem
                     value={role}
                     aria-label={role}
                     aria-disabled="true"
-                    className="cursor-not-allowed text-muted-foreground opacity-60"
+                    className="cursor-not-allowed opacity-60"
                     onClick={(e) => handleSoonClick(e, role)}
                   >
                     {text}
-                  </ToggleGroupItem>
+                  </BandToggleItem>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">{role} drills: not yet available</TooltipContent>
               </Tooltip>
@@ -87,7 +96,7 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
         </ToggleGroup>
       </div>
       <div className="flex items-center gap-2">
-        <span id={groupLabel} className="text-sm text-muted-foreground">
+        <span id={groupLabel} className="text-sm">
           Group
         </span>
         <ToggleGroup
@@ -100,12 +109,27 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
           onValueChange={(v) => v && setSlot(healerOf(v === "2" ? 2 : 1))}
         >
           {([1, 2] as const).map((lp) => (
-            <ToggleGroupItem key={lp} value={String(lp)} title={slotName({ lp, role: me.role })} className="min-w-9">
+            <BandToggleItem
+              key={lp}
+              value={String(lp)}
+              title={slotName({ lp, role: me.role })}
+              className="min-w-9 data-[state=on]:bg-highlight data-[state=on]:text-highlight-foreground"
+            >
               {lp}
-            </ToggleGroupItem>
+            </BandToggleItem>
           ))}
         </ToggleGroup>
       </div>
     </div>
+  );
+}
+
+/** A toggle item on the header's slate band: light lines and text, and a faint hover. */
+function BandToggleItem({ className, ...props }: ComponentProps<typeof ToggleGroupItem>) {
+  return (
+    <ToggleGroupItem
+      className={cn("border-header-foreground/40 text-header-foreground hover:bg-white/10 hover:text-header-foreground", className)}
+      {...props}
+    />
   );
 }

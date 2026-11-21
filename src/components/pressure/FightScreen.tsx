@@ -370,7 +370,7 @@ function Countdown() {
   if (!count) return null;
   return (
     <div className="pointer-events-none absolute inset-0 grid place-content-center justify-items-center gap-2 bg-background/60 text-center">
-      <b className="text-8xl font-bold tabular-nums">{count.n}</b>
+      <b className="font-display text-8xl tabular-nums">{count.n}</b>
       <span className="text-xl font-semibold">{count.name}</span>
     </div>
   );

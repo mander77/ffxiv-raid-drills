@@ -162,7 +162,7 @@ function Section({ title, children }: SectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">{title}</CardTitle>
+        <CardTitle className="font-display text-lg tracking-wide">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">{children}</CardContent>
     </Card>

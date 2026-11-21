@@ -14,7 +14,7 @@ export function RoundDone({ right, done, onAgain }: RoundDoneProps) {
     <Card className="mx-auto max-w-md">
       <CardHeader>
         <CardDescription>Round done</CardDescription>
-        <CardTitle className="text-2xl">
+        <CardTitle className="font-display text-2xl tracking-wide">
           {right} of {done} right ({pct}%)
         </CardTitle>
       </CardHeader>
