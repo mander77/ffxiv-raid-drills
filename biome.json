@@ -21,7 +21,8 @@
       "e2e/**",
       "vite.config.ts",
       "playwright.config.ts",
-      "test/figs.test.tsx"
+      "test/figs.test.tsx",
+      "test/stores/**"
     ]
   },
   "formatter": {

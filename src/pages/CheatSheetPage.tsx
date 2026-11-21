@@ -1,7 +1,9 @@
 // The Cheat sheet page (/sheet): the panic reset, the positions and your timeline on one page.
 // TS note: a .tsx file is TypeScript that may hold JSX, the HTML-like tags below. Each tag compiles
 // to a call to React, so the compiler checks every tag and attribute.
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
+import { Link } from "react-router";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Arena } from "../components/arena/Arena";
@@ -16,6 +18,7 @@ import { swordCross, swordPocket } from "../data/attacks";
 import { CACTBOT_TIMELINE, WTFDIG } from "../data/sources";
 import { TL } from "../data/timeline";
 import { f1, leftOf, unit, vadd } from "../geometry";
+import { useProgressStore } from "../stores/progress";
 import { useSlotStore } from "../stores/slot";
 import { tabOf } from "../tabs";
 import type { Point, Slot } from "../types";
@@ -91,39 +94,62 @@ function SwordExample({ slot, className }: SwordExampleProps) {
 /** One line of "Positions to remember": the mechanic, and its rule for your slot in a sentence or two. */
 interface Rule {
   name: string;
+  /** The Learn card with the detail. */
+  card: string;
   text: (s: Slot) => string;
 }
 
 /** One short line per mechanic, in fight order, written for your role. */
 const RULES: readonly Rule[] = [
-  { name: "Weapon order", text: () => "The first weapon is the one he faces. Then clockwise." },
+  { name: "Weapon order", card: "k-first-weapon", text: () => "The first weapon is the one he faces. Then clockwise." },
   {
     name: "Sword",
+    card: "k-sword",
     text: (s) =>
       `Stand in the pocket behind him, on the side he jumped from. Yours is his ${bySlot(s, { H1: "left", H2: "right" })}, and your light party stacks on you.`,
   },
-  { name: "Scythe", text: (s) => `Everyone stands close around him. You take the ${bySlot(s, { H1: "handle end", H2: "blade end" })}.` },
-  { name: "Axe", text: () => "The whole party stacks in the middle, out of the axe hit." },
-  { name: "Ultimate Trophy Weapons", text: () => "First spawn south and a bit west: clockwise. A bit east: counterclockwise." },
+  {
+    name: "Scythe",
+    card: "k-scythe",
+    text: (s) => `Everyone stands close around him. You take the ${bySlot(s, { H1: "handle end", H2: "blade end" })}.`,
+  },
+  { name: "Axe", card: "k-axe", text: () => "The whole party stacks in the middle, out of the axe hit." },
+  {
+    name: "Ultimate Trophy Weapons",
+    card: "k-ult-spawn",
+    text: () => "First spawn south and a bit west: clockwise. A bit east: counterclockwise.",
+  },
   {
     name: "Void Stardust",
+    card: "k-void",
     text: () => "Start north of him. Drop each puddle just outside the last, a small step clockwise. Then stack or spread.",
   },
   {
     name: "Second weapon set",
+    card: "k-assault-2",
     text: () =>
       "Spot it before the puddles: the first is the one with its flat side square to him. Sword or scythe first: stack or spread toward it.",
   },
-  { name: "Comet spread", text: () => "Healers take any open spot, away from the tanks and melee and out of the last puddle." },
+  {
+    name: "Comet spread",
+    card: "k-void-spread",
+    text: () => "Healers take any open spot, away from the tanks and melee and out of the last puddle.",
+  },
   {
     name: "Orbital Omen",
+    card: "k-orbital",
     text: () => "Stay against his side, where the #2 lines cross. After #1, cross through him. After #2, cross back.",
   },
   {
     name: "Meteorain, your meteor",
+    card: "k-meteor-drop",
     text: (s) => bySlot(s, { H1: "Drop it NW, inside his hitbox.", H2: "Drop it SW, in line with the first SW rock, farther out." }),
   },
-  { name: "Meteorain, tanks", text: () => "Their tethers are tank busters at 5:09, 5:19 and 5:29. Heal them after each one." },
+  {
+    name: "Meteorain, tanks",
+    card: "k-meteor-order",
+    text: () => "Their tethers are tank busters at 5:09, 5:19 and 5:29. Heal them after each one.",
+  },
 ];
 
 /** A guide or a source, with an optional note after it. */
@@ -158,6 +184,29 @@ function Section({ title, children }: SectionProps) {
   );
 }
 
+/** How many questions and drills you answered, and Reset, which asks once before it erases. */
+function Progress() {
+  const seen = useProgressStore((st) => Object.keys(st.scores).length);
+  const reset = useProgressStore((st) => st.reset);
+  const [confirm, setConfirm] = useState(false);
+  function handleReset(): void {
+    if (!confirm) {
+      setConfirm(true);
+      return;
+    }
+    reset();
+    setConfirm(false);
+  }
+  return (
+    <>
+      <p>You answered {seen} different items so far. Progress stays in this browser only.</p>
+      <Button variant={confirm ? "destructive" : "outline"} onClick={handleReset}>
+        {confirm ? "Click again to erase progress" : "Reset my progress"}
+      </Button>
+    </>
+  );
+}
+
 /** The whole cheat sheet, for the slot picked in the header. */
 export function CheatSheetPage() {
   const slot = useSlotStore((st) => st.slot);
@@ -180,7 +229,13 @@ export function CheatSheetPage() {
             <ul className="list-disc space-y-2 pl-5">
               {RULES.map((r) => (
                 <li key={r.name}>
-                  <span className="font-semibold">{r.name}:</span> {r.text(slot)}
+                  <span className="font-semibold">{r.name}:</span> {r.text(slot)}{" "}
+                  <Link
+                    to={`/mech/${r.card}`}
+                    className="text-sm font-medium whitespace-nowrap text-primary underline-offset-4 hover:underline"
+                  >
+                    Learn →
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -240,6 +295,9 @@ export function CheatSheetPage() {
               </li>
             ))}
           </ul>
+        </Section>
+        <Section title="Your progress">
+          <Progress />
         </Section>
       </PageContainer>
     </main>

@@ -9,7 +9,13 @@ export interface TabInfo {
   lede: string;
 }
 
-export const TABS: readonly TabInfo[] = [{ path: "/sheet", label: "Cheat sheet", lede: "The rules and your timeline on one page." }];
+export const TABS: readonly TabInfo[] = [
+  { path: "/", label: "Home", lede: "Practice M11S, The Tyrant (Savage), as a healer, away from the raid." },
+  { path: "/mech", label: "Learn", lede: "What each mechanic does, and what you do in it. Pick an answer to see it on the picture." },
+  { path: "/next", label: "Timeline", lede: "Which mechanic comes next in the fight." },
+  { path: "/sheet", label: "Cheat sheet", lede: "The rules and your timeline on one page." },
+];
 
-/** The tab of an address: "/sheet" is on the Cheat sheet tab. */
-export const tabOf = (pathname: string): TabInfo | undefined => TABS.find((t) => pathname === t.path || pathname.startsWith(`${t.path}/`));
+/** The tab of an address: "/mech/k-sword" is on the Learn tab, and only "/" is on Home. */
+export const tabOf = (pathname: string): TabInfo | undefined =>
+  TABS.find((t) => (t.path === "/" ? pathname === "/" : pathname === t.path || pathname.startsWith(`${t.path}/`)));

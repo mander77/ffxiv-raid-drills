@@ -72,6 +72,13 @@ make sure that each one still matches the code before you start it.
     arena's own styles (`arena.css`) sit under the `.arena` class, so its short class names, such
     as `ring` and `tag`, never touch the rest of the page. The shared pieces (rule box, last
     answer, step chips, setup text, tally, chip row, HUD prompt) use shadcn/ui's Alert and Badge.
+  - Rebuild 3 (#20): Home, Learn and Timeline are back. A card is in the address
+    (`/mech/k-sword`), and `/mech` alone opens the card you were on, or the first one. Your
+    scores are in a Zustand store (`src/stores/progress.ts`) under "raid-drills-progress"; each
+    tab's round count (right of done) is kept until you reload, and an answer for another slot
+    starts a new round. Home's "Start here" cards link only to tabs that exist. On a phone the
+    Lock in bar is fixed to the bottom of the screen once you pick an answer: a sticky bar would
+    stay inside the answers' column, under the picture, off screen.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what
