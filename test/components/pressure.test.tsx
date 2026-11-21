@@ -45,9 +45,15 @@ test("a timed card answered in time does not time out", async () => {
   assert.equal(onTimeout.mock.calls.length, 0);
 });
 
+/** Open the Settings sheet with its button. */
+async function openSettings(): Promise<void> {
+  await userEvent.setup().click(screen.getByRole("button", { name: "Settings" }));
+}
+
 test("Settings: a pick and Set all to Random", async () => {
   const onChange = vi.fn<(c: Choices) => void>();
-  render(<FightSettings code="K7Q2" choices={{ ...RANDOM, ult: "cw" }} onChange={onChange} onDone={() => {}} />);
+  render(<FightSettings code="K7Q2" choices={{ ...RANDOM, ult: "cw" }} onChange={onChange} />);
+  await openSettings();
   const user = userEvent.setup();
   await user.click(within(screen.getByRole("radiogroup", { name: "Ecliptic Fireball" })).getByRole("radio", { name: "Two-way" }));
   assert.equal(onChange.mock.calls[0][0].fireball, "two");
@@ -58,15 +64,17 @@ test("Settings: a pick and Set all to Random", async () => {
 
 test("Settings: a weapon order moves with the arrow keys", async () => {
   const onChange = vi.fn<(c: Choices) => void>();
-  render(<FightSettings code="K7Q2" choices={{ ...RANDOM, set1: "sword-axe-scythe" }} onChange={onChange} onDone={() => {}} />);
+  render(<FightSettings code="K7Q2" choices={{ ...RANDOM, set1: "sword-axe-scythe" }} onChange={onChange} />);
+  await openSettings();
   const card = screen.getByRole("listitem", { name: "Sword, number 1" });
   card.focus();
   await userEvent.setup().keyboard("{ArrowRight}");
   assert.equal(onChange.mock.calls[0][0].set1, "axe-sword-scythe");
 });
 
-test("Settings: on Random, the weapon cards show ? and do not move", () => {
-  render(<FightSettings code="K7Q2" choices={RANDOM} onChange={() => {}} onDone={() => {}} />);
+test("Settings: on Random, the weapon cards show ? and do not move", async () => {
+  render(<FightSettings code="K7Q2" choices={RANDOM} onChange={() => {}} />);
+  await openSettings();
   assert.equal(screen.getAllByRole("listitem", { name: "Sword, order random" }).length, 2);
 });
 
@@ -91,4 +99,13 @@ test("after watching: run the same fight or watch again", async () => {
   assert.ok(screen.getByText("Axe first."));
   await userEvent.setup().click(screen.getByRole("button", { name: "Run this fight" }));
   assert.equal(onRun.mock.calls.length, 1);
+});
+
+test("Settings is a sheet: its button opens it, and Done closes it and gives the focus back", async () => {
+  render(<FightSettings code="K7Q2" choices={RANDOM} onChange={() => {}} />);
+  await openSettings();
+  assert.ok(screen.getByRole("dialog", { name: "Fight pattern" }));
+  await userEvent.setup().click(screen.getByRole("button", { name: "Done" }));
+  assert.isNull(screen.queryByRole("dialog"));
+  assert.equal(document.activeElement, screen.getByRole("button", { name: "Settings" }));
 });

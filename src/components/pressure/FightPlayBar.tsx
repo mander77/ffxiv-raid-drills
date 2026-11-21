@@ -1,5 +1,5 @@
 import { Pause, Play } from "lucide-react";
-import { useId, useRef } from "react";
+import { type ReactNode, useId, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -14,30 +14,18 @@ export interface FightPlayBarProps {
   marks: readonly number[];
   paused: boolean;
   speed: Speed;
-  settingsOpen: boolean;
   onPlay: () => void;
   onSeek: (t: number) => void;
   onSpeed: (speed: Speed) => void;
-  onSettings: () => void;
+  /** The Settings button and its sheet. */
+  settings?: ReactNode;
   onRestart: () => void;
   onNewFight: () => void;
 }
 
 /** The play bar of Watch the right moves: play or pause, a slider for the fight time (its ticks
     mark where each mechanic starts), the time, Settings, the speed, Start over and New fight. */
-export function FightPlayBar({
-  end,
-  marks,
-  paused,
-  speed,
-  settingsOpen,
-  onPlay,
-  onSeek,
-  onSpeed,
-  onSettings,
-  onRestart,
-  onNewFight,
-}: FightPlayBarProps) {
+export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpeed, settings, onRestart, onNewFight }: FightPlayBarProps) {
   const slider = useRef<HTMLInputElement>(null);
   const time = useRef<HTMLSpanElement>(null);
   /** True while you drag the slider, so the clock does not move it under your finger. */
@@ -84,9 +72,7 @@ export function FightPlayBar({
           ))}
         </datalist>
         <span ref={time} className="text-sm whitespace-nowrap tabular-nums" />
-        <Button variant="outline" size="sm" aria-pressed={settingsOpen} onClick={onSettings}>
-          Settings
-        </Button>
+        {settings}
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <span id={speedLabel} className="sr-only">

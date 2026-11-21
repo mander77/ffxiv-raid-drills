@@ -107,6 +107,11 @@ make sure that each one still matches the code before you start it.
     `DrillScreen` (one go at a drill is a try), the quick round ends with Go again like the other
     rounds, and a weapon run in `src/data/drills.ts` is a jump set (`JumpSet`, `buildJumpSet`).
     Names only, never a value.
+  - Rebuild 5, after review: the player's Settings opens in a shadcn/ui Sheet, from the right on a
+    wide screen (the arena stays in view) and from the bottom on a phone. The owner chose Sheet
+    over Drawer: Drawer's drag to close would fight the drag of the weapon cards, and it needs a
+    second component on a wide screen. The fight's keys leave Settings alone, and the player does
+    not pause while it is open: a pick builds the fight again at the same moment.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what

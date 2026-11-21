@@ -115,7 +115,8 @@ src/components/practice/  Practice: DrillList (wide screens), DrillNav (phones),
 src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep, statusAfter, bossFor
 src/components/pressure/  Pressure: PressureStart, QuickRound, FightScreen (the run and the player:
                      frame loop, clicks, keys), FightArena, FightHud (cast bar, prompt),
-                     FightTimeline, FightPanel, FightPlayBar, FightSettings (pattern picks),
+                     FightTimeline, FightPanel, FightPlayBar, FightSettings (the Settings button
+                     and its sheet of pattern picks),
                      RunScore and WatchDone (the end screens)
 src/lib/fight.ts     the fight clock's rules as plain functions: newFightState, tickFight, seek,
                      answerFightStep, viewOf, promptOf, castOf, timelineOf
@@ -124,7 +125,7 @@ src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round)
                      (answers, previews, Lock in, keys, the timer of a timed card), TimerBar,
                      TimelinePicture
 src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useFightFrame (run code on
-                     each frame of the fight clock)
+                     each frame of the fight clock), useMediaQuery
 src/lib/             cn() for class names
 src/types.ts         drills, steps, zones, overlays, questions
 src/party.ts         party slots: roles, light parties, slot names

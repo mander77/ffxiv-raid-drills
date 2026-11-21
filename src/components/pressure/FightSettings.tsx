@@ -1,55 +1,89 @@
 import { GripVertical } from "lucide-react";
 import { type KeyboardEvent, type PointerEvent, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 import type { WeaponType } from "../../data/drills";
 import { CHOICE_ROWS, type Choices, choicesText, cleanChoices, RANDOM } from "../../data/fight";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 
 export interface FightSettingsProps {
   code: string;
   choices: Choices;
   /** Called with the new picks. The player builds the same fight again with them. */
   onChange: (choices: Choices) => void;
-  onDone: () => void;
 }
 
-/** Settings on the player: the fight pattern. Each random part of the fight can be Random or a
-    pick, to practice it on purpose. Parts left on Random still come from the fight code. */
-export function FightSettings({ code, choices, onChange, onDone }: FightSettingsProps) {
+/** The Settings button of the player, and its sheet: the fight pattern. Each random part of the fight can be
+    Random or a pick, to practice it on purpose. Parts left on Random still come from the fight
+    code. The sheet comes in from the right on a wide screen, so the arena stays in view, and from
+    the bottom on a phone. */
+export function FightSettings({ code, choices, onChange }: FightSettingsProps) {
+  const wide = useMediaQuery("(min-width: 768px)");
   /** Save one pick. cleanChoices checks it, so only a known value is kept. */
   const set = (key: string, value: string): void => onChange(cleanChoices({ ...choices, [key]: value }));
   return (
-    <section aria-labelledby="settings-title" className="space-y-4">
-      <p className="text-sm text-muted-foreground">Fight {code}</p>
-      <h2 id="settings-title" className="text-lg font-semibold">
-        Fight pattern
-      </h2>
-      <p className="text-sm text-muted-foreground">
-        Pick a part to practice it on purpose. For a weapon order, press Set order, then drag the cards into the order the boss takes them.
-      </p>
-      {CHOICE_ROWS.map((row) =>
-        row.key === "set1" || row.key === "set2" ? (
-          <WeaponOrderRow key={row.key} label={row.label} value={choices[row.key]} onChange={(v) => set(row.key, v)} />
-        ) : (
-          <PickRow
-            key={row.key}
-            label={row.label}
-            value={choices[row.key]}
-            options={[["random", "Random"], ...row.options]}
-            onChange={(v) => set(row.key, v)}
-          />
-        ),
-      )}
-      <div className="flex flex-wrap gap-3">
-        <Button onClick={onDone}>Done</Button>
-        {choicesText(choices) && (
-          <Button variant="link" onClick={() => onChange(RANDOM)}>
-            Set all to Random
-          </Button>
-        )}
-      </div>
-    </section>
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="outline" size="sm">
+          Settings
+        </Button>
+      </SheetTrigger>
+      <SheetContent side={wide ? "right" : "bottom"} className={cn(!wide && "max-h-[85dvh]")}>
+        <SheetHeader>
+          <SheetTitle>Fight pattern</SheetTitle>
+          <SheetDescription>
+            Fight {code}. Pick a part to practice it on purpose. For a weapon order, press Set order, then drag the cards into the order the
+            boss takes them.
+          </SheetDescription>
+        </SheetHeader>
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4">
+          <PickRows choices={choices} onPick={set} />
+        </div>
+        <SheetFooter className="flex-row flex-wrap">
+          <SheetClose asChild>
+            <Button>Done</Button>
+          </SheetClose>
+          {choicesText(choices) && (
+            <Button variant="link" onClick={() => onChange(RANDOM)}>
+              Set all to Random
+            </Button>
+          )}
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+interface PickRowsProps {
+  choices: Choices;
+  onPick: (key: string, value: string) => void;
+}
+
+/** One row per pick, in fight order. */
+function PickRows({ choices, onPick: set }: PickRowsProps) {
+  return CHOICE_ROWS.map((row) =>
+    row.key === "set1" || row.key === "set2" ? (
+      <WeaponOrderRow key={row.key} label={row.label} value={choices[row.key]} onChange={(v) => set(row.key, v)} />
+    ) : (
+      <PickRow
+        key={row.key}
+        label={row.label}
+        value={choices[row.key]}
+        options={[["random", "Random"], ...row.options]}
+        onChange={(v) => set(row.key, v)}
+      />
+    ),
   );
 }
 

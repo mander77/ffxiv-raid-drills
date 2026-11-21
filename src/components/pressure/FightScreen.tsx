@@ -46,11 +46,8 @@ export interface FightScreenProps {
   onQuit?: (s: FightState) => void;
   /** The player: called when it pauses (with the moment) or plays (null), for the address. */
   onPause?: (t: number | null) => void;
-  /** The player: what the panel on the right shows instead of the mechanic (Settings). */
-  side?: ReactNode;
-  /** The player: the Settings button, and whether Settings is open. */
-  onSettings?: () => void;
-  settingsOpen?: boolean;
+  /** The player: the Settings button and its sheet, in the play bar. */
+  settings?: ReactNode;
   /** The player: New fight, at this moment. */
   onNewFight?: (t: number) => void;
 }
@@ -72,9 +69,7 @@ export function FightScreen({
   onDone,
   onQuit,
   onPause,
-  side,
-  onSettings,
-  settingsOpen = false,
+  settings,
   onNewFight,
 }: FightScreenProps) {
   // TS note: the fight clock is a plain object that changes on every frame, outside React, so it
@@ -180,8 +175,9 @@ export function FightScreen({
   // paused at the end of a mechanic, Enter goes to the next one.
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (e.altKey || e.ctrlKey || e.metaKey) return;
-    const tag = (e.target as HTMLElement | null)?.tagName;
-    if (tag === "BUTTON" || tag === "INPUT") return;
+    // Keys on a button or the slider are theirs, and so are keys in Settings (a dialog).
+    const target = e.target as HTMLElement | null;
+    if (target?.tagName === "BUTTON" || target?.tagName === "INPUT" || target?.closest('[role="dialog"]')) return;
     const s = sim.current;
     if (e.key === " ") {
       e.preventDefault();
@@ -285,17 +281,16 @@ export function FightScreen({
               marks={fight.segs.map((g) => g.from)}
               paused={view.paused}
               speed={speed}
-              settingsOpen={settingsOpen}
               onPlay={togglePause}
               onSeek={seekTo}
               onSpeed={(v) => onSpeed?.(v)}
-              onSettings={() => onSettings?.()}
+              settings={settings}
               onRestart={restart}
               onNewFight={() => onNewFight?.(sim.current.t)}
             />
           </div>
           <div className="min-w-0">
-            {side || <FightPanel view={view} fight={fight} speed={speed} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />}
+            <FightPanel view={view} fight={fight} speed={speed} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />
           </div>
         </div>
       )}

@@ -128,7 +128,6 @@ function Player({ code, picks, onRun }: PlayerProps) {
   const speed = usePressureStore((s) => s.speed);
   const setSpeed = usePressureStore((s) => s.setSpeed);
   const setChoices = usePressureStore((s) => s.setChoices);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [done, setDone] = useState(false);
   const linkChoices = useMemo(() => (picks ? parseChoices(picks) : RANDOM), [picks]);
   const fight = useMemo(() => buildFight(slot, code, linkChoices), [slot, code, linkChoices]);
@@ -161,14 +160,10 @@ function Player({ code, picks, onRun }: PlayerProps) {
       startAt={startAt}
       speed={speed}
       onSpeed={setSpeed}
-      settingsOpen={settingsOpen}
-      onSettings={() => setSettingsOpen((o) => !o)}
+      settings={<FightSettings code={code} choices={linkChoices} onChange={changePicks} />}
       onDone={() => setDone(true)}
       onPause={(at) => setParams(at === null ? {} : { t: String(Math.round(at * 10) / 10) }, { replace: true })}
       onNewFight={(at) => navigate(playerLink(newCode(), linkChoices, at))}
-      side={
-        settingsOpen && <FightSettings code={code} choices={linkChoices} onChange={changePicks} onDone={() => setSettingsOpen(false)} />
-      }
     />
   );
 }
