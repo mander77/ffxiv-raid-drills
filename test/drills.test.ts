@@ -111,7 +111,7 @@ test("weapon runs: the sword's best spot is 2 yalms clear of both arms of the cr
       const d = Math.hypot(st.stand[0] - boss.x, st.stand[1] - boss.y);
       assert.ok(d > 24.5 && d < 25, name + ": " + d.toFixed(1) + " units from him, not 2 yalms clear of the arms");
       // The whole pocket is safe, also far from him: one more step out along the diagonal, or to
-      // the arena edge, is still right (the arms reach past the arena).
+      // the arena edge, is still correct (the arms reach past the arena).
       const diag: Point = [(st.stand[0] - boss.x) / d, (st.stand[1] - boss.y) / d];
       for(const k of [20, 40]){
         const far: Point = [st.stand[0] + diag[0] * k, st.stand[1] + diag[1] * k];
@@ -156,7 +156,7 @@ test("Void Stardust: the next puddle goes just outside the last one, clockwise",
   assert.notOk(inZone([52, 35], z), "inside the last puddle");
 });
 
-/* Results for the Void Stardust drill when every answer is right: the weapon pick (no
+/* Results for the Void Stardust drill when every answer is correct: the weapon pick (no
    puddle), then the three puddles at their usual spots, each placed by nextPuddle. */
 const asDrops = (ps: Point[]): StepResult[] => ps.map(d => ({p:d, ok:true, z:{c:d, r:5}, drop:d}));
 const PUDDLES: Point[] = [1, 2].reduce((ps: Point[]) => [...ps, zoneCenter(nextPuddle(asDrops(ps)))], [[50, 33]]);
@@ -199,7 +199,7 @@ test("Void Stardust spread: any open spot, on the first weapon's side for a swor
   assert.notOk(inZone([35, 65], south), "on the M1 spot");
 });
 
-test("Void Stardust into the second weapons: every right spot is inside its zone", () => {
+test("Void Stardust into the second weapons: every correct spot is inside its zone", () => {
   const drill = DRILLS.find(m => m.id === "m-void");
   if(!drill) throw new Error("missing drill m-void");
   for(let i = 0; i < REPEATS; i++) for(const s of SLOTS) for(const v of ["stack", "spread"]){
@@ -210,7 +210,7 @@ test("Void Stardust into the second weapons: every right spot is inside its zone
     if(!pick || !end) throw new Error("missing zone");
     const z = end(VOID_RESULTS);
     if(!("fn" in z)) throw new Error("the stack or spread zone is a rule zone");
-    assert.ok(inZone(z.label, z), v + ": the shown spot is right");
+    assert.ok(inZone(z.label, z), v + ": the shown spot is correct");
     // The pick answer starts "The axe, ..." when the axe goes first.
     if(v === "stack" && "c" in pick && !sc.steps[0].a.startsWith("The axe")){
       // In max melee range (8.5 yalms), out of the last puddle. It gets as close as it can to

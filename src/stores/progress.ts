@@ -4,18 +4,18 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { Slot } from "../types";
 
-/** How often you answered one question or drill (`seen`), and how often you were right. */
+/** How often you answered one question or drill (`seen`), and how often you were correct. */
 export interface Score {
   seen: number;
-  right: number;
+  correct: number;
 }
 
-/** The round on one tab: the answers so far and how many were right, for one slot, and the card
+/** The round on one tab: the answers so far and how many were correct, for one slot, and the card
     you were on (`current`), so the tab opens there again. `finished` is true after the last card. */
 export interface Round {
   slot: Slot | null;
   done: number;
-  right: number;
+  correct: number;
   current: string | null;
   finished: boolean;
 }
@@ -25,11 +25,11 @@ export type RoundTab = "learn" | "timeline" | "practice";
 
 /** The scores with one more answer to question or drill id. */
 function withAnswer(scores: Record<string, Score>, id: string, ok: boolean): Record<string, Score> {
-  const was = scores[id] ?? { seen: 0, right: 0 };
-  return { ...scores, [id]: { seen: was.seen + 1, right: was.right + (ok ? 1 : 0) } };
+  const was = scores[id] ?? { seen: 0, correct: 0 };
+  return { ...scores, [id]: { seen: was.seen + 1, correct: was.correct + (ok ? 1 : 0) } };
 }
 
-const NEW_ROUND: Round = { slot: null, done: 0, right: 0, current: null, finished: false };
+const NEW_ROUND: Round = { slot: null, done: 0, correct: 0, current: null, finished: false };
 const NO_ROUNDS: Record<RoundTab, Round> = { learn: NEW_ROUND, timeline: NEW_ROUND, practice: NEW_ROUND };
 
 interface ProgressState {
@@ -57,10 +57,10 @@ export const useProgressStore = create<ProgressState>()(
       rounds: NO_ROUNDS,
       record: (id, ok, tab, slot) =>
         set((st) => {
-          const round = st.rounds[tab].slot === slot ? st.rounds[tab] : { ...st.rounds[tab], slot, done: 0, right: 0 };
+          const round = st.rounds[tab].slot === slot ? st.rounds[tab] : { ...st.rounds[tab], slot, done: 0, correct: 0 };
           return {
             scores: withAnswer(st.scores, id, ok),
-            rounds: { ...st.rounds, [tab]: { ...round, done: round.done + 1, right: round.right + (ok ? 1 : 0) } },
+            rounds: { ...st.rounds, [tab]: { ...round, done: round.done + 1, correct: round.correct + (ok ? 1 : 0) } },
           };
         }),
       score: (id, ok) => set((st) => ({ scores: withAnswer(st.scores, id, ok) })),
@@ -79,6 +79,17 @@ export const useProgressStore = create<ProgressState>()(
       storage: createJSONStorage(() => localStorage),
       // Keep the scores; a round starts again with each visit.
       partialize: (st) => ({ scores: st.scores }),
+      // Version 1 calls a correct answer `correct`; version 0 called it `right`. Scores saved before
+      // keep their counts.
+      // TS note: `as` tells the compiler the shape of the saved data, which it cannot check itself.
+      version: 1,
+      migrate: (saved, version) => {
+        const old = saved as { scores?: Record<string, { seen: number; right?: number; correct?: number }> };
+        if (version > 0 || !old.scores) return saved as Pick<ProgressState, "scores">;
+        const scores: Record<string, Score> = {};
+        for (const [id, s] of Object.entries(old.scores)) scores[id] = { seen: s.seen, correct: s.correct ?? s.right ?? 0 };
+        return { scores };
+      },
     },
   ),
 );

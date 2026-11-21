@@ -39,8 +39,8 @@ function open(path: string): void {
 const where = (): string | null => screen.getByTestId("where").textContent;
 /** The answer buttons, in the order shown. */
 const answers = (): HTMLElement[] => screen.getAllByRole("button").filter((b) => /^\d/.test(b.textContent ?? ""));
-/** The right answer's text for a card, for slot H1. */
-const rightOf = (id: string): string =>
+/** The correct answer's text for a card, for slot H1. */
+const correctOf = (id: string): string =>
   LEARN_CARDS.concat(TIMELINE_CARDS)
     .find((x) => x.id === id)
     ?.build("H1")
@@ -57,14 +57,14 @@ test("a Learn answer shows on the picture first, then Lock in answers it", async
   const user = userEvent.setup();
   const lock = screen.getByRole("button", { name: "Lock in answer" });
   assert.isTrue(lock.hasAttribute("disabled"), "nothing to lock in yet");
-  const right = answers().find((b) => b.textContent?.includes(rightOf(LEARN[0].id)));
-  if (!right) throw new Error("no right answer");
-  await user.click(right);
-  assert.equal(right.getAttribute("aria-pressed"), "true");
+  const correct = answers().find((b) => b.textContent?.includes(correctOf(LEARN[0].id)));
+  if (!correct) throw new Error("no correct answer");
+  await user.click(correct);
+  assert.equal(correct.getAttribute("aria-pressed"), "true");
   assert.ok(screen.getByRole("img", { name: /Arena picture of answer/ }), "the picture shows the picked answer");
   await user.click(lock);
-  assert.ok(screen.getByText("Right answer.", { exact: false }));
-  assert.deepEqual(useProgressStore.getState().scores[LEARN[0].id], { seen: 1, right: 1 });
+  assert.ok(screen.getByText("Correct answer.", { exact: false }));
+  assert.deepEqual(useProgressStore.getState().scores[LEARN[0].id], { seen: 1, correct: 1 });
   assert.ok(screen.getByRole("img", { name: /green area shows the answer/ }));
 });
 
@@ -93,11 +93,11 @@ test("a Timeline card answers with one click and shows the coming rows", async (
   const user = userEvent.setup();
   assert.ok(screen.getByRole("list", { name: "Fight timeline" }));
   assert.ok(screen.getAllByText("? ? ?").length > 0, "the names hide until the answer");
-  const right = answers().find((b) => b.textContent?.includes(rightOf(TIMELINE[0].id)));
-  if (!right) throw new Error("no right answer");
-  await user.click(right);
+  const correct = answers().find((b) => b.textContent?.includes(correctOf(TIMELINE[0].id)));
+  if (!correct) throw new Error("no correct answer");
+  await user.click(correct);
   assert.equal(screen.queryAllByText("? ? ?").length, 0, "the names show after the answer");
-  assert.equal(useProgressStore.getState().rounds.timeline.right, 1);
+  assert.equal(useProgressStore.getState().rounds.timeline.correct, 1);
 });
 
 test("after the last card the round ends with the score, and Go again starts over", async () => {

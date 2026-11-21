@@ -2,7 +2,7 @@ import { Lightbulb } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export interface RuleBoxProps {
-  /** The rule of the mechanic: why the right spot is right. */
+  /** The rule of the mechanic: why the correct spot is the one to stand in. */
   rule: string;
 }
 

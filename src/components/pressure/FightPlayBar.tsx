@@ -39,7 +39,7 @@ export interface FightPlayBarProps {
   onNewFight: () => void;
 }
 
-/** The play bar of Watch the right moves, thin like a video player's: a slider for the fight
+/** The play bar of Watch the correct moves, thin like a video player's: a slider for the fight
     time across the top, with a tick under it where each mechanic starts (point at one for its
     name, click it to go there), then one row with play or pause, the time, the speed, and buttons
     for Start over, New fight and Settings. */

@@ -27,7 +27,7 @@ export interface FightPanelProps {
 export function FightPanel({ view: v, fight, onGoTo, onSpawns }: FightPanelProps) {
   const g = v.si >= 0 ? fight.segs[v.si] : null;
   return (
-    <section aria-label="The right moves">
+    <section aria-label="The correct moves">
       {g ? (
         <Mechanic view={v} fight={fight} g={g} onGoTo={onGoTo} onSpawns={onSpawns} />
       ) : (
@@ -69,9 +69,9 @@ function Mechanic({ view: v, fight, g, onGoTo, onSpawns }: MechanicProps) {
             )}
           </p>
           <p className="font-medium">{g.scene.steps[j].q}</p>
-          {/* The player shows the right move with its question; your marker walks there. */}
+          {/* The player shows the correct move with its question; your marker walks there. */}
           <p className="mt-1.5">
-            <span className="font-semibold text-success-foreground">Right move:</span> {g.scene.steps[j].a}
+            <span className="font-semibold text-success-foreground">Correct move:</span> {g.scene.steps[j].a}
           </p>
         </div>
       )}

@@ -78,7 +78,7 @@ describe("the run", () => {
     expect(s.results[0][0].missed).toBe(true);
   });
 
-  test("the right click is right, and the last one scores its drill", () => {
+  test("a correct click counts, and the last one scores its drill", () => {
     const s = newFightState("run", fight());
     const g = s.fight.segs[0];
     let last = null;
@@ -87,7 +87,7 @@ describe("the run", () => {
       last = answerFightStep(s, 0, null);
       expect(last?.kind).toBe("ok");
     }
-    expect(last?.scored).toEqual({ drill: g.drills[0], allRight: true });
+    expect(last?.scored).toEqual({ drill: g.drills[0], allCorrect: true });
     expect(s.clicks).toHaveLength(0);
   });
 
@@ -112,8 +112,8 @@ describe("the run", () => {
   });
 });
 
-describe("Watch the right moves", () => {
-  test("answers every step right by itself, at the given speed", () => {
+describe("Watch the correct moves", () => {
+  test("answers every step correct by itself, at the given speed", () => {
     const s = newFightState("watch", fight());
     let done = false;
     for (let i = 0; i < 100_000 && !done; i++) done = tickFight(s, 0.05, 2).done;
@@ -131,7 +131,7 @@ describe("Watch the right moves", () => {
     });
   });
 
-  test("the prompt gives the right move, and nothing turns red", () => {
+  test("the prompt gives the correct move, and nothing turns red", () => {
     const s = newFightState("watch", fight());
     const g = s.fight.segs[0];
     s.t = g.due[0] - 1;

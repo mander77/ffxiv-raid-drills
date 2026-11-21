@@ -45,7 +45,7 @@ test("the start screen offers the quick round and the full fight", () => {
   assert.ok(screen.getByText("Timed questions"));
   assert.ok(screen.getByText("The whole fight on the clock"));
   assert.ok(screen.getByRole("button", { name: "Start the run" }));
-  assert.ok(screen.getByRole("button", { name: "Watch the right moves" }));
+  assert.ok(screen.getByRole("button", { name: "Watch the correct moves" }));
 });
 
 test("the seconds to decide are saved", async () => {
@@ -83,9 +83,9 @@ test("Start the run opens the run on /pressure, and Quit with no answer goes bac
   assert.ok(screen.getByText("Timed questions"));
 });
 
-test("Watch the right moves opens the player at a new fight's address", async () => {
+test("Watch the correct moves opens the player at a new fight's address", async () => {
   open("/pressure");
-  await userEvent.setup().click(screen.getByRole("button", { name: "Watch the right moves" }));
+  await userEvent.setup().click(screen.getByRole("button", { name: "Watch the correct moves" }));
   assert.match(where() ?? "", /^\/pressure\/[2-9A-HJ-NP-Z]{4}$/);
   assert.ok(screen.getByRole("slider", { name: "Fight time" }));
 });

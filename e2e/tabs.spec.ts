@@ -36,9 +36,23 @@ test("a Learn card: pick an answer, lock it in, and go on", async ({ page }) => 
   await expect(page.getByRole("img", { name: "Arena picture of answer 1." })).toBeVisible();
   await page.getByRole("button", { name: "Lock in answer" }).click();
   await expect(page.getByRole("img", { name: "Arena picture. The green area shows the answer." })).toBeVisible();
-  await expect(page.getByText("Right answer.")).toBeVisible();
+  await expect(page.getByText("Correct answer.")).toBeVisible();
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page).not.toHaveURL(first);
+});
+
+test("in dark mode, the correct answer shows green and an incorrect pick red", async ({ page }) => {
+  // With no saved choice, the site follows the computer's setting: dark here.
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto("/learn/k-raw-first");
+  await page.getByRole("button", { name: /The party stacks north/ }).click();
+  await page.getByRole("button", { name: "Lock in answer" }).click();
+  // The dark values of --success and --danger in app.css.
+  await expect(page.getByRole("button", { name: /Tanks spread, and the party stacks south/ })).toHaveCSS(
+    "background-color",
+    "rgb(23, 58, 42)",
+  );
+  await expect(page.getByRole("button", { name: /The party stacks north/ })).toHaveCSS("background-color", "rgb(58, 29, 27)");
 });
 
 test("a Timeline card: one click answers, and the coming names show", async ({ page }) => {
@@ -46,7 +60,7 @@ test("a Timeline card: one click answers, and the coming names show", async ({ p
   await expect(page.getByText("? ? ?").first()).toBeVisible();
   await page.getByRole("button", { name: /^1/ }).click();
   await expect(page.getByText("? ? ?")).toHaveCount(0);
-  await expect(page.getByText("Right answer.")).toBeVisible();
+  await expect(page.getByText("Correct answer.")).toBeVisible();
 });
 
 test("the Group switch changes the slot on the Cheat sheet", async ({ page }) => {
@@ -59,7 +73,7 @@ test("the Group switch changes the slot on the Cheat sheet", async ({ page }) =>
   await expect(page.getByText("Your timeline as H2")).toBeVisible();
 });
 
-test("Practice: a right click and a wrong click on the arena", async ({ page }) => {
+test("Practice: a correct click and an incorrect click on the arena", async ({ page }) => {
   const { DRILLS } = await import("../src/data/drills");
   const { buildPattern } = await import("../src/lib/practice");
   const { rotZone, stepZone, zoneCenter } = await import("../src/geometry");
@@ -69,7 +83,7 @@ test("Practice: a right click and a wrong click on the arena", async ({ page }) 
   const pattern = buildPattern(drill, "H1", code);
   const zone = stepZone(pattern.scene.steps[0], []);
   if (!zone) throw new Error("no zone");
-  const right = zoneCenter(rotZone(zone, pattern.k));
+  const correct = zoneCenter(rotZone(zone, pattern.k));
 
   const arena = page.getByRole("img", { name: /Arena map/ });
   /** Click a spot given in arena units: the picture's own screen matrix turns it into pixels. */
@@ -83,8 +97,8 @@ test("Practice: a right click and a wrong click on the arena", async ({ page }) 
   };
 
   await page.goto(`/practice/${drill.id}/${code}`);
-  await clickAt(right);
-  await expect(page.getByRole("status")).toHaveText("Right");
+  await clickAt(correct);
+  await expect(page.getByRole("status")).toHaveText("Correct");
   await page.getByRole("button", { name: "Again" }).first().click();
   await clickAt([-3, -5]);
   await expect(page.getByRole("status")).toHaveText("Not there");

@@ -1,9 +1,9 @@
 // Arena pictures for the Mechanics questions. Each one shows the setup. Before you lock in an
-// answer, you can see each answer drawn on it, right or wrong, in one neutral colour, together
+// answer, you can see each answer drawn on it, correct or incorrect, in one neutral colour, together
 // with the boss attack that answer assumes: a spread draws one AoE on each player, a stack one
 // shared AoE, clock spots draw protean cones, and so on. So the quiz also asks what the boss
 // does, not only where you go. After you answer, the picture shows what the mechanic really
-// does and the right spot in green. Where a map drill already draws the same moment, the
+// does and the correct spot in green. Where a map drill already draws the same moment, the
 // picture is built from that drill, so the two always agree.
 import { bySlot, withSeed } from "../util";
 import { markRole, partyOf } from "../party";
@@ -58,7 +58,7 @@ const pairsAt = (spots: Point[]): Overlay[][] => spots.map((p, i) => cluster(p, 
 
 /* ---------- the boss attacks an answer assumes ---------- */
 const RAIDWIDE = aoe(CENTER, RAIDWIDE_R);
-/* Made-up attacks, drawn only in wrong answers. They are not in the fight, so BossMod has no
+/* Made-up attacks, drawn only in incorrect answers. They are not in the fight, so BossMod has no
    size for them. The real sizes are in data/attacks.ts. */
 const FAKE = {buster:7, platformBuster:6, circle:35, bigCircle:40, smallCircle:9, axeDonut:18, voidDonut:11, tripleDonut:12, line:10};
 /** Where the role marks in a list stand. */
@@ -398,10 +398,10 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-ecl-prio": s => { const T: Point[] = [[50, 13], [87, 50], [50, 87], [13, 50]];
     /** Labels on the towers N, E, S, W, and your tower circled when you have one. */
     const labels = (who: string[]): Preview => { const i = who.indexOf(s); return show(T.map((p, k) => tag(p[0], p[1], who[k])), i >= 0 ? [circle(T[i], TOWER_R)] : []); };
-    const right = labels(["H1", "H2", "R1", "R2"]);
-    return {overlays:T.map(([x, y]): Overlay => ({t:"tower", x, y})), boss:BOSS, after:right.pieces, answer:right.zones,
+    const correct = labels(["H1", "H2", "R1", "R2"]);
+    return {overlays:T.map(([x, y]): Overlay => ({t:"tower", x, y})), boss:BOSS, after:correct.pieces, answer:correct.zones,
       note:"Example tower spots. Count clockwise from A: H1 takes the first tower, then H2, R1 and R2.", options:[
-        right, labels(["R1", "H2", "H1", "R2"]), labels(["M1", "M2", "?", "?"]), labels(["MT", "OT", "MT", "OT"])]}; },
+        correct, labels(["R1", "H2", "H1", "R2"]), labels(["M1", "M2", "?", "?"]), labels(["MT", "OT", "MT", "OT"])]}; },
   // The tether goes to the player in the middle of the tower, so it draws from the boss to whoever the answer puts there.
   // M1 stands on the tower's edge. The answers put you in the middle, just inside the edge,
   // outside the tower, and on the edge.

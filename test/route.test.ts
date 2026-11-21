@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { rightRoute, clickRoute, runnerAt, MOVEMENT_SPEED, REACT, LOOK, REST_GAP, HOME as START, type Stop } from "../src/data/route";
+import { correctRoute, clickRoute, runnerAt, MOVEMENT_SPEED, REACT, LOOK, REST_GAP, HOME as START, type Stop } from "../src/data/route";
 import { buildFight, RANDOM } from "../src/data/fight";
 import { newCode } from "../src/util";
 import { inZone, rotZone } from "../src/geometry";
@@ -9,17 +9,17 @@ const SLOTS: Slot[] = ["H1", "H2"];
 const dist = (a: Point, b: Point): number => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const near = (a: Point, b: Point): boolean => dist(a, b) < 1e-6;
 
-test("the right route has one stop for every step of the fight, in time order", () => {
+test("the correct route has one stop for every step of the fight, in time order", () => {
   for(const s of SLOTS) for(let i = 0; i < 20; i++){
-    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f);
+    const f = buildFight(s, newCode(), RANDOM), route = correctRoute(f);
     assert.equal(route.length, f.segs.reduce((n, g) => n + g.due.length, 0));
     route.forEach((st, k) => { if(k) assert.isAtLeast(st.hit, route[k - 1].hit); });
   }
 });
 
-test("every spot of the right route is a right answer, so the watched run scores all right", () => {
+test("every spot of the correct route is a correct answer, so the watched run scores all correct", () => {
   for(const s of SLOTS) for(let i = 0; i < 20; i++){
-    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f);
+    const f = buildFight(s, newCode(), RANDOM), route = correctRoute(f);
     f.segs.forEach((g, si) => {
       const res: StepResult[] = [];
       route.filter(st => st.si === si).sort((a, b) => a.j - b.j).forEach(st => {
@@ -55,10 +55,10 @@ test("the runner waits on a spot until its hit, then runs straight to the next s
   assert.deepEqual(runnerAt(route, 99), {at:[80, 34], target:null});
 });
 
-test("at run speed the runner is never more than half a second late to a right spot", () => {
+test("at run speed the runner is never more than half a second late to a correct spot", () => {
   const late: string[] = [];
   for(const s of SLOTS) for(let i = 0; i < 30; i++){
-    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f);
+    const f = buildFight(s, newCode(), RANDOM), route = correctRoute(f);
     // A look-ahead stop is never reached on purpose, so it does not count.
     for(const st of route.filter(x => !x.lookAhead)){
       const g = f.segs[st.si];
@@ -75,7 +75,7 @@ test("at run speed the runner is never more than half a second late to a right s
 
 test("the spread after the puddles goes to the middle of the nearest open gap", () => {
   for(const s of SLOTS) for(let i = 0; i < 20; i++){
-    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f);
+    const f = buildFight(s, newCode(), RANDOM), route = correctRoute(f);
     f.segs.forEach((g, si) => {
       const steps = g.scene.steps, j = steps.findIndex(st => st.q.startsWith("Puddles done. Comet"));
       if(j < 0) return;
@@ -91,7 +91,7 @@ test("on a sword the route goes to the pocket's best spot, next to the boss", ()
   let swords = 0;
   for(const s of SLOTS) for(let i = 0; i < 10; i++){
     const f = buildFight(s, newCode(), RANDOM);
-    for(const st of rightRoute(f)){
+    for(const st of correctRoute(f)){
       const stand = f.segs[st.si].scene.steps[st.j].stand;
       if(!stand) continue;
       swords++;
@@ -103,7 +103,7 @@ test("on a sword the route goes to the pocket's best spot, next to the boss", ()
 
 test("in a quiet stretch the runner pre-positions for the next mechanic", () => {
   for(const s of SLOTS) for(let i = 0; i < 10; i++){
-    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f), moves = route.filter(st => !st.lookAhead);
+    const f = buildFight(s, newCode(), RANDOM), route = correctRoute(f), moves = route.filter(st => !st.lookAhead);
     let quiet = 0;
     moves.forEach((st, k) => {
       if(k && st.show - moves[k - 1].hit < REST_GAP) return;
@@ -128,7 +128,7 @@ test("in a quiet stretch the runner pre-positions for the next mechanic", () => 
 
 test("a look-ahead step has an answer, but the runner does not go there", () => {
   for(const s of SLOTS) for(let i = 0; i < 10; i++){
-    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f), si = f.segs.findIndex(g => g.drills.includes("m-void"));
+    const f = buildFight(s, newCode(), RANDOM), route = correctRoute(f), si = f.segs.findIndex(g => g.drills.includes("m-void"));
     const pick = route.find(st => st.si === si && st.j === 0), puddle = route.find(st => st.si === si && st.j === 1);
     if(!pick || !puddle) throw new Error("missing Void Stardust stops");
     assert.isTrue(pick.lookAhead, "the weapon pick is a look-ahead");
@@ -152,7 +152,7 @@ test("a played-back run follows your clicks, each one at the hit of the step it 
 
 test("the watched run shows no weapon spot before the boss turns to the first weapon", () => {
   for(const s of SLOTS) for(let i = 0; i < 20; i++){
-    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f);
+    const f = buildFight(s, newCode(), RANDOM), route = correctRoute(f);
     f.segs.forEach((g, si) => {
       if(!g.turn) return;
       const first = g.scene.steps.length - g.turn.weapons;

@@ -63,7 +63,7 @@ export function PressureStart({ onQuick, onRun, onWatch }: PressureStartProps) {
         <CardContent className="space-y-4">
           <p className="text-sm">
             The run: click your spot before each hit lands. About 5 minutes, with your score at the end. Watch: the whole fight plays with
-            the right moves.
+            the correct moves.
           </p>
           {/* A first run can stop at each new mechanic, so you can look before the clock runs. */}
           <div className="flex items-center gap-2">
@@ -73,7 +73,7 @@ export function PressureStart({ onQuick, onRun, onWatch }: PressureStartProps) {
           <div className="flex flex-wrap gap-3">
             <Button onClick={onRun}>Start the run</Button>
             <Button variant="outline" onClick={onWatch}>
-              Watch the right moves
+              Watch the correct moves
             </Button>
           </div>
         </CardContent>

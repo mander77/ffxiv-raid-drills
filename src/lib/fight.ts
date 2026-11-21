@@ -6,7 +6,7 @@ import { type Category, categoriesAt } from "../data/abilities";
 import { PUDDLE_LIFE } from "../data/attacks";
 import { facingNext, jumpsNext } from "../data/drills";
 import { buildHits, type Fight, type FightSeg, type Hit } from "../data/fight";
-import { clickRoute, rightRoute, type Stop, showOf } from "../data/route";
+import { clickRoute, correctRoute, type Stop, showOf } from "../data/route";
 import { inZone, rotOverlay, rotZone, stepZone, zoneCenter } from "../geometry";
 import type { Boss, Point, Scene, StepResult, Zone } from "../types";
 
@@ -30,9 +30,9 @@ export const TURN_AFTER = 1.0;
 /** How long before a weapon hits the boss lands on it: cactbot's "--jump N--" lines come 2.0
     seconds before each "Assault Evolved N" hit, in both sets. */
 export const JUMP_LEAD = 2.0;
-/** Watch the right moves: how long a green answer stays on the floor after its hit. */
+/** Watch the correct moves: how long a green answer stays on the floor after its hit. */
 export const GREEN_FOR = 1.5;
-/** Watch the right moves: how long before its due time a look-ahead step is answered. */
+/** Watch the correct moves: how long before its due time a look-ahead step is answered. */
 export const LOOK_SHOW = 4;
 /** The last seconds before a hit, when the prompt and the countdown ring turn red. */
 export const URGENT = 3;
@@ -51,7 +51,7 @@ export const TIMELINE_KEEP = 0.7;
 
 /* ---------- the state of one run of the fight clock ---------- */
 
-/** run: you click, like a game. watch: the right moves play by themselves. */
+/** run: you click, like a game. watch: the correct moves play by themselves. */
 export type FightMode = "run" | "watch";
 /** A click in the run: mechanic si, step j, fight time t, arena spot p. */
 export interface Click {
@@ -87,7 +87,7 @@ export interface FightState {
   nextHit: number;
   /** The timeline lines that show: cactbot's "--sync--" markers are left out. */
   lines: TimelineLine[];
-  /** The route the marker runs: the right spots (watch) or your clicks (run). */
+  /** The route the marker runs: the correct spots (watch) or your clicks (run). */
   route: Stop[];
 }
 
@@ -110,7 +110,7 @@ export function newFightState(mode: FightMode, fight: Fight, opts: { paused?: bo
     hits,
     nextHit: firstHitAfter(hits, t),
     lines: fight.events.filter((e) => !e.name.startsWith("--")),
-    route: mode === "watch" ? rightRoute(fight) : clickRoute(fight, []),
+    route: mode === "watch" ? correctRoute(fight) : clickRoute(fight, []),
   };
 }
 
@@ -186,7 +186,7 @@ export function jump(s: FightState, to: number): void {
 }
 
 /** Go to any moment on the player. Back: the answers to hits after that moment are forgotten.
-    Forward: the next frames fill in the right moves it jumped over. */
+    Forward: the next frames fill in the correct moves it jumped over. */
 export function seek(s: FightState, to: number): void {
   const t = Math.max(0, Math.min(s.fight.end, to));
   if (t < s.t)
@@ -197,14 +197,14 @@ export function seek(s: FightState, to: number): void {
   jump(s, t);
 }
 
-/** What answering a step did: right, wrong or too slow, and, when it finished a mechanic in the
+/** What answering a step did: correct, incorrect or too slow, and, when it finished a mechanic in the
     run, the drill whose score it counts for. */
 export interface Answered {
   kind: "ok" | "bad" | "slow";
-  scored: { drill: string; allRight: boolean } | null;
+  scored: { drill: string; allCorrect: boolean } | null;
 }
 
-/** Answer the next step of mechanic si: a click at p, the right spot (p null), or a step you were
+/** Answer the next step of mechanic si: a click at p, the correct spot (p null), or a step you were
     too slow for. In the run, your marker runs to each spot you click. */
 export function answerFightStep(s: FightState, si: number, p: Point | null, missed = false): Answered | null {
   const g = s.fight.segs[si];
@@ -222,7 +222,7 @@ export function answerFightStep(s: FightState, si: number, p: Point | null, miss
     s.clicks.push({ si, j: res.length - 1, t: s.t, p });
     s.route = clickRoute(s.fight, s.clicks);
   }
-  const scored = res.length === g.due.length && g.drills[0] ? { drill: g.drills[0], allRight: res.every((x) => x.ok) } : null;
+  const scored = res.length === g.due.length && g.drills[0] ? { drill: g.drills[0], allCorrect: res.every((x) => x.ok) } : null;
   return { kind: ok ? "ok" : missed ? "slow" : "bad", scored };
 }
 
@@ -251,7 +251,7 @@ export interface Tick {
     - The skip: in the run, after your last click on a mechanic its last hit lands at once; once
       its result has shown for RESULT_HOLD seconds, or with nothing on the floor, the run goes on
       to LEAD seconds before the next mechanic, and it ends after the last one.
-    - Watch the right moves answers each step at its hit (a look-ahead step LOOK_SHOW seconds
+    - Watch the correct moves answers each step at its hit (a look-ahead step LOOK_SHOW seconds
       early), with the spot the marker ran to. In the run, a step not answered by its hit is too
       slow.
     - "Stop at each new mechanic": in the run, when a mechanic appears, the clock waits for Go. */
@@ -318,7 +318,7 @@ export interface FightView {
   boss: Boss | null;
   /** For each answer, whether its puddle has gone off. */
   wentOff: boolean[];
-  /** The right area of the marker's next spot (watch), in blue. */
+  /** The correct area of the marker's next spot (watch), in blue. */
   target: Zone | null;
   paused: boolean;
   look: boolean;
@@ -356,7 +356,7 @@ export function viewOf(s: FightState): FightView {
   return { key, si, scene: sc, k, results: [...res], showAnswer, boss, wentOff, target, paused: s.paused, look: s.look };
 }
 
-/** The right area of the marker's next spot, when the answers before it are in. */
+/** The correct area of the marker's next spot, when the answers before it are in. */
 function targetZone(s: FightState): Zone | null {
   const moves = s.route.filter((x) => !x.lookAhead);
   const target = moves.find((x) => x.hit > s.t && x.show <= s.t);
@@ -391,12 +391,12 @@ export function promptOf(s: FightState): Prompt {
     const x = s.results[si][j - 1];
     const ahead = Boolean(g.scene.steps[j - 1].lookAhead);
     const text = x.ok
-      ? "Right"
+      ? "Correct"
       : x.missed
         ? "Too slow"
         : ahead
           ? "Not that one. The purple one is the weapon to save for later."
-          : "Not there. The green area was right.";
+          : "Not there. The green area was correct.";
     return { look: x.ok ? "ok" : "bad", count: x.ok ? "✓" : "✗", text, ring: null };
   }
   if (g && held >= 0) {
@@ -412,7 +412,7 @@ export function promptOf(s: FightState): Prompt {
   if (g && j < g.due.length) {
     const left = Math.max(0, g.due[j] - s.t);
     const start = j ? g.due[j - 1] : g.from;
-    // On the player you watch, so the prompt gives the right move, and nothing turns red.
+    // On the player you watch, so the prompt gives the correct move, and nothing turns red.
     const watch = s.mode === "watch";
     const urgent = left <= URGENT && !s.paused && !watch;
     return {

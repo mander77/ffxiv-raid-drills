@@ -9,12 +9,12 @@ import { readingMs } from "../util";
 /** How many cards a quick round asks. */
 export const QUICK_SIZE = 12;
 
-/** How often a card should come up: a card you never saw, or often got wrong, comes up more. A
-    card you got right a few times comes up less, but never stops. */
+/** How often a card should come up: a card you never saw, or often answered incorrectly, comes up more. A
+    card you answered correctly a few times comes up less, but never stops. */
 export function weight(score: Score | undefined): number {
   if (!score) return 3;
-  const wrong = score.seen - score.right;
-  return Math.max(0.3, 1 + 3 * wrong - 0.25 * Math.min(score.right, 3));
+  const incorrect = score.seen - score.correct;
+  return Math.max(0.3, 1 + 3 * incorrect - 0.25 * Math.min(score.correct, 3));
 }
 
 /** The list in a random order where a card with more weight tends to come first. */

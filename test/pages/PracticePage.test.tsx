@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 // Practice: a mechanic opens with a pattern code in the address, a click answers, Show me helps
-// without counting, and a wrong spot waits for Next step.
+// without counting, and an incorrect spot waits for Next step.
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
@@ -44,7 +44,7 @@ const where = (): string | null => screen.getByTestId("where").textContent;
 const arena = (): Element => screen.getByRole("img", { name: /Arena map/ });
 const clickAt = (p: Point): boolean => fireEvent.click(arena(), { clientX: p[0], clientY: p[1] });
 
-/** The right spot of the first step of the first mechanic, for the test's code. */
+/** The correct spot of the first step of the first mechanic, for the test's code. */
 function firstRightSpot(): Point {
   const pattern = buildPattern(FIRST, "H1", CODE);
   const base = stepZone(pattern.scene.steps[0], []);
@@ -67,32 +67,32 @@ test("a link with a code keeps that pattern", () => {
   assert.ok(arena());
 });
 
-test("a right click answers the step and counts in your score", () => {
+test("a correct click answers the step and counts in your score", () => {
   open(`/practice/${FIRST.id}/${CODE}`);
   clickAt(firstRightSpot());
-  assert.ok(screen.getByText("Right", { selector: "[role=status]" }));
-  assert.deepEqual(useProgressStore.getState().scores[FIRST.id], { seen: 1, right: 1 });
-  assert.ok(arena().querySelector(".zlabel"), "the right spot is tagged");
+  assert.ok(screen.getByText("Correct", { selector: "[role=status]" }));
+  assert.deepEqual(useProgressStore.getState().scores[FIRST.id], { seen: 1, correct: 1 });
+  assert.ok(arena().querySelector(".zlabel"), "the correct spot is tagged");
 });
 
 test("Show me draws the spot, and a try with it does not count", async () => {
   open(`/practice/${FIRST.id}/${CODE}`);
   const user = userEvent.setup();
   await user.click(screen.getByRole("button", { name: "Show me" }));
-  assert.ok(arena().querySelector(".zone.pick"), "the right area shows in blue");
+  assert.ok(arena().querySelector(".zone.pick"), "the correct area shows in blue");
   assert.equal(screen.getByRole("button", { name: "Hide" }).getAttribute("aria-pressed"), "true");
   clickAt(firstRightSpot());
-  assert.ok(screen.getByText("Right", { selector: "[role=status]" }));
+  assert.ok(screen.getByText("Correct", { selector: "[role=status]" }));
   assert.isUndefined(useProgressStore.getState().scores[FIRST.id]);
 });
 
-test("a wrong spot says so and counts, and Again starts over", async () => {
+test("an incorrect spot says so and counts, and Again starts over", async () => {
   open(`/practice/${FIRST.id}/${CODE}`);
   const user = userEvent.setup();
   clickAt([-40, -40]);
   assert.ok(screen.getAllByText("Not there").length > 0);
   assert.ok(arena().querySelector(".pick.bad"), "your click shows in red");
-  assert.deepEqual(useProgressStore.getState().scores[FIRST.id], { seen: 1, right: 0 });
+  assert.deepEqual(useProgressStore.getState().scores[FIRST.id], { seen: 1, correct: 0 });
   await user.click(screen.getAllByRole("button", { name: "Again" })[0]);
   assert.isNull(arena().querySelector(".pick"), "a fresh try");
   assert.equal(where(), `/practice/${FIRST.id}/${CODE}`, "the same pattern");

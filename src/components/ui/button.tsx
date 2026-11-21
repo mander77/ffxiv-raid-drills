@@ -16,6 +16,11 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // The site's own variants, added the way shadcn/ui's customization guide shows: an answer
+        // after you answer, in green (correct) or red (incorrect). They set their colours in light
+        // and dark mode alike through the theme, where outline's dark: classes would hide them.
+        correct: "border border-success-foreground bg-success shadow-xs",
+        incorrect: "border border-danger-foreground bg-danger shadow-xs",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

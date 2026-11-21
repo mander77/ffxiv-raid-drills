@@ -1,19 +1,19 @@
 import { cn } from "@/lib/utils";
 
 export interface TallyProps {
-  right: number;
-  wrong: number;
+  correct: number;
+  incorrect: number;
   missed: number;
   /** The name of the third count: "Froze" in the quick round, "Too slow" in the run. */
   missedLabel: string;
 }
 
-/** The counts at the end of a round: right, wrong, and the ones you missed. */
-export function Tally({ right, wrong, missed, missedLabel }: TallyProps) {
+/** The counts at the end of a round: correct, incorrect, and the ones you missed. */
+export function Tally({ correct, incorrect, missed, missedLabel }: TallyProps) {
   // Each count's colour is a complete Tailwind class, so Tailwind finds it when it scans the code.
   const items = [
-    { label: "Right", n: right, color: "text-success-foreground" },
-    { label: "Wrong", n: wrong, color: "text-destructive" },
+    { label: "Correct", n: correct, color: "text-success-foreground" },
+    { label: "Incorrect", n: incorrect, color: "text-destructive" },
     { label: missedLabel, n: missed, color: "text-warning-foreground" },
   ];
   return (

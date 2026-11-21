@@ -20,9 +20,9 @@ test("RuleBox shows the rule under its heading", () => {
   assert.ok(screen.getByText("Stand <south>."), "text, not HTML");
 });
 
-test("LastAnswer says Right or Not there, with the question and the right answer", () => {
+test("LastAnswer says Correct or Not there, with the question and the correct answer", () => {
   render(<LastAnswer ok={true} question="Where?" answer="North." />);
-  assert.ok(screen.getByText("Right"));
+  assert.ok(screen.getByText("Correct"));
   assert.match(screen.getByRole("alert").textContent ?? "", /Where\? North\./);
   cleanup();
   render(<LastAnswer ok={false} question="Where?" answer="North." />);
@@ -32,7 +32,7 @@ test("LastAnswer says Right or Not there, with the question and the right answer
 test("StepChips marks each answered step and the step you are on", () => {
   render(<StepChips count={4} results={[{ ok: true }, { ok: false }]} />);
   const steps = screen.getAllByRole("listitem").map((li) => li.getAttribute("aria-label"));
-  assert.deepEqual(steps, ["Step 1, right", "Step 2, wrong", "Step 3, now", "Step 4"]);
+  assert.deepEqual(steps, ["Step 1, correct", "Step 2, incorrect", "Step 3, now", "Step 4"]);
 });
 
 test("SetupText shows in full at first, then folds with More and Less", async () => {
@@ -54,10 +54,10 @@ test("SetupText shows in full at first, then folds with More and Less", async ()
 });
 
 test("Tally shows each count under its name", () => {
-  render(<Tally right={9} wrong={2} missed={1} missedLabel="Froze" />);
+  render(<Tally correct={9} incorrect={2} missed={1} missedLabel="Froze" />);
   const count = (name: string): string | null | undefined => screen.getByText(name).nextElementSibling?.textContent;
-  assert.equal(count("Right"), "9");
-  assert.equal(count("Wrong"), "2");
+  assert.equal(count("Correct"), "9");
+  assert.equal(count("Incorrect"), "2");
   assert.equal(count("Froze"), "1");
 });
 

@@ -80,7 +80,7 @@ test("the second Raw Steel Trophy and the second Void Stardust go the other way"
   }
 });
 
-test("Watch the right moves: the spot it clicks is right for every step", () => {
+test("Watch the correct moves: the spot it clicks is correct for every step", () => {
   for(let i = 0; i < REPEATS; i++) for(const s of SLOTS){
     for(const g of buildFight(s).segs){
       const results: StepResult[] = [];

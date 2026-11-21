@@ -2,20 +2,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export interface RoundDoneProps {
-  right: number;
+  correct: number;
   done: number;
   onAgain: () => void;
 }
 
-/** The end of a round on Learn, Timeline or Practice: how many you got right, and Go again. */
-export function RoundDone({ right, done, onAgain }: RoundDoneProps) {
-  const pct = done ? Math.round((100 * right) / done) : 0;
+/** The end of a round on Learn, Timeline or Practice: how many you answered correctly, and Go again. */
+export function RoundDone({ correct, done, onAgain }: RoundDoneProps) {
+  const pct = done ? Math.round((100 * correct) / done) : 0;
   return (
     <Card className="mx-auto max-w-md">
       <CardHeader>
         <CardDescription>Round done</CardDescription>
         <CardTitle className="font-display text-2xl tracking-wide">
-          {right} of {done} right ({pct}%)
+          {correct} of {done} correct ({pct}%)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

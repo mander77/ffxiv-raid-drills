@@ -1,15 +1,15 @@
 import { assert, test } from "vitest";
 import { QUICK_SIZE, quickRound, timerAt, weight, weighted } from "../../src/lib/pressure";
 
-test("a card you never saw or often got wrong comes up more, and none drops out", () => {
+test("a card you never saw or often got incorrect comes up more, and none drops out", () => {
   assert.equal(weight(undefined), 3);
-  assert.isAbove(weight({ seen: 3, right: 0 }), weight({ seen: 3, right: 3 }));
-  assert.equal(weight({ seen: 10, right: 10 }), 0.3);
+  assert.isAbove(weight({ seen: 3, correct: 0 }), weight({ seen: 3, correct: 3 }));
+  assert.equal(weight({ seen: 10, correct: 10 }), 0.3);
 });
 
 test("the weighted order keeps every card once, heavy ones first more often", () => {
   const list = [{ id: "a" }, { id: "b" }];
-  const scores = { a: { seen: 9, right: 9 } };
+  const scores = { a: { seen: 9, correct: 9 } };
   let bFirst = 0;
   for (let i = 0; i < 200; i++) {
     const out = weighted(list, scores);

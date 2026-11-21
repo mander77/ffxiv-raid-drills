@@ -21,8 +21,8 @@ export interface DrillScreenProps {
   count: number;
   /** True when the mechanic has random parts, so New pattern gives a different one. */
   canChange: boolean;
-  /** Called once when every step is answered, without Show me: true when every spot was right. */
-  onScore: (allRight: boolean) => void;
+  /** Called once when every step is answered, without Show me: true when every spot was correct. */
+  onScore: (allCorrect: boolean) => void;
   onNextMechanic: () => void;
   /** The same pattern from its first step. */
   onAgain: () => void;
@@ -32,7 +32,7 @@ export interface DrillScreenProps {
 }
 
 /** The screen of one Practice mechanic (a drill): click where you stand on the arena, one step at a time. Above the arena:
-    the question with Show me, or why a spot was wrong, or the result. Beside it: the mechanic, its
+    the question with Show me, or why a spot was incorrect, or the result. Beside it: the mechanic, its
     steps, the last answer and, at the end, the rule and the way on.
     Give it a `key` per mechanic, pattern and try, so each starts fresh. */
 export function DrillScreen({
@@ -50,7 +50,7 @@ export function DrillScreen({
   const { scene: sc, k } = pattern;
   const [results, setResults] = useState<StepResult[]>([]);
   const [status, setStatus] = useState<StepStatus>("ask");
-  /** Show me is on: the right spot for the step asked shows in blue. */
+  /** Show me is on: the correct spot for the step asked shows in blue. */
   const [shown, setShown] = useState(false);
   /** Show me was used, so this try does not count in your score: it was learning, not a test. */
   const [helped, setHelped] = useState(false);
@@ -61,8 +61,8 @@ export function DrillScreen({
   const last = n > 0 ? results[n - 1] : undefined;
 
   function handleArenaClick(p: Point): void {
-    // After a wrong spot the mechanic waits for Next step, so a click does not answer by accident.
-    if (done || status === "wrong") return;
+    // After an incorrect spot the mechanic waits for Next step, so a click does not answer by accident.
+    if (done || status === "incorrect") return;
     const r = answerStep(sc, k, results, p);
     if (!r) return;
     const next = [...results, r];
@@ -94,22 +94,22 @@ export function DrillScreen({
     return () => window.removeEventListener("keydown", listener);
   }, []);
 
-  const right = results.filter((r) => r.ok).length;
-  const allRight = right === sc.steps.length;
+  const correct = results.filter((r) => r.ok).length;
+  const allCorrect = correct === sc.steps.length;
   const hud = done ? (
     <div
       className={cn(
         "flex flex-wrap items-center gap-3 rounded-lg border px-3 py-2",
-        allRight ? "border-success-foreground bg-success" : "border-danger-foreground bg-danger",
+        allCorrect ? "border-success-foreground bg-success" : "border-danger-foreground bg-danger",
       )}
     >
-      {allRight ? (
+      {allCorrect ? (
         <Check aria-hidden="true" className="text-success-foreground" />
       ) : (
         <X aria-hidden="true" className="text-danger-foreground" />
       )}
       <p className="flex-1 text-sm font-semibold" role="status">
-        {allRight ? (multi ? "All steps right" : "Right") : multi ? `${right} of ${sc.steps.length} right` : "Not there"}
+        {allCorrect ? (multi ? "All steps correct" : "Correct") : multi ? `${correct} of ${sc.steps.length} correct` : "Not there"}
       </p>
       <Button size="sm" onClick={onNextMechanic}>
         Next mechanic
@@ -118,7 +118,7 @@ export function DrillScreen({
         Again
       </Button>
     </div>
-  ) : status === "wrong" && last ? (
+  ) : status === "incorrect" && last ? (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-danger-foreground bg-danger px-3 py-2">
       <X aria-hidden="true" className="text-danger-foreground" />
       <p className="flex-1 text-sm" role="status">
@@ -129,7 +129,7 @@ export function DrillScreen({
       </Button>
     </div>
   ) : (
-    // Show me: the right spot for this step, and its answer in place of the question. Your next
+    // Show me: the correct spot for this step, and its answer in place of the question. Your next
     // click still answers.
     <HudPrompt count={`${n + 1}/${sc.steps.length}`} text={shown ? sc.steps[n].a : sc.steps[n].q}>
       <Button size="sm" variant="outline" aria-pressed={shown} onClick={handleShowMe}>
@@ -148,7 +148,7 @@ export function DrillScreen({
             k={k}
             results={results}
             showLast={status !== "ask" || done}
-            hint={shown && status !== "wrong"}
+            hint={shown && status !== "incorrect"}
             onPointClick={handleArenaClick}
             className="block h-auto w-full"
           />
@@ -174,7 +174,7 @@ export function DrillScreen({
               <span className="font-medium">{sc.steps[n].q}</span>
             </div>
           )}
-          {/* The rule says why the spot is right: at the end, and with Show me, which gives where. */}
+          {/* The rule says why the spot is correct: at the end, and with Show me, which gives where. */}
           {(done || shown) && <RuleBox rule={sc.rule} />}
           {last && <LastAnswer ok={last.ok} question={sc.steps[n - 1].q} answer={sc.steps[n - 1].a} />}
           <div className="flex flex-wrap gap-2">

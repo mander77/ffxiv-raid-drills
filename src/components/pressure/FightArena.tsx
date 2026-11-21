@@ -22,8 +22,8 @@ export interface ShownHit {
 export interface FightArenaProps {
   view: FightView;
   slot: Slot;
-  /** The run: label the last right answer "Right spot". */
-  rightLabel: boolean;
+  /** The run: label the last correct answer "Correct spot". */
+  correctLabel: boolean;
   /** The last hit, for its flash or tank buster. */
   hit: ShownHit | null;
   /** A new number draws the arena anew, so a mechanic's spawns play again. */
@@ -34,7 +34,7 @@ export interface FightArenaProps {
 
 /** The arena of the full fight: the mechanic on the clock, with the flash of each hit, the
     countdown ring around the boss and your moving marker. */
-export function FightArena({ view: v, slot, rightLabel, hit, replay, onPointClick, className }: FightArenaProps) {
+export function FightArena({ view: v, slot, correctLabel, hit, replay, onPointClick, className }: FightArenaProps) {
   const g = v.si;
   const bossAt: Point = v.boss ? [v.boss.x, v.boss.y] : [50, 50];
   return (
@@ -48,7 +48,7 @@ export function FightArena({ view: v, slot, rightLabel, hit, replay, onPointClic
       hint={false}
       boss={v.boss}
       wentOff={(i) => v.wentOff[i] ?? false}
-      rightLabel={rightLabel}
+      correctLabel={correctLabel}
       target={v.target}
       onPointClick={onPointClick}
       className={cn("cursor-pointer", className)}
@@ -122,7 +122,7 @@ interface RunnerProps {
   slot: Slot;
 }
 
-/** Your marker: it runs the right spots on the player, and to your clicks in the run. It waits on
+/** Your marker: it runs the correct spots on the player, and to your clicks in the run. It waits on
     each spot until the hit lands, then runs to the next one. While it has to get there, a dotted
     line goes to the spot, and a ring marks it. */
 function Runner({ slot }: RunnerProps) {

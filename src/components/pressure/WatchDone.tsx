@@ -9,13 +9,13 @@ export interface WatchDoneProps {
   onWatch: () => void;
 }
 
-/** After Watch the right moves: run the same fight, or watch it again. */
+/** After Watch the correct moves: run the same fight, or watch it again. */
 export function WatchDone({ summary, onRun, onWatch }: WatchDoneProps) {
   return (
     <Card className="mx-auto max-w-lg">
       <CardHeader>
-        <CardDescription>The right moves · Done</CardDescription>
-        <CardTitle className="font-display text-2xl tracking-wide">That was the right way through</CardTitle>
+        <CardDescription>The correct moves · Done</CardDescription>
+        <CardTitle className="font-display text-2xl tracking-wide">That was the correct way through</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm">{summary}</p>

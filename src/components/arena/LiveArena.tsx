@@ -17,7 +17,7 @@ export interface LiveArenaProps {
   results: readonly StepResult[];
   /** Show the last answer on the floor: its area, its label and your click. */
   showLast: boolean;
-  /** Show me: the right area for the step asked, in blue with "Go here". */
+  /** Show me: the correct area for the step asked, in blue with "Go here". */
   hint: boolean;
   /** Called with the spot you click, in arena units. Leave it out when the arena takes no clicks. */
   onPointClick?: (p: Point) => void;
@@ -28,10 +28,10 @@ export interface LiveArenaProps {
   /** Whether the puddle of step i has gone off, so it fades. Left out, a puddle fades two steps
       after it drops. */
   wentOff?: (i: number) => boolean;
-  /** Label the last right answer "Right spot". Watch the right moves leaves it out: your marker
+  /** Label the last correct answer "Correct spot". Watch the correct moves leaves it out: your marker
       walks into each spot. */
-  rightLabel?: boolean;
-  /** The right area of your marker's next spot, in blue (Watch the right moves). */
+  correctLabel?: boolean;
+  /** The correct area of your marker's next spot, in blue (Watch the correct moves). */
   target?: Zone | null;
   /** What the fight draws over the arena: the flash of a hit, the countdown ring, a tank buster. */
   effects?: ReactNode;
@@ -52,7 +52,7 @@ export function LiveArena({
   className,
   boss: placed,
   wentOff,
-  rightLabel = true,
+  correctLabel = true,
   target,
   effects,
   runner,
@@ -129,7 +129,7 @@ export function LiveArena({
     .flatMap((st) => st.cue ?? [])
     .map((o) => rotOverlay(o, k));
 
-  // Show me: the right area of the step asked.
+  // Show me: the correct area of the step asked.
   const hintStep = hint ? sc.steps[n] : undefined;
   const hintBase = hintStep ? stepZone(hintStep, [...results]) : undefined;
   const hintZone = hintBase ? rotZone(hintBase, k) : undefined;
@@ -170,8 +170,8 @@ export function LiveArena({
         labels: (
           <>
             {base.labels}
-            {last && lastStep && (lastStep.lookAhead || rightLabel) && (
-              <ZoneLabel zone={last.z} kind={lastStep.lookAhead ? "later" : "right"} />
+            {last && lastStep && (lastStep.lookAhead || correctLabel) && (
+              <ZoneLabel zone={last.z} kind={lastStep.lookAhead ? "later" : "correct"} />
             )}
             {hintZone && hintStep && <ZoneLabel zone={hintZone} kind={hintStep.lookAhead ? "later" : "go"} />}
           </>

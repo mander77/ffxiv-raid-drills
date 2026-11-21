@@ -18,7 +18,7 @@ export function StepChips({ count, results }: StepChipsProps) {
           Enumerable.Range(0, n).Select(...) in C#. */}
       {Array.from({ length: count }, (_x, i) => {
         const r = results[i];
-        const label = `Step ${i + 1}${r ? (r.ok ? ", right" : ", wrong") : i === now ? ", now" : ""}`;
+        const label = `Step ${i + 1}${r ? (r.ok ? ", correct" : ", incorrect") : i === now ? ", now" : ""}`;
         return (
           // biome-ignore lint/suspicious/noArrayIndexKey: steps are numbered by their place.
           <li key={i} aria-label={label}>

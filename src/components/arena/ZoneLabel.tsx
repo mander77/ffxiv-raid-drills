@@ -6,7 +6,7 @@ import { ArenaLabel, type LabelLook } from "./ArenaLabel";
     look-ahead step (spot the first weapon) is not a spot to go to, so it gets its own label and
     colour. */
 export const ZONE_LABELS = {
-  right: { text: "Right spot", w: 17, look: "ok" },
+  correct: { text: "Correct spot", w: 17, look: "ok" },
   later: { text: "Saved for later", w: 24, look: "later" },
   go: { text: "Go here", w: 14, look: "pick" },
 } as const satisfies Record<string, { text: string; w: number; look: LabelLook }>;

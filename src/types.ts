@@ -31,7 +31,7 @@ type RectBox = [number, number, number, number];
 // TS note: an interface describes the shape of an object, like a C# interface or record.
 // TypeScript checks shapes, not class names: any object with these fields fits.
 // The `?` in `look?` means the field is optional. Its type is `ZoneLook | undefined`.
-/** The colour of a zone's area: "ok" (the right spot, green), "bad" (the right spot after a wrong
+/** The colour of a zone's area: "ok" (the correct spot, green), "bad" (the correct spot after an incorrect
     click, lighter green), "pick" (a preview or "Go here", blue), "other" (another slot's spot,
     grey), "later" (saved for later, purple) or "hit" (an area that gets hit, red). */
 export type ZoneLook = "ok" | "bad" | "pick" | "other" | "later" | "hit";
@@ -103,7 +103,7 @@ export interface Step {
   zf?: (results: StepResult[]) => Zone;
   drop?: boolean;
   /** A look-ahead step: you click to show what you have spotted (a weapon, for example), but you
-      do not move there. The moving marker in "Watch the right moves" skips it. */
+      do not move there. The moving marker in "Watch the correct moves" skips it. */
   lookAhead?: boolean;
   /** The best spot to stand when the zone has one, for example a few steps in from the
       sword pocket's inner corner. The moving marker goes there instead of
@@ -154,13 +154,13 @@ export interface Drill {
 
 /* ---------- questions ---------- */
 
-/** What one answer looks like on the arena, right or wrong: the pieces it adds, and the spots
+/** What one answer looks like on the arena, correct or incorrect: the pieces it adds, and the spots
     it marks. All answers draw in the same neutral colour, so a preview never gives away the answer. */
 export interface Preview { pieces: Overlay[]; zones?: ZoneShape[] }
 
 /** An arena picture for a quiz question. `overlays` and `boss` always show. `before` shows
     until you answer, unless an answer preview replaces it. After the answer, `after` draws what
-    the mechanic does and the green `answer` zones show the right spot. `options` holds one
+    the mechanic does and the green `answer` zones show the correct spot. `options` holds one
     preview per answer, in the order the question lists them. `note` is a caption. */
 export interface Picture { overlays: Overlay[]; boss?: Boss; split?: boolean; before?: Overlay[]; after?: Overlay[]; answer?: ZoneShape[]; options?: Preview[]; note?: string }
 

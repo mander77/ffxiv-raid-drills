@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { assert, beforeEach, test } from "vitest";
 import { useProgressStore } from "../../src/stores/progress";
 
@@ -7,15 +8,15 @@ const st = () => useProgressStore.getState();
 test("an answer counts in its score and in the round of its tab", () => {
   st().record("k-sword", true, "learn", "H1");
   st().record("k-sword", false, "learn", "H1");
-  assert.deepEqual(st().scores["k-sword"], { seen: 2, right: 1 });
-  assert.include(st().rounds.learn, { slot: "H1", done: 2, right: 1 });
+  assert.deepEqual(st().scores["k-sword"], { seen: 2, correct: 1 });
+  assert.include(st().rounds.learn, { slot: "H1", done: 2, correct: 1 });
   assert.include(st().rounds.timeline, { done: 0 }, "the other tab's round is apart");
 });
 
 test("an answer for another slot starts a new round, but keeps the scores", () => {
   st().record("k-sword", true, "learn", "H1");
   st().record("k-axe", true, "learn", "H2");
-  assert.include(st().rounds.learn, { slot: "H2", done: 1, right: 1 });
+  assert.include(st().rounds.learn, { slot: "H2", done: 1, correct: 1 });
   assert.equal(Object.keys(st().scores).length, 2);
 });
 
@@ -33,6 +34,12 @@ test("a finished round opens again on a new card, and reset erases everything", 
 
 test("the quick round counts an answer in its score only", () => {
   st().score("k-sword", false);
-  assert.deepEqual(st().scores["k-sword"], { seen: 1, right: 0 });
+  assert.deepEqual(st().scores["k-sword"], { seen: 1, correct: 0 });
   assert.include(st().rounds.learn, { done: 0 });
+});
+
+test("scores saved under the old name `right` keep their counts", async () => {
+  localStorage.setItem("raid-drills-progress", JSON.stringify({ state: { scores: { "k-sword": { seen: 3, right: 2 } } }, version: 0 }));
+  await useProgressStore.persist.rehydrate();
+  assert.deepEqual(st().scores["k-sword"], { seen: 3, correct: 2 });
 });

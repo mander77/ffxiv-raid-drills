@@ -1,5 +1,5 @@
 // The Practice page (/practice/<mechanic>/<code>): one mechanic at a time, with no timer. Click where you
-// stand, and the arena shows the right area. The code names the mechanic's pattern, so a link opens
+// stand, and the arena shows the correct area. The code names the mechanic's pattern, so a link opens
 // the same one. On a wide screen the list of mechanics sits beside the arena; on a narrow screen,
 // Back, Next and phase chips take its place.
 import { useEffect, useMemo, useState } from "react";
@@ -61,7 +61,7 @@ export function PracticePage() {
           <PageContainer className="space-y-6 py-6">
             {lede}
             <RoundDone
-              right={mine ? round.right : 0}
+              correct={mine ? round.correct : 0}
               done={mine ? round.done : 0}
               onAgain={() => {
                 newRound("practice");

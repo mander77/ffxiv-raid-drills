@@ -39,7 +39,7 @@ WHAT TO DO
    - Learn what happens in the fight and where you stand.
    - Practice one mechanic you got wrong.
    - Do the "whole fight" thing under time pressure.
-   - Watch the right moves for the fight.
+   - Watch the correct moves for the fight.
 5. Spend about 20 to 30 minutes, or stop early if you would have given up for real.
 
 HOW TO THINK OUT LOUD

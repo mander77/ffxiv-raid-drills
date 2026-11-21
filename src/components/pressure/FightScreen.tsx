@@ -35,7 +35,7 @@ import { FightPanel } from "./FightPanel";
 import { FightPlayBar } from "./FightPlayBar";
 
 export interface FightScreenProps {
-  /** run: you click your spots. watch: the right moves play by themselves. */
+  /** run: you click your spots. watch: the correct moves play by themselves. */
   mode: FightMode;
   fight: Fight;
   slot: Slot;
@@ -111,7 +111,7 @@ export function FightScreen({
   function showAnswer(a: Answered | null): void {
     if (!a || mode !== "run") return;
     setResult((was) => ({ n: (was?.n ?? 0) + 1, kind: a.kind }));
-    if (a.scored) score(a.scored.drill, a.scored.allRight);
+    if (a.scored) score(a.scored.drill, a.scored.allCorrect);
   }
 
   // One step of the clock per animation frame.
@@ -310,7 +310,7 @@ export function FightScreen({
       <FightArena
         view={view}
         slot={slot}
-        rightLabel={mode === "run"}
+        correctLabel={mode === "run"}
         hit={hit}
         replay={replays}
         onPointClick={handlePointClick}
@@ -379,7 +379,7 @@ const RESULT_LOOK: Record<Answered["kind"], string> = {
   bad: "bg-destructive",
   slow: "bg-amber-600",
 };
-const RESULT_TEXT: Record<Answered["kind"], string> = { ok: "✓ Right", bad: "✗ Not there", slow: "✗ Too slow" };
+const RESULT_TEXT: Record<Answered["kind"], string> = { ok: "✓ Correct", bad: "✗ Not there", slow: "✗ Too slow" };
 
 interface RunResultProps {
   kind: Answered["kind"];

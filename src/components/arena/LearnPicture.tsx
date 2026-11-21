@@ -5,7 +5,7 @@ import { ZoneArea } from "./ZoneArea";
 
 export interface LearnPictureProps {
   fig: Picture;
-  /** True once the question is answered: the picture shows what the mechanic does and the right
+  /** True once the question is answered: the picture shows what the mechanic does and the correct
       spot in green. */
   answered: boolean;
   label: string;
@@ -16,7 +16,7 @@ export interface LearnPictureProps {
 
 /** A still arena picture for a quiz question. Until it is answered, it shows the setup, or the
     setup with one answer previewed. After the answer, it shows what the mechanic does and the
-    right spot in green. */
+    correct spot in green. */
 export function LearnPicture({ fig: f, answered, label, preview, className }: LearnPictureProps) {
   const extra = answered ? (f.after ?? []) : preview ? preview.pieces : (f.before ?? []);
   const zones = answered

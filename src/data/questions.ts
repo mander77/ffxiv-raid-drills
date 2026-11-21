@@ -197,13 +197,13 @@ const RAIDWIDE_NAMES = [...new Set(TIMELINE.filter((_e, i) => isRaidwide(i)).map
 export const TIMELINE_CARDS: QuizItem[] = [];
 TIMELINE.slice(0, -1).forEach((ev, i) => {
   TIMELINE_CARDS.push({id:"n-" + i, order:i, phase:"Timeline", time:ev.t, build:s => {
-    const right = TIMELINE[i + 1];
-    const names = new Set([right.n, ev.n]);
+    const correct = TIMELINE[i + 1];
+    const names = new Set([correct.n, ev.n]);
     const picks: TimelineEvent[] = [];
     shuffle(TIMELINE.slice()).forEach(e => { if(picks.length < 3 && !names.has(e.n)){ names.add(e.n); picks.push(e); } });
     return {prompt:ev.n + " (" + ev.t + ") just happened. What comes next?",
-      options:[{t:right.n, ok:true}, ...picks.map(p => ({t:p.n}))],
-      why:"Next is " + right.n + " at " + right.t + ". " + right.job(s),
+      options:[{t:correct.n, ok:true}, ...picks.map(p => ({t:p.n}))],
+      why:"Next is " + correct.n + " at " + correct.t + ". " + correct.job(s),
       rule:"Know the next thing, and you know how long you have."};
   }});
   /* The next raidwide, by name only. Knowing which one comes next and whether it is soon is
@@ -211,16 +211,16 @@ TIMELINE.slice(0, -1).forEach((ev, i) => {
   const j = TIMELINE.findIndex((_e, x) => x > i && isRaidwide(x));
   if(j > i){
     TIMELINE_CARDS.push({id:"r-" + i, order:i + 0.5, phase:"Timeline", time:ev.t, build:s => {
-      const right = TIMELINE[j], between = TIMELINE.slice(i + 1, j);
-      const others = shuffle(RAIDWIDE_NAMES.filter(n => n !== right.n)).slice(0, 3);
-      const when = between.length === 0 ? right.n + " is next, and it comes soon. Have a mitigation ready for it."
-        : between.length <= 2 ? right.n + " is the next raidwide, but first comes " + between.map(e => e.n).join(", then ") + "."
-        : right.n + " is the next raidwide, but " + between.length + " mechanics come first, starting with " + between[0].n + ".";
+      const correct = TIMELINE[j], between = TIMELINE.slice(i + 1, j);
+      const others = shuffle(RAIDWIDE_NAMES.filter(n => n !== correct.n)).slice(0, 3);
+      const when = between.length === 0 ? correct.n + " is next, and it comes soon. Have a mitigation ready for it."
+        : between.length <= 2 ? correct.n + " is the next raidwide, but first comes " + between.map(e => e.n).join(", then ") + "."
+        : correct.n + " is the next raidwide, but " + between.length + " mechanics come first, starting with " + between[0].n + ".";
       // Crown of Arcadia often comes again. "again" says the same raidwide repeats, so the
       // answer does not read as the one that just happened.
       return {prompt:"It is just after " + ev.n + " (" + ev.t + "). Which raidwide comes next, so you can plan a mitigation for it?",
-        options:[{t:right.n + (right.n === ev.n ? " again" : ""), ok:true}, ...others.map(n => ({t:n}))],
-        why:when + " " + right.job(s),
+        options:[{t:correct.n + (correct.n === ev.n ? " again" : ""), ok:true}, ...others.map(n => ({t:n}))],
+        why:when + " " + correct.job(s),
         rule:"Know the next raidwide and whether it is soon, so your mitigation is ready."};
     }});
   }

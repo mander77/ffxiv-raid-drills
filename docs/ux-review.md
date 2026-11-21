@@ -18,7 +18,7 @@ CONTEXT
   least for the default settings."
 - Goals a user must reach: learn what each mechanic does and where to stand; practice one
   mechanic; answer under time pressure (the quick round and the full-fight run); watch the
-  right moves for the whole fight.
+  correct moves for the whole fight.
 
 SCOPE AND RULES
 - Use only the live site in the browser. Do not read source code, docs or the repository.

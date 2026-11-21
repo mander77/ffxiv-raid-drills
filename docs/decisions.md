@@ -75,7 +75,7 @@ make sure that each one still matches the code before you start it.
   - Rebuild 3 (#20): Home, Learn and Timeline are back. A card is in the address
     (`/learn/k-sword`), and `/learn` alone opens the card you were on, or the first one. Your
     scores are in a Zustand store (`src/stores/progress.ts`) under "raid-drills-progress"; each
-    tab's round count (right of done) is kept until you reload, and an answer for another slot
+    tab's round count (correct of done) is kept until you reload, and an answer for another slot
     starts a new round. Home's "Start here" cards link only to tabs that exist. On a phone the
     Lock in bar is fixed to the bottom of the screen once you pick an answer: a sticky bar would
     stay inside the answers' column, under the picture, off screen.
@@ -93,7 +93,7 @@ make sure that each one still matches the code before you start it.
     status; `look` is a colour, so a look-ahead step is `Step.lookAhead`; the ability categories
     are spelled out (`Category`, `CategoryDots`); `f1` (which rounds to 2 decimals) is `round2`.
     Only names changed, never a value, in `src/data/` too, with the owner's OK.
-  - Rebuild 5 (#22): Pressure is back: the quick round, the run and Watch the right moves, with
+  - Rebuild 5 (#22): Pressure is back: the quick round, the run and Watch the correct moves, with
     shared player links (`/pressure/<code>[/<picks>][?t=<s>]`). The fight clock's rules (the skip
     to 3 seconds before a mechanic, when a step can be answered, the result hold, the 3-2-1, the
     look-ahead answer) moved from the old screen code into plain functions in `src/lib/fight.ts`,
@@ -136,7 +136,7 @@ make sure that each one still matches the code before you start it.
     so white text reads at 4.9:1), and celery (`DAEAAE`) for where you are: the active tab and the
     line under the header. The palette came from the Figma color palette generator (DAEAAE,
     836996, 5E7A97, 4E7E5A); its mauve and green were left out, because purple means "saved for
-    later" and green means right. The owner rejected an accent that follows the role (DPS red
+    later" and green means correct. The owner rejected an accent that follows the role (DPS red
     looks like "wrong"), and brighter accents (teal, magenta, yellow, coral) as too bright. The
     selected Role and Group are celery, like the tab you are on; the Role does not take its game
     colour, so the header never changes colour. The chrome has no other colour. Fonts: Saira Condensed
@@ -189,7 +189,7 @@ make sure that each one still matches the code before you start it.
     mechanic first, then the prompt, the arena and its play bar, then the list; a phone leaves
     the list out.
   - The player has no prompt of its own (owner's choice): the mechanic's step box shows the
-    question and, under it, "Right move:" with the answer, where the prompt used to repeat the
+    question and, under it, "Correct move:" with the answer, where the prompt used to repeat the
     answer in a box of its own. The run keeps its prompt, the live question.
   - The play bar sits right on top of the casts coming up, on every screen (owner's choice): the
     clock and the list that runs on it belong together. The arena stands alone in its column, so
@@ -256,7 +256,7 @@ make sure that each one still matches the code before you start it.
 - The Learn picture with the answer drawn on it. A player who skips the text still gets the
   answer from the picture.
 - Practice's Show me with the blue "Go here" area. It teaches before it tests.
-- "Watch the right moves". The new-player tests liked it best.
+- "Watch the correct moves". The new-player tests liked it best.
 
 ## Ideas the owner rejected or declined
 
@@ -273,7 +273,7 @@ Do not propose these again unless the owner brings them up.
 - Tilt bars to show which weapon goes first in the second set.
 - White "clear slices" between protean cones. The floor got lighter instead (`--sand` #F8F2E6).
 - A flat layer for attacks. Each attack has its own fill, and overlaps get darker.
-- A slot name (H1, H2) on the green answer area. The tag says "Right spot", because the moving
+- A slot name (H1, H2) on the green answer area. The tag says "Correct spot", because the moving
   marker already shows your slot.
 - An order control for weak spots. The static always uses fight order.
 - Sound cues. Offered, not built.
@@ -287,7 +287,7 @@ Do not propose these again unless the owner brings them up.
 - Pick an answer (click or a number key) to preview it in blue on the picture, then Lock in (or
   Enter). The preview also draws the attack that the answer assumes, because the quiz tests what
   the boss does, not only where you stand.
-- After an answer, the right answer holds its explanation, and a wrong pick gets a "Your pick" tag.
+- After an answer, the correct answer holds its explanation, and an incorrect pick gets a "Your pick" tag.
 - Cards whose answer is your own spot show your role marker on the answer picture.
 - Back, Next and one chip per mechanic (`LEARN_GROUPS` in `src/data/questions.ts`). A test makes sure
   that each card is in exactly one chip.
@@ -306,7 +306,7 @@ Do not propose these again unless the owner brings them up.
   height, but it is never smaller than 420 px.
 - On a phone the long list of mechanics becomes a bar with Back, Next and chips "Phase 1" to
   "Phase 4".
-- Show me draws the right spot in blue with the tag "Go here", shows the answer text in the bar and
+- Show me draws the correct spot in blue with the tag "Go here", shows the answer text in the bar and
   the rule in the panel. A try with Show me does not count in the score.
 - Again and Next mechanic are in the bar above the map after a mechanic.
 
@@ -333,14 +333,14 @@ Do not propose these again unless the owner brings them up.
 - The option "Stop at each new mechanic, so I can look first" waits at each new mechanic until you
   press Go.
 
-### Pressure: Watch the right moves (the player)
+### Pressure: Watch the correct moves (the player)
 
-- A replay. A marker with your role runs the right spots. You do not click answers.
-- The HUD gives the right move (the step's answer text), and nothing turns red.
+- A replay. A marker with your role runs the correct spots. You do not click answers.
+- The HUD gives the correct move (the step's answer text), and nothing turns red.
 - Click the map, or press Space, to pause or play. A "Paused" badge shows above the map.
 - The play bar (play, slider, speeds, Settings) sticks to the bottom of the screen while the arena
   is in view. Settings holds only the fight pattern picks.
-- The green answer area has no "Right spot" tag here.
+- The green answer area has no "Correct spot" tag here.
 - The first weapon of Void Stardust is answered 4 seconds early and shows as "Saved for later"
   until its due time, so you have time to see it.
 
@@ -360,6 +360,11 @@ Do not propose these again unless the owner brings them up.
 - On a phone the six tabs show as two rows of three, and keyboard hints do not show on touch
   screens.
 - Start over and New fight are buttons, not text links.
+- An answer is "correct" or "incorrect", on screen and in the code, never "right" or "wrong"
+  (owner's choice). "Right" still means the direction. A correct answer is green and an
+  incorrect pick red, in light and dark mode alike: the answer buttons use the Button variants
+  `correct` and `incorrect`, which the site added to `src/components/ui/button.tsx` the way
+  shadcn/ui's customization guide shows. The outline variant's own dark-mode colours hid them.
 
 ## Fight facts and strat corrections
 
@@ -381,7 +386,7 @@ static wins.
   square to him. Then clockwise. Each weapon of this set faces where he jumps from.
 - Sword: stand in the pocket behind him, on the side he jumped from. H1 takes his left, H2 his
   right, and the light party stacks on the healer. Stand a few steps in from the inner corner,
-  about 2 yalms clear of each arm. The whole pocket inside the arena counts as right.
+  about 2 yalms clear of each arm. The whole pocket inside the arena counts as correct.
 - Scythe: proteans, so everyone takes a clock spot close around him. He always lands on the flat
   side, so you can pre-position on the weapon. H1 takes the butt (handle end), H2 the point (blade
   end).

@@ -58,8 +58,8 @@ test("every source opens in a new tab", () => {
 test("Reset my progress asks once, then erases the progress", async () => {
   useProgressStore.setState({
     scores: {
-      "k-sword": { seen: 2, right: 1 },
-      "k-axe": { seen: 1, right: 1 },
+      "k-sword": { seen: 2, correct: 1 },
+      "k-axe": { seen: 1, correct: 1 },
     },
   });
   draw("H1");

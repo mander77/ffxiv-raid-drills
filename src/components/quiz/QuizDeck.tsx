@@ -57,7 +57,7 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
       const mine = round.slot === slot;
       return (
         <RoundDone
-          right={mine ? round.right : 0}
+          correct={mine ? round.correct : 0}
           done={mine ? round.done : 0}
           onAgain={() => {
             newRound(tab);

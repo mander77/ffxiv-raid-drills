@@ -23,14 +23,14 @@ export function buildPattern(item: Drill, slot: Slot, code: string): Pattern {
 
 /** The status of a mechanic between clicks:
     - "ask": a step is asked, and the floor shows no answer for it.
-    - "right": the last spot was right. It stays on the floor, and the next click answers the next step.
-    - "wrong": the last spot was wrong. The mechanic waits for Next step.
+    - "correct": the last spot was correct. It stays on the floor, and the next click answers the next step.
+    - "incorrect": the last spot was incorrect. The mechanic waits for Next step.
     When every step is answered, the mechanic is done, whatever the status. */
-export type StepStatus = "ask" | "right" | "wrong";
+export type StepStatus = "ask" | "correct" | "incorrect";
 
 /** Answer the next step with a click at p, in arena units. Returns the result, or null when there
-    is no step left to answer. A puddle drops where you clicked, or in the right area after a
-    wrong click. */
+    is no step left to answer. A puddle drops where you clicked, or in the correct area after a
+    incorrect click. */
 export function answerStep(scene: Scene, k: number, results: readonly StepResult[], p: Point): StepResult | null {
   const step = scene.steps[results.length];
   const base = step ? stepZone(step, [...results]) : undefined;
@@ -40,10 +40,10 @@ export function answerStep(scene: Scene, k: number, results: readonly StepResult
   return { p, ok, z: zone, drop: step.drop ? (ok ? p : zoneCenter(zone)) : null };
 }
 
-/** The status after an answer: a right spot stays on screen until the next click; a wrong one waits
+/** The status after an answer: a correct spot stays on screen until the next click; an incorrect one waits
     for Next step; the last answer ends the mechanic. */
 export const statusAfter = (scene: Scene, results: readonly StepResult[]): StepStatus =>
-  results.length >= scene.steps.length ? "ask" : results[results.length - 1]?.ok ? "right" : "wrong";
+  results.length >= scene.steps.length ? "ask" : results[results.length - 1]?.ok ? "correct" : "incorrect";
 
 /** The boss for the picture: where the scene puts him after n answers. While the next step is
     asked, he has already turned to face its weapon. */

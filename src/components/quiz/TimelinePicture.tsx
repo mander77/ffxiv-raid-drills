@@ -31,17 +31,17 @@ export interface TimelinePictureProps {
   /** The timeline row that just happened. */
   row: number;
   answered: boolean;
-  /** The name of the right answer, outlined after the answer. */
-  rightName: string;
+  /** The name of the correct answer, outlined after the answer. */
+  correctName: string;
 }
 
 /** The picture on a Timeline card: the fight timeline at that moment, the way the cactbot overlay
     shows it, and a strip of the four phases with where you are in the fight. Before the answer
     the coming rows show their bars and countdowns but not their names. */
-export function TimelinePicture({ row, answered, rightName }: TimelinePictureProps) {
+export function TimelinePicture({ row, answered, correctName }: TimelinePictureProps) {
   const now = sec(TIMELINE[row].t);
-  const right = TIMELINE.findIndex((e, x) => x > row && e.n === rightName);
-  const last = Math.min(TIMELINE.length - 1, row + MAX_ROWS, Math.max(row + MIN_ROWS, right));
+  const correct = TIMELINE.findIndex((e, x) => x > row && e.n === correctName);
+  const last = Math.min(TIMELINE.length - 1, row + MAX_ROWS, Math.max(row + MIN_ROWS, correct));
   const phase = Math.max(
     0,
     STRIP.findIndex((p) => now >= p.start && now < p.end),
@@ -87,7 +87,7 @@ export function TimelinePicture({ row, answered, rightName }: TimelinePicturePro
               name={answered ? TIMELINE[x].n : null}
               cats={timelineCategories(x)}
               when={`in ${left < 60 ? `${left} s` : clock(left)}`}
-              right={answered && x === right}
+              correct={answered && x === correct}
             />
           );
         })}
@@ -105,18 +105,18 @@ interface TimelineRowProps {
   when: string;
   /** The row that just happened. */
   now?: boolean;
-  /** The right answer, outlined. */
-  right?: boolean;
+  /** The correct answer, outlined. */
+  correct?: boolean;
 }
 
 /** One row of the timeline: a bar that fills as its time comes, its name and when it comes. */
-function TimelineRow({ fill, name, cats, when, now = false, right = false }: TimelineRowProps) {
+function TimelineRow({ fill, name, cats, when, now = false, correct = false }: TimelineRowProps) {
   return (
     <li
       className={cn(
         "relative flex items-center justify-between gap-3 overflow-hidden rounded-md border px-2 py-1",
         now && "font-semibold",
-        right && "ring-2 ring-success-foreground",
+        correct && "ring-2 ring-success-foreground",
       )}
     >
       <i

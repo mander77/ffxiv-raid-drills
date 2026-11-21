@@ -14,17 +14,17 @@ export interface RunScoreProps {
   /** True after Quit: the score so far. */
   stopped: boolean;
   onAgain: () => void;
-  /** Watch the right moves for this same fight. */
+  /** Watch the correct moves for this same fight. */
   onWatch: () => void;
 }
 
-/** After the run: your score, and each mechanic with a wrong or missed spot, with a link to
+/** After the run: your score, and each mechanic with an incorrect or missed spot, with a link to
     practice it on its own. */
 export function RunScore({ fight, results, stopped, onAgain, onWatch }: RunScoreProps) {
   const all = results.flat();
-  const right = all.filter((x) => x.ok).length;
+  const correct = all.filter((x) => x.ok).length;
   const slow = all.filter((x) => x.missed).length;
-  const wrong = all.length - right - slow;
+  const incorrect = all.length - correct - slow;
   const misses = fight.segs.filter((_g, si) => results[si].some((x) => !x.ok));
   // After Quit: how far you got, counted in mechanics you answered at least once.
   const reached = results.filter((x) => x.length).length;
@@ -33,11 +33,11 @@ export function RunScore({ fight, results, stopped, onAgain, onWatch }: RunScore
       <CardHeader>
         <CardDescription>Full fight · {stopped ? `Stopped at mechanic ${reached} of ${fight.segs.length}` : "Done"}</CardDescription>
         <CardTitle className="font-display text-2xl tracking-wide">
-          {right} of {all.length} spots right
+          {correct} of {all.length} spots correct
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Tally right={right} wrong={wrong} missed={slow} missedLabel="Too slow" />
+        <Tally correct={correct} incorrect={incorrect} missed={slow} missedLabel="Too slow" />
         {misses.length ? (
           <section aria-labelledby="practice-these" className="space-y-2">
             <h3 id="practice-these" className="font-semibold">
@@ -65,13 +65,13 @@ export function RunScore({ fight, results, stopped, onAgain, onWatch }: RunScore
           </section>
         ) : (
           <p className="text-sm">
-            {stopped ? "Every spot right so far." : "Every spot right. Each run gets a new pattern, so run it again."}
+            {stopped ? "Every spot correct so far." : "Every spot correct. Each run gets a new pattern, so run it again."}
           </p>
         )}
         <div className="flex flex-wrap gap-3">
           <Button onClick={onAgain}>Run again</Button>
           <Button variant="outline" onClick={onWatch}>
-            Watch the right moves
+            Watch the correct moves
           </Button>
         </div>
       </CardContent>

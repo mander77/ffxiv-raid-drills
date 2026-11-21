@@ -15,11 +15,11 @@ export interface QuickRoundProps {
 
 /** The counts of a quick round. */
 interface Counts {
-  right: number;
-  wrong: number;
+  correct: number;
+  incorrect: number;
   froze: number;
 }
-const NO_COUNTS: Counts = { right: 0, wrong: 0, froze: 0 };
+const NO_COUNTS: Counts = { correct: 0, incorrect: 0, froze: 0 };
 
 /** The quick round: timed cards from Learn and Timeline, the ones you miss most often first. Each
     card gives you time to read, then the seconds you chose to decide. When the time runs out, you
@@ -40,7 +40,7 @@ export function QuickRound({ onBack }: QuickRoundProps) {
   }
   function handleAnswer(id: string, ok: boolean): void {
     score(id, ok);
-    setCounts((c) => (ok ? { ...c, right: c.right + 1 } : { ...c, wrong: c.wrong + 1 }));
+    setCounts((c) => (ok ? { ...c, correct: c.correct + 1 } : { ...c, incorrect: c.incorrect + 1 }));
   }
   function handleTimeout(id: string): void {
     score(id, false);
@@ -51,17 +51,17 @@ export function QuickRound({ onBack }: QuickRoundProps) {
     const msg =
       counts.froze === 0
         ? "No freezes. You made a choice every time, which is the habit you want in the fight."
-        : "Each freeze is a moment you would stand still in the fight. Go again and aim for zero freezes, even if some answers are wrong.";
+        : "Each freeze is a moment you would stand still in the fight. Go again and aim for zero freezes, even if some answers are incorrect.";
     return (
       <Card className="mx-auto max-w-md">
         <CardHeader>
           <CardDescription>Round done</CardDescription>
           <CardTitle className="font-display text-2xl tracking-wide">
-            {counts.right} of {cards.length} right
+            {counts.correct} of {cards.length} correct
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Tally right={counts.right} wrong={counts.wrong} missed={counts.froze} missedLabel="Froze" />
+          <Tally correct={counts.correct} incorrect={counts.incorrect} missed={counts.froze} missedLabel="Froze" />
           <p className="text-sm">{msg}</p>
           <div className="flex flex-wrap gap-3">
             <Button onClick={again}>Go again</Button>

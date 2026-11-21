@@ -8,7 +8,7 @@ import { hitsFirst, Shape } from "./Shape";
     piece looks the same everywhere.
     ground: the attacks, then the weapons and other pieces on the floor (clipped to the arena).
     drops: puddles and other pieces that stay on the floor after a step.
-    zones: where to stand, as the right answer, a preview or a target (clipped to the arena).
+    zones: where to stand, as the correct answer, a preview or a target (clipped to the arena).
     waymarks, then boss: the boss and his ring.
     labels: name tags for weapons and zones, over the boss so they stay readable.
     effects: what the full fight adds over the arena (the flash, the countdown ring, a tank buster).

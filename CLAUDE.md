@@ -51,7 +51,7 @@ claim on the live site before you act on it.
 | Learn | `/learn/<card>` | Quiz cards with arena pictures. Pick an answer to see it, then Lock in. Back, Next and one chip per mechanic. |
 | Practice | `/practice/<mechanic>/<code>` | Click where you stand, one mechanic at a time. Show me, Again, New pattern. The code names the pattern. |
 | Timeline | `/timeline/<card>` | Which mechanic comes next, with a cactbot-style list. |
-| Pressure | `/pressure`, `/pressure/<code>[/<picks>][?t=<s>]` | A quick round of 12 timed cards, or the full fight: the run (you click) and Watch the right moves (the player). The player's address names its fight, its picks and, paused, its moment. |
+| Pressure | `/pressure`, `/pressure/<code>[/<picks>][?t=<s>]` | A quick round of 12 timed cards, or the full fight: the run (you click) and Watch the correct moves (the player). The player's address names its fight, its picks and, paused, its moment. |
 | Cheat sheet | `/sheet` | One line per mechanic, the timeline for your role, sources and your progress. |
 
 Any other address opens Home, including the old site's addresses (`/mech/...`, `/map/...`).
@@ -149,7 +149,7 @@ src/data/drills.ts   Practice drills (DRILLS), scenes, safe spots, stack and spr
 src/data/pictures.ts Learn card pictures (LEARN_PICTURES)
 src/data/questions.ts  Learn cards (LEARN_CARDS, LEARN_GROUPS) and Timeline cards (TIMELINE_CARDS)
 src/data/fight.ts    the full fight: segments, due times, pattern picks and codes
-src/data/route.ts    the moving marker's route (rightRoute, clickRoute, runnerAt, showOf)
+src/data/route.ts    the moving marker's route (correctRoute, clickRoute, runnerAt, showOf)
 src/data/timeline.ts the fight timeline and "what you do" per row
 src/data/abilities.ts  the ability list, phases and colour categories
 src/data/attacks.ts  attack sizes and shapes (from BossMod). Put new sizes here.
@@ -227,8 +227,8 @@ These steps put a branch on `main`, the live site.
   `bg-success text-success-foreground`...), each with a light and a dark value, not from fixed
   Tailwind colours such as `bg-green-50`. Colours come in shadcn's pairs: the name is the
   background, `-foreground` the text and border on it. Keep the chrome quiet (ink, gray, the slate header and
-  the celery highlight), so the arena stays the focus: green, red, blue and purple mean right,
-  wrong, the arena's hints and the roles. The arena keeps its own colours in both modes. No
+  the celery highlight), so the arena stays the focus: green, red, blue and purple mean correct,
+  incorrect, the arena's hints and the roles. The arena keeps its own colours in both modes. No
   company branding.
 - Code comments: plain English. No ticket numbers, no history of old layouts.
 - Build the simplest shape for today's need. Do not add hooks for features nobody asked for.
@@ -244,6 +244,9 @@ These steps put a branch on `main`, the live site.
     colours over arbitrary values.
   - shadcn/ui (ui.shadcn.com): add components with its CLI and keep them as it writes them; use
     their variants and the theme's CSS variables (`bg-primary`, `text-muted-foreground`).
+    A colour a variant does not give comes from a new variant in the component (`cva`), as
+    shadcn/ui's customization guide shows, not from `dark:` classes on top of a variant.
+    `button.tsx` has two: `correct` and `incorrect`. Keep them when the CLI updates the file.
   - Tests (Testing Library, Playwright): find elements by role and text, as a user would.
 - The site is built with React, Tailwind CSS and shadcn/ui, in the usual React shape:
   - A component used by more than one page gets its own file in `src/components/`, named after
@@ -281,7 +284,9 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Drill**: one Practice mechanic (`Drill`, `DRILLS`). The screen says "mechanic"; the code says
   drill. A **try** is one go at a drill, on its screen (`DrillScreen`).
 - **Pattern**: the random parts of a drill, built from a **code** (`buildPattern`).
-- **Step**: one question of a drill. Its **status** (`StepStatus`) is ask, right or wrong.
+- **Correct** and **incorrect**: an answer that was or was not the one to give. Not "right" or
+  "wrong": "right" is a direction.
+- **Step**: one question of a drill. Its **status** (`StepStatus`) is ask, correct or incorrect.
 - **Phase**: a phase of the fight (Phase 1 to 4), and nothing else.
 - **Look-ahead**: a step that is saved for later (`Step.lookAhead`).
 - **Look**: the colour of a zone's area or a label (`ZoneLook`, `LabelLook`).
@@ -295,7 +300,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Round**: the answers so far on one tab, for one slot. The **quick round** is Pressure's 12
   timed cards (`QuickRound`).
 - **Fight**: the full fight on the clock (`Fight`, `FightScreen`), in two modes (`FightMode`):
-  **the run** (`"run"`), where you click your spots and get a score ("run" means only this), and **Watch the right moves**
+  **the run** (`"run"`), where you click your spots and get a score ("run" means only this), and **Watch the correct moves**
   (`"watch"`), the player. A **frame** is one step of the fight clock (`tickFight`,
   `useFightFrame`).
 - **Jump set**: the weapons the boss jumps to in order, in Assault Evolved and Ultimate Trophy
@@ -315,13 +320,13 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   never take one from a video, a guide's picture or memory. Name the source line or shape in a
   comment next to the number. When a source is missing or unclear, ask the owner.
 - A number the app chooses for itself is not a fight time. Examples: how long the clock runs past
-  the enrage (`AFTER_ENRAGE`), and the made-up attacks in wrong answers (`FAKE` in
+  the enrage (`AFTER_ENRAGE`), and the made-up attacks in incorrect answers (`FAKE` in
   `src/data/pictures.ts`). Give it a name and a comment that says it is the app's choice.
 - Never change a strat, a position or a rule without the owner. When a source and the owner
   disagree, ask.
 - Words: "pattern", not "layout". "Saved for later" is a mechanic that the boss shows early and
   resolves later (a look-ahead step, `Step.lookAhead`). "The run" is the scored full fight. "Watch the
-  right moves" is the replay.
+  correct moves" is the replay.
 - Never quiz an exact raidwide time. Ask which one comes next and whether it is soon.
 
 ## Planned work

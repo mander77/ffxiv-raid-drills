@@ -79,10 +79,10 @@ test("an arena label is a box with its text, centred on its spot, in its colour"
 });
 
 test("a zone label sits above its zone, or below it at the top edge, and inside the picture", () => {
-  const above = renderToStaticMarkup(<ZoneLabel zone={{ c: [50, 50], r: 10 }} kind="right" />);
+  const above = renderToStaticMarkup(<ZoneLabel zone={{ c: [50, 50], r: 10 }} kind="correct" />);
   // 3 units above the circle's top (40): the middle is at 37, so the 4.2-high box starts at 34.9.
   assert.include(above, '<rect x="41.5" y="34.9"');
-  assert.include(above, '<text x="50" y="37">Right spot</text>');
+  assert.include(above, '<text x="50" y="37">Correct spot</text>');
   const below = renderToStaticMarkup(<ZoneLabel zone={{ c: [99, 1], r: 3 }} kind="go" />);
   assert.include(below, 'x="90"', "kept inside the picture on the right");
   assert.include(below, "Go here");

@@ -1,5 +1,5 @@
 // The route your marker runs in the full fight: from spot to spot, leaving each spot right after
-// its hit. "Watch the right moves" runs the right spots, and the run goes to your own clicks.
+// its hit. "Watch the correct moves" runs the correct spots, and the run goes to your own clicks.
 // The position comes from the fight time, so pausing, the slider and the speed setting stay in
 // step with it.
 //
@@ -43,7 +43,7 @@ export const showOf = (g: FightSeg, j: number): number =>
 /** The middle of the spot to stand on in zone z, coming from `from`. Mostly the middle of the
     zone (a circle or a box) or its shown point (an area with a rule), because standing on the edge
     of a spread or a stack can clip the players next to you. When a rule area shows several
-    separate spots that are all right (the four open gaps for a spread), it is the middle of the
+    separate spots that are all correct (the four open gaps for a spread), it is the middle of the
     nearest one, the way a player picks one. */
 function middleOf(z: Zone, from: Point): Point {
   if(!("fn" in z)) return zoneCenter(z);
@@ -52,11 +52,11 @@ function middleOf(z: Zone, from: Point): Point {
   return choices.reduce((a, b) => dist(a, from) <= dist(b, from) ? a : b);
 }
 
-/** The right spots of the whole fight, in time order. "Watch the right moves" answers with these
+/** The correct spots of the whole fight, in time order. "Watch the correct moves" answers with these
     same points. Each one is the middle of its spot (see middleOf). A step with a best spot goes
     there instead: a few steps in from the sword pocket's inner corner. A spot that depends on the
     steps before it (a puddle, for example) is worked out from these answers. */
-export function rightRoute(f: Fight): Stop[] {
+export function correctRoute(f: Fight): Stop[] {
   return f.segs.flatMap((g, si) => {
     const res: StepResult[] = [], pre = g.pre;
     let from = pre ?? HOME;   // the player meets the mechanic at its pre-position

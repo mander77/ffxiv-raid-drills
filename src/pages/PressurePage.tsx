@@ -1,5 +1,5 @@
 // The Pressure page (/pressure): the same questions, fast. A quick round of timed questions, or
-// the full fight on the clock: the run, where you click your spots, and Watch the right moves,
+// the full fight on the clock: the run, where you click your spots, and Watch the correct moves,
 // the player. A link to the player holds its fight: /pressure/<code>[/<picks>][?t=<seconds>].
 import { type ReactNode, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams, useSearchParams } from "react-router";
@@ -57,7 +57,7 @@ export function PressurePage() {
         results={screen.results}
         stopped={screen.stopped}
         onAgain={() => startRun(newCode(), choices)}
-        // The same fight, so you see the right moves for the patterns you just had.
+        // The same fight, so you see the correct moves for the patterns you just had.
         onWatch={() => watch(screen.fight.code, screen.fight.choices)}
       />
     );
@@ -118,7 +118,7 @@ interface PlayerProps {
   onRun: (code: string, choices: Choices) => void;
 }
 
-/** Watch the right moves: the player for the fight in the address. New picks or another slot (H1
+/** Watch the correct moves: the player for the fight in the address. New picks or another slot (H1
     or H2) build the same fight again, with its own spots, at the same moment. The address follows
     the player: paused, it holds the moment, so a copied link opens the same place. */
 function Player({ code, picks, onRun }: PlayerProps) {

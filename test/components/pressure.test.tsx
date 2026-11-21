@@ -89,7 +89,7 @@ test("after the run: the score, and a Practice link for each mechanic with a mis
       <RunScore fight={fight} results={results} stopped onAgain={() => {}} onWatch={() => {}} />
     </MemoryRouter>,
   );
-  assert.ok(screen.getByText("0 of 1 spots right"));
+  assert.ok(screen.getByText("0 of 1 spots correct"));
   assert.ok(screen.getByText(`Full fight · Stopped at mechanic 1 of ${fight.segs.length}`));
   const list = screen.getByRole("list", { name: "Practice these" });
   assert.equal(within(list).getAllByRole("listitem").length, 1);

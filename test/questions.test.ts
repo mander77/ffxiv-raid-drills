@@ -9,7 +9,7 @@ import type { Slot } from "../src/types";
 const ALL = [...LEARN_CARDS, ...TIMELINE_CARDS];
 const SLOTS: Slot[] = ["H1", "H2"];
 
-test("every question has one right answer and no repeated options", () => {
+test("every question has one correct answer and no repeated options", () => {
   for(const item of ALL) for(const s of SLOTS){
     const q = item.build(s);
     assert.equal(q.options.filter(o => o.ok).length, 1, item.id);
@@ -42,10 +42,10 @@ test("next-raidwide questions ask for the name, not the exact time", () => {
   for(const item of raidwide){
     const q = item.build("H1");
     for(const o of q.options) assert.notMatch(o.t, /\d+:\d\d/, item.id + ": " + o.t);
-    // The right answer is a row named for raid damage in the fight list. When it is the same
+    // The correct answer is a row named for raid damage in the fight list. When it is the same
     // raidwide as the one that just happened, it ends with " again".
-    const right = (q.options.find(o => o.ok)?.t ?? "").replace(/ again$/, "");
-    assert.ok(TIMELINE.some((e, i) => tlAbilities(i)[0]?.cats.includes("raid") && e.n === right), item.id);
+    const correct = (q.options.find(o => o.ok)?.t ?? "").replace(/ again$/, "");
+    assert.ok(TIMELINE.some((e, i) => tlAbilities(i)[0]?.cats.includes("raid") && e.n === correct), item.id);
   }
 });
 

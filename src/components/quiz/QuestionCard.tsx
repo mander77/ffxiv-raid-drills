@@ -13,7 +13,7 @@ import { RuleBox } from "../RuleBox";
 import { TimelinePicture, timelineRowOf } from "./TimelinePicture";
 import { TimerBar } from "./TimerBar";
 
-/** An answer as shown: its text and rightness, and `k`, its place in the question's own list,
+/** An answer as shown: its text and correctness, and `k`, its place in the question's own list,
     which its preview on the picture follows. */
 type ShownOption = Option & { k: number };
 
@@ -57,7 +57,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
   const fig = LEARN_PICTURES[item.id]?.(slot);
   const previews = previewAnswers && Boolean(fig?.options);
   const row = fig ? null : timelineRowOf(item);
-  const rightName = q.options.find((o) => o.ok)?.t ?? "";
+  const correctName = q.options.find((o) => o.ok)?.t ?? "";
   const shown = hover ?? sel;
   const preview = !answered && shown !== null ? fig?.options?.[opts[shown].k] : undefined;
 
@@ -129,7 +129,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
       {answered && fig.note && <figcaption className="mt-2 text-sm text-muted-foreground">{fig.note}</figcaption>}
     </figure>
   ) : row !== null ? (
-    <TimelinePicture row={row} answered={answered} rightName={rightName} />
+    <TimelinePicture row={row} answered={answered} correctName={correctName} />
   ) : null;
 
   const okPick = pick !== null && opts[pick].ok === true;
@@ -155,7 +155,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
                 key={o.t}
                 n={i + 1}
                 text={o.t}
-                state={!answered ? (previews && sel === i ? "picked" : "open") : o.ok ? "right" : i === pick ? "wrong" : "other"}
+                state={!answered ? (previews && sel === i ? "picked" : "open") : o.ok ? "correct" : i === pick ? "incorrect" : "other"}
                 why={answered && o.ok ? q.why : undefined}
                 pressed={previews && !answered ? sel === i : undefined}
                 onClick={() => handleOptionClick(i)}
@@ -167,7 +167,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
           {answered ? (
             <>
               <p className={cn(slow ? "font-medium text-warning-foreground" : "sr-only")} role="status">
-                {slow ? "Too slow: the time ran out." : okPick ? "Right." : "Not this one."}
+                {slow ? "Too slow: the time ran out." : okPick ? "Correct." : "Not this one."}
               </p>
               <RuleBox rule={q.rule} />
               {q.src && <p className="text-xs text-muted-foreground">Source: {q.src}</p>}
@@ -205,13 +205,13 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
   );
 }
 
-type AnswerState = "open" | "picked" | "right" | "wrong" | "other";
+type AnswerState = "open" | "picked" | "correct" | "incorrect" | "other";
 
 interface AnswerButtonProps {
   n: number;
   text: string;
   state: AnswerState;
-  /** The explanation, under the right answer after you answer. */
+  /** The explanation, under the correct answer after you answer. */
   why?: string;
   /** For a Learn card before the answer: true when this answer is the picked one. */
   pressed?: boolean;
@@ -220,12 +220,12 @@ interface AnswerButtonProps {
   onPoint: (on: boolean) => void;
 }
 
-/** One answer: its number key, its text, and after the answer, whether it was right. */
+/** One answer: its number key, its text, and after the answer, whether it was correct. */
 function AnswerButton({ n, text, state, why, pressed, onClick, onPoint }: AnswerButtonProps) {
-  const done = state === "right" || state === "wrong" || state === "other";
+  const done = state === "correct" || state === "incorrect" || state === "other";
   return (
     <Button
-      variant="outline"
+      variant={state === "correct" || state === "incorrect" ? state : "outline"}
       aria-pressed={pressed}
       disabled={done}
       onClick={onClick}
@@ -236,8 +236,6 @@ function AnswerButton({ n, text, state, why, pressed, onClick, onPoint }: Answer
       className={cn(
         "h-auto w-full items-start justify-start gap-3 py-2 text-left whitespace-normal disabled:opacity-100",
         state === "picked" && "border-primary ring-2 ring-primary",
-        state === "right" && "border-success-foreground bg-success",
-        state === "wrong" && "border-danger-foreground bg-danger",
         state === "other" && "opacity-60",
       )}
     >
@@ -247,7 +245,7 @@ function AnswerButton({ n, text, state, why, pressed, onClick, onPoint }: Answer
       <span className="space-y-1">
         <span className="block">
           {text}
-          {state === "wrong" && (
+          {state === "incorrect" && (
             <Badge variant="destructive" className="ml-2">
               Your pick
             </Badge>
@@ -255,7 +253,7 @@ function AnswerButton({ n, text, state, why, pressed, onClick, onPoint }: Answer
         </span>
         {why && (
           <span className="block font-normal text-muted-foreground">
-            <span className="font-semibold text-success-foreground">Right answer.</span> {why}
+            <span className="font-semibold text-success-foreground">Correct answer.</span> {why}
           </span>
         )}
       </span>

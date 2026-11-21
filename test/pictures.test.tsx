@@ -27,7 +27,7 @@ test("every Mechanics question has an arena picture for both slots", () => {
   }
 });
 
-test("every answer has a preview, and no preview looks like the right answer", () => {
+test("every answer has a preview, and no preview looks like the correct answer", () => {
   for (const item of LEARN_CARDS)
     for (const s of SLOTS) {
       const make = LEARN_PICTURES[item.id];
