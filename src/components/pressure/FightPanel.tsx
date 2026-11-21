@@ -69,6 +69,10 @@ function Mechanic({ view: v, fight, g, onGoTo, onSpawns }: MechanicProps) {
             )}
           </p>
           <p className="font-medium">{g.scene.steps[j].q}</p>
+          {/* The player shows the right move with its question; your marker walks there. */}
+          <p className="mt-1.5">
+            <span className="font-semibold text-success">Right move:</span> {g.scene.steps[j].a}
+          </p>
         </div>
       )}
       {j > 0 && <LastAnswer ok={res[j - 1].ok} question={g.scene.steps[j - 1].q} answer={g.scene.steps[j - 1].a} />}

@@ -14,8 +14,8 @@ const PROMPT_LOOK: Record<Prompt["look"], string> = {
   later: "border-later bg-later-soft text-later",
 };
 
-/** Your prompt: the question (the right move on the player), its result in the run, or the next
-    mechanic. The seconds left change on every frame. */
+/** The run's prompt: the question, its result, or the next mechanic. The seconds left change on
+    every frame. (The player shows the question and its right move in the mechanic's step box.) */
 export function FightPrompt() {
   // It is two lines tall even for one line of text, so a longer prompt does not push the arena
   // down past the bottom of the screen.

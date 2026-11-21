@@ -178,6 +178,9 @@ make sure that each one still matches the code before you start it.
     own; ScrollArea holds the mechanic where it can run long. Narrow screens: the cast bar and the
     mechanic first, then the prompt, the arena and its play bar, then the list; a phone leaves
     the list out.
+  - The player has no prompt of its own (owner's choice): the mechanic's step box shows the
+    question and, under it, "Right move:" with the answer, where the prompt used to repeat the
+    answer in a box of its own. The run keeps its prompt, the live question.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what

@@ -32,7 +32,6 @@ import { FightArena, type ShownHit } from "./FightArena";
 import { FightHud } from "./FightHud";
 import { FightPanel } from "./FightPanel";
 import { FightPlayBar } from "./FightPlayBar";
-import { FightPrompt } from "./FightPrompt";
 
 export interface FightScreenProps {
   /** run: you click your spots. watch: the right moves play by themselves. */
@@ -96,7 +95,8 @@ export function FightScreen({
   /** Counts "Watch the spawns again": the arena draws anew, so its spawns play again. */
   const [replays, setReplays] = useState(0);
   const score = useProgressStore((s) => s.score);
-  /** A wide screen: the cast bar, prompt and controls sit beside the arena (the lg breakpoint). */
+  /** A wide screen: the cast bar, the mechanic or the prompt, and the controls sit beside the arena
+      (the lg breakpoint). */
   const wide = useMediaQuery("(min-width: 1024px)");
   /** An extra-wide screen: the player's mechanic panel also gets a column, left of the arena (xl). */
   const extraWide = useMediaQuery("(min-width: 1280px)");
@@ -296,12 +296,13 @@ export function FightScreen({
   return (
     <FightFrameContext value={frames}>
       {/* In the player the cast bar always sits over the mechanic: what the boss casts, and what it
-          means. The casts coming up scroll up a list toward a now line. In the run, which has no
-          mechanic panel, the cast bar sits over the prompt. */}
+          means; the mechanic's step box holds the question and its right move. The casts coming up
+          rise toward a now mark. The run, which has no mechanic panel, has a prompt instead, under
+          the cast bar. */}
       {mode === "watch" && extraWide ? (
         // An extra-wide screen: three columns. The cast bar and the mechanic on the left, high up
-        // where you can read them; the arena and its play bar in the middle; the prompt and the
-        // casts coming up on the right. The side columns are as tall as the middle one; the
+        // where you can read them; the arena and its play bar in the middle; the casts
+        // coming up on the right. The side columns are as tall as the middle one; the
         // mechanic scrolls inside when it is long, and the cast list fills the rest.
         <div className="grid grid-cols-[minmax(0,17rem)_minmax(0,1fr)_minmax(0,20rem)] gap-x-6">
           <div className="relative min-w-0">
@@ -317,15 +318,14 @@ export function FightScreen({
             {playBar}
           </div>
           <div className="relative min-w-0">
-            <div className="absolute inset-0 flex flex-col gap-4">
-              <FightPrompt />
+            <div className="absolute inset-0 flex flex-col">
               <CastList speed={speed} className="flex-1" />
             </div>
           </div>
         </div>
       ) : wide ? (
         // A wide screen: the arena on the left, as large as the screen allows, with the player's slim
-        // play bar under it. Beside it: the prompt, the cast bar over the mechanic, then the casts
+        // play bar under it. Beside it: the cast bar over the mechanic, then the casts
         // coming up (the run: the cast bar, the prompt and its bar). The side column is as tall as
         // the arena column, so the page never scrolls.
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,22rem)] gap-x-6">
@@ -341,7 +341,6 @@ export function FightScreen({
               </div>
             ) : (
               <div className="absolute inset-0 flex flex-col gap-3">
-                <FightPrompt />
                 <CastBar />
                 <ScrollArea className="min-h-0 flex-1">
                   <FightPanel view={view} fight={fight} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />
@@ -359,13 +358,12 @@ export function FightScreen({
           {runBar}
         </div>
       ) : (
-        // A narrower screen, the player: the cast bar over the mechanic first, then the prompt, the
-        // arena and its play bar, then the casts coming up. A phone leaves the cast list out: its
+        // A narrower screen, the player: the cast bar over the mechanic first, then the arena and its
+        // play bar, then the casts coming up. A phone leaves the cast list out: its
         // screen is too short to watch the list and the arena at once.
         <div className="space-y-3">
           <CastBar />
           <FightPanel view={view} fight={fight} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />
-          <FightPrompt />
           {arena}
           {playBar}
           <CastList speed={speed} className="h-72 max-sm:hidden" />
