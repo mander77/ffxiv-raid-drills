@@ -206,6 +206,12 @@ make sure that each one still matches the code before you start it.
     mechanic on the left, the bars under the arena) as looking wrong. The three columns start at
     1024 px, not 1280: there the arena is larger beside its columns (528 px at 1209 x 732, a screen
     at 150% zoom).
+  - The run looks like the player (owner's choice): the same layouts, with the run's pieces in the
+    player's places. Wide: the cast bar over the prompt against the floor on the left, the run's
+    bar (progress, Pause, Quit) in the play bar's look over the casts coming up on the right.
+    Narrower: the cast bar and the prompt over the arena, the run's bar and the sideways casts
+    under it. The run shows the casts coming up too: their names only, like cactbot's timeline in
+    the game, never where to stand.
   - `useFitToScreen` measures again when the web fonts have loaded: they can push the arena down a
     pixel or two after the first measure, and the page then scrolled.
   - November 21: the owner asked that every change be checked against the official best

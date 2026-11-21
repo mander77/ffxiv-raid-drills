@@ -1,8 +1,8 @@
 import { CastBar } from "./CastBar";
 import { FightPrompt } from "./FightPrompt";
 
-/** The cast bar and the prompt together, over the arena or beside it, as the run shows them. The
-    player places them apart: the cast bar always over the mechanic. */
+/** The run's cast bar over its prompt, in the place where the player shows the cast bar over the
+    mechanic: beside the arena, or over it. */
 export function FightHud() {
   return (
     <div className="space-y-2">

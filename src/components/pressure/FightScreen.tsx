@@ -223,13 +223,14 @@ export function FightScreen({
     return () => window.removeEventListener("keydown", listener);
   }, []);
 
+  /** The run's bar, in the place and the look of the player's play bar. */
   const runBar = (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex items-center gap-2 rounded-lg border bg-card py-1.5 pr-1.5 pl-3">
       <RunProgress />
-      <Button variant="outline" onClick={togglePause}>
+      <Button variant="outline" size="sm" onClick={togglePause}>
         {view.look ? "Go" : view.paused ? "Resume" : "Pause"}
       </Button>
-      <Button variant="outline" onClick={() => onQuit?.(sim.current)}>
+      <Button variant="outline" size="sm" onClick={() => onQuit?.(sim.current)}>
         Quit
       </Button>
     </div>
@@ -249,54 +250,63 @@ export function FightScreen({
     />
   );
   const mechanicPanel = <FightPanel view={view} fight={fight} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />;
-  /** The player's column against the floor: the cast bar over the mechanic, which scrolls inside
-      when it is long. */
-  const mechanic = (
-    <div className="flex w-68 flex-col gap-3">
-      <CastBar />
-      <ScrollArea className="min-h-0 flex-1">{mechanicPanel}</ScrollArea>
-    </div>
-  );
-  /** Over the arena, below a wide screen: the cast bar over the mechanic. */
-  const castAndMechanic = (
-    <div className="space-y-3 pb-2">
-      <CastBar />
-      {mechanicPanel}
-    </div>
-  );
-  /** Under the arena, below a wide screen: the play bar over the casts coming up, sideways. */
-  const playAndCasts = (
-    <div className="space-y-2">
-      {playBar}
-      <CastStrip />
-    </div>
-  );
+  /** The bar for the mode: the player's play bar, or the run's bar. */
+  const controls = mode === "watch" ? playBar : runBar;
 
-  /** What sits against the arena's floor in the player. A wide screen: the mechanic before it and
-      the play bar over the casts coming up beside it; in a row, the arena grows up to its size
-      limit (mx-0: no margins to centre it) and keeps room on each side for its columns. Below
-      that, one column: the cast bar and the mechanic over it, the play bar and the casts coming up
-      under it, and the arena at its full size. The run has nothing against the floor. */
-  const sides: Partial<ArenaFrameProps> =
-    mode === "run"
-      ? {}
-      : wide
-        ? {
-            before: mechanic,
-            beside: (
-              <div className="flex w-80 flex-col gap-2">
-                {playBar}
-                <CastList className="flex-1" />
-              </div>
-            ),
-            className: "mx-0 ml-68 mr-80 min-w-0 flex-1",
-          }
-        : { over: castAndMechanic, under: playAndCasts, fill: true };
+  /** What sits against the arena's floor, the same in the run and the player. A wide screen: what
+      the boss casts and what it means before it (the player: the cast bar over the mechanic, which
+      scrolls inside when it is long; the run: the cast bar over the prompt), and the bar over the
+      casts coming up beside it. In a row, the arena grows up to its size limit (mx-0: no margins to
+      centre it) and keeps room on each side for its columns. Below that, one column: the same
+      over the arena, and the bar over the casts coming up, sideways, under it; the arena keeps its
+      full size, and the page scrolls. */
+  const sides: Partial<ArenaFrameProps> = wide
+    ? {
+        before: (
+          <div className="flex w-68 flex-col gap-3">
+            {mode === "watch" ? (
+              <>
+                <CastBar />
+                <ScrollArea className="min-h-0 flex-1">{mechanicPanel}</ScrollArea>
+              </>
+            ) : (
+              <FightHud />
+            )}
+          </div>
+        ),
+        beside: (
+          <div className="flex w-80 flex-col gap-2">
+            {controls}
+            <CastList className="flex-1" />
+          </div>
+        ),
+        className: "mx-0 ml-68 mr-80 min-w-0 flex-1",
+      }
+    : {
+        over: (
+          <div className="space-y-3 pb-2">
+            {mode === "watch" ? (
+              <>
+                <CastBar />
+                {mechanicPanel}
+              </>
+            ) : (
+              <FightHud />
+            )}
+          </div>
+        ),
+        under: (
+          <div className="space-y-2">
+            {controls}
+            <CastStrip />
+          </div>
+        ),
+        fill: true,
+      };
   const arena = (
-    // On a wide screen the whole arena fits on the screen. Below that, the run keeps room for its
-    // bar under the arena, and the player's arena fills its column (`fill`): the page scrolls, as
-    // on a phone.
-    <ArenaFrame below={wide ? 0 : RUN_BAR_ROOM} {...sides}>
+    // On a wide screen the whole arena fits on the screen. Below that, it fills its column (`fill`)
+    // and the page scrolls, as on a phone.
+    <ArenaFrame {...sides}>
       <FightArena
         view={view}
         slot={slot}
@@ -338,46 +348,13 @@ export function FightScreen({
 
   return (
     <FightFrameContext value={frames}>
-      {/* In the player the cast bar always sits over the mechanic: what the boss casts, and what it
-          means; the mechanic's step box holds the question and its right move. The casts coming up
-          rise toward a now mark. The run, which has no mechanic panel, has a prompt instead, under
-          the cast bar. */}
-      {mode === "watch" ? (
-        wide ? (
-          // A wide screen: three columns, the mechanic, the arena, then the play bar over the casts
-          // coming up, in the middle of the page. Both side columns sit right against the floor and
-          // are as tall as it, so the three read as one.
-          <div className="flex justify-center">{arena}</div>
-        ) : (
-          // A narrower screen: one column, the cast bar over the mechanic, the arena, then the play
-          // bar over the casts coming up, sideways. Never half of each (owner's choice): the columns
-          // sit either both beside the arena or above and below it.
-          arena
-        )
-      ) : wide ? (
-        // A wide screen, the run: the arena as large as the screen allows, with the cast bar, the
-        // prompt and its bar beside it.
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,22rem)] gap-x-6">
-          <div className="min-w-0">{arena}</div>
-          <div className="space-y-4">
-            <FightHud />
-            {runBar}
-          </div>
-        </div>
-      ) : (
-        // A narrower screen, the run: the cast bar and the prompt over the arena, its bar under it.
-        <div className="space-y-3">
-          <FightHud />
-          {arena}
-          {runBar}
-        </div>
-      )}
+      {/* The run and the player look the same (owner's choice); only what sits against the floor
+          differs. A wide screen: three columns in the middle of the page, which read as one. Below
+          that, one column: never half of each (owner's choice). */}
+      {wide ? <div className="flex justify-center">{arena}</div> : arena}
     </FightFrameContext>
   );
 }
-
-/** The room under the arena for the run's bar, with the gap above it, in pixels. The app's choice. */
-const RUN_BAR_ROOM = 48;
 
 interface HitLabelProps {
   hit: ShownHit;
