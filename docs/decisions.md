@@ -145,6 +145,16 @@ make sure that each one still matches the code before you start it.
     Vite: our own ThemeProvider sets the class on <html> (next-themes renders a script tag that
     React 19 warns about), and a script in index.html sets it before the page draws. The arena
     stays sand in dark mode, so it is the brightest thing on the page.
+  - The theme has no chart colours (`--chart-1` to `--chart-5`) and no sidebar colours
+    (`--sidebar`, `--sidebar-foreground` and so on), though shadcn/ui's theming guide lists them.
+    The owner chose to add them only when a Chart or Sidebar component comes in, since nothing
+    uses them today. Then the sidebar colours take the site's own colours (card, foreground,
+    primary, accent, border, ring), not shadcn's neutral ones, whose blue active item in dark mode
+    does not fit the quiet chrome. The charts may start from shadcn's neutral grays. The CLI does
+    not add them cleanly: the `chart` item brings no colours, the `sidebar` item brings old v3
+    names (`--sidebar-background`, in HSL), and `init` would overwrite the theme. Copy the names
+    from the theming guide (https://ui.shadcn.com/docs/theming) and the `cssVarsV4` values from
+    https://ui.shadcn.com/r/colors/neutral.json.
   - Arena size: one rule on Learn, Practice and Pressure (`ArenaFrame`). The arena is as large
     as its column, but never taller than the room down to the bottom of the screen, so all of it
     is in view; at most 720 px, and at least 360 px, so it fills a phone's width. The header
