@@ -11,8 +11,8 @@ import { dist, inZone, rot, rotZone, stepZone, zoneCenter } from "../geometry";
 import type { Fight, FightSeg } from "./fight";
 import type { Point, StepResult, Zone } from "../types";
 
-/** Normal run speed, about 6 yalms a second, in arena units a second (6 / 0.4). Tune it here. */
-export const RUN_SPEED = 15;
+/** Normal movement speed, about 6 yalms a second, in arena units a second (6 / 0.4). Tune it here. */
+export const MOVEMENT_SPEED = 15;
 /** How long after a hit the player starts to move, in seconds. */
 export const REACT = 0.2;
 /** How long after a mechanic appears the player starts to move to its first spot, in seconds.
@@ -83,7 +83,7 @@ export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Po
 
 /** Where the runner is at time t, and its target: the stop for the next hit, once that mechanic is
     on the arena (null before it shows, and at the end). The runner waits on each spot until that
-    spot's hit, plus REACT, then runs straight to the next spot at RUN_SPEED. It leaves for the
+    spot's hit, plus REACT, then runs straight to the next spot at MOVEMENT_SPEED. It leaves for the
     first spot of a mechanic LOOK seconds after the mechanic appears, or, for your own click, right
     when you clicked (but not before the hit of the spot it stands on). Before a mechanic with its
     own pre-position (Stop.pre), it goes there right after the last hit. Before any other
@@ -96,7 +96,7 @@ export function runnerAt(route: Stop[], t: number): {at: Point; target: Stop | n
   /* One straight run from `at` to p, leaving at `leave`. Returns where the runner is at t if t
      falls before the end of this run, or null when the run is over by t. */
   const leg = (p: Point, leave: number): Point | null => {
-    const arrive = leave + dist(at, p) / RUN_SPEED;
+    const arrive = leave + dist(at, p) / MOVEMENT_SPEED;
     if(t < leave) return at;
     if(t < arrive){ const k = (t - leave) / (arrive - leave); return [at[0] + (p[0] - at[0]) * k, at[1] + (p[1] - at[1]) * k]; }
     at = p;

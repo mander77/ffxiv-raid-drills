@@ -219,7 +219,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     return {overlays:[...PUDDLE_PIECES, ...FIXED_SPREAD_MARKS], boss:BOSS, after:[...spreadWith(zoneCenter(gaps)), you(s, zoneCenter(gaps))], answer:[gaps], options:[
       hit(youIn(s, gaps), spreadWith(zoneCenter(gaps))), hit(youAt(s, [37, 71]), spreadWith([37, 71])),
       show([stackHit(stackedMarks), ...stackedMarks]), hit(youAt(s, [50, 58], 9), [donut(CENTER, FAKE.voidDonut)])]}; },
-  "k-void-run": s => { const R = buildJumpSet(s, faceApproach(weapons([[270, "scythe"]]))), toward = cometSpread(s, R.W[0].p)(VOID_RESULTS), lb = zoneCenter(toward);
+  "k-void-sprint": s => { const R = buildJumpSet(s, faceApproach(weapons([[270, "scythe"]]))), toward = cometSpread(s, R.W[0].p)(VOID_RESULTS), lb = zoneCenter(toward);
     const waitAt = bySlot<Point>(s, {H1:[83, 50], H2:[50, 83]});
     return {overlays:[...PUDDLE_PIECES, ...named(R), ...FIXED_SPREAD_MARKS], boss:STILL, after:[aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], answer:[toward],
       note:"Example: the first weapon of the second set is a scythe in the west.", options:[

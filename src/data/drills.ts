@@ -240,7 +240,7 @@ const far = (p: Point, q: Point, d: number): boolean => dist(p, q) >= d;
 const apart = (p: Point, q: Point): number => { const d = Math.abs(angOf([p[0] - 50, p[1] - 50]) - angOf([q[0] - 50, q[1] - 50])) % 360; return Math.min(d, 360 - d); };
 
 /* With `toward` set (a sword or scythe goes first next), the spread spot can be anywhere on
-   that weapon's side of the arena, so the run to it is short. That side shows as one shaded
+   that weapon's side of the arena, so the way to it is short. That side shows as one shaded
    area. Any spot in it is right if it is out of the hitbox, out of the last puddle and not on a
    tank or melee spot. A spread is 6 yalms (15 units), so a spot closer than that to a tank or
    melee spot hits them. */
@@ -405,18 +405,18 @@ function voidSteps(s: Slot, spread: boolean, toward: Point | null, c: Point = CE
 const safeSpot = (st: Step): Point | null => { const z = st.z ?? st.zf?.([]); return z ? zoneCenter(z) : null; };
 
 /* The first Void Stardust runs straight into the second weapon set: the weapons are already
-   out, so the party finds the first one early. A sword or scythe first means a run, so the
+   out, so the party finds the first one early. A sword or scythe first means a sprint, so the
    stack or spread moves toward it. An axe first keeps the usual spots. Then the scene goes on
    through all three weapons of this second set, so one drill covers the whole stretch. */
 export function voidIntoWeapons(s: Slot, spread: boolean, A: JumpSet): Scene {
-  const first = A.W[0], run = first.type !== "axe", where = COMPASS[Math.round(first.a / 45) % 8];
+  const first = A.W[0], sprint = first.type !== "axe", where = COMPASS[Math.round(first.a / 45) % 8];
   const steps: Step[] = [
     // A look-ahead: you spot the first weapon now, so you know what to do when the puddles are
     // done, but you go to A for the first puddle, not to the weapon.
     {q:"Before the puddles: which weapon goes first after Void Stardust? Click it.", z:{c:first.p, r:9}, lookAhead:true,
       a:"The " + first.type + ", " + where + ": its flat side is square to the boss. " +
-        (run ? "A sword or scythe first means a run, so the stack or spread moves toward it." : "An axe first means the party stacks in the middle, so the usual spots work.")},
-    ...voidSteps(s, spread, run ? first.p : null, CENTER, NORTH_START, safeSpot(A.steps[0])),
+        (sprint ? "A sword or scythe first means a sprint, so the stack or spread moves toward it." : "An axe first means the party stacks in the middle, so the usual spots work.")},
+    ...voidSteps(s, spread, sprint ? first.p : null, CENTER, NORTH_START, safeSpot(A.steps[0])),
     // The weapons start here, and the puddles are gone.
     {...A.steps[0], clearDrops:true, q:"The " + (spread ? "spread" : "stack") + " went off. The boss goes to the first weapon. Click where you go.",
       a:A.steps[0].a + " If you cannot make it in time, use Sprint or a movement ability. A scholar can use Expedient for the whole party."}];
