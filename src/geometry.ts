@@ -45,7 +45,7 @@ export function zoneCenter(z: Zone): Point {
 }
 
 /** Round to 2 decimals for SVG attributes. */
-export const f1 = (n: number): number => Math.round(n * 100) / 100;
+export const round2 = (n: number): number => Math.round(n * 100) / 100;
 
 /* Vector helpers for drills built from the path of the boss.
    Angles are degrees clockwise from north, and y grows south. */
@@ -55,7 +55,7 @@ export const DEG = Math.PI / 180;
 // that the body really returns a two-number tuple.
 export const unit = (v: Point): Point => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v[1] / l]; };
 // TS note: `k = 1` is a default parameter value, as in C#. Its type (number) comes from the default.
-export const vadd = (a: Point, b: Point, k = 1): Point => [a[0] + b[0] * k, a[1] + b[1] * k];
+export const addVec = (a: Point, b: Point, k = 1): Point => [a[0] + b[0] * k, a[1] + b[1] * k];
 export const leftOf = (d: Point): Point => [d[1], -d[0]];
 export const angOf = (d: Point): number => (Math.atan2(d[0], -d[1]) / DEG + 360) % 360;
 /** The point r units from c, `deg` degrees clockwise from north. */

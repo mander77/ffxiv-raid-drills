@@ -30,10 +30,14 @@ type RectBox = [number, number, number, number];
 
 // TS note: an interface describes the shape of an object, like a C# interface or record.
 // TypeScript checks shapes, not class names: any object with these fields fits.
-// The `?` in `cls?` means the field is optional. Its type is `string | undefined`.
-export interface CircleZone { c: Point; r: number; cls?: string }
-export interface RectZone { rect: RectBox; cls?: string }
-interface PolyShape { poly: Point[]; cls?: string }
+// The `?` in `look?` means the field is optional. Its type is `ZoneLook | undefined`.
+/** The colour of a zone's area: "ok" (the right spot, green), "bad" (the right spot after a wrong
+    click, lighter green), "pick" (a preview or "Go here", blue), "other" (another slot's spot,
+    grey), "later" (saved for later, purple) or "hit" (an area that gets hit, red). */
+export type ZoneLook = "ok" | "bad" | "pick" | "other" | "later" | "hit";
+export interface CircleZone { c: Point; r: number; look?: ZoneLook }
+export interface RectZone { rect: RectBox; look?: ZoneLook }
+interface PolyShape { poly: Point[]; look?: ZoneLook }
 /** A zone decided by a rule. `show` is what the map draws after an answer. */
 // TS note: `(p: Point) => boolean` is a function type, like Func<Point, bool> in C#.
 export interface RuleZone { fn: (p: Point) => boolean; label: Point; show: Array<CircleZone | RectZone | PolyShape> }
@@ -100,7 +104,7 @@ export interface Step {
   drop?: boolean;
   /** A look-ahead step: you click to show what you have spotted (a weapon, for example), but you
       do not move there. The moving marker in "Watch the right moves" skips it. */
-  look?: boolean;
+  lookAhead?: boolean;
   /** The best spot to stand when the zone has one, for example a few steps in from the
       sword pocket's inner corner. The moving marker goes there instead of
       the middle of the zone. */
@@ -128,7 +132,7 @@ export interface Scene {
   spawnAhead?: number;
 }
 
-export interface MapDrill {
+export interface Drill {
   id: string;
   order: number;
   phase: string;
@@ -158,7 +162,7 @@ export interface Preview { pieces: Overlay[]; zones?: ZoneShape[] }
     until you answer, unless an answer preview replaces it. After the answer, `after` draws what
     the mechanic does and the green `answer` zones show the right spot. `options` holds one
     preview per answer, in the order the question lists them. `note` is a caption. */
-export interface Fig { overlays: Overlay[]; boss?: Boss; split?: boolean; before?: Overlay[]; after?: Overlay[]; answer?: ZoneShape[]; options?: Preview[]; note?: string }
+export interface Picture { overlays: Overlay[]; boss?: Boss; split?: boolean; before?: Overlay[]; after?: Overlay[]; answer?: ZoneShape[]; options?: Preview[]; note?: string }
 
 export interface Option { t: string; ok?: boolean }
 export interface Question { prompt: string; options: Option[]; why: string; rule: string; src?: string }
@@ -172,5 +176,5 @@ export interface QuizItem {
 
 /* ---------- timeline ---------- */
 
-/** One row of the cheat-sheet timeline. Its categories come from the ability list (tlCats). */
+/** One row of the cheat-sheet timeline. Its categories come from the ability list (timelineCategories). */
 export interface TimelineEvent { t: string; n: string; job: (s: Slot) => string }

@@ -8,9 +8,9 @@
 import { bySlot, withSeed } from "../util";
 import { markRole, partyOf } from "../party";
 import { angOf, polar, rotOverlay, zoneCenter } from "../geometry";
-import { MAPS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, type WeaponRun, type Weapon, type WeaponType } from "./drills";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, type WeaponRun, type Weapon, type WeaponType } from "./drills";
 import { PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, lineTo, swordCross } from "./attacks";
-import type { Boss, Fig, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
+import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
 type Who = [string, MarkRole];
 const tag = (x: number, y: number, s: string): Overlay => ({t:"tag", x, y, s});
@@ -92,8 +92,8 @@ const youIn = (s: Slot, z: Zone, p?: Point): Preview => show([you(s, p ?? zoneCe
 
 /** One step of a map drill as a picture: its floor, boss and pieces, then what it hits and its
     answer zone, with you on your spot (on top of the boss's ring, which can cover a close spot). */
-function fromDrill(id: string, s: Slot, v: string | null = null, k = 0): Fig & {zone: Zone; hits: Overlay[]} {
-  const m = MAPS.find(x => x.id === id);
+function fromDrill(id: string, s: Slot, v: string | null = null, k = 0): Picture & {zone: Zone; hits: Overlay[]} {
+  const m = DRILLS.find(x => x.id === id);
   if(!m) throw new Error("missing drill " + id);
   const sc = m.build(s, v), st = sc.steps[k];
   if(!st.z) throw new Error(id + " step " + k + " has no fixed zone");
@@ -109,7 +109,7 @@ function jump(s: Slot, type: WeaponType, a: number) {
   const W: Weapon[] = [{a, p:atAngle(a), type}], R = buildRun(s, W), st = R.steps[0], b = R.states[1], st2 = buildRun(other(s), W).steps[0];
   if(!st.z || !st2.z) throw new Error("a weapon step has no zone");
   // The answer shows you on your spot, on top of the boss's ring: a close spot is under it.
-  const fig: Fig = {overlays:[guide(CENTER, [b.x, b.y]), ...R.overlays.filter(o => o.t !== "tag")], boss:b,
+  const fig: Picture = {overlays:[guide(CENTER, [b.x, b.y]), ...R.overlays.filter(o => o.t !== "tag")], boss:b,
     after:[...(st.reveal ?? []), you(s, st.stand ?? zoneCenter(st.z))], answer:[st.z]};
   return {fig, b, at:[b.x, b.y] as Point, zone:st.z, zoneOther:st2.z, hits:st.reveal ?? [], stand:st.stand, standOther:st2.stand};
 }
@@ -173,7 +173,7 @@ const AXE_HITS = [stackHit(TANKS_TOGETHER, 4), ...spreadHits(AXE_SPREAD)];
     one, and that `options` has one preview for each of its answers, in the question's order. */
 // TS note: Partial<Record<string, ...>> says any key may be missing, so a lookup returns
 // the function or undefined, and the caller must check before it calls it.
-export const MECH_FIGS: Partial<Record<string, (s: Slot) => Fig>> = {
+export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-raw-first": s => { const d = fromDrill("m-raw-scythe", s), north = cluster([50, 35], NONTANK, 3), all = clockRing(33);
     return {overlays:heldWeapon("scythe"), boss:BOSS, after:[...TANKS_APART, ...SCYTHE_CLEAVES, ...cluster([50, 66], NONTANK, 3)], answer:d.answer, options:[
       show([...SCYTHE_CLEAVES, ...TANKS_APART, ...cluster([50, 66], NONTANK, 3)]),

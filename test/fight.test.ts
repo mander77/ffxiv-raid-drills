@@ -1,7 +1,7 @@
 import { test, assert } from "vitest";
 import { buildFight } from "../src/data/fight";
 import { sec, clock } from "../src/time";
-import { MAPS } from "../src/data/drills";
+import { DRILLS } from "../src/data/drills";
 import { inZone, rotZone, zoneCenter } from "../src/geometry";
 import type { Slot, StepResult } from "../src/types";
 
@@ -54,13 +54,13 @@ test("the boss turns to the first weapon when his cast starts, at least 6 second
 });
 
 test("every drill has a place on the fight clock", () => {
-  const ids = new Set(MAPS.map(m => m.id)), seen = new Set<string>();
+  const ids = new Set(DRILLS.map(m => m.id)), seen = new Set<string>();
   for(let i = 0; i < 100; i++){
     const covered = buildFight("H1").segs.flatMap(g => g.drills);
     for(const id of covered){ assert.ok(ids.has(id), "the fight names a drill that does not exist: " + id); seen.add(id); }
   }
   // Two-way and Four-way Fireball take turns from fight to fight, so check over many fights.
-  for(const m of MAPS) assert.ok(seen.has(m.id), m.title + " has no place in the fight");
+  for(const m of DRILLS) assert.ok(seen.has(m.id), m.title + " has no place in the fight");
 });
 
 test("the arena is split from Flatliner until the Crown of Arcadia that joins it", () => {

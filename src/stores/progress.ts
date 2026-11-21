@@ -11,20 +11,20 @@ export interface Score {
 }
 
 /** The round on one tab: the answers so far and how many were right, for one slot, and the card
-    you were on, so the tab opens there again. `finished` is true after the last card. */
+    you were on (`current`), so the tab opens there again. `finished` is true after the last card. */
 export interface Round {
   slot: Slot | null;
   done: number;
   right: number;
-  card: string | null;
+  current: string | null;
   finished: boolean;
 }
 
-/** The tabs that count a round. */
-export type RoundTab = "mech" | "next";
+/** The tabs that count a round: Learn, Timeline and Practice. */
+export type RoundTab = "learn" | "timeline" | "practice";
 
-const NEW_ROUND: Round = { slot: null, done: 0, right: 0, card: null, finished: false };
-const NO_ROUNDS: Record<RoundTab, Round> = { mech: NEW_ROUND, next: NEW_ROUND };
+const NEW_ROUND: Round = { slot: null, done: 0, right: 0, current: null, finished: false };
+const NO_ROUNDS: Record<RoundTab, Round> = { learn: NEW_ROUND, timeline: NEW_ROUND, practice: NEW_ROUND };
 
 interface ProgressState {
   scores: Record<string, Score>;
@@ -33,7 +33,7 @@ interface ProgressState {
       belongs to one slot: an answer for another slot starts a new round. */
   record: (id: string, ok: boolean, tab: RoundTab, slot: Slot) => void;
   /** Remember the card you are on in a tab. */
-  visit: (tab: RoundTab, card: string) => void;
+  visit: (tab: RoundTab, current: string) => void;
   /** End the round of a tab, after its last card. */
   finish: (tab: RoundTab) => void;
   /** Start the round of a tab again, from its first card. */
@@ -56,11 +56,11 @@ export const useProgressStore = create<ProgressState>()(
             rounds: { ...st.rounds, [tab]: { ...round, done: round.done + 1, right: round.right + (ok ? 1 : 0) } },
           };
         }),
-      visit: (tab, card) =>
+      visit: (tab, current) =>
         set((st) =>
-          st.rounds[tab].card === card && !st.rounds[tab].finished
+          st.rounds[tab].current === current && !st.rounds[tab].finished
             ? st
-            : { rounds: { ...st.rounds, [tab]: { ...st.rounds[tab], card, finished: false } } },
+            : { rounds: { ...st.rounds, [tab]: { ...st.rounds[tab], current, finished: false } } },
         ),
       finish: (tab) => set((st) => ({ rounds: { ...st.rounds, [tab]: { ...st.rounds[tab], finished: true } } })),
       newRound: (tab) => set((st) => ({ rounds: { ...st.rounds, [tab]: NEW_ROUND } })),

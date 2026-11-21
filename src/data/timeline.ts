@@ -5,7 +5,7 @@ import type { TimelineEvent } from "../types";
 export const P1 = "Phase 1: Trophy Weapons", P2 = "Phase 2: Meteorain", P3 = "Phase 3: Arena Split", P4 = "Phase 4: Ecliptic Stampede";
 
 /* ---------- timeline (cactbot r11s timeline, rounded to the second) ---------- */
-export const TL: readonly TimelineEvent[] = [
+export const TIMELINE: readonly TimelineEvent[] = [
   {t:"0:11", n:"Crown of Arcadia", job:s=>"Physical raidwide. Mitigate it, then heal up."},
   {t:"0:18", n:"Raw Steel Trophy (axe or scythe)", job:s=>"Hits land at 0:24 to 0:25. Axe: tanks stack, you spread " + bySlot(s, {H1:"SSW", H2:"SSE"}) + " far out. Scythe: tanks spread, party stacks south."},
   {t:"0:38", n:"Trophy Weapons, then Assault Evolved", job:s=>"Weapon hits at 0:50, 0:55 and 1:00. The weapon he faces goes first, then clockwise. Every hit adds a vulnerability, so keep healing."},

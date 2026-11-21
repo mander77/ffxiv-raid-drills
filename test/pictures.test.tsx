@@ -1,20 +1,20 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { assert, test } from "vitest";
 import { WAYMARKS } from "../src/components/arena/Arena";
-import { FigPicture } from "../src/components/arena/FigPicture";
-import { MECH_FIGS } from "../src/data/figs";
-import { MECH } from "../src/data/questions";
-import type { Fig, Overlay, Preview, Slot } from "../src/types";
+import { LearnPicture } from "../src/components/arena/LearnPicture";
+import { LEARN_PICTURES } from "../src/data/pictures";
+import { LEARN_CARDS } from "../src/data/questions";
+import type { Overlay, Picture, Preview, Slot } from "../src/types";
 
 /** A Learn picture as SVG text. */
-const figSVG = (f: Fig, answered: boolean, label: string, preview?: Preview): string =>
-  renderToStaticMarkup(<FigPicture fig={f} answered={answered} label={label} preview={preview} />);
+const figSVG = (f: Picture, answered: boolean, label: string, preview?: Preview): string =>
+  renderToStaticMarkup(<LearnPicture fig={f} answered={answered} label={label} preview={preview} />);
 
 const SLOTS: Slot[] = ["H1", "H2"];
 
 test("every Mechanics question has an arena picture for both slots", () => {
-  for (const item of MECH) {
-    const make = MECH_FIGS[item.id];
+  for (const item of LEARN_CARDS) {
+    const make = LEARN_PICTURES[item.id];
     if (!make) throw new Error(`${item.id} has no picture`);
     for (const s of SLOTS) {
       const f = make(s),
@@ -28,9 +28,9 @@ test("every Mechanics question has an arena picture for both slots", () => {
 });
 
 test("every answer has a preview, and no preview looks like the right answer", () => {
-  for (const item of MECH)
+  for (const item of LEARN_CARDS)
     for (const s of SLOTS) {
-      const make = MECH_FIGS[item.id];
+      const make = LEARN_PICTURES[item.id];
       if (!make) continue;
       const f = make(s),
         answers = item.build(s).options;
@@ -62,9 +62,9 @@ const WAYMARK_BOXES: Box[] = WAYMARKS.map((w) => {
 
 test("no label hides under a waymark or the boss, runs off the arena, or covers another label", () => {
   const problems: string[] = [];
-  for (const item of MECH)
+  for (const item of LEARN_CARDS)
     for (const s of SLOTS) {
-      const make = MECH_FIGS[item.id];
+      const make = LEARN_PICTURES[item.id];
       if (!make) continue;
       const f = make(s);
       const views: Array<[string, Overlay[]]> = [
@@ -92,14 +92,14 @@ test("no label hides under a waymark or the boss, runs off the arena, or covers 
 });
 
 test("every picture belongs to a Mechanics question", () => {
-  const ids = new Set(MECH.map((m) => m.id));
-  for (const id of Object.keys(MECH_FIGS)) assert.ok(ids.has(id), `${id} is not a Mechanics question`);
+  const ids = new Set(LEARN_CARDS.map((m) => m.id));
+  for (const id of Object.keys(LEARN_PICTURES)) assert.ok(ids.has(id), `${id} is not a Mechanics question`);
 });
 
 test("the pictures are the same every time, so the answer cannot move after you pick", () => {
-  for (const item of MECH)
+  for (const item of LEARN_CARDS)
     for (const s of SLOTS) {
-      const make = MECH_FIGS[item.id];
+      const make = LEARN_PICTURES[item.id];
       if (make) assert.equal(figSVG(make(s), true, ""), figSVG(make(s), true, ""), item.id);
     }
 });

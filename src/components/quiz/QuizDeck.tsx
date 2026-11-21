@@ -2,11 +2,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect } from "react";
 import { Navigate, useNavigate, useParams } from "react-router";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { type RoundTab, useProgressStore } from "../../stores/progress";
 import { useSlotStore } from "../../stores/slot";
 import type { QuizItem } from "../../types";
 import { ChipRow } from "../ChipRow";
+import { RoundDone } from "../RoundDone";
 import { QuestionCard } from "./QuestionCard";
 
 /** A chip over the cards: its name, and the cards it covers, by id, in fight order. */
@@ -16,7 +16,7 @@ export interface ChipGroup {
 }
 
 export interface QuizDeckProps {
-  /** The tab, which is also the start of its address: /mech or /next. */
+  /** The tab, which is also the start of its address: /learn or /timeline. */
   tab: RoundTab;
   /** The cards, in fight order. */
   items: readonly QuizItem[];
@@ -29,7 +29,7 @@ export interface QuizDeckProps {
 }
 
 /** A tab of question cards: one card at a time, in fight order, with Back, Next and the chips.
-    The card is in the address (/mech/k-sword), so a link opens it. After the last card, the
+    The card is in the address (/learn/k-sword), so a link opens it. After the last card, the
     round ends with your score. */
 export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false }: QuizDeckProps) {
   const { card } = useParams();
@@ -51,7 +51,7 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
 
   const link = (id: string): string => `/${tab}/${id}`;
 
-  // /mech with no card: the round is done, or it opens on the card you were on, or the first one.
+  // /learn with no card: the round is done, or it opens on the card you were on, or the first one.
   if (card === undefined) {
     if (round.finished) {
       const mine = round.slot === slot;
@@ -66,7 +66,7 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
         />
       );
     }
-    return <Navigate to={link(round.card ?? items[0].id)} replace />;
+    return <Navigate to={link(round.current ?? items[0].id)} replace />;
   }
   // A card that does not exist: start from the first.
   if (!item) return <Navigate to={link(items[0].id)} replace />;
@@ -129,30 +129,5 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
       onAnswer={(ok) => record(item.id, ok, tab, slot)}
       onNext={goNext}
     />
-  );
-}
-
-interface RoundDoneProps {
-  right: number;
-  done: number;
-  onAgain: () => void;
-}
-
-/** The end of a round: how many you got right, and Go again. */
-function RoundDone({ right, done, onAgain }: RoundDoneProps) {
-  const pct = done ? Math.round((100 * right) / done) : 0;
-  return (
-    <Card className="mx-auto max-w-md">
-      <CardHeader>
-        <CardDescription>Round done</CardDescription>
-        <CardTitle className="text-2xl">
-          {right} of {done} right ({pct}%)
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">Your progress stays in this browser.</p>
-        <Button onClick={onAgain}>Go again</Button>
-      </CardContent>
-    </Card>
   );
 }

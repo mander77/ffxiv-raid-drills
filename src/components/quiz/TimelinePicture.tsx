@@ -1,9 +1,9 @@
-import { ENRAGE, PHASES, tlCats } from "../../data/abilities";
-import { TL } from "../../data/timeline";
+import { ENRAGE, PHASES, timelineCategories } from "../../data/abilities";
+import { TIMELINE } from "../../data/timeline";
 import { cn } from "../../lib/utils";
 import { clock, sec } from "../../time";
 import type { QuizItem } from "../../types";
-import { Marks } from "../Marks";
+import { CategoryDots } from "../CategoryDots";
 
 /** At least this many rows show after the one that just happened, and at most MAX_ROWS. */
 const MIN_ROWS = 5;
@@ -39,9 +39,9 @@ export interface TimelinePictureProps {
     shows it, and a strip of the four phases with where you are in the fight. Before the answer
     the coming rows show their bars and countdowns but not their names. */
 export function TimelinePicture({ row, answered, rightName }: TimelinePictureProps) {
-  const now = sec(TL[row].t);
-  const right = TL.findIndex((e, x) => x > row && e.n === rightName);
-  const last = Math.min(TL.length - 1, row + MAX_ROWS, Math.max(row + MIN_ROWS, right));
+  const now = sec(TIMELINE[row].t);
+  const right = TIMELINE.findIndex((e, x) => x > row && e.n === rightName);
+  const last = Math.min(TIMELINE.length - 1, row + MAX_ROWS, Math.max(row + MIN_ROWS, right));
   const phase = Math.max(
     0,
     STRIP.findIndex((p) => now >= p.start && now < p.end),
@@ -77,15 +77,15 @@ export function TimelinePicture({ row, answered, rightName }: TimelinePicturePro
       </p>
       {!answered && <p className="text-xs text-muted-foreground">Coming up: the names show after you answer.</p>}
       <ol aria-label="Fight timeline" className="space-y-1 text-sm">
-        <TimelineRow fill={1} name={TL[row].n} cats={tlCats(row)} when={TL[row].t} now />
+        <TimelineRow fill={1} name={TIMELINE[row].n} cats={timelineCategories(row)} when={TIMELINE[row].t} now />
         {rows.map((x) => {
-          const left = sec(TL[x].t) - now;
+          const left = sec(TIMELINE[x].t) - now;
           return (
             <TimelineRow
               key={x}
               fill={Math.max(0, Math.min(1, 1 - left / FILL_AT))}
-              name={answered ? TL[x].n : null}
-              cats={tlCats(x)}
+              name={answered ? TIMELINE[x].n : null}
+              cats={timelineCategories(x)}
               when={`in ${left < 60 ? `${left} s` : clock(left)}`}
               right={answered && x === right}
             />
@@ -101,7 +101,7 @@ interface TimelineRowProps {
   fill: number;
   /** The ability's name, or null to hide it until the answer. */
   name: string | null;
-  cats: ReturnType<typeof tlCats>;
+  cats: ReturnType<typeof timelineCategories>;
   when: string;
   /** The row that just happened. */
   now?: boolean;
@@ -129,7 +129,7 @@ function TimelineRow({ fill, name, cats, when, now = false, right = false }: Tim
           <span className="tracking-widest text-muted-foreground">? ? ?</span>
         ) : (
           <>
-            <Marks cats={cats} />
+            <CategoryDots cats={cats} />
             {name}
           </>
         )}

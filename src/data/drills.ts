@@ -1,9 +1,9 @@
 // Map drills: the arena scenes and the rules that decide each answer zone.
 import { bySlot, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
-import { DEG, unit, vadd, leftOf, angOf, inArena, zoneCenter, COMPASS, polar, dist } from "../geometry";
+import { DEG, unit, addVec, leftOf, angOf, inArena, zoneCenter, COMPASS, polar, dist } from "../geometry";
 import { HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
-import type { Boss, MapDrill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
+import type { Boss, Drill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
 /** One weapon in a jump run. `a` is its direction from the arena center, in degrees clockwise from north.
@@ -42,11 +42,11 @@ export function buildRun(s: Slot, W: Weapon[]): WeaponRun {
     if(w.type === "scythe"){
       const u = scytheAxis(w, i), d: Point = [u[1], -u[0]];
       // A turned scythe can face any way, so its label goes outward, clear of the waymarks.
-      const tag = w.axis ? vadd(w.p, unit([w.p[0] - 50, w.p[1] - 50]), 14) : vadd(w.p, d, -9);
+      const tag = w.axis ? addVec(w.p, unit([w.p[0] - 50, w.p[1] - 50]), 14) : addVec(w.p, d, -9);
       overlays.push({t:"scythe", spawn:i, x:w.p[0], y:w.p[1], ux:u[0], uy:u[1], dx:d[0], dy:d[1]}, {t:"tag", spawn:i, x:tag[0], y:tag[1], s:"SCYTHE"});
     } else {
       // A turned icon or the upright sword reaches farther, so the label sits farther out.
-      const out = vadd(w.p, unit([w.p[0] - 50, w.p[1] - 50]), w.axis ? 13 : w.type === "sword" ? 12.5 : 7.5);
+      const out = addVec(w.p, unit([w.p[0] - 50, w.p[1] - 50]), w.axis ? 13 : w.type === "sword" ? 12.5 : 7.5);
       const turn = w.axis ? {ux:w.axis[0], uy:w.axis[1]} : {};
       overlays.push({t:"tag", spawn:i, x:out[0], y:out[1], s:w.type.toUpperCase()}, {t:w.type, spawn:i, x:w.p[0], y:w.p[1], ...turn});
     }
@@ -57,12 +57,12 @@ export function buildRun(s: Slot, W: Weapon[]): WeaponRun {
     const where = w.where || COMPASS[Math.round(w.a / 45) % 8];
     let z: Zone, a: string, reveal: Overlay[], stand: Point | undefined;
     if(w.type === "axe"){
-      z = {c:vadd(P, unit([50 - P[0], 50 - P[1]]), 28), r:7};
+      z = {c:addVec(P, unit([50 - P[0], 50 - P[1]]), 28), r:7};
       a = "Axe, " + where + ": stack with the whole party in the middle, outside the axe AoE.";
       reveal = [axeHit(P)];
     } else if(w.type === "scythe"){
       // H1 at the butt end, H2 at the point end, as the scythe is drawn.
-      z = {c:vadd(P, scytheAxis(w, i), -9.5 * side), r:5};
+      z = {c:addVec(P, scytheAxis(w, i), -9.5 * side), r:5};
       a = "Scythe, " + where + ": close in at the " + bySlot(s, {H1:"butt (the handle end)", H2:"point (the blade end)"}) + " of the scythe.";
       // Proteans: a cone on every player, so each player takes a clock spot close around him.
       // The point and the butt (H2 and H1) are two of the eight spots, opposite each other.
@@ -80,8 +80,8 @@ export function buildRun(s: Slot, W: Weapon[]): WeaponRun {
       // moment you can see that you are safe. That is about 25 units (9.9 yalms) from him. The
       // sword's stack is a line from him through you, so the melee can stand closer in that line.
       const CLEAR = 5;
-      stand = vadd(vadd(P, d, -(HW + CLEAR)), sv, HW + CLEAR);
-      z = {fn, show:[{poly}], label:vadd(P, unit(vadd([-d[0], -d[1]], sv)), (HW + CLEAR) * Math.SQRT2 + 4)};
+      stand = addVec(addVec(P, d, -(HW + CLEAR)), sv, HW + CLEAR);
+      z = {fn, show:[{poly}], label:addVec(P, unit(addVec([-d[0], -d[1]], sv)), (HW + CLEAR) * Math.SQRT2 + 4)};
       a = "Sword, " + where + ": the pocket behind him on his " + own + ", on the side he jumped from, a few steps in from its inner corner. " + bySlot(s, {H1:"G1", H2:"G2"}) + " stacks on you.";
       reveal = swordCross(P, d);
     }
@@ -229,12 +229,12 @@ function nearestTo(t: Point, fn: (p: Point) => boolean): Point | null {
 const FIXED_SPREAD: {l: string; r: "T" | "D"; off: Point}[] = [
   {l:"MT", r:"T", off:[-15, -15]}, {l:"OT", r:"T", off:[15, -15]}, {l:"M1", r:"D", off:[-15, 15]}, {l:"M2", r:"D", off:[15, 15]}];
 /** The tank and melee spread spots around a boss at c. */
-const fixedAround = (c: Point): Array<{l: string; r: "T" | "D"; p: Point}> => FIXED_SPREAD.map(m => ({...m, p:vadd(c, m.off)}));
+const fixedAround = (c: Point): Array<{l: string; r: "T" | "D"; p: Point}> => FIXED_SPREAD.map(m => ({...m, p:addVec(c, m.off)}));
 const spreadMarks = (c: Point = CENTER): Overlay[] => fixedAround(c).map((m): Overlay => ({t:"mark", x:m.p[0], y:m.p[1], l:m.l, r:m.r}));
 export const FIXED_SPREAD_MARKS = spreadMarks();
 /** The open ground north, east, south and west of a boss at c, between the fixed spots. Any of
     them is a good spread spot. */
-const gapsAround = (c: Point): Point[] => ([[0, -33], [33, 0], [0, 33], [-33, 0]] as Point[]).map(o => vadd(c, o));
+const gapsAround = (c: Point): Point[] => ([[0, -33], [33, 0], [0, 33], [-33, 0]] as Point[]).map(o => addVec(c, o));
 const far = (p: Point, q: Point, d: number): boolean => dist(p, q) >= d;
 /** Degrees between two spots, as seen from the arena center (0 to 180). */
 const apart = (p: Point, q: Point): number => { const d = Math.abs(angOf([p[0] - 50, p[1] - 50]) - angOf([q[0] - 50, q[1] - 50])) % 360; return Math.min(d, 360 - d); };
@@ -413,7 +413,7 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: WeaponRun): Scene {
   const steps: Step[] = [
     // A look-ahead: you spot the first weapon now, so you know what to do when the puddles are
     // done, but you go to A for the first puddle, not to the weapon.
-    {q:"Before the puddles: which weapon goes first after Void Stardust? Click it.", z:{c:first.p, r:9}, look:true,
+    {q:"Before the puddles: which weapon goes first after Void Stardust? Click it.", z:{c:first.p, r:9}, lookAhead:true,
       a:"The " + first.type + ", " + where + ": its flat side is square to the boss. " +
         (run ? "A sword or scythe first means a run, so the stack or spread moves toward it." : "An axe first means the party stacks in the middle, so the usual spots work.")},
     ...voidSteps(s, spread, run ? first.p : null, CENTER, NORTH_START, safeSpot(A.steps[0])),
@@ -452,7 +452,7 @@ export function voidAgain(s: Slot, spread: boolean, boss: Boss): Scene {
 }
 
 /** True when a new run of this drill can look different: random parts, a variant or a turn. */
-export const changes = (m: MapDrill): boolean => Boolean(m.random || m.variants || m.rotate);
+export const changes = (m: Drill): boolean => Boolean(m.random || m.variants || m.rotate);
 
 /* ---------- map drills ---------- */
 export const BOSS: Boss = {x:50, y:50, f:0};
@@ -493,9 +493,9 @@ const SCYTHE_STACK: Zone = {
 // TypeScript would type t as plain string, and "puddle" would not fit the Overlay union.
 const NPUD = [22, 34, 46, 58, 70, 82].map((x): Overlay => ({t:"puddle", x, y:5, r:ATOMIC_R}));
 const SPUD = [18, 30, 42, 54, 66, 78].map((x): Overlay => ({t:"puddle", x, y:95, r:ATOMIC_R}));
-// TS note: the `MapDrill[]` annotation is what checks every drill below. Each build function
+// TS note: the `Drill[]` annotation is what checks every drill below. Each build function
 // must return a Scene, so a missing field or a misspelled one is a compile error.
-export const MAPS: readonly MapDrill[] = [
+export const DRILLS: readonly Drill[] = [
   {id:"m-raw-axe", order:2, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: axe",
     build:s=>({setup:"The boss pulls out an axe. The two tanks stack for a shared buster. The other six players each get an AoE, so everyone else spreads.",
       boss:BOSS, overlays:[...heldWeapon("axe"),{t:"mark",x:AXE_TANKS[0] - 3,y:AXE_TANKS[1],l:"MT",r:"T"},{t:"mark",x:AXE_TANKS[0] + 3,y:AXE_TANKS[1],l:"OT",r:"T"}],

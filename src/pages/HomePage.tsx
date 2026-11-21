@@ -2,10 +2,11 @@
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { FigPicture } from "../components/arena/FigPicture";
+import { LearnPicture } from "../components/arena/LearnPicture";
 import { PageContainer } from "../components/PageContainer";
-import { MECH_FIGS } from "../data/figs";
-import { MECH, NEXT_ITEMS } from "../data/questions";
+import { DRILLS } from "../data/drills";
+import { LEARN_PICTURES } from "../data/pictures";
+import { LEARN_CARDS, TIMELINE_CARDS } from "../data/questions";
 import { BOSSMOD, CACTBOT, WTFDIG } from "../data/sources";
 import { useSlotStore } from "../stores/slot";
 
@@ -24,8 +25,21 @@ interface StartCard {
 
 /** The tabs to start with, in order. Each rebuild step adds its tab. */
 const START: readonly StartCard[] = [
-  { path: "/mech", name: "Learn", step: "Step 1", about: "What each mechanic does, with a picture.", count: `${MECH.length} questions` },
-  { path: "/next", name: "Timeline", step: "Step 2", about: "Which mechanic comes next.", count: `${NEXT_ITEMS.length} questions` },
+  {
+    path: "/learn",
+    name: "Learn",
+    step: "Step 1",
+    about: "What each mechanic does, with a picture.",
+    count: `${LEARN_CARDS.length} questions`,
+  },
+  {
+    path: "/practice",
+    name: "Practice",
+    step: "Step 2",
+    about: "Click where you stand, one mechanic at a time.",
+    count: `${DRILLS.length} mechanics`,
+  },
+  { path: "/timeline", name: "Timeline", step: "Step 3", about: "Which mechanic comes next.", count: `${TIMELINE_CARDS.length} questions` },
   { path: "/sheet", name: "Cheat sheet", step: "Reference", about: "Everything on one page.", count: "One page" },
 ];
 
@@ -51,7 +65,7 @@ function OutLink({ href, children }: OutLinkProps) {
 
 export function HomePage() {
   const slot = useSlotStore((s) => s.slot);
-  const fig = MECH_FIGS[HERO_CARD]?.(slot);
+  const fig = LEARN_PICTURES[HERO_CARD]?.(slot);
   return (
     <main>
       <PageContainer className="space-y-10 py-6">
@@ -62,7 +76,7 @@ export function HomePage() {
           {fig && (
             <div className="shrink-0 rounded-lg bg-card p-1.5 shadow-md sm:w-60">
               <div className="overflow-hidden rounded-md max-sm:h-28">
-                <FigPicture
+                <LearnPicture
                   fig={fig}
                   answered
                   label="Raw Steel Trophy on the arena: your spot is the green area"

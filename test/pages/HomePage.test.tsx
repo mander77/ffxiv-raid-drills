@@ -15,7 +15,7 @@ test("Home links to the tabs that exist, in order, and shows your slot", () => {
     </MemoryRouter>,
   );
   const cards = screen.getAllByRole("listitem").map((li) => li.querySelector("a")?.getAttribute("href"));
-  assert.deepEqual(cards, ["/mech", "/next", "/sheet"]);
+  assert.deepEqual(cards, ["/learn", "/practice", "/timeline", "/sheet"]);
   assert.match(screen.getByText(/You are set as/).textContent ?? "", /You are set as H2./);
   assert.ok(screen.getByRole("img", { name: /your spot is the green area/ }));
   assert.ok(screen.getByRole("img", { name: /My character/ }));

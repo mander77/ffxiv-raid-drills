@@ -73,12 +73,26 @@ make sure that each one still matches the code before you start it.
     as `ring` and `tag`, never touch the rest of the page. The shared pieces (rule box, last
     answer, step chips, setup text, tally, chip row, HUD prompt) use shadcn/ui's Alert and Badge.
   - Rebuild 3 (#20): Home, Learn and Timeline are back. A card is in the address
-    (`/mech/k-sword`), and `/mech` alone opens the card you were on, or the first one. Your
+    (`/learn/k-sword`), and `/learn` alone opens the card you were on, or the first one. Your
     scores are in a Zustand store (`src/stores/progress.ts`) under "raid-drills-progress"; each
     tab's round count (right of done) is kept until you reload, and an answer for another slot
     starts a new round. Home's "Start here" cards link only to tabs that exist. On a phone the
     Lock in bar is fixed to the bottom of the screen once you pick an answer: a sticky bar would
     stay inside the answers' column, under the picture, off screen.
+  - Rebuild 4 (#21): Practice is back. The address always names the pattern
+    (`/practice/<mechanic>/<code>`): a mechanic with no code, or a broken one, gets a new code, and
+    Next mechanic and New pattern make a new one. The rules (build a pattern from its code, answer
+    a step, the phase after it, where the boss stands) are plain functions in
+    `src/lib/practice.ts`, with tests. The pictures and the boss's turns match the live site for
+    the same code. A try with Show me does not count in your score, as before. Choosing a spot on
+    the arena takes a pointer; the buttons around it all work from the keyboard.
+  - November 21: a naming clean-up, so one idea has one name (CLAUDE.md, "Words in the code").
+    The addresses and round names are the tabs' names (`/learn`, `/practice`, `/timeline`); a
+    Practice mechanic is a drill (`Drill`, `DRILLS`, `DrillRun`); Learn and Timeline cards are
+    `LEARN_CARDS` and `TIMELINE_CARDS`; "phase" means only a fight phase, so a step's state is its
+    status; `look` is a colour, so a look-ahead step is `Step.lookAhead`; the ability categories
+    are spelled out (`Category`, `CategoryDots`); `f1` (which rounds to 2 decimals) is `round2`.
+    Only names changed, never a value, in `src/data/` too, with the owner's OK.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what
@@ -132,7 +146,7 @@ Do not propose these again unless the owner brings them up.
   the boss does, not only where you stand.
 - After an answer, the right answer holds its explanation, and a wrong pick gets a "Your pick" tag.
 - Cards whose answer is your own spot show your role marker on the answer picture.
-- Back, Next and one chip per mechanic (`MECH_GROUPS` in `src/data/questions.ts`). A test makes sure
+- Back, Next and one chip per mechanic (`LEARN_GROUPS` in `src/data/questions.ts`). A test makes sure
   that each card is in exactly one chip.
 - On a phone, Lock in answer and Next stay in a bar at the bottom of the screen.
 
