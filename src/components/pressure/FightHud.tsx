@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useFightFrame } from "../../hooks/useFightFrame";
@@ -18,11 +18,17 @@ const PROMPT_LOOK: Record<Prompt["look"], string> = {
   later: "border-later bg-later-soft text-later",
 };
 
-/** The cast bar and the prompt over the arena. */
-export function FightHud() {
+export interface FightHudProps {
+  /** What goes between the cast bar and the prompt: the upcoming casts, on a wide screen. */
+  children?: ReactNode;
+}
+
+/** The cast bar and the prompt: over the arena on a phone, beside it on a wide screen. */
+export function FightHud({ children }: FightHudProps) {
   return (
     <div className="space-y-2">
       <CastBar />
+      {children}
       <FightPrompt />
     </div>
   );

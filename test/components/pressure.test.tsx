@@ -8,6 +8,7 @@ import { FightSettings } from "../../src/components/pressure/FightSettings";
 import { RunScore } from "../../src/components/pressure/RunScore";
 import { WatchDone } from "../../src/components/pressure/WatchDone";
 import { QuestionCard } from "../../src/components/quiz/QuestionCard";
+import { TooltipProvider } from "../../src/components/ui/tooltip";
 import { buildFight, type Choices, RANDOM } from "../../src/data/fight";
 import { LEARN_CARDS } from "../../src/data/questions";
 import type { StepResult } from "../../src/types";
@@ -53,7 +54,7 @@ async function openSettings(): Promise<void> {
 
 test("Settings: a pick and Set all to Random", async () => {
   const onChange = vi.fn<(c: Choices) => void>();
-  render(<FightSettings code="K7Q2" choices={{ ...RANDOM, ult: "cw" }} onChange={onChange} />);
+  render(<FightSettings code="K7Q2" choices={{ ...RANDOM, ult: "cw" }} onChange={onChange} />, { wrapper: TooltipProvider });
   await openSettings();
   const user = userEvent.setup();
   await user.click(within(screen.getByRole("radiogroup", { name: "Ecliptic Fireball" })).getByRole("radio", { name: "Two-way" }));
@@ -65,7 +66,7 @@ test("Settings: a pick and Set all to Random", async () => {
 
 test("Settings: a weapon order moves with the arrow keys", async () => {
   const onChange = vi.fn<(c: Choices) => void>();
-  render(<FightSettings code="K7Q2" choices={{ ...RANDOM, set1: "sword-axe-scythe" }} onChange={onChange} />);
+  render(<FightSettings code="K7Q2" choices={{ ...RANDOM, set1: "sword-axe-scythe" }} onChange={onChange} />, { wrapper: TooltipProvider });
   await openSettings();
   const card = screen.getByRole("listitem", { name: "Sword, number 1" });
   card.focus();
@@ -74,7 +75,7 @@ test("Settings: a weapon order moves with the arrow keys", async () => {
 });
 
 test("Settings: on Random, the weapon cards show ? and do not move", async () => {
-  render(<FightSettings code="K7Q2" choices={RANDOM} onChange={() => {}} />);
+  render(<FightSettings code="K7Q2" choices={RANDOM} onChange={() => {}} />, { wrapper: TooltipProvider });
   await openSettings();
   assert.equal(screen.getAllByRole("listitem", { name: "Sword, order random" }).length, 2);
 });
@@ -105,7 +106,7 @@ test("after watching: run the same fight or watch again", async () => {
 });
 
 test("Settings is a sheet: its button opens it, and Done closes it and gives the focus back", async () => {
-  render(<FightSettings code="K7Q2" choices={RANDOM} onChange={() => {}} />);
+  render(<FightSettings code="K7Q2" choices={RANDOM} onChange={() => {}} />, { wrapper: TooltipProvider });
   await openSettings();
   assert.ok(screen.getByRole("dialog", { name: "Fight pattern" }));
   await userEvent.setup().click(screen.getByRole("button", { name: "Done" }));

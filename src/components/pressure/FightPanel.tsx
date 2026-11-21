@@ -21,26 +21,42 @@ export interface FightPanelProps {
   onGoTo: (g: FightSeg) => void;
   /** Watch the spawns of the mechanic again. */
   onSpawns: () => void;
+  /** Show the clock and the fight timeline at the top (a narrow screen). On a wide screen they sit
+      under the cast bar instead (FightUpcoming). */
+  timeline?: boolean;
 }
 
 /** The panel beside the player: the clock, the fight timeline, then the mechanic on the arena.
     Its setup folds after the first hit, the steps show as chips, and at the end the rule shows
     with the way on to the next mechanic. Between mechanics: the next mechanic and the next ability. */
-export function FightPanel({ view: v, fight, speed, onGoTo, onSpawns }: FightPanelProps) {
+export function FightPanel({ view: v, fight, speed, onGoTo, onSpawns, timeline = true }: FightPanelProps) {
   const g = v.si >= 0 ? fight.segs[v.si] : null;
   return (
     <section aria-label="The right moves" className="space-y-4">
-      <p className="flex gap-2 text-sm text-muted-foreground">
-        <span className="font-semibold text-foreground">The right moves</span>
-        <Clock /> · {speed}x
-      </p>
-      <FightTimeline />
+      {timeline && <FightUpcoming speed={speed} />}
       {g ? (
         <Mechanic view={v} fight={fight} g={g} onGoTo={onGoTo} onSpawns={onSpawns} />
       ) : (
         <Between paused={v.paused} fight={fight} onGoTo={onGoTo} />
       )}
     </section>
+  );
+}
+
+export interface FightUpcomingProps {
+  speed: number;
+}
+
+/** The clock and the speed, then the fight timeline: what the boss casts next. */
+export function FightUpcoming({ speed }: FightUpcomingProps) {
+  return (
+    <div className="space-y-2">
+      <p className="flex gap-2 text-sm text-muted-foreground">
+        <span className="font-semibold text-foreground">The right moves</span>
+        <Clock /> · {speed}x
+      </p>
+      <FightTimeline />
+    </div>
   );
 }
 

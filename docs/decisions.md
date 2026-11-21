@@ -154,6 +154,11 @@ make sure that each one still matches the code before you start it.
     the cast bar, the prompt and the controls sit beside it. The countdown ring stays on the
     arena, around the boss. At 1280 x 800 the arena went from 494 to about 600 px. Three columns
     were turned down: the height limits the arena, so a third column would only narrow it.
+  - The player's controls (owner's choice): one slim row under the arena, like a video player:
+    play, the slider, the time, a speed menu, and icon buttons with tooltips for Start over, New
+    fight and Settings; the keys are in the play button's tooltip. Beside the arena: the cast
+    bar with the casts coming up under it, the prompt, then the mechanic, which scrolls in its
+    own box when long. The page does not scroll at 1280 x 800.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what

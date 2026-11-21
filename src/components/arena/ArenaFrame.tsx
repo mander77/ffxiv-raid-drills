@@ -8,8 +8,9 @@ const ARENA_MAX = 720;
 /** The smallest an arena gets, in pixels, however little room the screen has. On a phone this is
     more than the column, so the arena fills the width there. The app's choice. */
 const ARENA_MIN = 360;
-/** The room left at the bottom of the screen under an arena, in pixels. The app's choice. */
-const SCREEN_MARGIN = 16;
+/** The room left at the bottom of the screen under an arena, in pixels: the page's bottom padding
+    (py-6 on every page), so an arena at the end of the page does not make it scroll. */
+const SCREEN_MARGIN = 24;
 
 export interface ArenaFrameProps {
   children: ReactNode;

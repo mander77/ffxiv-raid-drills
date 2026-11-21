@@ -27,7 +27,7 @@ import { ArenaFrame } from "../arena/ArenaFrame";
 import { CategoryDots } from "../CategoryDots";
 import { FightArena, type ShownHit } from "./FightArena";
 import { FightHud } from "./FightHud";
-import { FightPanel } from "./FightPanel";
+import { FightPanel, FightUpcoming } from "./FightPanel";
 import { FightPlayBar } from "./FightPlayBar";
 
 export interface FightScreenProps {
@@ -219,9 +219,9 @@ export function FightScreen({
   }, []);
 
   const arena = (
-    // The whole arena fits on the screen, with room for the run's bar under it when the bar is
-    // under it (on a narrower screen).
-    <ArenaFrame below={mode === "run" && !wide ? RUN_BAR_ROOM : 0}>
+    // The whole arena fits on the screen, with room for what sits under it: the player's play bar,
+    // or the run's bar on a narrower screen.
+    <ArenaFrame below={mode === "watch" ? PLAY_BAR_ROOM : wide ? 0 : RUN_BAR_ROOM}>
       <FightArena
         view={view}
         slot={slot}
@@ -261,50 +261,87 @@ export function FightScreen({
     </ArenaFrame>
   );
 
+  const runBar = (
+    <div className="flex flex-wrap items-center gap-3">
+      <RunProgress />
+      <Button variant="outline" onClick={togglePause}>
+        {view.look ? "Go" : view.paused ? "Resume" : "Pause"}
+      </Button>
+      <Button variant="outline" onClick={() => onQuit?.(sim.current)}>
+        Quit
+      </Button>
+    </div>
+  );
+  const playBar = (
+    <FightPlayBar
+      end={fight.end}
+      marks={fight.segs.map((g) => g.from)}
+      paused={view.paused}
+      speed={speed}
+      onPlay={togglePause}
+      onSeek={seekTo}
+      onSpeed={(v) => onSpeed?.(v)}
+      settings={settings}
+      onRestart={restart}
+      onNewFight={() => onNewFight?.(sim.current.t)}
+    />
+  );
+
   return (
     <FightFrameContext value={frames}>
-      {/* On a wide screen the arena has the left column to itself, from the top, so it can use the
-          screen's whole height; the cast bar, the prompt and the controls sit beside it. On a
-          narrower screen they stack: the cast bar and prompt, the arena, then the controls. */}
-      <div className="grid grid-cols-1 gap-x-6 gap-y-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:grid-rows-[auto_1fr]">
-        <div className="min-w-0 lg:col-start-2 lg:row-start-1">
-          <FightHud />
+      {wide ? (
+        // A wide screen: the arena on the left, as large as the screen allows, with the player's slim
+        // play bar under it. Beside it: the cast bar, the casts coming up and the prompt, then the
+        // mechanic. The side column is as tall as the arena column, and only the mechanic scrolls
+        // when its text is long, so the page never does.
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,22rem)] gap-x-6">
+          <div className="min-w-0 space-y-3">
+            {arena}
+            {mode === "watch" && playBar}
+          </div>
+          <div className="relative min-w-0">
+            <div className="absolute inset-0 flex flex-col gap-4">
+              <FightHud>{mode === "watch" && <FightUpcoming speed={speed} />}</FightHud>
+              {mode === "run" ? (
+                runBar
+              ) : (
+                <div className="min-h-0 flex-1 overflow-y-auto">
+                  <FightPanel
+                    view={view}
+                    fight={fight}
+                    speed={speed}
+                    timeline={false}
+                    onGoTo={goToSeg}
+                    onSpawns={() => setReplays((n) => n + 1)}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="min-w-0 lg:col-start-1 lg:row-span-2 lg:row-start-1">{arena}</div>
-        {mode === "run" ? (
-          <div className="flex min-w-0 flex-wrap items-center gap-3 self-start lg:col-start-2">
-            <RunProgress />
-            <Button variant="outline" onClick={togglePause}>
-              {view.look ? "Go" : view.paused ? "Resume" : "Pause"}
-            </Button>
-            <Button variant="outline" onClick={() => onQuit?.(sim.current)}>
-              Quit
-            </Button>
-          </div>
-        ) : (
-          <div className="min-w-0 space-y-4 lg:col-start-2">
-            <FightPlayBar
-              end={fight.end}
-              marks={fight.segs.map((g) => g.from)}
-              paused={view.paused}
-              speed={speed}
-              onPlay={togglePause}
-              onSeek={seekTo}
-              onSpeed={(v) => onSpeed?.(v)}
-              settings={settings}
-              onRestart={restart}
-              onNewFight={() => onNewFight?.(sim.current.t)}
-            />
-            <FightPanel view={view} fight={fight} speed={speed} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />
-          </div>
-        )}
-      </div>
+      ) : (
+        // A narrower screen: everything in one column, the cast bar and prompt over the arena.
+        <div className="space-y-3">
+          <FightHud />
+          {arena}
+          {mode === "run" ? (
+            runBar
+          ) : (
+            <>
+              {playBar}
+              <FightPanel view={view} fight={fight} speed={speed} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />
+            </>
+          )}
+        </div>
+      )}
     </FightFrameContext>
   );
 }
 
-/** The room for the run's bar under the arena, in pixels. The app's choice. */
+/** The room under the arena for the run's bar or the player's play bar, with the gap above it, in
+    pixels. The app's choice. */
 const RUN_BAR_ROOM = 48;
+const PLAY_BAR_ROOM = 64;
 
 interface HitLabelProps {
   hit: ShownHit;

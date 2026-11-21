@@ -1,4 +1,4 @@
-import { GripVertical } from "lucide-react";
+import { GripVertical, Settings2 } from "lucide-react";
 import { type KeyboardEvent, type PointerEvent, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { WeaponType } from "../../data/drills";
 import { CHOICE_ROWS, type Choices, choicesText, cleanChoices, RANDOM } from "../../data/fight";
@@ -34,11 +35,16 @@ export function FightSettings({ code, choices, onChange }: FightSettingsProps) {
   const set = (key: string, value: string): void => onChange(cleanChoices({ ...choices, [key]: value }));
   return (
     <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="sm">
-          Settings
-        </Button>
-      </SheetTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="Settings">
+              <Settings2 aria-hidden="true" />
+            </Button>
+          </SheetTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Settings: the fight pattern</TooltipContent>
+      </Tooltip>
       <SheetContent side={wide ? "right" : "bottom"} className={cn(!wide && "max-h-[85dvh]")}>
         <SheetHeader>
           <SheetTitle>Fight pattern</SheetTitle>

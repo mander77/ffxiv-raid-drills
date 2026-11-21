@@ -4,6 +4,7 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, assert, beforeAll, beforeEach, test } from "vitest";
+import { TooltipProvider } from "../../src/components/ui/tooltip";
 import { RANDOM } from "../../src/data/fight";
 import { playerLink } from "../../src/lib/pressure";
 import { PressurePage } from "../../src/pages/PressurePage";
@@ -33,6 +34,8 @@ function open(path: string): void {
       </Routes>
       <Where />
     </MemoryRouter>,
+    // The app gives every tooltip one provider (App.tsx); the page needs it too.
+    { wrapper: TooltipProvider },
   );
 }
 const where = (): string | null => screen.getByTestId("where").textContent;

@@ -32,7 +32,7 @@ export function DrillList({ items, current, className }: DrillListProps) {
     // isolate: the sticky phase headings stack inside the list, never over the page header.
     <nav
       aria-label="Mechanics"
-      className={cn("isolate max-h-[calc(100vh-12rem)] overflow-y-auto rounded-xl border bg-card p-2", className)}
+      className={cn("isolate max-h-[calc(100dvh-12.5rem)] overflow-y-auto rounded-xl border bg-card p-2", className)}
     >
       {phases.map((ph) => {
         const [num, name = ""] = ph.name.split(": ");
