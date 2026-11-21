@@ -1,7 +1,7 @@
 import type { Fig, Preview } from "../../types";
 import { Arena, pieceLayers } from "./Arena";
 import { BossMark } from "./BossMark";
-import { ZoneMark } from "./ZoneMark";
+import { ZoneArea } from "./ZoneArea";
 
 export interface FigPictureProps {
   fig: Fig;
@@ -21,9 +21,9 @@ export function FigPicture({ fig: f, answered, label, preview, className }: FigP
   const extra = answered ? (f.after ?? []) : preview ? preview.pieces : (f.before ?? []);
   const zones = answered
     ? // biome-ignore lint/suspicious/noArrayIndexKey: the zones of a picture never change order.
-      (f.answer ?? []).map((z, i) => <ZoneMark key={i} z={z} cls="ok" />)
+      (f.answer ?? []).map((z, i) => <ZoneArea key={i} z={z} cls="ok" />)
     : // biome-ignore lint/suspicious/noArrayIndexKey: the zones of a picture never change order.
-      (preview?.zones ?? []).map((z, i) => <ZoneMark key={i} z={z} cls="pick" />);
+      (preview?.zones ?? []).map((z, i) => <ZoneArea key={i} z={z} cls="pick" />);
   return (
     <Arena
       label={label}

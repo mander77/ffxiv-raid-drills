@@ -7,8 +7,8 @@ import type { Overlay, Point, Scene, StepResult } from "../../types";
 import { Arena, pieceLayers } from "./Arena";
 import { hitsFirst, Shape } from "./Shape";
 import { TurningBoss } from "./TurningBoss";
+import { ZoneArea } from "./ZoneArea";
 import { ZoneLabel } from "./ZoneLabel";
-import { ZoneMark } from "./ZoneMark";
 
 export interface PracticeArenaProps {
   scene: Scene;
@@ -126,8 +126,8 @@ export function PracticeArena({ scene: sc, k, results, showLast, hint, onPointCl
         ),
         zones: (
           <>
-            {last && lastStep && <ZoneMark z={last.z} cls={lastStep.look ? "later" : last.ok ? "ok" : "bad"} />}
-            {hintZone && hintStep && <ZoneMark z={hintZone} cls={hintStep.look ? "later" : "pick"} />}
+            {last && lastStep && <ZoneArea z={last.z} cls={lastStep.look ? "later" : last.ok ? "ok" : "bad"} />}
+            {hintZone && hintStep && <ZoneArea z={hintZone} cls={hintStep.look ? "later" : "pick"} />}
           </>
         ),
         boss: boss && <TurningBoss boss={boss} />,

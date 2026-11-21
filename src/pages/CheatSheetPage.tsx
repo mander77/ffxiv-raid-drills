@@ -10,7 +10,7 @@ import { Arena } from "../components/arena/Arena";
 import { ArenaLabel } from "../components/arena/ArenaLabel";
 import { BossMark } from "../components/arena/BossMark";
 import { Shape } from "../components/arena/Shape";
-import { ZoneMark } from "../components/arena/ZoneMark";
+import { ZoneArea } from "../components/arena/ZoneArea";
 import { CatKey } from "../components/CatKey";
 import { catNames, Marks } from "../components/Marks";
 import { PageContainer } from "../components/PageContainer";
@@ -52,8 +52,8 @@ function SwordExample({ slot, className }: SwordExampleProps) {
         ground: swordCross(P, d).map((o, i) => <Shape key={i} o={o} />),
         zones: (
           <>
-            <ZoneMark z={{ poly: pocket(1) }} cls={mine === 1 ? "ok" : "other"} />
-            <ZoneMark z={{ poly: pocket(-1) }} cls={mine === -1 ? "ok" : "other"} />
+            <ZoneArea z={{ poly: pocket(1) }} cls={mine === 1 ? "ok" : "other"} />
+            <ZoneArea z={{ poly: pocket(-1) }} cls={mine === -1 ? "ok" : "other"} />
           </>
         ),
         // Where he stood in the middle, his jump, and where he lands.

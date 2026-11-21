@@ -1,7 +1,7 @@
 import { f1 } from "../../geometry";
 import type { ZoneShape } from "../../types";
 
-export interface ZoneMarkProps {
+export interface ZoneAreaProps {
   z: ZoneShape;
   /** The look: "ok" (the right spot, green), "pick" (a preview or "Go here", blue), "other" (the
       other slot's spot, grey), "later" (saved for later, purple) or "hit" (red). */
@@ -10,13 +10,13 @@ export interface ZoneMarkProps {
 
 /** A spot on the arena: a circle, a rectangle or a polygon. A zone decided by a rule draws its
     `show` shapes, each in its own look if it has one. */
-export function ZoneMark({ z, cls }: ZoneMarkProps) {
+export function ZoneArea({ z, cls }: ZoneAreaProps) {
   if ("fn" in z)
     return (
       <>
         {z.show.map((sh, i) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: the shapes of a zone never change order.
-          <ZoneMark key={i} z={sh} cls={sh.cls || cls} />
+          <ZoneArea key={i} z={sh} cls={sh.cls || cls} />
         ))}
       </>
     );
