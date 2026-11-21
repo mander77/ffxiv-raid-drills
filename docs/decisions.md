@@ -28,6 +28,11 @@ make sure that each one still matches the code before you start it.
   it one scrolling page or one mechanic at a time?
 - Issues #18 to #22, label "rebuild": rebuild the site in React, one step per issue and per
   branch, in order. Each step replaces some old screens; the old screens keep working until then.
+  - Why: the owner set new long-term goals. The site must be easy to maintain, simple, fast and
+    the same in every browser, and it should use trusted standard libraries over home-made code.
+    The owner was fine with a full rebuild, so React won as the most widely known choice.
+    Tailwind and shadcn/ui replace the hand-written CSS and controls, and Playwright tests in
+    Chromium, Firefox and WebKit check every browser.
   - November 21: the owner switched from the Preact plan to this rebuild. Pull request #17
     (Preact phase 2) was closed without a merge, and issues #5 to #10 were closed as not
     planned. Phases 0 and 1 of the Preact plan were published; Rebuild 1 replaced phase 1's
