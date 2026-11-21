@@ -19,6 +19,7 @@
     --arena-ok: #1b7448;
     --arena-pick: #1c6fc4;
     --arena-later: #7048e8;
+    --arena-miss: #a8261d;
     --arena-text: #131a2b;
     --arena-text-2: #465166;
     --arena-tank: #2d58b0;
@@ -328,9 +329,100 @@
     dominant-baseline: central;
   }
 
+  /* The live arena in Practice: click to answer; once the mechanic is done it stops taking clicks. */
+  .arena.live {
+    cursor: crosshair;
+    touch-action: manipulation;
+    user-select: none;
+  }
+  .arena.live.locked {
+    cursor: default;
+  }
+  /* After a wrong click the right area shows in a lighter green. */
+  .arena .zone.bad {
+    fill: rgb(27 116 72 / 0.16);
+    stroke: var(--arena-ok);
+  }
+  /* Your click: a dot with a ring, red when the spot was wrong. */
+  .arena .pick .dot {
+    fill: var(--arena-text);
+  }
+  .arena .pick .halo {
+    fill: none;
+    stroke: var(--arena-text);
+    stroke-width: 0.55;
+  }
+  .arena .pick.bad .dot {
+    fill: var(--arena-miss);
+  }
+  .arena .pick.bad .halo {
+    stroke: var(--arena-miss);
+  }
+  /* A puddle you dropped. When it goes off, it fades out. */
+  .arena .drop {
+    fill: var(--arena-aoe-fill);
+    stroke: var(--arena-aoe);
+    stroke-width: 0.35;
+  }
+  .arena .drop.fading {
+    animation: arena-drop-fade 0.6s ease-out forwards;
+  }
+  /* The weapons: each one fades once it has resolved. In a mechanic that shows the spawns, they
+     appear one at a time, with their order numbered when motion is reduced. */
+  .arena .spawn {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: opacity 0.25s;
+  }
+  .arena.play .spawn {
+    animation: arena-spawn-in 0.35s ease-out both;
+  }
+  .arena .spawn.gone {
+    opacity: 0.15;
+  }
+  .arena .spawn.later {
+    display: none;
+  }
+  .arena.play .spawn.gone {
+    animation: none;
+  }
+  .arena .ord {
+    display: none;
+    fill: var(--arena-text);
+    font-family: var(--arena-mono);
+    font-size: 3px;
+    font-weight: 500;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .arena .turn {
       transition: none;
     }
+    .arena .drop.fading {
+      animation: none;
+      opacity: 0;
+    }
+    .arena.play .spawn {
+      animation: none;
+    }
+    .arena .ord {
+      display: inline;
+    }
+  }
+}
+
+@keyframes arena-drop-fade {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes arena-spawn-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }

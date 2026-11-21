@@ -1,7 +1,7 @@
 import "./arena.css";
-import { type ReactNode, useId } from "react";
+import { type MouseEvent, type ReactNode, useId } from "react";
 import { cn } from "@/lib/utils";
-import type { Overlay } from "../../types";
+import type { Overlay, Point } from "../../types";
 import { hitsFirst, Shape } from "./Shape";
 
 /** The layers of an arena picture, from the bottom up. Every picture draws in this order, so a
@@ -58,18 +58,29 @@ export interface ArenaProps {
   /** The arena split down the middle, with the void between the halves. */
   split?: boolean;
   className?: string;
+  /** Called with the spot you click, in arena units (0 to 100 on each side). */
+  onPointClick?: (p: Point) => void;
 }
 
 /** An arena picture: the floor, the compass, the waymarks, then one group per layer in LAYERS order.
     The arena is 100 by 100 units, with a little room around it for the compass. */
-export function Arena({ label, layers, split = false, className }: ArenaProps) {
+export function Arena({ label, layers, split = false, className, onPointClick }: ArenaProps) {
   // Each picture gets its own ids, so two pictures on one page never share a clip or a pattern.
   const id = useId();
   const clip = `${id}-clip`;
   const tiles = `${id}-tiles`;
   const all: Partial<Record<Layer, ReactNode>> = { ...layers, waymarks: <Waymarks /> };
   return (
-    <svg className={cn("arena", className)} aria-label={label} viewBox="-4 -6 108 110" role="img">
+    // Choosing a spot on the arena is a pointing task with no keyboard form; the page's buttons
+    // (Show me, Next step, Again) all work from the keyboard.
+    // biome-ignore lint/a11y/useKeyWithClickEvents: a click picks a spot on a map, which keys cannot.
+    <svg
+      className={cn("arena", className)}
+      aria-label={label}
+      viewBox="-4 -6 108 110"
+      role="img"
+      onClick={onPointClick && ((e) => onPointClick(toArena(e)))}
+    >
       <defs>
         <clipPath id={clip}>
           <rect x="0" y="0" width="100" height="100" />
@@ -92,6 +103,15 @@ export function Arena({ label, layers, split = false, className }: ArenaProps) {
       ))}
     </svg>
   );
+}
+
+/** The spot of a click on the picture, in arena units. The screen matrix of the svg turns page
+    pixels into its viewBox units, whatever size the picture has on screen. */
+function toArena(e: MouseEvent<SVGSVGElement>): Point {
+  const ctm = e.currentTarget.getScreenCTM();
+  if (!ctm) return [Number.NaN, Number.NaN];
+  const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
+  return [q.x, q.y];
 }
 
 /** Overlays sorted into their layers: name tags are labels, role marks are marks, and the rest is

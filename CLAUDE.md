@@ -42,11 +42,12 @@ On the `rebuild` branch:
 |-----|-------|--------------|
 | Home | `/` | An arena picture from a Learn card, "Start here" cards, and About me. |
 | Learn | `/mech/<card>` | Quiz cards with arena pictures. Pick an answer to see it, then Lock in. Back, Next and one chip per mechanic. |
+| Practice | `/map/<mechanic>/<code>` | Click where you stand, one mechanic at a time. Show me, Again, New pattern. The code names the pattern. |
 | Timeline | `/next/<card>` | Which mechanic comes next, with a cactbot-style list. |
 | Cheat sheet | `/sheet` | One line per mechanic, the timeline for your role, sources and your progress. |
 
-Any other address opens Home. The other tabs come back one rebuild step at a time: Practice
-(#21), and Pressure with the full fight (#22). The
+Any other address opens Home. Pressure, with the full fight, comes back in the last rebuild step
+(#22). The
 live site on `main` still has them all, and git history keeps their old code (`src/views/`).
 
 The slot switch is in the header: the role (only Healer works today; the others show "not yet
@@ -95,16 +96,20 @@ src/app.css          Tailwind and the standard shadcn/ui theme, the ability cate
 src/tabs.ts          the tabs: path, label and one-line intro; tabOf
 src/share.ts         sharing the address of the page
 src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser
-src/stores/progress.ts  your scores (kept in the browser) and each tab's round
+src/stores/progress.ts  your scores (kept in the browser) and the round of Learn, Practice and Timeline
 src/components/      React components: Header, PageContainer, SlotSwitch, ShareButton, TabNav,
                      Marks, CatKey,
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
                      StepChips, SetupText, Tally, ChipRow, HudPrompt
-src/components/arena/  the arena pictures: Arena (floor, waymarks, layers), Shape (one attack,
-                     weapon or mark), BossMark, ZoneMark, FigPicture (a Learn picture), arena.css
+src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, clicks), Shape (one
+                     attack, weapon or mark), BossMark, ZoneMark, ZoneTag, FigPicture (a Learn
+                     picture), PracticeArena (the live arena), TurningBoss, arena.css
 src/components/ui/   shadcn/ui components, as the shadcn CLI writes them
-src/pages/           React pages, one per route: HomePage (/), LearnPage (/mech), TimelinePage
-                     (/next), CheatSheetPage (/sheet)
+src/pages/           React pages, one per route: HomePage (/), LearnPage (/mech), PracticePage
+                     (/map), TimelinePage (/next), CheatSheetPage (/sheet)
+src/components/practice/  Practice: MechanicList (wide screens), MechanicNav (phones),
+                     PracticeDrill (one mechanic's run: clicks, Show me, the prompt and panel)
+src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep, phaseAfter, bossFor
 src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round), QuestionCard
                      (answers, previews, Lock in, keys), TimelinePicture
 src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab
@@ -256,8 +261,8 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
 - Issue #2: a reference view of every mechanic in fight order, with the site's diagrams. Two
   questions are open for the owner. Ask them before you build it.
 - Issues #18 to #22 (label "rebuild"): rebuild the site in React on the `rebuild` branch, one
-  step per issue and per branch, in order. Rebuilds 1 to 3 (#18 to #20) are done, so the next one is
-  Rebuild 4 (#21). Each step brings its tabs back; the old code is in git history on `main`.
+  step per issue and per branch, in order. Rebuilds 1 to 4 (#18 to #21) are done, so the next one is
+  Rebuild 5 (#22). Each step brings its tabs back; the old code is in git history on `main`.
   `docs/decisions.md` has the decisions behind the plan.
 - Issue #11: make the repository self-contained, so a clone plus one step gives every tool. Three
   questions are open for the owner.

@@ -79,6 +79,13 @@ make sure that each one still matches the code before you start it.
     starts a new round. Home's "Start here" cards link only to tabs that exist. On a phone the
     Lock in bar is fixed to the bottom of the screen once you pick an answer: a sticky bar would
     stay inside the answers' column, under the picture, off screen.
+  - Rebuild 4 (#21): Practice is back. The address always names the pattern
+    (`/map/<mechanic>/<code>`): a mechanic with no code, or a broken one, gets a new code, and
+    Next mechanic and New pattern make a new one. The rules (build a pattern from its code, answer
+    a step, the phase after it, where the boss stands) are plain functions in
+    `src/lib/practice.ts`, with tests. The pictures and the boss's turns match the live site for
+    the same code. A try with Show me does not count in your score, as before. Choosing a spot on
+    the arena takes a pointer; the buttons around it all work from the keyboard.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what

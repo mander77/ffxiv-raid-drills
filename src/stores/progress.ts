@@ -20,11 +20,11 @@ export interface Round {
   finished: boolean;
 }
 
-/** The tabs that count a round. */
-export type RoundTab = "mech" | "next";
+/** The tabs that count a round: Learn, Timeline and Practice. */
+export type RoundTab = "mech" | "next" | "map";
 
 const NEW_ROUND: Round = { slot: null, done: 0, right: 0, card: null, finished: false };
-const NO_ROUNDS: Record<RoundTab, Round> = { mech: NEW_ROUND, next: NEW_ROUND };
+const NO_ROUNDS: Record<RoundTab, Round> = { mech: NEW_ROUND, next: NEW_ROUND, map: NEW_ROUND };
 
 interface ProgressState {
   scores: Record<string, Score>;

@@ -22,7 +22,8 @@
       "vite.config.ts",
       "playwright.config.ts",
       "test/figs.test.tsx",
-      "test/stores/**"
+      "test/stores/**",
+      "test/lib/**"
     ]
   },
   "formatter": {

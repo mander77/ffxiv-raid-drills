@@ -2,11 +2,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect } from "react";
 import { Navigate, useNavigate, useParams } from "react-router";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { type RoundTab, useProgressStore } from "../../stores/progress";
 import { useSlotStore } from "../../stores/slot";
 import type { QuizItem } from "../../types";
 import { ChipRow } from "../ChipRow";
+import { RoundDone } from "../RoundDone";
 import { QuestionCard } from "./QuestionCard";
 
 /** A chip over the cards: its name, and the cards it covers, by id, in fight order. */
@@ -129,30 +129,5 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
       onAnswer={(ok) => record(item.id, ok, tab, slot)}
       onNext={goNext}
     />
-  );
-}
-
-interface RoundDoneProps {
-  right: number;
-  done: number;
-  onAgain: () => void;
-}
-
-/** The end of a round: how many you got right, and Go again. */
-function RoundDone({ right, done, onAgain }: RoundDoneProps) {
-  const pct = done ? Math.round((100 * right) / done) : 0;
-  return (
-    <Card className="mx-auto max-w-md">
-      <CardHeader>
-        <CardDescription>Round done</CardDescription>
-        <CardTitle className="text-2xl">
-          {right} of {done} right ({pct}%)
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">Your progress stays in this browser.</p>
-        <Button onClick={onAgain}>Go again</Button>
-      </CardContent>
-    </Card>
   );
 }

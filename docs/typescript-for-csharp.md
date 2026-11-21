@@ -33,7 +33,7 @@ C# keeps type information at run time. TypeScript does not. When the code runs, 
 - `readonly T[]`. A list the code cannot change: no push, no new entries. The closest C# match is `IReadOnlyList<T>`. See `ROLES` in `src/party.ts` and `MAPS` in `src/data/drills.ts`.
 - `satisfies`. It checks that a value fits a type, but keeps the value's own, narrower type. With `as const` it checks a fixed list and keeps every exact value. C# has no direct match. See `NAMES` in `src/party.ts` and `CHOICE_ROWS` in `src/data/fight.ts`.
 - `Record<K, V>`. An object used as a map, like `Dictionary<K, V>`. When `K` is a union, the compiler requires an entry for every member. See `DOT` in `src/components/Marks.tsx`.
-- `?.` and `??`. They work as in C#. See `o.r ?? TOWER_R` in `src/components/arena/Shape.tsx`.
+- `?.`, `??` and `??=`. They work as in C#. See `o.r ?? TOWER_R` in `src/components/arena/Shape.tsx` and `groups[o.spawn] ??= []` in `src/components/arena/PracticeArena.tsx`.
 - `unknown` and `any`. `unknown` is like `object`: you must check the value before you use it. `any` is like `dynamic`: it turns checking off. This project does not use `any`. See `src/util.ts`.
 - Modules. Each file is a module. `export` makes a name public, and `import { name } from "./file"` brings it in. There are no namespaces. The closest C# match is a file-scoped namespace plus `using`.
 - JSX, the HTML-like tags in `.tsx` files, such as `<li><b>{name}:</b> {text}</li>`. The compiler turns each tag into a call to React and checks every tag and attribute. `{...}` inside a tag runs TypeScript. A CSS class is `className`, not `class`. The closest C# match is a Razor component. See `src/pages/CheatSheetPage.tsx`.

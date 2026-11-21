@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { FigPicture } from "../components/arena/FigPicture";
 import { PageContainer } from "../components/PageContainer";
+import { MAPS } from "../data/drills";
 import { MECH_FIGS } from "../data/figs";
 import { MECH, NEXT_ITEMS } from "../data/questions";
 import { BOSSMOD, CACTBOT, WTFDIG } from "../data/sources";
@@ -25,7 +26,14 @@ interface StartCard {
 /** The tabs to start with, in order. Each rebuild step adds its tab. */
 const START: readonly StartCard[] = [
   { path: "/mech", name: "Learn", step: "Step 1", about: "What each mechanic does, with a picture.", count: `${MECH.length} questions` },
-  { path: "/next", name: "Timeline", step: "Step 2", about: "Which mechanic comes next.", count: `${NEXT_ITEMS.length} questions` },
+  {
+    path: "/map",
+    name: "Practice",
+    step: "Step 2",
+    about: "Click where you stand, one mechanic at a time.",
+    count: `${MAPS.length} mechanics`,
+  },
+  { path: "/next", name: "Timeline", step: "Step 3", about: "Which mechanic comes next.", count: `${NEXT_ITEMS.length} questions` },
   { path: "/sheet", name: "Cheat sheet", step: "Reference", about: "Everything on one page.", count: "One page" },
 ];
 
