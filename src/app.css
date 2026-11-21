@@ -5,6 +5,7 @@
    stay free for right, wrong, the arena's hints and the roles. */
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 /* Dark mode follows the "dark" class on <html>, which ThemeProvider sets. */
 @custom-variant dark (&:is(.dark *));
