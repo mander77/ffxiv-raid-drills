@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Arena } from "../components/arena/Arena";
+import { ArenaLabel } from "../components/arena/ArenaLabel";
 import { BossMark } from "../components/arena/BossMark";
 import { Shape } from "../components/arena/Shape";
 import { ZoneMark } from "../components/arena/ZoneMark";
@@ -17,32 +18,15 @@ import { tlCats } from "../data/abilities";
 import { swordCross, swordPocket } from "../data/attacks";
 import { CACTBOT_TIMELINE, WTFDIG } from "../data/sources";
 import { TL } from "../data/timeline";
-import { f1, leftOf, unit, vadd } from "../geometry";
+import { leftOf, unit, vadd } from "../geometry";
 import { useProgressStore } from "../stores/progress";
 import { useSlotStore } from "../stores/slot";
 import { tabOf } from "../tabs";
 import type { Point, Slot } from "../types";
 import { bySlot } from "../util";
 
-interface PocketLabelProps {
-  /** The middle of the label, in arena units. */
-  at: Point;
-  text: string;
-  /** Your own pocket's label is green; the other light party's is grey. */
-  mine: boolean;
-}
-
-/** The name tag of a sword pocket. */
-function PocketLabel({ at, text, mine }: PocketLabelProps) {
-  return (
-    <g className={mine ? "zlabel" : "zlabel other"}>
-      <rect x={f1(at[0] - 8)} y={f1(at[1] - 2.3)} width="16" height="4.6" rx=".9" />
-      <text x={f1(at[0])} y={f1(at[1])}>
-        {text}
-      </text>
-    </g>
-  );
-}
+/** The size of a sword pocket's label, in arena units. */
+const POCKET_LABEL = { w: 16, h: 4.6 };
 
 interface SwordExampleProps {
   slot: Slot;
@@ -82,8 +66,9 @@ function SwordExample({ slot, className }: SwordExampleProps) {
         ),
         labels: (
           <>
-            <PocketLabel at={labelAt(1)} text="G1 / H1" mine={mine === 1} />
-            <PocketLabel at={labelAt(-1)} text="G2 / H2" mine={mine === -1} />
+            {/* Your own pocket's label is green; the other light party's is grey. */}
+            <ArenaLabel at={labelAt(1)} text="G1 / H1" {...POCKET_LABEL} look={mine === 1 ? "ok" : "other"} />
+            <ArenaLabel at={labelAt(-1)} text="G2 / H2" {...POCKET_LABEL} look={mine === -1 ? "ok" : "other"} />
           </>
         ),
       }}
