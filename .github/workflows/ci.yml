@@ -1,7 +1,8 @@
 # The checks: lint, type check, unit tests, build and browser tests.
 # They run on every push to any branch, so a branch has its result before it goes on main,
 # and on pull requests to main. main accepts a commit only after both jobs passed on it.
-# Cloudflare builds and deploys on its own; this does not deploy.
+# It has no path filter: GitHub leaves a skipped workflow's checks pending, and main requires
+# them on every commit. Cloudflare deploys main on its own; preview.yml makes branch previews.
 name: CI
 
 on:

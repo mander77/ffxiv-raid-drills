@@ -145,6 +145,16 @@ make sure that each one still matches the code before you start it.
     Vite: our own ThemeProvider sets the class on <html> (next-themes renders a script tag that
     React 19 warns about), and a script in index.html sets it before the page draws. The arena
     stays sand in dark mode, so it is the brightest thing on the page.
+  - The theme has no chart colours (`--chart-1` to `--chart-5`) and no sidebar colours
+    (`--sidebar`, `--sidebar-foreground` and so on), though shadcn/ui's theming guide lists them.
+    The owner chose to add them only when a Chart or Sidebar component comes in, since nothing
+    uses them today. Then the sidebar colours take the site's own colours (card, foreground,
+    primary, accent, border, ring), not shadcn's neutral ones, whose blue active item in dark mode
+    does not fit the quiet chrome. The charts may start from shadcn's neutral grays. The CLI does
+    not add them cleanly: the `chart` item brings no colours, the `sidebar` item brings old v3
+    names (`--sidebar-background`, in HSL), and `init` would overwrite the theme. Copy the names
+    from the theming guide (https://ui.shadcn.com/docs/theming) and the `cssVarsV4` values from
+    https://ui.shadcn.com/r/colors/neutral.json.
   - Arena size: one rule on Learn, Practice and Pressure (`ArenaFrame`). The arena is as large
     as its column, but never taller than the room down to the bottom of the screen, so all of it
     is in view; at most 720 px, and at least 360 px, so it fills a phone's width. The header
@@ -441,8 +451,21 @@ static wins.
   the dashboard.
 - The repository merges by fast-forward push, not by pull requests. The publish script deletes
   merged branches on GitHub.
-- Build watch paths (Cloudflare dashboard: the Worker, then Settings > Build > Build watch paths).
-  Cloudflare drops the changed files that match an exclude path first, then builds if any file
+- Build watch paths (Cloudflare dashboard: the Worker, Production chosen at the top, then
+  Settings > Build > Build watch paths) cover `main` only: a push to `main` that changes only
+  files outside the app makes no live deploy. Branch builds ignore them (tested with two
+  docs-only pushes to a test branch; others report the same), so Cloudflare's preview builds are
+  off, and GitHub Actions makes the previews.
+- Cloudflare's preview builds are off through its API, not the dashboard. Unticking "Enable
+  Preview Builds" (Settings > Build > Branch control) did not stop them: each new branch got
+  its own preview build anyway (cloudflare/developer-platform#75, open). The fix is an
+  undocumented field, set by the owner with a user API token that has Workers CI edit:
+  `PATCH https://api.cloudflare.com/client/v4/accounts/<account>/builds/workers/<worker tag>`
+  with `{"previews_enabled": false}`. A new docs-only branch then got no Cloudflare build;
+  `main` still builds. To undo it, send `true`. Cloudflare may change or drop the field: if
+  branch pushes get a "Workers Builds" check again, look here first. The fallback is to
+  disconnect the repository in Cloudflare and deploy `main` from GitHub Actions too.
+- Build watch paths, how they match: Cloudflare drops the changed files that match an exclude path first, then builds if any file
   left matches an include path. Its wildcard `*` may stand only alone or at the start or end of
   a path. Include: `*`. Exclude: `docs/*`, `*.md`, `.github/*`, `.claude/*`, `skills-lock.json`,
   `test/*`, `e2e/*`, `scripts/*`, `playwright.config.ts`, `biome.json`, `mise.toml`,
@@ -451,7 +474,7 @@ static wins.
   `tsconfig.json`, `wrangler.jsonc`, `.node-version`), and so does any new file, so a forgotten
   path costs a build, never a missed deploy. Cloudflare builds anyway for a push with 20 or more
   commits or 3000 or more changed files. When a new file outside the app comes in at the top
-  level, add it to the exclude list in the dashboard and here.
+  level, add it to the exclude list in the dashboard, here and in `paths-ignore` in `.github/workflows/preview.yml`.
 
 ## CI and the main ruleset
 
@@ -470,7 +493,24 @@ static wins.
   only. It is a ruleset of its own, because a bypass covers a whole ruleset, and the CI rule must
   bind the owner too.
 - GitHub checks the commit a push to `main` ends on, by the CI run on that same commit when its
-  branch was pushed. So push the branch, wait for CI, then push `main`. `scripts/publish.sh` waits for that run.
+  branch was pushed. So push the branch, wait for CI, then push `main`. `scripts/publish.sh` waits
+  for the two checks.
+- Branch previews come from GitHub Actions, not from Cloudflare's builds:
+  `.github/workflows/preview.yml`, on branch pushes, with GitHub's `paths-ignore` filter (the
+  same list as the watch paths), so a docs-only push makes no preview and the last one stays.
+  GitHub has no path filter for a single job, only for a whole workflow, and a skipped workflow
+  leaves its checks pending, so the preview is a workflow of its own and CI has no filter. The
+  job waits for the owner's approval, then runs `npx wrangler preview --name <branch>` (with "/"
+  as "-"), at `<branch>.test.ffxiv-raid-drills.app`. It does not wait for CI, so look at CI
+  before you approve. Pushes to `main`, pull requests and Dependabot get no preview. A pull
+  request from a fork never gets the token.
+- The GitHub environment "preview" holds the token and asks for the owner's approval on each
+  run (required reviewer: the owner; admins cannot skip it). Secret `CLOUDFLARE_API_TOKEN`: a
+  Cloudflare account API token (Manage Account > API Tokens), only for this account, with
+  Workers Scripts edit and Account Settings read, and an end date; renew it before then.
+  Variable `CLOUDFLARE_ACCOUNT_ID`. Cloudflare has no keyless sign-in (OIDC) for GitHub
+  Actions yet; check again when the token is renewed.
+- wrangler is a dev dependency, because previews need wrangler 4.135 or later.
 - Dependabot (`.github/dependabot.yml`) opens a pull request each week for npm (minor and patch
   together, a major alone) and for the GitHub Actions, a week after a release. Merge one with
   "Rebase and merge" (linear history), or pull its branch and publish it as usual.
@@ -478,5 +518,8 @@ static wins.
 ## Tips
 
 - Vitest hides `console.log` in a passing test. To see a value in a probe test, throw it.
+- A preview answers a deep link such as `/learn` with 404 to a bare `curl`, and with the page to
+  a browser. To test one with curl, send a browser's headers:
+  `curl -H 'Sec-Fetch-Mode: navigate' -H 'Sec-Fetch-Dest: document' <url>`.
 - An arena picture's view box is `-4 -6 108 110`. The row above the floor (y -6 to 0) holds only the
   "N", which is where the player's "Paused" badge sits.
