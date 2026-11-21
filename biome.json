@@ -54,6 +54,12 @@
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["src/components/ui/**"],
+      "linter": { "rules": { "a11y": { "useSemanticElements": "off" } } }
+    }
+  ],
   "css": {
     "parser": {
       "tailwindDirectives": true

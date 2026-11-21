@@ -41,11 +41,16 @@ test("SetupText shows in full at first, then folds with More and Less", async ()
   cleanup();
   render(<SetupText text="He jumps." folded={true} />);
   const user = userEvent.setup();
-  const text = screen.getByText("He jumps.");
-  assert.include(text.className, "line-clamp-2");
+  assert.include(screen.getByText("He jumps.").className, "line-clamp-2");
+  assert.equal(screen.getByRole("button", { name: "More" }).getAttribute("aria-expanded"), "false");
   await user.click(screen.getByRole("button", { name: "More" }));
-  assert.notInclude(text.className, "line-clamp-2");
-  assert.equal(screen.getByRole("button", { name: "Less" }).getAttribute("aria-expanded"), "true");
+  assert.notInclude(screen.getByText("He jumps.").className, "line-clamp-2");
+  const less = screen.getByRole("button", { name: "Less" });
+  assert.equal(less.getAttribute("aria-expanded"), "true");
+  assert.ok(
+    document.getElementById(less.getAttribute("aria-controls") ?? "")?.textContent?.includes("He jumps."),
+    "the button controls the text",
+  );
 });
 
 test("Tally shows each count under its name", () => {

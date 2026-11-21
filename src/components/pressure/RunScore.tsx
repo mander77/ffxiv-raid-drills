@@ -1,6 +1,8 @@
+import { Fragment } from "react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Item, ItemActions, ItemContent, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
 import type { Fight } from "../../data/fight";
 import type { StepResult } from "../../types";
 import { Tally } from "../Tally";
@@ -41,18 +43,25 @@ export function RunScore({ fight, results, stopped, onAgain, onWatch }: RunScore
             <h3 id="practice-these" className="font-semibold">
               Practice these
             </h3>
-            <ul className="divide-y rounded-lg border">
-              {misses.map((g) => (
-                <li key={g.title} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
-                  <span>{g.title}</span>
-                  {g.drills[0] && (
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to={`/practice/${g.drills[0]}`}>Practice it</Link>
-                    </Button>
-                  )}
-                </li>
+            <ItemGroup aria-labelledby="practice-these" className="rounded-lg border">
+              {misses.map((g, i) => (
+                <Fragment key={g.title}>
+                  {i > 0 && <ItemSeparator />}
+                  <Item size="sm" role="listitem">
+                    <ItemContent>
+                      <ItemTitle>{g.title}</ItemTitle>
+                    </ItemContent>
+                    {g.drills[0] && (
+                      <ItemActions>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/practice/${g.drills[0]}`}>Practice it</Link>
+                        </Button>
+                      </ItemActions>
+                    )}
+                  </Item>
+                </Fragment>
               ))}
-            </ul>
+            </ItemGroup>
           </section>
         ) : (
           <p className="text-sm">
