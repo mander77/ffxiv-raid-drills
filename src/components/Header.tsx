@@ -24,7 +24,8 @@ export function Header() {
         </div>
         <ul aria-label="Fight and strats" className="flex flex-wrap gap-1.5 max-sm:col-span-2 max-sm:flex-nowrap max-sm:overflow-x-auto">
           {STRATS.map((s) => (
-            <li key={s} className="rounded-full border border-header-foreground/40 px-2 text-xs leading-5 whitespace-nowrap">
+            // A darker fill on the band, so the text reads at 7:1.
+            <li key={s} className="rounded-full bg-black/25 px-2.5 py-0.5 text-sm font-medium whitespace-nowrap">
               {s}
             </li>
           ))}
