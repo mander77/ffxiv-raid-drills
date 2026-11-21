@@ -191,6 +191,9 @@ make sure that each one still matches the code before you start it.
     `beside` column by the floor's edges in the picture (`ARENA_VIEW`), as shares of the frame, so
     it fits at any size; the frame keeps room on its right for it. The cast line runs on a little
     above the now mark, and a cast that went off fades out as it rises past the mark.
+  - On an extra-wide screen the mechanic's column touches the arena too (owner's choice): it sits
+    against the floor's left edge (`ArenaFrame`'s `before` column), from the floor's top to its
+    bottom, so the arena and its two columns read as one piece in the middle of the page.
   - `useFitToScreen` measures again when the web fonts have loaded: they can push the arena down a
     pixel or two after the first measure, and the page then scrolled.
   - November 21: the owner asked that every change be checked against the official best

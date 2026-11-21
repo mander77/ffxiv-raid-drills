@@ -48,3 +48,15 @@ test("a column beside the arena sits against the floor's right edge, as tall as 
   assert.equal(column.style.top, `${(6 / 110) * 100}%`);
   assert.equal(column.style.bottom, `${(4 / 110) * 100}%`);
 });
+
+test("a column before the arena sits against the floor's left edge", () => {
+  render(
+    <ArenaFrame before={<p>mechanic</p>}>
+      <p>arena</p>
+    </ArenaFrame>,
+  );
+  const column = screen.getByText("mechanic").parentElement as HTMLElement;
+  // The floor starts at 4 of the picture's 108 units across: 104 units from the frame's right.
+  assert.equal(column.style.right, `calc(${(104 / 108) * 100}% + 0.5rem)`);
+  assert.equal(column.style.top, `${(6 / 110) * 100}%`);
+});
