@@ -19,8 +19,9 @@ export interface CastStripProps {
 
 /** The casts coming up, sideways, for a screen with no room beside the arena: the same line as
     CastList, lying down. Each cast is a square in its category's colour with its seconds inside
-    and its name wrapped under it; the casts slide left toward the now mark as the fight clock
-    runs, and a cast that went off fades out past it. useCastTimeline moves it. */
+    and its name wrapped under it; in its last seconds the square grows. The casts slide left
+    toward the now mark as the fight clock runs, and a cast that went off fades out past it.
+    useCastTimeline moves it. */
 export function CastStrip({ className }: CastStripProps) {
   const { box, nowMark, marks, itemRef } = useCastTimeline({ axis: "x", nowAt: NOW_X, end: END, gap: ITEM_W });
 
@@ -47,9 +48,16 @@ export function CastStrip({ className }: CastStripProps) {
         ))}
         <ol className="absolute inset-y-0 left-0">
           {marks.map((m) => (
-            <li key={m.i} ref={itemRef(m.i)} className="group absolute top-2 left-0 flex w-18 flex-col items-center gap-1 text-xs">
-              {/* The square on the line, with the seconds inside: filled for a hit, outlined for a cast. */}
-              <CastSquare mark={m} />
+            <li key={m.i} ref={itemRef(m.i)} className="group absolute top-1.5 left-0 flex w-18 flex-col items-center gap-1 text-xs">
+              {/* The square on the line, with the seconds inside: filled for a hit, outlined for a cast.
+                  It grows in its last seconds, as in CastList, inside a slot of its largest size, so
+                  it stays on the line and the name under it does not move. */}
+              <span className="flex size-8 items-center justify-center">
+                <CastSquare
+                  mark={m}
+                  className="group-data-[when=past]:size-8 group-data-[when=past]:text-base group-data-[when=soon]:size-8 group-data-[when=soon]:text-base"
+                />
+              </span>
               <span
                 className={cn(
                   "line-clamp-2 rounded px-0.5 text-center leading-tight",

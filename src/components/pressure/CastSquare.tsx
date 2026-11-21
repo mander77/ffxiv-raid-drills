@@ -16,7 +16,7 @@ export function CastSquare({ mark, className }: CastSquareProps) {
     <span
       data-secs
       className={cn(
-        // A size change (the last seconds of CastList) eases in rather than snapping.
+        // A size change (the last seconds of a cast) eases in rather than snapping.
         "flex size-7 shrink-0 items-center justify-center rounded-md font-display text-sm tabular-nums ring-2 ring-card",
         "transition-[width,height,font-size] duration-300 ease-out motion-reduce:transition-none",
         mark.cast
