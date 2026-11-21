@@ -46,6 +46,9 @@
   --later: #5b21b6;
   --later-soft: #f1ecfd;
   --cast: #fcd34d;
+  /* The Home banner's gradient: the palette's slate in light mode, a pale green in dark mode, where
+     it reads as light on the dark card. */
+  --banner: #5e7a97;
 }
 
 /* Dark: a slate night page (not pure black), lighter panels, near-white ink, a deep slate header. */
@@ -80,6 +83,7 @@
   --later: #c9bbfa;
   --later-soft: #2a2150;
   --cast: #8a6a1c;
+  --banner: #dcfce7;
 }
 
 /* The fonts, bundled with the site (src/main.tsx imports them). Source Sans 3 for text, Saira
@@ -124,6 +128,7 @@
   --color-later: var(--later);
   --color-later-soft: var(--later-soft);
   --color-cast: var(--cast);
+  --color-banner: var(--banner);
 }
 
 /* The colours of the fight's ability categories (the marks in the timeline), as Tailwind names:
