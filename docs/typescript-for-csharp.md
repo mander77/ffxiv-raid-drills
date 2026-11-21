@@ -28,6 +28,7 @@ C# keeps type information at run time. TypeScript does not. When the code runs, 
 - Arrow functions, such as `(v: Point): Point => ...`. They are lambdas. The part after the second colon is the return type. See `src/geometry.ts`.
 - Generics, such as `S<T>(s: Slot, h1: T, h2: T): T`. They work like C# generics, and the compiler usually infers `T` from the arguments. See `src/util.ts`.
 - Generic constraints, such as `T extends HTMLElement`. The closest C# match is `where T : HTMLElement`. See `el()` in `src/util.ts`.
+- `ReturnType<typeof f>`, the type a function returns. `typeof` reads the type of a value, here a function, and `ReturnType` takes its result. C# has no direct match; you would write the type out. See the Share timer in `src/share.ts`.
 - `Record<K, V>`. An object used as a map, like `Dictionary<K, V>`. When `K` is a union, the compiler requires an entry for every member. See `QUIZ_POOLS` in `src/core.ts`.
 - Overloads. Several signatures share one implementation, and that implementation must handle every case. See `getDeck()` in `src/core.ts`.
 - `?.`, `??` and `??=`. They work as in C#. See `go()` in `src/main.ts` and `getDeck()` in `src/core.ts`.

@@ -3,11 +3,11 @@ import { MECH, NEXT_ITEMS, MECH_GROUPS } from "../src/data/questions";
 import { TL } from "../src/data/timeline";
 import { tlAbilities } from "../src/data/abilities";
 import { readingMs } from "../src/util";
+import { sec } from "../src/time";
 import type { Slot } from "../src/types";
 
 const ALL = [...MECH, ...NEXT_ITEMS];
 const SLOTS: Slot[] = ["H1", "H2"];
-const toSec = (t: string): number => { const [m, s] = t.split(":").map(Number); return m * 60 + s; };
 
 test("every question has one right answer and no repeated options", () => {
   for(const item of ALL) for(const s of SLOTS){
@@ -33,7 +33,7 @@ test("question ids are unique", () => {
 });
 
 test("the timeline runs in time order", () => {
-  for(let i = 1; i < TL.length; i++) assert.isAbove(toSec(TL[i].t), toSec(TL[i - 1].t), TL[i].n);
+  for(let i = 1; i < TL.length; i++) assert.isAbove(sec(TL[i].t), sec(TL[i - 1].t), TL[i].n);
 });
 
 test("next-raidwide questions ask for the name, not the exact time", () => {

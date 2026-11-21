@@ -7,12 +7,18 @@
    and the button says "Link copied" for two seconds. Some browsers and embedded views block the
    Clipboard API; then the older copy from a hidden text field is tried, and if that fails too,
    a box shows the link to copy. */
+/** The timer that puts "Share" back. A second click starts the two seconds again. */
+// TS note: `ReturnType<typeof setTimeout>` is "whatever setTimeout returns". `typeof` here reads
+// the type of a function, and ReturnType takes its result type. So the code works whether the
+// timer id is a number (browsers) or an object (Node), with no type written by hand.
+let resetLabel: ReturnType<typeof setTimeout> | undefined;
 export async function shareLink(btn: HTMLButtonElement): Promise<void> {
   const url = location.href, touch = window.matchMedia("(pointer: coarse)").matches;
   const label = btn.querySelector<HTMLElement>(".sharelbl") ?? btn;
   const copied = (): void => {
     label.textContent = "Link copied";
-    setTimeout(() => { label.textContent = "Share"; }, 2000);
+    clearTimeout(resetLabel);
+    resetLabel = setTimeout(() => { label.textContent = "Share"; }, 2000);
   };
   try {
     // TS note: `"share" in navigator` checks at run time; older browsers do not have it.

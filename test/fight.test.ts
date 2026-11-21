@@ -1,5 +1,6 @@
 import { test, assert } from "vitest";
-import { buildFight, sec, clock } from "../src/data/fight";
+import { buildFight } from "../src/data/fight";
+import { sec, clock } from "../src/time";
 import { MAPS } from "../src/data/drills";
 import { inZone, rotZone, zoneCenter } from "../src/geometry";
 import type { Slot, StepResult } from "../src/types";
@@ -11,6 +12,9 @@ test("clock and sec turn fight times both ways", () => {
   assert.equal(sec("1:24"), 84);
   assert.equal(clock(84), "1:24");
   assert.equal(clock(sec("0:05")), "0:05");
+  // The seconds round down, so a time just before a full minute never shows as ":60".
+  assert.equal(clock(119.6), "1:59");
+  assert.equal(clock(659.6), "10:59");
 });
 
 test("every mechanic has one hit time per step, in order, inside the fight", () => {

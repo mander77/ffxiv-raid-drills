@@ -3,7 +3,7 @@
 // order. On a narrow screen, Back, Next and phase chips take its place.
 import { esc, el, newCode, random, withSeed } from "../util";
 import { state, getDeck, record, view, type MapCur } from "../core";
-import { rotZone, inZone, zoneCenter } from "../geometry";
+import { rotZone, inZone, stepZone, zoneCenter } from "../geometry";
 import { sceneSVG } from "../arena";
 import { changes } from "../data/drills";
 import { tabHead, renderRoundDone, hudPrompt } from "./common";
@@ -193,7 +193,7 @@ function again(): void {
 /** Answer the next step with a click at p (arena units). */
 function answerAt(c: MapCur, p: Point): void {
   const step = c.scene.steps[c.results.length];
-  const base = step?.zf ? step.zf(c.results) : step?.z;
+  const base = step ? stepZone(step, c.results) : undefined;
   if(!step || !base) return;
   // After a right spot the answer stays on screen until the next click, which answers the next step.
   c.waiting = false;

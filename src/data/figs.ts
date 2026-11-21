@@ -6,7 +6,7 @@
 // does and the right spot in green. Where a map drill already draws the same moment, the
 // picture is built from that drill, so the two always agree.
 import { S, withSeed } from "../util";
-import { DEG, angOf, rotOverlay, zoneCenter } from "../geometry";
+import { angOf, polar, rotOverlay, zoneCenter } from "../geometry";
 import { MAPS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, type Run, type Weapon, type WeaponType } from "./drills";
 import { PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, lineTo, swordCross } from "./attacks";
 import type { Boss, Fig, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
@@ -23,7 +23,7 @@ const circle = (c: Point, r: number): ZoneShape => ({c, r});
 // where only a Zone fits (youIn takes a Zone, and a polygon is not one).
 const rect = (x0: number, y0: number, x1: number, y1: number): RectZone => ({rect:[x0, y0, x1, y1]});
 /** The point r units from c, a degrees clockwise from north. */
-const at = (a: number, r: number, c: Point = [50, 50]): Point => [c[0] + r * Math.sin(a * DEG), c[1] - r * Math.cos(a * DEG)];
+const at = polar;
 /** A line of text on the map, for answers that are not a place. */
 const say = (text: string, y = 94): Overlay => tag(50, y, text);
 /** The boss with no facing arrow. */

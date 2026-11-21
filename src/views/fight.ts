@@ -6,13 +6,14 @@
 // like cactbot's. Its play bar pauses it, changes the speed and jumps to any moment, and Settings
 // holds the fight pattern picks.
 import { LS, esc, el } from "../util";
+import { clock } from "../time";
 import { state, view, app, stopTimer, setChoices, record } from "../core";
-import { rotZone, rotOverlay, inZone, zoneCenter } from "../geometry";
+import { rotZone, rotOverlay, inZone, stepZone, zoneCenter } from "../geometry";
 import { sceneSVG, drawOverlay, zoneSVG, layerIn } from "../arena";
 import { paintArena } from "./map";
 import { tabHead } from "./common";
 import { patternRows, wirePattern } from "./pattern";
-import { buildFight, buildHits, clock, choicesText, CHOICE_ROWS, RANDOM, type Choices, type Fight, type FightSeg, type Hit } from "../data/fight";
+import { buildFight, buildHits, choicesText, CHOICE_ROWS, RANDOM, type Choices, type Fight, type FightSeg, type Hit } from "../data/fight";
 import { BOSS, facingNext, jumpsNext } from "../data/drills";
 import { PUDDLE_LIFE, busterPieces } from "../data/attacks";
 import { ABILITIES, CATS, catsAt } from "../data/abilities";
@@ -41,6 +42,7 @@ interface Run {
   last: number;              // performance.now() at the last frame
   shown: string;             // what the arena and panel show, so they redraw only on a change
   hits: Hit[];               // every hit of this fight, in time order (see buildHits)
+  lines: Fight["events"];   // the timeline lines that show: cactbot's "--sync--" markers (like "--middle--") are left out
   nextHit: number;           // the first hit in `hits` that has not shown yet
   bossAt: Point;             // where the boss stands on the arena now, for the tank buster pulse
   route: Stop[] | null;      // the route the marker runs: the right spots (watch) or your clicks (run)
@@ -119,6 +121,12 @@ function askAt(g: FightSeg, j: number): number {
 
 /** The next mechanic after segment si, or null after the last one. */
 const nextSeg = (f: Fight, si: number): FightSeg | null => f.segs[si + 1] ?? null;
+/** The first stretch that starts after time t. */
+const upcoming = (f: Fight, t: number): FightSeg | undefined => f.segs.find(x => x.from > t);
+/** The index of the first hit after time t, or hits.length when none is left. */
+function firstHitAfter(hits: Hit[], t: number): number { const i = hits.findIndex(h => h.t > t); return i < 0 ? hits.length : i; }
+/** Set the text of the element with this id, only when it changes. */
+function setText(id: string, s: string): void { const n = document.getElementById(id); if(n && n.textContent !== s) n.textContent = s; }
 
 /** Enter on the player: paused at the end of a mechanic, go to the next one. */
 export function enterKey(): boolean {
@@ -174,10 +182,10 @@ function startRun(mode: Mode, fight: Fight, paused = false, settingsOpen = false
   stopTimer();
   // The run starts LEAD seconds before the first mechanic, as after each skip, so it opens with
   // the 3-2-1 of the first mechanic.
-  const t = mode === "run" ? Math.max(0, fight.segs[0].from - LEAD) : 0, hits = buildHits(fight), after = hits.findIndex(h => h.t > t);
+  const t = mode === "run" ? Math.max(0, fight.segs[0].from - LEAD) : 0, hits = buildHits(fight);
   R = {mode, fight, slot:state.slot, t, answeredAt:-Infinity, stops:mode === "run" && LS.get("fstops", false), stoppedAt:-1, look:false,
        results:fight.segs.map(() => []), clicks:[], paused,
-       last:performance.now(), shown:"", hits, nextHit:after < 0 ? hits.length : after, bossAt:[50, 50],
+       last:performance.now(), shown:"", hits, lines:fight.events.filter(e => !e.name.startsWith("--")), nextHit:firstHitAfter(hits, t), bossAt:[50, 50],
        // In the run the marker runs to your clicks; on the player it shows the right moves.
        route:mode === "watch" ? rightRoute(fight) : clickRoute(fight, []), zoneKey:"",
        settings:settingsOpen, setupOpen:false, setupSeg:-1};
@@ -281,8 +289,7 @@ export function seekBy(d: number): void { if(R?.mode === "watch") seekTo(R.t + d
     weapons that have not spawned yet must hide again). */
 function jump(r: Run, to: number): void {
   r.t = to;
-  const after = r.hits.findIndex(h => h.t > to);
-  r.nextHit = after < 0 ? r.hits.length : after;
+  r.nextHit = firstHitAfter(r.hits, to);
   r.shown = "";
   r.last = performance.now();
   frame();
@@ -323,7 +330,7 @@ function tick(now: number): void {
     const done = g != null && r.results[si].length >= g.due.length;
     if(done && r.t < last - 0.05) jump(r, last - 0.05);
     else if(!g || (done && r.t >= last + RESULT_HOLD)){
-      const nx = f.segs.find(x => x.from > r.t);
+      const nx = upcoming(f, r.t);
       if(!nx) return finish();
       if(nx.from - r.t > LEAD) jump(r, nx.from - LEAD);
     }
@@ -358,7 +365,7 @@ function answer(si: number, p: Point | null, missed = false): void {
   const r = R;
   if(!r) return;
   const g = r.fight.segs[si], res = r.results[si], step = g.scene.steps[res.length];
-  const base = step.zf ? step.zf(res) : step.z;
+  const base = stepZone(step, res);
   if(!base) return;
   const zone = rotZone(base, g.k), at: Point = p ?? zoneCenter(zone);
   const ok = !missed && inZone(at, zone);
@@ -511,7 +518,7 @@ function drawPanel(r: Run, si: number): void {
         '<button type="button" class="btn ghost" id="f-again">Watch it again</button>' + (nx && r.paused ? '<span class="hint keys"><kbd>Enter</kbd> next</span>' : "") + "</div>";
     } else if(g.scene.spawnPlay) h += '<div class="actions"><button type="button" class="btn ghost" id="f-spawns">Watch the spawns again</button></div>';
   } else {
-    const nx = f.segs.find(x => x.from > r.t), a = ABILITIES.find(x => x.t >= r.t);
+    const nx = upcoming(f, r.t), a = ABILITIES.find(x => x.t >= r.t);
     h += "<h2>Between mechanics</h2>";
     if(nx) h += '<p class="setup">Next mechanic: ' + esc(nx.title) + " at " + clock(nx.from) + '.</p><div class="actions"><button type="button" class="btn" id="f-goto">Go to ' + esc(nx.title) + "</button></div>";
     if(a) h += '<div class="lastans"><span class="tag">Next ability &middot; ' + clock(a.t) + "</span><b>" + esc(a.name) + '</b><p class="cmline">' + marks(a.cats) + esc(catNames(a.cats)) + "</p>" + esc(a.note) + "</div>";
@@ -521,7 +528,7 @@ function drawPanel(r: Run, si: number): void {
   document.getElementById("setup-toggle")?.addEventListener("click", () => { r.setupOpen = !r.setupOpen; frame(); });
   document.getElementById("f-nextseg")?.addEventListener("click", () => { const nx = nextSeg(f, si); if(nx) goToSeg(r, nx); });
   document.getElementById("f-again")?.addEventListener("click", () => { if(g) goToSeg(r, g); });
-  document.getElementById("f-goto")?.addEventListener("click", () => { const nx = f.segs.find(x => x.from > r.t); if(nx) goToSeg(r, nx); });
+  document.getElementById("f-goto")?.addEventListener("click", () => { const nx = upcoming(f, r.t); if(nx) goToSeg(r, nx); });
   // The spawns play again when the scene is built again.
   document.getElementById("f-spawns")?.addEventListener("click", () => { r.shown = ""; frame(); });
 }
@@ -533,26 +540,26 @@ function drawPanel(r: Run, si: number): void {
 const SHOW_AT = 30, SOON = 6, KEEP = 0.7, ROWS = 6;
 
 function updateLive(r: Run): void {
-  const f = r.fight, set = (id: string, s: string): void => { const n = document.getElementById(id); if(n && n.textContent !== s) n.textContent = s; };
+  const f = r.fight;
   const si = activeSeg(f, r.t), play = document.getElementById("f-play");
   if(r.mode === "run"){
     // The 3-2-1 before each mechanic: in the last LEAD seconds before it, while no step is asked.
     // It runs on the fight clock, so a pause stops it too.
     const g = si >= 0 ? f.segs[si] : null, asking = g != null && r.results[si].length < g.due.length;
-    const nx = asking ? null : f.segs.find(x => x.from > r.t), left = nx ? nx.from - r.t : 0;
+    const nx = asking ? null : upcoming(f, r.t), left = nx ? nx.from - r.t : 0;
     document.getElementById("f-count")?.toggleAttribute("hidden", !(nx && left > 0 && left <= LEAD));
-    if(nx && left > 0 && left <= LEAD){ set("f-count-n", String(Math.ceil(left))); set("f-count-name", nx.title); }
+    if(nx && left > 0 && left <= LEAD){ setText("f-count-n", String(Math.ceil(left))); setText("f-count-name", nx.title); }
     // The pause screen, the Pause button and your progress.
     // A stop at a new mechanic shows the Go bar, which leaves the floor in view; Pause covers it.
     document.getElementById("f-pause")?.toggleAttribute("hidden", !r.paused || r.look);
     document.getElementById("f-look")?.toggleAttribute("hidden", !r.look);
-    if(r.look && si >= 0) set("f-look-name", f.segs[si].title);
-    if(play) set("f-play", r.look ? "Go" : r.paused ? "Resume" : "Pause");
+    if(r.look && si >= 0) setText("f-look-name", f.segs[si].title);
+    if(play) setText("f-play", r.look ? "Go" : r.paused ? "Resume" : "Pause");
     const i = si >= 0 ? si : f.segs.findIndex(x => x.from > r.t);
-    set("f-prog", "Mechanic " + (i < 0 ? f.segs.length : i + 1) + " of " + f.segs.length);
+    setText("f-prog", "Mechanic " + (i < 0 ? f.segs.length : i + 1) + " of " + f.segs.length);
   } else {
-    set("f-clock", clock(r.t));
-    set("f-time", clock(r.t) + " / " + clock(f.end));
+    setText("f-clock", clock(r.t));
+    setText("f-time", clock(r.t) + " / " + clock(f.end));
     const seek = document.getElementById("f-seek") as HTMLInputElement | null;
     if(seek && !dragging) seek.value = r.t.toFixed(1);
     if(play){
@@ -564,8 +571,7 @@ function updateLive(r: Run): void {
   }
   const tl = document.getElementById("f-tl");
   if(tl){
-    // cactbot's "--sync--" lines (like "--middle--") are markers, not attacks, so they do not show.
-    const lines = f.events.filter(e => !e.name.startsWith("--"));
+    const lines = r.lines;
     const rows = lines.filter(e => e.t >= r.t - KEEP && e.t - r.t <= SHOW_AT).slice(0, ROWS);
     const next = lines.find(e => e.t > r.t);
     tl.innerHTML = rows.length ? rows.map(e => {
@@ -577,7 +583,7 @@ function updateLive(r: Run): void {
   }
   if(si >= 0){
     const g = f.segs[si], j = r.results[si].length;
-    if(j < g.due.length) set("f-due", Math.max(0, g.due[j] - r.t).toFixed(1) + " s");
+    if(j < g.due.length) setText("f-due", Math.max(0, g.due[j] - r.t).toFixed(1) + " s");
   }
   updateHud(r, si);
   drawRunner(r);
@@ -641,7 +647,7 @@ function drawRunner(r: Run): void {
     r.zoneKey = key;
     const layer = document.getElementById("f-runzone"), g = target ? r.fight.segs[target.si] : null;
     const step = g && target ? g.scene.steps[target.j] : null, res = target ? r.results[target.si] : [];
-    const base = step && target && res.length === target.j ? (step.zf ? step.zf(res) : step.z) : undefined;
+    const base = step && target && res.length === target.j ? stepZone(step, res) : undefined;
     if(layer) layer.innerHTML = key && g && base ? zoneSVG(rotZone(base, g.k), "pick") : "";
   }
 }
@@ -687,45 +693,45 @@ const CAST_MAX = 10;   // the longest a cast bar takes to fill, in seconds
 const URGENT = 3;      // the last seconds before a hit turn the prompt and the ring red
 
 function updateHud(r: Run, si: number): void {
-  const f = r.fight, put = (id: string, s: string): void => { const n = document.getElementById(id); if(n && n.textContent !== s) n.textContent = s; };
+  const f = r.fight;
   const box = document.getElementById("h-q"), cast = document.getElementById("h-cast"), fill = document.getElementById("h-fill"), ring = document.getElementById("tring");
   if(!box || !cast || !fill) return;
   // The cast bar: the next line that is not a "--sync--" marker. It fills from the line before it,
   // like a cast that starts when the last one ends, but never over more than CAST_MAX seconds.
-  const lines = f.events.filter(e => !e.name.startsWith("--")), k = lines.findIndex(e => e.t > r.t - KEEP);
+  const lines = r.lines, k = lines.findIndex(e => e.t > r.t - KEEP);
   const e = k >= 0 ? lines[k] : null;
   if(e){
     const left = e.t - r.t, span = Math.max(1, Math.min(CAST_MAX, e.t - (k > 0 ? lines[k - 1].t : 0)));
     const casting = left <= span;
     cast.classList.toggle("idle", !casting);
     fill.style.width = casting ? (Math.min(1, 1 - left / span) * 100).toFixed(1) + "%" : "0%";
-    put("h-name", casting ? e.name : "Next: " + e.name);
-    put("h-left", left > 0 ? (casting ? left.toFixed(1) : Math.round(left) + " s") : "");
-  } else { cast.classList.add("idle"); fill.style.width = "0%"; put("h-name", "No more casts"); put("h-left", ""); }
+    setText("h-name", casting ? e.name : "Next: " + e.name);
+    setText("h-left", left > 0 ? (casting ? left.toFixed(1) : Math.round(left) + " s") : "");
+  } else { cast.classList.add("idle"); fill.style.width = "0%"; setText("h-name", "No more casts"); setText("h-left", ""); }
   // Your prompt and the time left (the step number while paused), or the next mechanic.
   const g = si >= 0 ? f.segs[si] : null, j = g ? r.results[si].length : 0, held = lookHold(r, si);
   if(g && showingResult(r, g, j)){
     // The run: the result of the step you just answered, before the next question.
     const x = r.results[si][j - 1];
     box.className = "hq done " + (x.ok ? "ok" : "bad");
-    put("h-count", x.ok ? "✓" : "✗");
+    setText("h-count", x.ok ? "✓" : "✗");
     // A look-ahead answer (which weapon is first) is drawn in purple, saved for later.
     const look = Boolean(g.scene.steps[j - 1].look);
-    put("h-text", x.ok ? "Right" : x.missed ? "Too slow" : look ? "Not that one. The purple one is the weapon to save for later." : "Not there. The green area was right.");
+    setText("h-text", x.ok ? "Right" : x.missed ? "Too slow" : look ? "Not that one. The purple one is the weapon to save for later." : "Not there. The green area was right.");
     if(ring) ring.style.display = "none";
   } else if(g && held >= 0){
     // The look-ahead answer up to its first colon or full stop ("The sword, north: its flat
     // side ..."), shown as saved for later: "Saved for later: the sword, north."
     const a = g.scene.steps[held].a, cut = a.search(/[:.]/), what = cut > 0 ? a.slice(0, cut) : a;
     box.className = "hq done later";
-    put("h-count", "✓");
-    put("h-text", "Saved for later: " + what.charAt(0).toLowerCase() + what.slice(1) + ".");
+    setText("h-count", "✓");
+    setText("h-text", "Saved for later: " + what.charAt(0).toLowerCase() + what.slice(1) + ".");
     if(ring) ring.style.display = "none";
   } else if(g && j < g.due.length && r.t < askFrom(g, j)){
     // A weapon question waits for the tell: the boss turns to face the first weapon.
     box.className = "hq idle";
-    put("h-count", "");
-    put("h-text", "Watch the boss: the arrow on his ring turns to the first weapon.");
+    setText("h-count", "");
+    setText("h-text", "Watch the boss: the arrow on his ring turns to the first weapon.");
     if(ring) ring.style.display = "none";
   } else if(g && j < g.due.length){
     const left = Math.max(0, g.due[j] - r.t), start = j ? g.due[j - 1] : g.from;
@@ -733,18 +739,18 @@ function updateHud(r: Run, si: number): void {
     // and nothing turns red: no one is timing you.
     const watch = r.mode === "watch";
     box.className = "hq" + (left <= URGENT && !r.paused && !watch ? " urgent" : "");
-    put("h-count", r.paused ? (j + 1) + "/" + g.due.length : left.toFixed(1));
-    put("h-text", watch ? g.scene.steps[j].a : g.scene.steps[j].q);
+    setText("h-count", r.paused ? (j + 1) + "/" + g.due.length : left.toFixed(1));
+    setText("h-text", watch ? g.scene.steps[j].a : g.scene.steps[j].q);
     if(ring){
       ring.style.display = r.paused ? "none" : "";
       ring.classList.toggle("urgent", left <= URGENT && !watch);
       ring.setAttribute("stroke-dashoffset", (100 * (1 - Math.min(1, left / Math.max(0.1, g.due[j] - start)))).toFixed(1));
     }
   } else {
-    const nx = f.segs.find(x => x.from > r.t);
+    const nx = upcoming(f, r.t);
     box.className = "hq idle";
-    put("h-count", "");
-    put("h-text", g ? "Done. " + (nx ? "Next: " + nx.title : "No more mechanics") : nx ? "Next: " + nx.title + " in " + Math.ceil(nx.from - r.t) + " s" : "No more mechanics");
+    setText("h-count", "");
+    setText("h-text", g ? "Done. " + (nx ? "Next: " + nx.title : "No more mechanics") : nx ? "Next: " + nx.title + " in " + Math.ceil(nx.from - r.t) + " s" : "No more mechanics");
     if(ring) ring.style.display = "none";
   }
 }

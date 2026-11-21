@@ -4,7 +4,7 @@
 //
 // Sizes come from BossMod's M11S module (awgil/ffxiv_bossmod, RM11STheTyrant), which lists each
 // ability's shape in yalms. The arena is 40 yalms across and 100 units in this app.
-import { DEG, leftOf, unit, vadd } from "../geometry";
+import { leftOf, polar, unit, vadd } from "../geometry";
 import type { Overlay, Point } from "../types";
 
 /** Yalms to arena units. */
@@ -71,7 +71,7 @@ export const lineTo = (from: Point, to: Point, w = LINE_STACK_W): Overlay => {
 
 /** A cone from c toward a (degrees clockwise from north), `half` degrees to each side, r units long. */
 export function cleave(c: Point, a: number, half = 16, r = 80): Overlay {
-  const p = (d: number): Point => [c[0] + r * Math.sin(d * DEG), c[1] - r * Math.cos(d * DEG)];
+  const p = (d: number): Point => polar(d, r, c);
   return {t:"poly", pts:[c, p(a - half), p(a), p(a + half)]};
 }
 

@@ -84,11 +84,6 @@ export function cleanChoices(x: unknown): Choices {
 export const choicesText = (c: Choices): string => CHOICE_ROWS.filter(r => c[r.key] !== "random").map(r => r.key + "=" + c[r.key]).join(",");
 export const parseChoices = (text: string): Choices => cleanChoices(Object.fromEntries(text.split(",").map(p => p.split("="))));
 
-/** "1:24" to 84. */
-export const sec = (t: string): number => { const [m, s] = t.split(":").map(Number); return m * 60 + s; };
-/** 84 to "1:24". */
-export const clock = (t: number): string => Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0");
-
 function drill(id: string, s: Slot, variant: string | null = null): Scene {
   const m = MAPS.find(x => x.id === id);
   if(!m) throw new Error("missing drill " + id);

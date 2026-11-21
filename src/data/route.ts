@@ -7,7 +7,7 @@
 // center (100, 100) and the numbered marks about 16.3 yalms out, which is where this app draws them
 // (25 and about 41 units out). So 1 unit is 0.4 yalm, and the arena is 40 x 40 yalms. No guide
 // states the size; this follows from the waymarks.
-import { inZone, rot, rotZone, zoneCenter } from "../geometry";
+import { dist, inZone, rot, rotZone, stepZone, zoneCenter } from "../geometry";
 import type { Fight, FightSeg } from "./fight";
 import type { Point, StepResult, Zone } from "../types";
 
@@ -34,7 +34,6 @@ export const REST_GAP = 8;
     clicked the spot, for a route made of your own clicks: the runner goes there only then. */
 export interface Stop { p: Point; hit: number; show: number; si: number; j: number; pre?: Point; look?: boolean; click?: number }
 
-const dist = (a: Point, b: Point): number => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
 /** When step j of a mechanic appears for the player: when the mechanic does, but a weapon only
     once the boss turns to the first one. Before that, nobody can know where to go. */
@@ -62,7 +61,7 @@ export function rightRoute(f: Fight): Stop[] {
     const res: StepResult[] = [], pre = g.pre;
     let from = pre ?? HOME;   // the player meets the mechanic at its pre-position
     return g.scene.steps.flatMap((st, j): Stop[] => {
-      const base = st.zf ? st.zf(res) : st.z;
+      const base = stepZone(st, res);
       if(!base) return [];
       const z = rotZone(base, g.k), p = st.stand && !st.look ? rot(st.stand, g.k) : middleOf(z, from);
       res.push({p, ok:inZone(p, z), z, drop:st.drop ? p : null});

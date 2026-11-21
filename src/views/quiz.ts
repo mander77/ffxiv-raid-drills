@@ -1,5 +1,6 @@
 // Multiple-choice cards, used by the quiz tabs and the pressure round.
 import { esc, shuffle, el } from "../util";
+import { sec } from "../time";
 import { state, getDeck, record, view, stopTimer, type McqCur, type QuizCat } from "../core";
 import { tabHead, renderRoundDone, fadeEdges } from "./common";
 import { showRoute } from "../router";
@@ -47,13 +48,12 @@ export function renderQuiz(cat: QuizCat): void {
 /** When each phase starts, in seconds, for the Timeline chips. */
 const PHASE_STARTS = PHASES.map((p, k) => k === 0 ? 0 : Math.min(...p.rows.map(a => a.t)));
 const PHASE_CHIPS = PHASES.map((p, k) => "P" + (k + 1) + " · " + (p.name.split(": ")[1] ?? p.name));
-const toSec = (t: string): number => { const [m, s] = t.split(":").map(Number); return m * 60 + s; };
 
 /** The chips over a card: the Learn cards by mechanic, the Timeline cards by phase. Each chip
     lists its cards (their places in the deck), in fight order. */
 function chipGroups(cat: QuizCat): Array<{name: string; idx: number[]}> {
   const keyOf = (it: QuizItem): string => cat === "mech" ? MECH_GROUPS.find(g => g.ids.includes(it.id))?.name ?? ""
-    : PHASE_CHIPS[PHASE_STARTS.reduce((k, start, i) => toSec(it.time) >= start ? i : k, 0)];
+    : PHASE_CHIPS[PHASE_STARTS.reduce((k, start, i) => sec(it.time) >= start ? i : k, 0)];
   const groups: Array<{name: string; idx: number[]}> = [];
   getDeck(cat).items.forEach((it, i) => {
     const name = keyOf(it);

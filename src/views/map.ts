@@ -1,5 +1,5 @@
 // Painting the answer layers on an arena: Practice and the full fight under Pressure use it.
-import { rotOverlay, rotZone, zoneCenter, f1 } from "../geometry";
+import { rotOverlay, rotZone, stepZone, zoneCenter, f1 } from "../geometry";
 import { drawOverlay, paintBoss, zoneSVG, hitsSVG } from "../arena";
 import { facingNext } from "../data/drills";
 import { PUDDLE_R } from "../data/attacks";
@@ -25,7 +25,7 @@ function tagSVG(z: Zone, tag: Tag): string {
 /** Show me in Practice: the right area for the next step, in blue with "Go here" (purple with
     "Saved for later" for a look-ahead step), on top of what paintArena drew. It is not an answer. */
 export function paintHint(svg: Element, sc: Scene, k: number, results: StepResult[]): void {
-  const st = sc.steps[results.length], base = st ? (st.zf ? st.zf(results) : st.z) : undefined;
+  const st = sc.steps[results.length], base = st ? stepZone(st, results) : undefined;
   if(!st || !base) return;
   const z = rotZone(base, k);
   svg.querySelector("#fb-layer")?.insertAdjacentHTML("beforeend", zoneSVG(z, st.look ? "later" : "pick"));

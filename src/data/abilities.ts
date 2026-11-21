@@ -7,6 +7,7 @@
 // with two abilities, for example), it takes the colours of the abilities it names.
 // The notes are written for this app.
 import { P1, P2, P3, P4, TL } from "./timeline";
+import { sec } from "../time";
 
 /** The enrage (Heartbreaker), in seconds into the fight: the last line of the cactbot timeline,
     at 1659.6 there (its fight starts at 1000). Every screen that needs the end of the fight
@@ -192,7 +193,6 @@ export const catsAt = (t: number): Cat[] => [...new Set(ABILITIES.filter(a => Ma
 /** The abilities that one row of the cheat-sheet timeline (TL) covers: from its time
     to the next row's time. TL times are rounded cast starts, so each bound is a second early. */
 export function tlAbilities(i: number): Ability[] {
-  const sec = (m: string): number => { const [a, b] = m.split(":").map(Number); return a * 60 + b; };
   const t0 = sec(TL[i].t) - 1, t1 = i + 1 < TL.length ? sec(TL[i + 1].t) - 1 : Infinity;
   return ABILITIES.filter(a => a.t >= t0 && a.t < t1);
 }

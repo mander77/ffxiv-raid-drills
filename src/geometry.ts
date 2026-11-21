@@ -1,5 +1,5 @@
 // Arena geometry. The arena is 100 x 100 units, north is up, y grows south.
-import type { Point, Zone } from "./types";
+import type { Point, Step, StepResult, Zone } from "./types";
 
 /** Turn a point a quarter turn clockwise about the arena center, k times. */
 export function rot(p: Point, k: number): Point {
@@ -58,6 +58,12 @@ export const unit = (v: Point): Point => { const l = Math.hypot(v[0], v[1]) || 1
 export const vadd = (a: Point, b: Point, k = 1): Point => [a[0] + b[0] * k, a[1] + b[1] * k];
 export const leftOf = (d: Point): Point => [d[1], -d[0]];
 export const angOf = (d: Point): number => (Math.atan2(d[0], -d[1]) / DEG + 360) % 360;
+/** The point r units from c, `deg` degrees clockwise from north. */
+export const polar = (deg: number, r: number, c: Point = [50, 50]): Point => [c[0] + r * Math.sin(deg * DEG), c[1] - r * Math.cos(deg * DEG)];
+/** The distance between two points. */
+export const dist = (p: Point, q: Point): number => Math.hypot(p[0] - q[0], p[1] - q[1]);
+/** The zone a step asks for: its fixed zone, or the zone built from the answers so far. */
+export const stepZone = (step: Step, results: StepResult[]): Zone | undefined => step.zf ? step.zf(results) : step.z;
 export const inArena = (p: Point): boolean => p[0] >= 0 && p[0] <= 100 && p[1] >= 0 && p[1] <= 100;
 // TS note: `as const` makes the array read-only and keeps each entry as its exact text type.
 export const COMPASS = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"] as const;

@@ -1,7 +1,7 @@
 // Map drills: the arena scenes and the rules that decide each answer zone.
 import { S, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
-import { DEG, unit, vadd, leftOf, angOf, inArena, zoneCenter, COMPASS } from "../geometry";
+import { DEG, unit, vadd, leftOf, angOf, inArena, zoneCenter, COMPASS, polar, dist } from "../geometry";
 import { HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
 import type { Boss, MapDrill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
@@ -15,7 +15,7 @@ export interface Run { W: Weapon[]; states: Boss[]; steps: Step[]; overlays: Ove
 const WEAPON_TYPES: WeaponType[] = ["axe", "sword", "scythe"];
 const ORDINALS = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"];
 /** A weapon spot: 29 units from the arena center, `a` degrees clockwise from north. */
-export const atAngle = (a: number): Point => [50 + 29 * Math.sin(a * DEG), 50 - 29 * Math.cos(a * DEG)];
+export const atAngle = (a: number): Point => polar(a, 29);
 /** Just outside the boss's hitbox: where the first puddle and his butt spot are. */
 const OUTSIDE = HITBOX + 4.5;
 /** The first Void Stardust puddle: north of the boss, just outside his hitbox. */
@@ -235,8 +235,7 @@ export const FIXED_SPREAD_MARKS = spreadMarks();
 /** The open ground north, east, south and west of a boss at c, between the fixed spots. Any of
     them is a good spread spot. */
 const gapsAround = (c: Point): Point[] => ([[0, -33], [33, 0], [0, 33], [-33, 0]] as Point[]).map(o => vadd(c, o));
-const far = (p: Point, q: Point, d: number): boolean => Math.hypot(p[0] - q[0], p[1] - q[1]) >= d;
-const dist = (p: Point, q: Point): number => Math.hypot(p[0] - q[0], p[1] - q[1]);
+const far = (p: Point, q: Point, d: number): boolean => dist(p, q) >= d;
 /** Degrees between two spots, as seen from the arena center (0 to 180). */
 const apart = (p: Point, q: Point): number => { const d = Math.abs(angOf([p[0] - 50, p[1] - 50]) - angOf([q[0] - 50, q[1] - 50])) % 360; return Math.min(d, 360 - d); };
 
@@ -245,7 +244,7 @@ const apart = (p: Point, q: Point): number => { const d = Math.abs(angOf([p[0] -
    area. Any spot in it is right if it is out of the hitbox, out of the last puddle and not on a
    tank or melee spot. A spread is 6 yalms (15 units), so a spot closer than that to a tank or
    melee spot hits them. */
-const POINT_AT = (deg: number, r: number): Point => [50 + r * Math.sin(deg * DEG), 50 - r * Math.cos(deg * DEG)];
+const POINT_AT = (deg: number, r: number): Point => polar(deg, r);
 export function cometSpread(s: Slot, toward: Point | null = null, c: Point = CENTER): (results: StepResult[]) => Zone {
   const fixed = fixedAround(c), gaps = gapsAround(c);
   return results => {
@@ -287,7 +286,7 @@ export function cometSpread(s: Slot, toward: Point | null = null, c: Point = CEN
 const STACK_SLACK = 10;   // units (4 yalms): how much farther than the closest spot still counts
 export function stackNear(target: Point | ((results: StepResult[]) => Point), c: Point = CENTER): (results: StepResult[]) => Zone {
   const ray = (deg: number): Point => [Math.sin(deg * DEG), -Math.cos(deg * DEG)];
-  const at = (deg: number, r: number): Point => [c[0] + r * Math.sin(deg * DEG), c[1] - r * Math.cos(deg * DEG)];
+  const at = (deg: number, r: number): Point => polar(deg, r, c);
   /** Where the ray at `deg` is inside the circle around q with radius rad: from b - h to b + h
       units along the ray (from solving |c + r * ray - q| = rad for r), or null if it misses. */
   const cross = (deg: number, q: Point, rad: number): [number, number] | null => {
@@ -543,7 +542,7 @@ export const MAPS: MapDrill[] = [
       steps:[{q:"Where do you drop your meteor?",
         // S<Zone>: the H1 answer is a rule zone and the H2 answer is a circle, so name the shared type.
         z:S<Zone>(s, {fn:p => { const r = Math.hypot(p[0] - 50, p[1] - 50), a = angOf([p[0] - 50, p[1] - 50]); return r >= 3 && r <= 11.5 && a >= 285 && a <= 345; },
-                label:[43, 43], show:[{poly:[[50, 50], ...[285, 300, 315, 330, 345].map((a): Point => [50 + 11 * Math.sin(a * DEG), 50 - 11 * Math.cos(a * DEG)])]}]},
+                label:[43, 43], show:[{poly:[[50, 50], ...[285, 300, 315, 330, 345].map((a): Point => polar(a, 11))]}]},
                {c:[26, 74], r:8}),
         a:S(s, "Inside the boss hitbox, on his NW side.", "SW, in line with the first SW rock, about halfway to the edge.")}],
       rule:S(s, "H1 drops NW, inside the boss hitbox.", "H2 drops SW in line with the first rock. That rock already sits inside the hitbox, and two rocks too close together explode, so yours goes farther out.") + " Icy Veins swaps H1 and H2 here, so do not mix guides."})},
