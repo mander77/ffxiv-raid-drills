@@ -487,13 +487,17 @@ export function hitsGoneOff(marks: readonly CastMark[], was: number, t: number):
 }
 
 /** Where each cast sits in a list `height` pixels tall, from its top: the now line is at `nowY`,
-    and CASTS_AHEAD seconds away is the bottom, so the gaps show the time between casts. Casts that
-    come close are pushed down to stay `rowH` apart, so their names never overlap. */
+    and CASTS_AHEAD seconds away is the bottom, so the gaps show the time between casts. Casts to
+    come that come close are pushed down to stay `rowH` apart, so their names never overlap. A cast
+    that went off pushes nothing: it fades out past the now line, and if it pushed the next one, that
+    one would jump back up as it left. */
 export function castPositions(marks: readonly CastMark[], height: number, nowY: number, rowH: number): number[] {
   const perSecond = (height - nowY) / CASTS_AHEAD;
   let prev = Number.NEGATIVE_INFINITY;
   return marks.map((m) => {
-    const y = Math.max(nowY + m.left * perSecond, prev + rowH);
+    const at = nowY + m.left * perSecond;
+    if (m.left < 0) return at;
+    const y = Math.max(at, prev + rowH);
     prev = y;
     return y;
   });

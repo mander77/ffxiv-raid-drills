@@ -196,5 +196,7 @@ describe("the HUD", () => {
     // 330 pixels for 30 seconds after the now line at 30: 10 pixels a second.
     expect(castPositions([mark(0), mark(15), mark(30)], 330, 30, 20)).toEqual([30, 180, 330]);
     expect(castPositions([mark(5), mark(5.5)], 330, 30, 20)).toEqual([80, 100]);
+    // A cast that went off a second ago pushes nothing: the next one stays at its time.
+    expect(castPositions([mark(-1), mark(0.5)], 330, 30, 20)).toEqual([20, 35]);
   });
 });
