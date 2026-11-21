@@ -283,7 +283,7 @@ export function FightScreen({
   const playBar = (
     <FightPlayBar
       end={fight.end}
-      marks={fight.segs.map((g) => g.from)}
+      marks={fight.segs.map((g) => ({ t: g.from, name: g.title }))}
       paused={view.paused}
       speed={speed}
       onPlay={togglePause}

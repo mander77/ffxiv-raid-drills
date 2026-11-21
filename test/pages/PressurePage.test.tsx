@@ -96,6 +96,16 @@ test("a shared link opens the player paused at its moment, on its mechanic", () 
   assert.ok(screen.getByText(/Paused/));
 });
 
+test("a tick under the slider names its mechanic, and a click goes there", async () => {
+  open("/pressure/K7Q2?t=46");
+  const user = userEvent.setup();
+  const tick = screen.getByRole("button", { name: "Go to Void Stardust again" });
+  await user.hover(tick);
+  assert.ok(await screen.findByRole("tooltip", { name: "Void Stardust again" }));
+  await user.click(tick);
+  assert.ok(screen.getByRole("heading", { name: "Void Stardust again" }));
+});
+
 test("a pick in Settings goes in the address, and the moment stays", async () => {
   open("/pressure/K7Q2?t=46");
   const user = userEvent.setup();

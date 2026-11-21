@@ -154,7 +154,7 @@ make sure that each one still matches the code before you start it.
     the cast bar, the prompt and the controls sit beside it. The countdown ring stays on the
     arena, around the boss. At 1280 x 800 the arena went from 494 to about 600 px. Three columns
     were turned down: the height limits the arena, so a third column would only narrow it.
-  - The player's controls (owner's choice): a thin bar like a video player's, the slider across the top and the buttons in one row under it (64 px tall):
+  - The player's controls (owner's choice): a thin bar like a video player's, the slider across the top and the buttons in one row under it, past a thin line. Under the slider, a tick marks where each mechanic starts: point at it for its name (a shadcn Tooltip), click it to go there. The ticks are our own, not a datalist, which browsers draw without names, or not at all:
     play, the slider, the time, a speed menu, and icon buttons with tooltips for Start over, New
     fight and Settings; the keys are in the play button's tooltip. Beside the arena: the cast
     bar with the casts coming up under it, the prompt, then the mechanic, which scrolls in its
