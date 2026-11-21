@@ -62,7 +62,7 @@ export function CastStrip({ className }: CastStripProps) {
                 className={cn(
                   "line-clamp-2 rounded px-0.5 text-center leading-tight",
                   m.cast ? "text-muted-foreground" : "font-semibold",
-                  m.raidwide && "bg-danger-soft",
+                  m.raidwide && "bg-danger",
                 )}
               >
                 {m.name}

@@ -116,7 +116,7 @@ function TimelineRow({ fill, name, cats, when, now = false, right = false }: Tim
       className={cn(
         "relative flex items-center justify-between gap-3 overflow-hidden rounded-md border px-2 py-1",
         now && "font-semibold",
-        right && "ring-2 ring-success",
+        right && "ring-2 ring-success-foreground",
       )}
     >
       <i

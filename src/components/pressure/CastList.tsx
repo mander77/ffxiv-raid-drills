@@ -62,7 +62,7 @@ export function CastList({ className }: CastListProps) {
                 className={cn(
                   "min-w-0 truncate rounded px-1",
                   m.cast ? "text-muted-foreground" : "font-semibold",
-                  m.raidwide && "bg-danger-soft",
+                  m.raidwide && "bg-danger",
                 )}
               >
                 {m.name}

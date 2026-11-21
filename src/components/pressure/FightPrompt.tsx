@@ -7,11 +7,11 @@ import { type Prompt, promptOf } from "../../lib/fight";
 /** The border and background of the prompt, per look. Complete class names, so Tailwind finds them. */
 const PROMPT_LOOK: Record<Prompt["look"], string> = {
   ask: "bg-card",
-  urgent: "border-destructive bg-danger-soft text-destructive",
+  urgent: "border-danger-foreground bg-danger text-danger-foreground",
   idle: "bg-card text-muted-foreground",
-  ok: "border-success bg-success-soft text-success",
-  bad: "border-destructive bg-danger-soft text-destructive",
-  later: "border-later bg-later-soft text-later",
+  ok: "border-success-foreground bg-success text-success-foreground",
+  bad: "border-danger-foreground bg-danger text-danger-foreground",
+  later: "border-later-foreground bg-later text-later-foreground",
 };
 
 /** The run's prompt: the question, its result, or the next mechanic. The seconds left change on

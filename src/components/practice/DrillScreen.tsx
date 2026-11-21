@@ -100,10 +100,14 @@ export function DrillScreen({
     <div
       className={cn(
         "flex flex-wrap items-center gap-3 rounded-lg border px-3 py-2",
-        allRight ? "border-success bg-success-soft" : "border-destructive bg-danger-soft",
+        allRight ? "border-success-foreground bg-success" : "border-danger-foreground bg-danger",
       )}
     >
-      {allRight ? <Check aria-hidden="true" className="text-success" /> : <X aria-hidden="true" className="text-destructive" />}
+      {allRight ? (
+        <Check aria-hidden="true" className="text-success-foreground" />
+      ) : (
+        <X aria-hidden="true" className="text-danger-foreground" />
+      )}
       <p className="flex-1 text-sm font-semibold" role="status">
         {allRight ? (multi ? "All steps right" : "Right") : multi ? `${right} of ${sc.steps.length} right` : "Not there"}
       </p>
@@ -115,8 +119,8 @@ export function DrillScreen({
       </Button>
     </div>
   ) : status === "wrong" && last ? (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-destructive bg-danger-soft px-3 py-2">
-      <X aria-hidden="true" className="text-destructive" />
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-danger-foreground bg-danger px-3 py-2">
+      <X aria-hidden="true" className="text-danger-foreground" />
       <p className="flex-1 text-sm" role="status">
         <span className="font-semibold">Not there.</span> {sc.steps[n - 1].a}
       </p>

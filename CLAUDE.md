@@ -89,7 +89,7 @@ index.html           the page: React draws into #root
 src/main.tsx         start-up: draws the React app (App.tsx) into #root
 src/App.tsx          the header and the routes (React Router): one page per path
 src/app.css          Tailwind and the shadcn/ui theme colours, light and dark (ink, slate header,
-                     celery highlight; success, danger-soft, warning, later), the fonts, the
+                     celery highlight; success, danger, warning and later answers), the fonts, the
                      ability category colours
 src/tabs.ts          the tabs: path, label and one-line intro; tabOf
 src/share.ts         sharing the address of the page
@@ -207,8 +207,9 @@ These steps put a branch on `main`, the live site.
   comment where the code uses a TypeScript feature for the first time. Keep
   `docs/typescript-for-csharp.md` current.
 - Light and dark mode. Colours come from the theme in `src/app.css` (`bg-header`,
-  `text-success`, `bg-danger-soft`...), each with a light and a dark value, not from fixed
-  Tailwind colours such as `bg-green-50`. Keep the chrome quiet (ink, gray, the slate header and
+  `bg-success text-success-foreground`...), each with a light and a dark value, not from fixed
+  Tailwind colours such as `bg-green-50`. Colours come in shadcn's pairs: the name is the
+  background, `-foreground` the text and border on it. Keep the chrome quiet (ink, gray, the slate header and
   the celery highlight), so the arena stays the focus: green, red, blue and purple mean right,
   wrong, the arena's hints and the roles. The arena keeps its own colours in both modes. No
   company branding.

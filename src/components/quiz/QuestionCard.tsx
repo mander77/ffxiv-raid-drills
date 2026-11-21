@@ -166,7 +166,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
 
           {answered ? (
             <>
-              <p className={cn(slow ? "font-medium text-warning" : "sr-only")} role="status">
+              <p className={cn(slow ? "font-medium text-warning-foreground" : "sr-only")} role="status">
                 {slow ? "Too slow: the time ran out." : okPick ? "Right." : "Not this one."}
               </p>
               <RuleBox rule={q.rule} />
@@ -236,8 +236,8 @@ function AnswerButton({ n, text, state, why, pressed, onClick, onPoint }: Answer
       className={cn(
         "h-auto w-full items-start justify-start gap-3 py-2 text-left whitespace-normal disabled:opacity-100",
         state === "picked" && "border-primary ring-2 ring-primary",
-        state === "right" && "border-success bg-success-soft",
-        state === "wrong" && "border-destructive bg-danger-soft",
+        state === "right" && "border-success-foreground bg-success",
+        state === "wrong" && "border-danger-foreground bg-danger",
         state === "other" && "opacity-60",
       )}
     >
@@ -255,7 +255,7 @@ function AnswerButton({ n, text, state, why, pressed, onClick, onPoint }: Answer
         </span>
         {why && (
           <span className="block font-normal text-muted-foreground">
-            <span className="font-semibold text-success">Right answer.</span> {why}
+            <span className="font-semibold text-success-foreground">Right answer.</span> {why}
           </span>
         )}
       </span>

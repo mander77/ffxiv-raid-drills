@@ -37,14 +37,17 @@
   /* Celery: where you are, such as the active tab and the line under the header. */
   --highlight: #daeaae;
   --highlight-foreground: #1e2a36;
-  /* What an answer was: right (green), wrong (the destructive red, on a soft red), too slow
-     (amber), saved for later (violet, as on the arena). The fill of the boss's cast bar. */
-  --success: #1b7448;
-  --success-soft: #e3f1e8;
-  --danger-soft: #fbe9e7;
-  --warning: #b45309;
-  --later: #5b21b6;
-  --later-soft: #f1ecfd;
+  /* What an answer was, in shadcn's pairs: the name is the soft background, -foreground the
+     text and border on it. Right (green), wrong (the destructive red on a soft red), too slow
+     (amber text, with no background) and saved for later (violet, as on the arena). Then the
+     fill of the boss's cast bar. */
+  --success: #e3f1e8;
+  --success-foreground: #1b7448;
+  --danger: #fbe9e7;
+  --danger-foreground: var(--destructive);
+  --warning-foreground: #b45309;
+  --later: #f1ecfd;
+  --later-foreground: #5b21b6;
   --cast: #fcd34d;
   /* The Home banner's gradient: the palette's sage in light mode, a pale green in dark mode, where
      it reads as light on the dark card. */
@@ -76,12 +79,13 @@
   --header-foreground: #e9eee0;
   --highlight: #daeaae;
   --highlight-foreground: #1e2a36;
-  --success: #7fd3a3;
-  --success-soft: #173a2a;
-  --danger-soft: #3a1d1b;
-  --warning: #f0b35a;
-  --later: #c9bbfa;
-  --later-soft: #2a2150;
+  --success: #173a2a;
+  --success-foreground: #7fd3a3;
+  --danger: #3a1d1b;
+  --danger-foreground: var(--destructive);
+  --warning-foreground: #f0b35a;
+  --later: #2a2150;
+  --later-foreground: #c9bbfa;
   --cast: #8a6a1c;
   --banner: #dcfce7;
 }
@@ -125,11 +129,12 @@
   --color-highlight: var(--highlight);
   --color-highlight-foreground: var(--highlight-foreground);
   --color-success: var(--success);
-  --color-success-soft: var(--success-soft);
-  --color-danger-soft: var(--danger-soft);
-  --color-warning: var(--warning);
+  --color-success-foreground: var(--success-foreground);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-warning-foreground: var(--warning-foreground);
   --color-later: var(--later);
-  --color-later-soft: var(--later-soft);
+  --color-later-foreground: var(--later-foreground);
   --color-cast: var(--cast);
   --color-banner: var(--banner);
 }
