@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The site's icon in the browser tab: the boss's target ring, with the arrow where he faces and
+       the opening at his rear, drawn bold so it reads at 16 pixels. The header uses a finer version
+       with flank ticks (TitleIcon in src/components/Header.tsx). -->
+  <rect width="32" height="32" rx="7" fill="#f8f2e6"/>
+  <path d="M8.93 24.87 A10 10 0 1 1 23.07 24.87" fill="none" stroke="#c2362b" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M16 2 L21.8 9.4 H10.2 Z" fill="#c2362b"/>
+  <circle cx="16" cy="17.8" r="4.4" fill="#5b1a12"/>
+</svg>

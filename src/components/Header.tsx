@@ -15,7 +15,7 @@ export function Header() {
     <header className="sticky top-0 z-10 border-b-3 border-highlight bg-header text-header-foreground">
       <PageContainer className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 pt-3">
         <h1 className="flex items-center gap-2 font-display text-2xl tracking-wide">
-          <ArenaMark />
+          <TitleIcon />
           FFXIV Raid Drills
         </h1>
         <div className="flex items-center justify-self-end">
@@ -37,13 +37,17 @@ export function Header() {
   );
 }
 
-/** A small arena beside the site name: the sand floor in its bronze edge, and the boss's red ring. */
-function ArenaMark() {
+/** The site's icon beside its name: the boss's target ring as on the arena, with the arrow where he
+    faces, a tick on each flank and the opening at his rear. The browser tab uses a bolder version of
+    it (public/favicon.svg), which reads better at 16 pixels. */
+function TitleIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-7 shrink-0" aria-hidden="true">
-      <rect x="1.5" y="1.5" width="21" height="21" rx="4" fill="#f8f2e6" stroke="#b49c6c" strokeWidth="3" />
-      <circle cx="12" cy="12" r="4.5" fill="none" stroke="#c2362b" strokeWidth="2" />
-      <circle cx="12" cy="12" r="1.6" fill="#5b1a12" />
+    <svg viewBox="0 0 32 32" className="size-7 shrink-0" aria-hidden="true">
+      <rect width="32" height="32" rx="7" fill="#f8f2e6" />
+      <path d="M9.28 24.22 A9.5 9.5 0 1 1 22.72 24.22" fill="none" stroke="#c2362b" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M4.4 17.5 H8.4 M23.6 17.5 H27.6" stroke="#c2362b" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M16 3 L21 9.6 H11 Z" fill="#c2362b" />
+      <circle cx="16" cy="17.5" r="3.8" fill="#5b1a12" />
     </svg>
   );
 }
