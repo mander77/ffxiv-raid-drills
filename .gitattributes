@@ -1,0 +1,12 @@
+# Every text file uses LF line endings, on every computer. Biome checks for LF, so a Windows
+# checkout that turned them into CRLF would fail the lint after each branch switch.
+* text=auto eol=lf
+
+# Pictures and fonts are binary: git never changes their line endings.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary

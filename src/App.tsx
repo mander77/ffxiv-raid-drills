@@ -1,7 +1,8 @@
 // The app: the header, then the page for the address. React Router picks the page.
-// Each rebuild step adds its page here. Any other address opens Home.
+// Each tab has its page here. Any other address opens Home.
 import { Navigate, Route, Routes } from "react-router";
 import { Header } from "./components/Header";
+import { Toaster } from "./components/ui/sonner";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { useScrollToTopOnNewTab } from "./hooks/useScrollToTopOnNewTab";
 import { CheatSheetPage } from "./pages/CheatSheetPage";
@@ -27,6 +28,8 @@ export function App() {
         <Route path="/sheet" element={<CheatSheetPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      {/* The toasts, such as "Link copied". The site has a light theme only. */}
+      <Toaster theme="light" />
     </TooltipProvider>
   );
 }
