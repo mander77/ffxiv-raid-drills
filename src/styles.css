@@ -393,6 +393,8 @@ button.chip{cursor:pointer}
 .tally span{display:block;font-size:13px;color:var(--ink-2)}
 .tally .ok .big{color:var(--heal)} .tally .bad .big{color:var(--miss)} .tally .slow .big{color:var(--warn)}
 
+/* The root a Preact screen draws into. It adds no box of its own, so the layout is as before. */
+.viewroot{display:contents}
 .sheet{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
 .sheet section{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;min-width:0}
 .sheet h2{font-family:var(--font-display);font-size:26px;letter-spacing:.02em;text-transform:uppercase;margin:0 0 10px}

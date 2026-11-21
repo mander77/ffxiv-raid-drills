@@ -46,7 +46,6 @@ interface AppState {
   pressure: PressureRun | null;
   raf: number;
   tout: number;
-  confirmReset: boolean;
 }
 
 /* main.ts fills in render, so views can redraw the current tab without importing main.ts. */
@@ -83,8 +82,7 @@ export const state: AppState = {
   cur: null,
   pressure: null,
   raf: 0,
-  tout: 0,
-  confirmReset: false
+  tout: 0
 };
 
 export const view = el("view");

@@ -22,7 +22,11 @@
     "strict": true,
     // Report variables and imports that are never used.
     "noUnusedLocals": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    // JSX in .tsx files: tsc and Vite both turn <div> into a call to Preact's jsx() function, which
+    // they import from "preact/jsx-runtime" by themselves. No Babel and no Vite plugin needed.
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
   },
   "include": ["src", "test", "vite.config.ts"]
 }

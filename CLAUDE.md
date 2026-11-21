@@ -99,11 +99,11 @@ src/views/practice.ts  Practice
 src/views/pressure.ts  Pressure start screen and the quick round
 src/views/fight.ts   the full fight: the run and the player
 src/views/map.ts     paintArena: the answer layers that Practice and the fight share
-src/views/sheet.ts   Cheat sheet
+src/views/sheet.tsx  Cheat sheet (the first screen built with Preact)
 src/views/tlfig.ts   the Timeline card picture
-src/views/tlnav.ts   colour marks for the timeline categories
+src/views/tlnav.tsx  colour marks for the timeline categories (as text and as components)
 src/views/pattern.ts fight pattern picks (Settings on the player)
-src/views/common.ts  tab header, HUD prompt, fadeEdges, round-done panel
+src/views/common.ts  tab header, mountView (draws a Preact screen), HUD prompt, fadeEdges, round-done panel
 test/                Vitest tests
 ```
 
@@ -192,12 +192,11 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
 
 - Issue #2: a reference view of every mechanic in fight order, with the site's diagrams. Two
   questions are open for the owner. Ask them before you build it.
-- Issues #4 to #10 (label "preact"): move the views to Preact, one phase per issue and per branch,
-  in order. Phase 0 (#3) is done, so the next one is phase 1 (#4). `docs/decisions.md` has the
-  decisions behind the plan.
+- Issues #5 to #10 (label "preact"): move the views to Preact, one phase per issue and per branch,
+  in order. Phases 0 (#3) and 1 (#4) are done, so the next one is phase 2 (#5).
+  `docs/decisions.md` has the decisions behind the plan.
 - Issue #11: make the repository self-contained, so a clone plus one step gives every tool. Three
   questions are open for the owner.
-- Issue #4 holds findings from a second code review.
 - Issue #14: a script that imports fight times and attack sizes from cactbot and BossMod.
 - The issues were written before some later changes. Before you start one, make sure that it
   still matches the code.
