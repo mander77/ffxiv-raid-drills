@@ -23,6 +23,12 @@ export interface Round {
 /** The tabs that count a round: Learn, Timeline and Practice. */
 export type RoundTab = "learn" | "timeline" | "practice";
 
+/** The scores with one more answer to question or drill id. */
+function withAnswer(scores: Record<string, Score>, id: string, ok: boolean): Record<string, Score> {
+  const was = scores[id] ?? { seen: 0, right: 0 };
+  return { ...scores, [id]: { seen: was.seen + 1, right: was.right + (ok ? 1 : 0) } };
+}
+
 const NEW_ROUND: Round = { slot: null, done: 0, right: 0, current: null, finished: false };
 const NO_ROUNDS: Record<RoundTab, Round> = { learn: NEW_ROUND, timeline: NEW_ROUND, practice: NEW_ROUND };
 
@@ -32,6 +38,8 @@ interface ProgressState {
   /** Count an answer to a question or drill, in its score and in the round of its tab. A round
       belongs to one slot: an answer for another slot starts a new round. */
   record: (id: string, ok: boolean, tab: RoundTab, slot: Slot) => void;
+  /** Count an answer in its score only, for the quick round on Pressure, which keeps its own count. */
+  score: (id: string, ok: boolean) => void;
   /** Remember the card you are on in a tab. */
   visit: (tab: RoundTab, current: string) => void;
   /** End the round of a tab, after its last card. */
@@ -49,13 +57,13 @@ export const useProgressStore = create<ProgressState>()(
       rounds: NO_ROUNDS,
       record: (id, ok, tab, slot) =>
         set((st) => {
-          const was = st.scores[id] ?? { seen: 0, right: 0 };
           const round = st.rounds[tab].slot === slot ? st.rounds[tab] : { ...st.rounds[tab], slot, done: 0, right: 0 };
           return {
-            scores: { ...st.scores, [id]: { seen: was.seen + 1, right: was.right + (ok ? 1 : 0) } },
+            scores: withAnswer(st.scores, id, ok),
             rounds: { ...st.rounds, [tab]: { ...round, done: round.done + 1, right: round.right + (ok ? 1 : 0) } },
           };
         }),
+      score: (id, ok) => set((st) => ({ scores: withAnswer(st.scores, id, ok) })),
       visit: (tab, current) =>
         set((st) =>
           st.rounds[tab].current === current && !st.rounds[tab].finished

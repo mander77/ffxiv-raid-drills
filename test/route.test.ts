@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { rightRoute, clickRoute, runnerAt, RUN_SPEED, REACT, LOOK, REST_GAP, HOME as START, type Stop } from "../src/data/route";
+import { rightRoute, clickRoute, runnerAt, MOVEMENT_SPEED, REACT, LOOK, REST_GAP, HOME as START, type Stop } from "../src/data/route";
 import { buildFight, RANDOM } from "../src/data/fight";
 import { newCode } from "../src/util";
 import { inZone, rotZone } from "../src/geometry";
@@ -40,7 +40,7 @@ test("the runner waits on a spot until its hit, then runs straight to the next s
   // The mechanic is on the arena: still waiting, and the target is the spot for the first hit.
   assert.deepEqual(runnerAt(route, 5.5), {at:START, target:route[0]});
   // It leaves LOOK seconds after the mechanic shows, and gets there at run speed.
-  const leave = 5 + LOOK, arrive = leave + dist(START, [50, 34]) / RUN_SPEED;
+  const leave = 5 + LOOK, arrive = leave + dist(START, [50, 34]) / MOVEMENT_SPEED;
   const mid = runnerAt(route, (leave + arrive) / 2);
   assert.isTrue(near(mid.at, [(START[0] + 50) / 2, (START[1] + 34) / 2]), "halfway: " + mid.at);
   // On the first spot, the target stays that spot until its hit lands.
@@ -49,8 +49,8 @@ test("the runner waits on a spot until its hit, then runs straight to the next s
   assert.equal(wait.target, route[0]);
   // The hit lands: the target moves on to the next spot, and it runs there.
   assert.equal(runnerAt(route, 10 + REACT / 2).target, route[1]);
-  const run = runnerAt(route, 10 + REACT + 1);
-  assert.isTrue(near(run.at, [50 + RUN_SPEED, 34]), "one second after leaving: " + run.at);
+  const moving = runnerAt(route, 10 + REACT + 1);
+  assert.isTrue(near(moving.at, [50 + MOVEMENT_SPEED, 34]), "one second after leaving: " + moving.at);
   // At the end it stays on the last spot, with no target.
   assert.deepEqual(runnerAt(route, 99), {at:[80, 34], target:null});
 });
@@ -64,7 +64,7 @@ test("at run speed the runner is never more than half a second late to a right s
       const g = f.segs[st.si];
       // How far short the runner is at the hit, in seconds of running. A Void Stardust puddle
       // counts when it drops, 3 seconds before it goes off, so the runner leaves it then.
-      const short = dist(runnerAt(route, st.hit).at, st.p) / RUN_SPEED;
+      const short = dist(runnerAt(route, st.hit).at, st.p) / MOVEMENT_SPEED;
       if(short > 0.5) late.push(g.title + " step " + (st.j + 1) + ": " + short.toFixed(2) + " s");
     }
   }
@@ -172,6 +172,6 @@ test("your own click: the marker runs to the spot when you click it, not before"
   assert.isUndefined(route[0].pre, "your own route takes no pre-position");
   assert.isTrue(near(runnerAt(route, tClick - 0.1).at, START), "before the click it stands still");
   // Half a second after the click it is half a second of running on its way.
-  assert.closeTo(dist(runnerAt(route, tClick + 0.5).at, START), RUN_SPEED * 0.5, 1e-6);
+  assert.closeTo(dist(runnerAt(route, tClick + 0.5).at, START), MOVEMENT_SPEED * 0.5, 1e-6);
   assert.isTrue(near(runnerAt(route, g.due[0]).at, p), "on the spot when the weapon hits");
 });

@@ -8,7 +8,7 @@
 import { bySlot, withSeed } from "../util";
 import { markRole, partyOf } from "../party";
 import { angOf, polar, rotOverlay, zoneCenter } from "../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildRun, buildOrbital, atAngle, cometSpread, type WeaponRun, type Weapon, type WeaponType } from "./drills";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, type JumpSet, type Weapon, type WeaponType } from "./drills";
 import { PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, lineTo, swordCross } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
@@ -106,7 +106,7 @@ function fromDrill(id: string, s: Slot, v: string | null = null, k = 0): Picture
     and `hits` what the weapon really does. The question names the weapon, so its name tag is
     left out: the boss stands on it anyway. */
 function jump(s: Slot, type: WeaponType, a: number) {
-  const W: Weapon[] = [{a, p:atAngle(a), type}], R = buildRun(s, W), st = R.steps[0], b = R.states[1], st2 = buildRun(other(s), W).steps[0];
+  const W: Weapon[] = [{a, p:atAngle(a), type}], R = buildJumpSet(s, W), st = R.steps[0], b = R.states[1], st2 = buildJumpSet(other(s), W).steps[0];
   if(!st.z || !st2.z) throw new Error("a weapon step has no zone");
   // The answer shows you on your spot, on top of the boss's ring: a close spot is under it.
   const fig: Picture = {overlays:[guide(CENTER, [b.x, b.y]), ...R.overlays.filter(o => o.t !== "tag")], boss:b,
@@ -116,7 +116,7 @@ function jump(s: Slot, type: WeaponType, a: number) {
 
 /** A run's pieces with each weapon's name outside it (41 units out), clear of the order
     numbers that go between the weapon and the boss. */
-const named = (R: WeaponRun): Overlay[] => [...R.overlays.filter(o => o.t !== "tag"),
+const named = (R: JumpSet): Overlay[] => [...R.overlays.filter(o => o.t !== "tag"),
   ...R.W.map((w, i): Overlay => ({...tag(...at(w.a, 41), w.type.toUpperCase()), spawn:i}))];
 
 // TS note: Array<[number, WeaponType]> is an array of pairs. Each `[a, type]` in map() unpacks
@@ -132,10 +132,10 @@ const inOrder = (W: Weapon[], order: number[]): Overlay[] => [...path(order.map(
 
 /* Ultimate Trophy Weapons, clockwise: the first spawns south and slightly west, the last north. */
 const ULT: Array<[number, WeaponType]> = [[200, "sword"], [315, "axe"], [90, "scythe"], [180, "axe"], [270, "sword"], [0, "scythe"]];
-const ultRun = (s: Slot) => buildRun(s, weapons(ULT));
+const ultSet = (s: Slot) => buildJumpSet(s, weapons(ULT));
 /** The pieces of the weapons whose spawn index passes `keep`, with their order numbers. */
 function ultPart(s: Slot, keep: (i: number) => boolean): Overlay[] {
-  const R = ultRun(s);
+  const R = ultSet(s);
   return [...named(R).filter(o => o.spawn != null && keep(o.spawn)), ...R.W.map((w, i) => numAt(w, String(i + 1))).filter((_o, i) => keep(i))];
 }
 /** Order labels for weapon spots with no weapon drawn yet ([angle, label] pairs, where the order
@@ -186,7 +186,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...AXE_HITS, ...heldWeapon("axe"), ...TANKS_TOGETHER, ...AXE_SPREAD]),
       show([tag(...HELD_TAG, "AXE OR SCYTHE")]),
       show([...swordCross(CENTER, [0, -1]), ...heldWeapon("sword")])]}; },
-  "k-first-weapon": s => { const R = buildRun(s, weapons([[315, "scythe"], [90, "axe"], [180, "sword"]])), W = R.W;
+  "k-first-weapon": s => { const R = buildJumpSet(s, weapons([[315, "scythe"], [90, "axe"], [180, "sword"]])), W = R.W;
     return {overlays:named(R), boss:R.states[0], after:inOrder(W, [0, 1, 2]), answer:[circle(W[0].p, 9)], options:[
       show(inOrder(W, [0, 1, 2]), [circle(W[0].p, 9)]),
       show([...path([W[2].p]), numAt(W[2], "1"), say("ALWAYS THE SWORD FIRST", 8)], [circle(W[2].p, 9)]),
@@ -219,7 +219,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     return {overlays:[...PUDDLE_PIECES, ...FIXED_SPREAD_MARKS], boss:BOSS, after:[...spreadWith(zoneCenter(gaps)), you(s, zoneCenter(gaps))], answer:[gaps], options:[
       hit(youIn(s, gaps), spreadWith(zoneCenter(gaps))), hit(youAt(s, [37, 71]), spreadWith([37, 71])),
       show([stackHit(stackedMarks), ...stackedMarks]), hit(youAt(s, [50, 58], 9), [donut(CENTER, FAKE.voidDonut)])]}; },
-  "k-void-run": s => { const R = buildRun(s, faceApproach(weapons([[270, "scythe"]]))), toward = cometSpread(s, R.W[0].p)(VOID_RESULTS), lb = zoneCenter(toward);
+  "k-void-sprint": s => { const R = buildJumpSet(s, faceApproach(weapons([[270, "scythe"]]))), toward = cometSpread(s, R.W[0].p)(VOID_RESULTS), lb = zoneCenter(toward);
     const waitAt = bySlot<Point>(s, {H1:[83, 50], H2:[50, 83]});
     return {overlays:[...PUDDLE_PIECES, ...named(R), ...FIXED_SPREAD_MARKS], boss:STILL, after:[aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], answer:[toward],
       note:"Example: the first weapon of the second set is a scythe in the west.", options:[
@@ -227,7 +227,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
         show([aoe(waitAt, SPREAD_R), you(s, waitAt), say("WAIT FOR HIS FACING", 8)], [cometSpread(s)(VOID_RESULTS)]),
         youAt(s, [70, 44]),
         show([RAIDWIDE, ...stackedMarks, say("MITIGATE, STAY PUT", 8)])]}; },
-  "k-assault-2": s => { const R = buildRun(s, faceApproach(weapons([[135, "scythe"], [270, "axe"], [0, "sword"]]))), W = R.W;
+  "k-assault-2": s => { const R = buildJumpSet(s, faceApproach(weapons([[135, "scythe"], [270, "axe"], [0, "sword"]]))), W = R.W;
     return {overlays:named(R), boss:STILL, after:inOrder(W, [0, 1, 2]), answer:[circle(W[0].p, 9)], options:[
       show(inOrder(W, [0, 1, 2]), [circle(W[0].p, 9)]),
       show([...inOrder(W, [1, 2, 0]), say("THE ONE HE FACED IN SET 1", 94)], [circle(W[1].p, 9)]),
@@ -265,7 +265,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     return {overlays:ring(ALL, 20, 22.5, 45), boss:BOSS, after:[RAIDWIDE, say("EVERYONE AT 1 HP", 8)], options:[
       show([RAIDWIDE, say("EVERYONE AT 1 HP", 8)]), show([aoe(mt, FAKE.buster), target(mt), say("THE TANK DIES", 8)]),
       show([aoe(mt, FAKE.buster), target(mt), say("TANK BUSTER", 8)]), show([say("NOTHING HAPPENS", 8)])]}; },
-  "k-ult-spawn": s => { const R = ultRun(s), cw: Array<[number, string]> = [[315, "2"], [90, "3"], [180, "4"], [270, "5"], [0, "6"]];
+  "k-ult-spawn": s => { const R = ultSet(s), cw: Array<[number, string]> = [[315, "2"], [90, "3"], [180, "4"], [270, "5"], [0, "6"]];
     return {overlays:ultPart(s, i => i === 0), boss:STILL, after:ultPart(s, i => i > 0), answer:[circle(R.W[1].p, 9)], options:[
       show(spotTags(cw), [circle(at(315, 29), 7)]),
       show(spotTags([[45, "2"], [270, "3"], [180, "4"], [90, "5"], [0, "6"]]), [circle(at(45, 29), 7)]),

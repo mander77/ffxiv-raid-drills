@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
 import { LEARN_PICTURES } from "../../data/pictures";
+import { timerOf } from "../../lib/pressure";
 import type { Option, QuizItem, Slot } from "../../types";
 import { shuffle } from "../../util";
 import { LearnPicture } from "../arena/LearnPicture";
 import { RuleBox } from "../RuleBox";
 import { TimelinePicture, timelineRowOf } from "./TimelinePicture";
+import { TimerBar } from "./TimerBar";
 
 /** An answer as shown: its text and rightness, and `k`, its place in the question's own list,
     which its preview on the picture follows. */
@@ -26,12 +28,16 @@ export interface QuestionCardProps {
   onAnswer: (ok: boolean) => void;
   /** Called when you go on to the next card. */
   onNext: () => void;
+  /** A timed card (the quick round on Pressure): the seconds to decide, after the time to read. */
+  decideSecs?: number;
+  /** Called once, when the time runs out before an answer. */
+  onTimeout?: () => void;
 }
 
 /** A multiple-choice card. A Learn card has an arena picture, and its answers show on the picture
     before you lock one in. A Timeline card has a picture of the fight timeline instead.
     Give it a `key` per card and slot, so each card starts fresh. */
-export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer, onNext }: QuestionCardProps) {
+export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer, onNext, decideSecs, onTimeout }: QuestionCardProps) {
   // TS note: a function passed to useState runs only on the first draw, so the answers are built
   // and shuffled once per card, not on every draw.
   const [q] = useState(() => item.build(slot));
@@ -42,8 +48,11 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
   /** The answer you point at or move to with Tab. It shows on the picture while you do. */
   const [hover, setHover] = useState<number | null>(null);
   const next = useRef<HTMLButtonElement>(null);
+  /** A timed card: its timer, made once, and whether the time ran out (too slow). */
+  const [timer] = useState(() => (decideSecs ? timerOf([q.prompt, ...q.options.map((o) => o.t)], decideSecs) : null));
+  const [slow, setSlow] = useState(false);
 
-  const answered = pick !== null;
+  const answered = pick !== null || slow;
   const fig = LEARN_PICTURES[item.id]?.(slot);
   const previews = previewAnswers && Boolean(fig?.options);
   const row = fig ? null : timelineRowOf(item);
@@ -55,6 +64,11 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
     if (answered) return;
     setPick(i);
     onAnswer(opts[i].ok === true);
+  }
+  function handleTimeout(): void {
+    if (answered) return;
+    setSlow(true);
+    onTimeout?.();
   }
   function handleOptionClick(i: number): void {
     if (previews) setSel(i);
@@ -119,6 +133,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
   return (
     <div className="space-y-4 max-md:pb-20">
       {top}
+      {timer && <TimerBar timer={timer} stopped={answered} onTimeout={handleTimeout} />}
       <h2 className="text-xl font-semibold text-balance">{q.prompt}</h2>
       <div className={cn("grid gap-6", picture && "md:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]")}>
         {/* The picture sits beside the answers, on the right. On a phone it goes above them. */}
@@ -142,8 +157,8 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
 
           {answered ? (
             <>
-              <p className="sr-only" role="status">
-                {okPick ? "Right." : "Not this one."}
+              <p className={cn(slow ? "font-medium text-amber-700" : "sr-only")} role="status">
+                {slow ? "Too slow: the time ran out." : okPick ? "Right." : "Not this one."}
               </p>
               <RuleBox rule={q.rule} />
               {q.src && <p className="text-xs text-muted-foreground">Source: {q.src}</p>}

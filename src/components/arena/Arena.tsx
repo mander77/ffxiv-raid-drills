@@ -50,6 +50,9 @@ function Waymarks() {
   ));
 }
 
+/** The picture's width over its height: its viewBox is 108 by 110 arena units. */
+export const ARENA_ASPECT = 108 / 110;
+
 export interface ArenaProps {
   /** What the picture shows, for screen readers. */
   label: string;

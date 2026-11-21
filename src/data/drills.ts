@@ -6,11 +6,11 @@ import { HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_
 import type { Boss, Drill, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
-/** One weapon in a jump run. `a` is its direction from the arena center, in degrees clockwise from north.
+/** One weapon in a jump set. `a` is its direction from the arena center, in degrees clockwise from north.
     `axis`, when set, turns the icon: it is the long side, from the handle end to the tip. */
 export interface Weapon { a: number; p: Point; type: WeaponType; where?: string; tornado?: boolean; axis?: Point }
-/** Everything a jump-run drill needs: the weapons, where the boss stands after each jump, the steps and the drawing. */
-export interface WeaponRun { W: Weapon[]; states: Boss[]; steps: Step[]; overlays: Overlay[] }
+/** Everything a jump-set drill needs: the weapons, where the boss stands after each jump, the steps and the drawing. */
+export interface JumpSet { W: Weapon[]; states: Boss[]; steps: Step[]; overlays: Overlay[] }
 
 const WEAPON_TYPES: WeaponType[] = ["axe", "sword", "scythe"];
 const ORDINALS = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"];
@@ -21,9 +21,9 @@ const OUTSIDE = HITBOX + 4.5;
 /** The first Void Stardust puddle: north of the boss, just outside his hitbox. */
 export const FIRST_PUDDLE: Point = [50, 50 - OUTSIDE];
 
-/* A jump run: the boss starts in the middle and jumps to each weapon in order.
+/* A jump set: the boss starts in the middle and jumps to each weapon in order.
    He faces the way he jumped, so relative north at each weapon = his travel direction. */
-export function buildRun(s: Slot, W: Weapon[]): WeaponRun {
+export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
   const states: Boss[] = [{x:50, y:50, f:W[0].a}];
   const dirs: Point[] = [];   // dirs[i] = the direction of the jump into weapon i
   let prev: Point = [50, 50];
@@ -94,8 +94,8 @@ export function buildRun(s: Slot, W: Weapon[]): WeaponRun {
 /* Assault Evolved: three weapons. The boss faces the first, then goes clockwise.
    `order` forces the weapon types in the order he takes them (the fight pattern picks); without it,
    the order is random. */
-export function buildAssault(s: Slot, order?: WeaponType[]): WeaponRun {
-  return buildRun(s, assaultWeapons(order));
+export function buildAssault(s: Slot, order?: WeaponType[]): JumpSet {
+  return buildJumpSet(s, assaultWeapons(order));
 }
 
 /** Three weapons at least 90 degrees apart, in the order he takes them: the first, then clockwise. */
@@ -129,30 +129,30 @@ export function faceApproach(W: Weapon[]): Weapon[] {
 /* Assault Evolved, second set (1:33, after Void Stardust). The boss does not face a weapon until
    his cast starts, but the weapons show the order (cactbot reads it from their facing): the one
    that faces the middle, square to the boss, goes first. Then clockwise. */
-export function buildAssault2(s: Slot, order?: WeaponType[]): WeaponRun {
+export function buildAssault2(s: Slot, order?: WeaponType[]): JumpSet {
   const W = faceApproach(assaultWeapons(order));
   // The weapons used to get a random turn and flip. Those random numbers are still drawn, so a
   // fight code made before this change builds the rest of the fight the same way.
   for(let i = 0; i < W.length; i++){ if(i){ random(); random(); } random(); }
-  const run = buildRun(s, W);
-  run.states[0].f = null;
-  return run;
+  const set = buildJumpSet(s, W);
+  set.states[0].f = null;
+  return set;
 }
 
 /* Ultimate Trophy Weapons: six weapons, resolved in spawn order.
    The first spawns south, slightly west (then clockwise) or slightly east (then counterclockwise).
    The second spawns northwest or northeast. The rest sit on cardinals.
    The first three are all different, and so are the last three. The last four leave tornadoes. */
-export function buildUltimate(s: Slot, forceCw?: boolean): WeaponRun & {cw: boolean} {
+export function buildUltimate(s: Slot, forceCw?: boolean): JumpSet & {cw: boolean} {
   // The coin is always tossed, so a forced direction leaves the other random calls in place.
   const toss = random() < 0.5, cw = forceCw ?? toss;
   const angles = cw ? [200, 315, 90, 180, 270, 0] : [160, 45, 270, 180, 90, 0];
   const names = cw ? ["south, slightly west", "northwest", "east", "south", "west", "north"]
                    : ["south, slightly east", "northeast", "west", "south", "east", "north"];
   const types = shuffle([...WEAPON_TYPES]).concat(shuffle([...WEAPON_TYPES]));
-  const run = buildRun(s, angles.map((a, i): Weapon => ({a, p:atAngle(a), type:types[i], where:names[i], tornado:i >= 2})));
-  run.states[0].f = null;   // no facing arrow, so the spawn order is the only clue
-  return {...run, cw};
+  const set = buildJumpSet(s, angles.map((a, i): Weapon => ({a, p:atAngle(a), type:types[i], where:names[i], tornado:i >= 2})));
+  set.states[0].f = null;   // no facing arrow, so the spawn order is the only clue
+  return {...set, cw};
 }
 
 /** A picked weapon order ("sword-axe-scythe") as weapon types, or undefined for Random.
@@ -171,9 +171,9 @@ export function facingNext(sc: Scene, n: number, boss: Boss): Boss {
   return next && next.f != null && (next.x !== boss.x || next.y !== boss.y) ? {...boss, f:next.f} : boss;
 }
 
-/* The scenes around a weapon run. Practice and the full fight both use them, so a
-   fight can pass in a run built with the player's choices. */
-export function assaultScene(A: WeaponRun, s: Slot): Scene {
+/* The scenes around a jump set. Practice and the full fight both use them, so a
+   fight can pass in a set built with the player's choices. */
+export function assaultScene(A: JumpSet, s: Slot): Scene {
   return {
     setup:"Three weapons are on the floor. The boss is in the middle, and the red arrow points at the weapon he faces. He jumps to that one first, then goes clockwise. For the sword, watch where he jumps from. For the scythe, read the weapon: the butt has the round knob, the point is the blade end.",
     overlays:A.overlays,
@@ -181,7 +181,7 @@ export function assaultScene(A: WeaponRun, s: Slot): Scene {
     steps:A.steps,
     rule:"First = the weapon he faces, then clockwise. Sword: the pocket on the side he jumped from, " + bySlot(s, {H1:"G1 on his left", H2:"G2 on his right"}) + ", a few steps in from its inner corner. Scythe: " + bySlot(s, {H1:"H1 at the butt", H2:"H2 at the point"}) + ", close in. Axe: the whole party stacks in the middle (not like Raw Steel Trophy's axe, where the party spreads)."};
 }
-export function ultimateScene(U: WeaponRun): Scene {
+export function ultimateScene(U: JumpSet): Scene {
   return {
     setup:"Everyone is at 1 HP after Charybdistopia. Six weapons spawn one after another, and the boss resolves them in spawn order. He starts on the first weapon before the last ones spawn: three show now, and each hit brings in the next one. Watch where the first one spawns: south and slightly west means clockwise, south and slightly east means counterclockwise.",
     spawnPlay:true, spawnAhead:3, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,
@@ -240,7 +240,7 @@ const far = (p: Point, q: Point, d: number): boolean => dist(p, q) >= d;
 const apart = (p: Point, q: Point): number => { const d = Math.abs(angOf([p[0] - 50, p[1] - 50]) - angOf([q[0] - 50, q[1] - 50])) % 360; return Math.min(d, 360 - d); };
 
 /* With `toward` set (a sword or scythe goes first next), the spread spot can be anywhere on
-   that weapon's side of the arena, so the run to it is short. That side shows as one shaded
+   that weapon's side of the arena, so the way to it is short. That side shows as one shaded
    area. Any spot in it is right if it is out of the hitbox, out of the last puddle and not on a
    tank or melee spot. A spread is 6 yalms (15 units), so a spot closer than that to a tank or
    melee spot hits them. */
@@ -405,18 +405,18 @@ function voidSteps(s: Slot, spread: boolean, toward: Point | null, c: Point = CE
 const safeSpot = (st: Step): Point | null => { const z = st.z ?? st.zf?.([]); return z ? zoneCenter(z) : null; };
 
 /* The first Void Stardust runs straight into the second weapon set: the weapons are already
-   out, so the party finds the first one early. A sword or scythe first means a run, so the
+   out, so the party finds the first one early. A sword or scythe first means a sprint, so the
    stack or spread moves toward it. An axe first keeps the usual spots. Then the scene goes on
    through all three weapons of this second set, so one drill covers the whole stretch. */
-export function voidIntoWeapons(s: Slot, spread: boolean, A: WeaponRun): Scene {
-  const first = A.W[0], run = first.type !== "axe", where = COMPASS[Math.round(first.a / 45) % 8];
+export function voidIntoWeapons(s: Slot, spread: boolean, A: JumpSet): Scene {
+  const first = A.W[0], sprint = first.type !== "axe", where = COMPASS[Math.round(first.a / 45) % 8];
   const steps: Step[] = [
     // A look-ahead: you spot the first weapon now, so you know what to do when the puddles are
     // done, but you go to A for the first puddle, not to the weapon.
     {q:"Before the puddles: which weapon goes first after Void Stardust? Click it.", z:{c:first.p, r:9}, lookAhead:true,
       a:"The " + first.type + ", " + where + ": its flat side is square to the boss. " +
-        (run ? "A sword or scythe first means a run, so the stack or spread moves toward it." : "An axe first means the party stacks in the middle, so the usual spots work.")},
-    ...voidSteps(s, spread, run ? first.p : null, CENTER, NORTH_START, safeSpot(A.steps[0])),
+        (sprint ? "A sword or scythe first means a sprint, so the stack or spread moves toward it." : "An axe first means the party stacks in the middle, so the usual spots work.")},
+    ...voidSteps(s, spread, sprint ? first.p : null, CENTER, NORTH_START, safeSpot(A.steps[0])),
     // The weapons start here, and the puddles are gone.
     {...A.steps[0], clearDrops:true, q:"The " + (spread ? "spread" : "stack") + " went off. The boss goes to the first weapon. Click where you go.",
       a:A.steps[0].a + " If you cannot make it in time, use Sprint or a movement ability. A scholar can use Expedient for the whole party."}];
@@ -451,7 +451,7 @@ export function voidAgain(s: Slot, spread: boolean, boss: Boss): Scene {
     rule:"The boss stays on the third weapon. Puddles start at his butt, each just outside the last, clockwise around him. The second Void Stardust ends the other way from the first."};
 }
 
-/** True when a new run of this drill can look different: random parts, a variant or a turn. */
+/** True when a new try at this drill can look different: random parts, a variant or a turn. */
 export const changes = (m: Drill): boolean => Boolean(m.random || m.variants || m.rotate);
 
 /* ---------- map drills ---------- */

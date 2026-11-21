@@ -1,25 +1,6 @@
 // Small helpers shared by every module.
 import type { Slot } from "./types";
 
-/* Per-viewer conveniences only. Reads and writes survive blocked or missing storage. */
-export const LS = {
-  // TS note: <T> is a generic type parameter, like a C# generic method.
-  // LS.get("psecs", 6) infers T = number from the default value, so the result is a number.
-  // `as T` tells the compiler to trust that the parsed JSON has that type. It does no check at run time.
-  get<T>(k: string, d: T): T {
-    try { const v = localStorage.getItem("m11s." + k); return v == null ? d : JSON.parse(v) as T; } catch { return d; }
-  },
-  // TS note: `unknown` accepts any value, but you must check it before you use it.
-  // It is the safe form of `any`, which turns type checking off.
-  set(k: string, v: unknown): void {
-    // TS note: `catch { }` with no variable is allowed when you do not need the error.
-    try { localStorage.setItem("m11s." + k, JSON.stringify(v)); } catch { /* storage blocked */ }
-  },
-  del(k: string): void {
-    try { localStorage.removeItem("m11s." + k); } catch { /* storage blocked */ }
-  }
-};
-
 /** Pick the H1 or the H2 version of a value: bySlot(s, {H1:"left", H2:"right"}). */
 // TS note: Record<Slot, T> needs an entry for every Slot. When a new slot joins Slot, each call
 // that misses it is a type error, so no slot falls back to another slot's value by accident.
@@ -71,18 +52,4 @@ export function shuffle<T>(a: T[]): T[] {
 export function readingMs(texts: string[]): number {
   const words = texts.join(" ").trim().split(/\s+/).length;
   return Math.max(2000, Math.round(words / 4 * 1000));
-}
-
-// TS note: Record<string, string> is an object used as a map, like Dictionary<string, string>.
-const ESCAPES: Record<string, string> = {"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;"};
-export function esc(t: unknown): string { return String(t).replace(/[&<>"]/g, c => ESCAPES[c]); }
-
-/** getElementById for elements the page always has. */
-// TS note: `T extends HTMLElement = HTMLElement` is a constraint with a default,
-// like `where T : HTMLElement` in C#. el<HTMLButtonElement>("p-start") returns a button type.
-// Throwing here means callers get a plain HTMLElement, never `HTMLElement | null`.
-export function el<T extends HTMLElement = HTMLElement>(id: string): T {
-  const e = document.getElementById(id);
-  if(!e) throw new Error("Missing element #" + id);
-  return e as T;
 }

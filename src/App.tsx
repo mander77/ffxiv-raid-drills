@@ -8,6 +8,7 @@ import { CheatSheetPage } from "./pages/CheatSheetPage";
 import { HomePage } from "./pages/HomePage";
 import { LearnPage } from "./pages/LearnPage";
 import { PracticePage } from "./pages/PracticePage";
+import { PressurePage } from "./pages/PressurePage";
 import { TimelinePage } from "./pages/TimelinePage";
 
 export function App() {
@@ -22,6 +23,7 @@ export function App() {
         <Route path="/learn/:card?" element={<LearnPage />} />
         <Route path="/practice/:drill?/:code?" element={<PracticePage />} />
         <Route path="/timeline/:card?" element={<TimelinePage />} />
+        <Route path="/pressure/:code?/:picks?" element={<PressurePage />} />
         <Route path="/sheet" element={<CheatSheetPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -3,14 +3,14 @@ import { PUDDLE_R } from "../../data/attacks";
 import { rotOverlay, rotZone, round2, stepZone } from "../../geometry";
 import { bossFor } from "../../lib/practice";
 import { cn } from "../../lib/utils";
-import type { Overlay, Point, Scene, StepResult } from "../../types";
+import type { Boss, Overlay, Point, Scene, StepResult, Zone } from "../../types";
 import { Arena, pieceLayers } from "./Arena";
 import { hitsFirst, Shape } from "./Shape";
 import { TurningBoss } from "./TurningBoss";
 import { ZoneArea } from "./ZoneArea";
 import { ZoneLabel } from "./ZoneLabel";
 
-export interface PracticeArenaProps {
+export interface LiveArenaProps {
   scene: Scene;
   /** How many quarter turns the arena is turned. */
   k: number;
@@ -22,12 +22,41 @@ export interface PracticeArenaProps {
   /** Called with the spot you click, in arena units. Leave it out when the arena takes no clicks. */
   onPointClick?: (p: Point) => void;
   className?: string;
+  /* The full fight sets the props below. */
+  /** The boss, when the fight clock places him. Left out, he follows the answers. */
+  boss?: Boss | null;
+  /** Whether the puddle of step i has gone off, so it fades. Left out, a puddle fades two steps
+      after it drops. */
+  wentOff?: (i: number) => boolean;
+  /** Label the last right answer "Right spot". Watch the right moves leaves it out: your marker
+      walks into each spot. */
+  rightLabel?: boolean;
+  /** The right area of your marker's next spot, in blue (Watch the right moves). */
+  target?: Zone | null;
+  /** What the fight draws over the arena: the flash of a hit, the countdown ring, a tank buster. */
+  effects?: ReactNode;
+  /** Your moving marker, on top of everything. */
+  runner?: ReactNode;
 }
 
 /** The arena of a Practice mechanic: its pattern, your answers, the puddles you dropped and the
     boss. Each weapon is its own group, so it fades once it has resolved, and in a mechanic that
     shows its spawns, the weapons appear one at a time. */
-export function PracticeArena({ scene: sc, k, results, showLast, hint, onPointClick, className }: PracticeArenaProps) {
+export function LiveArena({
+  scene: sc,
+  k,
+  results,
+  showLast,
+  hint,
+  onPointClick,
+  className,
+  boss: placed,
+  wentOff,
+  rightLabel = true,
+  target,
+  effects,
+  runner,
+}: LiveArenaProps) {
   const n = results.length;
   const done = n >= sc.steps.length;
   const asking = showLast ? n - 1 : n;
@@ -81,7 +110,7 @@ export function PracticeArena({ scene: sc, k, results, showLast, hint, onPointCl
         <circle
           // biome-ignore lint/suspicious/noArrayIndexKey: a puddle belongs to its step, which never moves.
           key={`drop-${i}`}
-          className={cn("drop", i <= n - 2 && "fading")}
+          className={cn("drop", (wentOff ? wentOff(i) : i <= n - 2) && "fading")}
           cx={round2(r.drop[0])}
           cy={round2(r.drop[1])}
           r={PUDDLE_R}
@@ -105,7 +134,7 @@ export function PracticeArena({ scene: sc, k, results, showLast, hint, onPointCl
   const hintBase = hintStep ? stepZone(hintStep, [...results]) : undefined;
   const hintZone = hintBase ? rotZone(hintBase, k) : undefined;
 
-  const boss = bossFor(sc, k, n, showLast);
+  const boss = placed === undefined ? bossFor(sc, k, n, showLast) : placed;
   const shapes = (os: readonly Overlay[]): ReactNode =>
     // biome-ignore lint/suspicious/noArrayIndexKey: these pieces never change order.
     os.map((o, i) => <Shape key={i} overlay={o} />);
@@ -134,13 +163,16 @@ export function PracticeArena({ scene: sc, k, results, showLast, hint, onPointCl
           <>
             {last && lastStep && <ZoneArea zone={last.z} look={lastStep.lookAhead ? "later" : last.ok ? "ok" : "bad"} />}
             {hintZone && hintStep && <ZoneArea zone={hintZone} look={hintStep.lookAhead ? "later" : "pick"} />}
+            {target && <ZoneArea zone={target} look="pick" />}
           </>
         ),
         boss: boss && <TurningBoss boss={boss} />,
         labels: (
           <>
             {base.labels}
-            {last && lastStep && <ZoneLabel zone={last.z} kind={lastStep.lookAhead ? "later" : "right"} />}
+            {last && lastStep && (lastStep.lookAhead || rightLabel) && (
+              <ZoneLabel zone={last.z} kind={lastStep.lookAhead ? "later" : "right"} />
+            )}
             {hintZone && hintStep && <ZoneLabel zone={hintZone} kind={hintStep.lookAhead ? "later" : "go"} />}
           </>
         ),
@@ -150,11 +182,17 @@ export function PracticeArena({ scene: sc, k, results, showLast, hint, onPointCl
             {shapes(cues.filter((o) => o.t === "mark"))}
           </>
         ),
-        me: last && !last.missed && (
-          <g className={cn("pick", last.ok ? "ok" : "bad")} transform={`translate(${round2(last.p[0])} ${round2(last.p[1])})`}>
-            <circle className="halo" r="2.6" />
-            <circle className="dot" r="1.1" />
-          </g>
+        effects,
+        me: (
+          <>
+            {last && !last.missed && (
+              <g className={cn("pick", last.ok ? "ok" : "bad")} transform={`translate(${round2(last.p[0])} ${round2(last.p[1])})`}>
+                <circle className="halo" r="2.6" />
+                <circle className="dot" r="1.1" />
+              </g>
+            )}
+            {runner}
+          </>
         ),
       }}
     />

@@ -93,6 +93,30 @@ make sure that each one still matches the code before you start it.
     status; `look` is a colour, so a look-ahead step is `Step.lookAhead`; the ability categories
     are spelled out (`Category`, `CategoryDots`); `f1` (which rounds to 2 decimals) is `round2`.
     Only names changed, never a value, in `src/data/` too, with the owner's OK.
+  - Rebuild 5 (#22): Pressure is back: the quick round, the run and Watch the right moves, with
+    shared player links (`/pressure/<code>[/<picks>][?t=<s>]`). The fight clock's rules (the skip
+    to 3 seconds before a mechanic, when a step can be answered, the result hold, the 3-2-1, the
+    look-ahead answer) moved from the old screen code into plain functions in `src/lib/fight.ts`,
+    with tests; the numbers are the same. The clock runs outside React, in a ref; one frame loop
+    moves it, and the parts that change every frame (cast bar, timeline, your marker, the ring)
+    update through refs (`useFightFrame`), so React draws the arena only when what it shows
+    changes. New picks or another slot build the same fight again at the same moment. The quick
+    round keeps its own counts and adds each answer to your scores, as before. `PracticeArena` is
+    `LiveArena`, since the fight uses it too. The unused `LS`, `esc` and `el` helpers are gone.
+    "Run" now means only the scored full fight, with the owner's OK: Practice's `DrillRun` is
+    `DrillScreen` (one go at a drill is a try), the quick round ends with Go again like the other
+    rounds, and a weapon run in `src/data/drills.ts` is a jump set (`JumpSet`, `buildJumpSet`).
+    Names only, never a value.
+  - Rebuild 5, after review: the player's Settings opens in a shadcn/ui Sheet, from the right on a
+    wide screen (the arena stays in view) and from the bottom on a phone. The owner chose Sheet
+    over Drawer: Drawer's drag to close would fight the drag of the weapon cards, and it needs a
+    second component on a wide screen. The fight's keys leave Settings alone, and the player does
+    not pause while it is open: a pick builds the fight again at the same moment.
+  - Rebuild 5, after review: the whole arena must be on the screen during the fight, with no
+    scroll. The arena is as large as the room from its top to the bottom of the screen
+    (`useFitToScreen`). On a wide screen the play bar sits beside it, above the panel; it is no
+    longer sticky, since it covered the map. The prompt is always two lines tall, so a longer one
+    does not push the arena down.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what

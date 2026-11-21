@@ -14,6 +14,7 @@ export const TABS: readonly TabInfo[] = [
   { path: "/learn", label: "Learn", lede: "What each mechanic does, and what you do in it. Pick an answer to see it on the picture." },
   { path: "/practice", label: "Practice", lede: "Click where you stand. One mechanic at a time, no timer." },
   { path: "/timeline", label: "Timeline", lede: "Which mechanic comes next in the fight." },
+  { path: "/pressure", label: "Pressure", lede: "The same questions, fast: timed questions, or the whole fight on the clock." },
   { path: "/sheet", label: "Cheat sheet", lede: "The rules and your timeline on one page." },
 ];
 
