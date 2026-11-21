@@ -462,8 +462,13 @@ static wins.
   skip any path, because `main` needs its result on every commit.
 - A repository ruleset, "main", on the default branch, with no bypass (the owner too): the two CI
   jobs must have passed on the commit, no force push, no deletion, linear history (no merge
-  commits). The owner chose this over pull requests, so the fast-forward publish stays. In an
-  emergency, turn the ruleset off in Settings > Rules > Rulesets, and back on after.
+  commits). The owner chose this over pull requests for themselves, so the fast-forward publish
+  stays. In an emergency, turn the ruleset off in Settings > Rules > Rulesets, and back on after.
+- A second ruleset, "main: pull requests": only the owner may push to `main` directly. Everyone
+  else needs a pull request with one approval (a push after the approval needs a new one),
+  merged by rebase or squash. The repository admin role (only the owner) bypasses this ruleset
+  only. It is a ruleset of its own, because a bypass covers a whole ruleset, and the CI rule must
+  bind the owner too.
 - GitHub checks the commit a push to `main` ends on, by the CI run on that same commit when its
   branch was pushed. So push the branch, wait for CI, then push `main`. `scripts/publish.sh` waits for that run.
 - Dependabot (`.github/dependabot.yml`) opens a pull request each week for npm (minor and patch

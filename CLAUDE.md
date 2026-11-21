@@ -24,7 +24,8 @@ tokens or account details.
   See `docs/decisions.md` for the hosting details.
 - CI: GitHub Actions (`.github/workflows/ci.yml`) runs lint, the type check, the unit tests, the
   build and the browser tests on every branch push. A ruleset on `main` takes only a commit on
-  which both CI jobs passed, and blocks force pushes, deletion and merge commits.
+  which both CI jobs passed, and blocks force pushes, deletion and merge commits. Only the owner
+  may push to `main` directly; anyone else needs a pull request.
 
 ## The aim of the tool
 
