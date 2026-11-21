@@ -282,7 +282,7 @@
     fill: var(--arena-dps);
   }
 
-  /* Where to stand: the right answer is green, a preview or "Go here" is blue, the other slot's spot
+  /* Where to stand: the correct answer is green, a preview or "Go here" is blue, the other slot's spot
      is grey, a spot saved for later is purple, and an area that gets hit is red. */
   .arena .zone {
     stroke-width: 0.7;
@@ -339,12 +339,12 @@
   .arena.live.locked {
     cursor: default;
   }
-  /* After a wrong click the right area shows in a lighter green. */
+  /* After an incorrect click the correct area shows in a lighter green. */
   .arena .zone.bad {
     fill: rgb(27 116 72 / 0.16);
     stroke: var(--arena-ok);
   }
-  /* Your click: a dot with a ring, red when the spot was wrong. */
+  /* Your click: a dot with a ring, red when the spot was incorrect. */
   .arena .pick .dot {
     fill: var(--arena-text);
   }

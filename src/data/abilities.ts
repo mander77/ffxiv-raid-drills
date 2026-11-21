@@ -48,7 +48,7 @@ const N = {
   danceTrophy: "Dance of Domination starts: a raidwide that hits seven times.",
   danceHits: "Seven raidwide hits in a row. The last one is the biggest.",
   eye: "Lines go off along the cuts in the floor, and four players get a stack. Stand with your pair.",
-  charyb: "Every player drops to 1 HP. Heal the whole party right away.",
+  charyb: "Every player drops to 1 HP. Heal the whole party immediately.",
   ultimate: "Like Trophy Weapons, but with six weapons, and four tornadoes appear during it.",
   apex: "Assault Apex: the boss uses all six weapons in order.",
   gust: "Each tornado hits the two players closest to it with a cone.",

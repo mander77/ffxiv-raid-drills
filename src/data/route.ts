@@ -1,4 +1,4 @@
-// The route your marker runs in the full fight: from spot to spot, leaving each spot right after
+// The route your marker runs in the full fight: from spot to spot, leaving each spot just after
 // its hit. "Watch the correct moves" runs the correct spots, and the run goes to your own clicks.
 // The position comes from the fight time, so pausing, the slider and the speed setting stay in
 // step with it.
@@ -18,7 +18,7 @@ export const REACT = 0.2;
 /** How long after a mechanic appears the player starts to move to its first spot, in seconds.
     Dance of Domination shows its lines only 4.5 seconds before the pair stacks, so this is short. */
 export const LOOK = 0.5;
-/** The default pre-position, and where the player starts: right up at the boss, inside his hitbox
+/** The default pre-position, and where the player starts: up close to the boss, inside his hitbox
     just south of his center. It is the most central spot, so any first weapon, any pair spot and
     so on is a short run away. Pre-positioning is a big part of the raid. */
 export const HOME: Point = [50, 56];
@@ -84,9 +84,9 @@ export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Po
 /** Where the runner is at time t, and its target: the stop for the next hit, once that mechanic is
     on the arena (null before it shows, and at the end). The runner waits on each spot until that
     spot's hit, plus REACT, then runs straight to the next spot at MOVEMENT_SPEED. It leaves for the
-    first spot of a mechanic LOOK seconds after the mechanic appears, or, for your own click, right
-    when you clicked (but not before the hit of the spot it stands on). Before a mechanic with its
-    own pre-position (Stop.pre), it goes there right after the last hit. Before any other
+    first spot of a mechanic LOOK seconds after the mechanic appears, or, for your own click, as soon as
+    you clicked (but not before the hit of the spot it stands on). Before a mechanic with its
+    own pre-position (Stop.pre), it goes there just after the last hit. Before any other
     mechanic, after a quiet stretch of REST_GAP seconds or more, it goes to HOME. Look-ahead
     stops are skipped: the player does not move for them. */
 export function runnerAt(route: Stop[], t: number): {at: Point; target: Stop | null} {

@@ -73,7 +73,7 @@ export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
         ...Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, PROTEAN_HALF, PROTEAN_LEN))];
     } else {
       // Safe pocket: behind him (f < -HW) and on your side (sd > HW), outside both arms of the
-      // cross. Anywhere in it inside the arena is right, and the drawn pocket is the same area.
+      // cross. Anywhere in it inside the arena is correct, and the drawn pocket is the same area.
       const fn = (p: Point): boolean => { const v: Point = [p[0] - P[0], p[1] - P[1]], f = v[0] * d[0] + v[1] * d[1], sd = v[0] * sv[0] + v[1] * sv[1]; return inArena(p) && f < -HW && sd > HW; };
       const poly = swordPocket(P, d, sv);
       // Where to stand: on the pocket's diagonal, 2 yalms (5 units) clear of each arm, so in the
@@ -202,7 +202,7 @@ function puddleAfter(c: Point = CENTER): (results: StepResult[]) => Zone {
       const dq = dist(p, q), r = Math.hypot(...rel(p)), cw = (angOf(rel(p)) - angOf(rel(q)) + 360) % 360;
       return inArena(p) && dq >= PUDDLE_R && dq <= PUDDLE_R + 6 && r >= 6 && r <= 32 && cw > 3 && cw < 110;
     };
-    // Next to a wall the ideal spot can be off the arena. Then the shown spot is the nearest right one.
+    // Next to a wall the ideal spot can be off the arena. Then the shown spot is the nearest correct one.
     const label = fn(ideal) ? ideal : nearestTo(ideal, fn) ?? ideal;
     return {fn, label, show:[{c:label, r:4.5}]};
   };
@@ -241,7 +241,7 @@ const apart = (p: Point, q: Point): number => { const d = Math.abs(angOf([p[0] -
 
 /* With `toward` set (a sword or scythe goes first next), the spread spot can be anywhere on
    that weapon's side of the arena, so the way to it is short. That side shows as one shaded
-   area. Any spot in it is right if it is out of the hitbox, out of the last puddle and not on a
+   area. Any spot in it is correct if it is out of the hitbox, out of the last puddle and not on a
    tank or melee spot. A spread is 6 yalms (15 units), so a spot closer than that to a tank or
    melee spot hits them. */
 const POINT_AT = (deg: number, r: number): Point => polar(deg, r);
@@ -435,9 +435,9 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: JumpSet): Scene {
 /* The second Void Stardust: the same puddles, ending the other way from the first one. The boss
    stays on the third weapon of the second set: he does not jump to the middle until Dance of
    Domination (cactbot's "--middle--"). The first puddle drops 2.3 seconds after the third weapon,
-   so the group stands at his butt, right behind him, and drops it there. The puddles then go
+   so the group stands at his butt, directly behind him, and drops it there. The puddles then go
    clockwise around him. */
-/** The spot right behind the boss, at his butt, just outside his hitbox. */
+/** The spot directly behind the boss, at his butt, just outside his hitbox. */
 export function behind(boss: Boss): Point {
   const f = (boss.f ?? 0) * DEG;
   return [boss.x - OUTSIDE * Math.sin(f), boss.y + OUTSIDE * Math.cos(f)];
@@ -445,9 +445,9 @@ export function behind(boss: Boss): Point {
 export function voidAgain(s: Slot, spread: boolean, boss: Boss): Scene {
   const c: Point = [boss.x, boss.y], butt = behind(boss);
   return {
-    setup:"Void Stardust again. The boss stays on the third weapon. The group stands at his butt, right behind him, and drops the first puddle there. Three puddles, then this time " +
+    setup:"Void Stardust again. The boss stays on the third weapon. The group stands at his butt, directly behind him, and drops the first puddle there. Three puddles, then this time " +
       (spread ? "a spread (Comet)." : "a stack on a healer (Crushing Comet).") + " It always ends the other way from the first one.",
-    boss, overlays:[], steps:voidSteps(s, spread, null, c, {p:butt, a:"At his butt, right behind him, just outside the hitbox."}),
+    boss, overlays:[], steps:voidSteps(s, spread, null, c, {p:butt, a:"At his butt, directly behind him, just outside the hitbox."}),
     rule:"The boss stays on the third weapon. Puddles start at his butt, each just outside the last, clockwise around him. The second Void Stardust ends the other way from the first."};
 }
 
@@ -504,7 +504,7 @@ export const DRILLS: readonly Drill[] = [
   {id:"m-raw-scythe", order:2.1, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: scythe",
     build:s=>({setup:"The boss pulls out a scythe and cleaves three times: one cone on each tank, and one cone that everyone else shares. So the tanks spread, and the rest of the party stacks.",
       boss:BOSS, overlays:[...heldWeapon("scythe"),{t:"mark",x:37,y:36,l:"MT",r:"T"},{t:"mark",x:63,y:36,l:"OT",r:"T"}],
-      steps:[{q:"Click where the party stacks.", z:SCYTHE_STACK, a:"South, right behind the boss, inside the shared cone.", reveal:SCYTHE_CLEAVES}],
+      steps:[{q:"Click where the party stacks.", z:SCYTHE_STACK, a:"South, directly behind the boss, inside the shared cone.", reveal:SCYTHE_CLEAVES}],
       rule:"Scythe: three cleaves. The tanks spread to the front, and the party stacks behind."})},
   {id:"m-assault", order:3, random:true, follows:{pick:"set1"}, phase:P1, time:"0:48", title:"Assault Evolved: three weapons",
     build:(s, _v, pick)=>assaultScene(buildAssault(s, orderFrom(pick)), s)},
@@ -528,7 +528,7 @@ export const DRILLS: readonly Drill[] = [
       rule:"Supports stand on the left, DPS on the right, as you face in from your tornado."})},
   {id:"m-orbital", order:15, random:true, phase:P2, time:"4:26 and 8:24", title:"Orbital Omen",
     build:s=>{ const O = buildOrbital(); return {
-      setup:"Orbital Omen. The main tank points the boss north. Portals on the north and east edges fire lines across the arena in the order shown (1 to 4). Fire and Fury cleaves his front and back right after the #1 lines. Use Hector's dodge: stay against his hitbox and cross it to the middle square the next lines miss.",
+      setup:"Orbital Omen. The main tank points the boss north. Portals on the north and east edges fire lines across the arena in the order shown (1 to 4). Fire and Fury cleaves his front and back just after the #1 lines. Use Hector's dodge: stay against his hitbox and cross it to the middle square the next lines miss.",
       boss:BOSS, overlays:O.overlays, steps:O.steps,
       rule:"Hector's dodge: stay against the boss hitbox. Start where the #2 lines cross, at his side. After #1 and Fire and Fury, cross the hitbox to the opposite middle square. After #2, cross back and stay."}; }},
   {id:"m-meteor-1", order:16, phase:P2, time:"5:00", title:"Meteorain: first stack",

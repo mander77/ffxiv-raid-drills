@@ -173,7 +173,7 @@ make sure that each one still matches the code before you start it.
     left, high up where you read it; the arena and its play bar in the middle; the cast bar, the
     casts coming up and the prompt on the right. The page container widens there (max-w-7xl), on
     every page, so the header lines up and the arena keeps its size.
-  - In the player the cast bar always sits right over the mechanic, on every screen (owner's
+  - In the player the cast bar always sits directly over the mechanic, on every screen (owner's
     choice): what the boss casts, then what it means. Extra-wide: cast bar and mechanic on the
     left, the prompt and the casts coming up on the right. Wide: the prompt, the cast bar over
     the mechanic, then the casts coming up. Phone: the prompt over the arena, the play bar under
@@ -191,12 +191,12 @@ make sure that each one still matches the code before you start it.
   - The player has no prompt of its own (owner's choice): the mechanic's step box shows the
     question and, under it, "Correct move:" with the answer, where the prompt used to repeat the
     answer in a box of its own. The run keeps its prompt, the live question.
-  - The play bar sits right on top of the casts coming up, on every screen (owner's choice): the
+  - The play bar sits directly on top of the casts coming up, on every screen (owner's choice): the
     clock and the list that runs on it belong together. The arena stands alone in its column, so
     it gets the room the bar took. The list lost its "Coming up" line (the play bar shows the time
     and the speed), and its now mark sits lower, 56 px from the top, with the line running on 40 px above it.
   - The player's side column touches the arena (owner's choice): on a wide screen the play bar
-    and the casts coming up (and, below xl, the mechanic too) sit right against the floor's right
+    and the casts coming up (and, below xl, the mechanic too) sit directly against the floor's right
     edge, from its top to its bottom, so they read as part of the arena. `ArenaFrame` places this
     `beside` column by the floor's edges in the picture (`ARENA_VIEW`), as shares of the frame, so
     it fits at any size; the frame keeps room on its right for it. The cast line runs on a little
@@ -361,7 +361,8 @@ Do not propose these again unless the owner brings them up.
   screens.
 - Start over and New fight are buttons, not text links.
 - An answer is "correct" or "incorrect", on screen and in the code, never "right" or "wrong"
-  (owner's choice). "Right" still means the direction. A correct answer is green and an
+  (owner's choice). "Right" means only the direction: "directly behind", not "right behind";
+  "immediately", not "right away". A correct answer is green and an
   incorrect pick red, in light and dark mode alike: the answer buttons use the Button variants
   `correct` and `incorrect`, which the site added to `src/components/ui/button.tsx` the way
   shadcn/ui's customization guide shows. The outline variant's own dark-mode colours hid them.
@@ -407,7 +408,7 @@ static wins.
 - If the first weapon of the second set is a sword or a scythe, stack or spread toward it. For a
   long run, use Sprint, a movement ability or a scholar's Expedient.
 - The second Void Stardust: the boss stays on the third weapon. The group starts at his butt,
-  right behind him, and goes clockwise around him.
+  directly behind him, and goes clockwise around him.
 
 ### Later mechanics
 
@@ -428,7 +429,7 @@ static wins.
   The sword is the exception: it stands at its best spot near the inner corner.
 - It leaves a spot 0.2 seconds after the hit, starts for a new mechanic 0.5 seconds after it shows,
   and runs at 15 arena units a second.
-- After 8 quiet seconds it goes to the next mechanic's pre-position. The default is right up at the
+- After 8 quiet seconds it goes to the next mechanic's pre-position. The default is up close to the
   boss (50, 56). Both Void Stardusts pre-position at the first puddle.
 - A weapon step shows only from the boss's turn (`showOf`). Before he turns, nobody can know the
   spot.

@@ -22,17 +22,17 @@ export interface ArenaFrameProps {
   /** Room to keep under the arena, in pixels, for what comes below it: the run's bar, or what
       `under` holds. */
   below?: number;
-  /** What sits right under the floor, as wide as the floor. Count its height in `below`. */
+  /** What sits directly under the floor, as wide as the floor. Count its height in `below`. */
   under?: ReactNode;
-  /** What sits right over the picture, as wide as the floor. */
+  /** What sits directly over the picture, as wide as the floor. */
   over?: ReactNode;
   /** The arena fills its column, up to ARENA_MAX, however tall the screen is: the page scrolls to
       it, as on a phone. */
   fill?: boolean;
-  /** A column drawn right against the floor's right edge and as tall as the floor, so it reads as
+  /** A column drawn directly against the floor's right edge and as tall as the floor, so it reads as
       part of the arena. It gives itself a width; keep that much room to the right of the frame. */
   beside?: ReactNode;
-  /** The same on the left: a column right against the floor's left edge. Keep room for it on the
+  /** The same on the left: a column directly against the floor's left edge. Keep room for it on the
       left of the frame. */
   before?: ReactNode;
   className?: string;

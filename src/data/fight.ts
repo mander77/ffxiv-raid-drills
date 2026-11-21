@@ -29,8 +29,8 @@ export interface FightSeg {
   turn?: { at: number; f: number; weapons: number };
   /** Where to pre-position before this stretch, when the first move is known in advance (the
       first Void Stardust puddle is always north, the second one is at the boss's butt). The
-      player goes there right after the last hit before it. Without it, the player waits right up
-      at the boss in a quiet stretch (see data/route.ts). */
+      player goes there just after the last hit before it. Without it, the player waits up close
+      to the boss in a quiet stretch (see data/route.ts). */
   pre?: Point;
 }
 
@@ -125,7 +125,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   const CAST = 6.0, face1 = assault1.bossAt?.(0).f;
   /* A Void Stardust puddle drops under you when its 3.0-second cast starts (Cometite in BossMod)
      and goes off at cactbot's line, 3 seconds later. Where you drop it counts when it drops, so
-     you can leave right away. */
+     you can leave immediately. */
   const placed = (hits: number[]): number[] => hits.map(t => Math.round((t - 3.0) * 10) / 10);
   // The boss after the third weapon of the second set. He stays there for the second Void Stardust.
   const lastBoss = A2.states[A2.states.length - 1];

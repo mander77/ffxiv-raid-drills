@@ -285,7 +285,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   drill. A **try** is one go at a drill, on its screen (`DrillScreen`).
 - **Pattern**: the random parts of a drill, built from a **code** (`buildPattern`).
 - **Correct** and **incorrect**: an answer that was or was not the one to give. Not "right" or
-  "wrong": "right" is a direction.
+  "wrong": "right" is only a direction, so write "directly behind", not "right behind".
 - **Step**: one question of a drill. Its **status** (`StepStatus`) is ask, correct or incorrect.
 - **Phase**: a phase of the fight (Phase 1 to 4), and nothing else.
 - **Look-ahead**: a step that is saved for later (`Step.lookAhead`).

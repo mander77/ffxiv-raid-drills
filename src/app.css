@@ -2,7 +2,7 @@
    ink text and buttons on a soft page, a slate header band, and a pale celery mark for where you
    are (the active tab, the line under the header). The arena keeps its own sand colours in both
    modes (arena.css), so it is the one warm, bright thing on the page. Green, red, blue and purple
-   stay free for right, wrong, the arena's hints and the roles. */
+   stay free for correct, incorrect, the arena's hints and the roles. */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -43,7 +43,7 @@
   --highlight: #daeaae;
   --highlight-foreground: #1e2a36;
   /* What an answer was, in shadcn's pairs: the name is the soft background, -foreground the
-     text and border on it. Right (green), wrong (the destructive red on a soft red), too slow
+     text and border on it. Correct (green), incorrect (the destructive red on a soft red), too slow
      (amber text, with no background) and saved for later (violet, as on the arena). Then the
      fill of the boss's cast bar. */
   --success: #e3f1e8;
