@@ -126,3 +126,11 @@ test("the player's address holds the code, the picks and the moment", () => {
   assert.equal(playerLink("K7Q2", RANDOM), "/pressure/K7Q2");
   assert.equal(playerLink("K7Q2", { ...RANDOM, raw: "axe", ult: "cw" }, 48.24), "/pressure/K7Q2/raw=axe,ult=cw?t=48.2");
 });
+
+test("between mechanics, Jump to next mechanic goes to the mechanic named above it", async () => {
+  open("/pressure/K7Q2?t=66");
+  // The panel fills in the next mechanic on the first frame of the fight clock.
+  assert.ok(await screen.findByText(/Next mechanic: Void Stardust into the second weapons/));
+  await userEvent.setup().click(screen.getByRole("button", { name: "Jump to next mechanic" }));
+  assert.ok(screen.getByRole("heading", { name: "Void Stardust into the second weapons" }));
+});

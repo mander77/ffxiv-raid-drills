@@ -146,9 +146,8 @@ function Between({ paused, fight, onGoTo }: BetweenProps) {
           <p className="text-sm">
             Next mechanic: {nx.title} at {clock(nx.from)}.
           </p>
-          <Button className="h-auto min-h-9 py-2 text-left whitespace-normal" onClick={() => onGoTo(nx)}>
-            Go to {nx.title}
-          </Button>
+          {/* The line above names the mechanic, so the button stays short. */}
+          <Button onClick={() => onGoTo(nx)}>Jump to next mechanic</Button>
         </>
       )}
       {a && (
