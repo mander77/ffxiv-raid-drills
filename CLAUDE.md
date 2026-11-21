@@ -105,7 +105,8 @@ src/components/      React components: Header, PageContainer, SlotSwitch, ShareB
 src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, clicks), Shape (one
                      attack, weapon or mark), BossMark, ZoneArea (a zone's coloured area),
                      ArenaLabel (a name tag), ZoneLabel (a label placed over a zone), LearnPicture
-                     (a Learn picture), LiveArena (the live arena), TurningBoss, arena.css
+                     (a Learn picture), LiveArena (the live arena), ArenaFrame (the one size rule for
+                     every arena you play on), TurningBoss, arena.css
 src/components/ui/   shadcn/ui components, as the shadcn CLI writes them
 src/pages/           React pages, one per route: HomePage (/), LearnPage (/learn), PracticePage
                      (/practice), TimelinePage (/timeline), PressurePage (/pressure),

@@ -7,6 +7,7 @@ import { LEARN_PICTURES } from "../../data/pictures";
 import { timerOf } from "../../lib/pressure";
 import type { Option, QuizItem, Slot } from "../../types";
 import { shuffle } from "../../util";
+import { ArenaFrame } from "../arena/ArenaFrame";
 import { LearnPicture } from "../arena/LearnPicture";
 import { RuleBox } from "../RuleBox";
 import { TimelinePicture, timelineRowOf } from "./TimelinePicture";
@@ -110,19 +111,21 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
 
   const picture = fig ? (
     <figure>
-      <LearnPicture
-        fig={fig}
-        answered={answered}
-        preview={preview}
-        label={
-          answered
-            ? "Arena picture. The green area shows the answer."
-            : preview && shown !== null
-              ? `Arena picture of answer ${shown + 1}.`
-              : "Arena picture of the setup."
-        }
-        className="h-auto w-full"
-      />
+      <ArenaFrame>
+        <LearnPicture
+          fig={fig}
+          answered={answered}
+          preview={preview}
+          label={
+            answered
+              ? "Arena picture. The green area shows the answer."
+              : preview && shown !== null
+                ? `Arena picture of answer ${shown + 1}.`
+                : "Arena picture of the setup."
+          }
+          className="h-auto w-full"
+        />
+      </ArenaFrame>
       {answered && fig.note && <figcaption className="mt-2 text-sm text-muted-foreground">{fig.note}</figcaption>}
     </figure>
   ) : row !== null ? (
@@ -135,7 +138,13 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
       {top}
       {timer && <TimerBar timer={timer} stopped={answered} onTimeout={handleTimeout} />}
       <h2 className="text-xl font-semibold text-balance">{q.prompt}</h2>
-      <div className={cn("grid gap-6", picture && "md:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]")}>
+      {/* A Learn card's arena picture gets the wide column; a Timeline card's picture the narrow one. */}
+      <div
+        className={cn(
+          "grid gap-6",
+          fig ? "md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]" : row !== null && "md:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]",
+        )}
+      >
         {/* The picture sits beside the answers, on the right. On a phone it goes above them. */}
         {picture && <div className="md:order-last">{picture}</div>}
         <div className="space-y-4">

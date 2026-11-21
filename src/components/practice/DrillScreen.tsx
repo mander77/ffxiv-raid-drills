@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { answerStep, type Pattern, type StepStatus, statusAfter } from "../../lib/practice";
 import { cn } from "../../lib/utils";
 import type { Drill, Point, StepResult } from "../../types";
+import { ArenaFrame } from "../arena/ArenaFrame";
 import { LiveArena } from "../arena/LiveArena";
 import { HudPrompt } from "../HudPrompt";
 import { LastAnswer } from "../LastAnswer";
@@ -137,15 +138,17 @@ export function DrillScreen({
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="space-y-3">
         {hud}
-        <LiveArena
-          scene={sc}
-          k={k}
-          results={results}
-          showLast={status !== "ask" || done}
-          hint={shown && status !== "wrong"}
-          onPointClick={handleArenaClick}
-          className="mx-auto block h-auto w-full max-w-[min(100%,40rem)]"
-        />
+        <ArenaFrame>
+          <LiveArena
+            scene={sc}
+            k={k}
+            results={results}
+            showLast={status !== "ask" || done}
+            hint={shown && status !== "wrong"}
+            onPointClick={handleArenaClick}
+            className="block h-auto w-full"
+          />
+        </ArenaFrame>
       </div>
       <Card>
         <CardHeader>

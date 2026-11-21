@@ -5,40 +5,47 @@ import { ShareButton } from "./ShareButton";
 import { SlotSwitch } from "./SlotSwitch";
 import { TabNav } from "./TabNav";
 
-/** The fight and the strats the positions follow, as tags under the site name. */
+/** The fight and the strats the positions follow, as tags beside the site name. */
 const STRATS = ["M11S The Tyrant (Savage)", "Hector/Toxic", "Kindred No Buddies split", "Fixed (3CJ) Ecliptic"];
 
-/** The header at the top of every page, a slate band: the name and the strats on the left; the
-    light/dark switch and Share in the top right corner, with the slot switch under them; the tabs
-    along the bottom, the one you are on in celery. On a phone the slot switch gets its own row. */
+/** The header at the top of every page, a slate band. On a wide screen it has two rows, so the
+    page below gets more room: the name and the strats, then Light/dark and Share on the right; the
+    tabs along the bottom (the one you are on in celery), with the slot switch on the right. On a
+    narrower screen the slot switch and the tabs each get their own row. */
 export function Header() {
   return (
     <header className="sticky top-0 z-10 border-b-3 border-highlight bg-header text-header-foreground">
-      <PageContainer className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 pt-3">
-        {/* The site name is a link to Home, as on most sites. */}
-        <h1 className="font-display text-2xl tracking-wide">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 rounded-md hover:opacity-90 focus-visible:ring-3 focus-visible:ring-highlight focus-visible:outline-none"
-          >
-            <TitleIcon />
-            FFXIV Raid Drills
-          </Link>
-        </h1>
-        <div className="flex items-center justify-self-end">
-          <ModeToggle className="hover:bg-white/10 hover:text-header-foreground" />
-          <ShareButton className="hover:bg-white/10 hover:text-header-foreground" />
+      <PageContainer className="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-2 pt-3">
+        {/* The first row spans the whole width, so the strats fit beside the name. */}
+        <div className="col-span-2 flex flex-wrap items-center gap-x-4 gap-y-2">
+          {/* The site name is a link to Home, as on most sites. */}
+          <h1 className="font-display text-2xl tracking-wide">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 rounded-md hover:opacity-90 focus-visible:ring-3 focus-visible:ring-highlight focus-visible:outline-none"
+            >
+              <TitleIcon />
+              FFXIV Raid Drills
+            </Link>
+          </h1>
+          {/* Light/dark and Share: on the name's line on a phone, at the far right on a wide screen. */}
+          <div className="ml-auto flex items-center self-start lg:order-last">
+            <ModeToggle className="hover:bg-white/10 hover:text-header-foreground" />
+            <ShareButton className="hover:bg-white/10 hover:text-header-foreground" />
+          </div>
+          <ul aria-label="Fight and strats" className="flex flex-wrap gap-1.5 max-lg:basis-full">
+            {STRATS.map((s) => (
+              // A darker fill on the band, so the text reads at 7:1.
+              <li key={s} className="rounded-full bg-black/25 px-2.5 py-0.5 text-sm font-medium whitespace-nowrap">
+                {s}
+              </li>
+            ))}
+          </ul>
         </div>
-        <ul aria-label="Fight and strats" className="flex flex-wrap gap-1.5 max-sm:col-span-2">
-          {STRATS.map((s) => (
-            // A darker fill on the band, so the text reads at 7:1.
-            <li key={s} className="rounded-full bg-black/25 px-2.5 py-0.5 text-sm font-medium whitespace-nowrap">
-              {s}
-            </li>
-          ))}
-        </ul>
-        <SlotSwitch className="justify-self-end max-sm:col-span-2 max-sm:justify-self-stretch" />
-        <TabNav className="col-span-2" />
+        {/* The tabs come first, so on a wide screen they sit on the left of the last row. On a
+            narrower screen they move under the slot switch. */}
+        <TabNav className="self-end max-lg:order-last max-lg:col-span-2" />
+        <SlotSwitch className="justify-self-end pb-1.5 max-lg:col-span-2 max-lg:pb-0 max-sm:justify-self-stretch" />
       </PageContainer>
     </header>
   );

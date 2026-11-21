@@ -145,6 +145,11 @@ make sure that each one still matches the code before you start it.
     Vite: our own ThemeProvider sets the class on <html> (next-themes renders a script tag that
     React 19 warns about), and a script in index.html sets it before the page draws. The arena
     stays sand in dark mode, so it is the brightest thing on the page.
+  - Arena size: one rule on Learn, Practice and Pressure (`ArenaFrame`). The arena is as large
+    as its column, but never taller than the room down to the bottom of the screen, so all of it
+    is in view; at most 720 px, and at least 360 px, so it fills a phone's width. The header
+    takes two rows on a wide screen (the strats beside the name, Role and Group beside the tabs),
+    so the arena gets more room.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what
