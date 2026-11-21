@@ -19,8 +19,10 @@ tokens or account details.
   keeps the old code (`src/views/`).
 - Branch previews: `https://<branch>.test.ffxiv-raid-drills.app/`. The bare `test.` host does not
   load.
-- Hosting: Cloudflare Workers Builds on the owner's personal Cloudflare account. A push builds
-  when it changes the app; a push of only docs, tests or tooling does not (build watch paths).
+- Hosting: Cloudflare Workers Builds on the owner's personal Cloudflare account. A push to
+  `main` deploys the live site only when it changes the app, not for only docs, tests or tooling
+  (build watch paths). Branch previews come from GitHub Actions (`preview.yml`): when a branch
+  push changes the app, the Preview workflow waits for the owner's approval, then makes the preview.
   See `docs/decisions.md` for the hosting details.
 - CI: GitHub Actions (`.github/workflows/ci.yml`) runs lint, the type check, the unit tests, the
   build and the browser tests on every branch push. A ruleset on `main` takes only a commit on
@@ -185,9 +187,11 @@ These steps put a branch on `main`, the live site.
    so the repository's `mise.toml` applies:
    `mise -C <checkout> exec -- sh <checkout>/scripts/publish.sh`. The script runs the type check
    and the tests, then pushes the branch as `mander77`. The push starts CI on GitHub.
-4. Run `sh scripts/wait-deploy.sh https://<branch>.test.ffxiv-raid-drills.app index-<hash>.js`,
-   then test the preview in a browser. When the branch changes only files outside the app (docs,
-   tests, `.github/`, `.claude/`, scripts), Cloudflare builds no preview: skip this step.
+4. If the branch changed the app, wait for CI to pass, then ask the owner to approve the
+   waiting Preview run on GitHub. Then run
+   `sh scripts/wait-deploy.sh https://<branch>.test.ffxiv-raid-drills.app index-<hash>.js` and
+   test the preview in a browser. A branch with only docs, tests or tooling gets no preview: skip
+   this step.
 5. In the main checkout, make sure that it is on `main` and has no changes. Run
    `git merge --ff-only <branch>`, then run the publish script there. On `main` the script first
    waits for the branch's CI run on that commit and stops if it failed: GitHub refuses a commit on
