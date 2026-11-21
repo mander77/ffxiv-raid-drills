@@ -11,63 +11,30 @@ import { LastAnswer } from "../LastAnswer";
 import { RuleBox } from "../RuleBox";
 import { SetupText } from "../SetupText";
 import { StepChips } from "../StepChips";
-import { FightTimeline } from "./FightTimeline";
 
 export interface FightPanelProps {
   view: FightView;
   fight: Fight;
-  speed: number;
   /** Go to a mechanic. */
   onGoTo: (g: FightSeg) => void;
   /** Watch the spawns of the mechanic again. */
   onSpawns: () => void;
-  /** Show the clock and the fight timeline at the top (a narrow screen). On a wide screen they sit
-      under the cast bar instead (FightUpcoming). */
-  timeline?: boolean;
 }
 
-/** The panel beside the player: the mechanic on the arena, then the clock and the fight timeline.
-    Its setup folds after the first hit, the steps show as chips, and at the end the rule shows
-    with the way on to the next mechanic. Between mechanics: the next mechanic and the next ability. */
-export function FightPanel({ view: v, fight, speed, onGoTo, onSpawns, timeline = true }: FightPanelProps) {
+/** The mechanic on the arena, in the player. Its setup folds after the first hit, the steps show as
+    chips, and at the end the rule shows with the way on to the next mechanic. Between mechanics:
+    the next mechanic and the next ability. */
+export function FightPanel({ view: v, fight, onGoTo, onSpawns }: FightPanelProps) {
   const g = v.si >= 0 ? fight.segs[v.si] : null;
   return (
-    <section aria-label="The right moves" className="space-y-4">
+    <section aria-label="The right moves">
       {g ? (
         <Mechanic view={v} fight={fight} g={g} onGoTo={onGoTo} onSpawns={onSpawns} />
       ) : (
         <Between paused={v.paused} fight={fight} onGoTo={onGoTo} />
       )}
-      {timeline && <FightUpcoming speed={speed} />}
     </section>
   );
-}
-
-export interface FightUpcomingProps {
-  speed: number;
-}
-
-/** The clock and the speed, then the fight timeline: what the boss casts next. */
-export function FightUpcoming({ speed }: FightUpcomingProps) {
-  return (
-    <div className="space-y-2">
-      <p className="flex gap-2 text-sm text-muted-foreground">
-        <span className="font-semibold text-foreground">The right moves</span>
-        <Clock /> · {speed}x
-      </p>
-      <FightTimeline />
-    </div>
-  );
-}
-
-/** The fight time, moved on every frame. */
-function Clock() {
-  const text = useRef<HTMLSpanElement>(null);
-  useFightFrame((s) => {
-    const t = clock(s.t);
-    if (text.current && text.current.textContent !== t) text.current.textContent = t;
-  });
-  return <span ref={text} className="tabular-nums" />;
 }
 
 interface MechanicProps {

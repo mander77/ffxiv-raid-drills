@@ -39,13 +39,15 @@ export const URGENT = 3;
 /** The longest a cast bar takes to fill. */
 export const CAST_MAX = 10;
 
-/* The fight timeline works like cactbot's raidboss timeline with its default settings: a line
-   shows once it is 30 seconds away, at most 6 lines show, a line turns "soon" in its last 6
-   seconds, and a line that just happened stays for 0.7 seconds. */
-export const TIMELINE_SHOW_AT = 30;
-export const TIMELINE_SOON = 6;
+/* The casts coming up scroll up a list toward a "now" line, like cactbot's raidboss timeline set
+   in motion: a cast shows once it is 30 seconds away (cactbot's default), turns "soon" in its last
+   6 seconds (cactbot's default), and stays above the line for 2 seconds after it happens (the
+   app's choice, so you see it go by). The cast bar keeps a cast that just happened for 0.7
+   seconds (cactbot's default). */
+export const CASTS_AHEAD = 30;
+export const CASTS_SOON = 6;
+export const CASTS_PAST = 2;
 export const TIMELINE_KEEP = 0.7;
-export const TIMELINE_ROWS = 6;
 
 /* ---------- the state of one run of the fight clock ---------- */
 
@@ -453,33 +455,36 @@ export function castOf(s: FightState): Cast {
   };
 }
 
-/** One row of the fight timeline. */
-export interface TimelineRow {
+/** One cast in the list of casts coming up. */
+export interface CastMark {
+  /** Its place in s.lines, which stays the same while it is in view. */
+  i: number;
   name: string;
   cats: Category[];
-  /** Seconds to go, empty once it happened. */
-  left: string;
-  fill: number;
-  look: "now" | "soon" | "later";
   raidwide: boolean;
+  /** Seconds to go; below 0 once it happened. */
+  left: number;
 }
 
-/** The rows of the fight timeline at this moment, or the next line when none is near. */
-export function timelineOf(s: FightState): { rows: TimelineRow[]; idle: string } {
-  const rows = s.lines
-    .filter((e) => e.t >= s.t - TIMELINE_KEEP && e.t - s.t <= TIMELINE_SHOW_AT)
-    .slice(0, TIMELINE_ROWS)
-    .map((e): TimelineRow => {
-      const left = e.t - s.t;
-      return {
-        name: e.name,
-        cats: categoriesAt(e.t),
-        left: left > 0 ? left.toFixed(1) : "",
-        fill: Math.max(0, Math.min(1, 1 - left / TIMELINE_SHOW_AT)),
-        look: left <= 0 ? "now" : left <= TIMELINE_SOON ? "soon" : "later",
-        raidwide: Boolean(e.raidwide),
-      };
-    });
-  const next = s.lines.find((e) => e.t > s.t);
-  return { rows, idle: next ? `Next: ${next.name} in ${Math.round(next.t - s.t)} s` : "No more lines" };
+/** The casts in view: from CASTS_PAST seconds ago to CASTS_AHEAD seconds ahead, in time order. */
+export function castsAhead(s: FightState): CastMark[] {
+  return s.lines.flatMap((e, i) => {
+    const left = e.t - s.t;
+    return left >= -CASTS_PAST && left <= CASTS_AHEAD
+      ? [{ i, name: e.name, cats: categoriesAt(e.t), raidwide: Boolean(e.raidwide), left }]
+      : [];
+  });
+}
+
+/** Where each cast sits in a list `height` pixels tall, from its top: the now line is at `nowY`,
+    and CASTS_AHEAD seconds away is the bottom, so the gaps show the time between casts. Casts that
+    come close are pushed down to stay `rowH` apart, so their names never overlap. */
+export function castPositions(marks: readonly CastMark[], height: number, nowY: number, rowH: number): number[] {
+  const perSecond = (height - nowY) / CASTS_AHEAD;
+  let prev = Number.NEGATIVE_INFINITY;
+  return marks.map((m) => {
+    const y = Math.max(nowY + m.left * perSecond, prev + rowH);
+    prev = y;
+    return y;
+  });
 }

@@ -117,11 +117,11 @@ src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep
 src/components/pressure/  Pressure: PressureStart, QuickRound, FightScreen (the run and the player:
                      frame loop, clicks, keys), FightArena, CastBar, FightPrompt, FightHud (the
                      two together, in the run),
-                     FightTimeline, FightPanel, FightPlayBar, FightSettings (the Settings button
+                     CastList (the casts coming up, scrolling up to a now line), FightPanel, FightPlayBar, FightSettings (the Settings button
                      and its sheet of pattern picks),
                      RunScore and WatchDone (the end screens)
 src/lib/fight.ts     the fight clock's rules as plain functions: newFightState, tickFight, seek,
-                     answerFightStep, viewOf, promptOf, castOf, timelineOf
+                     answerFightStep, viewOf, promptOf, castOf, castsAhead, castPositions
 src/lib/pressure.ts  the quick round's rules (weighted cards, the timer) and playerLink
 src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round), QuestionCard
                      (answers, previews, Lock in, keys, the timer of a timed card), TimerBar,

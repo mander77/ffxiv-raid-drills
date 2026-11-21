@@ -5,7 +5,10 @@ import {
   answerFightStep,
   askAt,
   askFrom,
+  CASTS_AHEAD,
   castOf,
+  castPositions,
+  castsAhead,
   clickTarget,
   countdownOf,
   LEAD,
@@ -15,7 +18,6 @@ import {
   seek,
   TELL_HOLD,
   tickFight,
-  timelineOf,
   viewOf,
 } from "../../src/lib/fight";
 
@@ -150,13 +152,23 @@ describe("the HUD", () => {
     expect(c.fill).toBeGreaterThan(0);
   });
 
-  test("the timeline shows at most 6 lines, 30 seconds ahead", () => {
+  test("the casts in view: up to 30 seconds ahead and 2 behind, in time order", () => {
     const s = newFightState("watch", fight());
     for (const t of [0, 60, 200, 400]) {
       s.t = t;
-      const { rows } = timelineOf(s);
-      expect(rows.length).toBeLessThanOrEqual(6);
-      for (const r of rows) expect(Number(r.left || 0)).toBeLessThanOrEqual(30);
+      const marks = castsAhead(s);
+      for (const m of marks) {
+        expect(m.left).toBeLessThanOrEqual(CASTS_AHEAD);
+        expect(m.left).toBeGreaterThanOrEqual(-2);
+      }
+      for (let k = 1; k < marks.length; k++) expect(marks[k].left).toBeGreaterThanOrEqual(marks[k - 1].left);
     }
+  });
+
+  test("a cast sits by its time, and close casts are pushed apart", () => {
+    const mark = (left: number) => ({ i: 0, name: "", cats: [], raidwide: false, left });
+    // 330 pixels for 30 seconds after the now line at 30: 10 pixels a second.
+    expect(castPositions([mark(0), mark(15), mark(30)], 330, 30, 20)).toEqual([30, 180, 330]);
+    expect(castPositions([mark(5), mark(5.5)], 330, 30, 20)).toEqual([80, 100]);
   });
 });

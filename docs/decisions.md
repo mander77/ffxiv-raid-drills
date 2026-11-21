@@ -168,6 +168,13 @@ make sure that each one still matches the code before you start it.
     left, the prompt and the casts coming up on the right. Wide: the prompt, the cast bar over
     the mechanic, then the casts coming up. Phone: the prompt over the arena, the play bar under
     it, then the cast bar over the mechanic. The run keeps the cast bar over the prompt.
+  - The casts coming up scroll up a list toward a now line (CastList), like cactbot's timeline in
+    motion: the gaps show the time between casts, close casts are pushed apart so names never
+    overlap, the last 6 seconds are bold, and a cast fades above the line for 2 seconds. shadcn/ui
+    has no timeline, and its ScrollArea is for content you scroll yourself, so the list is our
+    own; ScrollArea holds the mechanic where it can run long. Narrow screens: the cast bar and the
+    mechanic first, then the prompt, the arena and its play bar, then the list; a phone leaves
+    the list out.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what
