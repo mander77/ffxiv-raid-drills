@@ -23,6 +23,7 @@ test("a timed card: when the time to read and decide runs out, you froze", () =>
   const onAnswer = vi.fn();
   render(<QuestionCard item={LEARN_CARDS[0]} slot="H1" decideSecs={4} onAnswer={onAnswer} onNext={() => {}} onTimeout={onTimeout} />);
   assert.ok(screen.getByText("Read"));
+  assert.ok(screen.getByRole("progressbar", { name: "Time to read" }));
   // Reading takes at least 2 seconds; a card's text never takes a minute.
   act(() => {
     vi.advanceTimersByTime(60_000);
@@ -89,7 +90,9 @@ test("after the run: the score, and a Practice link for each mechanic with a mis
   );
   assert.ok(screen.getByText("0 of 1 spots right"));
   assert.ok(screen.getByText(`Full fight · Stopped at mechanic 1 of ${fight.segs.length}`));
-  const link = screen.getByRole("link", { name: "Practice it" });
+  const list = screen.getByRole("list", { name: "Practice these" });
+  assert.equal(within(list).getAllByRole("listitem").length, 1);
+  const link = within(list).getByRole("link", { name: "Practice it" });
   assert.equal(link.getAttribute("href"), `/practice/${fight.segs[0].drills[0]}`);
 });
 

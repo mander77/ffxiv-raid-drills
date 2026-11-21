@@ -120,6 +120,15 @@ make sure that each one still matches the code before you start it.
   - November 21: the rebuild went live. `rebuild` merged into `main` with a fast-forward, and
     the `rebuild` branch is no longer used: new work branches from `main`. The old site's
     addresses open Home, and its saved scores and settings (`m11s.` keys) do not carry over.
+  - Issue #29: four hand-built parts are now shadcn/ui components. The More/Less setup text is a
+    Collapsible, Share confirms a copied link with a Sonner toast (the Toaster is in `App.tsx`,
+    light theme), the quick round's timer is a Progress, and the end of the run lists the
+    mechanics to practice as Items. shadcn's Progress keeps `value` for the bar's width only, so
+    `TimerBar` passes `aria-valuenow` too. Biome's `useSemanticElements` rule is off for
+    `src/components/ui/` only (`overrides` in `biome.json`), so the CLI's files stay as it writes
+    them: its Item puts `role="list"` on a div.
+  - `.gitattributes` keeps LF line endings in every text file, on every computer. Before it, a
+    Windows checkout turned files into CRLF after a branch switch, and the lint failed.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what

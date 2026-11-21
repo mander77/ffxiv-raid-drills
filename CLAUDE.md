@@ -94,7 +94,8 @@ src/share.ts         sharing the address of the page
 src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser
 src/stores/progress.ts  your scores (kept in the browser) and the round of Learn, Practice and Timeline
 src/stores/pressure.ts  your Pressure settings: seconds to decide, stops, pattern picks, speed
-src/components/      React components: Header, PageContainer, SlotSwitch, ShareButton, TabNav,
+src/components/      React components: Header, PageContainer, SlotSwitch, ShareButton (a toast
+                     says the link was copied), TabNav,
                      CategoryDots and CategoryKey (the ability category colours), RoundDone,
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
                      StepChips, SetupText, Tally, ChipRow, HudPrompt
