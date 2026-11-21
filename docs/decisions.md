@@ -43,6 +43,13 @@ make sure that each one still matches the code before you start it.
     that first shares state between screens adds it. A Preact screen draws into its own root
     inside #view (`mountView` in `src/views/common.ts`), so the screens that still set
     innerHTML cannot break it.
+  - Phase 2 (#5, done): the shared components are in `src/views/parts.tsx`, each with a test
+    that checks it draws the same markup as the text version. The screens do not use them yet.
+    Each screen starts to use them when it moves: Learn uses `ChipRow` and `RuleBox` in phase 3,
+    and then `fadeEdges` goes. Practice uses `StepChips`, `SetupText`, `LastAnswer`, `RuleBox`
+    and `HudPrompt` in phase 4, and then `hudPrompt` goes. The fight and the quick round use the
+    rest in phases 3 and 5. Mounting components into the text screens now would be work that
+    those phases throw away.
   - Keep the `TS note:` comments, and add notes for the Preact features too.
   - Use only Preact's core API: `preact`, `preact/hooks` and `@preact/signals`. Do not use
     `preact/compat` or features that only Preact has. Then a later move to React is close to a

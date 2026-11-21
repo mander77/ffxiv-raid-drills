@@ -40,6 +40,8 @@ C# keeps type information at run time. TypeScript does not. When the code runs, 
 - JSX, the HTML-like tags in `.tsx` files, such as `<li><b>{name}:</b> {text}</li>`. The compiler turns each tag into a call to Preact and checks every tag and attribute. `{...}` inside a tag runs TypeScript. The closest C# match is a Razor component. See `src/views/sheet.tsx`.
 - Components and props. A Preact component is a function that takes one props object and returns JSX. An interface types the props, like a method's parameter list: `function Rule({name, text, card}: RuleProps)`. See `Rule` in `src/views/sheet.tsx` and `Marks` in `src/views/tlnav.tsx`.
 - Hooks, such as `const [confirm, setConfirm] = useState(false)`. A hook keeps a value between draws of a component, and calling the setter draws it again. The type comes from the first value. The closest C# match is a field in a Blazor component plus `StateHasChanged()`. See `Sheet` in `src/views/sheet.tsx`.
+- `useRef` and `useLayoutEffect`. `useRef` holds a value between draws without drawing again, often the element that a `ref={...}` attribute points to. `useLayoutEffect` runs code after Preact puts the elements on the page, for measuring and scrolling, and the function it returns cleans up (like `Dispose`). See `ChipRow` in `src/views/parts.tsx`.
+- `Array.from({length: n}, (_x, i) => ...)` makes an array of n items, like `Enumerable.Range(0, n).Select(...)`. See `StepChips` in `src/views/parts.tsx`.
 - `import type`. It imports names that the compiler needs for checking only. C# has no equivalent, because C# types exist at run time. See the top of most files.
 
 ## Unions and narrowing
