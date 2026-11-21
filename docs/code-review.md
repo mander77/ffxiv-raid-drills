@@ -28,7 +28,7 @@ The plan is to support many raid fights (M11S is the first) and every role: tank
 melee DPS, ranged DPS and casters, each with their own slots (for example MT/OT, H1/H2,
 M1/M2, R1/R2). Evaluate the code against that goal:
 - What is hard-coded to M11S or to healers today? Look at names, data, types, text and CSS
-  (for example "M11S Healer" in the header, H1/H2 as the only slots, and fight data mixed
+  (for example H1/H2 as the only working slots, and fight data mixed
   into view code).
 - Where should the line be between shared engine code (arena drawing, the fight clock,
   routes, quizzes, scoring) and per-fight data or per-role data?
