@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
 import { useCastTimeline } from "../../hooks/useCastTimeline";
 import { CASTS_AHEAD } from "../../lib/fight";
-import { CATEGORY_BG } from "../CategoryDots";
+import { CastKey } from "./CastKey";
+import { CastSquare } from "./CastSquare";
 
 /** Where the now mark sits from the top, how far the line goes on above it, the room under the
     line at the bottom, and how far apart two casts stay at least, in pixels. The app's choice. */
@@ -19,7 +20,8 @@ export interface CastListProps {
 /** The casts coming up, in the style of WoW's boss ability timeline: a line with each cast as a
     square in its category's colour, its seconds inside, and its name beside it. The squares rise
     toward the now mark at the top as the fight clock runs; the gaps between them show the time
-    between casts, and in their last seconds a square grows and its name turns bold.
+    between casts, and in their last seconds a square grows. A hit (damage going off) is a filled
+    square with its name in bold; the boss's own cast, which starts a mechanic, is outlined (CastSquare).
     shadcn/ui has no timeline, so this list is its own; useCastTimeline moves it. */
 export function CastList({ className }: CastListProps) {
   const { box, marks, itemRef } = useCastTimeline({ axis: "y", nowAt: NOW_Y, end: BOTTOM, gap: ROW_H });
@@ -45,21 +47,21 @@ export function CastList({ className }: CastListProps) {
         <ol className="absolute inset-x-0 top-0">
           {marks.map((m) => (
             <li key={m.i} ref={itemRef(m.i)} className="group absolute top-0 right-2 left-3.5 flex items-center gap-2.5 text-sm">
-              {/* The square on the line, in the category's colour, with the seconds inside. */}
+              {/* The square on the line, with the seconds inside: filled for a hit, outlined for a cast. */}
+              <CastSquare mark={m} className="group-data-[when=soon]:size-8 group-data-[when=soon]:text-base" />
               <span
-                data-secs
                 className={cn(
-                  "flex size-7 shrink-0 items-center justify-center rounded-md font-display text-sm text-white tabular-nums shadow-sm ring-2 ring-card",
-                  "group-data-[when=soon]:size-8 group-data-[when=soon]:text-base",
-                  CATEGORY_BG[m.cats[0] ?? "none"],
+                  "min-w-0 truncate rounded px-1",
+                  m.cast ? "text-muted-foreground" : "font-semibold",
+                  m.raidwide && "bg-danger-soft",
                 )}
-              />
-              <span className={cn("min-w-0 truncate rounded px-1 group-data-[when=soon]:font-semibold", m.raidwide && "bg-danger-soft")}>
+              >
                 {m.name}
               </span>
             </li>
           ))}
         </ol>
+        <CastKey className="absolute right-2 bottom-1.5 rounded bg-card/90 px-1" />
       </div>
     </section>
   );

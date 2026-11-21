@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
 import { useCastTimeline } from "../../hooks/useCastTimeline";
 import { CASTS_AHEAD } from "../../lib/fight";
-import { CATEGORY_BG } from "../CategoryDots";
+import { CastKey } from "./CastKey";
+import { CastSquare } from "./CastSquare";
 
 /** Where the now mark sits from the left, how far the line goes on before it, the room after the
     line at the right, and how far apart two casts stay at least, in pixels. The app's choice. */
@@ -46,17 +47,12 @@ export function CastStrip({ className }: CastStripProps) {
         <ol className="absolute inset-y-0 left-0">
           {marks.map((m) => (
             <li key={m.i} ref={itemRef(m.i)} className="group absolute top-2 left-0 flex w-18 flex-col items-center gap-1 text-xs">
-              {/* The square on the line, in the category's colour, with the seconds inside. */}
-              <span
-                data-secs
-                className={cn(
-                  "flex size-7 shrink-0 items-center justify-center rounded-md font-display text-sm text-white tabular-nums shadow-sm ring-2 ring-card",
-                  CATEGORY_BG[m.cats[0] ?? "none"],
-                )}
-              />
+              {/* The square on the line, with the seconds inside: filled for a hit, outlined for a cast. */}
+              <CastSquare mark={m} />
               <span
                 className={cn(
-                  "line-clamp-2 rounded px-0.5 text-center leading-tight group-data-[when=soon]:font-semibold",
+                  "line-clamp-2 rounded px-0.5 text-center leading-tight",
+                  m.cast ? "text-muted-foreground" : "font-semibold",
                   m.raidwide && "bg-danger-soft",
                 )}
               >
@@ -65,6 +61,7 @@ export function CastStrip({ className }: CastStripProps) {
             </li>
           ))}
         </ol>
+        <CastKey className="absolute right-2 bottom-0.5 rounded bg-card/90 px-1" />
       </div>
     </section>
   );

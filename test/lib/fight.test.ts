@@ -152,6 +152,17 @@ describe("the HUD", () => {
     expect(c.fill).toBeGreaterThan(0);
   });
 
+  test("a cast in view is the boss's own cast (BossMod: Boss->self, single-target) or a hit", () => {
+    const s = newFightState("watch", fight());
+    s.t = 44;
+    const kind = (name: string) => castsAhead(s).find((m) => m.name === name)?.cast;
+    expect(kind("Assault Evolved")).toBe(true);
+    expect(kind("Assault Evolved 1")).toBe(false);
+    s.t = 80;
+    expect(kind("Cometite 1 drops")).toBe(true);
+    expect(kind("Cometite 1")).toBe(false);
+  });
+
   test("the casts in view: up to 30 seconds ahead and 2 behind, in time order", () => {
     const s = newFightState("watch", fight());
     for (const t of [0, 60, 200, 400]) {
@@ -166,7 +177,7 @@ describe("the HUD", () => {
   });
 
   test("a cast sits by its time, and close casts are pushed apart", () => {
-    const mark = (left: number) => ({ i: 0, name: "", cats: [], raidwide: false, left });
+    const mark = (left: number) => ({ i: 0, name: "", cats: [], raidwide: false, cast: false, left });
     // 330 pixels for 30 seconds after the now line at 30: 10 pixels a second.
     expect(castPositions([mark(0), mark(15), mark(30)], 330, 30, 20)).toEqual([30, 180, 330]);
     expect(castPositions([mark(5), mark(5.5)], 330, 30, 20)).toEqual([80, 100]);

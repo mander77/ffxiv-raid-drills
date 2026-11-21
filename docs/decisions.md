@@ -212,6 +212,14 @@ make sure that each one still matches the code before you start it.
     Narrower: the cast bar and the prompt over the arena, the run's bar and the sideways casts
     under it. The run shows the casts coming up too: their names only, like cactbot's timeline in
     the game, never where to stand.
+  - The casts coming up show two kinds of line apart (owner's choice, over showing the hits only).
+    Every line is a cactbot time; some are the boss's own cast (its cast bar ends and a mechanic
+    starts, such as "Assault Evolved"), the rest are hits (damage goes off, such as "Assault
+    Evolved 1"). A cast is a dashed, outlined square with its name in plain text; a hit is a filled
+    square with its name in bold; a small key says Cast and Hit. Which lines are casts comes from
+    BossMod: the abilities it lists as "Boss->self, N s cast, single-target", matched by the
+    ability id on each cactbot line (`BOSS_CAST` in `src/data/fight.ts`). A Cometite puddle's
+    "drops" line is the start of its cast, so it counts as a cast too.
   - `useFitToScreen` measures again when the web fonts have loaded: they can push the arena down a
     pixel or two after the first measure, and the page then scrolled.
   - November 21: the owner asked that every change be checked against the official best

@@ -38,4 +38,10 @@ for (const [name, timeline] of [
     assert.include(names, "5Assault Evolved 1");
     for (const n of names) assert.notInclude(n, "Void Stardust into");
   });
+
+  test(`${name} has a key to its squares: a cast and a hit`, () => {
+    const box = showAt(timeline, 46);
+    assert.ok(within(box).getByText("Cast"));
+    assert.ok(within(box).getByText("Hit"));
+  });
 }

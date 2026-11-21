@@ -8,7 +8,7 @@ import { newCode, random, withSeed } from "../util";
 import type { Point, Scene, Slot } from "../types";
 
 /** One line on the fight timeline: `name` happens at `t`, in seconds into the fight. */
-interface TLEvent { t: number; name: string; raidwide?: boolean }
+interface TLEvent { t: number; name: string; raidwide?: boolean; cast?: boolean }
 
 /** One stretch of the fight with a scene on the arena. `due[i]` is when step i resolves. */
 export interface FightSeg {
@@ -182,6 +182,15 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     [[t, "Heartbreak Kick"], ...Array.from({length:n}, (_x, i): [number, string] => [t + 1.1 + 2 * i, "Heartbreak Kick " + (i + 1)])];
   const RAIDWIDE = new Set(["Crown of Arcadia", "Dance of Domination 1", "Dance of Domination 7", "One and Only",
     "Triple Tyrannhilation", "Flatliner", "Mammoth Meteor x2", "Heartbreaker (Enrage)"]);
+  /* The boss's own casts: the lines whose ability BossMod lists as "Boss->self, N s cast,
+     single-target" (AID in RM11STheTyrantEnums.cs), matched by the ability id on cactbot's line.
+     They do no damage: the boss's cast bar ends and a mechanic starts. Orbital Omen and Massive
+     Meteor are cactbot's "(castbar)" lines. A Cometite puddle "drops" when its cast starts, so
+     those lines count as casts too. Every other line is a hit. */
+  const BOSS_CAST = new Set(["Raw Steel Trophy Axe", "Raw Steel Trophy Scythe", "Trophy Weapons", "Assault Evolved",
+    "Void Stardust", "Dance of Domination Trophy", "Ultimate Trophy Weapons", "Assault Apex", "Immortal Reign",
+    "Orbital Omen", "Meteorain", "Triple Tyrannhilation", "Majestic Meteor", "Massive Meteor", "Ecliptic Stampede",
+    "Heartbreak Kick"]);
   const lines: Array<[number, string]> = [
     [10.6, "Crown of Arcadia"],
     ...raw(w1, 17.7), [33.1, "--middle--"],
@@ -219,7 +228,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     ...kicks(593.3, 5), ...kicks(612.4, 6), ...kicks(633.5, 7),
     [ENRAGE, "Heartbreaker (Enrage)"]
   ];
-  const events = lines.map(([t, name]): TLEvent => ({t, name, raidwide:RAIDWIDE.has(name)}));
+  const events = lines.map(([t, name]): TLEvent => ({t, name, raidwide:RAIDWIDE.has(name), cast:BOSS_CAST.has(name) || name.endsWith(" drops")}));
   const picks: Picks = {raw:w1, void:stackFirst ? "stack" : "spread", set1:orderIn(A1), set2:orderIn(A2),
     ult:U.cw ? "cw" : "ccw", fireball:four ? "four" : "two", wall};
   const summary = "Raw Steel Trophy: " + w1 + " first, then " + w2 + ". Assault Evolved at 0:48: " + orderText(picks.set1).toLowerCase() +

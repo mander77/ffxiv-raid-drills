@@ -462,6 +462,8 @@ export interface CastMark {
   name: string;
   cats: Category[];
   raidwide: boolean;
+  /** The boss's own cast, which starts a mechanic, rather than a hit. */
+  cast: boolean;
   /** Seconds to go; below 0 once it happened. */
   left: number;
 }
@@ -471,7 +473,7 @@ export function castsAhead(s: FightState): CastMark[] {
   return s.lines.flatMap((e, i) => {
     const left = e.t - s.t;
     return left >= -CASTS_PAST && left <= CASTS_AHEAD
-      ? [{ i, name: e.name, cats: categoriesAt(e.t), raidwide: Boolean(e.raidwide), left }]
+      ? [{ i, name: e.name, cats: categoriesAt(e.t), raidwide: Boolean(e.raidwide), cast: Boolean(e.cast), left }]
       : [];
   });
 }

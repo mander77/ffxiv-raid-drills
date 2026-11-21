@@ -14,6 +14,18 @@ export const CATEGORY_BG: Record<Category | "none", string> = {
   none: "bg-cat-none",
 };
 
+/** The border colour of each category, for an outlined mark. Complete class names, so Tailwind finds them. */
+export const CATEGORY_BORDER: Record<Category | "none", string> = {
+  raid: "border-cat-raid",
+  tank: "border-cat-tank",
+  spot: "border-cat-spot",
+  dodge: "border-cat-dodge",
+  target: "border-cat-target",
+  mech: "border-cat-mech",
+  enrage: "border-cat-enrage",
+  none: "border-cat-none",
+};
+
 // TS note: a component's props get a named interface, `<Name>Props`, like a parameter class in C#.
 // A call that leaves out a prop, or gives the wrong type, is a compile error.
 export interface CategoryDotsProps {
