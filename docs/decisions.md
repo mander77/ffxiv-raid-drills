@@ -163,6 +163,11 @@ make sure that each one still matches the code before you start it.
     left, high up where you read it; the arena and its play bar in the middle; the cast bar, the
     casts coming up and the prompt on the right. The page container widens there (max-w-7xl), on
     every page, so the header lines up and the arena keeps its size.
+  - In the player the cast bar always sits right over the mechanic, on every screen (owner's
+    choice): what the boss casts, then what it means. Extra-wide: cast bar and mechanic on the
+    left, the prompt and the casts coming up on the right. Wide: the prompt, the cast bar over
+    the mechanic, then the casts coming up. Phone: the prompt over the arena, the play bar under
+    it, then the cast bar over the mechanic. The run keeps the cast bar over the prompt.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what

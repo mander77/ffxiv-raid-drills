@@ -115,7 +115,8 @@ src/components/practice/  Practice: DrillList (wide screens), DrillNav (phones),
                      DrillScreen (one drill's screen: clicks, Show me, the prompt and panel)
 src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep, statusAfter, bossFor
 src/components/pressure/  Pressure: PressureStart, QuickRound, FightScreen (the run and the player:
-                     frame loop, clicks, keys), FightArena, FightHud (cast bar, prompt),
+                     frame loop, clicks, keys), FightArena, CastBar, FightPrompt, FightHud (the
+                     two together, in the run),
                      FightTimeline, FightPanel, FightPlayBar, FightSettings (the Settings button
                      and its sheet of pattern picks),
                      RunScore and WatchDone (the end screens)

@@ -25,10 +25,12 @@ import { useProgressStore } from "../../stores/progress";
 import type { Point, Slot } from "../../types";
 import { ArenaFrame } from "../arena/ArenaFrame";
 import { CategoryDots } from "../CategoryDots";
+import { CastBar } from "./CastBar";
 import { FightArena, type ShownHit } from "./FightArena";
 import { FightHud } from "./FightHud";
 import { FightPanel, FightUpcoming } from "./FightPanel";
 import { FightPlayBar } from "./FightPlayBar";
+import { FightPrompt } from "./FightPrompt";
 
 export interface FightScreenProps {
   /** run: you click your spots. watch: the right moves play by themselves. */
@@ -291,21 +293,27 @@ export function FightScreen({
 
   return (
     <FightFrameContext value={frames}>
-      {extraWide && mode === "watch" ? (
-        // An extra-wide screen: three columns. The mechanic on the left, high up where you can read
-        // it; the arena and its play bar in the middle; the cast bar, the casts coming up and the
-        // prompt on the right. The side columns are as tall as the middle one, and scroll inside.
+      {/* In the player the cast bar always sits over the mechanic: what the boss casts, and what it
+          means. In the run, which has no mechanic panel, it sits over the prompt. */}
+      {mode === "watch" && extraWide ? (
+        // An extra-wide screen: three columns. The cast bar and the mechanic on the left, high up
+        // where you can read them; the arena and its play bar in the middle; the prompt and the
+        // casts coming up on the right. The side columns are as tall as the middle one; their
+        // long parts scroll inside.
         <div className="grid grid-cols-[minmax(0,17rem)_minmax(0,1fr)_minmax(0,20rem)] gap-x-6">
           <div className="relative min-w-0">
-            <div className="absolute inset-0 overflow-y-auto">
-              <FightPanel
-                view={view}
-                fight={fight}
-                speed={speed}
-                timeline={false}
-                onGoTo={goToSeg}
-                onSpawns={() => setReplays((n) => n + 1)}
-              />
+            <div className="absolute inset-0 flex flex-col gap-3">
+              <CastBar />
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <FightPanel
+                  view={view}
+                  fight={fight}
+                  speed={speed}
+                  timeline={false}
+                  onGoTo={goToSeg}
+                  onSpawns={() => setReplays((n) => n + 1)}
+                />
+              </div>
             </div>
           </div>
           <div className="min-w-0 space-y-3">
@@ -313,29 +321,32 @@ export function FightScreen({
             {playBar}
           </div>
           <div className="relative min-w-0">
-            <div className="absolute inset-0 overflow-y-auto">
-              <FightHud>
-                <FightUpcoming speed={speed} />
-              </FightHud>
+            <div className="absolute inset-0 space-y-4 overflow-y-auto">
+              <FightPrompt />
+              <FightUpcoming speed={speed} />
             </div>
           </div>
         </div>
       ) : wide ? (
         // A wide screen: the arena on the left, as large as the screen allows, with the player's slim
-        // play bar under it. Beside it: the cast bar and the prompt, the mechanic, then the casts
-        // coming up. The side column is as tall as the arena column, and only the mechanic scrolls
-        // when its text is long, so the page never does.
+        // play bar under it. Beside it: the prompt, the cast bar over the mechanic, then the casts
+        // coming up (the run: the cast bar, the prompt and its bar). The side column is as tall as
+        // the arena column, and only the mechanic scrolls when it is long, so the page never does.
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,22rem)] gap-x-6">
           <div className="min-w-0 space-y-3">
             {arena}
             {mode === "watch" && playBar}
           </div>
           <div className="relative min-w-0">
-            <div className="absolute inset-0 flex flex-col gap-4">
-              <FightHud />
-              {mode === "run" ? (
-                runBar
-              ) : (
+            {mode === "run" ? (
+              <div className="space-y-4">
+                <FightHud />
+                {runBar}
+              </div>
+            ) : (
+              <div className="absolute inset-0 flex flex-col gap-3">
+                <FightPrompt />
+                <CastBar />
                 <div className="min-h-0 flex-1 overflow-y-auto">
                   <FightPanel
                     view={view}
@@ -346,28 +357,29 @@ export function FightScreen({
                     onSpawns={() => setReplays((n) => n + 1)}
                   />
                 </div>
-              )}
-              {mode === "watch" && (
                 <div className="shrink-0">
                   <FightUpcoming speed={speed} />
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
-      ) : (
-        // A narrower screen: everything in one column, the cast bar and prompt over the arena.
+      ) : mode === "run" ? (
+        // A narrower screen, the run: the cast bar and the prompt over the arena, its bar under it.
         <div className="space-y-3">
           <FightHud />
           {arena}
-          {mode === "run" ? (
-            runBar
-          ) : (
-            <>
-              {playBar}
-              <FightPanel view={view} fight={fight} speed={speed} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />
-            </>
-          )}
+          {runBar}
+        </div>
+      ) : (
+        // A narrower screen, the player: the prompt over the arena, the play bar under it, then the
+        // cast bar over the mechanic, and the casts coming up.
+        <div className="space-y-3">
+          <FightPrompt />
+          {arena}
+          {playBar}
+          <CastBar />
+          <FightPanel view={view} fight={fight} speed={speed} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />
         </div>
       )}
     </FightFrameContext>
