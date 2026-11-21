@@ -13,11 +13,10 @@ tokens or account details.
   Today it has one fight and one role. More roles and fights can come later.
 - The owner is the GitHub account `mander77`. The owner plays a healer in a static and shares the
   live link with the static.
-- Live site: https://ffxiv-raid-drills.app (built from `main`). It runs the old version of the
-  site until the React rebuild is done.
-- The rebuild happens on the `rebuild` branch (issues #18 to #22). Its preview is
-  https://rebuild.test.ffxiv-raid-drills.app. Each rebuild step is a branch from `rebuild` and a
-  pull request into `rebuild`. When every tab is back, `rebuild` merges into `main` in one go.
+- Live site: https://ffxiv-raid-drills.app (built from `main`). It runs the React site.
+- The site was rebuilt in React, Tailwind CSS and shadcn/ui in five steps (issues #18 to #22) on
+  a `rebuild` branch, which merged into `main` when every tab was back. Git history on `main`
+  keeps the old code (`src/views/`).
 - Branch previews: `https://<branch>.test.ffxiv-raid-drills.app/`. The bare `test.` host does not
   load.
 - Hosting: Cloudflare Workers Builds on the owner's personal Cloudflare account. Each push builds.
@@ -36,8 +35,6 @@ claim on the live site before you act on it.
 
 ## Tabs and routes
 
-On the `rebuild` branch:
-
 | Tab | Route | What it does |
 |-----|-------|--------------|
 | Home | `/` | An arena picture from a Learn card, "Start here" cards, and About me. |
@@ -47,8 +44,7 @@ On the `rebuild` branch:
 | Pressure | `/pressure`, `/pressure/<code>[/<picks>][?t=<s>]` | A quick round of 12 timed cards, or the full fight: the run (you click) and Watch the right moves (the player). The player's address names its fight, its picks and, paused, its moment. |
 | Cheat sheet | `/sheet` | One line per mechanic, the timeline for your role, sources and your progress. |
 
-Any other address opens Home. Every tab of the live site is back; git history keeps the old code
-(`src/views/` on `main`).
+Any other address opens Home, including the old site's addresses (`/mech/...`, `/map/...`).
 
 The slot switch is in the header: the role (only Healer works today; the others show "not yet
 available") and the group, which is the light party (1 or 2, as wtfdig names it). Each drill and question builds its answer for the
@@ -145,9 +141,9 @@ e2e/                 Playwright browser tests
 
 ## How to work with the owner
 
-1. Make a branch from the latest `rebuild` (for a rebuild step) or `main` (for a fix to the live
-   site). When another session can use the main checkout, work in a git worktree, for example
-   `git worktree add -b <branch> ../ffxiv-raid-drills-<name> origin/rebuild`, and run `npm ci` there.
+1. Make a branch from the latest `main`. When another session can use the main checkout, work in
+   a git worktree, for example
+   `git worktree add -b <branch> ../ffxiv-raid-drills-<name> origin/main`, and run `npm ci` there.
    If mise is installed, run `mise trust <worktree>/mise.toml` once.
 2. Run the dev server and check the change in a browser at desktop width (1280 px) and phone width
    (375 px). Measure positions in the page. Do not guess.
@@ -166,10 +162,7 @@ e2e/                 Playwright browser tests
 
 ## How to publish
 
-A rebuild step: run `sh scripts/publish.sh` from the step's branch (it checks, then pushes), and
-open a pull request into `rebuild` with `gh pr create --base rebuild`. The owner reviews it on the
-branch preview and merges it. The steps below are for `main`, the live site: a fix to the live
-site, and at the end, the merge of `rebuild` into `main`.
+These steps put a branch on `main`, the live site.
 
 1. `git fetch origin`, then make sure that the branch contains `origin/main`:
    `git merge-base --is-ancestor origin/main <branch>`. Another session can publish in between. If
@@ -240,8 +233,8 @@ site, and at the end, the merge of `rebuild` into `main`.
   - Each component and page has a test in `test/components/` or `test/pages/`. Find elements by role and
     text, the way a player would.
   - Add new files to `files.includes` in `biome.json`, so Biome checks them.
-- Leave `src/data/` and `src/geometry.ts` as they are when you rebuild a tab. They are checked
-  against cactbot and BossMod.
+- Leave the values in `src/data/` and `src/geometry.ts` as they are. They are checked against
+  cactbot and BossMod. Names may change, with the owner's OK.
 - The player marks are always the top layer of an arena picture.
 - New attack sizes go in `src/data/attacks.ts`, not in a drill or a picture.
 - A drill pattern comes from a seeded code (`withSeed`), so the same code builds the same pattern.
@@ -306,11 +299,10 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
 
 - Issue #2: a reference view of every mechanic in fight order, with the site's diagrams. Two
   questions are open for the owner. Ask them before you build it.
-- Issues #18 to #22 (label "rebuild"): rebuild the site in React on the `rebuild` branch, one
-  step per issue and per branch, in order. All five are done once Rebuild 5 (#22) merges. Then
-  `rebuild` merges into `main` (see "How to publish"), after the owner says so. The old code is in
-  git history on `main`.
-  `docs/decisions.md` has the decisions behind the plan.
+- The React rebuild (issues #18 to #22, label "rebuild") is done and live. `docs/decisions.md`
+  has the decisions behind it.
+- Issue #29: use shadcn/ui Collapsible, Sonner, Progress and Item for parts the site built itself.
+- Issue #27: clearer weapon pictures. Issue #15: the white frame around the Home picture.
 - Issue #11: make the repository self-contained, so a clone plus one step gives every tool. Three
   questions are open for the owner.
 - Issue #14: a script that imports fight times and attack sizes from cactbot and BossMod.

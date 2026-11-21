@@ -117,6 +117,9 @@ make sure that each one still matches the code before you start it.
     (`useFitToScreen`). On a wide screen the play bar sits beside it, above the panel; it is no
     longer sticky, since it covered the map. The prompt is always two lines tall, so a longer one
     does not push the arena down.
+  - November 21: the rebuild went live. `rebuild` merged into `main` with a fast-forward, and
+    the `rebuild` branch is no longer used: new work branches from `main`. The old site's
+    addresses open Home, and its saved scores and settings (`m11s.` keys) do not carry over.
   - November 21: the owner asked that every change be checked against the official best
     practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
     test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what
