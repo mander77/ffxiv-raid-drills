@@ -488,10 +488,12 @@ static wins.
   commits). The owner chose this over pull requests for themselves, so the fast-forward publish
   stays. In an emergency, turn the ruleset off in Settings > Rules > Rulesets, and back on after.
 - A second ruleset, "main: pull requests": only the owner may push to `main` directly. Everyone
-  else needs a pull request with one approval (a push after the approval needs a new one),
-  merged by rebase or squash. The repository admin role (only the owner) bypasses this ruleset
-  only. It is a ruleset of its own, because a bypass covers a whole ruleset, and the CI rule must
-  bind the owner too.
+  else needs a pull request, merged by rebase or squash. It needs no approval: the owner chose
+  this so their own pull requests merge without a bypass. GitHub cannot tell rules apart by who
+  wrote a pull request, but only people with write access can merge one, and today that is only
+  the owner. Give someone else write access, and set the approvals back to 1 first. The
+  repository admin role (only the owner) bypasses this ruleset only. It is a ruleset of its own,
+  because a bypass covers a whole ruleset, and the CI rule must bind the owner too.
 - GitHub checks the commit a push to `main` ends on, by the CI run on that same commit when its
   branch was pushed. So push the branch, wait for CI, then push `main`. `scripts/publish.sh` waits
   for the two checks.
