@@ -12,8 +12,8 @@
 //                                  (raw=axe,set2=...) and, if paused, the moment in seconds
 //   /sheet                         the Cheat sheet
 //
-// Anything else opens the landing screen. Old links put the route after a # (/#mech/k-sword).
-// They still open the same screen, and the address bar then shows the real path.
+// Anything else opens the landing screen. React Router (App.tsx) reads the path, and parseRoute
+// turns it into a route for the old screens.
 //
 // TS note: this file imports only types from core.ts (`import type`), so it has no code that
 // needs a page and the tests can run it.
@@ -48,7 +48,7 @@ function parseT(query: string): number | undefined {
   return Number.isFinite(t) && t > 0 && t <= FIGHT_END ? t : undefined;
 }
 
-/** Read a link into a route: a path (/mech/k-sword), with a query if any, or an old # link (#mech/k-sword). */
+/** Read a link into a route: a path (/mech/k-sword), with a query if any. */
 export function parseRoute(link: string): Route {
   const [path = "", query = ""] = link.split("?");
   const parts = path.replace(/^[#/]+/, "").replace(/\/+$/, "").split("/").map(p => { try { return decodeURIComponent(p); } catch { return p; } });
@@ -60,11 +60,6 @@ export function parseRoute(link: string): Route {
   if(isQuiz(name)) return only({tab:name, card:a});
   if(name === "sheet") return {tab:name};
   return {tab:"home"};
-}
-
-/** The route in the address bar. An old link keeps its route after the #, so the # wins over the path. */
-export function currentRoute(): Route {
-  return parseRoute(location.hash.length > 1 ? location.hash : location.pathname + location.search);
 }
 
 /** Write a route as a path, starting with /. */
@@ -80,14 +75,17 @@ export function routeLink(r: Route): string {
   }
 }
 
-/** Show a route in the address bar. With `push`, it adds a history entry, so the Back button
-    returns to the screen before (a tab, a link). Without it, it replaces the entry (the next card
-    of the same tab). It never draws the screen again. */
-export function showRoute(r: Route, push = false): void {
+/** Show a route in the address bar, in place of the entry there now. An old screen calls it when it
+    moves to another card of the same tab. It keeps the history entry's state, which React Router
+    uses, and it never draws the screen again. */
+export function showRoute(r: Route): void {
   const link = routeLink(r);
-  if(location.pathname + location.search === link && !location.hash) return;
-  try {
-    if(push) history.pushState(null, "", link);
-    else history.replaceState(null, "", link);
-  } catch { /* a sandboxed frame */ }
+  if(location.pathname + location.search === link) return;
+  try { history.replaceState(history.state, "", link); } catch { /* a sandboxed frame */ }
 }
+
+/** The tab a path belongs to: "/mech/k-sword" is on "mech". */
+export const tabOf = (pathname: string): Route["tab"] => parseRoute(pathname).tab;
+
+/** The link to a tab's first screen: "/" for Home, "/mech" for Learn. */
+export const tabLink = (tab: Route["tab"]): string => tab === "home" ? "/" : "/" + tab;

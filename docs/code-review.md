@@ -1,7 +1,8 @@
 # TypeScript code review
 
-The owner asked a fresh agent for a code review with the prompt below. The review led to the
-Preact plan in issues #3 to #10 (see `docs/decisions.md`). Run the prompt again after large
+The owner asked a fresh agent for a code review with the prompt below. The first review led to a
+Preact plan, which the owner later replaced with a React rebuild (issues #18 to #22, see
+`docs/decisions.md`). Run the prompt again after large
 changes. Change the repository path in it to your clone. The review only reads: it must not edit,
 commit or push.
 

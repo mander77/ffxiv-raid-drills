@@ -7,8 +7,9 @@ import type { MapDrill, Option, Question, QuizItem, Scene, Slot, StepResult } fr
 
 // TS note: other files import these types with `import { state, type Deck } from "./core"`.
 // The `type` keyword inside the braces marks a type-only import next to normal value imports.
-export type QuizCat = "mech" | "next";
-export type Tab = "home" | "map" | QuizCat | "pressure" | "sheet";
+export type { QuizCat, Tab } from "./tabs";
+import type { QuizCat, Tab } from "./tabs";
+export { TABS } from "./tabs";
 
 // TS note: a generic interface, like a C# generic class. Deck<MapDrill> holds map drills
 // and Deck<QuizItem> holds quiz cards.
@@ -58,22 +59,12 @@ const QUIZ_POOLS: Record<QuizCat, () => QuizItem[]> = {
   next: () => NEXT_ITEMS
 };
 
-/** In the order a player learns the fight: what each mechanic does, where you stand, what comes
-    next, then all of it fast. The cheat sheet comes last because it sums up the rest. Each intro
-    is one short line: the screen itself shows what to do. */
-export const TABS: readonly {id: Tab; label: string; lede: string}[] = [
-  {id:"home", label:"Home", lede:"Practice M11S, The Tyrant (Savage), as a healer, away from the raid."},
-  {id:"mech", label:"Learn", lede:"What each mechanic does, and what you do in it. Pick an answer to see it on the picture."},
-  {id:"map", label:"Practice", lede:"Click where you stand. One mechanic at a time, no timer."},
-  {id:"next", label:"Timeline", lede:"Which mechanic comes next in the fight."},
-  {id:"pressure", label:"Pressure", lede:"The same questions, fast: timed questions, or the whole fight on the clock."},
-  {id:"sheet", label:"Cheat sheet", lede:"The rules and your timeline on one page."}
-];
 
 const savedSecs = LS.get("psecs", 6);
 export const state: AppState = {
   // LS.get<string> reads any saved string. Each ternary then turns it into one of the allowed values.
-  slot: LS.get<string>("slot", "H1") === "H2" ? "H2" : "H1",
+  // The slot comes from the slot store (stores/slot.ts) when the old screens start (views/legacy.ts).
+  slot: "H1",
   choices: cleanChoices(LS.get<unknown>("fchoices", null)),
   psecs: [4, 6, 8, 10].includes(savedSecs) ? savedSecs : 6,
   stats: LS.get<AppState["stats"]>("stats", {}) || {},

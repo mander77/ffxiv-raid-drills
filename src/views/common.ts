@@ -1,23 +1,6 @@
 // Pieces every tab uses: the tab header and the "round done" panel.
-import { render, type ComponentChild } from "preact";
 import { esc, el } from "../util";
 import { state, TABS, view, app, type Deck, type QuizCat } from "../core";
-
-/* A screen built with Preact draws into its own root element inside #view. The screens that still
-   build HTML as text replace everything in #view, root included. The next Preact screen then
-   starts on a new root, so Preact never works on elements that are gone. */
-let root: HTMLElement | null = null;
-/** Draw a Preact screen into #view. Drawing again into the same screen updates it in place. */
-export function mountView(node: ComponentChild): void {
-  if(!root || root.parentNode !== view){
-    // Let Preact clean up the old screen first (its effects and handlers).
-    if(root) render(null, root);
-    root = document.createElement("div");
-    root.className = "viewroot";
-    view.replaceChildren(root);
-  }
-  render(node, root);
-}
 
 /** The one-line intro of the tab on screen. */
 export const lede = (): string => (TABS.find(x => x.id === state.tab) ?? TABS[0]).lede;

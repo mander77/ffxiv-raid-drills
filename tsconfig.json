@@ -23,10 +23,10 @@
     // Report variables and imports that are never used.
     "noUnusedLocals": true,
     "noFallthroughCasesInSwitch": true,
-    // JSX in .tsx files: tsc and Vite both turn <div> into a call to Preact's jsx() function, which
-    // they import from "preact/jsx-runtime" by themselves. No Babel and no Vite plugin needed.
+    // JSX in .tsx files: tsc checks it as React. Vite compiles it, with @vitejs/plugin-react.
     "jsx": "react-jsx",
-    "jsxImportSource": "preact"
+    // "@/..." means "src/...", the same as the alias in vite.config.ts. shadcn/ui writes its imports this way.
+    "paths": { "@/*": ["./src/*"] }
   },
-  "include": ["src", "test", "vite.config.ts"]
+  "include": ["src", "test", "e2e", "vite.config.ts", "playwright.config.ts"]
 }

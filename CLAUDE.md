@@ -59,7 +59,8 @@ one worked before you go on:
    `git config user.name mander77` and
    `git config user.email 220622142+mander77@users.noreply.github.com`.
    Then run `git var GIT_AUTHOR_IDENT` and make sure that it shows this name and address.
-5. Run `npm ci`, then `npm run typecheck` and `npm test`.
+5. Run `npm ci`, then `npm run typecheck` and `npm test`. For the browser tests, run
+   `npx playwright install` once, then `npm run e2e`.
 6. If mise is installed, run `mise trust mise.toml` in the clone.
 
 ## Commands
@@ -70,21 +71,35 @@ You need Node.js 24 (the version in `.node-version`).
 npm ci              # install
 npm run dev         # local site; add -- --port 5174 --strictPort for a second checkout
 npm run typecheck   # tsc, strict
-npm test            # Vitest
+npm test            # Vitest: unit and component tests
+npm run e2e         # Playwright: browser tests in Chromium, Firefox and WebKit
+npm run lint        # Biome: lint and format check of the rebuilt code
+npm run format      # Biome: format and fix the rebuilt code
 npm run build       # tsc, then Vite writes dist/
 ```
 
 ## Code map
 
 ```text
-src/main.ts          start-up, tabs, links, keyboard keys
-src/router.ts        routes: parseRoute, routeLink, showRoute
-src/core.ts          shared state, tabs, decks, scores, the MapCur and McqCur types
+index.html           the page: #root for React, #view for the old screens
+src/main.tsx         start-up: draws the React app (App.tsx) into #root
+src/App.tsx          the header, the routes (React Router), links from the old screens
+src/app.css          Tailwind, the site colours as Tailwind names, the cascade layers
+src/tabs.ts          the tabs: id, label and one-line intro
+src/router.ts        paths and routes: parseRoute, routeLink, tabOf, showRoute
+src/share.ts         sharing the address of the screen
+src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser
+src/components/      React components: Header, SlotSwitch, ShareButton, TabNav, Marks, CatKey,
+                     LegacyScreen (shows an old screen)
+src/components/ui/   shadcn/ui components (button, toggle, toggle-group, tooltip)
+src/screens/         React screens: CheatSheet
+src/lib/             cn() for class names, WRAP for the page width
+src/core.ts          old screens: shared state, decks, scores, the MapCur and McqCur types
 src/types.ts         drills, steps, zones, overlays, questions
+src/party.ts         party slots: roles, light parties, slot names
 src/util.ts          helpers, LS (localStorage with the "m11s." prefix), seeded random
 src/geometry.ts      arena geometry: zones, rotation, inZone
 src/arena.ts         SVG drawing: arenaSVG with layers, drawBoss, figSVG, sceneSVG
-src/share.ts         the Share button
 src/data/drills.ts   Practice drills (MAPS), scenes, safe spots, stack and spread rules
 src/data/figs.ts     Learn card pictures (MECH_FIGS)
 src/data/questions.ts  Learn cards (MECH, MECH_GROUPS) and Timeline cards (NEXT_ITEMS)
@@ -93,18 +108,21 @@ src/data/route.ts    the moving marker's route (rightRoute, clickRoute, runnerAt
 src/data/timeline.ts the fight timeline and "what you do" per row
 src/data/abilities.ts  the ability list, phases and colour categories
 src/data/attacks.ts  attack sizes and shapes (from BossMod). Put new sizes here.
+src/views/           the old screens, built as HTML text, until the rebuild replaces them
+src/views/legacy.ts  shows and hides the old screens; their keyboard keys and their slot
 src/views/home.ts    Home
 src/views/quiz.ts    Learn and Timeline cards, and the quick round's card
 src/views/practice.ts  Practice
 src/views/pressure.ts  Pressure start screen and the quick round
 src/views/fight.ts   the full fight: the run and the player
 src/views/map.ts     paintArena: the answer layers that Practice and the fight share
-src/views/sheet.tsx  Cheat sheet (the first screen built with Preact)
 src/views/tlfig.ts   the Timeline card picture
-src/views/tlnav.tsx  colour marks for the timeline categories (as text and as components)
+src/views/tlnav.ts   colour marks for the timeline categories, as text
 src/views/pattern.ts fight pattern picks (Settings on the player)
-src/views/common.ts  tab header, mountView (draws a Preact screen), HUD prompt, fadeEdges, round-done panel
-test/                Vitest tests
+src/views/common.ts  tab header, HUD prompt, fadeEdges, round-done panel
+src/styles.css       the old screens' styles, and the site colours (:root)
+test/                Vitest tests; test/components and test/screens for React
+e2e/                 Playwright browser tests
 ```
 
 ## How to work with the owner
@@ -115,7 +133,7 @@ test/                Vitest tests
    If mise is installed, run `mise trust <worktree>/mise.toml` once.
 2. Run the dev server and check the change in a browser at desktop width (1280 px) and phone width
    (375 px). Measure positions in the page. Do not guess.
-3. Run the type check and the tests.
+3. Run the type check, the tests (`npm test` and `npm run e2e`) and `npm run lint`.
 4. Commit. The header is a Conventional Commit (`feat:`, `fix:`, `chore:`). The body is plain,
    simple English: short sentences, active voice, what changed for the player and why. Write the
    message to a file and run `git commit -F <file>`.
@@ -161,6 +179,22 @@ test/                Vitest tests
 - Light theme only. No company branding.
 - Code comments: plain English. No ticket numbers, no history of old layouts.
 - Build the simplest shape for today's need. Do not add hooks for features nobody asked for.
+- The site is being rebuilt in React (issues #18 to #22). New screens and parts are React
+  components with Tailwind classes, in the usual React shape:
+  - A component used by more than one screen gets its own file in `src/components/`, named after
+    it (`SlotSwitch.tsx` exports `SlotSwitch`). A screen goes in `src/screens/`. A small part that
+    only one screen uses stays in that screen's file.
+  - Function components with named exports. The props are a named interface, `<Name>Props`.
+  - State in hooks (`useState`), or in a Zustand store (`src/stores/`) when more than one screen
+    needs it. Events are JSX props (`onClick`). Do not change a React element's classes or add
+    listeners to it by hand.
+  - Use shadcn/ui for common controls (`npx shadcn@latest add <name>`), and style them with the
+    site's Tailwind colours (`bg-card`, `text-ink-2`, `border-heal`).
+  - Each component has a test in `test/components/` or `test/screens/`. Find elements by role and
+    text, the way a player would.
+  - Add new files to `files.includes` in `biome.json`, so Biome checks them.
+- Leave `src/data/` and `src/geometry.ts` as they are when you rebuild a screen. They are checked
+  against cactbot and BossMod.
 - The player marks are always the top layer of an arena picture.
 - New attack sizes go in `src/data/attacks.ts`, not in a drill or a picture.
 - A drill pattern comes from a seeded code (`withSeed`), so the same code builds the same pattern.
@@ -192,8 +226,8 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
 
 - Issue #2: a reference view of every mechanic in fight order, with the site's diagrams. Two
   questions are open for the owner. Ask them before you build it.
-- Issues #5 to #10 (label "preact"): move the views to Preact, one phase per issue and per branch,
-  in order. Phases 0 (#3) and 1 (#4) are done, so the next one is phase 2 (#5).
+- Issues #18 to #22 (label "rebuild"): rebuild the site in React, one step per issue and per
+  branch, in order. Rebuild 1 (#18) is done, so the next one is Rebuild 2 (#19).
   `docs/decisions.md` has the decisions behind the plan.
 - Issue #11: make the repository self-contained, so a clone plus one step gives every tool. Three
   questions are open for the owner.

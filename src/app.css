@@ -1,0 +1,75 @@
+/* The site's styles: Tailwind CSS for the React screens, and the old stylesheet for the screens that
+   are not rebuilt yet.
+
+   Cascade layers, from weakest to strongest. A Tailwind class always wins over the old stylesheet.
+   Tailwind's own reset (preflight) is left out while old screens remain, because they rely on the
+   browser's default styles. A small reset for the React parts (.rx) takes its place. */
+@layer theme, legacy, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "./styles.css" layer(legacy);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "tw-animate-css";
+
+/* The site's colours and fonts as Tailwind names: bg-card, text-ink-2, border-heal, font-display.
+   The colour values live in styles.css (:root) while old screens still use them. */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-heal: var(--heal);
+  --color-heal-soft: var(--heal-soft);
+  --color-heal-ink: var(--heal-ink);
+  --color-link: var(--wm-blue);
+  /* The ability categories of the fight timeline. */
+  --color-cat-raid: var(--c-raid);
+  --color-cat-tank: var(--c-tank);
+  --color-cat-spot: var(--c-spot);
+  --color-cat-dodge: var(--c-dodge);
+  --color-cat-target: var(--c-target);
+  --color-cat-mech: var(--c-mech);
+  --color-cat-enrage: var(--c-enrage);
+  --color-cat-none: var(--c-none);
+
+  /* The names shadcn/ui components use, mapped to the site's colours. */
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-primary: var(--heal);
+  --color-primary-foreground: #fff;
+  --color-secondary: var(--heal-soft);
+  --color-secondary-foreground: var(--heal-ink);
+  --color-muted: var(--paper);
+  --color-muted-foreground: var(--ink-2);
+  --color-accent: var(--heal-soft);
+  --color-accent-foreground: var(--heal);
+  --color-destructive: var(--miss);
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--wm-blue);
+  --radius-md: 8px;
+  --radius-lg: var(--r);
+
+  --font-display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --font-sans: "Atkinson Hyperlegible", "Segoe UI", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+
+/* A small reset for the React parts only. Tailwind's preflight does this for the whole page once
+   the old screens are gone. */
+@layer base {
+  :where(.rx) *,
+  :where(.rx) ::before,
+  :where(.rx) ::after {
+    border: 0 solid;
+  }
+  :where(.rx) button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+}
