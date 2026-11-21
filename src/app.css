@@ -1,7 +1,6 @@
 /* The site's styles: Tailwind CSS with the standard shadcn/ui theme. Light theme only. */
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "./arena.css";
 
 /* The shadcn/ui theme colours (its "neutral" base colour). The components read them through the
    Tailwind names below: bg-background, text-muted-foreground, border-border and so on. */

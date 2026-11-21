@@ -89,20 +89,23 @@ index.html           the page: React draws into #root
 src/main.tsx         start-up: draws the React app (App.tsx) into #root
 src/App.tsx          the header and the routes (React Router): one page per path
 src/app.css          Tailwind and the standard shadcn/ui theme, the ability category colours
-src/arena.css        the arena pictures' SVG styles
 src/tabs.ts          the tabs: path, label and one-line intro; tabOf
 src/share.ts         sharing the address of the page
 src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser
-src/components/      React components: Header, SlotSwitch, ShareButton, TabNav, Marks, CatKey
+src/components/      React components: Header, PageContainer, SlotSwitch, ShareButton, TabNav,
+                     Marks, CatKey,
+                     and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
+                     StepChips, SetupText, Tally, ChipRow, HudPrompt
+src/components/arena/  the arena pictures: Arena (floor, waymarks, layers), Shape (one attack,
+                     weapon or mark), BossMark, ZoneMark, FigPicture (a Learn picture), arena.css
 src/components/ui/   shadcn/ui components, as the shadcn CLI writes them
 src/pages/           React pages, one per route: CheatSheetPage (/sheet)
 src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab
-src/lib/             cn() for class names, WRAP for the page width
+src/lib/             cn() for class names
 src/types.ts         drills, steps, zones, overlays, questions
 src/party.ts         party slots: roles, light parties, slot names
 src/util.ts          helpers, LS (localStorage with the "m11s." prefix), seeded random
 src/geometry.ts      arena geometry: zones, rotation, inZone
-src/arena.ts         SVG drawing: arenaSVG with layers, drawBoss, figSVG, sceneSVG
 src/data/drills.ts   Practice drills (MAPS), scenes, safe spots, stack and spread rules
 src/data/figs.ts     Learn card pictures (MECH_FIGS)
 src/data/questions.ts  Learn cards (MECH, MECH_GROUPS) and Timeline cards (NEXT_ITEMS)
@@ -124,10 +127,16 @@ e2e/                 Playwright browser tests
 2. Run the dev server and check the change in a browser at desktop width (1280 px) and phone width
    (375 px). Measure positions in the page. Do not guess.
 3. Run the type check, the tests (`npm test` and `npm run e2e`) and `npm run lint`.
-4. Commit. The header is a Conventional Commit (`feat:`, `fix:`, `chore:`). The body is plain,
+4. Check the change against the official best practices of every framework and language it
+   touches, before you commit. Today that is React (react.dev), Tailwind CSS (tailwindcss.com),
+   shadcn/ui (ui.shadcn.com), TypeScript, Vitest, Testing Library and Playwright. Read the
+   current docs (the context7 tools help), compare, and fix what does not follow them. A new
+   developer who knows the framework should find their way without help. Tell the owner what
+   you checked and what you changed. See "Checked against" below.
+5. Commit. The header is a Conventional Commit (`feat:`, `fix:`, `chore:`). The body is plain,
    simple English: short sentences, active voice, what changed for the player and why. Write the
    message to a file and run `git commit -F <file>`.
-5. Tell the owner what changed, and ask: "Publish, or more changes first?" The owner reviews in a
+6. Tell the owner what changed, and ask: "Publish, or more changes first?" The owner reviews in a
    browser before a publish. Publish only after the owner says so.
 
 ## How to publish
@@ -174,6 +183,19 @@ site, and at the end, the merge of `rebuild` into `main`.
 - Light theme only. No company branding.
 - Code comments: plain English. No ticket numbers, no history of old layouts.
 - Build the simplest shape for today's need. Do not add hooks for features nobody asked for.
+- Follow the official best practices of each framework and language, so the code looks the way
+  a developer who knows it expects. "Checked against" (what each review looks at):
+  - React (react.dev): one component per file for shared parts, named exports, props as a named
+    interface, small components over functions that return JSX, click logic in handlers and not
+    in effects ("You might not need an effect"), effects only to sync with outside systems,
+    keys on list items, refs for DOM access.
+  - Tailwind CSS (tailwindcss.com): reuse styles with a component, not a string of class names
+    or @apply. Write complete class names (never build one from parts, such as `bg-${color}-600`).
+    Custom CSS goes in a cascade layer (`@layer components`). Prefer the theme's sizes and
+    colours over arbitrary values.
+  - shadcn/ui (ui.shadcn.com): add components with its CLI and keep them as it writes them; use
+    their variants and the theme's CSS variables (`bg-primary`, `text-muted-foreground`).
+  - Tests (Testing Library, Playwright): find elements by role and text, as a user would.
 - The site is built with React, Tailwind CSS and shadcn/ui, in the usual React shape:
   - A component used by more than one page gets its own file in `src/components/`, named after
     it (`SlotSwitch.tsx` exports `SlotSwitch`). A page (one per route) goes in `src/pages/` and
@@ -227,8 +249,8 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
 - Issue #2: a reference view of every mechanic in fight order, with the site's diagrams. Two
   questions are open for the owner. Ask them before you build it.
 - Issues #18 to #22 (label "rebuild"): rebuild the site in React on the `rebuild` branch, one
-  step per issue and per branch, in order. Rebuild 1 (#18) is done, so the next one is Rebuild 2
-  (#19). Each step brings its tabs back; the old code is in git history on `main`.
+  step per issue and per branch, in order. Rebuilds 1 (#18) and 2 (#19) are done, so the next one is
+  Rebuild 3 (#20). Each step brings its tabs back; the old code is in git history on `main`.
   `docs/decisions.md` has the decisions behind the plan.
 - Issue #11: make the repository self-contained, so a clone plus one step gives every tool. Three
   questions are open for the owner.

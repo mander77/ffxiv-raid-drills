@@ -1,5 +1,4 @@
-import { WRAP } from "@/lib/layout";
-import { cn } from "@/lib/utils";
+import { PageContainer } from "./PageContainer";
 import { ShareButton } from "./ShareButton";
 import { SlotSwitch } from "./SlotSwitch";
 import { TabNav } from "./TabNav";
@@ -9,7 +8,7 @@ import { TabNav } from "./TabNav";
 export function Header() {
   return (
     <header className="sticky top-0 z-10 border-b bg-background">
-      <div className={cn(WRAP, "grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 pt-3")}>
+      <PageContainer className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 pt-3">
         <h1 className="text-xl font-semibold tracking-tight">FFXIV Raid Drills</h1>
         <ShareButton className="justify-self-end" />
         {/* The line breaks between its items, never inside one. */}
@@ -19,7 +18,7 @@ export function Header() {
         </p>
         <SlotSwitch className="justify-self-end max-sm:col-span-2 max-sm:justify-self-stretch" />
         <TabNav className="col-span-2" />
-      </div>
+      </PageContainer>
     </header>
   );
 }

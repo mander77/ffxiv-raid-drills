@@ -49,8 +49,7 @@ make sure that each one still matches the code before you start it.
     WebKit for browser tests; Biome to lint and format; lucide-react for icons. Hosting stays on
     Cloudflare.
   - Keep `src/data/` and `src/geometry.ts` as they are. They are checked against cactbot and
-    BossMod. `arena.ts` still draws the arena pictures as SVG text, styled by `arena.css`, until
-    Rebuild 2 (#19) turns them into components.
+    BossMod.
   - The arena stays SVG, drawn by React components, not a canvas or a game library. The full
     fight's per-frame parts run in a requestAnimationFrame loop that updates elements through refs.
   - Rebuild 1 (#18): the header and the Cheat sheet, in the default look. Any other address opens
@@ -66,6 +65,19 @@ make sure that each one still matches the code before you start it.
   - The bundle is 129 kB (gzip), from 61.5 kB for the old site with every tab. React DOM is about
     65 kB of that, and Radix and floating-ui, behind the tooltip and the toggles, about 35 kB.
   - Keep the `TS note:` comments, and add notes for the React features too.
+  - Rebuild 2 (#19): the arena pictures are React components in `src/components/arena/`. Before
+    the old `arena.ts` was removed, a test drew every Learn picture (before, after and with each
+    answer previewed) and the pieces of 25 random patterns of every Practice drill with both, and
+    they were the same. Snapshot tests of every Learn picture keep them the same from now on. The
+    arena's own styles (`arena.css`) sit under the `.arena` class, so its short class names, such
+    as `ring` and `tag`, never touch the rest of the page. The shared pieces (rule box, last
+    answer, step chips, setup text, tally, chip row, HUD prompt) use shadcn/ui's Alert and Badge.
+  - November 21: the owner asked that every change be checked against the official best
+    practices of its framework or language (React, Tailwind CSS, shadcn/ui, TypeScript and the
+    test tools), so a developer who knows them finds their way at once. CLAUDE.md lists what
+    each check looks at. The first check moved the page width into a `PageContainer` component
+    (Tailwind advises a component over a string of classes), put the arena styles in the
+    "components" cascade layer, and turned a function that returned JSX into a component.
 - Issue #11: make the repository self-contained. A new person should get Node 24, the GitHub CLI
   and the other tools in one step after the clone.
 - Party slots (#13, done). A slot has two parts, the light party (1 or 2) and the role (Tank,
@@ -177,7 +189,7 @@ Do not propose these again unless the owner brings them up.
 
 ### Everywhere
 
-- Player marks are always the top layer (see `LAYERS` in `src/arena.ts`).
+- Player marks are always the top layer (see `LAYERS` in `src/components/arena/Arena.tsx`).
 - The boss turns smoothly to face his next target. He does not flip.
 - "Saved for later" (purple) marks a mechanic shown early and resolved later, for example the
   first weapon during Void Stardust. It is never a spot to stand on.

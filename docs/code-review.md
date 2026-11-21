@@ -53,7 +53,7 @@ HOUSE RULES (keep them in every recommendation)
 - Fight data (times, sizes, positions) comes from cactbot, BossMod and the group's guide.
   Do not change numbers or game behaviour. Flag doubts as questions instead.
 - Attack sizes and shapes belong in src/data/attacks.ts. The arena layer order belongs in
-  arena.ts (LAYERS). Flag any code that bypasses these.
+  src/components/arena/Arena.tsx (LAYERS). Flag any code that bypasses these.
 
 WHAT TO LOOK FOR
 1. Duplication: repeated logic, markup strings, constants, CSS rules or test setup.

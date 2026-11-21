@@ -4,11 +4,13 @@
 import type { ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { WRAP } from "@/lib/layout";
-import { cn } from "@/lib/utils";
-import { arenaSVG, drawBoss, drawOverlay } from "../arena";
+import { Arena } from "../components/arena/Arena";
+import { BossMark } from "../components/arena/BossMark";
+import { Shape } from "../components/arena/Shape";
+import { ZoneMark } from "../components/arena/ZoneMark";
 import { CatKey } from "../components/CatKey";
 import { catNames, Marks } from "../components/Marks";
+import { PageContainer } from "../components/PageContainer";
 import { tlCats } from "../data/abilities";
 import { swordCross, swordPocket } from "../data/attacks";
 import { CACTBOT_TIMELINE, WTFDIG } from "../data/sources";
@@ -19,32 +21,70 @@ import { tabOf } from "../tabs";
 import type { Point, Slot } from "../types";
 import { bySlot } from "../util";
 
-/** A fixed sword example: the boss jumps west from the middle. The player's pocket is green.
-    The arena pictures are built as SVG text (arena.ts), so this one stays text too. */
-function swordDiagram(s: Slot): string {
+interface PocketLabelProps {
+  /** The middle of the label, in arena units. */
+  at: Point;
+  text: string;
+  /** Your own pocket's label is green; the other light party's is grey. */
+  mine: boolean;
+}
+
+/** The name tag of a sword pocket. */
+function PocketLabel({ at, text, mine }: PocketLabelProps) {
+  return (
+    <g className={mine ? "zlabel" : "zlabel other"}>
+      <rect x={f1(at[0] - 8)} y={f1(at[1] - 2.3)} width="16" height="4.6" rx=".9" />
+      <text x={f1(at[0])} y={f1(at[1])}>
+        {text}
+      </text>
+    </g>
+  );
+}
+
+interface SwordExampleProps {
+  slot: Slot;
+  className?: string;
+}
+
+/** A fixed sword example: the boss jumps west from the middle. The pockets on the side he came
+    from are the two stack spots. Yours is green, the other light party's is grey. */
+function SwordExample({ slot, className }: SwordExampleProps) {
   const P: Point = [21, 50];
   const d: Point = [-1, 0];
   const L = leftOf(d);
-  const mine = bySlot(s, { H1: 1, H2: -1 });
+  const mine = bySlot(slot, { H1: 1, H2: -1 });
   const pocket = (side: number): Point[] => swordPocket(P, d, [L[0] * side, L[1] * side]);
-  const poly = (pts: Point[], cls: string): string =>
-    `<polygon class="zone ${cls}" points="${pts.map((p) => `${f1(p[0])},${f1(p[1])}`).join(" ")}"/>`;
-  const label = (side: number, txt: string): string => {
-    const p = vadd(P, unit(vadd([-d[0], -d[1]], [L[0] * side, L[1] * side])), 29);
-    const cls = side === mine ? "zlabel" : "zlabel other";
-    return `<g class="${cls}"><rect x="${f1(p[0] - 8)}" y="${f1(p[1] - 2.3)}" width="16" height="4.6" rx=".9"/><text x="${f1(p[0])}" y="${f1(p[1])}">${txt}</text></g>`;
-  };
-  return arenaSVG(
-    'aria-label="Sword example. The boss jumps west from the middle. G1 takes the pocket behind his left side, G2 the pocket behind his right side."',
-    {
-      ground: swordCross(P, d).map(drawOverlay).join(""),
-      zones: poly(pocket(1), mine === 1 ? "ok" : "other") + poly(pocket(-1), mine === -1 ? "ok" : "other"),
-      // Where he stood in the middle, his jump, and where he lands.
-      boss:
-        '<circle class="ghost" cx="50" cy="50" r="3.4"/><line class="jump" x1="46" y1="50" x2="33" y2="50"/>' +
-        drawBoss({ x: P[0], y: P[1], f: 270 }),
-      labels: label(1, "G1 / H1") + label(-1, "G2 / H2"),
-    },
+  // Each pocket's label sits 29 units out from where he lands, behind his side.
+  const labelAt = (side: number): Point => vadd(P, unit(vadd([-d[0], -d[1]], [L[0] * side, L[1] * side])), 29);
+  return (
+    <Arena
+      label="Sword example. The boss jumps west from the middle. G1 takes the pocket behind his left side, G2 the pocket behind his right side."
+      className={className}
+      layers={{
+        // biome-ignore lint/suspicious/noArrayIndexKey: the pieces of the example never change order.
+        ground: swordCross(P, d).map((o, i) => <Shape key={i} o={o} />),
+        zones: (
+          <>
+            <ZoneMark z={{ poly: pocket(1) }} cls={mine === 1 ? "ok" : "other"} />
+            <ZoneMark z={{ poly: pocket(-1) }} cls={mine === -1 ? "ok" : "other"} />
+          </>
+        ),
+        // Where he stood in the middle, his jump, and where he lands.
+        boss: (
+          <>
+            <circle className="ghost" cx="50" cy="50" r="3.4" />
+            <line className="jump" x1="46" y1="50" x2="33" y2="50" />
+            <BossMark boss={{ x: P[0], y: P[1], f: 270 }} />
+          </>
+        ),
+        labels: (
+          <>
+            <PocketLabel at={labelAt(1)} text="G1 / H1" mine={mine === 1} />
+            <PocketLabel at={labelAt(-1)} text="G2 / H2" mine={mine === -1} />
+          </>
+        ),
+      }}
+    />
   );
 }
 
@@ -122,90 +162,86 @@ function Section({ title, children }: SectionProps) {
 export function CheatSheetPage() {
   const slot = useSlotStore((st) => st.slot);
   return (
-    <main className={cn(WRAP, "space-y-6 py-6")}>
-      <p className="text-muted-foreground">{tabOf("/sheet")?.lede}</p>
+    <main>
+      <PageContainer className="space-y-6 py-6">
+        <p className="text-muted-foreground">{tabOf("/sheet")?.lede}</p>
 
-      <Section title="Panic reset">
-        <ol className="list-decimal space-y-2 pl-6">
-          <li>Feet: go to your spot for the next mechanic.</li>
-          <li>Self: if you are low, heal or shield yourself.</li>
-          <li>Team: a hit soon? Heal the party.</li>
-        </ol>
-        <p>Say it in your head: feet, self, team. If you are not sure, any of these beats standing still.</p>
-      </Section>
+        <Section title="Panic reset">
+          <ol className="list-decimal space-y-2 pl-6">
+            <li>Feet: go to your spot for the next mechanic.</li>
+            <li>Self: if you are low, heal or shield yourself.</li>
+            <li>Team: a hit soon? Heal the party.</li>
+          </ol>
+          <p>Say it in your head: feet, self, team. If you are not sure, any of these beats standing still.</p>
+        </Section>
 
-      <Section title="Positions to remember">
-        <div className="grid gap-6 md:grid-cols-2">
-          <ul className="list-disc space-y-2 pl-5">
-            {RULES.map((r) => (
-              <li key={r.name}>
-                <span className="font-semibold">{r.name}:</span> {r.text(slot)}
+        <Section title="Positions to remember">
+          <div className="grid gap-6 md:grid-cols-2">
+            <ul className="list-disc space-y-2 pl-5">
+              {RULES.map((r) => (
+                <li key={r.name}>
+                  <span className="font-semibold">{r.name}:</span> {r.text(slot)}
+                </li>
+              ))}
+            </ul>
+            <figure className="min-w-0">
+              <SwordExample slot={slot} className="mx-auto block h-auto w-full max-w-sm" />
+              <figcaption className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+                Example: he jumps west from the middle. The pockets on the side he came from are the two stack spots. Yours is green.
+              </figcaption>
+            </figure>
+          </div>
+        </Section>
+
+        <Section title={`Your timeline as ${slot}`}>
+          <CatKey />
+          <Table className="min-w-[620px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Time</TableHead>
+                <TableHead>Mechanic</TableHead>
+                <TableHead>What you do</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {/* Each row shows the ability list's marks for what it covers, with the same colour key. */}
+              {TL.map((e, i) => {
+                const cats = tlCats(i);
+                return (
+                  <TableRow key={e.t + e.n}>
+                    <TableCell className="align-top font-mono tabular-nums">{e.t}</TableCell>
+                    <TableCell className="min-w-[170px] align-top font-medium whitespace-normal">
+                      {e.n}
+                      <div className="mt-1 flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
+                        <Marks cats={cats} size="md" />
+                        {catNames(cats)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="align-top whitespace-normal">{e.job(slot)}</TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+          <p className="text-sm text-muted-foreground">
+            Times are from the cactbot fight timeline. Some phase 1 times move by a second or two with the axe or scythe opener.
+          </p>
+        </Section>
+
+        <Section title="Sources">
+          <ul className="space-y-1.5">
+            {SOURCES.map((src) => (
+              <li key={src.href}>
+                <a className="text-primary underline underline-offset-4" href={src.href} target="_blank" rel="noopener">
+                  {src.label}
+                </a>
+                {/* TS note: `note && <span>` shows the span only when there is a note. JSX skips false and undefined. */}
+                {src.note && <span className="text-sm text-muted-foreground"> {src.note}</span>}
               </li>
             ))}
           </ul>
-          <figure className="min-w-0">
-            {/* TS note: dangerouslySetInnerHTML puts ready-made HTML into an element. The name is a
-                warning: use it only for text the app built itself, never for text from a user. */}
-            <div
-              className="[&_svg]:mx-auto [&_svg]:block [&_svg]:h-auto [&_svg]:w-full [&_svg]:max-w-sm"
-              // biome-ignore lint/security/noDangerouslySetInnerHtml: the app builds this SVG itself (arena.ts).
-              dangerouslySetInnerHTML={{ __html: swordDiagram(slot) }}
-            />
-            <figcaption className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-              Example: he jumps west from the middle. The pockets on the side he came from are the two stack spots. Yours is green.
-            </figcaption>
-          </figure>
-        </div>
-      </Section>
-
-      <Section title={`Your timeline as ${slot}`}>
-        <CatKey />
-        <Table className="min-w-[620px]">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Time</TableHead>
-              <TableHead>Mechanic</TableHead>
-              <TableHead>What you do</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {/* Each row shows the ability list's marks for what it covers, with the same colour key. */}
-            {TL.map((e, i) => {
-              const cats = tlCats(i);
-              return (
-                <TableRow key={e.t + e.n}>
-                  <TableCell className="align-top font-mono tabular-nums">{e.t}</TableCell>
-                  <TableCell className="min-w-[170px] align-top font-medium whitespace-normal">
-                    {e.n}
-                    <div className="mt-1 flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
-                      <Marks cats={cats} size="md" />
-                      {catNames(cats)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="align-top whitespace-normal">{e.job(slot)}</TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-        <p className="text-sm text-muted-foreground">
-          Times are from the cactbot fight timeline. Some phase 1 times move by a second or two with the axe or scythe opener.
-        </p>
-      </Section>
-
-      <Section title="Sources">
-        <ul className="space-y-1.5">
-          {SOURCES.map((src) => (
-            <li key={src.href}>
-              <a className="text-primary underline underline-offset-4" href={src.href} target="_blank" rel="noopener">
-                {src.label}
-              </a>
-              {/* TS note: `note && <span>` shows the span only when there is a note. JSX skips false and undefined. */}
-              {src.note && <span className="text-sm text-muted-foreground"> {src.note}</span>}
-            </li>
-          ))}
-        </ul>
-      </Section>
+        </Section>
+      </PageContainer>
     </main>
   );
 }
