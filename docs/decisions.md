@@ -465,7 +465,7 @@ static wins.
   `tsconfig.json`, `wrangler.jsonc`, `.node-version`), and so does any new file, so a forgotten
   path costs a build, never a missed deploy. Cloudflare builds anyway for a push with 20 or more
   commits or 3000 or more changed files. When a new file outside the app comes in at the top
-  level, add it to the exclude list in the dashboard, here and in `scripts/app-changed.sh`.
+  level, add it to the exclude list in the dashboard, here and in `paths-ignore` in `.github/workflows/preview.yml`.
 
 ## CI and the main ruleset
 
@@ -486,13 +486,15 @@ static wins.
 - GitHub checks the commit a push to `main` ends on, by the CI run on that same commit when its
   branch was pushed. So push the branch, wait for CI, then push `main`. `scripts/publish.sh` waits
   for the two checks.
-- Branch previews come from CI, not from Cloudflare's builds. The "App changed" job runs
-  `scripts/app-changed.sh` on the files of the push (or, for a new or force-pushed branch, the
-  files since main). When the app changed and both checks passed, the "Preview" job waits for the
-  owner's approval, then runs `npx wrangler preview --name <branch>` (with "/" as "-"), at
-  `<branch>.test.ffxiv-raid-drills.app`. A docs-only push makes no preview; the last one stays.
-  Pushes to `main`, pull requests and Dependabot get no preview. A pull request from a fork
-  never gets the token.
+- Branch previews come from GitHub Actions, not from Cloudflare's builds:
+  `.github/workflows/preview.yml`, on branch pushes, with GitHub's `paths-ignore` filter (the
+  same list as the watch paths), so a docs-only push makes no preview and the last one stays.
+  GitHub has no path filter for a single job, only for a whole workflow, and a skipped workflow
+  leaves its checks pending, so the preview is a workflow of its own and CI has no filter. The
+  job waits for the owner's approval, then runs `npx wrangler preview --name <branch>` (with "/"
+  as "-"), at `<branch>.test.ffxiv-raid-drills.app`. It does not wait for CI, so look at CI
+  before you approve. Pushes to `main`, pull requests and Dependabot get no preview. A pull
+  request from a fork never gets the token.
 - The GitHub environment "preview" holds the token and asks for the owner's approval on each
   run (required reviewer: the owner; admins cannot skip it). Secret `CLOUDFLARE_API_TOKEN`: a
   Cloudflare account API token (Manage Account > API Tokens), only for this account, with

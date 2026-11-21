@@ -21,8 +21,8 @@ tokens or account details.
   load.
 - Hosting: Cloudflare Workers Builds on the owner's personal Cloudflare account. A push to
   `main` deploys the live site only when it changes the app, not for only docs, tests or tooling
-  (build watch paths). Branch previews come from CI: when a branch push changes the app and the
-  checks pass, the Preview job waits for the owner's approval on GitHub, then makes the preview.
+  (build watch paths). Branch previews come from GitHub Actions (`preview.yml`): when a branch
+  push changes the app, the Preview workflow waits for the owner's approval, then makes the preview.
   See `docs/decisions.md` for the hosting details.
 - CI: GitHub Actions (`.github/workflows/ci.yml`) runs lint, the type check, the unit tests, the
   build and the browser tests on every branch push. A ruleset on `main` takes only a commit on
@@ -187,8 +187,8 @@ These steps put a branch on `main`, the live site.
    so the repository's `mise.toml` applies:
    `mise -C <checkout> exec -- sh <checkout>/scripts/publish.sh`. The script runs the type check
    and the tests, then pushes the branch as `mander77`. The push starts CI on GitHub.
-4. If the branch changed the app, ask the owner to approve the run's Preview job on GitHub once
-   the checks pass. Then run
+4. If the branch changed the app, wait for CI to pass, then ask the owner to approve the
+   waiting Preview run on GitHub. Then run
    `sh scripts/wait-deploy.sh https://<branch>.test.ffxiv-raid-drills.app index-<hash>.js` and
    test the preview in a browser. A branch with only docs, tests or tooling gets no preview: skip
    this step.

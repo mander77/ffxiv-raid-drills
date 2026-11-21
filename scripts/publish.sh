@@ -1,8 +1,8 @@
 #!/bin/sh
 # Runs the type check and the tests, then pushes the current branch to GitHub.
 # GitHub runs CI on each push. Cloudflare builds main as the live site, and skips the build
-# when only docs, tests or tooling changed. For another branch, CI makes a preview when the
-# push changed the app, the checks passed and the owner approved it.
+# when only docs, tests or tooling changed. For another branch, GitHub Actions makes a
+# preview when the push changed the app and the owner approved it.
 # main takes only a commit on which CI already passed (when its branch was pushed). On main,
 # the script waits for those checks, and stops if they failed or never ran.
 # On main, it then deletes every branch that main already contains, on GitHub and locally.
@@ -34,8 +34,7 @@ if [ "$who" != "$OWNER" ]; then
 fi
 
 if [ "$branch" = "main" ]; then
-  # Wait for the two CI checks that main requires, not for the whole run: its preview job may
-  # still wait for the owner's approval. Checks every 15 seconds, for up to 30 minutes.
+  # Wait for the two CI checks that main requires. Checks every 15 seconds, for up to 30 minutes.
   sha=$(git rev-parse HEAD)
   echo "Waiting for CI on $sha..."
   i=0
@@ -69,7 +68,7 @@ gitgh() { git -c credential.helper= -c "credential.helper=!gh auth git-credentia
 gitgh push -u origin "$branch"
 if [ "$branch" != "main" ]; then
   echo "Pushed $branch. CI runs on GitHub: gh run list --branch $branch"
-  echo "If the app changed, approve its Preview job on GitHub once the checks pass."
+  echo "If the app changed, approve its Preview run on GitHub once CI passed."
   exit 0
 fi
 echo "Pushed main. Cloudflare deploys the live site in about a minute if the app changed."
