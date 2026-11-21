@@ -60,7 +60,7 @@ test("at run speed the runner is never more than half a second late to a right s
   for(const s of SLOTS) for(let i = 0; i < 30; i++){
     const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f);
     // A look-ahead stop is never reached on purpose, so it does not count.
-    for(const st of route.filter(x => !x.look)){
+    for(const st of route.filter(x => !x.lookAhead)){
       const g = f.segs[st.si];
       // How far short the runner is at the hit, in seconds of running. A Void Stardust puddle
       // counts when it drops, 3 seconds before it goes off, so the runner leaves it then.
@@ -103,7 +103,7 @@ test("on a sword the route goes to the pocket's best spot, next to the boss", ()
 
 test("in a quiet stretch the runner pre-positions for the next mechanic", () => {
   for(const s of SLOTS) for(let i = 0; i < 10; i++){
-    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f), moves = route.filter(st => !st.look);
+    const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f), moves = route.filter(st => !st.lookAhead);
     let quiet = 0;
     moves.forEach((st, k) => {
       if(k && st.show - moves[k - 1].hit < REST_GAP) return;
@@ -131,7 +131,7 @@ test("a look-ahead step has an answer, but the runner does not go there", () => 
     const f = buildFight(s, newCode(), RANDOM), route = rightRoute(f), si = f.segs.findIndex(g => g.drills.includes("m-void"));
     const pick = route.find(st => st.si === si && st.j === 0), puddle = route.find(st => st.si === si && st.j === 1);
     if(!pick || !puddle) throw new Error("missing Void Stardust stops");
-    assert.isTrue(pick.look, "the weapon pick is a look-ahead");
+    assert.isTrue(pick.lookAhead, "the weapon pick is a look-ahead");
     // From the moment the mechanic shows until the first puddle drops, the runner never goes to
     // the weapon, and its target is the first puddle spot (north, by A), never the weapon.
     for(let t = pick.show; t < puddle.hit; t += 0.25){

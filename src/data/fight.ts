@@ -2,8 +2,8 @@
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6, `ENRAGE`).
-import { MAPS, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
-import { ABILITIES, ENRAGE, FIGHT_END, type Cat } from "./abilities";
+import { DRILLS, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
+import { ABILITIES, ENRAGE, FIGHT_END, type Category } from "./abilities";
 import { newCode, random, withSeed } from "../util";
 import type { Point, Scene, Slot } from "../types";
 
@@ -95,7 +95,7 @@ export const choicesText = (c: Choices): string => CHOICE_ROWS.filter(r => c[r.k
 export const parseChoices = (text: string): Choices => cleanChoices(Object.fromEntries(text.split(",").map(p => p.split("="))));
 
 function drill(id: string, s: Slot, variant: string | null = null): Scene {
-  const m = MAPS.find(x => x.id === id);
+  const m = DRILLS.find(x => x.id === id);
   if(!m) throw new Error("missing drill " + id);
   return m.build(s, variant);
 }
@@ -234,7 +234,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     tanks and the hit on them, a shared hit (a stack or a tower the party shares) flashes softer,
     the enrage flashes long and dark, and any other AoE only shows its name. */
 export type HitKind = "raid" | "tank" | "shared" | "enrage" | "aoe";
-export interface Hit { t: number; name: string; kind: HitKind; cat: Cat }
+export interface Hit { t: number; name: string; kind: HitKind; cat: Category }
 
 /** Every hit of the fight, in time order, from the ability list and its hit rules. */
 export function buildHits(f: Fight): Hit[] {

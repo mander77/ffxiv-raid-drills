@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { MAPS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, stackNear, changes, assaultScene, ultimateScene, facingNext, jumpsNext, DANCE_LINES, DANCE_PAIRS, type WeaponRun } from "../src/data/drills";
+import { DRILLS, buildAssault, buildAssault2, buildUltimate, buildOrbital, nextPuddle, cometSpread, stackNear, changes, assaultScene, ultimateScene, facingNext, jumpsNext, DANCE_LINES, DANCE_PAIRS, type WeaponRun } from "../src/data/drills";
 import { angOf, inZone, zoneCenter } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, StepResult, Zone } from "../src/types";
 
@@ -13,7 +13,7 @@ function zoneOf(z: Zone | undefined): Zone {
 }
 
 test("every map drill builds for both slots and every variant", () => {
-  for(const m of MAPS) for(const s of SLOTS) for(const v of m.variants ?? [null]){
+  for(const m of DRILLS) for(const s of SLOTS) for(const v of m.variants ?? [null]){
     const sc = m.build(s, v);
     assert.isAbove(sc.steps.length, 0, m.id);
     for(const st of sc.steps) assert.ok(st.z || st.zf, m.id + ": step without a zone");
@@ -23,11 +23,11 @@ test("every map drill builds for both slots and every variant", () => {
 
 test("drills with no random parts build the same pattern every time", () => {
   // JSON leaves out the zone functions, but keeps every drawn piece and every fixed zone.
-  for(const m of MAPS.filter(x => !changes(x))) for(const s of SLOTS){
+  for(const m of DRILLS.filter(x => !changes(x))) for(const s of SLOTS){
     const first = JSON.stringify(m.build(s, null));
     for(let i = 0; i < 20; i++) assert.equal(JSON.stringify(m.build(s, null)), first, m.id + " changed between builds, so mark it random");
   }
-  assert.equal(MAPS.filter(x => !changes(x)).length, 10, "10 fixed drills");
+  assert.equal(DRILLS.filter(x => !changes(x)).length, 10, "10 fixed drills");
 });
 
 test("Assault Evolved: the faced weapon goes first, then clockwise", () => {
@@ -200,7 +200,7 @@ test("Void Stardust spread: any open spot, on the first weapon's side for a swor
 });
 
 test("Void Stardust into the second weapons: every right spot is inside its zone", () => {
-  const drill = MAPS.find(m => m.id === "m-void");
+  const drill = DRILLS.find(m => m.id === "m-void");
   if(!drill) throw new Error("missing drill m-void");
   for(let i = 0; i < RUNS; i++) for(const s of SLOTS) for(const v of ["stack", "spread"]){
     const sc = drill.build(s, v);
@@ -234,7 +234,7 @@ test("Orbital Omen: Hector's dodge is safe for every pattern", () => {
 });
 
 test("Meteorain: H1 drops inside the boss hitbox, H2 farther out on the SW line", () => {
-  const drill = MAPS.find(m => m.id === "m-meteor-2");
+  const drill = DRILLS.find(m => m.id === "m-meteor-2");
   if(!drill) throw new Error("missing drill m-meteor-2");
   const h1 = zoneOf(drill.build("H1", null).steps[0].z), h2 = zoneOf(drill.build("H2", null).steps[0].z);
   assert.ok(inZone([44, 44], h1));
@@ -244,7 +244,7 @@ test("Meteorain: H1 drops inside the boss hitbox, H2 farther out on the SW line"
 });
 
 test("Void Stardust into the weapons: the puddles are gone when the weapons start", () => {
-  const drill = MAPS.find(m => m.id === "m-void");
+  const drill = DRILLS.find(m => m.id === "m-void");
   if(!drill) throw new Error("missing drill m-void");
   for(const s of SLOTS) for(const v of ["stack", "spread"]){
     const steps = drill.build(s, v).steps, first = steps.findIndex(st => st.clearDrops);
@@ -322,7 +322,7 @@ test("Dance of Domination: every pair spot is clear of the 10-yalm Hurricane Exp
     assert.isAbove(d, 12.5 + (who[0] === "H" ? 5 : 0), who + " is too close to the line from " + l.x + "," + l.y);
   }
   // The H1 and H2 answers are those spots.
-  const drill = MAPS.find(m => m.id === "m-dance");
+  const drill = DRILLS.find(m => m.id === "m-dance");
   if(!drill) throw new Error("missing drill m-dance");
   for(const s of SLOTS) assert.deepEqual(zoneOf(drill.build(s, null).steps[0].z), {c:DANCE_PAIRS[s], r:5});
 });

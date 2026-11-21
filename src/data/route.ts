@@ -29,10 +29,10 @@ export const REST_GAP = 8;
 /** One stop on the route: the spot `p`, the hit at `hit` (seconds into the fight) that the spot is
     for, and `show`, when that mechanic appears on the arena. `si` and `j` say which segment and
     step of the fight it answers. `pre` is the segment's own pre-position, when it has one: a
-    first move known in advance. A `look` stop is a look-ahead step: it has an answer (the
+    first move known in advance. A `lookAhead` stop is a look-ahead step: it has an answer (the
     click), but the player does not move there, so the runner skips it. `click` is when you
     clicked the spot, for a route made of your own clicks: the runner goes there only then. */
-export interface Stop { p: Point; hit: number; show: number; si: number; j: number; pre?: Point; look?: boolean; click?: number }
+export interface Stop { p: Point; hit: number; show: number; si: number; j: number; pre?: Point; lookAhead?: boolean; click?: number }
 
 
 /** When step j of a mechanic appears for the player: when the mechanic does, but a weapon only
@@ -63,10 +63,10 @@ export function rightRoute(f: Fight): Stop[] {
     return g.scene.steps.flatMap((st, j): Stop[] => {
       const base = stepZone(st, res);
       if(!base) return [];
-      const z = rotZone(base, g.k), p = st.stand && !st.look ? rot(st.stand, g.k) : middleOf(z, from);
+      const z = rotZone(base, g.k), p = st.stand && !st.lookAhead ? rot(st.stand, g.k) : middleOf(z, from);
       res.push({p, ok:inZone(p, z), z, drop:st.drop ? p : null});
-      if(!st.look) from = p;   // a look-ahead does not move the player
-      return [{p, hit:g.due[j], show:showOf(g, j), si, j, ...(pre ? {pre} : {}), ...(st.look ? {look:true} : {})}];
+      if(!st.lookAhead) from = p;   // a look-ahead does not move the player
+      return [{p, hit:g.due[j], show:showOf(g, j), si, j, ...(pre ? {pre} : {}), ...(st.lookAhead ? {lookAhead:true} : {})}];
     });
   }).sort((a, b) => a.hit - b.hit);
 }
@@ -77,7 +77,7 @@ export function rightRoute(f: Fight): Stop[] {
 export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Point; t?: number}>): Stop[] {
   return clicks.flatMap((c): Stop[] => {
     const g = f.segs[c.si], hit = g?.due[c.j];
-    return g && hit != null ? [{p:c.p, hit, show:showOf(g, c.j), si:c.si, j:c.j, ...(c.t != null ? {click:c.t} : {}), look:g.scene.steps[c.j]?.look}] : [];
+    return g && hit != null ? [{p:c.p, hit, show:showOf(g, c.j), si:c.si, j:c.j, ...(c.t != null ? {click:c.t} : {}), lookAhead:g.scene.steps[c.j]?.lookAhead}] : [];
   }).sort((a, b) => a.hit - b.hit);
 }
 
@@ -90,7 +90,7 @@ export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Po
     mechanic, after a quiet stretch of REST_GAP seconds or more, it goes to HOME. Look-ahead
     stops are skipped: the player does not move for them. */
 export function runnerAt(route: Stop[], t: number): {at: Point; target: Stop | null} {
-  const moves = route.filter(s => !s.look);
+  const moves = route.filter(s => !s.lookAhead);
   const target = moves.find(s => s.hit > t && s.show <= t) ?? null;
   let at = HOME, lastHit = -Infinity, seg = -1;
   /* One straight run from `at` to p, leaving at `leave`. Returns where the runner is at t if t

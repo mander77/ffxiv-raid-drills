@@ -5,7 +5,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, assert, test } from "vitest";
-import { TL } from "../../src/data/timeline";
+import { TIMELINE } from "../../src/data/timeline";
 import { CheatSheetPage } from "../../src/pages/CheatSheetPage";
 import { useProgressStore } from "../../src/stores/progress";
 import { useSlotStore } from "../../src/stores/slot";
@@ -26,7 +26,7 @@ test("the cheat sheet shows the timeline for your slot, one row per line", () =>
   draw("H2");
   assert.ok(screen.getByText("Your timeline as H2"));
   // One header row, then one row per timeline line.
-  assert.equal(screen.getAllByRole("row").length, TL.length + 1);
+  assert.equal(screen.getAllByRole("row").length, TIMELINE.length + 1);
   assert.match(screen.getByText(/Stand in the pocket behind him/).textContent ?? "", /Yours is his right/);
 });
 
@@ -46,7 +46,7 @@ test("each rule links to its Learn card", () => {
   draw("H1");
   const links = screen.getAllByRole("link", { name: "Learn →" });
   assert.equal(links.length, 11);
-  assert.equal(links[0].getAttribute("href"), "/mech/k-first-weapon");
+  assert.equal(links[0].getAttribute("href"), "/learn/k-first-weapon");
 });
 
 test("every source opens in a new tab", () => {

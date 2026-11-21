@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
-import { MECH_FIGS } from "../../data/figs";
+import { LEARN_PICTURES } from "../../data/pictures";
 import type { Option, QuizItem, Slot } from "../../types";
 import { shuffle } from "../../util";
-import { FigPicture } from "../arena/FigPicture";
+import { LearnPicture } from "../arena/LearnPicture";
 import { RuleBox } from "../RuleBox";
 import { TimelinePicture, timelineRowOf } from "./TimelinePicture";
 
@@ -44,7 +44,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
   const next = useRef<HTMLButtonElement>(null);
 
   const answered = pick !== null;
-  const fig = MECH_FIGS[item.id]?.(slot);
+  const fig = LEARN_PICTURES[item.id]?.(slot);
   const previews = previewAnswers && Boolean(fig?.options);
   const row = fig ? null : timelineRowOf(item);
   const rightName = q.options.find((o) => o.ok)?.t ?? "";
@@ -96,7 +96,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
 
   const picture = fig ? (
     <figure>
-      <FigPicture
+      <LearnPicture
         fig={fig}
         answered={answered}
         preview={preview}

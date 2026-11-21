@@ -6,7 +6,7 @@
 // sheet runs up to 3 seconds later in the later phases. Where a sheet row has no colour (a row
 // with two abilities, for example), it takes the colours of the abilities it names.
 // The notes are written for this app.
-import { P1, P2, P3, P4, TL } from "./timeline";
+import { P1, P2, P3, P4, TIMELINE } from "./timeline";
 import { sec } from "../time";
 
 /** The enrage (Heartbreaker), in seconds into the fight: the last line of the cactbot timeline,
@@ -20,8 +20,8 @@ const AFTER_ENRAGE = 2.4;
 export const FIGHT_END = Math.round((ENRAGE + AFTER_ENRAGE) * 10) / 10;
 
 /** The sheet's colour codes. "spot" is the sheet's "Positioning Required". */
-export type Cat = "raid" | "tank" | "spot" | "dodge" | "target" | "mech" | "enrage";
-export const CATS: Record<Cat, string> = {
+export type Category = "raid" | "tank" | "spot" | "dodge" | "target" | "mech" | "enrage";
+export const CATEGORIES: Record<Category, string> = {
   raid:"Raid damage", tank:"Tank damage", spot:"Positioning", dodge:"Avoidable AoE",
   target:"Targeted AoE", mech:"Mechanic", enrage:"Enrage"
 };
@@ -33,7 +33,7 @@ export const CATS: Record<Cat, string> = {
 export interface HitRule { shared?: boolean; times?: { n: number; gap: number; name: string }; lines?: string }
 
 /** One row of the ability list. `t` is when it hits, in seconds into the fight. */
-export interface Ability { t: number; name: string; cats: Cat[]; note: string; hit?: HitRule }
+export interface Ability { t: number; name: string; cats: Category[]; note: string; hit?: HitRule }
 
 const N = {
   crown: "Raid damage on the whole party.",
@@ -84,7 +84,7 @@ const N = {
 // TS note: Row is a tuple type: a fixed-length array where each position has its own type. The
 // names (t:, name:, ...) only label the positions for the reader and the editor. The `?` makes the
 // last position optional. Tuples keep the long list below short.
-type Row = [t: number, name: string, cats: Cat[], note: string, hit?: HitRule];
+type Row = [t: number, name: string, cats: Category[], note: string, hit?: HitRule];
 const rows = (list: Row[]): Ability[] => list.map(([t, name, cats, note, hit]) => ({t, name, cats, note, ...(hit ? {hit} : {})}));
 
 /** Dance of Domination: seven raidwide hits. cactbot has the first at 2:21.3 and the seventh at
@@ -188,17 +188,17 @@ export const PHASES: readonly {name: string; rows: Ability[]}[] = [
 export const ABILITIES: Array<Ability & {phase: string}> = PHASES.flatMap(p => p.rows.map(a => ({...a, phase:p.name})));
 
 /** The categories of the abilities at t seconds, for a line of the fight timeline. */
-export const catsAt = (t: number): Cat[] => [...new Set(ABILITIES.filter(a => Math.abs(a.t - t) < 0.05).flatMap(a => a.cats))];
+export const categoriesAt = (t: number): Category[] => [...new Set(ABILITIES.filter(a => Math.abs(a.t - t) < 0.05).flatMap(a => a.cats))];
 
-/** The abilities that one row of the cheat-sheet timeline (TL) covers: from its time
-    to the next row's time. TL times are rounded cast starts, so each bound is a second early. */
+/** The abilities that one row of the cheat-sheet timeline (TIMELINE) covers: from its time
+    to the next row's time. TIMELINE times are rounded cast starts, so each bound is a second early. */
 export function tlAbilities(i: number): Ability[] {
-  const t0 = sec(TL[i].t) - 1, t1 = i + 1 < TL.length ? sec(TL[i + 1].t) - 1 : Infinity;
+  const t0 = sec(TIMELINE[i].t) - 1, t1 = i + 1 < TIMELINE.length ? sec(TIMELINE[i + 1].t) - 1 : Infinity;
   return ABILITIES.filter(a => a.t >= t0 && a.t < t1);
 }
-/** A TL row's categories, in the order of the colour key, so it shows the same marks as the
+/** A TIMELINE row's categories, in the order of the colour key, so it shows the same marks as the
     ability list. */
-export function tlCats(i: number): Cat[] {
+export function timelineCategories(i: number): Category[] {
   const found = new Set(tlAbilities(i).flatMap(a => a.cats));
-  return (Object.keys(CATS) as Cat[]).filter(c => found.has(c));
+  return (Object.keys(CATEGORIES) as Category[]).filter(c => found.has(c));
 }

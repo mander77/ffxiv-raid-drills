@@ -2,11 +2,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { MapDrill } from "../../types";
+import type { Drill } from "../../types";
 import { ChipRow } from "../ChipRow";
 
-export interface MechanicNavProps {
-  items: readonly MapDrill[];
+export interface DrillNavProps {
+  items: readonly Drill[];
   /** The place of the mechanic on screen in the list. */
   i: number;
   className?: string;
@@ -14,7 +14,7 @@ export interface MechanicNavProps {
 
 /** In place of the list on a narrow screen: the mechanic, Back and Next, and one chip for each
     phase that opens the first mechanic of that phase. */
-export function MechanicNav({ items, i, className }: MechanicNavProps) {
+export function DrillNav({ items, i, className }: DrillNavProps) {
   const m = items[i];
   // TS note: flatMap with [] or [x] keeps only the mechanics where a new phase starts.
   const starts = items.flatMap((x, k) => (k === 0 || x.phase !== items[k - 1].phase ? [x] : []));
@@ -31,14 +31,14 @@ export function MechanicNav({ items, i, className }: MechanicNavProps) {
           {/* TS note: asChild hands the button's look to the link inside it (a shadcn/ui pattern). A link
               cannot be disabled, so the first and last are marked aria-disabled and take no clicks. */}
           <Button variant="outline" size="sm" asChild className="aria-disabled:pointer-events-none aria-disabled:opacity-50">
-            <Link to={`/map/${items[Math.max(0, i - 1)].id}`} aria-label="Back in the list" aria-disabled={i <= 0}>
+            <Link to={`/practice/${items[Math.max(0, i - 1)].id}`} aria-label="Back in the list" aria-disabled={i <= 0}>
               <ChevronLeft aria-hidden="true" />
               Back
             </Link>
           </Button>
           <Button variant="outline" size="sm" asChild className="aria-disabled:pointer-events-none aria-disabled:opacity-50">
             <Link
-              to={`/map/${items[Math.min(items.length - 1, i + 1)].id}`}
+              to={`/practice/${items[Math.min(items.length - 1, i + 1)].id}`}
               aria-label="Next in the list"
               aria-disabled={i >= items.length - 1}
             >
@@ -53,7 +53,7 @@ export function MechanicNav({ items, i, className }: MechanicNavProps) {
           const on = x.phase === m.phase;
           return (
             <Button key={x.id} variant={on ? "default" : "outline"} size="sm" className="shrink-0 rounded-full" asChild>
-              <Link to={`/map/${x.id}`} title={x.phase} aria-current={on ? "true" : undefined}>
+              <Link to={`/practice/${x.id}`} title={x.phase} aria-current={on ? "true" : undefined}>
                 Phase {x.phase.match(/\d+/)?.[0] ?? ""}
               </Link>
             </Button>

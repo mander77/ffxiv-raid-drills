@@ -16,7 +16,7 @@ export interface ChipGroup {
 }
 
 export interface QuizDeckProps {
-  /** The tab, which is also the start of its address: /mech or /next. */
+  /** The tab, which is also the start of its address: /learn or /timeline. */
   tab: RoundTab;
   /** The cards, in fight order. */
   items: readonly QuizItem[];
@@ -29,7 +29,7 @@ export interface QuizDeckProps {
 }
 
 /** A tab of question cards: one card at a time, in fight order, with Back, Next and the chips.
-    The card is in the address (/mech/k-sword), so a link opens it. After the last card, the
+    The card is in the address (/learn/k-sword), so a link opens it. After the last card, the
     round ends with your score. */
 export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false }: QuizDeckProps) {
   const { card } = useParams();
@@ -51,7 +51,7 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
 
   const link = (id: string): string => `/${tab}/${id}`;
 
-  // /mech with no card: the round is done, or it opens on the card you were on, or the first one.
+  // /learn with no card: the round is done, or it opens on the card you were on, or the first one.
   if (card === undefined) {
     if (round.finished) {
       const mine = round.slot === slot;
@@ -66,7 +66,7 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
         />
       );
     }
-    return <Navigate to={link(round.card ?? items[0].id)} replace />;
+    return <Navigate to={link(round.current ?? items[0].id)} replace />;
   }
   // A card that does not exist: start from the first.
   if (!item) return <Navigate to={link(items[0].id)} replace />;

@@ -5,10 +5,10 @@ import { afterEach, assert, expect, test } from "vitest";
 import { Arena, LAYERS, pieceLayers } from "../../../src/components/arena/Arena";
 import { ArenaLabel } from "../../../src/components/arena/ArenaLabel";
 import { BossMark } from "../../../src/components/arena/BossMark";
-import { FigPicture } from "../../../src/components/arena/FigPicture";
+import { LearnPicture } from "../../../src/components/arena/LearnPicture";
 import { ZoneLabel } from "../../../src/components/arena/ZoneLabel";
-import { MECH_FIGS } from "../../../src/data/figs";
-import { MECH } from "../../../src/data/questions";
+import { LEARN_PICTURES } from "../../../src/data/pictures";
+import { LEARN_CARDS } from "../../../src/data/questions";
 import type { Overlay } from "../../../src/types";
 
 afterEach(cleanup);
@@ -61,11 +61,11 @@ test("the boss shows his facing only when he has one", () => {
 // The pictures were checked against the old site's drawing code when it was replaced. These
 // snapshots keep them the same from now on: a change to a picture shows up as a failed test.
 test("every Learn picture stays the same", () => {
-  for (const item of MECH) {
-    const f = MECH_FIGS[item.id]?.("H1");
+  for (const item of LEARN_CARDS) {
+    const f = LEARN_PICTURES[item.id]?.("H1");
     if (!f) continue;
-    expect(renderToStaticMarkup(<FigPicture fig={f} answered={false} label={item.id} />)).toMatchSnapshot(`${item.id} before`);
-    expect(renderToStaticMarkup(<FigPicture fig={f} answered={true} label={item.id} />)).toMatchSnapshot(`${item.id} after`);
+    expect(renderToStaticMarkup(<LearnPicture fig={f} answered={false} label={item.id} />)).toMatchSnapshot(`${item.id} before`);
+    expect(renderToStaticMarkup(<LearnPicture fig={f} answered={true} label={item.id} />)).toMatchSnapshot(`${item.id} after`);
   }
 });
 

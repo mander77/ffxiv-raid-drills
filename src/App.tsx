@@ -19,9 +19,9 @@ export function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         {/* TS note: ":card?" is an optional part of the address, read with useParams(). */}
-        <Route path="/mech/:card?" element={<LearnPage />} />
-        <Route path="/map/:drill?/:code?" element={<PracticePage />} />
-        <Route path="/next/:card?" element={<TimelinePage />} />
+        <Route path="/learn/:card?" element={<LearnPage />} />
+        <Route path="/practice/:drill?/:code?" element={<PracticePage />} />
+        <Route path="/timeline/:card?" element={<TimelinePage />} />
         <Route path="/sheet" element={<CheatSheetPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

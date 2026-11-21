@@ -1,10 +1,10 @@
-import { DEG, f1 } from "../../geometry";
+import { DEG, round2 } from "../../geometry";
 import type { Boss } from "../../types";
 import { RING } from "./Shape";
 
 /** Half of the opening at his rear, in degrees. */
 const REAR = 45;
-const onRing = (deg: number, r: number): string => `${f1(r * Math.sin(deg * DEG))} ${f1(-r * Math.cos(deg * DEG))}`;
+const onRing = (deg: number, r: number): string => `${round2(r * Math.sin(deg * DEG))} ${round2(-r * Math.cos(deg * DEG))}`;
 
 export interface BossMarkProps {
   boss: Boss;
@@ -16,7 +16,7 @@ export interface BossMarkProps {
     smoothly (the "turn" class in arena.css). With no facing, the ring is a plain circle, so it does
     not give away where he faces. */
 export function BossMark({ boss: b }: BossMarkProps) {
-  const at = `translate(${f1(b.x)} ${f1(b.y)})`;
+  const at = `translate(${round2(b.x)} ${round2(b.y)})`;
   if (b.f == null)
     return (
       <g transform={at}>
@@ -26,7 +26,7 @@ export function BossMark({ boss: b }: BossMarkProps) {
     );
   return (
     <g transform={at}>
-      <g className="turn" style={{ transform: `rotate(${f1(b.f)}deg)` }}>
+      <g className="turn" style={{ transform: `rotate(${round2(b.f)}deg)` }}>
         {/* From the left rear corner, clockwise past his front, to the right rear corner. */}
         <path className="ring" d={`M${onRing(180 + REAR, RING)} A${RING} ${RING} 0 1 1 ${onRing(180 - REAR, RING)}`} />
         <path
@@ -34,7 +34,7 @@ export function BossMark({ boss: b }: BossMarkProps) {
           d={`M${onRing(90, RING - 2)} L${onRing(90, RING + 2)} M${onRing(270, RING - 2)} L${onRing(270, RING + 2)}`}
         />
         <circle className="bosscore" r="3.4" />
-        <path className="face" d={`M0,${f1(-(RING + 3.6))} L-2.6,${f1(-(RING - 0.6))} L2.6,${f1(-(RING - 0.6))} Z`} />
+        <path className="face" d={`M0,${round2(-(RING + 3.6))} L-2.6,${round2(-(RING - 0.6))} L2.6,${round2(-(RING - 0.6))} Z`} />
       </g>
     </g>
   );

@@ -27,8 +27,8 @@ test("an address with no page opens Home", async ({ page }) => {
 });
 
 test("a Learn card: pick an answer, lock it in, and go on", async ({ page }) => {
-  await page.goto("/mech");
-  await expect(page).toHaveURL(/\/mech\/[\w-]+$/);
+  await page.goto("/learn");
+  await expect(page).toHaveURL(/\/learn\/[\w-]+$/);
   const first = page.url();
   // Wait for the card, so its keys listen before the test presses one.
   await expect(page.getByRole("button", { name: "Lock in answer" })).toBeVisible();
@@ -42,7 +42,7 @@ test("a Learn card: pick an answer, lock it in, and go on", async ({ page }) => 
 });
 
 test("a Timeline card: one click answers, and the coming names show", async ({ page }) => {
-  await page.goto("/next");
+  await page.goto("/timeline");
   await expect(page.getByText("? ? ?").first()).toBeVisible();
   await page.getByRole("button", { name: /^1/ }).click();
   await expect(page.getByText("? ? ?")).toHaveCount(0);
@@ -60,10 +60,10 @@ test("the Group switch changes the slot on the Cheat sheet", async ({ page }) =>
 });
 
 test("Practice: a right click and a wrong click on the arena", async ({ page }) => {
-  const { MAPS } = await import("../src/data/drills");
+  const { DRILLS } = await import("../src/data/drills");
   const { buildPattern } = await import("../src/lib/practice");
   const { rotZone, stepZone, zoneCenter } = await import("../src/geometry");
-  const drill = MAPS.find((m) => m.id === "m-raw-axe");
+  const drill = DRILLS.find((m) => m.id === "m-raw-axe");
   if (!drill) throw new Error("no m-raw-axe");
   const code = "K7Q2";
   const pattern = buildPattern(drill, "H1", code);
@@ -82,7 +82,7 @@ test("Practice: a right click and a wrong click on the arena", async ({ page }) 
     await page.mouse.click(at[0], at[1]);
   };
 
-  await page.goto(`/map/${drill.id}/${code}`);
+  await page.goto(`/practice/${drill.id}/${code}`);
   await clickAt(right);
   await expect(page.getByRole("status")).toHaveText("Right");
   await page.getByRole("button", { name: "Again" }).first().click();

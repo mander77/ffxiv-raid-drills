@@ -1,10 +1,10 @@
-import type { Fig, Preview } from "../../types";
+import type { Picture, Preview } from "../../types";
 import { Arena, pieceLayers } from "./Arena";
 import { BossMark } from "./BossMark";
 import { ZoneArea } from "./ZoneArea";
 
-export interface FigPictureProps {
-  fig: Fig;
+export interface LearnPictureProps {
+  fig: Picture;
   /** True once the question is answered: the picture shows what the mechanic does and the right
       spot in green. */
   answered: boolean;
@@ -17,13 +17,13 @@ export interface FigPictureProps {
 /** A still arena picture for a quiz question. Until it is answered, it shows the setup, or the
     setup with one answer previewed. After the answer, it shows what the mechanic does and the
     right spot in green. */
-export function FigPicture({ fig: f, answered, label, preview, className }: FigPictureProps) {
+export function LearnPicture({ fig: f, answered, label, preview, className }: LearnPictureProps) {
   const extra = answered ? (f.after ?? []) : preview ? preview.pieces : (f.before ?? []);
   const zones = answered
     ? // biome-ignore lint/suspicious/noArrayIndexKey: the zones of a picture never change order.
-      (f.answer ?? []).map((z, i) => <ZoneArea key={i} z={z} cls="ok" />)
+      (f.answer ?? []).map((z, i) => <ZoneArea key={i} zone={z} look="ok" />)
     : // biome-ignore lint/suspicious/noArrayIndexKey: the zones of a picture never change order.
-      (preview?.zones ?? []).map((z, i) => <ZoneArea key={i} z={z} cls="pick" />);
+      (preview?.zones ?? []).map((z, i) => <ZoneArea key={i} zone={z} look="pick" />);
   return (
     <Arena
       label={label}

@@ -119,7 +119,7 @@ function toArena(e: MouseEvent<SVGSVGElement>): Point {
 export function pieceLayers(os: readonly Overlay[]): Pick<Record<Layer, ReactNode>, "ground" | "labels" | "marks"> {
   const draw = (list: readonly Overlay[]): ReactNode =>
     // biome-ignore lint/suspicious/noArrayIndexKey: a picture's pieces never change order.
-    list.map((o, i) => <Shape key={i} o={o} />);
+    list.map((o, i) => <Shape key={i} overlay={o} />);
   return {
     ground: draw(hitsFirst(os.filter((o) => o.t !== "tag" && o.t !== "mark"))),
     labels: draw(os.filter((o) => o.t === "tag")),

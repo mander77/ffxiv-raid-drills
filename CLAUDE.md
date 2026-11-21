@@ -41,9 +41,9 @@ On the `rebuild` branch:
 | Tab | Route | What it does |
 |-----|-------|--------------|
 | Home | `/` | An arena picture from a Learn card, "Start here" cards, and About me. |
-| Learn | `/mech/<card>` | Quiz cards with arena pictures. Pick an answer to see it, then Lock in. Back, Next and one chip per mechanic. |
-| Practice | `/map/<mechanic>/<code>` | Click where you stand, one mechanic at a time. Show me, Again, New pattern. The code names the pattern. |
-| Timeline | `/next/<card>` | Which mechanic comes next, with a cactbot-style list. |
+| Learn | `/learn/<card>` | Quiz cards with arena pictures. Pick an answer to see it, then Lock in. Back, Next and one chip per mechanic. |
+| Practice | `/practice/<mechanic>/<code>` | Click where you stand, one mechanic at a time. Show me, Again, New pattern. The code names the pattern. |
+| Timeline | `/timeline/<card>` | Which mechanic comes next, with a cactbot-style list. |
 | Cheat sheet | `/sheet` | One line per mechanic, the timeline for your role, sources and your progress. |
 
 Any other address opens Home. Pressure, with the full fight, comes back in the last rebuild step
@@ -98,19 +98,19 @@ src/share.ts         sharing the address of the page
 src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser
 src/stores/progress.ts  your scores (kept in the browser) and the round of Learn, Practice and Timeline
 src/components/      React components: Header, PageContainer, SlotSwitch, ShareButton, TabNav,
-                     Marks, CatKey,
+                     CategoryDots and CategoryKey (the ability category colours), RoundDone,
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
                      StepChips, SetupText, Tally, ChipRow, HudPrompt
 src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, clicks), Shape (one
                      attack, weapon or mark), BossMark, ZoneArea (a zone's coloured area),
-                     ArenaLabel (a name tag), ZoneLabel (a label placed over a zone), FigPicture
+                     ArenaLabel (a name tag), ZoneLabel (a label placed over a zone), LearnPicture
                      (a Learn picture), PracticeArena (the live arena), TurningBoss, arena.css
 src/components/ui/   shadcn/ui components, as the shadcn CLI writes them
-src/pages/           React pages, one per route: HomePage (/), LearnPage (/mech), PracticePage
-                     (/map), TimelinePage (/next), CheatSheetPage (/sheet)
-src/components/practice/  Practice: MechanicList (wide screens), MechanicNav (phones),
-                     PracticeDrill (one mechanic's run: clicks, Show me, the prompt and panel)
-src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep, phaseAfter, bossFor
+src/pages/           React pages, one per route: HomePage (/), LearnPage (/learn), PracticePage
+                     (/practice), TimelinePage (/timeline), CheatSheetPage (/sheet)
+src/components/practice/  Practice: DrillList (wide screens), DrillNav (phones),
+                     DrillRun (one mechanic's run: clicks, Show me, the prompt and panel)
+src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep, statusAfter, bossFor
 src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round), QuestionCard
                      (answers, previews, Lock in, keys), TimelinePicture
 src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab
@@ -119,9 +119,9 @@ src/types.ts         drills, steps, zones, overlays, questions
 src/party.ts         party slots: roles, light parties, slot names
 src/util.ts          helpers, LS (localStorage with the "m11s." prefix), seeded random
 src/geometry.ts      arena geometry: zones, rotation, inZone
-src/data/drills.ts   Practice drills (MAPS), scenes, safe spots, stack and spread rules
-src/data/figs.ts     Learn card pictures (MECH_FIGS)
-src/data/questions.ts  Learn cards (MECH, MECH_GROUPS) and Timeline cards (NEXT_ITEMS)
+src/data/drills.ts   Practice drills (DRILLS), scenes, safe spots, stack and spread rules
+src/data/pictures.ts Learn card pictures (LEARN_PICTURES)
+src/data/questions.ts  Learn cards (LEARN_CARDS, LEARN_GROUPS) and Timeline cards (TIMELINE_CARDS)
 src/data/fight.ts    the full fight: segments, due times, pattern picks and codes
 src/data/route.ts    the moving marker's route (rightRoute, clickRoute, runnerAt, showOf)
 src/data/timeline.ts the fight timeline and "what you do" per row
@@ -235,6 +235,29 @@ site, and at the end, the merge of `rebuild` into `main`.
 - A drill pattern comes from a seeded code (`withSeed`), so the same code builds the same pattern.
   Keep every random choice inside `random()`, or old codes change.
 
+## Words in the code
+
+One idea has one name. Use these, and add to the list when a new idea comes in.
+
+- **Tab**: Home, Learn, Practice, Timeline, Pressure, Cheat sheet. The address and the round name
+  are the tab's name in lower case: `/learn`, `/practice`, `/timeline`.
+- **Card**: one Learn or Timeline question (`QuizItem`; `LEARN_CARDS`, `TIMELINE_CARDS`).
+- **Drill**: one Practice mechanic (`Drill`, `DRILLS`). The screen says "mechanic"; the code says
+  drill. A **run** (`DrillRun`) is one try at a drill.
+- **Pattern**: the random parts of a drill, built from a **code** (`buildPattern`).
+- **Step**: one question of a drill. Its **status** (`StepStatus`) is ask, right or wrong.
+- **Phase**: a phase of the fight (Phase 1 to 4), and nothing else.
+- **Look-ahead**: a step that is saved for later (`Step.lookAhead`).
+- **Look**: the colour of a zone's area or a label (`ZoneLook`, `LabelLook`).
+- **Zone**: a spot on the arena. `ZoneArea` draws its area, `ZoneLabel` its label.
+- **Overlay**: a piece drawn on the arena (an attack, a weapon, a tag, a player mark); `Shape`
+  draws one.
+- **Mark**: a player's mark on the arena, or the boss (`BossMark`).
+- **Category**: an ability category of the timeline (raid damage, tank damage...).
+  `CategoryDots` draws its coloured dots.
+- **Picture**: an arena picture with its data (`Picture`, `LEARN_PICTURES`, `LearnPicture`).
+- **Round**: the answers so far on one tab, for one slot.
+
 ## Rules for the content
 
 - Positions follow the owner's static, which uses the wtfdig guide:
@@ -247,11 +270,11 @@ site, and at the end, the merge of `rebuild` into `main`.
   comment next to the number. When a source is missing or unclear, ask the owner.
 - A number the app chooses for itself is not a fight time. Examples: how long the clock runs past
   the enrage (`AFTER_ENRAGE`), and the made-up attacks in wrong answers (`FAKE` in
-  `src/data/figs.ts`). Give it a name and a comment that says it is the app's choice.
+  `src/data/pictures.ts`). Give it a name and a comment that says it is the app's choice.
 - Never change a strat, a position or a rule without the owner. When a source and the owner
   disagree, ask.
 - Words: "pattern", not "layout". "Saved for later" is a mechanic that the boss shows early and
-  resolves later (a look-ahead step, `Step.look`). "The run" is the scored full fight. "Watch the
+  resolves later (a look-ahead step, `Step.lookAhead`). "The run" is the scored full fight. "Watch the
   right moves" is the replay.
 - Never quiz an exact raidwide time. Ask which one comes next and whether it is soon.
 

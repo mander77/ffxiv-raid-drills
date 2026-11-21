@@ -5,7 +5,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, assert, beforeAll, beforeEach, test } from "vitest";
-import { MAPS } from "../../src/data/drills";
+import { DRILLS } from "../../src/data/drills";
 import { rotZone, stepZone, zoneCenter } from "../../src/geometry";
 import { buildPattern } from "../../src/lib/practice";
 import { PracticePage } from "../../src/pages/PracticePage";
@@ -13,7 +13,7 @@ import { useProgressStore } from "../../src/stores/progress";
 import { useSlotStore } from "../../src/stores/slot";
 import type { Point } from "../../src/types";
 
-const FIRST = [...MAPS].sort((a, b) => a.order - b.order)[0];
+const FIRST = [...DRILLS].sort((a, b) => a.order - b.order)[0];
 const CODE = "K7Q2";
 
 beforeAll(() => {
@@ -34,7 +34,7 @@ function open(path: string): void {
   render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/map/:drill?/:code?" element={<PracticePage />} />
+        <Route path="/practice/:drill?/:code?" element={<PracticePage />} />
       </Routes>
       <Where />
     </MemoryRouter>,
@@ -57,18 +57,18 @@ test("the first mechanic is one step, which these tests rely on", () => {
 });
 
 test("Practice with no mechanic opens the first one with a new pattern code", () => {
-  open("/map");
-  assert.match(where() ?? "", new RegExp(`^/map/${FIRST.id}/[2-9A-HJ-NP-Z]{4}$`));
+  open("/practice");
+  assert.match(where() ?? "", new RegExp(`^/practice/${FIRST.id}/[2-9A-HJ-NP-Z]{4}$`));
 });
 
 test("a link with a code keeps that pattern", () => {
-  open(`/map/${FIRST.id}/${CODE}`);
-  assert.equal(where(), `/map/${FIRST.id}/${CODE}`);
+  open(`/practice/${FIRST.id}/${CODE}`);
+  assert.equal(where(), `/practice/${FIRST.id}/${CODE}`);
   assert.ok(arena());
 });
 
 test("a right click answers the step and counts in your score", () => {
-  open(`/map/${FIRST.id}/${CODE}`);
+  open(`/practice/${FIRST.id}/${CODE}`);
   clickAt(firstRightSpot());
   assert.ok(screen.getByText("Right", { selector: "[role=status]" }));
   assert.deepEqual(useProgressStore.getState().scores[FIRST.id], { seen: 1, right: 1 });
@@ -76,7 +76,7 @@ test("a right click answers the step and counts in your score", () => {
 });
 
 test("Show me draws the spot, and a try with it does not count", async () => {
-  open(`/map/${FIRST.id}/${CODE}`);
+  open(`/practice/${FIRST.id}/${CODE}`);
   const user = userEvent.setup();
   await user.click(screen.getByRole("button", { name: "Show me" }));
   assert.ok(arena().querySelector(".zone.pick"), "the right area shows in blue");
@@ -87,7 +87,7 @@ test("Show me draws the spot, and a try with it does not count", async () => {
 });
 
 test("a wrong spot says so and counts, and Again starts over", async () => {
-  open(`/map/${FIRST.id}/${CODE}`);
+  open(`/practice/${FIRST.id}/${CODE}`);
   const user = userEvent.setup();
   clickAt([-40, -40]);
   assert.ok(screen.getAllByText("Not there").length > 0);
@@ -95,5 +95,5 @@ test("a wrong spot says so and counts, and Again starts over", async () => {
   assert.deepEqual(useProgressStore.getState().scores[FIRST.id], { seen: 1, right: 0 });
   await user.click(screen.getAllByRole("button", { name: "Again" })[0]);
   assert.isNull(arena().querySelector(".pick"), "a fresh try");
-  assert.equal(where(), `/map/${FIRST.id}/${CODE}`, "the same pattern");
+  assert.equal(where(), `/practice/${FIRST.id}/${CODE}`, "the same pattern");
 });

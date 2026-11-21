@@ -4,7 +4,7 @@
 //
 // Sizes come from BossMod's M11S module (awgil/ffxiv_bossmod, RM11STheTyrant), which lists each
 // ability's shape in yalms. The arena is 40 yalms across and 100 units in this app.
-import { leftOf, polar, unit, vadd } from "../geometry";
+import { leftOf, polar, unit, addVec } from "../geometry";
 import type { Overlay, Point } from "../types";
 
 /** Yalms to arena units. */
@@ -82,8 +82,8 @@ export const axeHit = (c: Point): Overlay => aoe(c, AXE_R);
     across d), outside both arms of the cross. The arms reach past the arena, so the pocket does
     too: anywhere in it inside the arena is safe. */
 export function swordPocket(c: Point, d: Point, sv: Point): Point[] {
-  const corner = vadd(vadd(c, d, -SWORD_HALF), sv, SWORD_HALF), far = 150;
-  return [corner, vadd(corner, d, -far), vadd(vadd(corner, d, -far), sv, far), vadd(corner, sv, far)];
+  const corner = addVec(addVec(c, d, -SWORD_HALF), sv, SWORD_HALF), far = 150;
+  return [corner, addVec(corner, d, -far), addVec(addVec(corner, d, -far), sv, far), addVec(corner, sv, far)];
 }
 
 /** The sword hit: a cross through the boss at c, one arm along d (the way he faces) and one

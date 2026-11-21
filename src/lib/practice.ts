@@ -2,7 +2,7 @@
 // a step with a click. The Practice page and its tests both use them.
 import { facingNext } from "../data/drills";
 import { inZone, rotOverlay, rotZone, stepZone, zoneCenter } from "../geometry";
-import type { Boss, MapDrill, Point, Scene, Slot, StepResult } from "../types";
+import type { Boss, Drill, Point, Scene, Slot, StepResult } from "../types";
 import { random, withSeed } from "../util";
 
 /** A mechanic's pattern: its scene, and `k`, how many quarter turns the arena is turned. */
@@ -13,7 +13,7 @@ export interface Pattern {
 
 /** Build a mechanic's pattern from its code. The code seeds every random choice, so the same code
     builds the same pattern: a link with a code opens the pattern it names. */
-export function buildPattern(item: MapDrill, slot: Slot, code: string): Pattern {
+export function buildPattern(item: Drill, slot: Slot, code: string): Pattern {
   return withSeed(code, () => {
     const v = item.variants ? item.variants[Math.floor(random() * item.variants.length)] : null;
     const k = item.rotate ? Math.floor(random() * 4) : 0;
@@ -21,12 +21,12 @@ export function buildPattern(item: MapDrill, slot: Slot, code: string): Pattern 
   });
 }
 
-/** Where a mechanic is between clicks:
+/** The status of a mechanic between clicks:
     - "ask": a step is asked, and the floor shows no answer for it.
     - "right": the last spot was right. It stays on the floor, and the next click answers the next step.
     - "wrong": the last spot was wrong. The mechanic waits for Next step.
-    When every step is answered, the mechanic is done, whatever the phase. */
-export type Phase = "ask" | "right" | "wrong";
+    When every step is answered, the mechanic is done, whatever the status. */
+export type StepStatus = "ask" | "right" | "wrong";
 
 /** Answer the next step with a click at p, in arena units. Returns the result, or null when there
     is no step left to answer. A puddle drops where you clicked, or in the right area after a
@@ -40,9 +40,9 @@ export function answerStep(scene: Scene, k: number, results: readonly StepResult
   return { p, ok, z: zone, drop: step.drop ? (ok ? p : zoneCenter(zone)) : null };
 }
 
-/** The phase after an answer: a right spot stays on screen until the next click; a wrong one waits
+/** The status after an answer: a right spot stays on screen until the next click; a wrong one waits
     for Next step; the last answer ends the mechanic. */
-export const phaseAfter = (scene: Scene, results: readonly StepResult[]): Phase =>
+export const statusAfter = (scene: Scene, results: readonly StepResult[]): StepStatus =>
   results.length >= scene.steps.length ? "ask" : results[results.length - 1]?.ok ? "right" : "wrong";
 
 /** The boss for the picture: where the scene puts him after n answers. While the next step is

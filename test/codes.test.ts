@@ -1,5 +1,5 @@
 import { test, assert } from "vitest";
-import { MAPS, changes } from "../src/data/drills";
+import { DRILLS, changes } from "../src/data/drills";
 import { buildFight } from "../src/data/fight";
 import { isCode, newCode, withSeed } from "../src/util";
 
@@ -16,14 +16,14 @@ test("new codes are 4 easy-to-read characters", () => {
 });
 
 test("a pattern code always rebuilds the same drill pattern", () => {
-  for(const m of MAPS.filter(changes)) for(const c of CODES.slice(0, 10)){
+  for(const m of DRILLS.filter(changes)) for(const c of CODES.slice(0, 10)){
     const once = JSON.stringify(withSeed(c, () => m.build("H1", null)));
     assert.equal(JSON.stringify(withSeed(c, () => m.build("H1", null))), once, m.id + " " + c);
   }
 });
 
 test("different codes give different patterns", () => {
-  const assault = MAPS.find(m => m.id === "m-assault");
+  const assault = DRILLS.find(m => m.id === "m-assault");
   if(!assault) throw new Error("missing drill m-assault");
   const patterns = new Set(CODES.map(c => JSON.stringify(withSeed(c, () => assault.build("H1", null)))));
   assert.isAbove(patterns.size, 5, "30 codes, only " + patterns.size + " patterns");

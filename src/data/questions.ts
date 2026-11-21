@@ -1,6 +1,6 @@
 // Quiz questions: the mechanics (Learn), and questions made from the timeline (Timeline).
 import { bySlot, shuffle } from "../util";
-import { P1, P2, P3, P4, TL } from "./timeline";
+import { P1, P2, P3, P4, TIMELINE } from "./timeline";
 import { tlAbilities } from "./abilities";
 import type { Question, QuizItem, Slot, TimelineEvent } from "../types";
 
@@ -8,7 +8,7 @@ import type { Question, QuizItem, Slot, TimelineEvent } from "../types";
 function mq(id: string, order: number, phase: string, time: string, build: (s: Slot) => Question): QuizItem {
   return {id, order, phase, time, build};
 }
-export const MECH: QuizItem[] = [
+export const LEARN_CARDS: QuizItem[] = [
   mq("k-raw-first", 1, P1, "0:18", s=>({prompt:"Raw Steel Trophy: the boss pulls out a scythe. What happens?",
     options:[{t:"Tanks spread, and the party stacks south behind the boss.", ok:true},{t:"Tanks stack, and the party spreads."},{t:"Everyone spreads on their clock spot."},{t:"The party stacks north, in front of the boss."}],
     why:"The scythe cleaves three times: one cone on each tank, and one cone that the rest of the party shares behind him. The axe is the reverse: a shared tank buster and six spread hits.",
@@ -193,14 +193,14 @@ export const MECH: QuizItem[] = [
 /** A raidwide row: the mechanic the row is named for (its first ability in the ability list) is raid damage. */
 const isRaidwide = (i: number): boolean => tlAbilities(i)[0]?.cats.includes("raid") ?? false;
 // Each raidwide name once. Crown of Arcadia happens six times, so the Set removes the repeats.
-const RAIDWIDE_NAMES = [...new Set(TL.filter((_e, i) => isRaidwide(i)).map(e => e.n))];
-export const NEXT_ITEMS: QuizItem[] = [];
-TL.slice(0, -1).forEach((ev, i) => {
-  NEXT_ITEMS.push({id:"n-" + i, order:i, phase:"Timeline", time:ev.t, build:s => {
-    const right = TL[i + 1];
+const RAIDWIDE_NAMES = [...new Set(TIMELINE.filter((_e, i) => isRaidwide(i)).map(e => e.n))];
+export const TIMELINE_CARDS: QuizItem[] = [];
+TIMELINE.slice(0, -1).forEach((ev, i) => {
+  TIMELINE_CARDS.push({id:"n-" + i, order:i, phase:"Timeline", time:ev.t, build:s => {
+    const right = TIMELINE[i + 1];
     const names = new Set([right.n, ev.n]);
     const picks: TimelineEvent[] = [];
-    shuffle(TL.slice()).forEach(e => { if(picks.length < 3 && !names.has(e.n)){ names.add(e.n); picks.push(e); } });
+    shuffle(TIMELINE.slice()).forEach(e => { if(picks.length < 3 && !names.has(e.n)){ names.add(e.n); picks.push(e); } });
     return {prompt:ev.n + " (" + ev.t + ") just happened. What comes next?",
       options:[{t:right.n, ok:true}, ...picks.map(p => ({t:p.n}))],
       why:"Next is " + right.n + " at " + right.t + ". " + right.job(s),
@@ -208,10 +208,10 @@ TL.slice(0, -1).forEach((ev, i) => {
   }});
   /* The next raidwide, by name only. Knowing which one comes next and whether it is soon is
      enough to plan a mitigation. The exact time is not asked. */
-  const j = TL.findIndex((_e, x) => x > i && isRaidwide(x));
+  const j = TIMELINE.findIndex((_e, x) => x > i && isRaidwide(x));
   if(j > i){
-    NEXT_ITEMS.push({id:"r-" + i, order:i + 0.5, phase:"Timeline", time:ev.t, build:s => {
-      const right = TL[j], between = TL.slice(i + 1, j);
+    TIMELINE_CARDS.push({id:"r-" + i, order:i + 0.5, phase:"Timeline", time:ev.t, build:s => {
+      const right = TIMELINE[j], between = TIMELINE.slice(i + 1, j);
       const others = shuffle(RAIDWIDE_NAMES.filter(n => n !== right.n)).slice(0, 3);
       const when = between.length === 0 ? right.n + " is next, and it comes soon. Have a mitigation ready for it."
         : between.length <= 2 ? right.n + " is the next raidwide, but first comes " + between.map(e => e.n).join(", then ") + "."
@@ -229,7 +229,7 @@ TL.slice(0, -1).forEach((ev, i) => {
 /* ---------- the chips over a Learn card ---------- */
 /** The Learn cards by mechanic, for the chips over a card: a chip jumps to the first card of its
     mechanic. The tests check that every Learn card is in exactly one. */
-export const MECH_GROUPS: Array<{name: string; ids: string[]}> = [
+export const LEARN_GROUPS: Array<{name: string; ids: string[]}> = [
   {name:"Raw Steel", ids:["k-raw-first", "k-raw-second"]},
   {name:"Weapons", ids:["k-first-weapon", "k-sword", "k-axe", "k-scythe", "k-assault-2"]},
   {name:"Void Stardust", ids:["k-void", "k-void-target", "k-void-spread", "k-void-run", "k-void-2"]},

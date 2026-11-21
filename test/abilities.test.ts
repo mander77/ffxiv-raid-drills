@@ -1,6 +1,6 @@
 import { test, assert } from "vitest";
 import { ABILITIES, ENRAGE, FIGHT_END } from "../src/data/abilities";
-import { MAPS } from "../src/data/drills";
+import { DRILLS } from "../src/data/drills";
 import { buildFight, buildHits } from "../src/data/fight";
 
 test("the ability list runs in time order, and every row says what it does", () => {
@@ -11,7 +11,7 @@ test("the ability list runs in time order, and every row says what it does", () 
 });
 
 test("every drill a stretch of the full fight names exists", () => {
-  const ids = new Set(MAPS.map(m => m.id));
+  const ids = new Set(DRILLS.map(m => m.id));
   for(const g of buildFight("H1").segs) for(const id of g.drills) assert.ok(ids.has(id), g.title + " names a drill that does not exist: " + id);
 });
 

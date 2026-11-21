@@ -2,9 +2,9 @@ import { Check, X } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { answerStep, type Pattern, type Phase, phaseAfter } from "../../lib/practice";
+import { answerStep, type Pattern, type StepStatus, statusAfter } from "../../lib/practice";
 import { cn } from "../../lib/utils";
-import type { MapDrill, Point, StepResult } from "../../types";
+import type { Drill, Point, StepResult } from "../../types";
 import { PracticeArena } from "../arena/PracticeArena";
 import { HudPrompt } from "../HudPrompt";
 import { LastAnswer } from "../LastAnswer";
@@ -12,8 +12,8 @@ import { RuleBox } from "../RuleBox";
 import { SetupText } from "../SetupText";
 import { StepChips } from "../StepChips";
 
-export interface PracticeDrillProps {
-  item: MapDrill;
+export interface DrillRunProps {
+  item: Drill;
   pattern: Pattern;
   /** The place of the mechanic in the list, and how many there are. */
   i: number;
@@ -34,7 +34,7 @@ export interface PracticeDrillProps {
     the question with Show me, or why a spot was wrong, or the result. Beside it: the mechanic, its
     steps, the last answer and, at the end, the rule and the way on.
     Give it a `key` per mechanic, pattern and try, so each starts fresh. */
-export function PracticeDrill({
+export function DrillRun({
   item,
   pattern,
   i,
@@ -45,10 +45,10 @@ export function PracticeDrill({
   onAgain,
   onNewPattern,
   onReplaySpawns,
-}: PracticeDrillProps) {
+}: DrillRunProps) {
   const { scene: sc, k } = pattern;
   const [results, setResults] = useState<StepResult[]>([]);
-  const [phase, setPhase] = useState<Phase>("ask");
+  const [status, setStatus] = useState<StepStatus>("ask");
   /** Show me is on: the right spot for the step asked shows in blue. */
   const [shown, setShown] = useState(false);
   /** Show me was used, so this try does not count in your score: it was learning, not a test. */
@@ -61,12 +61,12 @@ export function PracticeDrill({
 
   function handleArenaClick(p: Point): void {
     // After a wrong spot the mechanic waits for Next step, so a click does not answer by accident.
-    if (done || phase === "wrong") return;
+    if (done || status === "wrong") return;
     const r = answerStep(sc, k, results, p);
     if (!r) return;
     const next = [...results, r];
     setResults(next);
-    setPhase(phaseAfter(sc, next));
+    setStatus(statusAfter(sc, next));
     setShown(false);
     if (next.length >= sc.steps.length && !helped) onScore(next.every((x) => x.ok));
   }
@@ -74,7 +74,7 @@ export function PracticeDrill({
     setShown(!shown);
     if (!shown) setHelped(true);
   }
-  const nextStep = (): void => setPhase("ask");
+  const nextStep = (): void => setStatus("ask");
 
   // Enter: Next step after an answer, or Next mechanic at the end. Enter on a button is its click.
   const onKey = useEffectEvent((e: KeyboardEvent) => {
@@ -82,7 +82,7 @@ export function PracticeDrill({
     if (done) {
       e.preventDefault();
       onNextMechanic();
-    } else if (phase !== "ask") {
+    } else if (status !== "ask") {
       e.preventDefault();
       nextStep();
     }
@@ -113,7 +113,7 @@ export function PracticeDrill({
         Again
       </Button>
     </div>
-  ) : phase === "wrong" && last ? (
+  ) : status === "wrong" && last ? (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-destructive bg-red-50 px-3 py-2">
       <X aria-hidden="true" className="text-destructive" />
       <p className="flex-1 text-sm" role="status">
@@ -141,8 +141,8 @@ export function PracticeDrill({
           scene={sc}
           k={k}
           results={results}
-          showLast={phase !== "ask" || done}
-          hint={shown && phase !== "wrong"}
+          showLast={status !== "ask" || done}
+          hint={shown && status !== "wrong"}
           onPointClick={handleArenaClick}
           className="mx-auto block h-auto w-full max-w-[min(100%,40rem)]"
         />

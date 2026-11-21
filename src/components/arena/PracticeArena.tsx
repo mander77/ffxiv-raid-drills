@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { PUDDLE_R } from "../../data/attacks";
-import { f1, rotOverlay, rotZone, stepZone } from "../../geometry";
+import { rotOverlay, rotZone, round2, stepZone } from "../../geometry";
 import { bossFor } from "../../lib/practice";
 import { cn } from "../../lib/utils";
 import type { Overlay, Point, Scene, StepResult } from "../../types";
@@ -55,10 +55,10 @@ export function PracticeArena({ scene: sc, k, results, showLast, hint, onPointCl
       >
         {g.map((o, j) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: the pieces of a weapon never change order.
-          <Shape key={j} o={rotOverlay(o, k)} />
+          <Shape key={j} overlay={rotOverlay(o, k)} />
         ))}
         {sc.spawnPlay && pos && "x" in pos && (
-          <text className="ord" x={f1(pos.x + 4.5)} y={f1(pos.y + 4.5)}>
+          <text className="ord" x={round2(pos.x + 4.5)} y={round2(pos.y + 4.5)}>
             {i + 1}
           </text>
         )}
@@ -78,14 +78,20 @@ export function PracticeArena({ scene: sc, k, results, showLast, hint, onPointCl
   results.forEach((r, i) => {
     if (r.drop && i >= kept)
       drops.push(
-        // biome-ignore lint/suspicious/noArrayIndexKey: a puddle belongs to its step, which never moves.
-        <circle key={`drop-${i}`} className={cn("drop", i <= n - 2 && "fading")} cx={f1(r.drop[0])} cy={f1(r.drop[1])} r={PUDDLE_R} />,
+        <circle
+          // biome-ignore lint/suspicious/noArrayIndexKey: a puddle belongs to its step, which never moves.
+          key={`drop-${i}`}
+          className={cn("drop", i <= n - 2 && "fading")}
+          cx={round2(r.drop[0])}
+          cy={round2(r.drop[1])}
+          r={PUDDLE_R}
+        />,
       );
     const leave = sc.steps[i].leave;
     if (leave)
       drops.push(
         // biome-ignore lint/suspicious/noArrayIndexKey: a piece left behind belongs to its step, which never moves.
-        <Shape key={`leave-${i}`} o={leave} />,
+        <Shape key={`leave-${i}`} overlay={leave} />,
       );
   });
   // Cues show with their step's question and stay. Player marks in a cue go in the marks layer.
@@ -102,7 +108,7 @@ export function PracticeArena({ scene: sc, k, results, showLast, hint, onPointCl
   const boss = bossFor(sc, k, n, showLast);
   const shapes = (os: readonly Overlay[]): ReactNode =>
     // biome-ignore lint/suspicious/noArrayIndexKey: these pieces never change order.
-    os.map((o, i) => <Shape key={i} o={o} />);
+    os.map((o, i) => <Shape key={i} overlay={o} />);
 
   return (
     <Arena
@@ -126,16 +132,16 @@ export function PracticeArena({ scene: sc, k, results, showLast, hint, onPointCl
         ),
         zones: (
           <>
-            {last && lastStep && <ZoneArea z={last.z} cls={lastStep.look ? "later" : last.ok ? "ok" : "bad"} />}
-            {hintZone && hintStep && <ZoneArea z={hintZone} cls={hintStep.look ? "later" : "pick"} />}
+            {last && lastStep && <ZoneArea zone={last.z} look={lastStep.lookAhead ? "later" : last.ok ? "ok" : "bad"} />}
+            {hintZone && hintStep && <ZoneArea zone={hintZone} look={hintStep.lookAhead ? "later" : "pick"} />}
           </>
         ),
         boss: boss && <TurningBoss boss={boss} />,
         labels: (
           <>
             {base.labels}
-            {last && lastStep && <ZoneLabel zone={last.z} kind={lastStep.look ? "later" : "right"} />}
-            {hintZone && hintStep && <ZoneLabel zone={hintZone} kind={hintStep.look ? "later" : "go"} />}
+            {last && lastStep && <ZoneLabel zone={last.z} kind={lastStep.lookAhead ? "later" : "right"} />}
+            {hintZone && hintStep && <ZoneLabel zone={hintZone} kind={hintStep.lookAhead ? "later" : "go"} />}
           </>
         ),
         marks: (
@@ -145,7 +151,7 @@ export function PracticeArena({ scene: sc, k, results, showLast, hint, onPointCl
           </>
         ),
         me: last && !last.missed && (
-          <g className={cn("pick", last.ok ? "ok" : "bad")} transform={`translate(${f1(last.p[0])} ${f1(last.p[1])})`}>
+          <g className={cn("pick", last.ok ? "ok" : "bad")} transform={`translate(${round2(last.p[0])} ${round2(last.p[1])})`}>
             <circle className="halo" r="2.6" />
             <circle className="dot" r="1.1" />
           </g>

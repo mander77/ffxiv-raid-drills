@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
-import { CATS, type Cat } from "../data/abilities";
+import { CATEGORIES, type Category } from "../data/abilities";
 
 /** The Tailwind colour of each category's mark. A row with no category gets grey. */
-const DOT: Record<Cat | "none", string> = {
+const DOT: Record<Category | "none", string> = {
   raid: "bg-cat-raid",
   tank: "bg-cat-tank",
   spot: "bg-cat-spot",
@@ -15,17 +15,17 @@ const DOT: Record<Cat | "none", string> = {
 
 // TS note: a component's props get a named interface, `<Name>Props`, like a parameter class in C#.
 // A call that leaves out a prop, or gives the wrong type, is a compile error.
-export interface MarksProps {
-  cats: readonly Cat[];
+export interface CategoryDotsProps {
+  cats: readonly Category[];
   /** "sm" is 8 px, for the colour key. "md" is 10 px, next to a row's category names. */
   size?: "sm" | "md";
 }
 
 // TS note: a React component is a function that takes one object, its props, and returns JSX.
-// `{ cats, size = "sm" }: MarksProps` takes the props apart and gives size a default.
+// `{ cats, size = "sm" }: CategoryDotsProps` takes the props apart and gives size a default.
 /** The coloured marks of a timeline row, one per ability category. */
-export function Marks({ cats, size = "sm" }: MarksProps) {
-  const shown: Array<Cat | "none"> = cats.length ? [...cats] : ["none"];
+export function CategoryDots({ cats, size = "sm" }: CategoryDotsProps) {
+  const shown: Array<Category | "none"> = cats.length ? [...cats] : ["none"];
   return (
     <span className="inline-flex flex-none gap-0.5" aria-hidden="true">
       {/* TS note: `{...}` inside JSX runs TypeScript. Each item of a list gets a `key`, so React can
@@ -38,4 +38,4 @@ export function Marks({ cats, size = "sm" }: MarksProps) {
 }
 
 /** The category names of a row, joined: "Raid damage, Mechanic". */
-export const catNames = (cats: readonly Cat[]): string => cats.map((c) => CATS[c]).join(", ") || "No category";
+export const categoryNames = (cats: readonly Category[]): string => cats.map((c) => CATEGORIES[c]).join(", ") || "No category";

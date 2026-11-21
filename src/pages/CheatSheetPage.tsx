@@ -11,14 +11,14 @@ import { ArenaLabel } from "../components/arena/ArenaLabel";
 import { BossMark } from "../components/arena/BossMark";
 import { Shape } from "../components/arena/Shape";
 import { ZoneArea } from "../components/arena/ZoneArea";
-import { CatKey } from "../components/CatKey";
-import { catNames, Marks } from "../components/Marks";
+import { CategoryDots, categoryNames } from "../components/CategoryDots";
+import { CategoryKey } from "../components/CategoryKey";
 import { PageContainer } from "../components/PageContainer";
-import { tlCats } from "../data/abilities";
+import { timelineCategories } from "../data/abilities";
 import { swordCross, swordPocket } from "../data/attacks";
 import { CACTBOT_TIMELINE, WTFDIG } from "../data/sources";
-import { TL } from "../data/timeline";
-import { leftOf, unit, vadd } from "../geometry";
+import { TIMELINE } from "../data/timeline";
+import { addVec, leftOf, unit } from "../geometry";
 import { useProgressStore } from "../stores/progress";
 import { useSlotStore } from "../stores/slot";
 import { tabOf } from "../tabs";
@@ -42,18 +42,18 @@ function SwordExample({ slot, className }: SwordExampleProps) {
   const mine = bySlot(slot, { H1: 1, H2: -1 });
   const pocket = (side: number): Point[] => swordPocket(P, d, [L[0] * side, L[1] * side]);
   // Each pocket's label sits 29 units out from where he lands, behind his side.
-  const labelAt = (side: number): Point => vadd(P, unit(vadd([-d[0], -d[1]], [L[0] * side, L[1] * side])), 29);
+  const labelAt = (side: number): Point => addVec(P, unit(addVec([-d[0], -d[1]], [L[0] * side, L[1] * side])), 29);
   return (
     <Arena
       label="Sword example. The boss jumps west from the middle. G1 takes the pocket behind his left side, G2 the pocket behind his right side."
       className={className}
       layers={{
         // biome-ignore lint/suspicious/noArrayIndexKey: the pieces of the example never change order.
-        ground: swordCross(P, d).map((o, i) => <Shape key={i} o={o} />),
+        ground: swordCross(P, d).map((o, i) => <Shape key={i} overlay={o} />),
         zones: (
           <>
-            <ZoneArea z={{ poly: pocket(1) }} cls={mine === 1 ? "ok" : "other"} />
-            <ZoneArea z={{ poly: pocket(-1) }} cls={mine === -1 ? "ok" : "other"} />
+            <ZoneArea zone={{ poly: pocket(1) }} look={mine === 1 ? "ok" : "other"} />
+            <ZoneArea zone={{ poly: pocket(-1) }} look={mine === -1 ? "ok" : "other"} />
           </>
         ),
         // Where he stood in the middle, his jump, and where he lands.
@@ -216,7 +216,7 @@ export function CheatSheetPage() {
                 <li key={r.name}>
                   <span className="font-semibold">{r.name}:</span> {r.text(slot)}{" "}
                   <Link
-                    to={`/mech/${r.card}`}
+                    to={`/learn/${r.card}`}
                     className="text-sm font-medium whitespace-nowrap text-primary underline-offset-4 hover:underline"
                   >
                     Learn →
@@ -234,7 +234,7 @@ export function CheatSheetPage() {
         </Section>
 
         <Section title={`Your timeline as ${slot}`}>
-          <CatKey />
+          <CategoryKey />
           <Table className="min-w-[620px]">
             <TableHeader>
               <TableRow>
@@ -245,16 +245,16 @@ export function CheatSheetPage() {
             </TableHeader>
             <TableBody>
               {/* Each row shows the ability list's marks for what it covers, with the same colour key. */}
-              {TL.map((e, i) => {
-                const cats = tlCats(i);
+              {TIMELINE.map((e, i) => {
+                const cats = timelineCategories(i);
                 return (
                   <TableRow key={e.t + e.n}>
                     <TableCell className="align-top font-mono tabular-nums">{e.t}</TableCell>
                     <TableCell className="min-w-[170px] align-top font-medium whitespace-normal">
                       {e.n}
                       <div className="mt-1 flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
-                        <Marks cats={cats} size="md" />
-                        {catNames(cats)}
+                        <CategoryDots cats={cats} size="md" />
+                        {categoryNames(cats)}
                       </div>
                     </TableCell>
                     <TableCell className="align-top whitespace-normal">{e.job(slot)}</TableCell>
