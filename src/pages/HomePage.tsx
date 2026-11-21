@@ -55,14 +55,24 @@ export function HomePage() {
   return (
     <main>
       <PageContainer className="space-y-10 py-6">
-        <section className="flex flex-col gap-6 sm:flex-row sm:items-center">
+        {/* The banner: a soft green gradient from the top left, with a Learn card's answer picture in
+            a white frame. On a phone the picture is a short strip from the middle of the arena, and
+            the frame still goes all the way around it. */}
+        <section className="flex flex-col gap-6 rounded-xl border bg-linear-135 from-green-100 to-card to-60% p-6 shadow-sm sm:flex-row sm:items-center">
           {fig && (
-            <div className="w-full max-w-60 shrink-0 self-center">
-              <FigPicture fig={fig} answered label="Raw Steel Trophy on the arena: your spot is the green area" className="h-auto w-full" />
+            <div className="shrink-0 rounded-lg bg-card p-1.5 shadow-md sm:w-60">
+              <div className="overflow-hidden rounded-md max-sm:h-28">
+                <FigPicture
+                  fig={fig}
+                  answered
+                  label="Raw Steel Trophy on the arena: your spot is the green area"
+                  className="block h-auto w-full max-sm:-mt-[38%]"
+                />
+              </div>
             </div>
           )}
           <div className="space-y-3">
-            <p className="text-sm font-medium text-muted-foreground">M11S · The Tyrant (Savage) · Healers</p>
+            <p className="text-xs font-semibold tracking-wider text-green-700 uppercase">M11S · The Tyrant (Savage) · Healers</p>
             <h2 className="text-2xl font-semibold tracking-tight text-balance">Practice savage mechanics without a party</h2>
             <p>
               Learn the mechanics, practice where you stand, then do it all fast. The answers follow Hector (Toxic), Kindred No Buddies and
@@ -99,8 +109,9 @@ export function HomePage() {
           </ol>
         </section>
 
-        <section className="flex flex-col gap-6 md:flex-row md:items-start">
-          <div className="space-y-3">
+        {/* About me: the text, and my character beside it. On a phone the picture goes on top. */}
+        <section className="flex flex-col-reverse gap-6 rounded-xl border bg-card p-6 shadow-sm sm:flex-row sm:items-center">
+          <div className="min-w-0 flex-1 space-y-3">
             <h2 className="text-xl font-semibold">About me</h2>
             {ABOUT_ME.map((p) => (
               <p key={p}>{p}</p>
@@ -113,13 +124,14 @@ export function HomePage() {
               <OutLink href={BOSSMOD}>BossMod</OutLink> and times from <OutLink href={CACTBOT}>cactbot</OutLink>.
             </p>
           </div>
-          {/* My character: a static file in public/, cropped wide to the face, the card and both arms. */}
+          {/* My character: a static file in public/, cropped wide and aimed a fifth of the way down, so
+              it shows the face, the card and both arms. */}
           <img
             src="/nydori-banner.jpeg"
             width={436}
             height={800}
             alt="My character in Final Fantasy XIV, in a green hooded robe, holding up a card"
-            className="h-64 w-full rounded-xl object-cover md:h-auto md:w-56"
+            className="h-50 w-full shrink-0 rounded-lg object-cover object-[50%_20%] shadow-md sm:h-60 sm:w-[42%] sm:max-w-85"
           />
         </section>
       </PageContainer>
