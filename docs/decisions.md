@@ -331,17 +331,23 @@ Do not propose these again unless the owner brings them up.
 - The map is the main thing on the screen. It grows until the whole arena fits in the window
   height, but it is never smaller than 420 px.
 - The mechanics are on the fight line (owner's choice), the same component as Pressure's casts
-  coming up, so both tabs draw the fight one way. On Practice it shows only the Practice
-  mechanics (`types={["practice"]}`), each at its first time, and the fight clock does not move
-  it. The mechanic on screen rests at the now mark, marked in celery. You drag the line as in
-  Pressure's player, and the mechanic nearest the now mark opens when you let go; or you click a
-  mechanic. A long wait between two mechanics is cut short on the line, so they stay close enough
-  to drag between. Pressure's line shows every cast, as before, and no mechanic names for now.
+  coming up, so both tabs draw the fight one way. On Practice it is a list (owner's
+  choice, over a line with a now mark that you drag to pick a mechanic): it stands still and shows
+  only the Practice mechanics (`types={["practice"]}`), each at its first time, under its phase.
+  A click opens the mechanic; the one on screen is marked in celery. The line does not move when
+  you click a mechanic you can see, so it stays under your pointer; a mechanic out of view (a new
+  page, Next mechanic) is scrolled into view, inside the line, never the page. You scroll it, or
+  drag it with the mouse. Pressure's line shows every cast, as before, and no mechanic names for
+  now.
+- Each Practice mechanic has a kind (`Drill.kind`): what you do in it (spread, stack, pairs, bait,
+  dodge, tower, hide, memory, position). Its square on the fight line shows the kind's icon, and
+  the mechanic's panel names it. The kinds are a first proposal for the owner to confirm.
 - Practice has the layout of Pressure's player (owner's choice), so the two tabs look and feel the
   same. A wide screen: the prompt over the mechanic on the left of the arena, and a bar (which
   mechanic, Again, New pattern) over the fight line on its right. A narrow screen: the same in one
   column, the prompt and the mechanic over the arena, the bar and the line, sideways, under it. It
-  has no timer yet: Practice stays untimed, and Pressure is the timed tab.
+  has no timer (owner's choice, after a timer for each mechanic was discussed): Practice is where
+  you learn a mechanic with no time pressure, and Pressure is the timed tab.
 - Show me draws the correct spot in blue with the tag "Go here", shows the answer text in the bar and
   the rule in the panel. A try with Show me does not count in the score.
 - Again and Next mechanic are in the prompt bar after a mechanic. Again and New pattern are also in

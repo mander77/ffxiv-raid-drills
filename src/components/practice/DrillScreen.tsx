@@ -1,5 +1,6 @@
 import { Check, X } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
@@ -11,6 +12,7 @@ import { ArenaFrame, type ArenaFrameProps } from "../arena/ArenaFrame";
 import { LiveArena } from "../arena/LiveArena";
 import { FightLine } from "../fight-line/FightLine";
 import { HudPrompt } from "../HudPrompt";
+import { KINDS, KindIcon } from "../KindIcon";
 import { LastAnswer } from "../LastAnswer";
 import { RuleBox } from "../RuleBox";
 import { SetupText } from "../SetupText";
@@ -173,6 +175,11 @@ export function DrillScreen({
         </p>
         <h2 className="font-display text-xl tracking-wide">{item.title}</h2>
       </div>
+      {/* What you do, with the icon the fight line shows for it. */}
+      <Badge variant="secondary">
+        <KindIcon kind={item.kind} />
+        {KINDS[item.kind].name}
+      </Badge>
       <SetupText key={tryKey} text={sc.setup} folded={n > 0} />
       {multi && <StepChips count={sc.steps.length} results={results} />}
       {/* The rule says why the spot is correct: at the end, and with Show me, which gives where. */}

@@ -24,8 +24,9 @@ interface Press {
 
 /** Drag a fight line along its axis, like scrubbing a video. A press becomes a drag once it moves a
     few pixels; then the box holds the pointer, so the drag goes on outside it and the press does
-    not click the row it started on. With no `drag`, the line takes no drags. */
-export function useLineDrag(axis: "x" | "y", drag?: LineDrag): DragHandlers {
+    not click the row it started on. With no `drag`, the line takes no drags. With `mouseOnly`, a
+    finger or a pen does not drag, so the browser scrolls the box the usual way. */
+export function useLineDrag(axis: "x" | "y", drag?: LineDrag, mouseOnly = false): DragHandlers {
   const press = useRef<Press | null>(null);
   const along = (e: PointerEvent<HTMLElement>): number => (axis === "y" ? e.clientY : e.clientX);
   function letGo(id: number): void {
@@ -37,7 +38,7 @@ export function useLineDrag(axis: "x" | "y", drag?: LineDrag): DragHandlers {
   if (!drag) return {};
   return {
     onPointerDown: (e) => {
-      if (e.button !== 0) return;
+      if (e.button !== 0 || (mouseOnly && e.pointerType !== "mouse")) return;
       press.current = { id: e.pointerId, from: along(e), dragging: false };
     },
     onPointerMove: (e) => {

@@ -113,7 +113,8 @@ src/stores/pressure.ts  your Pressure settings: seconds to decide, stops, patter
 src/components/      React components: Header, PageContainer, SlotSwitch, ShareButton (a toast
                      says the link was copied), TabNav, ThemeProvider and ModeToggle (light and
                      dark mode),
-                     CategoryDots and CategoryKey (the ability category colours), RoundDone,
+                     CategoryDots and CategoryKey (the ability category colours), KindIcon (the
+                     icon of a mechanic's kind), RoundDone,
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
                      StepChips, SetupText, Tally, ChipRow, HudPrompt
 src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, clicks), Shape (one
@@ -128,14 +129,13 @@ src/pages/           React pages, one per route: HomePage (/), LearnPage (/learn
 src/components/fight-line/  the fight line, on Practice and Pressure: FightLine (one component, set
                      up per page: down the box or sideways, moving with the fight clock or
                      not, and the types of rows it shows), MovingLine (the casts coming up,
-                     WoW-style squares rising to a now mark), StillLine (the whole fight, which
-                     you drag; the mechanic on screen rests at the now mark), lineLook (the
-                     sizes and classes both share), CastSquare (a row's
-                     square: filled for a hit, outlined for the boss's cast, ink for a Practice
-                     mechanic), CastKey (its key) and CastButton (a cast you click to go to it,
+                     WoW-style squares rising to a now mark), StillLine (the whole fight as a
+                     list under its phases, which you scroll; a Practice mechanic is a link),
+                     CastSquare (a row's
+                     square: filled for a hit, outlined for the boss's cast, ink with the icon of
+                     its kind for a Practice mechanic), CastKey (its key) and CastButton (a cast you click to go to it,
                      in the player)
-src/lib/fightLine.ts the fight line's rows: LineType, shows (which rows a line shows), FIGHT_ROWS,
-                     linePlaces (where the rows sit on the line that the clock does not move)
+src/lib/fightLine.ts the fight line's rows: LineType, shows (which rows a line shows), FIGHT_ROWS
 src/components/practice/  Practice: DrillScreen (one drill's screen, in the layout of Pressure's
                      player: clicks, Show me, the prompt, the panel, the bar and the fight line)
 src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep, statusAfter, bossFor
@@ -307,6 +307,8 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Overlay**: a piece drawn on the arena (an attack, a weapon, a tag, a player mark); `Shape`
   draws one.
 - **Mark**: a player's mark on the arena, or the boss (`BossMark`).
+- **Kind**: what you do in a Practice mechanic: spread, stack, pairs, bait, dodge, tower, hide,
+  memory or position (`DrillKind`, `Drill.kind`). `KindIcon` draws its icon. Not a category.
 - **Category**: an ability category of the timeline (raid damage, tank damage...).
   `CategoryDots` draws its coloured dots.
 - **Picture**: an arena picture with its data (`Picture`, `LEARN_PICTURES`, `LearnPicture`).
@@ -322,8 +324,8 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   parts a fight has; `Choices` are your settings, a pick or Random each (`CHOICE_ROWS`). The
   player's address calls them picks.
 - **Fight line**: the fight drawn as squares on a line (`FightLine`). On Pressure it moves with the
-  fight clock (the casts coming up, `MovingLine`); on Practice the clock does not move it, and
-  you drag it or click a mechanic to open it (`StillLine`). Its **types** (`LineType`) are the ability categories and "practice",
+  fight clock (the casts coming up, `MovingLine`); on Practice it stands still, a list you
+  scroll, and a click opens a mechanic (`StillLine`). Its **types** (`LineType`) are the ability categories and "practice",
   the Practice mechanics; with no types it shows every row.
 
 ## Rules for the content

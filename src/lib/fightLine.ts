@@ -3,6 +3,7 @@
 import { ABILITIES, type Category } from "../data/abilities";
 import { DRILLS } from "../data/drills";
 import { clock, sec } from "../time";
+import type { DrillKind } from "../types";
 
 // TS note: a union of a type and a string literal. A LineType is one of the ability categories
 // ("raid", "tank"...) or the word "practice", like an enum with one extra member.
@@ -23,6 +24,8 @@ export interface LineRow {
   cats: Category[];
   /** A Practice mechanic: its id, for its address. */
   drill?: string;
+  /** A Practice mechanic: what you do in it. */
+  kind?: DrillKind;
 }
 
 /** True when a line told to show `types` shows a row with these categories, or a Practice mechanic.
@@ -50,17 +53,16 @@ export const FIGHT_ROWS: readonly LineRow[] = [
   ),
   ...[...DRILLS]
     .sort((a, b) => a.order - b.order)
-    .map((d): LineRow => ({ key: d.id, t: firstTime(d.time), when: d.time, name: d.title, phase: d.phase, cats: [], drill: d.id })),
+    .map(
+      (d): LineRow => ({
+        key: d.id,
+        t: firstTime(d.time),
+        when: d.time,
+        name: d.title,
+        phase: d.phase,
+        cats: [],
+        drill: d.id,
+        kind: d.kind,
+      }),
+    ),
 ].sort((a, b) => a.t - b.t);
-
-/** Where each row sits along a line that stands still, in pixels from the first: a second of the
-    fight is `perSecond` pixels, but two rows stay at least `gap` apart, so their names never
-    overlap, and at most `most`, so a long wait between mechanics does not leave a long empty line.
-    `times` are in fight order. */
-export function linePlaces(times: readonly number[], perSecond: number, gap: number, most: number): number[] {
-  let at = 0;
-  return times.map((t, k) => {
-    if (k > 0) at += Math.min(most, Math.max(gap, (t - times[k - 1]) * perSecond));
-    return at;
-  });
-}

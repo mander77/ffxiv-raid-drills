@@ -133,12 +133,19 @@ export interface Scene {
   spawnAhead?: number;
 }
 
+/** What you do in a Practice mechanic: spread out, stack, stand in pairs, bait an attack, dodge,
+    take a tower, hide behind something, remember what the boss showed earlier, or go to your set
+    spot. The fight line shows it as an icon. */
+export type DrillKind = "spread" | "stack" | "pairs" | "bait" | "dodge" | "tower" | "hide" | "memory" | "position";
+
 export interface Drill {
   id: string;
   order: number;
   phase: string;
   time: string;
   title: string;
+  /** What you do in it. */
+  kind: DrillKind;
   /** The arena turns a random number of quarter turns. */
   rotate?: boolean;
   /** One variant is picked at random for each run. */

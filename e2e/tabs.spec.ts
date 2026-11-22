@@ -1,5 +1,5 @@
 // The site in every browser: each tab opens, the header scrolls away on a phone, a Learn card and a Timeline card can be answered,
-// the Group switch changes the slot, a click or a drag on Practice's fight line opens a mechanic, and Pressure runs a quick round and a shared link to the player.
+// the Group switch changes the slot, a click on Practice's fight line opens a mechanic, and Pressure runs a quick round and a shared link to the player.
 import { expect, type Locator, test } from "@playwright/test";
 import { TABS } from "../src/tabs";
 
@@ -150,25 +150,35 @@ for (const [screen, width] of [
   ["a wide screen", 1280],
   ["a phone", 375],
 ] as const) {
-  test(`Practice on ${screen}: a click or a drag on the fight line opens a mechanic`, async ({ page }) => {
+  test(`Practice on ${screen}: a click on the fight line opens a mechanic and leaves the line still`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/practice/m-assault/K7Q2");
     // One line shows at a time: beside the arena on a wide screen, sideways under it on a phone.
     const line = page.getByRole("navigation", { name: "Mechanics" }).filter({ visible: true });
-    await line.getByRole("link", { name: "Void Stardust into the second weapons" }).click();
-    await expect(page).toHaveURL(/\/practice\/m-void\/[^/]+$/);
-    await expect(line.locator("[aria-current=step]")).toHaveText(/Void Stardust/);
-    // Drag the line down (or right), far: the earlier mechanics pass the now mark, and the first one opens.
-    const box = await line.locator("div").first().boundingBox();
+    const link = line.getByRole("link", { name: "Raw Steel Trophy: scythe" });
+    /** Where the mechanic sits inside the line, whatever the page's scroll. */
+    const inLine = () =>
+      link.evaluate((a: HTMLElement) => {
+        const nav = a.closest("nav");
+        return [a.offsetLeft - (nav?.scrollLeft ?? 0), a.offsetTop - (nav?.scrollTop ?? 0)];
+      });
+    const before = await inLine();
+    await link.click();
+    await expect(page).toHaveURL(/\/practice\/m-raw-scythe\/[^/]+$/);
+    await expect(line.locator("[aria-current=step]")).toHaveText(/scythe/);
+    // The mechanic you clicked stays under your pointer: the line does not move.
+    expect(await inLine()).toEqual(before);
+    // With a mouse, a drag along the line scrolls it, and opens nothing.
+    const box = await line.boundingBox();
     if (!box) throw new Error("no line");
+    const scroll = () => line.evaluate((el) => el.scrollTop + el.scrollLeft);
     const [x, y] = [box.x + box.width / 2, box.y + box.height / 2];
     await page.mouse.move(x, y);
     await page.mouse.down();
-    await page.mouse.move(width === 375 ? x + 150 : x, width === 375 ? y : y + 300, { steps: 10 });
-    await page.mouse.move(width === 375 ? x + 600 : x, width === 375 ? y : y + 600, { steps: 10 });
+    await page.mouse.move(width === 375 ? x - 120 : x, width === 375 ? y : y - 120, { steps: 10 });
     await page.mouse.up();
-    await expect(page).toHaveURL(/\/practice\/m-raw-axe\/[^/]+$/);
-    await expect(line.locator("[aria-current=step]")).toBeInViewport();
+    expect(await scroll()).toBeGreaterThan(0);
+    await expect(page).toHaveURL(/\/practice\/m-raw-scythe\/[^/]+$/);
     // The page itself never scrolls sideways.
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
   });

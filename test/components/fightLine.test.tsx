@@ -119,33 +119,43 @@ for (const [axis, along] of [
       IN_ORDER.map((d) => `/practice/${d.id}`),
     );
     for (const d of IN_ORDER) assert.ok(within(nav).getByText(d.title));
+    // Each mechanic's square names what you do in it, for a pointer that rests on it.
+    assert.equal(
+      within(nav)
+        .getByRole("link", { name: /Raw Steel Trophy: axe$/ })
+        .querySelector("[title]")
+        ?.getAttribute("title"),
+      "Spread",
+    );
     assert.deepEqual(
       links.filter((a) => a.getAttribute("aria-current") === "step").map((a) => a.getAttribute("href")),
       [`/practice/${IN_ORDER[3].id}`],
     );
+    // One heading per phase.
+    assert.equal(within(nav).getAllByRole("heading").length, 4);
   });
 
   test(`the still line (${axis}): a click on a mechanic opens it`, () => {
     const onPick = vi.fn();
     const nav = showStill(<FightLine axis={axis} types={["practice"]} label="Mechanics" current={IN_ORDER[3].id} onPick={onPick} />);
-    fireEvent.click(within(nav).getByRole("link", { name: IN_ORDER[5].title }));
+    fireEvent.click(within(nav).getByRole("link", { name: new RegExp(`${IN_ORDER[5].title}$`) }));
     assert.deepEqual(onPick.mock.calls, [[IN_ORDER[5].id]]);
   });
 
-  test(`the still line (${axis}): a drag opens the mechanic nearest the now mark when you let go`, () => {
+  test(`the still line (${axis}): a mouse drag scrolls it and opens nothing; a finger is left to the browser`, () => {
     const onPick = vi.fn();
     const nav = showStill(<FightLine axis={axis} types={["practice"]} label="Mechanics" current={IN_ORDER[3].id} onPick={onPick} />);
-    const box = nav.firstElementChild as HTMLElement;
-    fireEvent.pointerDown(box, { pointerId: 1, button: 0, [along]: 300 });
-    // A small move is still a click.
-    fireEvent.pointerMove(box, { pointerId: 1, [along]: 298 });
-    fireEvent.pointerUp(box, { pointerId: 1, [along]: 298 });
+    const scrolled = vi.spyOn(nav, "scrollTo");
+    fireEvent.pointerDown(nav, { pointerId: 1, button: 0, pointerType: "mouse", [along]: 300 });
+    fireEvent.pointerMove(nav, { pointerId: 1, pointerType: "mouse", [along]: 200 });
+    fireEvent.pointerUp(nav, { pointerId: 1, pointerType: "mouse", [along]: 200 });
+    // Dragging up (or left) by 100 pixels scrolls the list on by 100.
+    assert.deepEqual<unknown[] | undefined>(scrolled.mock.calls.at(-1), [axis === "y" ? { top: 100 } : { left: 100 }]);
+    scrolled.mockClear();
+    fireEvent.pointerDown(nav, { pointerId: 2, button: 0, pointerType: "touch", [along]: 300 });
+    fireEvent.pointerMove(nav, { pointerId: 2, pointerType: "touch", [along]: 200 });
+    assert.equal(scrolled.mock.calls.length, 0);
     assert.equal(onPick.mock.calls.length, 0);
-    // Dragging down (or right) brings the earlier mechanics to the now mark; far enough, the first.
-    fireEvent.pointerDown(box, { pointerId: 2, button: 0, [along]: 0 });
-    fireEvent.pointerMove(box, { pointerId: 2, [along]: 5000 });
-    fireEvent.pointerUp(box, { pointerId: 2, [along]: 5000 });
-    assert.deepEqual(onPick.mock.calls, [[IN_ORDER[0].id]]);
   });
 }
 
