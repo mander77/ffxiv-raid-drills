@@ -208,7 +208,7 @@
     dominant-baseline: central;
   }
 
-  /* The weapons: a line at the angle each one rests at, and its icon on a round badge. */
+  /* The weapons: a line at the angle each one rests at, and its icon on a clear round badge. */
   .arena .wpn .rest {
     stroke: var(--arena-void);
     stroke-width: 1.6;
@@ -218,7 +218,7 @@
     fill: var(--arena-void);
   }
   .arena .wpn .badge {
-    fill: var(--arena-sand);
+    fill: none;
     stroke: var(--arena-void);
     stroke-width: 0.6;
   }

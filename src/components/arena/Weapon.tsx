@@ -1,3 +1,4 @@
+import { type ReactNode, useId } from "react";
 import { SCYTHE_SAFE } from "../../data/attacks";
 import { round2, unit } from "../../geometry";
 import type { Overlay, Point } from "../../types";
@@ -13,6 +14,8 @@ export interface WeaponProps {
 
 /** Half the length of the line a sword or an axe rests along. The app's choice. */
 const LINE_HALF = 9;
+/** Half the size of the square a weapon's mask covers: more than its longest line. */
+const MASK_HALF = 16;
 /** The radius of the round badge each weapon's icon sits on. The app's choice. */
 const BADGE_R = 5.6;
 /** How big the icon is inside its badge. It leaves a gap to the badge's rim, so an icon's handle
@@ -34,8 +37,12 @@ function floorLine(o: WeaponOverlay): Point {
 /** A boss weapon: a small upright icon that says which weapon, in the middle of a line drawn at
     the true angle the weapon rests at. The sword's and the axe's line is straight. The scythe's
     line tapers from the thick butt (H1's end) to the sharp point (H2's end), and is as long as the
-    green safe ring drawn when he lands on it is wide. A held weapon is its icon alone. */
+    green safe ring drawn when he lands on it is wide. A held weapon is its icon alone.
+    The icon's badge is clear, so what lies under it still shows; the line stops at the badge's
+    rim, so the icon never runs into it. */
 export function Weapon({ overlay: o }: WeaponProps) {
+  // Each weapon gets its own mask id, so two weapons on one page never share one.
+  const gap = `${useId()}-gap`;
   if (o.held) {
     return (
       <g className={`wpn ${o.t}`}>
@@ -44,19 +51,14 @@ export function Weapon({ overlay: o }: WeaponProps) {
     );
   }
   const u = floorLine(o);
+  let line: ReactNode;
   if (o.t === "scythe") {
     const half = SCYTHE_SAFE - SAFE_INSET;
     // The blade in its own frame: x from the butt (-half) to the point (+half), turned to u.
     const turn = [u[0], u[1], -u[1], u[0], o.x, o.y].map(round2).join(" ");
-    return (
-      <g className="wpn scythe">
-        <path className="blade" transform={`matrix(${turn})`} d={`M${-half} -1.6 Q0 -1 ${half} 0 Q0 1 ${-half} 1.6 Z`} />
-        <WeaponIcon t="scythe" at={[o.x, o.y]} />
-      </g>
-    );
-  }
-  return (
-    <g className={`wpn ${o.t}`}>
+    line = <path className="blade" transform={`matrix(${turn})`} d={`M${-half} -1.6 Q0 -1 ${half} 0 Q0 1 ${-half} 1.6 Z`} />;
+  } else {
+    line = (
       <line
         className="rest"
         x1={round2(o.x - u[0] * LINE_HALF)}
@@ -64,6 +66,17 @@ export function Weapon({ overlay: o }: WeaponProps) {
         x2={round2(o.x + u[0] * LINE_HALF)}
         y2={round2(o.y + u[1] * LINE_HALF)}
       />
+    );
+  }
+  // The mask shows everything around the weapon except the inside of its badge.
+  const box = { x: o.x - MASK_HALF, y: o.y - MASK_HALF, width: 2 * MASK_HALF, height: 2 * MASK_HALF };
+  return (
+    <g className={`wpn ${o.t}`}>
+      <mask id={gap} maskUnits="userSpaceOnUse" {...box}>
+        <rect {...box} fill="white" />
+        <circle cx={round2(o.x)} cy={round2(o.y)} r={BADGE_R} fill="black" />
+      </mask>
+      <g mask={`url(#${gap})`}>{line}</g>
       <WeaponIcon t={o.t} at={[o.x, o.y]} />
     </g>
   );

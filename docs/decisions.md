@@ -370,7 +370,8 @@ Do not propose these again unless the owner brings them up.
 ### Everywhere
 
 - Player marks are always the top layer (see `LAYERS` in `src/components/arena/Arena.tsx`).
-- Each boss weapon is a small upright icon on a round badge, sitting on a line drawn at the true
+- Each boss weapon is a small upright icon on a clear round badge (only its rim shows, so attacks
+  and the floor stay visible under it; the line stops at the rim), sitting on a line drawn at the true
   angle the weapon rests at (`src/components/arena/Weapon.tsx`, one drawing for every screen). The
   owner chose this after trying detailed standing weapons, silhouettes and a cut in the floor: the
   line shows the angle, the icon says which weapon, and nothing stretches as it turns. Every icon
