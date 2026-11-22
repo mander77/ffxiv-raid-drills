@@ -152,7 +152,8 @@ src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useCastTi
                      casts coming up, or the list of mechanics), useFightFrame (run code on
                      each frame of the fight clock), useFightKeys (the fight's keys: Space, the arrows, Enter),
                      useMediaQuery, useFitToScreen, useTheme, useSectionInView (the section you have scrolled to)
-src/lib/             cn() for class names
+src/lib/             cn() for class names; dom.ts: isPageKey (a key belongs to the page, not to a
+                     button, an input or a dialog) and prefersLessMotion
 scripts/             setup.mjs (npm run setup), publish.mjs (npm run publish), wait-deploy.mjs
                      (npm run wait-deploy): plain Node.js, so they run the same on every OS
 src/types.ts         drills, steps, zones, overlays, questions

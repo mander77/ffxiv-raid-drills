@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
+import { isPageKey } from "../../lib/dom";
 import { answerStep, type Pattern, type StepStatus, statusAfter } from "../../lib/practice";
 import { cn } from "../../lib/utils";
 import type { Drill, Point, StepResult } from "../../types";
@@ -105,7 +106,7 @@ export function DrillScreen({
 
   // Enter: Next step after an answer, or Next mechanic at the end. Enter on a button is its click.
   const onKey = useEffectEvent((e: KeyboardEvent) => {
-    if (e.key !== "Enter" || e.altKey || e.ctrlKey || e.metaKey || (e.target as HTMLElement | null)?.tagName === "BUTTON") return;
+    if (e.key !== "Enter" || !isPageKey(e)) return;
     if (done) {
       e.preventDefault();
       onNextMechanic();

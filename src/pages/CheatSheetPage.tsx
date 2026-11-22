@@ -17,6 +17,7 @@ import { learnCard, practiceDrill, type ReferenceEntry, referenceByPhase, slotAn
 import { CACTBOT_TIMELINE, WTFDIG } from "../data/sources";
 import { TIMELINE } from "../data/timeline";
 import { useSectionInView } from "../hooks/useSectionInView";
+import { prefersLessMotion } from "../lib/dom";
 import { useProgressStore } from "../stores/progress";
 import { useSlotStore } from "../stores/slot";
 import { tabOf } from "../tabs";
@@ -153,8 +154,7 @@ interface JumpLinkProps extends ComponentProps<"a"> {
 function JumpLink({ to, smooth = false, ...props }: JumpLinkProps) {
   function handleClick(e: MouseEvent<HTMLAnchorElement>): void {
     e.preventDefault();
-    const calm = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const behavior = smooth && !calm ? "smooth" : "instant";
+    const behavior = smooth && !prefersLessMotion() ? "smooth" : "instant";
     if (to === "top") window.scrollTo({ top: 0, behavior });
     // scrollIntoView keeps the section's scroll margin, so it stops below the wide-screen header.
     else document.getElementById(to)?.scrollIntoView({ behavior });
@@ -259,7 +259,7 @@ function Section({ id, title, children }: SectionProps) {
 }
 
 /** How many questions and drills you answered, and Reset, which asks once before it erases. */
-function Progress() {
+function YourProgress() {
   const seen = useProgressStore((st) => Object.keys(st.scores).length);
   const reset = useProgressStore((st) => st.reset);
   const [confirm, setConfirm] = useState(false);
@@ -350,7 +350,7 @@ export function CheatSheetPage() {
           </ul>
         </Section>
         <Section id="progress" title="Your progress">
-          <Progress />
+          <YourProgress />
         </Section>
         <SectionButtons />
       </PageContainer>

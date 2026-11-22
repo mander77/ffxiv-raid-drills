@@ -1,4 +1,5 @@
 import { useEffect, useEffectEvent } from "react";
+import { isPageKey } from "../lib/dom";
 
 /** How far one arrow key moves the player's clock, in seconds. The app's choice. */
 const ARROW_SECONDS = 5;
@@ -16,9 +17,7 @@ export interface FightKeyHandlers {
     button, the slider or in Settings (a dialog), stay theirs. */
 export function useFightKeys({ onPlayPause, onSkip, onEnter }: FightKeyHandlers): void {
   const onKey = useEffectEvent((e: KeyboardEvent) => {
-    if (e.altKey || e.ctrlKey || e.metaKey) return;
-    const target = e.target as HTMLElement | null;
-    if (target?.tagName === "BUTTON" || target?.tagName === "INPUT" || target?.closest('[role="dialog"]')) return;
+    if (!isPageKey(e)) return;
     if (e.key === " ") {
       e.preventDefault();
       onPlayPause();

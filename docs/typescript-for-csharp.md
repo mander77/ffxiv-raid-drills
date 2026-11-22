@@ -65,6 +65,8 @@ The `Overlay` type in `src/types.ts` is a discriminated union. Every member has 
 
 `Screen` in `src/pages/PressurePage.tsx` is one too: after `screen.kind === "run"`, TypeScript knows `screen.code`. `Extract<Screen, { kind: "run" }>` names that one member.
 
+`instanceof` narrows a class type, like C#'s `is Element el`. In `isPageKey` in `src/lib/dom.ts`, an event's target is only an `EventTarget`; after `target instanceof Element`, TypeScript lets you read `target.tagName`.
+
 ## Common compiler errors
 
 - "Object is possibly 'null'." The value can be null. Check for null first, use `?.`, or use a helper that throws, such as `el()`.

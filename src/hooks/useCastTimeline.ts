@@ -1,4 +1,5 @@
 import { type RefCallback, type RefObject, useEffect, useEffectEvent, useRef, useState } from "react";
+import { prefersLessMotion } from "../lib/dom";
 import { CASTS_AHEAD, CASTS_PAST, CASTS_SOON, type CastMark, castPositions, castsAhead, hitsGoneOff } from "../lib/fight";
 import { useFightFrame } from "./useFightFrame";
 import { type DragHandlers, useLineDrag } from "./useLineDrag";
@@ -155,16 +156,12 @@ const WHEEL_SPEED = 1 / 3;
 const FLASH_MS = 600;
 const PEAK = 0.25;
 
-/** True when the player's system asks for less motion: the flash keeps its glow but does not grow. */
-function lessMotion(): boolean {
-  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-}
-
 /** Flash the now mark in the colour of the hit that went off. The Web Animations API runs it
     outside React, like the rest of the frame loop; a browser without it shows nothing. */
 function wentOff(mark: HTMLElement | null, hit: CastMark): void {
   const colour = `var(--color-cat-${hit.cats[0] ?? "none"})`;
-  const grow = lessMotion() ? {} : { scale: "1.8" };
+  // With less motion the flash keeps its glow but does not grow.
+  const grow = prefersLessMotion() ? {} : { scale: "1.8" };
   // It grows in and settles back, from its own look to the hit's and back, so nothing snaps.
   mark?.animate?.(
     [
@@ -178,6 +175,6 @@ function wentOff(mark: HTMLElement | null, hit: CastMark): void {
 
 /** A hit's square swells for a moment as it goes off, and settles back. */
 function pop(square: HTMLElement | null | undefined): void {
-  if (lessMotion()) return;
+  if (prefersLessMotion()) return;
   square?.animate?.([{ scale: "1" }, { scale: "1.3", offset: PEAK }, { scale: "1" }], { duration: FLASH_MS, easing: "ease-in-out" });
 }
