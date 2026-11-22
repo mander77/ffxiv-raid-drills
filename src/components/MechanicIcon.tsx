@@ -21,32 +21,64 @@ import {
   WildChargeIcon,
 } from "./icons";
 
-/** The name and the icon of each kind of mechanic. A stack also has the number of its players, in
-    the middle of its icon: 2 for pairs, 4 for light parties, R when the roles decide; a stack of
-    the whole party has none. A shared tank buster has the number of tanks who share it, smaller,
-    since the middle of its shield is narrower than the stack's. */
-export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon; count?: string; smallCount?: boolean }> = {
-  spread: { name: "Spread", icon: SpreadIcon },
-  stack: { name: "Party stack", icon: StackIcon },
-  pairStack: { name: "Pair stack", icon: StackIcon, count: "2" },
-  lightPartyStack: { name: "Light party stack", icon: StackIcon, count: "4" },
-  roleStack: { name: "Role stack", icon: StackIcon, count: "R" },
-  lineStack: { name: "Line stack", icon: LineStackIcon },
-  // You are the target: you bring the hit to where it should go.
-  bait: { name: "Bait", icon: BaitIcon },
-  // You drop several puddles in order, walking on as each one lands.
-  puddles: { name: "Puddle drop sequence", icon: PuddleDropIcon },
-  dodge: { name: "Dodge", icon: DodgeIcon },
-  sequence: { name: "Dodge sequence", icon: DodgeSequenceIcon },
-  tower: { name: "Tower", icon: TowerIcon },
-  towerKnockback: { name: "Knockback tower", icon: KnockbackTowerIcon },
-  wildCharge: { name: "Wild charge", icon: WildChargeIcon },
-  later: { name: "Saved for later", icon: SavedForLaterIcon },
-  knockback: { name: "Knockback", icon: KnockbackIcon },
-  // Two tethered players move apart until the tether is long enough.
-  stretchTether: { name: "Stretch tether", icon: StretchTetherIcon },
-  tankBuster: { name: "Tank buster", icon: TankBusterIcon },
-  sharedTankBuster: { name: "Shared tank buster", icon: SharedTankBusterIcon, count: "2", smallCount: true },
+/** A kind of mechanic: its name, what you do in it, and its icon. */
+export interface KindInfo {
+  name: string;
+  /** What you do in it, in one short sentence. */
+  meaning: string;
+  icon: LucideIcon;
+  /** The number in the middle of the icon, if it has one. */
+  count?: string;
+  /** The number is smaller, for an icon with a narrow middle. */
+  smallCount?: boolean;
+}
+
+/** Each kind of mechanic. A stack also has the number of its players, in the middle of its icon: 2
+    for pairs, 4 for light parties, R when the roles decide; a stack of the whole party has none. A
+    shared tank buster has the number of tanks who share it, smaller, since the middle of its
+    shield is narrower than the stack's. */
+export const KINDS: Record<DrillKind, KindInfo> = {
+  spread: { name: "Spread", meaning: "Spread out, away from the others.", icon: SpreadIcon },
+  stack: { name: "Party stack", meaning: "The whole party stacks on one spot.", icon: StackIcon },
+  pairStack: { name: "Pair stack", meaning: "Stack in twos.", icon: StackIcon, count: "2" },
+  lightPartyStack: {
+    name: "Light party stack",
+    meaning: "Stack with your light party of four.",
+    icon: StackIcon,
+    count: "4",
+  },
+  roleStack: { name: "Role stack", meaning: "Stack by role: the roles decide who stacks.", icon: StackIcon, count: "R" },
+  lineStack: { name: "Line stack", meaning: "Stand in the line from the boss to the marked player.", icon: LineStackIcon },
+  bait: { name: "Bait", meaning: "You are the target: bring the hit to where it should go.", icon: BaitIcon },
+  puddles: {
+    name: "Puddle drop sequence",
+    meaning: "Drop several puddles in order, walking on as each one lands.",
+    icon: PuddleDropIcon,
+  },
+  dodge: { name: "Dodge", meaning: "Step out of the attack.", icon: DodgeIcon },
+  sequence: { name: "Dodge sequence", meaning: "Dodge a set order of attacks.", icon: DodgeSequenceIcon },
+  tower: { name: "Tower", meaning: "Stand in a tower to soak it.", icon: TowerIcon },
+  towerKnockback: { name: "Knockback tower", meaning: "Soak a tower that knocks you back.", icon: KnockbackTowerIcon },
+  wildCharge: {
+    name: "Wild charge",
+    meaning: "A line stack with a tank or a rock in front, to take the biggest hit.",
+    icon: WildChargeIcon,
+  },
+  later: { name: "Saved for later", meaning: "Act on what the boss showed earlier.", icon: SavedForLaterIcon },
+  knockback: { name: "Knockback", meaning: "Stand where the knockback throws you to your spot.", icon: KnockbackIcon },
+  stretchTether: {
+    name: "Stretch tether",
+    meaning: "Move away from the other end of your tether until it is long enough.",
+    icon: StretchTetherIcon,
+  },
+  tankBuster: { name: "Tank buster", meaning: "A heavy hit on one tank.", icon: TankBusterIcon },
+  sharedTankBuster: {
+    name: "Shared tank buster",
+    meaning: "A heavy hit that two tanks share.",
+    icon: SharedTankBusterIcon,
+    count: "2",
+    smallCount: true,
+  },
 };
 
 export interface MechanicIconProps {
