@@ -3,7 +3,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTimeout } from "@/hooks/useTimeout";
 import { cn } from "@/lib/utils";
-import { healerOf, partyOf, ROLES, slotName } from "../party";
+import { isSlot, partyOf, ROLES, slotName } from "../party";
 import { useSlotStore } from "../stores/slot";
 import type { Role } from "../types";
 
@@ -97,7 +97,11 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
           value={String(me.lp)}
           aria-labelledby={groupLabel}
           // A click on the group you have already picked gives "", which keeps it.
-          onValueChange={(v) => v && setSlot(healerOf(v === "2" ? 2 : 1))}
+          onValueChange={(v) => {
+            if (!v) return;
+            const next = slotName({ lp: v === "2" ? 2 : 1, role: me.role });
+            if (isSlot(next)) setSlot(next);
+          }}
         >
           {([1, 2] as const).map((lp) => (
             <BandToggleItem key={lp} value={String(lp)} title={slotName({ lp, role: me.role })} className="min-w-9">

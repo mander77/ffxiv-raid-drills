@@ -4,6 +4,7 @@
 // Code outside React reads it with useSlotStore.getState() and listens with subscribe().
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { isSlot } from "../party";
 import type { Slot } from "../types";
 
 interface SlotState {
@@ -25,8 +26,11 @@ export const useSlotStore = create<SlotState>()(
       storage: createJSONStorage(() => localStorage),
       // Save only the slot, not the function.
       partialize: (s) => ({ slot: s.slot }),
-      // A saved value that is not a slot (an old or edited one) falls back to H1.
-      merge: (saved, current) => ({ ...current, slot: (saved as Partial<SlotState> | undefined)?.slot === "H2" ? "H2" : "H1" }),
+      // A saved value that is not a slot with drills (an old or edited one) falls back to H1.
+      merge: (saved, current) => {
+        const slot = (saved as Partial<SlotState> | undefined)?.slot;
+        return { ...current, slot: isSlot(slot) ? slot : "H1" };
+      },
     },
   ),
 );
