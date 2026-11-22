@@ -139,7 +139,8 @@ src/components/pressure/  Pressure: PressureStart, QuickRound, FightScreen (the 
                      two together, in the run), CastList (the casts coming up, WoW-style squares
                      rising to a now mark, down the box or sideways), CastKey (its key) and
                      CastButton (a cast you click to go to it, in the player), FightPanel, FightPlayBar, FightSettings (the Settings button
-                     and its sheet of pattern picks),
+                     and its sheet of pattern picks), RunOverlays (over the arena: a hit's name, and the
+                     run's result, 3-2-1 and progress),
                      RunScore and WatchDone (the end screens)
 src/lib/fight.ts     the fight clock's rules as plain functions: newFightState, tickFight, seek,
                      answerFightStep, viewOf, promptOf, castOf, castsAhead, castPositions
@@ -149,7 +150,8 @@ src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round)
                      TimelinePicture
 src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useCastTimeline (the casts coming up, moving with the fight clock), useLineDrag (drag the
                      casts coming up, or the list of mechanics), useFightFrame (run code on
-                     each frame of the fight clock), useMediaQuery, useFitToScreen, useTheme, useSectionInView (the section you have scrolled to)
+                     each frame of the fight clock), useFightKeys (the fight's keys: Space, the arrows, Enter),
+                     useMediaQuery, useFitToScreen, useTheme, useSectionInView (the section you have scrolled to)
 src/lib/             cn() for class names
 scripts/             setup.mjs (npm run setup), publish.mjs (npm run publish), wait-deploy.mjs
                      (npm run wait-deploy): plain Node.js, so they run the same on every OS

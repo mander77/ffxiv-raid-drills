@@ -1,10 +1,10 @@
 import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
 import type { Fight, FightSeg } from "../../data/fight";
 import type { CastControls } from "../../hooks/useCastTimeline";
-import { FightFrameContext, type FrameFn, useFightFrame } from "../../hooks/useFightFrame";
+import { FightFrameContext, type FrameFn } from "../../hooks/useFightFrame";
+import { useFightKeys } from "../../hooks/useFightKeys";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import {
   type Answered,
@@ -13,7 +13,6 @@ import {
   askAt,
   CAST_GO_LEAD,
   clickTarget,
-  countdownOf,
   type FightMode,
   type FightState,
   type FightView,
@@ -27,13 +26,13 @@ import type { Speed } from "../../stores/pressure";
 import { useProgressStore } from "../../stores/progress";
 import type { Point, Slot } from "../../types";
 import { ArenaFrame, type ArenaFrameProps } from "../arena/ArenaFrame";
-import { CategoryDots } from "../CategoryDots";
 import { CastBar } from "./CastBar";
 import { CastList } from "./CastList";
 import { FightArena, type ShownHit } from "./FightArena";
 import { FightHud } from "./FightHud";
 import { FightPanel } from "./FightPanel";
 import { FightPlayBar } from "./FightPlayBar";
+import { Countdown, HitLabel, RunProgress, RunResult } from "./RunOverlays";
 
 export interface FightScreenProps {
   /** run: you click your spots. watch: the correct moves play by themselves. */
@@ -208,26 +207,19 @@ export function FightScreen({
 
   // The keys: Space plays or pauses. On the player, the arrows go 5 seconds back or on, and
   // paused at the end of a mechanic, Enter goes to the next one.
-  const onKey = useEffectEvent((e: KeyboardEvent) => {
-    if (e.altKey || e.ctrlKey || e.metaKey) return;
-    // Keys on a button or the slider are theirs, and so are keys in Settings (a dialog).
-    const target = e.target as HTMLElement | null;
-    if (target?.tagName === "BUTTON" || target?.tagName === "INPUT" || target?.closest('[role="dialog"]')) return;
+  /** The player, paused at the end of a mechanic: go to the next one. Returns whether it went. */
+  function goToNextSeg(): boolean {
     const s = sim.current;
-    if (e.key === " ") {
-      e.preventDefault();
-      togglePause();
-    } else if (mode === "watch" && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
-      e.preventDefault();
-      seekTo(s.t + (e.key === "ArrowLeft" ? -5 : 5));
-    } else if (mode === "watch" && e.key === "Enter") {
-      const si = activeSeg(s.fight, s.t);
-      const nx = si >= 0 ? nextSeg(s.fight, si) : null;
-      if (s.paused && nx && s.results[si].length >= s.fight.segs[si].due.length) {
-        e.preventDefault();
-        goToSeg(nx);
-      }
-    }
+    const si = activeSeg(s.fight, s.t);
+    const nx = si >= 0 ? nextSeg(s.fight, si) : null;
+    if (!s.paused || !nx || s.results[si].length < s.fight.segs[si].due.length) return false;
+    goToSeg(nx);
+    return true;
+  }
+  useFightKeys({
+    onPlayPause: togglePause,
+    onSkip: mode === "watch" ? (seconds) => seekTo(sim.current.t + seconds) : undefined,
+    onEnter: mode === "watch" ? goToNextSeg : undefined,
   });
   // A new fight (new picks, another slot) is built again at the same moment, paused or playing.
   // The clock is outside React, so an effect keeps it in step with the fight prop.
@@ -241,13 +233,6 @@ export function FightScreen({
     refresh();
   });
   useEffect(() => rebuild(fight), [fight]);
-
-  // The keys listen on the window, outside React, so an effect adds and removes the listener.
-  useEffect(() => {
-    const listener = (e: KeyboardEvent): void => onKey(e);
-    window.addEventListener("keydown", listener);
-    return () => window.removeEventListener("keydown", listener);
-  }, []);
 
   /** The run's bar, in the place and the look of the player's play bar. */
   const runBar = (
@@ -380,76 +365,4 @@ export function FightScreen({
       {wide ? <div className="flex justify-center">{arena}</div> : arena}
     </FightFrameContext>
   );
-}
-
-interface HitLabelProps {
-  hit: ShownHit;
-}
-
-/** The name of a hit over the arena for a moment, after its category's colour mark. */
-function HitLabel({ hit }: HitLabelProps) {
-  return (
-    <div
-      role="status"
-      className="pointer-events-none absolute top-[8%] left-1/2 flex max-w-[94%] -translate-x-1/2 animate-flash-label items-center gap-1.5 rounded-md bg-foreground px-2.5 py-1 text-sm font-semibold whitespace-nowrap text-background"
-    >
-      <CategoryDots cats={[hit.hit.cat]} size="md" />
-      <span className="truncate">{hit.hit.name}</span>
-    </div>
-  );
-}
-
-/** The colour of a result in the run. Complete class names, so Tailwind finds them. */
-const RESULT_LOOK: Record<Answered["kind"], string> = {
-  ok: "bg-green-700",
-  bad: "bg-destructive",
-  slow: "bg-amber-600",
-};
-const RESULT_TEXT: Record<Answered["kind"], string> = { ok: "✓ Correct", bad: "✗ Not there", slow: "✗ Too slow" };
-
-interface RunResultProps {
-  kind: Answered["kind"];
-}
-
-/** The run: your result over the arena for a moment. */
-function RunResult({ kind }: RunResultProps) {
-  return (
-    <div
-      role="status"
-      className={cn(
-        "pointer-events-none absolute bottom-[6%] left-1/2 -translate-x-1/2 animate-flash-label rounded-full px-3.5 py-1 font-semibold whitespace-nowrap text-white",
-        RESULT_LOOK[kind],
-      )}
-    >
-      {RESULT_TEXT[kind]}
-    </div>
-  );
-}
-
-/** The run: the 3-2-1 before each mechanic. It runs on the fight clock, so a pause stops it too. */
-function Countdown() {
-  const [count, setCount] = useState<{ n: number; name: string } | null>(null);
-  useFightFrame((s) => {
-    const c = countdownOf(s);
-    setCount((was) => (was?.n === c?.n && was?.name === c?.name ? was : c));
-  });
-  if (!count) return null;
-  return (
-    <div className="pointer-events-none absolute inset-0 grid place-content-center justify-items-center gap-2 bg-background/60 text-center">
-      <b className="font-display text-8xl tabular-nums">{count.n}</b>
-      <span className="text-xl font-semibold">{count.name}</span>
-    </div>
-  );
-}
-
-/** The run: how far you are, in mechanics. */
-function RunProgress() {
-  const [text, setText] = useState("");
-  useFightFrame((s) => {
-    const f = s.fight;
-    const si = activeSeg(f, s.t);
-    const i = si >= 0 ? si : f.segs.findIndex((x) => x.from > s.t);
-    setText(`Mechanic ${i < 0 ? f.segs.length : i + 1} of ${f.segs.length}`);
-  });
-  return <span className="flex-1 text-sm text-muted-foreground">{text}</span>;
 }
