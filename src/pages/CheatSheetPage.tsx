@@ -13,7 +13,7 @@ import { CategoryKey } from "../components/CategoryKey";
 import { PageContainer } from "../components/PageContainer";
 import { timelineCategories } from "../data/abilities";
 import { LEARN_PICTURES } from "../data/pictures";
-import { learnCard, type ReferenceEntry, referenceByPhase } from "../data/reference";
+import { learnCard, practiceDrill, type ReferenceEntry, referenceByPhase, slotAnswer } from "../data/reference";
 import { CACTBOT_TIMELINE, WTFDIG } from "../data/sources";
 import { TIMELINE } from "../data/timeline";
 import { useProgressStore } from "../stores/progress";
@@ -34,16 +34,24 @@ function phaseId(phase: string): string {
   return shortPhase(phase).toLowerCase().replace(" ", "-");
 }
 
+/** The name of a drill on its button: "Practice" when the mechanic has one drill, or "Practice:
+    axe" from "Raw Steel Trophy: axe" when it has more. */
+function practiceLabel(drill: string, many: boolean): string {
+  const title = practiceDrill(drill).title;
+  return many ? `Practice: ${title.split(": ").at(-1)}` : "Practice";
+}
+
 interface MechanicCardProps {
   entry: ReferenceEntry;
   slot: Slot;
 }
 
-/** One mechanic: its time and name, its Learn answer picture for your slot, its rules and a link
-    to its Learn cards. */
+/** One mechanic: its time and name, its Learn answer picture for your slot, its rules, the answers
+    that are yours alone, and links to the tabs that train it. */
 function MechanicCard({ entry, slot }: MechanicCardProps) {
   const card = learnCard(entry.picture);
   const fig = LEARN_PICTURES[entry.picture]?.(slot);
+  const yours = entry.cards.map((id) => slotAnswer(id, slot)).filter((a) => a !== undefined);
   return (
     <Card className="gap-3 py-4">
       <CardHeader className="px-4">
@@ -52,29 +60,42 @@ function MechanicCard({ entry, slot }: MechanicCardProps) {
           <span className="font-display text-lg tracking-wide">{entry.name}</span>
         </CardTitle>
       </CardHeader>
-      {/* The picture fills the card's width, and the rules go under it. */}
-      <CardContent className="space-y-3 px-4">
+      {/* From tablet width the text sits beside the picture; on a phone, under it. */}
+      <CardContent className="flex flex-col gap-4 px-4 md:flex-row md:items-start">
         {fig && (
           <LearnPicture
             fig={fig}
             answered
             label={`${entry.name} on the arena. The green area shows the answer.`}
-            className="block h-auto w-full"
+            className="block h-auto w-full md:w-sm md:shrink-0 lg:w-md xl:w-xl"
           />
         )}
-        <div className="space-y-3">
+        <div className="min-w-0 space-y-4">
           <ul className="list-disc space-y-1 pl-5">
             {entry.cards.map((id) => (
               <li key={id}>{learnCard(id).build(slot).rule}</li>
             ))}
           </ul>
-          <Link
-            to={`/learn/${entry.cards[0]}`}
-            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-            aria-label={`Learn ${entry.name}`}
-          >
-            Learn →
-          </Link>
+          {yours.map((answer) => (
+            <p key={answer}>
+              <span className="font-semibold">As {slot}:</span> {answer}
+            </p>
+          ))}
+          <nav aria-label={`Train ${entry.name}`} className="flex flex-wrap gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link to={`/learn/${entry.cards[0]}`}>Learn</Link>
+            </Button>
+            {entry.drills.map((d) => (
+              <Button key={d} asChild variant="outline" size="sm">
+                <Link to={`/practice/${d}`}>{practiceLabel(d, entry.drills.length > 1)}</Link>
+              </Button>
+            ))}
+            {entry.timeline && (
+              <Button asChild variant="outline" size="sm">
+                <Link to={`/timeline/${entry.timeline}`}>Timeline</Link>
+              </Button>
+            )}
+          </nav>
         </div>
       </CardContent>
     </Card>
@@ -105,7 +126,7 @@ function Mechanics({ slot }: MechanicsProps) {
           <h3 id={phaseId(p.phase)} className="scroll-mt-32 font-display text-xl tracking-wide">
             {p.phase}
           </h3>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-4">
             {p.entries.map((e) => (
               <MechanicCard key={e.name} entry={e} slot={slot} />
             ))}

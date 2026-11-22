@@ -387,9 +387,12 @@ Do not propose these again unless the owner brings them up.
   card `k-raw-first` (on a phone, a 110 px strip from the boss to the party stack). The owner's
   character picture is in About me with a wide crop of the face, the card and both arms.
 - Cheat sheet: first every mechanic in fight order, by phase, as cards: its time, a Learn answer
-  picture for your slot, its Learn cards' rules and a link to Learn. At most two columns, from
-  tablet width up (owner's choice: three and four were too many), one on a phone. The picture fills the
-  card's width (owner's choice: bigger arenas), and the rules go under it. Then the panic reset, your timeline, the sources and
+  picture for your slot, its Learn cards' rules and a link to Learn. One card per row (owner's
+  choice, after four, three and two per row): from tablet width the text sits beside a big
+  picture (576 px at 1280 px), on a phone under it. Under the rules, "As H1:" gives each Learn
+  answer that differs between H1 and H2 (owner's choice: short rules plus your own answer). Then
+  links to train it: Learn, each Practice drill, and the Timeline card whose answer is this
+  mechanic. No Pressure link: the player needs a fight code, and its times move with the pattern. Then the panic reset, your timeline, the sources and
   your progress.
 
 ### Everywhere

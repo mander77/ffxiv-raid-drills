@@ -51,7 +51,7 @@ claim on the live site before you act on it.
 | Practice | `/practice/<mechanic>/<code>` | Click where you stand, one mechanic at a time. Show me, Again, New pattern. The code names the pattern. |
 | Timeline | `/timeline/<card>` | Which mechanic comes next, with a cactbot-style list. |
 | Pressure | `/pressure`, `/pressure/<code>[/<picks>][?t=<s>]` | A quick round of 12 timed cards, or the full fight: the run (you click) and Watch the correct moves (the player). The player's address names its fight, its picks and, paused, its moment. |
-| Cheat sheet | `/sheet` | Every mechanic in fight order with its picture and rules, the timeline for your role, sources and your progress. |
+| Cheat sheet | `/sheet` | Every mechanic in fight order with its picture, rules, your own answer and links to train it, the timeline for your role, sources and your progress. |
 
 Any other address opens Home, including the old site's addresses (`/mech/...`, `/map/...`).
 
@@ -159,7 +159,7 @@ src/data/fight.ts    the full fight: segments, due times, pattern picks and code
 src/data/route.ts    the moving marker's route (correctRoute, clickRoute, runnerAt, showOf)
 src/data/timeline.ts the fight timeline and "what you do" per row
 src/data/reference.ts  the Cheat sheet's mechanics in fight order (REFERENCE): a Learn picture
-                     and the Learn cards whose rules each one lists
+                     and the Learn cards whose rules each one lists, its drills and Timeline card
 src/data/abilities.ts  the ability list, phases and colour categories
 src/data/attacks.ts  attack sizes and shapes (from BossMod). Put new sizes here.
 test/                Vitest tests; test/components and test/pages for React

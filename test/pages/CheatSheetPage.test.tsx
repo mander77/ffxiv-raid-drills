@@ -51,10 +51,25 @@ test("each phase chip jumps to its phase", () => {
   assert.ok(document.getElementById("phase-3"));
 });
 
-test("each mechanic links to its first Learn card", () => {
+test("each mechanic links to the tabs that train it", () => {
   draw("H1");
-  assert.equal(screen.getAllByRole("link", { name: /^Learn / }).length, REFERENCE.length);
-  assert.equal(screen.getByRole("link", { name: "Learn Meteorain" }).getAttribute("href"), "/learn/k-meteor-order");
+  assert.equal(screen.getAllByRole("link", { name: "Learn" }).length, REFERENCE.length);
+  const links = within(screen.getByRole("navigation", { name: "Train Raw Steel Trophy" })).getAllByRole("link");
+  assert.deepEqual(
+    links.map((l) => [l.textContent, l.getAttribute("href")]),
+    [
+      ["Learn", "/learn/k-raw-first"],
+      ["Practice: axe", "/practice/m-raw-axe"],
+      ["Practice: scythe", "/practice/m-raw-scythe"],
+      ["Timeline", "/timeline/n-0"],
+    ],
+  );
+});
+
+test("a mechanic shows the answer that is yours alone", () => {
+  draw("H2");
+  assert.ok(screen.getByText(/The pocket behind him on his right/));
+  assert.isNotEmpty(screen.getAllByText("As H2:"));
 });
 
 test("every source opens in a new tab", () => {
