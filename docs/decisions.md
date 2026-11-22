@@ -365,7 +365,8 @@ Do not propose these again unless the owner brings them up.
     mechanic in other fights.
 - Practice has the layout of Pressure's player (owner's choice), so the two tabs look and feel the
   same. A wide screen: the prompt over the mechanic on the left of the arena, and a bar (which
-  mechanic, New pattern) over the list of mechanics on its right. A narrow screen: the same in one
+  mechanic, New pattern) over the list of mechanics on its right. Both sides are 20rem wide, so
+  the prompt and its buttons fit; Pressure's left side is 17rem (owner's choice for Practice). A narrow screen: the same in one
   column, the prompt and the mechanic over the arena, the bar and the list, sideways, under it. It
   has no timer (owner's choice, after a timer for each mechanic was discussed): Practice is where
   you learn a mechanic with no time pressure, and Pressure is the timed tab.

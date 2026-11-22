@@ -213,7 +213,7 @@ export function DrillScreen({
   const sides: Partial<ArenaFrameProps> = wide
     ? {
         before: (
-          <div className="flex w-68 flex-col gap-3">
+          <div className="flex w-80 flex-col gap-3">
             {hud}
             <ScrollArea className="min-h-0 flex-1">{panel}</ScrollArea>
           </div>
@@ -224,7 +224,7 @@ export function DrillScreen({
             <MechanicList axis="y" current={item.id} onPick={onPick} className="flex-1" />
           </div>
         ),
-        className: "mx-0 ml-68 mr-80 min-w-0 flex-1",
+        className: "mx-0 ml-80 mr-80 min-w-0 flex-1",
       }
     : {
         over: (
