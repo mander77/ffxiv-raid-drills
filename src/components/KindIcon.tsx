@@ -9,7 +9,6 @@ import {
   type LucideIcon,
   Route,
   Shrink,
-  UsersRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DrillKind } from "../types";
@@ -37,7 +36,7 @@ const PUSHED_OUT: IconNode = [
   ["path", { d: "M22 16v6h-6", key: "southeast" }],
 ];
 
-/** A knockback: the boss as a filled dot, with chevrons pushing away from it. Drawn the same way. */
+/** A knockback: a player (a filled dot), pushed out by the boss's chevrons. Drawn the same way. */
 const Knockback = createLucideIcon("knockback", [
   ["circle", { cx: "12", cy: "12", r: "3", fill: "currentColor", key: "boss" }],
   ...PUSHED_OUT,
@@ -47,12 +46,19 @@ const Knockback = createLucideIcon("knockback", [
     knocks you back. Drawn the same way. */
 const TowerKnockback = createLucideIcon("tower-knockback", [["circle", { cx: "12", cy: "12", r: "6", key: "tower" }], ...PUSHED_OUT]);
 
+/** Pairs: two players (filled dots) on one spot (a ring). Drawn the same way. */
+const Pairs = createLucideIcon("pairs", [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "spot" }],
+  ["circle", { cx: "8.5", cy: "12", r: "2.5", fill: "currentColor", key: "first" }],
+  ["circle", { cx: "15.5", cy: "12", r: "2.5", fill: "currentColor", key: "second" }],
+]);
+
 /** The name and the icon of each kind of mechanic. */
 export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon }> = {
   spread: { name: "Spread", icon: Expand },
   stack: { name: "Stack", icon: Shrink },
   lineStack: { name: "Line stack", icon: LineStack },
-  pairs: { name: "Pairs", icon: UsersRound },
+  pairs: { name: "Pairs", icon: Pairs },
   // You bring the hit to your spot, then step out of it before it goes off.
   bait: { name: "Bait", icon: CircleArrowOutUpRight },
   dodge: { name: "Dodge", icon: Footprints },
