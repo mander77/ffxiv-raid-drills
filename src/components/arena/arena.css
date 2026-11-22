@@ -230,6 +230,17 @@
     stroke-width: 1.1;
     stroke-linecap: round;
   }
+  /* The sand outline under each icon, so it reads over the boss's dot or an attack. */
+  .arena .wpn .halo .glyph {
+    fill: var(--arena-sand);
+    stroke: var(--arena-sand);
+    stroke-width: 1.4;
+    stroke-linejoin: round;
+  }
+  .arena .wpn .halo .glyph-line {
+    stroke: var(--arena-sand);
+    stroke-width: 2.5;
+  }
 
   /* Labels: name tags, and the other players' role marks. */
   .arena .tag rect {

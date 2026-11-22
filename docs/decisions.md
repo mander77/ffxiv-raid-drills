@@ -380,7 +380,9 @@ Do not propose these again unless the owner brings them up.
   end), and is as long as the green safe ring drawn when he lands on it is wide (owner's rule).
   The scythe icon has its blade at the bottom, as it rests in the floor, and a small nub at the
   butt. Each icon is drawn a little inside its badge, so a handle never runs into the line. Weapons have their own layer, over the
-  waymarks they often land next to and under the boss and the player marks. The held weapon in
+  waymarks they often land next to and over the boss, under the labels and the player marks. When
+  he stands on a weapon, his dot shows through the clear badge, and a thin sand outline keeps the
+  icon readable over it (owner's choice). The held weapon in
   Raw Steel Trophy is its icon alone, a little smaller, east of him. A weapon's name goes out to
   the side of its line, away from the arena center; in Practice, its order number goes in toward
   the center.
