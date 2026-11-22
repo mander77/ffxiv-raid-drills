@@ -34,7 +34,7 @@ export function CastSquare({ mark, className }: CastSquareProps) {
       )}
       title={mark.kind && KINDS[mark.kind].name}
     >
-      {mark.kind && <KindIcon kind={mark.kind} />}
+      {mark.kind && <KindIcon kind={mark.kind} className="size-5" />}
     </span>
   );
 }

@@ -30,16 +30,14 @@ const WildCharge = createLucideIcon("wild-charge", [
   ["path", { d: "m7 14 5 5 5-5", key: "bottom" }],
 ]);
 
-/** A knockback: the boss as a dot, with arrows pushing away from it: straight down, and down to
-    each side at 45 degrees. Drawn the same way. */
+/** A knockback: the boss as a filled dot, with two arrows pushing away from it, down to each side
+    at 45 degrees. Drawn the same way. */
 const Knockback = createLucideIcon("knockback", [
-  ["circle", { cx: "12", cy: "3", r: "1", key: "boss" }],
-  ["path", { d: "M12 7v14", key: "down" }],
-  ["path", { d: "m8 17 4 4 4-4", key: "down-head" }],
-  ["path", { d: "M10 6 4 12", key: "left" }],
-  ["path", { d: "M4 7v5h5", key: "left-head" }],
-  ["path", { d: "m14 6 6 6", key: "right" }],
-  ["path", { d: "M20 7v5h-5", key: "right-head" }],
+  ["circle", { cx: "12", cy: "5", r: "2", fill: "currentColor", key: "boss" }],
+  ["path", { d: "M10 8 3 15", key: "left" }],
+  ["path", { d: "M3 10v5h5", key: "left-head" }],
+  ["path", { d: "m14 8 7 7", key: "right" }],
+  ["path", { d: "M21 10v5h-5", key: "right-head" }],
 ]);
 
 /** The name and the icon of each kind of mechanic. */
