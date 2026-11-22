@@ -40,15 +40,15 @@ test("every mechanic has its picture, under its phase, for your slot", () => {
   assert.ok(screen.getByText("Scythe: H1 at the butt, H2 at the point, close in."));
 });
 
-test("each phase chip jumps to its phase", () => {
+test("the buttons at the top jump to each section of the page", () => {
   draw("H1");
-  const chips = within(screen.getByRole("navigation", { name: "Go to a phase" })).getAllByRole("link");
+  const chips = within(screen.getByRole("navigation", { name: "Sections on this page" })).getAllByRole("link");
   assert.deepEqual(
     chips.map((c) => c.textContent),
-    ["Phase 1", "Phase 2", "Phase 3", "Phase 4"],
+    ["Phase 1", "Phase 2", "Phase 3", "Phase 4", "Panic reset", "Timeline", "Sources", "Your progress"],
   );
-  assert.equal(chips[2].getAttribute("href"), "#phase-3");
-  assert.ok(document.getElementById("phase-3"));
+  // Each one goes to a section that is on the page.
+  for (const c of chips) assert.ok(document.getElementById(c.getAttribute("href")?.slice(1) ?? ""), c.textContent ?? "");
 });
 
 test("each mechanic links to the tabs that train it", () => {

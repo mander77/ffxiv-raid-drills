@@ -107,20 +107,13 @@ interface MechanicsProps {
   slot: Slot;
 }
 
-/** Every mechanic in fight order, by phase, with a chip to jump to each phase. */
+/** Every mechanic in fight order, by phase. */
 function Mechanics({ slot }: MechanicsProps) {
   return (
     <section aria-labelledby="mechanics" className="space-y-4">
       <h2 id="mechanics" className="font-display text-2xl tracking-wide">
         Every mechanic as {slot}
       </h2>
-      <nav aria-label="Go to a phase" className="flex flex-wrap gap-2">
-        {PHASES.map((p) => (
-          <Button key={p.phase} asChild variant="outline" size="sm">
-            <a href={`#${phaseId(p.phase)}`}>{shortPhase(p.phase)}</a>
-          </Button>
-        ))}
-      </nav>
       {PHASES.map((p) => (
         // The wide-screen header stays at the top, so a phase heading stops below it.
         <section key={p.phase} aria-labelledby={phaseId(p.phase)} className="space-y-3">
@@ -147,6 +140,27 @@ const SECTIONS: readonly { id: string; label: string }[] = [
   { id: "panic-reset", label: "Panic reset" },
   { id: "timeline", label: "Timeline" },
 ];
+
+/** Every section of the page, for the buttons at its top: the stops of Back and Next, then the
+    two short cards that end the page. */
+const ALL_SECTIONS: readonly { id: string; label: string }[] = [
+  ...SECTIONS,
+  { id: "sources", label: "Sources" },
+  { id: "progress", label: "Your progress" },
+];
+
+/** A row of buttons at the top of the page, one per section, to jump to it. */
+function SectionChips() {
+  return (
+    <nav aria-label="Sections on this page" className="flex flex-wrap gap-2">
+      {ALL_SECTIONS.map((x) => (
+        <Button key={x.id} asChild variant="outline" size="sm">
+          <a href={`#${x.id}`}>{x.label}</a>
+        </Button>
+      ))}
+    </nav>
+  );
+}
 
 /** How far from the top of the screen a section heading counts as reached, in pixels: below the
     wide-screen header, which stays at the top. The app's choice. */
@@ -198,8 +212,8 @@ const SOURCES: readonly { href: string; label: string; note?: string }[] = [
 ];
 
 interface SectionProps {
-  /** The address of the section, when the Back and Next buttons jump to it. */
-  id?: string;
+  /** The address of the section, for the buttons that jump to it. */
+  id: string;
   title: string;
   children: ReactNode;
 }
@@ -247,6 +261,7 @@ export function CheatSheetPage() {
     <main>
       <PageContainer className="space-y-6 py-6">
         <p className="text-muted-foreground">{tabOf("/sheet")?.lede}</p>
+        <SectionChips />
 
         <Mechanics slot={slot} />
 
@@ -294,7 +309,7 @@ export function CheatSheetPage() {
           </p>
         </Section>
 
-        <Section title="Sources">
+        <Section id="sources" title="Sources">
           <ul className="space-y-1.5">
             {SOURCES.map((src) => (
               <li key={src.href}>
@@ -307,7 +322,7 @@ export function CheatSheetPage() {
             ))}
           </ul>
         </Section>
-        <Section title="Your progress">
+        <Section id="progress" title="Your progress">
           <Progress />
         </Section>
         <SectionButtons />

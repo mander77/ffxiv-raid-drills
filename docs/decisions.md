@@ -25,7 +25,7 @@ make sure that each one still matches the code before you start it.
 
 - Issue #2, the reference view (November 22): it lives at the top of the Cheat sheet, in place of
   "Positions to remember", not in a new tab, so the phone keeps its 2 x 3 tab grid. It is one
-  scrolling page, not one mechanic at a time, with a chip per phase to jump. Each mechanic gets
+  scrolling page, not one mechanic at a time. Each mechanic gets
   one key picture, not one per Learn card: 26 mechanics in fight order (`REFERENCE` in
   `src/data/reference.ts`), each with the answer picture of one Learn card for your slot, the
   one-line rules of its Learn cards (1 to 3), its time and a Learn link. Together they hold every
@@ -396,7 +396,9 @@ Do not propose these again unless the owner brings them up.
   The page is long, so once you scroll to Phase 1, buttons sit in the bottom right corner: "↑"
   the section before the one you are in, "↓" the next one, and "↑ Top" (owner's ask). The
   sections are Phase 1 to 4, Panic reset and Timeline. Sources and Your progress are not stops:
-  they are short and end the page, so their headings never scroll up to the top. Then the panic reset, your timeline, the sources and
+  they are short and end the page, so their headings never scroll up to the top. At the top of
+  the page, one button per section jumps to it: the phases, Panic reset, Timeline, Sources and
+  Your progress (owner's ask). Then the panic reset, your timeline, the sources and
   your progress.
 
 ### Everywhere
