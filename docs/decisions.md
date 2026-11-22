@@ -387,8 +387,9 @@ Do not propose these again unless the owner brings them up.
   card `k-raw-first` (on a phone, a 110 px strip from the boss to the party stack). The owner's
   character picture is in About me with a wide crop of the face, the card and both arms.
 - Cheat sheet: first every mechanic in fight order, by phase, as cards: its time, a Learn answer
-  picture for your slot, its Learn cards' rules and a link to Learn. At most three columns on
-  a wide screen (owner's choice: four was too many), two on a tablet, one on a phone. Then the panic reset, your timeline, the sources and
+  picture for your slot, its Learn cards' rules and a link to Learn. At most two columns, from
+  tablet width up (owner's choice: three and four were too many), one on a phone. From 1024 px the rules
+  sit beside the picture, so a wide card has no empty half. Then the panic reset, your timeline, the sources and
   your progress.
 
 ### Everywhere
