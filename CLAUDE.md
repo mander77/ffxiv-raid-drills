@@ -304,7 +304,8 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Mark**: a player's mark on the arena, or the boss (`BossMark`).
 - **Kind**: what you do in a Practice mechanic: spread, a stack (party, pair, light party or role
   stack), line stack, bait, dodge, dodge sequence, tower, knockback tower, wild charge, saved for
-  later or knockback (`DrillKind`, `Drill.kind`). `KindIcon` draws its icon. Not a category.
+  later or knockback (`DrillKind`, `Drill.kind`). `KindIcon` draws its icon; the rules for
+  the icons are at the top of its file. Not a category.
 - **Category**: an ability category of the timeline (raid damage, tank damage...).
   `CategoryDots` draws its coloured dots.
 - **Picture**: an arena picture with its data (`Picture`, `LEARN_PICTURES`, `LearnPicture`).

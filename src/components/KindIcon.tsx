@@ -1,3 +1,23 @@
+// The icons of the kinds of mechanic, and the rules they follow (the owner's), so a new icon reads
+// the same way as the others:
+//
+// What a shape means
+// 1. A ring is a spot on the floor (a tower, the spot a bait leaves).
+// 2. A filled dot is a player.
+// 3. Chevrons are a hit or a push from the boss, toward the players (a line stack, a knockback).
+// 4. Arrows are a move the players make themselves (spread, dodge, a stack coming together).
+// 5. A bar is a blocker that takes a hit for the others: a tank, a rock, a wall (a wild charge).
+// 6. A clock is timing: something you see now and act on later (saved for later).
+// 7. Every stack has the same arrows, from the corners into the middle. The middle says how many:
+//    2 (pairs), 4 (light parties), R (the roles decide), or nothing for the whole party. The number
+//    is in the body font, bold, in its own colour (--count in app.css), so it stands out.
+// 8. When an icon has a direction, the boss is at the top and the hit runs down, away from it.
+//
+// How an icon is drawn
+// 9. Lucide's style: a 24 by 24 grid, a 2 pixel stroke, round ends and corners. Use a lucide icon
+//    when one says it; otherwise draw one here with lucide's createLucideIcon.
+// 10. Few lines, about five at most: it must read at 20 pixels in its square on the list. Check it
+//    there, in the browser, in light and dark mode, before you keep it.
 import { CircleArrowOutUpRight, createLucideIcon, Expand, History, type IconNode, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DrillKind } from "../types";
