@@ -370,21 +370,18 @@ Do not propose these again unless the owner brings them up.
 ### Everywhere
 
 - Player marks are always the top layer (see `LAYERS` in `src/components/arena/Arena.tsx`).
-- The weapons stand upright, as in the game, each a plain dark silhouette with no small parts
-  (`src/components/arena/Weapon.tsx`, one drawing for every screen). The owner picked the shapes
-  from mock-ups and game screenshots. Scythe: the handle stands at the butt end (H1), and the
-  curved blade dips into the floor toward the point (H2) and curls up. Sword: a broad greatsword,
-  point down, with a wide crossguard. Axe: a double-headed half-moon axe on a long handle, its
-  lower horns in the floor. A weapon is drawn as if from a raised camera south of the arena: as
-  it turns away from facing you it gets narrower (40% at the least) and its far end sits a little
-  higher, but its height never changes, so it never looks stretched. There is no line on the
-  floor: the owner tried a cut along the flat side and chose this instead. The held weapon in
-  Raw Steel Trophy is drawn smaller and narrower, between his ring and waymark B. A weapon's
-  name goes below it, beside it for a weapon due north (waymark A is below it), and out toward
-  the edge for one due east or west. The drawn sizes are the app's choice, set by eye (no source
-  gives the weapons' size in the game): the sword and axe at 80% of the first drawing. The scythe,
-  centred on its spot, reaches from butt to point exactly across the green safe ring drawn when
-  he lands on it, at the same height as the others (owner's rule).
+- Each boss weapon is a small upright icon on a round badge, sitting on a line drawn at the true
+  angle the weapon rests at (`src/components/arena/Weapon.tsx`, one drawing for every screen). The
+  owner chose this after trying detailed standing weapons, silhouettes and a cut in the floor: the
+  line shows the angle, the icon says which weapon, and nothing stretches as it turns. The sword
+  and the axe (a double-headed half-moon axe) sit in the middle of a straight line. The scythe's
+  line tapers from the butt, where its icon sits (H1's end), to the sharp point (H2's end), and is
+  as long as the green safe ring drawn when he lands on it is wide (owner's rule). The scythe icon
+  has its blade at the bottom, as it rests in the floor. Weapons have their own layer, over the
+  waymarks they often land next to and under the boss and the player marks. The held weapon in
+  Raw Steel Trophy is its icon alone, a little smaller, east of him. A weapon's name goes out to
+  the side of its line, away from the arena center; in Practice, its order number goes in toward
+  the center.
 - The boss turns smoothly to face his next target. He does not flip.
 - "Saved for later" (purple) marks a mechanic shown early and resolved later, for example the
   first weapon during Void Stardust. It is never a spot to stand on.

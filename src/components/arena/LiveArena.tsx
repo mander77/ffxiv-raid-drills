@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { PUDDLE_R } from "../../data/attacks";
-import { rotOverlay, rotZone, round2, stepZone } from "../../geometry";
+import { rotOverlay, rotZone, round2, stepZone, unit } from "../../geometry";
 import { bossFor } from "../../lib/practice";
 import { cn } from "../../lib/utils";
 import type { Boss, Overlay, Point, Scene, StepResult, Zone } from "../../types";
@@ -10,8 +10,9 @@ import { TurningBoss } from "./TurningBoss";
 import { ZoneArea } from "./ZoneArea";
 import { ZoneLabel } from "./ZoneLabel";
 
-/** How far below a weapon's foot its order number goes, under its name. The app's choice. */
-const ORD_BELOW = 10;
+/** How far in from a weapon, toward the arena center, its order number goes, so it stays clear
+    of the weapon's name on the outer side. The app's choice. */
+const ORD_IN = 10;
 
 export interface LiveArenaProps {
   scene: Scene;
@@ -90,7 +91,11 @@ export function LiveArena({
           <Shape key={j} overlay={rotOverlay(o, k)} />
         ))}
         {sc.spawnPlay && pos && "x" in pos && (
-          <text className="ord" x={round2(pos.x)} y={round2(pos.y + ORD_BELOW)}>
+          <text
+            className="ord"
+            x={round2(pos.x + unit([50 - pos.x, 50 - pos.y])[0] * ORD_IN)}
+            y={round2(pos.y + unit([50 - pos.x, 50 - pos.y])[1] * ORD_IN)}
+          >
             {i + 1}
           </text>
         )}
@@ -153,6 +158,11 @@ export function LiveArena({
           <>
             {shapes(reveal)}
             {base.ground}
+          </>
+        ),
+        weapons: (
+          <>
+            {base.weapons}
             {weapons}
           </>
         ),

@@ -112,7 +112,7 @@ src/components/      React components: Header, PageContainer, SlotSwitch, ShareB
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
                      StepChips, SetupText, Tally, ChipRow, HudPrompt
 src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, clicks), Shape (one
-                     attack, weapon or mark), Weapon (a boss weapon standing in the floor), BossMark, ZoneArea (a zone's coloured area),
+                     attack, weapon or mark), Weapon (a boss weapon: its icon on the line it rests along), BossMark, ZoneArea (a zone's coloured area),
                      ArenaLabel (a name tag), ZoneLabel (a label placed over a zone), LearnPicture
                      (a Learn picture), LiveArena (the live arena), ArenaFrame (the one size rule for
                      every arena you play on), TurningBoss, arena.css

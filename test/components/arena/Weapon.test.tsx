@@ -19,42 +19,27 @@ function draw(overlay: Extract<Overlay, { t: "axe" | "sword" | "scythe" }>): SVG
   return g;
 }
 
-/** The six numbers of the group's matrix(a b c d e f). */
-const matrixOf = (g: Element): number[] =>
-  (g.getAttribute("transform") ?? "")
-    .replace(/^matrix\(|\)$/g, "")
-    .split(" ")
-    .map(Number);
+test("a sword rests along a line at its true angle, with its icon in the middle", () => {
+  const g = draw({ t: "sword", x: 50, y: 79, ux: 0, uy: 1 });
+  const line = g.querySelector(".rest");
+  // North to south: the line runs straight up and down through the sword's spot.
+  assert.deepEqual(
+    ["x1", "y1", "x2", "y2"].map((k) => Number(line?.getAttribute(k))),
+    [50, 70, 50, 88],
+  );
+  assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(50 79) scale(1)");
+});
 
-test("a scythe facing you stands upright on its point, as long as the green safe ring is wide", () => {
+test("the scythe's blade reaches across the green safe ring, with its icon at the butt", () => {
+  // Butt to the west, point to the east.
   const g = draw({ t: "scythe", x: 50, y: 21, ux: 1, uy: 0, dx: 0, dy: -1 });
-  assert.include(g.getAttribute("class"), "scythe");
-  assert.isNotNull(g.querySelector(".body"));
-  const [a, b, c, d, e, f] = matrixOf(g);
-  // Half its length in the drawing is 9.2; the green ring is drawn 1.6 inside 12.5.
-  assert.closeTo(a * 9.2, 12.5 - 1.6, 0.05);
-  assert.deepEqual([b, c, d, e, f], [0, 0, 0.8, 50, 21]);
+  // The green ring is drawn 1.6 inside the 12.5 safe edge, so it is 10.9 from the middle.
+  assert.include(g.querySelector(".blade")?.getAttribute("d"), "M-10.9 ");
+  assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(39.1 21) scale(1)");
 });
 
-test("a turned weapon gets narrower and tilts a little, but never taller", () => {
-  // Its line runs north to south: it is turned edge-on, so it is drawn at the least width.
-  const [a, b, c, d] = matrixOf(draw({ t: "axe", x: 79, y: 50, ux: 0, uy: 1 }));
-  assert.equal(a, 0.32);
-  assert.isAbove(b, 0);
-  assert.isBelow(b, 0.5);
-  assert.deepEqual([c, d], [0, 0.8]);
-});
-
-test("without a turn, the sword faces the arena center", () => {
-  // South of the center, so it faces north: full width, no tilt.
-  const [a, b] = matrixOf(draw({ t: "sword", x: 50, y: 79 }));
-  assert.equal(Math.abs(a), 0.8);
-  assert.equal(b, 0);
-});
-
-test("a held weapon is drawn smaller, beside the point", () => {
-  const [a, , , d, e] = matrixOf(draw({ t: "axe", x: 63, y: 50, ux: 1, uy: 0, held: true }));
-  assert.isBelow(a, 1);
-  assert.isBelow(d, 1);
-  assert.isAbove(e, 63);
+test("a held weapon is its icon alone, smaller, east of the point", () => {
+  const g = draw({ t: "axe", x: 63, y: 50, ux: 1, uy: 0, held: true });
+  assert.isNull(g.querySelector(".rest"));
+  assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(67.5 50) scale(0.8)");
 });

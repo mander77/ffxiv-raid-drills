@@ -2,18 +2,19 @@ import "./arena.css";
 import { type MouseEvent, type ReactNode, useId } from "react";
 import { cn } from "@/lib/utils";
 import type { Overlay, Point } from "../../types";
-import { hitsFirst, Shape } from "./Shape";
+import { hitsFirst, isWeapon, Shape } from "./Shape";
 
 /** The layers of an arena picture, from the bottom up. Every picture draws in this order, so a
     piece looks the same everywhere.
-    ground: the attacks, then the weapons and other pieces on the floor (clipped to the arena).
+    ground: the attacks, then the other pieces on the floor (clipped to the arena).
     drops: puddles and other pieces that stay on the floor after a step.
     zones: where to stand, as the correct answer, a preview or a target (clipped to the arena).
-    waymarks, then boss: the boss and his ring.
+    waymarks, then weapons: the boss's weapons, over the waymarks they often land next to.
+    boss: the boss and his ring.
     labels: name tags for weapons and zones, over the boss so they stay readable.
     effects: what the full fight adds over the arena (the flash, the countdown ring, a tank buster).
     marks: the other players. me: your own click and your moving marker, on top of everything. */
-export const LAYERS = ["ground", "drops", "zones", "waymarks", "boss", "labels", "effects", "marks", "me"] as const;
+export const LAYERS = ["ground", "drops", "zones", "waymarks", "weapons", "boss", "labels", "effects", "marks", "me"] as const;
 // TS note: `typeof LAYERS[number]` is the union of the array's values: "ground" | "drops" | ...
 export type Layer = (typeof LAYERS)[number];
 const CLIPPED: ReadonlySet<Layer> = new Set<Layer>(["ground", "zones"]);
@@ -120,14 +121,15 @@ function toArena(e: MouseEvent<SVGSVGElement>): Point {
   return [q.x, q.y];
 }
 
-/** Overlays sorted into their layers: name tags are labels, role marks are marks, and the rest is
-    ground, with the attacks under the other pieces. */
-export function pieceLayers(os: readonly Overlay[]): Pick<Record<Layer, ReactNode>, "ground" | "labels" | "marks"> {
+/** Overlays sorted into their layers: name tags are labels, role marks are marks, the boss's
+    weapons are weapons, and the rest is ground, with the attacks under the other pieces. */
+export function pieceLayers(os: readonly Overlay[]): Pick<Record<Layer, ReactNode>, "ground" | "weapons" | "labels" | "marks"> {
   const draw = (list: readonly Overlay[]): ReactNode =>
     // biome-ignore lint/suspicious/noArrayIndexKey: a picture's pieces never change order.
     list.map((o, i) => <Shape key={i} overlay={o} />);
   return {
-    ground: draw(hitsFirst(os.filter((o) => o.t !== "tag" && o.t !== "mark"))),
+    ground: draw(hitsFirst(os.filter((o) => o.t !== "tag" && o.t !== "mark" && !isWeapon(o)))),
+    weapons: draw(os.filter(isWeapon)),
     labels: draw(os.filter((o) => o.t === "tag")),
     marks: draw(os.filter((o) => o.t === "mark")),
   };

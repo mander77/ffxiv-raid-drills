@@ -33,7 +33,7 @@ test("two arenas on one page never share a clip or a pattern", () => {
   assert.equal(new Set(ids).size, 4);
 });
 
-test("pieces go to their layers: attacks under weapons, tags to labels, role marks to marks", () => {
+test("pieces go to their layers: attacks on the ground, weapons over the waymarks, tags to labels, role marks to marks", () => {
   const os: Overlay[] = [
     { t: "sword", x: 30, y: 30 },
     { t: "aoe", x: 50, y: 50, r: 10 },
@@ -44,7 +44,11 @@ test("pieces go to their layers: attacks under weapons, tags to labels, role mar
   const layer = (l: string): Element | null => document.querySelector(`[data-layer="${l}"]`);
   assert.deepEqual(
     [...(layer("ground")?.children ?? [])].map((e) => e.getAttribute("class")),
-    ["aoe", "wpn sword"],
+    ["aoe"],
+  );
+  assert.deepEqual(
+    [...(layer("weapons")?.children ?? [])].map((e) => e.getAttribute("class")),
+    ["wpn sword"],
   );
   assert.equal(layer("labels")?.textContent, "SWORD");
   assert.equal(layer("marks")?.textContent, "H1");

@@ -21,15 +21,16 @@ const OUTSIDE = HITBOX + 4.5;
 /** The first Void Stardust puddle: north of the boss, just outside his hitbox. */
 export const FIRST_PUDDLE: Point = [50, 50 - OUTSIDE];
 
-/** Where a weapon's name goes, clear of the weapon, the waymark next to it and the spot where
-    you stand at it. A weapon due north has waymark A right below it, so its name goes beside it,
-    east. A weapon due east or west has its name out toward the edge, a little higher. Any other
-    goes just below its foot. The distances are the app's choice. */
-function weaponTagAt(p: Point): Point {
-  const dx = p[0] - 50, dy = p[1] - 50;
-  if(Math.abs(dx) < 8 && dy < 0) return [p[0] + 16, p[1]];
-  if(Math.abs(dy) < 8) return [p[0] + Math.sign(dx) * 13, p[1] - 6];
-  return [p[0], p[1] + 5.5];
+/** How far a weapon's name sits from its spot, out to the side of the line it rests along. The
+    app's choice: clear of the weapon's icon and line. */
+const TAG_OUT = 11;
+
+/** Where the name of a weapon at p, resting along u, goes: out to the side of its line, on the
+    side away from the arena center, so it stays clear of the waymark and the boss. */
+function weaponTagAt(p: Point, u: Point): Point {
+  const n: Point = [-u[1], u[0]];
+  const side = n[0] * (p[0] - 50) + n[1] * (p[1] - 50) >= 0 ? 1 : -1;
+  return addVec(p, n, side * TAG_OUT);
 }
 
 /* A jump set: the boss starts in the middle and jumps to each weapon in order.
@@ -50,11 +51,14 @@ export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
   const scytheAxis = (w: Weapon, i: number): Point => w.axis ?? [-dirs[i][1], dirs[i][0]];
   const overlays: Overlay[] = [];
   W.forEach((w, i) => {
-    // Each weapon stands up from its foot, so its name goes below or beside it.
-    const at = weaponTagAt(w.p);
+    // The line the weapon rests along. Without a turn, a sword or an axe lies across the line to
+    // the arena center (as Weapon draws it).
+    const out = unit([w.p[0] - 50, w.p[1] - 50]);
+    const u: Point = w.type === "scythe" ? scytheAxis(w, i) : w.axis ?? [-out[1], out[0]];
+    const at = weaponTagAt(w.p, u);
     const tag: Overlay = {t:"tag", spawn:i, x:at[0], y:at[1], s:w.type.toUpperCase()};
     if(w.type === "scythe"){
-      const u = scytheAxis(w, i), d: Point = [u[1], -u[0]];
+      const d: Point = [u[1], -u[0]];
       overlays.push({t:"scythe", spawn:i, x:w.p[0], y:w.p[1], ux:u[0], uy:u[1], dx:d[0], dy:d[1]}, tag);
     } else {
       const turn = w.axis ? {ux:w.axis[0], uy:w.axis[1]} : {};

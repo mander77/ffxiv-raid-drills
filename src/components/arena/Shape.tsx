@@ -109,10 +109,13 @@ export function Shape({ overlay: o }: ShapeProps) {
   }
 }
 
+/** True for one of the boss's weapons. */
+export const isWeapon = (o: Overlay): boolean => o.t === "axe" || o.t === "sword" || o.t === "scythe";
+
 /** True for the filled area of an attack. */
 export const isHit = (o: Overlay): boolean =>
   o.t === "aoe" || o.t === "donut" || o.t === "band" || o.t === "poly" || (o.t === "lane" && !o.soft);
 
-/** Overlays with the attacks first, then the rest (safe rings, weapons, towers) on top, so an
-    attack never covers a weapon icon. */
+/** Overlays with the attacks first, then the rest (safe rings, towers) on top, so an attack never
+    covers them. */
 export const hitsFirst = (os: readonly Overlay[]): Overlay[] => [...os.filter(isHit), ...os.filter((o) => !isHit(o))];

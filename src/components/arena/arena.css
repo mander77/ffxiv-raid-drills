@@ -208,13 +208,26 @@
     dominant-baseline: central;
   }
 
-  /* The weapons: dark silhouettes, standing upright. */
-  .arena .wpn .body {
+  /* The weapons: a line at the angle each one rests at, and its icon on a round badge. */
+  .arena .wpn .rest {
+    stroke: var(--arena-void);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+  .arena .wpn .blade {
     fill: var(--arena-void);
   }
-  .arena .wpn .haft {
+  .arena .wpn .badge {
+    fill: var(--arena-sand);
     stroke: var(--arena-void);
-    stroke-width: 2;
+    stroke-width: 0.6;
+  }
+  .arena .wpn .glyph {
+    fill: var(--arena-void);
+  }
+  .arena .wpn .glyph-line {
+    stroke: var(--arena-void);
+    stroke-width: 1.1;
     stroke-linecap: round;
   }
 
