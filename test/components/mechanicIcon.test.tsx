@@ -28,3 +28,10 @@ test("a pair stack and a shared tank buster show 2 in the middle; a tank buster 
   cleanup();
   assert.equal(squareOf("tankBuster").textContent, "");
 });
+
+test("a tower shows how many players soak it, and nothing when the mechanic does not say", () => {
+  render(<CastSquare mark={{ cats: [], kind: "towerKnockback", soak: 2 }} />);
+  assert.equal(screen.getByTitle(KINDS.towerKnockback.name).textContent, "2");
+  cleanup();
+  assert.equal(squareOf("tower").textContent, "");
+});

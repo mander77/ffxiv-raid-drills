@@ -7,7 +7,7 @@ import { KINDS, MechanicIcon } from "./MechanicIcon";
 export interface CastSquareProps {
   /** The row's categories (the first one colours the square), whether it is the boss's own cast,
       or, for a Practice mechanic, what you do in it. */
-  mark: { cats: readonly Category[]; cast?: boolean; kind?: DrillKind };
+  mark: { cats: readonly Category[]; cast?: boolean; kind?: DrillKind; soak?: number };
   className?: string;
 }
 
@@ -34,7 +34,7 @@ export function CastSquare({ mark, className }: CastSquareProps) {
       )}
       title={mark.kind && KINDS[mark.kind].name}
     >
-      {mark.kind && <MechanicIcon kind={mark.kind} className="size-5" countClassName="text-count" />}
+      {mark.kind && <MechanicIcon kind={mark.kind} soak={mark.soak} className="size-5" countClassName="text-count" />}
     </span>
   );
 }

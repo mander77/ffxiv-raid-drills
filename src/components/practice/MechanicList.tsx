@@ -179,7 +179,7 @@ function Row({ drill: d, axis, current, onRef, onClick }: RowProps) {
         look.row,
       )}
     >
-      <CastSquare mark={{ cats: NO_CATS, kind: d.kind }} />
+      <CastSquare mark={{ cats: NO_CATS, kind: d.kind, soak: d.soak }} />
       <span className={look.name}>
         {axis === "y" && <span className="block font-mono text-[11px] text-muted-foreground">{d.time}</span>}
         {d.title}

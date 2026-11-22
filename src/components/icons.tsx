@@ -19,14 +19,14 @@
 // 4. Arrows are a move the players make themselves (spread, dodge, a stack coming together, puddles
 //    dropped in a row, a tether pulled apart).
 // 5. A knockback is a burst (where it comes from) and a wide, hollow arrow (the push), never a thin
-//    arrow: you do not move yourself. A knockback tower has the game's own sign instead: chevrons
-//    pointing out of its ring.
+//    arrow: you do not move yourself. A knockback tower is a tower with a burst line on each side.
 // 6. A bar is a blocker that takes a hit for the others: a tank, a rock, a wall (a wild charge).
 // 7. A shield is a tank buster.
 // 8. A clock is timing: something you see now and act on later (saved for later).
 // 9. Every stack has the same arrows, from the corners into the middle. The middle says how many:
 //    2 (pairs), 4 (light parties), R (the roles decide), or nothing for the whole party. A shared
-//    tank buster's shield takes a number the same way. The number is in the body font, bold, in
+//    tank buster's shield takes a number the same way, and so does a tower's column: how many
+//    players soak it (Drill.soak). The number is in the body font, bold, in
 //    its own colour (--count in app.css), so it stands out (MechanicIcon draws it).
 // 10. When an icon has a direction, the boss is at the top and the hit runs down, away from it.
 //
@@ -167,20 +167,21 @@ export const KnockbackIcon = createLucideIcon("knockback", [
   ["circle", { cx: "19", cy: "19", r: "3", fill: "currentColor", key: "player" }],
 ]);
 
-/** A tower: a column standing in its ring on the floor. */
-export const TowerIcon = createLucideIcon("tower", [
-  ["ellipse", { cx: "12", cy: "18", rx: "9", ry: "3.5", key: "ring" }],
-  ["path", { d: "M8 18 9.5 4h5L16 18", key: "column" }],
-]);
+/** A tower: a wide column standing in its ring on the floor, with room inside for the number of
+    players who soak it (MechanicIcon puts it there). */
+const TOWER: IconNode = [
+  ["ellipse", { cx: "12", cy: "20", rx: "10", ry: "3", key: "ring" }],
+  ["path", { d: "M5 20 7 2h10l2 18", key: "column" }],
+];
 
-/** A knockback tower: a tower with chevrons pointing out of its ring, as the game draws it, since
-    you soak it and it knocks you back. */
+export const TowerIcon = createLucideIcon("tower", TOWER);
+
+/** A knockback tower: the tower with a burst line on each side, since you soak it and it knocks
+    you back. */
 export const KnockbackTowerIcon = createLucideIcon("knockback-tower", [
-  ["ellipse", { cx: "12", cy: "15", rx: "7", ry: "2.5", key: "ring" }],
-  ["path", { d: "M9.5 15 10.5 2h3l1 13", key: "column" }],
-  ["path", { d: "M4 12 1.5 15 4 18", key: "out-west" }],
-  ["path", { d: "m20 12 2.5 3-2.5 3", key: "out-east" }],
-  ["path", { d: "m9 20 3 2.5 3-2.5", key: "out-south" }],
+  ...TOWER,
+  ["path", { d: "M3.5 11 1 9", key: "burst-west" }],
+  ["path", { d: "m20.5 11 2.5-2", key: "burst-east" }],
 ]);
 
 /** A stretch tether: two players (filled dots) joined by a tether, and the arrow of their moving

@@ -97,6 +97,9 @@ const WEAPONS: readonly { overlay: ComponentProps<typeof Weapon>["overlay"]; nam
   },
 ];
 
+/** The number a tower's icon shows on this page, as an example. */
+const EXAMPLE_SOAK = 2;
+
 /** The titles of the Practice mechanics of a kind, in fight order. */
 function drillsOf(kind: DrillKind): string[] {
   return DRILLS.filter((d) => d.kind === kind).map((d) => d.title);
@@ -180,16 +183,18 @@ interface KindItemProps {
 
 /** A kind of mechanic: its icon large and in its square on the list, and the mechanics that use it. */
 function KindItem({ kind }: KindItemProps) {
-  const { name, meaning } = KINDS[kind];
+  const { name, meaning, soaked } = KINDS[kind];
   const drills = drillsOf(kind);
+  // A tower's number comes from each mechanic; 2 shows where it goes.
+  const soak = soaked ? EXAMPLE_SOAK : undefined;
   return (
     <IconItem
       picture={
         <>
           <span className="flex size-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <MechanicIcon kind={kind} className="size-8" countClassName="text-count" />
+            <MechanicIcon kind={kind} soak={soak} className="size-8" countClassName="text-count" />
           </span>
-          <CastSquare mark={{ cats: [], kind }} />
+          <CastSquare mark={{ cats: [], kind, soak }} />
         </>
       }
       name={name}

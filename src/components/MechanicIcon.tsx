@@ -31,6 +31,9 @@ export interface KindInfo {
   count?: string;
   /** The number is smaller, for an icon with a narrow middle. */
   smallCount?: boolean;
+  /** A tower: each mechanic gives its own number, how many players soak it (Drill.soak), and the
+      number sits higher, in the column above the ring. */
+  soaked?: boolean;
 }
 
 /** Each kind of mechanic. A stack also has the number of its players, in the middle of its icon: 2
@@ -57,8 +60,20 @@ export const KINDS: Record<DrillKind, KindInfo> = {
   },
   dodge: { name: "Dodge", meaning: "Step out of the attack.", icon: DodgeIcon },
   sequence: { name: "Dodge sequence", meaning: "Dodge a set order of attacks.", icon: DodgeSequenceIcon },
-  tower: { name: "Tower", meaning: "Stand in a tower to soak it.", icon: TowerIcon },
-  towerKnockback: { name: "Knockback tower", meaning: "Soak a tower that knocks you back.", icon: KnockbackTowerIcon },
+  tower: {
+    name: "Tower",
+    meaning: "Stand in a tower to soak it. The number says how many players soak it.",
+    icon: TowerIcon,
+    smallCount: true,
+    soaked: true,
+  },
+  towerKnockback: {
+    name: "Knockback tower",
+    meaning: "Soak a tower that knocks you back. The number says how many players soak it.",
+    icon: KnockbackTowerIcon,
+    smallCount: true,
+    soaked: true,
+  },
   wildCharge: {
     name: "Wild charge",
     meaning: "A line stack with a tank or a rock in front, to take the biggest hit.",
@@ -83,6 +98,8 @@ export const KINDS: Record<DrillKind, KindInfo> = {
 
 export interface MechanicIconProps {
   kind: DrillKind;
+  /** A tower's number: how many players soak it (Drill.soak). Other kinds take theirs from KINDS. */
+  soak?: number;
   /** The size and colour of the icon. */
   className?: string;
   /** The colour of a stack's number, when it should stand out from the arrows. */
@@ -91,8 +108,9 @@ export interface MechanicIconProps {
 
 /** The icon of what you do in a mechanic (spread, stack...), with a stack's number in its middle.
     It is only a picture: the text next to it, or a label, says the same in words. */
-export function MechanicIcon({ kind, className, countClassName }: MechanicIconProps) {
-  const { icon: Icon, count, smallCount } = KINDS[kind];
+export function MechanicIcon({ kind, soak, className, countClassName }: MechanicIconProps) {
+  const { icon: Icon, smallCount, soaked } = KINDS[kind];
+  const count = soaked ? soak?.toString() : KINDS[kind].count;
   if (!count) return <Icon aria-hidden="true" className={cn("size-4", className)} />;
   // A container, so the number takes its size from the icon's: 70 percent of its width (50 for a
   // small one), at any size.
@@ -102,6 +120,8 @@ export function MechanicIcon({ kind, className, countClassName }: MechanicIconPr
       <span
         className={cn(
           "absolute font-sans font-bold",
+          // A tower's number goes up, into the column, clear of the ring.
+          soaked && "-translate-y-[10cqw]",
           // The size goes before leading-none: cn drops a line height that comes before a size.
           smallCount ? "text-[50cqw]" : "text-[70cqw]",
           "leading-none",

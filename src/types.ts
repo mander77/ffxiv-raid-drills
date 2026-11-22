@@ -203,6 +203,8 @@ export interface Drill {
   title: string;
   /** What you do in it. */
   kind: DrillKind;
+  /** A tower: how many players soak each tower. Its icon shows the number. */
+  soak?: number;
   /** The arena turns a random number of quarter turns. */
   rotate?: boolean;
   /** One variant is picked at random for each run. */

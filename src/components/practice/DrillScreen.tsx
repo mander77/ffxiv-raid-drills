@@ -181,7 +181,7 @@ export function DrillScreen({
       </div>
       {/* What you do, with the icon the list of mechanics shows for it. */}
       <Badge>
-        <MechanicIcon kind={item.kind} countClassName="text-count" />
+        <MechanicIcon kind={item.kind} soak={item.soak} countClassName="text-count" />
         {KINDS[item.kind].name}
       </Badge>
       <SetupText key={tryKey} text={sc.setup} folded={n > 0} />
