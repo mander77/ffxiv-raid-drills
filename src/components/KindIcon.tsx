@@ -38,14 +38,14 @@ const TowerKnockback = createLucideIcon("tower-knockback", [["circle", { cx: "12
 /** A stack: four arrows from the corners, the players coming together, with the middle left open
     for the number of players in the stack (see KINDS). Drawn the same way. */
 const Stack = createLucideIcon("stack", [
-  ["path", { d: "m1 1 6 6", key: "northwest" }],
-  ["path", { d: "M7 3v4H3", key: "northwest-head" }],
-  ["path", { d: "m23 1-6 6", key: "northeast" }],
-  ["path", { d: "M17 3v4h4", key: "northeast-head" }],
-  ["path", { d: "m1 23 6-6", key: "southwest" }],
-  ["path", { d: "M7 21v-4H3", key: "southwest-head" }],
-  ["path", { d: "m23 23-6-6", key: "southeast" }],
-  ["path", { d: "M17 21v-4h4", key: "southeast-head" }],
+  ["path", { d: "m1 1 5 5", key: "northwest" }],
+  ["path", { d: "M6 2v4H2", key: "northwest-head" }],
+  ["path", { d: "m23 1-5 5", key: "northeast" }],
+  ["path", { d: "M18 2v4h4", key: "northeast-head" }],
+  ["path", { d: "m1 23 5-5", key: "southwest" }],
+  ["path", { d: "M6 22v-4H2", key: "southwest-head" }],
+  ["path", { d: "m23 23-5-5", key: "southeast" }],
+  ["path", { d: "M18 22v-4h4", key: "southeast-head" }],
 ]);
 
 /** A tower: a player (a filled dot) standing in the spot (a ring). Drawn the same way. */
@@ -103,11 +103,11 @@ export interface KindIconProps {
 export function KindIcon({ kind, className, countClassName }: KindIconProps) {
   const { icon: Icon, count } = KINDS[kind];
   if (!count) return <Icon aria-hidden="true" className={cn("size-4", className)} />;
-  // A container, so the number takes its size from the icon's: half its width, at any size.
+  // A container, so the number takes its size from the icon's: 70 percent of its width, at any size.
   return (
     <span aria-hidden="true" className={cn("@container relative inline-grid size-4 place-items-center", className)}>
       <Icon className="size-full" />
-      <span className={cn("absolute font-display text-[55cqw] leading-none font-bold", countClassName)}>{count}</span>
+      <span className={cn("absolute font-display text-[70cqw] leading-none font-bold", countClassName)}>{count}</span>
     </span>
   );
 }
