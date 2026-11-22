@@ -170,22 +170,21 @@ export const KnockbackIcon = createLucideIcon("knockback", [
 
 /** A tower: a wide column standing in its ring on the floor, with room inside for the number of
     players who soak it (MechanicIcon puts it there). */
-const TOWER: IconNode = [
+export const TowerIcon = createLucideIcon("tower", [
   ["ellipse", { cx: "12", cy: "20", rx: "11", ry: "3", key: "ring" }],
   ["path", { d: "M3.5 20 5 4h14l1.5 16", key: "column" }],
-];
+]);
 
-export const TowerIcon = createLucideIcon("tower", TOWER);
-
-/** A knockback tower: the tower with a burst on each side, as on the knockback: a short line out of
-    the top corner and one a little lower, apart from the tower, since you soak it and it knocks you
-    back. */
+/** A knockback tower: the tower, a little narrower to leave room, with a burst on each side, as on
+    the knockback: a line out of the top corner and one a little lower, apart from the tower, since
+    you soak it and it knocks you back. */
 export const KnockbackTowerIcon = createLucideIcon("knockback-tower", [
-  ...TOWER,
-  ["path", { d: "M2.6 1.6 1 0", key: "burst-west-top" }],
-  ["path", { d: "M1.7 8 0 7.3", key: "burst-west-side" }],
-  ["path", { d: "m21.4 1.6 1.6-1.6", key: "burst-east-top" }],
-  ["path", { d: "m22.3 8 1.7-.7", key: "burst-east-side" }],
+  ["ellipse", { cx: "12", cy: "20", rx: "10", ry: "3", key: "ring" }],
+  ["path", { d: "M5 20 6.5 4h11L19 20", key: "column" }],
+  ["path", { d: "M3.9 2.1 1.4 0.6", key: "burst-west-top" }],
+  ["path", { d: "M3.2 7.6 0.4 6.8", key: "burst-west-side" }],
+  ["path", { d: "m20.1 2.1 2.5-1.5", key: "burst-east-top" }],
+  ["path", { d: "m20.8 7.6 2.8-.8", key: "burst-east-side" }],
 ]);
 
 /** A stretch tether: two players (filled dots) joined by a tether, and the arrow of their moving
