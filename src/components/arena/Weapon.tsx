@@ -110,10 +110,10 @@ function Glyph({ t }: GlyphProps) {
         <>
           {/* The handle: a short stub above the heads, the long part below. */}
           <line className="glyph-line" x1="0" y1="-4.8" x2="0" y2="4.8" />
-          {/* Two half-moon heads near the top, their horns pointing up and down. */}
+          {/* Two wide half-moon heads near the top, their horns pointing up and down. */}
           <path
             className="glyph"
-            transform="translate(0 -1.3) scale(0.85)"
+            transform="translate(0 -1.3) scale(1.12 1)"
             d="M-0.42 -1.3 Q-1.68 -1.51 -2.52 -3.36 Q-5.21 -0.25 -2.6 3.36 Q-1.51 1.68 -0.42 1.64 Z M0.42 -1.3 Q1.68 -1.51 2.52 -3.36 Q5.21 -0.25 2.6 3.36 Q1.51 1.68 0.42 1.64 Z"
           />
         </>
