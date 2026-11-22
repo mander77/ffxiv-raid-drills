@@ -30,7 +30,7 @@ export function PracticePage() {
   const visit = useProgressStore((s) => s.visit);
   const finish = useProgressStore((s) => s.finish);
   const newRound = useProgressStore((s) => s.newRound);
-  /** Counts Again and Watch the spawns again: each one starts the same pattern fresh. */
+  /** Counts Reset and Watch the spawns again: each one starts the same pattern fresh. */
   const [tries, setTries] = useState(0);
   /** A new code for a redirect, made once when the page opens, so every draw sends to the same one. */
   // TS note: useState(newCode) passes the function itself, so React calls it once, on the first draw.
@@ -99,7 +99,7 @@ export function PracticePage() {
           canChange={changes(item)}
           onScore={(ok) => record(item.id, ok, "practice", slot)}
           onNextMechanic={goNext}
-          onAgain={() => setTries((t) => t + 1)}
+          onReset={() => setTries((t) => t + 1)}
           onNewPattern={() => navigate(withNewCode(item.id))}
           onReplaySpawns={() => setTries((t) => t + 1)}
           onPick={(id) => navigate(withNewCode(id))}

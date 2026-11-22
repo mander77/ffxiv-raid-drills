@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useFightFrame } from "../../hooks/useFightFrame";
 import { SPEEDS, type Speed } from "../../stores/pressure";
 import { clock } from "../../time";
+import { IconButton } from "../IconButton";
 
 /** A mechanic's start, marked under the slider. */
 export interface SliderMark {
@@ -153,27 +154,6 @@ function Tick({ mark, left, onSeek }: TickProps) {
         </button>
       </TooltipTrigger>
       <TooltipContent>{mark.name}</TooltipContent>
-    </Tooltip>
-  );
-}
-
-interface IconButtonProps {
-  /** The button's name, read out and shown as its tooltip. */
-  label: string;
-  onClick: () => void;
-  children: ReactNode;
-}
-
-/** A small icon button, with its name as a tooltip. */
-function IconButton({ label, onClick, children }: IconButtonProps) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label={label} onClick={onClick}>
-          {children}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
     </Tooltip>
   );
 }

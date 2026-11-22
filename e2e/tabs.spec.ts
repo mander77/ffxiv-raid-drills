@@ -141,7 +141,7 @@ test("Practice: a correct click and an incorrect click on the arena", async ({ p
   await page.goto(`/practice/${drill.id}/${code}`);
   await clickAt(correct);
   await expect(page.getByRole("status")).toHaveText("Correct");
-  await page.getByRole("button", { name: "Again" }).first().click();
+  await page.getByRole("button", { name: "Reset" }).click();
   await clickAt([-3, -5]);
   await expect(page.getByRole("status")).toHaveText("Not there");
 });

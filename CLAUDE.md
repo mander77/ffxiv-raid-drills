@@ -48,7 +48,7 @@ claim on the live site before you act on it.
 |-----|-------|--------------|
 | Home | `/` | An arena picture from a Learn card, "Start here" cards, and About me. |
 | Learn | `/learn/<card>` | Quiz cards with arena pictures. Pick an answer to see it, then Lock in. Back, Next and one chip per mechanic. |
-| Practice | `/practice/<mechanic>/<code>` | Click where you stand, one mechanic at a time. Show me, Again, New pattern. The code names the pattern. |
+| Practice | `/practice/<mechanic>/<code>` | Click where you stand, one mechanic at a time. Show me, Reset, New pattern. The code names the pattern. |
 | Timeline | `/timeline/<card>` | Which mechanic comes next, with a cactbot-style list. |
 | Pressure | `/pressure`, `/pressure/<code>[/<picks>][?t=<s>]` | A quick round of 12 timed cards, or the full fight: the run (you click) and Watch the correct moves (the player). The player's address names its fight, its picks and, paused, its moment. |
 | Cheat sheet | `/sheet` | Every mechanic in fight order with its picture, rules, your own answer and links to train it, the timeline for your role, sources and your progress. |
@@ -118,7 +118,8 @@ src/components/      React components: Header, PageContainer, SlotSwitch, ShareB
                      coming up and Practice's list: filled for a hit, outlined for the boss's
                      cast, ink with its kind's icon for a mechanic), RoundDone,
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
-                     StepChips, SetupText, Tally, ChipRow, HudPrompt
+                     StepChips, SetupText, Tally, ChipRow, HudPrompt, IconButton (a button with
+                     only an icon, named by its tooltip)
 src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, clicks), Shape (one
                      attack, weapon or mark), Weapon (a boss weapon: its icon on the line it rests along), BossMark, ZoneArea (a zone's coloured area),
                      ArenaLabel (a name tag), ZoneLabel (a label placed over a zone), LearnPicture

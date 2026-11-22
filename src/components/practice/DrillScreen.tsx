@@ -1,4 +1,4 @@
-import { Check, X } from "lucide-react";
+import { ArrowRight, Check, RotateCcw, X } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import type { Drill, Point, StepResult } from "../../types";
 import { ArenaFrame, type ArenaFrameProps } from "../arena/ArenaFrame";
 import { LiveArena } from "../arena/LiveArena";
 import { HudPrompt } from "../HudPrompt";
+import { IconButton } from "../IconButton";
 import { LastAnswer } from "../LastAnswer";
 import { KINDS, MechanicIcon } from "../MechanicIcon";
 import { RuleBox } from "../RuleBox";
@@ -31,8 +32,8 @@ export interface DrillScreenProps {
   /** Called once when every step is answered, without Show me: true when every spot was correct. */
   onScore: (allCorrect: boolean) => void;
   onNextMechanic: () => void;
-  /** The same pattern from its first step. */
-  onAgain: () => void;
+  /** Reset: the same pattern from its first step. */
+  onReset: () => void;
   onNewPattern: () => void;
   /** Draw the mechanic again, so its weapons appear one at a time again. */
   onReplaySpawns: () => void;
@@ -55,7 +56,7 @@ export function DrillScreen({
   canChange,
   onScore,
   onNextMechanic,
-  onAgain,
+  onReset,
   onNewPattern,
   onReplaySpawns,
   onPick,
@@ -121,6 +122,12 @@ export function DrillScreen({
 
   const correct = results.filter((r) => r.ok).length;
   const allCorrect = correct === sc.steps.length;
+  /** Reset: the same pattern from its first step. Always in the bar at the top of the left side. */
+  const reset = (
+    <IconButton label="Reset" variant="outline" onClick={onReset}>
+      <RotateCcw aria-hidden="true" />
+    </IconButton>
+  );
   const hud = done ? (
     <div
       className={cn(
@@ -136,12 +143,10 @@ export function DrillScreen({
       <p className="flex-1 text-sm font-semibold" role="status">
         {allCorrect ? (multi ? "All steps correct" : "Correct") : multi ? `${correct} of ${sc.steps.length} correct` : "Not there"}
       </p>
-      <Button size="sm" onClick={onNextMechanic}>
-        Next mechanic
-      </Button>
-      <Button size="sm" variant="outline" onClick={onAgain}>
-        Again
-      </Button>
+      <IconButton label="Next mechanic" variant="default" onClick={onNextMechanic}>
+        <ArrowRight aria-hidden="true" />
+      </IconButton>
+      {reset}
     </div>
   ) : status === "incorrect" && last ? (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-danger-foreground bg-danger px-3 py-2">
@@ -152,6 +157,7 @@ export function DrillScreen({
       <Button size="sm" onClick={nextStep}>
         Next step
       </Button>
+      {reset}
     </div>
   ) : (
     // Show me: the correct spot for this step, and its answer in place of the question. Your next
@@ -160,6 +166,7 @@ export function DrillScreen({
       <Button size="sm" variant="outline" aria-pressed={shown} onClick={handleShowMe}>
         {shown ? "Hide" : "Show me"}
       </Button>
+      {reset}
     </HudPrompt>
   );
 
@@ -194,9 +201,6 @@ export function DrillScreen({
       <span className="flex-1 text-sm text-muted-foreground">
         Mechanic {i + 1} of {count}
       </span>
-      <Button variant="outline" size="sm" onClick={onAgain}>
-        Again
-      </Button>
       {/* A mechanic with nothing random would look the same again, so it gets no New pattern. */}
       {canChange && (
         <Button variant="outline" size="sm" onClick={onNewPattern}>

@@ -364,14 +364,15 @@ Do not propose these again unless the owner brings them up.
     mechanic in other fights.
 - Practice has the layout of Pressure's player (owner's choice), so the two tabs look and feel the
   same. A wide screen: the prompt over the mechanic on the left of the arena, and a bar (which
-  mechanic, Again, New pattern) over the list of mechanics on its right. A narrow screen: the same in one
+  mechanic, New pattern) over the list of mechanics on its right. A narrow screen: the same in one
   column, the prompt and the mechanic over the arena, the bar and the list, sideways, under it. It
   has no timer (owner's choice, after a timer for each mechanic was discussed): Practice is where
   you learn a mechanic with no time pressure, and Pressure is the timed tab.
 - Show me draws the correct spot in blue with the tag "Go here", shows the answer text in the bar and
   the rule in the panel. A try with Show me does not count in the score.
-- Again and Next mechanic are in the prompt bar after a mechanic. Again and New pattern are also in
-  the bar over the list of mechanics.
+- Reset (start the same pattern again) is always in the prompt bar on the left, as an icon button
+  with a tooltip (owner's choice); after a mechanic, Next mechanic sits beside it, as an icon too.
+  The bar over the list of mechanics has no Again: one restart button, in one place.
 
 ### Pressure: the quick round
 

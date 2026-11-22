@@ -5,6 +5,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, assert, beforeAll, beforeEach, test } from "vitest";
+import { TooltipProvider } from "../../src/components/ui/tooltip";
 import { DRILLS } from "../../src/data/drills";
 import { rotZone, stepZone, zoneCenter } from "../../src/geometry";
 import { buildPattern } from "../../src/lib/practice";
@@ -38,6 +39,8 @@ function open(path: string): void {
       </Routes>
       <Where />
     </MemoryRouter>,
+    // The app wraps every page in a TooltipProvider, for the icon buttons.
+    { wrapper: TooltipProvider },
   );
 }
 const where = (): string | null => screen.getByTestId("where").textContent;
@@ -86,14 +89,14 @@ test("Show me draws the spot, and a try with it does not count", async () => {
   assert.isUndefined(useProgressStore.getState().scores[FIRST.id]);
 });
 
-test("an incorrect spot says so and counts, and Again starts over", async () => {
+test("an incorrect spot says so and counts, and Reset starts over", async () => {
   open(`/practice/${FIRST.id}/${CODE}`);
   const user = userEvent.setup();
   clickAt([-40, -40]);
   assert.ok(screen.getAllByText("Not there").length > 0);
   assert.ok(arena().querySelector(".pick.bad"), "your click shows in red");
   assert.deepEqual(useProgressStore.getState().scores[FIRST.id], { seen: 1, correct: 0 });
-  await user.click(screen.getAllByRole("button", { name: "Again" })[0]);
+  await user.click(screen.getByRole("button", { name: "Reset" }));
   assert.isNull(arena().querySelector(".pick"), "a fresh try");
   assert.equal(where(), `/practice/${FIRST.id}/${CODE}`, "the same pattern");
 });
