@@ -44,7 +44,8 @@ test("the scythe's icon is a curved handle with a curved blade, and no fill on t
   const handles = g.querySelectorAll(".icon path.glyph-line");
   assert.equal(handles.length, 2);
   assert.match(handles[0]?.getAttribute("d") ?? "", /Q/);
-  assert.match(g.querySelector(".icon path.glyph")?.getAttribute("d") ?? "", /Q.*Q/);
+  // Both edges of the blade are curves (Q or C in the path), not straight lines.
+  assert.match(g.querySelector(".icon path.glyph")?.getAttribute("d") ?? "", /[QC].*[QC]/);
 });
 
 test("a held weapon is its icon alone, smaller, east of the point", () => {

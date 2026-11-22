@@ -394,8 +394,9 @@ Do not propose these again unless the owner brings them up.
   sits in the middle of its line. The sword's and the axe's (a double-headed half-moon axe) line
   is straight. The scythe's line tapers from the thick butt (H1's end) to the sharp point (H2's
   end), and is as long as the green safe ring drawn when he lands on it is wide (owner's rule).
-  The scythe icon is a reaper's scythe: a long, gently bent handle and a curved blade sweeping
-  down from its top (owner's pick over an L-shaped scythe and a blade at the bottom). Each icon is drawn a little inside its badge, so a handle never runs into the line. Weapons have their own layer, over the
+  The scythe icon is a reaper's scythe: a long, gently bent handle and a long curved blade
+  that sweeps from its top and hooks down past the middle, so it does not read as a 7 (owner's
+  pick over an L-shaped scythe, a blade at the bottom and a shorter blade). Each icon is drawn a little inside its badge, so a handle never runs into the line. Weapons have their own layer, over the
   waymarks they often land next to and over the boss, under the labels and the player marks. When
   he stands on a weapon, his dot shows through the clear badge, and a thin sand outline keeps the
   icon readable over it (owner's choice). The held weapon in
