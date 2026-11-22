@@ -4,6 +4,9 @@ import { RING } from "./Shape";
 
 /** Half of the opening at his rear, in degrees. */
 const REAR = 45;
+/** The radius of his dot. It is wider than a weapon's badge, so when he stands on a weapon a red
+    band shows around the badge's rim and you see where each one ends. The app's choice. */
+const DOT_R = 5.8;
 const onRing = (deg: number, r: number): string => `${round2(r * Math.sin(deg * DEG))} ${round2(-r * Math.cos(deg * DEG))}`;
 
 export interface BossMarkProps {
@@ -21,7 +24,7 @@ export function BossMark({ boss: b }: BossMarkProps) {
     return (
       <g transform={at}>
         <circle className="ring" r={RING} />
-        <circle className="bosscore" r="3.4" />
+        <circle className="bosscore" r={DOT_R} />
       </g>
     );
   return (
@@ -33,7 +36,7 @@ export function BossMark({ boss: b }: BossMarkProps) {
           className="ringmark"
           d={`M${onRing(90, RING - 2)} L${onRing(90, RING + 2)} M${onRing(270, RING - 2)} L${onRing(270, RING + 2)}`}
         />
-        <circle className="bosscore" r="3.4" />
+        <circle className="bosscore" r={DOT_R} />
         <path className="face" d={`M0,${round2(-(RING + 3.6))} L-2.6,${round2(-(RING - 0.6))} L2.6,${round2(-(RING - 0.6))} Z`} />
       </g>
     </g>

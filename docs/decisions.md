@@ -399,7 +399,8 @@ Do not propose these again unless the owner brings them up.
   pick over an L-shaped scythe, a blade at the bottom and a shorter blade). Each icon is drawn a little inside its badge, so a handle never runs into the line. Weapons have their own layer, over the
   waymarks they often land next to and over the boss, under the labels and the player marks. When
   he stands on a weapon, his dot shows through the clear badge, and a thin sand outline keeps the
-  icon readable over it (owner's choice). The held weapon in
+  icon readable over it (owner's choice). His dot is wider than the badge, so a red band shows
+  around the badge's rim and you see where each one ends (owner's choice). The held weapon in
   Raw Steel Trophy is its icon alone, a little smaller, east of him. A weapon's name goes out to
   the side of its line, away from the arena center; in Practice, its order number goes in toward
   the center.
