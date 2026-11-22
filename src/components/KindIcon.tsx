@@ -5,6 +5,7 @@ import {
   Expand,
   Footprints,
   History,
+  type IconNode,
   type LucideIcon,
   Route,
   Shrink,
@@ -30,24 +31,21 @@ const WildCharge = createLucideIcon("wild-charge", [
   ["path", { d: "m7 14 5 5 5-5", key: "bottom" }],
 ]);
 
-/** A knockback: the boss as a filled dot, with two arrows pushing away from it, down to each side
-    at 45 degrees. Drawn the same way. */
+/** The chevrons of both knockbacks: pushing out to the northwest and southeast corners. */
+const PUSHED_OUT: IconNode = [
+  ["path", { d: "M2 8V2h6", key: "northwest" }],
+  ["path", { d: "M22 16v6h-6", key: "southeast" }],
+];
+
+/** A knockback: the boss as a filled dot, with chevrons pushing away from it. Drawn the same way. */
 const Knockback = createLucideIcon("knockback", [
-  ["circle", { cx: "12", cy: "5", r: "2", fill: "currentColor", key: "boss" }],
-  ["path", { d: "M10 8 3 15", key: "left" }],
-  ["path", { d: "M3 10v5h5", key: "left-head" }],
-  ["path", { d: "m14 8 7 7", key: "right" }],
-  ["path", { d: "M21 10v5h-5", key: "right-head" }],
+  ["circle", { cx: "12", cy: "12", r: "3", fill: "currentColor", key: "boss" }],
+  ...PUSHED_OUT,
 ]);
 
-/** A knockback tower: the tower's ring, with a chevron on each side pushing out, since you soak it
-    and it knocks you back: west and east, as Arena Split sends you to the platforms. Drawn the
-    same way. */
-const TowerKnockback = createLucideIcon("tower-knockback", [
-  ["circle", { cx: "12", cy: "12", r: "6", key: "tower" }],
-  ["path", { d: "M3.5 9 1 12l2.5 3", key: "left" }],
-  ["path", { d: "m20.5 9 2.5 3-2.5 3", key: "right" }],
-]);
+/** A knockback tower: the tower's ring with the knockback's chevrons, since you soak it and it
+    knocks you back. Drawn the same way. */
+const TowerKnockback = createLucideIcon("tower-knockback", [["circle", { cx: "12", cy: "12", r: "6", key: "tower" }], ...PUSHED_OUT]);
 
 /** The name and the icon of each kind of mechanic. */
 export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon }> = {
