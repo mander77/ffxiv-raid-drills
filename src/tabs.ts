@@ -12,7 +12,7 @@ export interface TabInfo {
 }
 
 export const TABS: readonly TabInfo[] = [
-  { path: "/", label: "Home", lede: `Practice ${FIGHT_INFO.short}, ${FIGHT_INFO.full}, as a healer, away from the raid.` },
+  { path: "/", label: "Home", lede: `Practice ${FIGHT_INFO.short}, ${FIGHT_INFO.full}, for your role, away from the raid.` },
   { path: "/learn", label: "Learn", lede: "What each mechanic does, and what you do in it. Pick an answer to see it on the picture." },
   { path: "/practice", label: "Practice", lede: "Click where you stand. One mechanic at a time, no timer." },
   { path: "/timeline", label: "Timeline", lede: "Which mechanic comes next in the fight." },
