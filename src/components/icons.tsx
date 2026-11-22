@@ -12,23 +12,28 @@
 // The rules the icons follow (the owner's), so a new icon reads the same way as the others:
 //
 // What a shape means
-// 1. A ring is a spot on the floor (a tower, the spot a bait leaves).
+// 1. A ring is a spot on the floor (the spot a bait leaves, a puddle). A tower is a column standing
+//    in its ring.
 // 2. A filled dot is a player.
-// 3. Chevrons are a hit or a push from the boss, toward the players (a line stack, a knockback).
-// 4. Arrows are a move the players make themselves (spread, dodge, a stack coming together).
-// 5. A bar is a blocker that takes a hit for the others: a tank, a rock, a wall (a wild charge).
-// 6. A clock is timing: something you see now and act on later (saved for later).
-// 7. Every stack has the same arrows, from the corners into the middle. The middle says how many:
-//    2 (pairs), 4 (light parties), R (the roles decide), or nothing for the whole party. The number
-//    is in the body font, bold, in its own colour (--count in app.css), so it stands out
-//    (MechanicIcon draws it).
-// 8. When an icon has a direction, the boss is at the top and the hit runs down, away from it.
+// 3. Chevrons are a hit from the boss, toward the players (a line stack, a wild charge).
+// 4. Arrows are a move the players make themselves (spread, dodge, a stack coming together, puddles
+//    dropped in a row, a tether pulled apart).
+// 5. A knockback is a burst (where it comes from) and a wide, hollow arrow (the push), never a thin
+//    arrow: you do not move yourself. A knockback tower's burst splashes out of its ring.
+// 6. A bar is a blocker that takes a hit for the others: a tank, a rock, a wall (a wild charge).
+// 7. A shield is a tank buster.
+// 8. A clock is timing: something you see now and act on later (saved for later).
+// 9. Every stack has the same arrows, from the corners into the middle. The middle says how many:
+//    2 (pairs), 4 (light parties), R (the roles decide), or nothing for the whole party. A shared
+//    tank buster's shield takes a number the same way. The number is in the body font, bold, in
+//    its own colour (--count in app.css), so it stands out (MechanicIcon draws it).
+// 10. When an icon has a direction, the boss is at the top and the hit runs down, away from it.
 //
 // How an icon is drawn
-// 9. Lucide's style: a 24 by 24 grid, a 2 pixel stroke, round ends and corners. Use a lucide icon
+// 11. Lucide's style: a 24 by 24 grid, a 2 pixel stroke, round ends and corners. Use a lucide icon
 //    when one says it; otherwise draw one here with lucide's createLucideIcon.
-// 10. Few lines, about five at most: a mechanic's icon must read at 20 pixels in its square on the
-//    list. Check it there, in the browser, in light and dark mode, before you keep it.
+// 12. Few lines, about five, eight at most: a mechanic's icon must read at 20 pixels in its square
+//    on the list. Check it there, in the browser, in light and dark mode, before you keep it.
 import { createLucideIcon, type IconNode } from "lucide-react";
 
 export type { LucideIcon } from "lucide-react";
@@ -94,8 +99,6 @@ export {
 /* ---------- the kinds of mechanic (see MechanicIcon) ---------- */
 
 export {
-  // A bait: bring the hit to your spot (a ring), then step out of it (an arrow).
-  CircleArrowOutUpRight as BaitIcon,
   // Spread out: arrows out to the corners.
   Expand as SpreadIcon,
   // Saved for later: a clock that turns back.
@@ -130,30 +133,87 @@ export const WildChargeIcon = createLucideIcon("wild-charge", [
   ["path", { d: "m7 14 5 5 5-5", key: "bottom" }],
 ]);
 
-/** The chevrons of both knockbacks: pushing out to the northwest and southeast corners. */
-const PUSHED_OUT: IconNode = [
-  ["path", { d: "M2 8V2h6", key: "northwest" }],
-  ["path", { d: "M22 16v6h-6", key: "southeast" }],
-];
-
-/** A knockback: a player (a filled dot), pushed out by the boss's chevrons. */
-export const KnockbackIcon = createLucideIcon("knockback", [
-  ["circle", { cx: "12", cy: "12", r: "3", fill: "currentColor", key: "player" }],
-  ...PUSHED_OUT,
+/** A bait: you are the target, a player (a filled dot) in a crosshair, and you bring the hit to
+    where it should go. Lucide's LocateFixed, with the player filled in. */
+export const BaitIcon = createLucideIcon("bait", [
+  ["circle", { cx: "12", cy: "12", r: "7", key: "crosshair" }],
+  ["circle", { cx: "12", cy: "12", r: "2.5", fill: "currentColor", key: "player" }],
+  ["path", { d: "M12 2v3", key: "north" }],
+  ["path", { d: "M12 19v3", key: "south" }],
+  ["path", { d: "M2 12h3", key: "west" }],
+  ["path", { d: "M19 12h3", key: "east" }],
 ]);
 
-/** A knockback tower: the tower's ring with the knockback's chevrons, since you soak it and it
+/** A puddle drop sequence: three spots on the floor (rings), and the curved arrow of the player
+    walking on as they drop them. */
+export const PuddleDropIcon = createLucideIcon("puddle-drop", [
+  ["circle", { cx: "5", cy: "19", r: "2.5", key: "first" }],
+  ["circle", { cx: "12", cy: "15", r: "2.5", key: "second" }],
+  ["circle", { cx: "19", cy: "11", r: "2.5", key: "third" }],
+  ["path", { d: "M3 11C5 5 11 2.5 18 4", key: "walk" }],
+  ["path", { d: "m15 1 3 3-3 3", key: "walk-head" }],
+]);
+
+/** A knockback: a burst at the top left, where it comes from, and the wide arrow that throws the
+    player (a filled dot) down and away. */
+export const KnockbackIcon = createLucideIcon("knockback", [
+  ["path", { d: "M7.14 0.95 7.58 4.05", key: "burst-east" }],
+  ["path", { d: "m3.16 3.16 2.21 2.21", key: "burst-middle" }],
+  ["path", { d: "M0.95 7.14 4.05 7.58", key: "burst-south" }],
+  ["path", { d: "m9.35 6.7 3.53 3.53 2.66-2.65v7.96H7.58l2.65-2.66L6.7 9.35z", key: "push" }],
+  ["circle", { cx: "19", cy: "19", r: "3", fill: "currentColor", key: "player" }],
+]);
+
+/** A tower: a column standing in its ring on the floor. */
+export const TowerIcon = createLucideIcon("tower", [
+  ["ellipse", { cx: "12", cy: "18", rx: "9", ry: "3.5", key: "ring" }],
+  ["path", { d: "M8 18 9.5 4h5L16 18", key: "column" }],
+]);
+
+/** A knockback tower: a tower with a burst splashing out of its ring, since you soak it and it
     knocks you back. */
 export const KnockbackTowerIcon = createLucideIcon("knockback-tower", [
-  ["circle", { cx: "12", cy: "12", r: "6", key: "tower" }],
-  ...PUSHED_OUT,
+  ["ellipse", { cx: "12", cy: "18", rx: "7", ry: "2.5", key: "ring" }],
+  ["path", { d: "M9.5 18 10.5 4h3l1 14", key: "column" }],
+  ["path", { d: "m4.5 16-3-2", key: "splash-west" }],
+  ["path", { d: "m5.5 14.5-2-3.5", key: "splash-northwest" }],
+  ["path", { d: "m7.5 13.5-1-3", key: "splash-north-of-west" }],
+  ["path", { d: "m19.5 16 3-2", key: "splash-east" }],
+  ["path", { d: "m18.5 14.5 2-3.5", key: "splash-northeast" }],
+  ["path", { d: "m16.5 13.5 1-3", key: "splash-north-of-east" }],
 ]);
 
-/** A tower: a player (a filled dot) standing in the spot (a ring). */
-export const TowerIcon = createLucideIcon("tower", [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "spot" }],
+/** A stretch tether: two players (filled dots) joined by a tether, and the arrow of their moving
+    apart to stretch it. */
+export const StretchTetherIcon = createLucideIcon("stretch-tether", [
+  ["circle", { cx: "5", cy: "17", r: "3", fill: "currentColor", key: "west-player" }],
+  ["circle", { cx: "19", cy: "17", r: "3", fill: "currentColor", key: "east-player" }],
+  ["path", { d: "M8 17h8", key: "tether" }],
+  ["path", { d: "M3 7h18", key: "apart" }],
+  ["path", { d: "m6 4-3 3 3 3", key: "apart-west" }],
+  ["path", { d: "m18 4 3 3-3 3", key: "apart-east" }],
+]);
+
+/** The shield of a tank buster: lucide's Shield. */
+const SHIELD: IconNode = [
+  [
+    "path",
+    {
+      d: "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",
+      key: "shield",
+    },
+  ],
+];
+
+/** A tank buster: a player (a filled dot) behind a shield. */
+export const TankBusterIcon = createLucideIcon("tank-buster", [
+  ...SHIELD,
   ["circle", { cx: "12", cy: "12", r: "3", fill: "currentColor", key: "player" }],
 ]);
+
+/** A shared tank buster: the shield, with the middle left open for the number of tanks who share
+    it (MechanicIcon puts it there), as a stack does. */
+export const SharedTankBusterIcon = createLucideIcon("shared-tank-buster", SHIELD);
 
 /** A dodge: a player (a filled dot) stepping aside, an arrow of their own. */
 export const DodgeIcon = createLucideIcon("dodge", [

@@ -525,7 +525,7 @@ export const DRILLS: readonly Drill[] = [
     build:(s, _v, pick)=>assaultScene(buildAssault(s, orderFrom(pick)), s)},
   // One drill for the whole stretch: the weapons spawn at 1:13, Void Stardust runs, then the boss
   // takes the same three weapons. A separate drill for the weapons would show a different set.
-  {id:"m-void", order:4, random:true, variants:["stack","spread"], follows:{variant:"void", pick:"set2"}, phase:P1, time:"1:13 to 1:45", title:"Void Stardust into the second weapons", kind:"later",
+  {id:"m-void", order:4, random:true, variants:["stack","spread"], follows:{variant:"void", pick:"set2"}, phase:P1, time:"1:13 to 1:45", title:"Void Stardust into the second weapons", kind:"puddles",
     build:(s, v, pick)=>voidIntoWeapons(s, v === "spread", buildAssault2(s, orderFrom(pick)))},
   {id:"m-dance", order:8.1, rotate:true, phase:P1, time:"2:31", title:"Dance of Domination: pairs", kind:"pairStack",
     build:s=>({setup:"The seven hits are over and the lines are on the floor. Find the side with no outer line. That open side is new south.",
@@ -582,7 +582,7 @@ export const DRILLS: readonly Drill[] = [
       split:true, boss:BOSS, overlays:[{t:"tower",x:11,y:23},{t:"tower",x:89,y:23},{t:"tower",x:11,y:77},{t:"tower",x:89,y:77}],
       steps:[{q:"Which tower do you take?", z:bySlot(s, {H1:{c:[11,23],r:TOWER_R}, H2:{c:[89,77],r:TOWER_R}}), a:bySlot(s, {H1:"The NW tower, with the MT.", H2:"The SE tower, with the OT."})}],
       rule:"Tethered: get knocked to the other platform. Not tethered: get knocked to the same platform."})},
-  {id:"m-ecl-start", order:26, phase:P4, time:"8:54", title:"Ecliptic Stampede: start", kind:"bait",
+  {id:"m-ecl-start", order:26, phase:P4, time:"8:54", title:"Ecliptic Stampede: start", kind:"puddles",
     build:s=>({setup:"Ecliptic Stampede. The melee and tanks stack under the boss. The ranged and healers stay out to bait the markers.",
       boss:BOSS, overlays:[{t:"mark",x:25,y:25,l:"R1",r:"D"},{t:"mark",x:75,y:25,l:"R2",r:"D"}],
       steps:[{q:"Where do you stand?", z:bySlot(s, {H1:{c:[25,74],r:9}, H2:{c:[75,74],r:9}}), a:bySlot(s, {H1:"Southwest, outside.", H2:"Southeast, outside."})}],

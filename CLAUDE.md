@@ -317,8 +317,9 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   draws one.
 - **Mark**: a player's mark on the arena, or the boss (`BossMark`).
 - **Kind**: what you do in a Practice mechanic: spread, a stack (party, pair, light party or role
-  stack), line stack, bait, dodge, dodge sequence, tower, knockback tower, wild charge, saved for
-  later or knockback (`DrillKind`, `Drill.kind`). `MechanicIcon` draws its icon; the rules for
+  stack), line stack, bait, puddle drop sequence, dodge, dodge sequence, tower, knockback tower,
+  wild charge, saved for later, knockback, stretch tether, tank buster or shared tank buster
+  (`DrillKind`, `Drill.kind`). `MechanicIcon` draws its icon; the rules for
   the icons are at the top of `src/components/icons.tsx`. Not a category.
 - **Category**: an ability category of the timeline (raid damage, tank damage...).
   `CategoryDots` draws its coloured dots.

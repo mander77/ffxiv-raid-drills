@@ -170,10 +170,11 @@ export interface Scene {
 }
 
 /** What you do in a Practice mechanic: spread out, stack (the whole party, in pairs, in light
-    parties, or by role), stack in a line from the boss, bait an attack (bring it to your spot, then
-    step out), dodge, dodge a set order of attacks, take a tower (one that knocks you back, too),
-    line up behind a blocker for a wild charge, act on what the boss showed earlier (saved for
-    later), or get knocked back to your spot. Practice's list of mechanics shows it as an icon. */
+    parties, or by role), stack in a line from the boss, bait an attack (bring it to where it should
+    go), drop puddles in order, dodge, dodge a set order of attacks, take a tower (one that knocks
+    you back, too), line up behind a blocker for a wild charge, act on what the boss showed earlier
+    (saved for later), get knocked back to your spot, stretch a tether, or take a tank buster alone
+    or shared. Practice's list of mechanics shows it as an icon. */
 export type DrillKind =
   | "spread"
   | "stack"
@@ -182,13 +183,17 @@ export type DrillKind =
   | "roleStack"
   | "lineStack"
   | "bait"
+  | "puddles"
   | "dodge"
   | "sequence"
   | "tower"
   | "towerKnockback"
   | "wildCharge"
   | "later"
-  | "knockback";
+  | "knockback"
+  | "stretchTether"
+  | "tankBuster"
+  | "sharedTankBuster";
 
 export interface Drill {
   id: string;

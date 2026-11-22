@@ -351,9 +351,25 @@ Do not propose these again unless the owner brings them up.
 - Each Practice mechanic has a kind (`Drill.kind`): what you do in it. Its square in the list
   shows the kind's icon, and the mechanic's panel names it. The owner chose the kinds and the icons
   with Claude:
-  - The icons follow rules (the owner's): a ring is a spot, a filled dot a player, chevrons a
-    hit or push from the boss, arrows a move you make, a bar a blocker, a clock timing. The full
+  - The icons follow rules (the owner's): a ring is a spot, a tower a column standing in its
+    ring, a filled dot a player, chevrons a hit from the boss, arrows a move you make, a burst and a
+    wide hollow arrow a knockback, a bar a blocker, a shield a tank buster, a clock timing. The full
     list, with how to draw a new icon, is at the top of src/components/icons.tsx.
+  - The owner chose several icons from a generated sheet of extra mechanic icons, redrawn in
+    lucide's line style: a bait is a player in a crosshair (you are the target), and a puddle drop
+    sequence is three puddles with the curved arrow of the player walking on. A knockback got a
+    rule of its own (owner's choice), since neither an arrow (your own move) nor chevrons (a hit)
+    said it: a burst at the top left, a wide arrow down to the player at the bottom right. A tower
+    rises out of its ring, and a knockback tower's burst splashes out of the ring, like water. A
+    tank buster is a player behind a shield; a shared tank buster puts the stack's number 2 in the
+    shield, a little smaller, since the shield's middle is narrower. The owner turned down the
+    sheet's tether (no drill needs it), its hide behind cover (the fight has no hide kind), its safe
+    side and its tank tower.
+  - Void Stardust and Ecliptic Stampede: start are puddle drop sequences (owner's choice). Saved for
+    later keeps its icon and its kind, though no drill uses it now.
+  - Stretch tether, tank buster and shared tank buster are kinds with no drill yet, like Tower: the
+    owner wants them ready for later roles. Arena Split's tethers stretch, but its first towers stay
+    knockback towers, because you click a tower there.
   - Stacks share one icon, four arrows from the corners coming together, with the number of
     players in the middle, in Source Sans 3 bold (Saira Condensed's R looked like an A) and its own
     colour, so it stands out from the arrows: bright amber on the dark square in light mode, deep
@@ -365,7 +381,7 @@ Do not propose these again unless the owner brings them up.
     every Meteorain stack is one. The fight has no hide kind.
   - Assault Evolved and the six Ultimate Trophy Weapons are a dodge sequence (owner's name): the
     boss goes through the weapons in order. Saved for later is only for a mechanic with a
-    look-ahead step (Void Stardust), as the site uses the words.
+    look-ahead step, as the site uses the words.
   - Arena Split: line up is a knockback to your platform. Arena Split's first towers are knockback
     towers: you soak them, and they knock you back. Tower stays for a plain tower, a common
     mechanic in other fights.
