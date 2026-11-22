@@ -67,7 +67,7 @@ The data for the drills and the questions is in `src/data/`. Each item has a `bu
 3. Run `npm run typecheck` and `npm test`.
 4. Run `npm run dev` and try the drill.
 5. Commit the change, then run `sh scripts/publish.sh` to push the branch.
-6. Open the Cloudflare preview of the branch at `https://<branch>.test.ffxiv-raid-drills.app/`. If it is correct, merge the branch into `main` and publish again.
+6. Open the Cloudflare preview of the branch at `https://<branch>.ffxiv-raid-drills.app/`. If it is correct, merge the branch into `main` and publish again.
 
 ## Publish
 

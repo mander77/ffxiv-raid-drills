@@ -17,8 +17,7 @@ tokens or account details.
 - The site was rebuilt in React, Tailwind CSS and shadcn/ui in five steps (issues #18 to #22) on
   a `rebuild` branch, which merged into `main` when every tab was back. Git history on `main`
   keeps the old code (`src/views/`).
-- Branch previews: `https://<branch>.test.ffxiv-raid-drills.app/`. The bare `test.` host does not
-  load.
+- Branch previews: `https://<branch>.ffxiv-raid-drills.app/`, with "/" in the branch name as "-".
 - Hosting: Cloudflare Workers Builds on the owner's personal Cloudflare account. A push to
   `main` deploys the live site only when it changes the app, not for only docs, tests or tooling
   (build watch paths). Branch previews come from GitHub Actions (`preview.yml`): when a branch
@@ -192,7 +191,7 @@ These steps put a branch on `main`, the live site.
    and the tests, then pushes the branch as `mander77`. The push starts CI on GitHub.
 4. If the branch changed the app, wait for CI to pass, then ask the owner to approve the
    waiting Preview run on GitHub. Then run
-   `sh scripts/wait-deploy.sh https://<branch>.test.ffxiv-raid-drills.app index-<hash>.js` and
+   `sh scripts/wait-deploy.sh https://<branch>.ffxiv-raid-drills.app index-<hash>.js` and
    test the preview in a browser. A branch with only docs, tests or tooling gets no preview: skip
    this step.
 5. In the main checkout, make sure that it is on `main` and has no changes. Run

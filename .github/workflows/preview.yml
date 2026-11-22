@@ -1,4 +1,4 @@
-# A Cloudflare preview of a branch, at <branch>.test.ffxiv-raid-drills.app.
+# A Cloudflare preview of a branch, at <branch>.ffxiv-raid-drills.app.
 # It runs only when a push changes the app: GitHub's path filter skips the workflow when every
 # changed file is in the list below. The list must match the exclude paths of Cloudflare's build
 # watch paths for main (docs/decisions.md, "Hosting").
@@ -63,4 +63,4 @@ jobs:
         run: |
           name=$(printf '%s' "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g')
           npx wrangler preview --name "$name" --message "$GITHUB_SHA"
-          echo "url=https://$name.test.ffxiv-raid-drills.app/" >> "$GITHUB_OUTPUT"
+          echo "url=https://$name.ffxiv-raid-drills.app/" >> "$GITHUB_OUTPUT"

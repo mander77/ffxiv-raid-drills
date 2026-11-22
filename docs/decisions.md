@@ -450,7 +450,7 @@ static wins.
 - `wrangler.jsonc` needs `"previews": {}`, or the preview build fails. It also sets
   `not_found_handling` to `single-page-application`, so deep links load.
 - `vite.config.ts` uses base `/`. The base `./` breaks deep paths.
-- Custom domains: `ffxiv-raid-drills.app` (live) and `<branch>.test.ffxiv-raid-drills.app`
+- Custom domains: `ffxiv-raid-drills.app` (live) and `<branch>.ffxiv-raid-drills.app`
   (previews).
 - The Cloudflare check run on GitHub has no log text. Read the state with
   `gh api repos/mander77/ffxiv-raid-drills/commits/<sha>/check-runs`. The owner can paste logs from
@@ -509,7 +509,7 @@ static wins.
   GitHub has no path filter for a single job, only for a whole workflow, and a skipped workflow
   leaves its checks pending, so the preview is a workflow of its own and CI has no filter. The
   job waits for the owner's approval, then runs `npx wrangler preview --name <branch>` (with "/"
-  as "-"), at `<branch>.test.ffxiv-raid-drills.app`. It does not wait for CI, so look at CI
+  as "-"), at `<branch>.ffxiv-raid-drills.app`. It does not wait for CI, so look at CI
   before you approve. Pushes to `main`, pull requests and Dependabot get no preview. A pull
   request from a fork never gets the token.
 - The GitHub environment "preview" holds the token and asks for the owner's approval on each

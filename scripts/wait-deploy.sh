@@ -3,7 +3,7 @@
 # Get the name from `npm run build`: it is the file in dist/assets that ends in .js.
 # Checks every 10 seconds, for up to 10 minutes.
 #
-#   sh scripts/wait-deploy.sh https://my-branch.test.ffxiv-raid-drills.app index-AbCd1234.js
+#   sh scripts/wait-deploy.sh https://my-branch.ffxiv-raid-drills.app index-AbCd1234.js
 #   sh scripts/wait-deploy.sh https://ffxiv-raid-drills.app index-AbCd1234.js
 set -u
 base=$1
