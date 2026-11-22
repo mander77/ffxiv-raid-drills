@@ -1,6 +1,5 @@
 import { type RefCallback, type RefObject, useRef, useState } from "react";
 import { CASTS_AHEAD, CASTS_PAST, CASTS_SOON, type CastMark, castPositions, castsAhead, hitsGoneOff } from "../lib/fight";
-import { type LineType, shows } from "../lib/fightLine";
 import { useFightFrame } from "./useFightFrame";
 import { type DragHandlers, useLineDrag } from "./useLineDrag";
 
@@ -44,13 +43,8 @@ export interface CastTimeline {
     element through its ref, marks it past, soon or later (data-when), fades it out once it went
     off, and writes its seconds to go into its [data-secs] element. React draws again only when a
     cast comes into view or leaves it. When a hit goes off in a playing fight, the now mark flashes
-    in the hit's category colour and its square pops. `types` keeps only the casts of those
-    categories (see shows); with none, every cast shows. FightLine's moving line uses it. */
-export function useCastTimeline(
-  { axis, nowAt, end, gap }: CastTimelineLayout,
-  controls?: CastControls,
-  types?: readonly LineType[],
-): CastTimeline {
+    in the hit's category colour and its square pops. CastList uses it. */
+export function useCastTimeline({ axis, nowAt, end, gap }: CastTimelineLayout, controls?: CastControls): CastTimeline {
   const box = useRef<HTMLDivElement>(null);
   /** The elements by cast, for the frame loop to move. */
   const items = useRef(new Map<number, HTMLLIElement>());
@@ -71,7 +65,7 @@ export function useCastTimeline(
     // now mark, so you can drag back to them.
     const dragging = dragFrom.current !== null;
     const past = dragging ? Math.max(CASTS_PAST, nowAt / perSecond) : CASTS_PAST;
-    const now = castsAhead(s, past).filter((m) => shows(m, types));
+    const now = castsAhead(s, past);
     // Draw again only when the casts in view change.
     setMarks((was) => (was.length === now.length && was.every((m, k) => m.i === now[k].i) ? was : now));
     const places = castPositions(now, size - end, nowAt, gap);

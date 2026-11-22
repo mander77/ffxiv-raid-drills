@@ -1,5 +1,5 @@
 // The site in every browser: each tab opens, the header scrolls away on a phone, a Learn card and a Timeline card can be answered,
-// the Group switch changes the slot, a click on Practice's fight line opens a mechanic, and Pressure runs a quick round and a shared link to the player.
+// the Group switch changes the slot, a click on Practice's list of mechanics opens one, and Pressure runs a quick round and a shared link to the player.
 import { expect, type Locator, test } from "@playwright/test";
 import { TABS } from "../src/tabs";
 
@@ -150,7 +150,7 @@ for (const [screen, width] of [
   ["a wide screen", 1280],
   ["a phone", 375],
 ] as const) {
-  test(`Practice on ${screen}: a click on the fight line opens a mechanic and leaves the line still`, async ({ page }) => {
+  test(`Practice on ${screen}: a click on the list of mechanics opens one and leaves the list still`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/practice/m-assault/K7Q2");
     // One line shows at a time: beside the arena on a wide screen, sideways under it on a phone.

@@ -114,7 +114,9 @@ src/components/      React components: Header, PageContainer, SlotSwitch, ShareB
                      says the link was copied), TabNav, ThemeProvider and ModeToggle (light and
                      dark mode),
                      CategoryDots and CategoryKey (the ability category colours), KindIcon (the
-                     icon of a mechanic's kind), RoundDone,
+                     icon of a mechanic's kind), CastSquare (a row's square on Pressure's casts
+                     coming up and Practice's list: filled for a hit, outlined for the boss's
+                     cast, ink with its kind's icon for a mechanic), RoundDone,
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
                      StepChips, SetupText, Tally, ChipRow, HudPrompt
 src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, clicks), Shape (one
@@ -126,22 +128,15 @@ src/components/ui/   shadcn/ui components, as the shadcn CLI writes them
 src/pages/           React pages, one per route: HomePage (/), LearnPage (/learn), PracticePage
                      (/practice), TimelinePage (/timeline), PressurePage (/pressure),
                      CheatSheetPage (/sheet)
-src/components/fight-line/  the fight line, on Practice and Pressure: FightLine (one component, set
-                     up per page: down the box or sideways, moving with the fight clock or
-                     not, and the types of rows it shows), MovingLine (the casts coming up,
-                     WoW-style squares rising to a now mark), StillLine (the whole fight as a
-                     list under its phases, which you scroll; a Practice mechanic is a link),
-                     CastSquare (a row's
-                     square: filled for a hit, outlined for the boss's cast, ink with the icon of
-                     its kind for a Practice mechanic), CastKey (its key) and CastButton (a cast you click to go to it,
-                     in the player)
-src/lib/fightLine.ts the fight line's rows: LineType, shows (which rows a line shows), FIGHT_ROWS
 src/components/practice/  Practice: DrillScreen (one drill's screen, in the layout of Pressure's
-                     player: clicks, Show me, the prompt, the panel, the bar and the fight line)
+                     player: clicks, Show me, the prompt, the panel, the bar and the list),
+                     MechanicList (the mechanics under their phases: a click opens one)
 src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep, statusAfter, bossFor
 src/components/pressure/  Pressure: PressureStart, QuickRound, FightScreen (the run and the player:
                      frame loop, clicks, keys), FightArena, CastBar, FightPrompt, FightHud (the
-                     two together, in the run), FightPanel, FightPlayBar, FightSettings (the Settings button
+                     two together, in the run), CastList (the casts coming up, WoW-style squares
+                     rising to a now mark, down the box or sideways), CastKey (its key) and
+                     CastButton (a cast you click to go to it, in the player), FightPanel, FightPlayBar, FightSettings (the Settings button
                      and its sheet of pattern picks),
                      RunScore and WatchDone (the end screens)
 src/lib/fight.ts     the fight clock's rules as plain functions: newFightState, tickFight, seek,
@@ -150,8 +145,8 @@ src/lib/pressure.ts  the quick round's rules (weighted cards, the timer) and pla
 src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round), QuestionCard
                      (answers, previews, Lock in, keys, the timer of a timed card), TimerBar,
                      TimelinePicture
-src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useCastTimeline (the casts coming up, moving with the fight clock), useLineDrag (drag a
-                     fight line), useFightFrame (run code on
+src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useCastTimeline (the casts coming up, moving with the fight clock), useLineDrag (drag the
+                     casts coming up, or the list of mechanics), useFightFrame (run code on
                      each frame of the fight clock), useMediaQuery, useFitToScreen, useTheme, useSectionInView (the section you have scrolled to)
 src/lib/             cn() for class names
 scripts/             setup.mjs (npm run setup), publish.mjs (npm run publish), wait-deploy.mjs
@@ -308,7 +303,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   draws one.
 - **Mark**: a player's mark on the arena, or the boss (`BossMark`).
 - **Kind**: what you do in a Practice mechanic: spread, stack, pairs, bait, dodge, tower, hide,
-  memory or position (`DrillKind`, `Drill.kind`). `KindIcon` draws its icon. Not a category.
+  dodge sequence, saved for later or position (`DrillKind`, `Drill.kind`). `KindIcon` draws its icon. Not a category.
 - **Category**: an ability category of the timeline (raid damage, tank damage...).
   `CategoryDots` draws its coloured dots.
 - **Picture**: an arena picture with its data (`Picture`, `LEARN_PICTURES`, `LearnPicture`).
@@ -323,10 +318,9 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Pick**: one random part of the full fight, such as the first weapon order. `Picks` are the
   parts a fight has; `Choices` are your settings, a pick or Random each (`CHOICE_ROWS`). The
   player's address calls them picks.
-- **Fight line**: the fight drawn as squares on a line (`FightLine`). On Pressure it moves with the
-  fight clock (the casts coming up, `MovingLine`); on Practice it stands still, a list you
-  scroll, and a click opens a mechanic (`StillLine`). Its **types** (`LineType`) are the ability categories and "practice",
-  the Practice mechanics; with no types it shows every row.
+- **Casts coming up**: Pressure's line of casts that moves with the fight clock (`CastList`).
+  Practice's **list of mechanics** (`MechanicList`) looks like it but stands still: it is for
+  picking a mechanic. They share the square (`CastSquare`) and the drag (`useLineDrag`).
 
 ## Rules for the content
 

@@ -1,4 +1,4 @@
-import { Brain, Castle, Expand, EyeOff, Footprints, type LucideIcon, MapPin, Shrink, Target, Users } from "lucide-react";
+import { Castle, Expand, EyeOff, Footprints, Hourglass, ListOrdered, type LucideIcon, MapPin, Shrink, Target, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DrillKind } from "../types";
 
@@ -9,9 +9,10 @@ export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon }> = {
   pairs: { name: "Pairs", icon: Users },
   bait: { name: "Bait", icon: Target },
   dodge: { name: "Dodge", icon: Footprints },
+  sequence: { name: "Dodge sequence", icon: ListOrdered },
   tower: { name: "Tower", icon: Castle },
   hide: { name: "Hide", icon: EyeOff },
-  memory: { name: "Memory", icon: Brain },
+  later: { name: "Saved for later", icon: Hourglass },
   position: { name: "Position", icon: MapPin },
 };
 

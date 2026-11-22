@@ -1,10 +1,9 @@
 import { cn } from "@/lib/utils";
 import { type CastControls, useCastTimeline } from "../../hooks/useCastTimeline";
 import { CASTS_AHEAD, type CastMark } from "../../lib/fight";
-import type { LineType } from "../../lib/fightLine";
+import { CastSquare } from "../CastSquare";
 import { CastButton } from "./CastButton";
 import { CastKey } from "./CastKey";
-import { CastSquare } from "./CastSquare";
 
 /** Where the now mark sits from the start of the box, how far the line goes on before it, the
     room after the line at the end, and how far apart two casts stay at least, in pixels, down the
@@ -55,24 +54,26 @@ const LOOK = {
   },
 } as const;
 
-export interface MovingLineProps {
+export interface CastListProps {
+  /** Which way the line runs: "y" down the box, "x" across it. */
   axis: "x" | "y";
-  types?: readonly LineType[];
+  /** The player: click a cast to go to it, drag the line to move the clock. The run has none. */
   controls?: CastControls;
   className?: string;
 }
 
-/** The fight line that moves with the fight clock: the casts coming up, in the style of WoW's
+/** The casts coming up, on a line that moves with the fight clock, in the style of WoW's
     boss ability timeline. Each cast is a square in its category's colour with its seconds inside
     and its name beside it ("y") or under it ("x"). The squares move toward the now mark as the
     clock runs; the gaps between them show the time between casts, and in their last seconds a
     square grows. A hit (damage going off) is a filled square with its name in bold; the boss's own
     cast is outlined. useCastTimeline moves it. In the player you can click a cast to go to it, or
-    drag the line to move the clock. FightLine draws it. */
-export function MovingLine({ axis, types, controls, className }: MovingLineProps) {
+    drag the line to move the clock. Down the box ("y") beside the arena, or across
+    it ("x") under the arena on a narrow screen. */
+export function CastList({ axis, controls, className }: CastListProps) {
   const size = SIZES[axis];
   const look = LOOK[axis];
-  const { box, nowMark, marks, itemRef, drag } = useCastTimeline({ axis, nowAt: size.now, end: size.end, gap: size.gap }, controls, types);
+  const { box, nowMark, marks, itemRef, drag } = useCastTimeline({ axis, nowAt: size.now, end: size.end, gap: size.gap }, controls);
   // The line, the now mark and the ticks sit by the box's size, in CSS.
   const along = (from: number, to: number) => (axis === "y" ? { top: from, bottom: to } : { left: from, right: to });
   const at = (px: string) => (axis === "y" ? { top: px } : { left: px });

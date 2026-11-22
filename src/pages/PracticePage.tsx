@@ -1,7 +1,7 @@
 // The Practice page (/practice/<mechanic>/<code>): one mechanic at a time, with no timer. Click where you
 // stand, and the arena shows the correct area. The code names the mechanic's pattern, so a link opens
-// the same one. The screen has the layout of Pressure's player, and its fight line (Practice
-// mechanics only) opens another mechanic.
+// the same one. The screen has the layout of Pressure's player, and its list of mechanics
+// opens another one.
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router";
 import { PageContainer } from "../components/PageContainer";

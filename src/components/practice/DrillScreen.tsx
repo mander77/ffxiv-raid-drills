@@ -4,22 +4,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
-import type { LineType } from "../../lib/fightLine";
 import { answerStep, type Pattern, type StepStatus, statusAfter } from "../../lib/practice";
 import { cn } from "../../lib/utils";
 import type { Drill, Point, StepResult } from "../../types";
 import { ArenaFrame, type ArenaFrameProps } from "../arena/ArenaFrame";
 import { LiveArena } from "../arena/LiveArena";
-import { FightLine } from "../fight-line/FightLine";
 import { HudPrompt } from "../HudPrompt";
 import { KINDS, KindIcon } from "../KindIcon";
 import { LastAnswer } from "../LastAnswer";
 import { RuleBox } from "../RuleBox";
 import { SetupText } from "../SetupText";
 import { StepChips } from "../StepChips";
-
-/** The fight line on Practice shows only the Practice mechanics. */
-const PRACTICE: readonly LineType[] = ["practice"];
+import { MechanicList } from "./MechanicList";
 
 export interface DrillScreenProps {
   item: Drill;
@@ -40,14 +36,14 @@ export interface DrillScreenProps {
   onNewPattern: () => void;
   /** Draw the mechanic again, so its weapons appear one at a time again. */
   onReplaySpawns: () => void;
-  /** Open another mechanic, from the fight line. */
+  /** Open another mechanic, from the list of mechanics. */
   onPick: (drill: string) => void;
 }
 
 /** The screen of one Practice mechanic (a drill): click where you stand on the arena, one step at
     a time. It has the layout of Pressure's player. On a wide screen: on the left, the question with
     Show me (or why a spot was incorrect, or the result) over the mechanic, its steps, the last
-    answer and, at the end, the rule; on the right, a bar over the fight line, where you pick
+    answer and, at the end, the rule; on the right, a bar over the list of mechanics, where you pick
     another mechanic. On a narrow screen, the same in one column: the left side over the arena, the
     right side under it, with the line sideways. */
 export function DrillScreen({
@@ -71,8 +67,8 @@ export function DrillScreen({
   const [shown, setShown] = useState(false);
   /** Show me was used, so this try does not count in your score: it was learning, not a test. */
   const [helped, setHelped] = useState(false);
-  // A new try starts fresh. The screen is not given a key for it, so the fight line stays and
-  // slides to the next mechanic; its state is reset as react.dev shows for a prop that changes.
+  // A new try starts fresh. The screen is not given a key for it, so the list of mechanics stays
+  // where it is, under your pointer; the screen's state is reset as react.dev shows for a prop that changes.
   const [shownTry, setShownTry] = useState(tryKey);
   if (shownTry !== tryKey) {
     setShownTry(tryKey);
@@ -175,7 +171,7 @@ export function DrillScreen({
         </p>
         <h2 className="font-display text-xl tracking-wide">{item.title}</h2>
       </div>
-      {/* What you do, with the icon the fight line shows for it. */}
+      {/* What you do, with the icon the list of mechanics shows for it. */}
       <Badge variant="secondary">
         <KindIcon kind={item.kind} />
         {KINDS[item.kind].name}
@@ -192,7 +188,7 @@ export function DrillScreen({
       )}
     </section>
   );
-  /** The bar over the fight line, in the place and the look of Pressure's bar. */
+  /** The bar over the list of mechanics, in the place and the look of Pressure's bar. */
   const bar = (
     <div className="flex items-center gap-2 rounded-lg border bg-card py-1.5 pr-1.5 pl-3">
       <span className="flex-1 text-sm text-muted-foreground">
@@ -221,7 +217,7 @@ export function DrillScreen({
         beside: (
           <div className="flex w-80 flex-col gap-2">
             {bar}
-            <FightLine axis="y" types={PRACTICE} current={item.id} onPick={onPick} label="Mechanics" className="flex-1" />
+            <MechanicList axis="y" current={item.id} onPick={onPick} className="flex-1" />
           </div>
         ),
         className: "mx-0 ml-68 mr-80 min-w-0 flex-1",
@@ -236,7 +232,7 @@ export function DrillScreen({
         under: (
           <div className="space-y-2">
             {bar}
-            <FightLine axis="x" types={PRACTICE} current={item.id} onPick={onPick} label="Mechanics" />
+            <MechanicList axis="x" current={item.id} onPick={onPick} />
           </div>
         ),
         fill: true,

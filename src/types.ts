@@ -134,9 +134,10 @@ export interface Scene {
 }
 
 /** What you do in a Practice mechanic: spread out, stack, stand in pairs, bait an attack, dodge,
-    take a tower, hide behind something, remember what the boss showed earlier, or go to your set
-    spot. The fight line shows it as an icon. */
-export type DrillKind = "spread" | "stack" | "pairs" | "bait" | "dodge" | "tower" | "hide" | "memory" | "position";
+    take a tower, hide behind something, dodge a set order of attacks, act on what the boss showed
+    earlier (saved for later), or go to your set spot. Practice's list of mechanics shows it as an
+    icon. */
+export type DrillKind = "spread" | "stack" | "pairs" | "bait" | "dodge" | "tower" | "hide" | "sequence" | "later" | "position";
 
 export interface Drill {
   id: string;

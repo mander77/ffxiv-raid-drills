@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 // Practice: a mechanic opens with a pattern code in the address, a click answers, Show me helps
 // without counting, and an incorrect spot waits for Next step.
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, assert, beforeAll, beforeEach, test } from "vitest";
@@ -96,4 +96,12 @@ test("an incorrect spot says so and counts, and Again starts over", async () => 
   await user.click(screen.getAllByRole("button", { name: "Again" })[0]);
   assert.isNull(arena().querySelector(".pick"), "a fresh try");
   assert.equal(where(), `/practice/${FIRST.id}/${CODE}`, "the same pattern");
+});
+
+test("the mechanic's panel names what you do in it, and the list opens another mechanic with a new code", async () => {
+  open(`/practice/${FIRST.id}/${CODE}`);
+  assert.ok(within(screen.getByRole("region", { name: "The mechanic" })).getByText("Spread"));
+  const second = [...DRILLS].sort((a, b) => a.order - b.order)[1];
+  await userEvent.setup().click(screen.getAllByRole("link", { name: new RegExp(`${second.title}$`) })[0]);
+  assert.match(where() ?? "", new RegExp(`^/practice/${second.id}/[2-9A-HJ-NP-Z]{4}$`));
 });
