@@ -134,11 +134,9 @@ function Glyph({ t }: GlyphProps) {
       )}
       {t === "scythe" && (
         <>
-          {/* The blade at the bottom, as it rests in the floor. */}
-          <line className="glyph-line" x1="-2" y1="-4.2" x2="-2" y2="4" />
-          <path className="glyph" d="M-2 4.2 Q2.8 4.8 4.4 0.8 Q1.6 2.8 -2 2.7 Z" />
-          {/* A small nub at the butt, on the other side of the handle from the blade. */}
-          <path className="glyph" d="M-2 2.9 L-4.2 4.3 L-2 4.3 Z" />
+          {/* A long handle with a gentle bend, and a curved blade sweeping down from its top. */}
+          <path className="glyph-line" d="M1.4 4.8 Q-0.4 0.6 0.2 -4.4" />
+          <path className="glyph" d="M0.4 -4.7 Q-3.8 -5.3 -5 -1.2 Q-3.3 -3.3 0 -3.3 Z" />
         </>
       )}
     </>

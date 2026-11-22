@@ -38,6 +38,15 @@ test("the scythe's blade reaches across the green safe ring, with its icon in th
   assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(50 21) scale(1)");
 });
 
+test("the scythe's icon is a curved handle with a curved blade, and no fill on the handle", () => {
+  const g = draw({ t: "scythe", x: 50, y: 21, ux: 1, uy: 0, dx: 0, dy: -1 });
+  // The icon is drawn twice: the sand outline, then the icon itself.
+  const handles = g.querySelectorAll(".icon path.glyph-line");
+  assert.equal(handles.length, 2);
+  assert.match(handles[0]?.getAttribute("d") ?? "", /Q/);
+  assert.match(g.querySelector(".icon path.glyph")?.getAttribute("d") ?? "", /Q.*Q/);
+});
+
 test("a held weapon is its icon alone, smaller, east of the point", () => {
   const g = draw({ t: "axe", x: 63, y: 50, ux: 1, uy: 0, held: true });
   assert.isNull(g.querySelector(".rest"));

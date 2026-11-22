@@ -226,6 +226,7 @@
     fill: var(--arena-void);
   }
   .arena .wpn .glyph-line {
+    fill: none;
     stroke: var(--arena-void);
     stroke-width: 1.1;
     stroke-linecap: round;
