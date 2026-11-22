@@ -311,6 +311,10 @@ Do not propose these again unless the owner brings them up.
 
 ### Learn
 
+- On a wide screen a card with an arena picture has Practice's layout (owner's choice): the
+  question and the answers in a 20rem column against the arena's floor, lined up with its top, so
+  the arena takes the height the question took above it. The column scrolls when a long rule does
+  not fit. A phone, and a Timeline card, keep the question above and the picture beside or above.
 - Pick an answer (click or a number key) to preview it in blue on the picture, then Lock in (or
   Enter). The preview also draws the attack that the answer assumes, because the quiz tests what
   the boss does, not only where you stand.

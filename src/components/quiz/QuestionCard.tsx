@@ -2,8 +2,10 @@ import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from "rea
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { LEARN_PICTURES } from "../../data/pictures";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { timerOf } from "../../lib/pressure";
 import type { Option, QuizItem, Slot } from "../../types";
 import { shuffle } from "../../util";
@@ -109,35 +111,116 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
     return () => window.removeEventListener("keydown", listener);
   }, []);
 
-  const picture = fig ? (
+  /** A wide screen (lg, 1024 px and up): a card with an arena picture has the layout of Practice. */
+  const wide = useMediaQuery("(min-width: 1024px)");
+  const pictureLabel = answered
+    ? "Arena picture. The green area shows the answer."
+    : preview && shown !== null
+      ? `Arena picture of answer ${shown + 1}.`
+      : "Arena picture of the setup.";
+  const arena = fig && <LearnPicture fig={fig} answered={answered} preview={preview} label={pictureLabel} className="h-auto w-full" />;
+  const note = answered && fig?.note;
+
+  const okPick = pick !== null && opts[pick].ok === true;
+  const prompt = <h2 className="text-xl font-semibold text-balance">{q.prompt}</h2>;
+  const answers = (
+    <div className="space-y-4">
+      <fieldset className="space-y-2">
+        <legend className="sr-only">Answers</legend>
+        {opts.map((o, i) => (
+          <AnswerButton
+            key={o.t}
+            n={i + 1}
+            text={o.t}
+            state={!answered ? (previews && sel === i ? "picked" : "open") : o.ok ? "correct" : i === pick ? "incorrect" : "other"}
+            why={answered && o.ok ? q.why : undefined}
+            pressed={previews && !answered ? sel === i : undefined}
+            onClick={() => handleOptionClick(i)}
+            onPoint={(on) => previews && !answered && setHover(on ? i : null)}
+          />
+        ))}
+      </fieldset>
+
+      {answered ? (
+        <>
+          <p className={cn(slow ? "font-medium text-warning-foreground" : "sr-only")} role="status">
+            {slow ? "Too slow: the time ran out." : okPick ? "Correct." : "Not this one."}
+          </p>
+          <RuleBox rule={q.rule} />
+          {q.src && <p className="text-xs text-muted-foreground">Source: {q.src}</p>}
+          <ActionBar>
+            <Button ref={next} onClick={onNext}>
+              Next
+            </Button>
+            <KeyHint>
+              <Kbd>Enter</Kbd> next
+            </KeyHint>
+          </ActionBar>
+        </>
+      ) : previews ? (
+        // On a phone the answers sit under the picture, so Lock in stays in a bar at the bottom.
+        <ActionBar pinned={sel !== null}>
+          <Button disabled={sel === null} onClick={() => sel !== null && lockIn(sel)}>
+            Lock in answer
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            Pick an answer to see it on the picture.
+            <KeyHint>
+              {" "}
+              <Kbd>1</Kbd> to <Kbd>{opts.length}</Kbd> pick, <Kbd>Enter</Kbd> lock in.
+            </KeyHint>
+          </p>
+        </ActionBar>
+      ) : (
+        <KeyHint>
+          Press <Kbd>1</Kbd> to <Kbd>{opts.length}</Kbd> or click an answer.
+        </KeyHint>
+      )}
+    </div>
+  );
+
+  // A wide screen, with an arena picture: the question and the answers in a column against the
+  // arena's floor, lined up with its top and bottom, as on Practice; it scrolls when a long rule
+  // does not fit. The arena gets the height the question took above it.
+  if (wide && arena) {
+    return (
+      <div className="space-y-4">
+        {top}
+        {timer && <TimerBar timer={timer} stopped={answered} onTimeout={handleTimeout} />}
+        <div className="flex justify-center">
+          <ArenaFrame
+            before={
+              <ScrollArea className="w-80">
+                <div className="space-y-4">
+                  {prompt}
+                  {answers}
+                  {note && <p className="text-sm text-muted-foreground">{note}</p>}
+                </div>
+              </ScrollArea>
+            }
+            className="mx-0 ml-80 min-w-0 flex-1"
+          >
+            <figure>{arena}</figure>
+          </ArenaFrame>
+        </div>
+      </div>
+    );
+  }
+
+  const picture = arena ? (
     <figure>
-      <ArenaFrame>
-        <LearnPicture
-          fig={fig}
-          answered={answered}
-          preview={preview}
-          label={
-            answered
-              ? "Arena picture. The green area shows the answer."
-              : preview && shown !== null
-                ? `Arena picture of answer ${shown + 1}.`
-                : "Arena picture of the setup."
-          }
-          className="h-auto w-full"
-        />
-      </ArenaFrame>
-      {answered && fig.note && <figcaption className="mt-2 text-sm text-muted-foreground">{fig.note}</figcaption>}
+      <ArenaFrame>{arena}</ArenaFrame>
+      {note && <figcaption className="mt-2 text-sm text-muted-foreground">{note}</figcaption>}
     </figure>
   ) : row !== null ? (
     <TimelinePicture row={row} answered={answered} correctName={correctName} />
   ) : null;
 
-  const okPick = pick !== null && opts[pick].ok === true;
   return (
     <div className="space-y-4 max-md:pb-20">
       {top}
       {timer && <TimerBar timer={timer} stopped={answered} onTimeout={handleTimeout} />}
-      <h2 className="text-xl font-semibold text-balance">{q.prompt}</h2>
+      {prompt}
       {/* A Learn card's arena picture gets the wide column; a Timeline card's picture the narrow one. */}
       <div
         className={cn(
@@ -147,59 +230,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
       >
         {/* The picture sits beside the answers, on the right. On a phone it goes above them. */}
         {picture && <div className="md:order-last">{picture}</div>}
-        <div className="space-y-4">
-          <fieldset className="space-y-2">
-            <legend className="sr-only">Answers</legend>
-            {opts.map((o, i) => (
-              <AnswerButton
-                key={o.t}
-                n={i + 1}
-                text={o.t}
-                state={!answered ? (previews && sel === i ? "picked" : "open") : o.ok ? "correct" : i === pick ? "incorrect" : "other"}
-                why={answered && o.ok ? q.why : undefined}
-                pressed={previews && !answered ? sel === i : undefined}
-                onClick={() => handleOptionClick(i)}
-                onPoint={(on) => previews && !answered && setHover(on ? i : null)}
-              />
-            ))}
-          </fieldset>
-
-          {answered ? (
-            <>
-              <p className={cn(slow ? "font-medium text-warning-foreground" : "sr-only")} role="status">
-                {slow ? "Too slow: the time ran out." : okPick ? "Correct." : "Not this one."}
-              </p>
-              <RuleBox rule={q.rule} />
-              {q.src && <p className="text-xs text-muted-foreground">Source: {q.src}</p>}
-              <ActionBar>
-                <Button ref={next} onClick={onNext}>
-                  Next
-                </Button>
-                <KeyHint>
-                  <Kbd>Enter</Kbd> next
-                </KeyHint>
-              </ActionBar>
-            </>
-          ) : previews ? (
-            // On a phone the answers sit under the picture, so Lock in stays in a bar at the bottom.
-            <ActionBar pinned={sel !== null}>
-              <Button disabled={sel === null} onClick={() => sel !== null && lockIn(sel)}>
-                Lock in answer
-              </Button>
-              <p className="text-sm text-muted-foreground">
-                Pick an answer to see it on the picture.
-                <KeyHint>
-                  {" "}
-                  <Kbd>1</Kbd> to <Kbd>{opts.length}</Kbd> pick, <Kbd>Enter</Kbd> lock in.
-                </KeyHint>
-              </p>
-            </ActionBar>
-          ) : (
-            <KeyHint>
-              Press <Kbd>1</Kbd> to <Kbd>{opts.length}</Kbd> or click an answer.
-            </KeyHint>
-          )}
-        </div>
+        {answers}
       </div>
     </div>
   );
