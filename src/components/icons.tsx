@@ -19,7 +19,8 @@
 // 4. Arrows are a move the players make themselves (spread, dodge, a stack coming together, puddles
 //    dropped in a row, a tether pulled apart).
 // 5. A knockback is a burst (where it comes from) and a wide, hollow arrow (the push), never a thin
-//    arrow: you do not move yourself. A knockback tower's burst splashes out of its ring.
+//    arrow: you do not move yourself. A knockback tower has the game's own sign instead: chevrons
+//    pointing out of its ring.
 // 6. A bar is a blocker that takes a hit for the others: a tank, a rock, a wall (a wild charge).
 // 7. A shield is a tank buster.
 // 8. A clock is timing: something you see now and act on later (saved for later).
@@ -172,17 +173,14 @@ export const TowerIcon = createLucideIcon("tower", [
   ["path", { d: "M8 18 9.5 4h5L16 18", key: "column" }],
 ]);
 
-/** A knockback tower: a tower with a burst splashing out of its ring, since you soak it and it
-    knocks you back. */
+/** A knockback tower: a tower with chevrons pointing out of its ring, as the game draws it, since
+    you soak it and it knocks you back. */
 export const KnockbackTowerIcon = createLucideIcon("knockback-tower", [
-  ["ellipse", { cx: "12", cy: "18", rx: "7", ry: "2.5", key: "ring" }],
-  ["path", { d: "M9.5 18 10.5 4h3l1 14", key: "column" }],
-  ["path", { d: "m4.5 16-3-2", key: "splash-west" }],
-  ["path", { d: "m5.5 14.5-2-3.5", key: "splash-northwest" }],
-  ["path", { d: "m7.5 13.5-1-3", key: "splash-north-of-west" }],
-  ["path", { d: "m19.5 16 3-2", key: "splash-east" }],
-  ["path", { d: "m18.5 14.5 2-3.5", key: "splash-northeast" }],
-  ["path", { d: "m16.5 13.5 1-3", key: "splash-north-of-east" }],
+  ["ellipse", { cx: "12", cy: "15", rx: "7", ry: "2.5", key: "ring" }],
+  ["path", { d: "M9.5 15 10.5 2h3l1 13", key: "column" }],
+  ["path", { d: "M4 12 1.5 15 4 18", key: "out-west" }],
+  ["path", { d: "m20 12 2.5 3-2.5 3", key: "out-east" }],
+  ["path", { d: "m9 20 3 2.5 3-2.5", key: "out-south" }],
 ]);
 
 /** A stretch tether: two players (filled dots) joined by a tether, and the arrow of their moving
