@@ -1,4 +1,4 @@
-import { CircleArrowOutUpRight, CircleDot, createLucideIcon, Expand, History, type IconNode, type LucideIcon, Shrink } from "lucide-react";
+import { CircleArrowOutUpRight, createLucideIcon, Expand, History, type IconNode, type LucideIcon, Shrink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DrillKind } from "../types";
 
@@ -42,6 +42,12 @@ const Pairs = createLucideIcon("pairs", [
   ["circle", { cx: "15.5", cy: "12", r: "2.5", fill: "currentColor", key: "second" }],
 ]);
 
+/** A tower: a player (a filled dot) standing in the spot (a ring). Drawn the same way. */
+const Tower = createLucideIcon("tower", [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "spot" }],
+  ["circle", { cx: "12", cy: "12", r: "3", fill: "currentColor", key: "player" }],
+]);
+
 /** A dodge: a player (a filled dot) stepping aside, an arrow of their own. Drawn the same way. */
 const Dodge = createLucideIcon("dodge", [
   ["circle", { cx: "5", cy: "12", r: "3", fill: "currentColor", key: "player" }],
@@ -67,7 +73,7 @@ export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon }> = {
   bait: { name: "Bait", icon: CircleArrowOutUpRight },
   dodge: { name: "Dodge", icon: Dodge },
   sequence: { name: "Dodge sequence", icon: DodgeSequence },
-  tower: { name: "Tower", icon: CircleDot },
+  tower: { name: "Tower", icon: Tower },
   towerKnockback: { name: "Knockback tower", icon: TowerKnockback },
   wildCharge: { name: "Wild charge", icon: WildCharge },
   later: { name: "Saved for later", icon: History },
