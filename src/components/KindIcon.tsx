@@ -15,18 +15,13 @@ import {
 import { cn } from "@/lib/utils";
 import type { DrillKind } from "../types";
 
-/** A line stack: the dashed line the stack runs along, with the hit running down each side.
-    Lucide has no such icon, so it is drawn in its style (a 24 by 24 grid, the same stroke) with its
-    createLucideIcon, and takes the same size and colour as the others. */
+/** A line stack: three chevrons, the hit running down the line. Lucide's ChevronsDown has two, so
+    this one is drawn in its style (a 24 by 24 grid, the same stroke) with its createLucideIcon,
+    and takes the same size and colour as the others. */
 const LineStack = createLucideIcon("line-stack", [
-  ["path", { d: "M12 2v2", key: "dash1" }],
-  ["path", { d: "M12 8v2", key: "dash2" }],
-  ["path", { d: "M12 14v2", key: "dash3" }],
-  ["path", { d: "M12 20v2", key: "dash4" }],
-  ["path", { d: "M5 3v17", key: "left" }],
-  ["path", { d: "m2 17 3 3 3-3", key: "left-head" }],
-  ["path", { d: "M19 3v17", key: "right" }],
-  ["path", { d: "m16 17 3 3 3-3", key: "right-head" }],
+  ["path", { d: "m7 3 5 5 5-5", key: "top" }],
+  ["path", { d: "m7 9 5 5 5-5", key: "middle" }],
+  ["path", { d: "m7 15 5 5 5-5", key: "bottom" }],
 ]);
 
 /** The name and the icon of each kind of mechanic. `flip` turns the icon upside down. */
