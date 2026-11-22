@@ -134,9 +134,9 @@ export interface Scene {
 }
 
 /** What you do in a Practice mechanic: spread out, stack, stack in a line from the boss, stand in
-    pairs, bait an attack (bring it to your spot, then step out), dodge, dodge a set order of attacks, take a tower, hide behind something,
-    act on what the boss showed earlier (saved for later), or get knocked back to your spot.
-    Practice's list of mechanics shows it as an icon. */
+    pairs, bait an attack (bring it to your spot, then step out), dodge, dodge a set order of
+    attacks, take a tower, hide behind something, act on what the boss showed earlier (saved for
+    later), or get knocked back to your spot. Practice's list of mechanics shows it as an icon. */
 export type DrillKind =
   | "spread"
   | "stack"
