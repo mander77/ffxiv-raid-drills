@@ -29,8 +29,9 @@ export interface KindInfo {
   icon: LucideIcon;
   /** The number in the middle of the icon, if it has one. */
   count?: string;
-  /** The number is smaller, for an icon with a narrow middle. */
-  smallCount?: boolean;
+  /** The size and place of the number, as complete Tailwind classes, for an icon whose middle is
+      not square. Without it, the number is 70 percent of the icon wide, in its middle. */
+  countLook?: string;
   /** A tower: each mechanic gives its own number, how many players soak it (Drill.soak). */
   soaked?: boolean;
 }
@@ -63,14 +64,16 @@ export const KINDS: Record<DrillKind, KindInfo> = {
     name: "Tower",
     meaning: "Stand in a tower to soak it. The number says how many players soak it.",
     icon: TowerIcon,
-    smallCount: true,
+    // Up a little, in the column, clear of the ring.
+    countLook: "-translate-y-[6cqw] text-[50cqw]",
     soaked: true,
   },
   towerKnockback: {
     name: "Knockback tower",
     meaning: "Soak a tower that knocks you back. The number says how many players soak it.",
     icon: KnockbackTowerIcon,
-    smallCount: true,
+    // Smaller, in the middle of the arrow, clear of the ring.
+    countLook: "-translate-y-[2cqw] text-[42cqw]",
     soaked: true,
   },
   wildCharge: {
@@ -91,7 +94,7 @@ export const KINDS: Record<DrillKind, KindInfo> = {
     meaning: "A heavy hit that two tanks share.",
     icon: SharedTankBusterIcon,
     count: "2",
-    smallCount: true,
+    countLook: "text-[50cqw]",
   },
 };
 
@@ -108,21 +111,19 @@ export interface MechanicIconProps {
 /** The icon of what you do in a mechanic (spread, stack...), with a stack's number in its middle.
     It is only a picture: the text next to it, or a label, says the same in words. */
 export function MechanicIcon({ kind, soak, className, countClassName }: MechanicIconProps) {
-  const { icon: Icon, smallCount, soaked } = KINDS[kind];
+  const { icon: Icon, countLook, soaked } = KINDS[kind];
   const count = soaked ? soak?.toString() : KINDS[kind].count;
   if (!count) return <Icon aria-hidden="true" className={cn("size-4", className)} />;
-  // A container, so the number takes its size from the icon's: 70 percent of its width (50 for a
-  // small one), at any size.
+  // A container, so the number takes its size from the icon's (cqw is a percent of its width), at
+  // any size.
   return (
     <span aria-hidden="true" className={cn("@container relative inline-grid size-4 place-items-center", className)}>
       <Icon className="size-full" />
       <span
         className={cn(
           "absolute font-sans font-bold",
-          // A tower's number goes up a little, into the column, clear of the ring.
-          soaked && "-translate-y-[6cqw]",
           // The size goes before leading-none: cn drops a line height that comes before a size.
-          smallCount ? "text-[50cqw]" : "text-[70cqw]",
+          countLook ?? "text-[70cqw]",
           "leading-none",
           countClassName,
         )}

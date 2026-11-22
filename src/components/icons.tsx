@@ -19,8 +19,8 @@
 // 4. Arrows are a move the players make themselves (spread, dodge, a stack coming together, puddles
 //    dropped in a row, a tether pulled apart).
 // 5. A knockback is a burst (where it comes from) and a wide, hollow arrow (the push), never a thin
-//    arrow: you do not move yourself. A knockback tower is a tower with a knockback burst on each side: a line out of the top corner
-//    and one a little lower.
+//    arrow: you do not move yourself. A knockback tower is that wide, hollow arrow bursting up out
+//    of a tower's ring, with the number of players who soak it inside.
 // 6. A bar is a blocker that takes a hit for the others: a tank, a rock, a wall (a wild charge).
 // 7. A shield is a tank buster.
 // 8. A clock is timing: something you see now and act on later (saved for later).
@@ -34,7 +34,7 @@
 // How an icon is drawn
 // 11. Lucide's style: a 24 by 24 grid, a 2 pixel stroke, round ends and corners. Use a lucide icon
 //    when one says it; otherwise draw one here with lucide's createLucideIcon.
-// 12. Few lines, about five, eight at most: a mechanic's icon must read at 20 pixels in its square
+// 12. Few lines, about five, eight at most: a mechanic's icon must read at 24 pixels in its square
 //    on the list. Check it there, in the browser, in light and dark mode, before you keep it.
 // 13. Every icon here is on the icons page (/icons, IconsPage) with what it means; a test fails
 //    when one is missing. The page shows them side by side, large and at their real size.
@@ -175,16 +175,12 @@ export const TowerIcon = createLucideIcon("tower", [
   ["path", { d: "M3.5 20 5 4h14l1.5 16", key: "column" }],
 ]);
 
-/** A knockback tower: the tower, a little narrower to leave room, with a burst on each side, as on
-    the knockback: a line out of the top corner and one a little lower, apart from the tower, since
-    you soak it and it knocks you back. */
+/** A knockback tower: a wide, hollow arrow bursting up out of the tower's ring, its head curved and
+    its barbs swept back, since you soak it and it throws you. The number of players who soak it
+    goes inside the arrow (MechanicIcon puts it there). */
 export const KnockbackTowerIcon = createLucideIcon("knockback-tower", [
-  ["ellipse", { cx: "12", cy: "20", rx: "10", ry: "3", key: "ring" }],
-  ["path", { d: "M5 20 6.5 4h11L19 20", key: "column" }],
-  ["path", { d: "M3.9 2.1 1.4 0.6", key: "burst-west-top" }],
-  ["path", { d: "M3.2 7.6 0.4 6.8", key: "burst-west-side" }],
-  ["path", { d: "m20.1 2.1 2.5-1.5", key: "burst-east-top" }],
-  ["path", { d: "m20.8 7.6 2.8-.8", key: "burst-east-side" }],
+  ["ellipse", { cx: "12", cy: "20", rx: "11", ry: "3", key: "ring" }],
+  ["path", { d: "M5.5 20 7 9.5 1.5 11.5C5.5 7.5 9.5 4 12 1c2.5 3 6.5 6.5 10.5 10.5L17 9.5l1.5 10.5", key: "arrow" }],
 ]);
 
 /** A stretch tether: two players (filled dots) joined by a tether, and the arrow of their moving

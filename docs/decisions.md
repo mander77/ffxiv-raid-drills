@@ -361,8 +361,10 @@ Do not propose these again unless the owner brings them up.
     rule of its own (owner's choice), since neither an arrow (your own move) nor chevrons (a hit)
     said it: a burst at the top left, a wide arrow down to the player at the bottom right. A tower
     is a wide column in its ring, with room for the number of players who soak it (each mechanic
-    gives it, Drill.soak); a knockback tower is the same tower, a little narrower to leave room, with a burst on each side, a line out of the top corner and one lower
-    (the owner found a splash of lines too loud and chevrons out of the ring did not look good). A
+    gives it, Drill.soak). A knockback tower is a wide, hollow arrow, its head curved and its barbs
+    swept back, bursting up out of the ring, with the number inside (the owner turned down a splash
+    of lines, chevrons out of the ring, and burst lines beside the tower). A mechanic's icon fills
+    24 of its square's 28 pixels, so it reads larger. A
     tank buster is a player behind a shield; a shared tank buster puts the stack's number 2 in the
     shield, a little smaller, since the shield's middle is narrower. The owner turned down the
     sheet's tether (no drill needs it), its hide behind cover (the fight has no hide kind), its safe
