@@ -348,9 +348,9 @@ Do not propose these again unless the owner brings them up.
     players in the middle in the cast colour (amber): 2 for a pair stack (Dance of Domination,
     Four-way Fireball), 4 for a light party stack, R for a role stack, where the roles decide who
     stacks (Raw Steel: scythe). A party stack, the whole party, has no number.
-  - A line stack (Meteorain's first and third stacks, Two-way Fireball) is its own kind. A wild
-    charge is a line stack where the first in line takes far more damage, so a tank or a rock
-    stands in front (owner's words); Meteorain's last stack is one. The fight has no hide kind.
+  - A line stack (Two-way Fireball) is its own kind. A wild charge is a line stack where the
+    first in line takes far more damage, so a tank or a rock stands in front (owner's words);
+    every Meteorain stack is one. The fight has no hide kind.
   - Assault Evolved and the six Ultimate Trophy Weapons are a dodge sequence (owner's name): the
     boss goes through the weapons in order. Saved for later is only for a mechanic with a
     look-ahead step (Void Stardust), as the site uses the words.
