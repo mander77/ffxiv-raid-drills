@@ -263,6 +263,8 @@ make sure that each one still matches the code before you start it.
     publishing needs it, and a pull request needs only git.
   - The publish and wait-deploy scripts moved from `sh` to Node.js (`npm run publish`,
     `npm run wait-deploy`), so they run in PowerShell with no Git Bash step.
+  - `npm run publish -- main` puts the branch on `main` from its own worktree. The owner chose
+    this after a publish from the main checkout clashed with another session working there.
 - Party slots (#13, done). A slot has two parts, the light party (1 or 2) and the role (Tank,
   Healer, Melee, Ranged). Casters count as Ranged. The header shows both parts. The light party control is labelled "Group", with 1 and 2, as on wtfdig. The owner chose
   to show every role now: a role with no drills yet is greyed out, and pointing at it, focusing
@@ -547,8 +549,8 @@ static wins.
   repository admin role (only the owner) bypasses this ruleset only. It is a ruleset of its own,
   because a bypass covers a whole ruleset, and the CI rule must bind the owner too.
 - GitHub checks the commit a push to `main` ends on, by the CI run on that same commit when its
-  branch was pushed. So push the branch, wait for CI, then push `main`. `npm run publish` waits
-  for the two checks.
+  branch was pushed. So push the branch, wait for CI, then push `main`. `npm run publish -- main`
+  waits for the two checks.
 - Branch previews come from GitHub Actions, not from Cloudflare's builds:
   `.github/workflows/preview.yml`, on branch pushes, with GitHub's `paths-ignore` filter (the
   same list as the watch paths), so a docs-only push makes no preview and the last one stays.

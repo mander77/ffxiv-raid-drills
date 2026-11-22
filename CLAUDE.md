@@ -199,10 +199,11 @@ These steps put a branch on `main`, the live site.
    `npm run wait-deploy -- https://<branch>.ffxiv-raid-drills.app index-<hash>.js` and
    test the preview in a browser. A branch with only docs, tests or tooling gets no preview: skip
    this step.
-5. In the main checkout, make sure that it is on `main` and has no changes. Run
-   `git merge --ff-only <branch>`, then run the publish script there. On `main` the script first
-   waits for the branch's CI run on that commit and stops if it failed: GitHub refuses a commit on
-   `main` that has not passed CI. Then it pushes and deletes every branch on GitHub that `main`
+5. From the same branch checkout, run `npm run publish -- main`. Never use the main checkout:
+   another session may be working there. The script checks that the branch still contains
+   `origin/main`, then waits for the branch's CI run on that commit and stops if it failed:
+   GitHub refuses a commit on `main` that has not passed CI. Then it pushes the branch to `main`
+   and deletes every branch on GitHub that `main`
    already contains. A branch that merged `main` into itself must be rebased first, because `main`
    takes no merge commits.
 6. Run `npm run wait-deploy -- https://ffxiv-raid-drills.app index-<hash>.js` and check the

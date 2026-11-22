@@ -1,11 +1,14 @@
 // Runs the type check, the tests and the lint, then pushes the current branch to GitHub:
 // `npm run publish`. Runs on Windows, macOS and Linux.
+// `npm run publish -- main` puts the current branch on main instead, from any checkout, so the
+// main checkout is never needed: the branch must contain origin/main (a fast-forward), and its
+// CI must have passed.
 // GitHub runs CI on each push. Cloudflare builds main as the live site, and skips the build
 // when only docs, tests or tooling changed. For another branch, GitHub Actions makes a
 // preview when the push changed the app and the owner approved it.
-// main takes only a commit on which CI already passed (when its branch was pushed). On main,
-// the script waits for those checks, and stops if they failed or never ran.
-// On main, it then deletes every branch that main already contains, on GitHub and locally.
+// main takes only a commit on which CI already passed (when its branch was pushed). To publish
+// main, the script waits for those checks, and stops if they failed or never ran.
+// After it pushed main, it deletes every branch that main already contains, on GitHub and locally.
 // Pushes as the repository owner. Ignores any GH_TOKEN or GITHUB_TOKEN in the
 // shell, and switches the GitHub CLI back to the previous account at the end.
 import { spawnSync } from "node:child_process";
@@ -83,6 +86,8 @@ function deleteMergedBranches() {
 async function publish() {
   const branch = output("git", ["branch", "--show-current"]);
   if (branch === "") throw new Error("Stopped: check out a branch before you publish.");
+  // Publish to main: from main itself, or with "main" after npm run publish --.
+  const toMain = branch === "main" || process.argv.slice(2).includes("main");
 
   npm("typecheck");
   npm("test");
@@ -94,14 +99,20 @@ async function publish() {
     const who = output("gh", ["api", "user", "--jq", ".login"]);
     if (who !== OWNER) throw new Error(`Stopped: the GitHub CLI is signed in as ${who}, not ${OWNER}.`);
 
-    if (branch === "main") await waitForCi(output("git", ["rev-parse", "HEAD"]));
+    if (toMain) {
+      gitgh(["fetch", "origin"]);
+      const ahead = spawnSync("git", ["merge-base", "--is-ancestor", "origin/main", "HEAD"]);
+      if (ahead.status !== 0) throw new Error("Stopped: main moved. Rebase the branch on origin/main, publish it, then try again.");
+      await waitForCi(output("git", ["rev-parse", "HEAD"]));
+    }
 
-    gitgh(["push", "-u", "origin", branch]);
-    if (branch !== "main") {
+    if (!toMain) {
+      gitgh(["push", "-u", "origin", branch]);
       console.log(`Pushed ${branch}. CI runs on GitHub: gh run list --branch ${branch}`);
       console.log("If the app changed, approve its Preview run on GitHub once CI passed.");
       return;
     }
+    gitgh(["push", "origin", "HEAD:refs/heads/main"]);
     console.log("Pushed main. Cloudflare deploys the live site in about a minute if the app changed.");
     deleteMergedBranches();
   } finally {
