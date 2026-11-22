@@ -77,8 +77,14 @@ export function LiveArena({
   // spawnAhead, each answered step brings in one more weapon.
   const gone = showLast ? n - 1 : n;
   const visible = sc.spawnAhead != null ? sc.spawnAhead + n : Number.POSITIVE_INFINITY;
+  const boss = placed === undefined ? bossFor(sc, k, n, showLast) : placed;
+  const bossAt: Point | null = boss ? [boss.x, boss.y] : null;
   const weapons = groups.map((g, i) => {
     const pos = g.find((o) => o.t === "scythe" || o.t === "axe" || o.t === "sword");
+    // The weapon he stands on needs no name: his ring on its icon says which one it is.
+    const at = pos && "x" in pos ? rotOverlay(pos, k) : undefined;
+    const onBoss = boss && at && "x" in at && Math.hypot(at.x - boss.x, at.y - boss.y) < 0.5;
+    const pieces = onBoss ? g.filter((o) => o.t !== "tag") : g;
     return (
       <g
         // biome-ignore lint/suspicious/noArrayIndexKey: a weapon's spawn index is its identity.
@@ -86,7 +92,7 @@ export function LiveArena({
         className={cn("spawn", i < gone && "gone", i >= visible && "later")}
         style={sc.spawnPlay ? { animationDelay: `${0.3 + i}s` } : undefined}
       >
-        {g.map((o, j) => (
+        {pieces.map((o, j) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: the pieces of a weapon never change order.
           <Shape key={j} overlay={rotOverlay(o, k)} />
         ))}
@@ -142,7 +148,6 @@ export function LiveArena({
   const hintBase = hintStep ? stepZone(hintStep, [...results]) : undefined;
   const hintZone = hintBase ? rotZone(hintBase, k) : undefined;
 
-  const boss = placed === undefined ? bossFor(sc, k, n, showLast) : placed;
   const shapes = (os: readonly Overlay[]): ReactNode =>
     // biome-ignore lint/suspicious/noArrayIndexKey: these pieces never change order.
     os.map((o, i) => <Shape key={i} overlay={o} />);
@@ -184,9 +189,9 @@ export function LiveArena({
           <>
             {base.labels}
             {last && lastStep && (lastStep.lookAhead || correctLabel) && (
-              <ZoneLabel zone={last.z} kind={lastStep.lookAhead ? "later" : "correct"} />
+              <ZoneLabel zone={last.z} kind={lastStep.lookAhead ? "later" : "correct"} boss={bossAt} />
             )}
-            {hintZone && hintStep && <ZoneLabel zone={hintZone} kind={hintStep.lookAhead ? "later" : "go"} />}
+            {hintZone && hintStep && <ZoneLabel zone={hintZone} kind={hintStep.lookAhead ? "later" : "go"} boss={bossAt} />}
           </>
         ),
         marks: (

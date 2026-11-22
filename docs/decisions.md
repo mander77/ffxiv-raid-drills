@@ -404,7 +404,12 @@ Do not propose these again unless the owner brings them up.
   icon keeps it readable over an attack. The held weapon in
   Raw Steel Trophy is its icon alone, the same size as on the floor (one scythe icon across the app), on top of his dot, with its name tag under the dot (owner's choice). A weapon's name goes out to
   the side of its line, away from the arena center; in Practice, its order number goes in toward
-  the center.
+  the center. The axe's heads are wide, a little wider than tall (owner's choice).
+- When the boss jumps onto a weapon (Practice and Pressure), the picture stays clear (owner's
+  choice): the weapon he stands on loses its name tag (his ring on its icon says which one), the
+  weapons he has left fade, and the "Correct spot", "Go here" and "Saved for later" labels move
+  straight out from him past his ring, so they never cover him or the weapon. A weapon on a
+  waymark still covers the waymark: the owner chose to keep that.
 - The boss turns smoothly to face his next target. He does not flip.
 - "Saved for later" (purple) marks a mechanic shown early and resolved later, for example the
   first weapon during Void Stardust. It is never a spot to stand on.

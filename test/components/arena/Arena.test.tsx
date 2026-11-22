@@ -91,3 +91,11 @@ test("a zone label sits above its zone, or below it at the top edge, and inside 
   assert.include(below, 'x="90"', "kept inside the picture on the right");
   assert.include(below, "Go here");
 });
+
+test("a zone label on the boss moves straight out of his ring", () => {
+  // A small zone on the boss's south side: above it would be on him, so the label goes south.
+  const svg = renderToStaticMarkup(<ZoneLabel zone={{ c: [50, 55], r: 3 }} kind="correct" boss={[50, 50]} />);
+  const y = Number(svg.match(/<rect x="[\d.-]+" y="([\d.-]+)"/)?.[1]);
+  assert.isAtLeast(y, 50 + 14.5, "the box's top is past his ring and its ticks");
+  assert.include(svg, 'x="41.5"', "straight below him");
+});
