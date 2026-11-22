@@ -40,6 +40,17 @@ const Knockback = createLucideIcon("knockback", [
   ["path", { d: "M21 10v5h-5", key: "right-head" }],
 ]);
 
+/** A knockback tower: the tower's ring and dot, with a chevron on each side pushing out, since you
+    soak it and it knocks you back. Drawn the same way. */
+const TowerKnockback = createLucideIcon("tower-knockback", [
+  ["circle", { cx: "12", cy: "12", r: "4.5", key: "tower" }],
+  ["circle", { cx: "12", cy: "12", r: "1", key: "centre" }],
+  ["path", { d: "m9.5 4 2.5-2.5L14.5 4", key: "up" }],
+  ["path", { d: "m9.5 20 2.5 2.5 2.5-2.5", key: "down" }],
+  ["path", { d: "M4 9.5 1.5 12 4 14.5", key: "left" }],
+  ["path", { d: "m20 9.5 2.5 2.5-2.5 2.5", key: "right" }],
+]);
+
 /** The name and the icon of each kind of mechanic. */
 export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon }> = {
   spread: { name: "Spread", icon: Expand },
@@ -51,6 +62,7 @@ export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon }> = {
   dodge: { name: "Dodge", icon: Footprints },
   sequence: { name: "Dodge sequence", icon: Route },
   tower: { name: "Tower", icon: CircleDot },
+  towerKnockback: { name: "Knockback tower", icon: TowerKnockback },
   wildCharge: { name: "Wild charge", icon: WildCharge },
   later: { name: "Saved for later", icon: History },
   knockback: { name: "Knockback", icon: Knockback },

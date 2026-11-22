@@ -577,7 +577,7 @@ export const DRILLS: readonly Drill[] = [
       split:true, boss:BOSS, overlays:[],
       steps:[{q:"Click where you line up.", z:bySlot(s, {H1:{rect:[0,8,26,48]}, H2:{rect:[74,52,100,92]}}), a:bySlot(s, {H1:"West platform (G1), north end. Supports go NW.", H2:"East platform (G2), south end. Supports go SE."})}],
       rule:"G1 west, G2 east. Supports NW and SE, DPS SW and NE. Hector's video puts tanks and ranged north, healers and melee south, so ask your lead which one you use."})},
-  {id:"m-split-tower", order:19, phase:P3, time:"6:29", title:"Arena Split: first towers", kind:"tower",
+  {id:"m-split-tower", order:19, phase:P3, time:"6:29", title:"Arena Split: first towers", kind:"towerKnockback",
     build:s=>({setup:"Four towers appear, two on each platform. Every player takes a tower.",
       split:true, boss:BOSS, overlays:[{t:"tower",x:11,y:23},{t:"tower",x:89,y:23},{t:"tower",x:11,y:77},{t:"tower",x:89,y:77}],
       steps:[{q:"Which tower do you take?", z:bySlot(s, {H1:{c:[11,23],r:TOWER_R}, H2:{c:[89,77],r:TOWER_R}}), a:bySlot(s, {H1:"The NW tower, with the MT.", H2:"The SE tower, with the OT."})}],
