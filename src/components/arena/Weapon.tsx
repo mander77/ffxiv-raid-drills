@@ -1,5 +1,7 @@
+import { SCYTHE_SAFE } from "../../data/attacks";
 import { round2, unit } from "../../geometry";
 import type { Overlay, Point } from "../../types";
+import { SAFE_INSET } from "./Shape";
 
 // TS note: this Extract keeps the three weapon members of the Overlay union.
 type WeaponOverlay = Extract<Overlay, { t: "axe" | "sword" | "scythe" }>;
@@ -12,11 +14,17 @@ export interface WeaponProps {
    from facing you it gets narrower, and its far end sits a little higher. Its height never
    changes, so it never looks stretched. */
 
-/** How big each weapon on the floor is drawn, as a share of its drawing. No source gives the
-    weapons' size in the game, so this is the app's choice, set by eye next to the waymarks. The
-    scythe is smaller: it fits inside the boss's hitbox ring when he lands on it, with room for H1
-    and H2 at its butt and point (their spots are 9.5 units out, see buildJumpSet). */
-const SIZE: Record<WeaponOverlay["t"], number> = { scythe: 0.65, sword: 0.8, axe: 0.8 };
+/** How big the sword and the axe are drawn, as a share of their drawing. No source gives the
+    weapons' size in the game, so this is the app's choice, set by eye next to the waymarks. */
+const SIZE = 0.8;
+/** Half the scythe's length in its drawing, from the middle to the butt or the point. */
+const SCYTHE_HALF = 9.2;
+
+/** The scale of a weapon's drawing on the floor, across and up. The scythe reaches from butt to
+    point across the green safe ring drawn when he lands on it (owner's rule), at the usual height. */
+function scaleOf(t: WeaponOverlay["t"]): Point {
+  return t === "scythe" ? [(SCYTHE_SAFE - SAFE_INSET) / SCYTHE_HALF, SIZE] : [SIZE, SIZE];
+}
 
 /** How wide a weapon is drawn at the least, as a share of its full width, so one turned edge-on
     still shows its shape. The app's choice. */
@@ -53,8 +61,8 @@ export function Weapon({ overlay: o }: WeaponProps) {
   } else {
     // On the floor: it stands on the point, turned along its line.
     const s = screenBase(floorLine(o));
-    const k = SIZE[o.t];
-    m = [s[0] * k, s[1] * k, 0, k, o.x, o.y];
+    const [kx, ky] = scaleOf(o.t);
+    m = [s[0] * kx, s[1] * kx, 0, ky, o.x, o.y];
   }
   return (
     <g className={`wpn ${o.t}`} transform={`matrix(${m.map(round2).join(" ")})`}>

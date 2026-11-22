@@ -14,7 +14,7 @@ function circlePath(cx: number, cy: number, r: number): string {
 /** How far inside its true edge a safe ring is drawn, in arena units. The scythe's safe edge is
     5 yalms, the same as the boss's hitbox ring, so without this the green ring would hide under
     it. Inside, not outside, so the ring never makes the safe ground look bigger than it is. */
-const SAFE_INSET = 1.6;
+export const SAFE_INSET = 1.6;
 
 /** The boss's hitbox ring, from BossMod (see src/data/attacks.ts). */
 export const RING = HITBOX;
