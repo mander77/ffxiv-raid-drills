@@ -1,4 +1,4 @@
-import { type RefCallback, type RefObject, useRef, useState } from "react";
+import { type RefCallback, type RefObject, useEffect, useEffectEvent, useRef, useState } from "react";
 import { CASTS_AHEAD, CASTS_PAST, CASTS_SOON, type CastMark, castPositions, castsAhead, hitsGoneOff } from "../lib/fight";
 import { useFightFrame } from "./useFightFrame";
 import { type DragHandlers, useLineDrag } from "./useLineDrag";
@@ -119,6 +119,29 @@ export function useCastTimeline({ axis, nowAt, end, gap }: CastTimelineLayout, c
       },
     },
   );
+
+  // The mouse wheel moves the clock too, as a drag does: a wheel step moves the line as many pixels
+  // as it says, so the casts move with it. Down (or right) moves the clock on. Only the player has
+  // it; in the run the wheel scrolls the page.
+  const onWheel = useEffectEvent((e: WheelEvent) => {
+    if (!controls) return;
+    // A wheel that counts in lines (deltaMode 1), not pixels: a line is about 16 pixels.
+    const scale = e.deltaMode === 1 ? 16 : 1;
+    const delta = (axis === "x" && e.deltaX !== 0 ? e.deltaX : e.deltaY) * scale;
+    if (delta === 0) return;
+    e.preventDefault();
+    controls.scrub(clock.current.t + delta / clock.current.perSecond);
+  });
+  const hasControls = controls !== undefined;
+  // The wheel listener goes on the box itself, not through React: React's wheel handler is passive,
+  // so it cannot stop the page from scrolling under the line.
+  useEffect(() => {
+    const b = box.current;
+    if (!b || !hasControls) return;
+    const listener = (e: WheelEvent): void => onWheel(e);
+    b.addEventListener("wheel", listener, { passive: false });
+    return () => b.removeEventListener("wheel", listener);
+  }, [hasControls]);
 
   return { box, nowMark, marks, itemRef, drag };
 }

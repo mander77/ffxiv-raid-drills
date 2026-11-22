@@ -78,4 +78,19 @@ for (const [name, lineAxis, axis] of [
     fireEvent.pointerUp(line, { pointerId: 1, [axis]: 80 });
     assert.deepEqual(controls.hold.mock.calls, [[true], [false]]);
   });
+
+  test(`${name} in the player: the mouse wheel moves the clock, and the page does not scroll`, () => {
+    const controls = spyControls();
+    const line = showAt(<CastList axis={lineAxis} controls={controls} />, 46).firstElementChild as HTMLElement;
+    // Down moves the clock on, up moves it back.
+    assert.isFalse(fireEvent.wheel(line, { deltaY: 40 }), "the page does not scroll");
+    assert.isAbove(controls.scrub.mock.calls[0][0], 46);
+    fireEvent.wheel(line, { deltaY: -40 });
+    assert.isBelow(controls.scrub.mock.calls[1][0], 46);
+  });
+
+  test(`${name} in the run: the mouse wheel scrolls the page, as anywhere else`, () => {
+    const line = showAt(<CastList axis={lineAxis} />, 46).firstElementChild as HTMLElement;
+    assert.isTrue(fireEvent.wheel(line, { deltaY: 40 }), "the page scrolls");
+  });
 }
