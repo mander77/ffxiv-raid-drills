@@ -289,7 +289,7 @@ export function FightScreen({
   const sides: Partial<ArenaFrameProps> = wide
     ? {
         before: (
-          <div className="flex w-68 flex-col gap-3">
+          <div className="flex w-80 flex-col gap-3">
             {mode === "watch" ? (
               <>
                 <CastBar />
@@ -306,7 +306,7 @@ export function FightScreen({
             <CastList axis="y" className="flex-1" controls={mode === "watch" ? castControls : undefined} />
           </div>
         ),
-        className: "mx-0 ml-68 mr-80 min-w-0 flex-1",
+        className: "mx-0 ml-80 mr-80 min-w-0 flex-1",
       }
     : {
         over: (
