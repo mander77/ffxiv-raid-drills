@@ -17,10 +17,10 @@ const LINE_HALF = 9;
 /** Half the size of the square a weapon's mask covers: more than its longest line. */
 const MASK_HALF = 16;
 /** The radius of the round badge each weapon's icon sits on. The app's choice. */
-const BADGE_R = 5.6;
+const BADGE_R = 4.6;
 /** How big the icon is inside its badge. It leaves a gap to the badge's rim, so an icon's handle
     never runs into the line beneath when that line runs the same way. The app's choice. */
-const GLYPH_SCALE = 0.75;
+const GLYPH_SCALE = 0.62;
 /** A held weapon's icon: how far east of the point its middle is, and how big it is. It fits
     between his hitbox ring and waymark B. The app's choice. */
 const HELD_EAST = 4.5;
