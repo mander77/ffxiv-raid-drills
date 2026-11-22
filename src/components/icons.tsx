@@ -182,10 +182,10 @@ export const TowerIcon = createLucideIcon("tower", TOWER);
     back. */
 export const KnockbackTowerIcon = createLucideIcon("knockback-tower", [
   ...TOWER,
-  ["path", { d: "M3.5 2.5 1.5 0.5", key: "burst-west-top" }],
-  ["path", { d: "M2.6 7.5 0.4 6.7", key: "burst-west-side" }],
-  ["path", { d: "m20.5 2.5 2-2", key: "burst-east-top" }],
-  ["path", { d: "m21.4 7.5 2.2-.8", key: "burst-east-side" }],
+  ["path", { d: "M2.6 1.6 1 0", key: "burst-west-top" }],
+  ["path", { d: "M1.7 8 0 7.3", key: "burst-west-side" }],
+  ["path", { d: "m21.4 1.6 1.6-1.6", key: "burst-east-top" }],
+  ["path", { d: "m22.3 8 1.7-.7", key: "burst-east-side" }],
 ]);
 
 /** A stretch tether: two players (filled dots) joined by a tether, and the arrow of their moving
