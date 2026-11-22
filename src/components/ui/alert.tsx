@@ -9,6 +9,11 @@ const alertVariants = cva(
       variant: {
         default: "bg-card text-card-foreground",
         destructive: "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 [&>svg]:text-current",
+        // The site's own variants, added the way shadcn/ui's customization guide shows, as in
+        // button.tsx: an answer after you answer, in green (correct) or red (incorrect), with the
+        // colours of a Learn card's answer.
+        correct: "border-success-foreground bg-success text-foreground [&>svg]:text-success-foreground",
+        incorrect: "border-danger-foreground bg-danger text-foreground [&>svg]:text-danger-foreground",
       },
     },
     defaultVariants: {

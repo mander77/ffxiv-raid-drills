@@ -256,7 +256,8 @@ These steps put a branch on `main`, the live site.
     their variants and the theme's CSS variables (`bg-primary`, `text-muted-foreground`).
     A colour a variant does not give comes from a new variant in the component (`cva`), as
     shadcn/ui's customization guide shows, not from `dark:` classes on top of a variant.
-    `button.tsx` has two: `correct` and `incorrect`. Keep them when the CLI updates the file.
+    `button.tsx` and `alert.tsx` each have two: `correct` and `incorrect`, the colours of an
+    answer after you answer. Keep them when the CLI updates the files.
   - Tests (Testing Library, Playwright): find elements by role and text, as a user would.
 - The site is built with React, Tailwind CSS and shadcn/ui, in the usual React shape:
   - A component used by more than one page gets its own file in `src/components/`, named after

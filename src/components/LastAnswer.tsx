@@ -13,7 +13,7 @@ export interface LastAnswerProps {
 /** The answer to the step before: correct or not, its question, and the correct answer. */
 export function LastAnswer({ ok, question, answer }: LastAnswerProps) {
   return (
-    <Alert variant={ok ? "default" : "destructive"}>
+    <Alert variant={ok ? "correct" : "incorrect"}>
       {ok ? <CorrectAnswerIcon aria-hidden="true" /> : <IncorrectAnswerIcon aria-hidden="true" />}
       <AlertTitle>{ok ? "Correct" : "Not there"}</AlertTitle>
       <AlertDescription>
