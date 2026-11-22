@@ -342,13 +342,15 @@ Do not propose these again unless the owner brings them up.
   and the drag (`useLineDrag`). A filter by ability category was dropped with the one component,
   because neither needs it.
 - Each Practice mechanic has a kind (`Drill.kind`): what you do in it (spread, stack, line stack,
-  pairs, bait, dodge, dodge sequence, tower, hide, saved for later, knockback). Its square in the list shows the
+  pairs, bait, dodge, dodge sequence, tower, wild charge, saved for later, knockback). Its square in the list shows the
   kind's icon, and the mechanic's panel names it. Assault Evolved and the six Ultimate Trophy
   Weapons are a dodge sequence (owner's name): the boss goes through the weapons in order. Saved
   for later is only for a mechanic with a look-ahead step (Void Stardust), as the site uses the
   words. A line stack (Meteorain's first and third stacks, Two-way Fireball) is its own kind, apart from
   a stack (owner's choice). Arena Split: line up is a knockback to your platform (owner's choice).
-  The owner chose the icons with Claude.
+  A wild charge is a line stack where the first in line takes far more damage, so a tank or a
+  rock stands in front (owner's words); Meteorain's last stack is one. The fight has no hide
+  kind. The owner chose the icons with Claude.
 - Practice has the layout of Pressure's player (owner's choice), so the two tabs look and feel the
   same. A wide screen: the prompt over the mechanic on the left of the arena, and a bar (which
   mechanic, Again, New pattern) over the list of mechanics on its right. A narrow screen: the same in one

@@ -4,7 +4,6 @@ import {
   CircleDot,
   createLucideIcon,
   Expand,
-  EyeOff,
   Footprints,
   History,
   type LucideIcon,
@@ -24,6 +23,14 @@ const LineStack = createLucideIcon("line-stack", [
   ["path", { d: "m7 15 5 5 5-5", key: "bottom" }],
 ]);
 
+/** A wild charge: the line stack's chevrons with a bar in front, the tank or rock that takes the
+    first, biggest hit. Drawn the same way. */
+const WildCharge = createLucideIcon("wild-charge", [
+  ["path", { d: "M5 3h14", key: "front" }],
+  ["path", { d: "m7 8 5 5 5-5", key: "top" }],
+  ["path", { d: "m7 14 5 5 5-5", key: "bottom" }],
+]);
+
 /** The name and the icon of each kind of mechanic. `flip` turns the icon upside down. */
 export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon; flip?: boolean }> = {
   spread: { name: "Spread", icon: Expand },
@@ -35,7 +42,7 @@ export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon; flip?: b
   dodge: { name: "Dodge", icon: Footprints },
   sequence: { name: "Dodge sequence", icon: Route },
   tower: { name: "Tower", icon: CircleDot },
-  hide: { name: "Hide", icon: EyeOff },
+  wildCharge: { name: "Wild charge", icon: WildCharge },
   later: { name: "Saved for later", icon: History },
   // Upside down: the dot is the boss, and the arrow pushes you away from it.
   knockback: { name: "Knockback", icon: ArrowUpFromDot, flip: true },
