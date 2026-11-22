@@ -35,11 +35,15 @@ const Knockback = createLucideIcon("knockback", [
     knocks you back. Drawn the same way. */
 const TowerKnockback = createLucideIcon("tower-knockback", [["circle", { cx: "12", cy: "12", r: "6", key: "tower" }], ...PUSHED_OUT]);
 
-/** Pairs: two players (filled dots) on one spot (a ring). Drawn the same way. */
+/** Pairs: two players (filled dots), from the northeast and the southwest, moving toward each
+    other (arrows of their own). Drawn the same way. */
 const Pairs = createLucideIcon("pairs", [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "spot" }],
-  ["circle", { cx: "8.5", cy: "12", r: "2.5", fill: "currentColor", key: "first" }],
-  ["circle", { cx: "15.5", cy: "12", r: "2.5", fill: "currentColor", key: "second" }],
+  ["circle", { cx: "19", cy: "5", r: "2.5", fill: "currentColor", key: "first" }],
+  ["path", { d: "M17 7 13 11", key: "first-move" }],
+  ["path", { d: "M13 7v4h4", key: "first-head" }],
+  ["circle", { cx: "5", cy: "19", r: "2.5", fill: "currentColor", key: "second" }],
+  ["path", { d: "m7 17 4-4", key: "second-move" }],
+  ["path", { d: "M11 17v-4H7", key: "second-head" }],
 ]);
 
 /** A tower: a player (a filled dot) standing in the spot (a ring). Drawn the same way. */
