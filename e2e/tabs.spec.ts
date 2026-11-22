@@ -1,4 +1,4 @@
-// The site in every browser: each tab opens, a Learn card and a Timeline card can be answered,
+// The site in every browser: each tab opens, the header scrolls away on a phone, a Learn card and a Timeline card can be answered,
 // the Group switch changes the slot, and Pressure runs a quick round and a shared link to the player.
 import { expect, test } from "@playwright/test";
 import { TABS } from "../src/tabs";
@@ -18,6 +18,24 @@ test("each tab opens from the header", async ({ page }) => {
     if (t.path !== "/") await expect(page.getByText(t.lede)).toBeVisible();
   }
   expect(errors).toEqual([]);
+});
+
+test("on a phone the header scrolls away, so the whole arena is in view", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto("/practice");
+  // Scroll the arena to the top of the screen, where a sticky header would cover it.
+  await page
+    .getByRole("img", { name: /^Arena/ })
+    .first()
+    .evaluate((el) => el.scrollIntoView({ block: "start" }));
+  await expect(page.getByRole("banner")).not.toBeInViewport();
+});
+
+test("on a wide screen the header stays at the top", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/sheet");
+  await page.evaluate(() => window.scrollBy(0, 600));
+  await expect(page.getByRole("banner")).toBeInViewport();
 });
 
 test("an address with no page opens Home", async ({ page }) => {

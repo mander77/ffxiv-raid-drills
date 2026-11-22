@@ -160,6 +160,11 @@ make sure that each one still matches the code before you start it.
     is in view; at most 720 px, and at least 360 px, so it fills a phone's width. The header
     takes two rows on a wide screen (the strats beside the name, Role and Group beside the tabs),
     so the arena gets more room.
+  - The header stays at the top of the screen only on a wide screen (lg and up), where it is two
+    rows. On a narrower screen it is four rows (199 px at 375 x 812, a quarter of a phone) and
+    covered the top of the arena, so there it scrolls away with the page. NN/g, Smashing Magazine
+    and Adobe all advise against a tall sticky header on a phone. A header that hides on scroll
+    down and comes back on scroll up is the next step, if players miss the tabs on a phone.
   - Pressure on a wide screen (lg and up): the arena has the left column to itself, from the top;
     the cast bar, the prompt and the controls sit beside it. The countdown ring stays on the
     arena, around the boss. At 1280 x 800 the arena went from 494 to about 600 px. Three columns

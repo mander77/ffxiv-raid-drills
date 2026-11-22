@@ -11,10 +11,12 @@ const STRATS = ["M11S The Tyrant (Savage)", "Hector/Toxic", "Kindred No Buddies 
 /** The header at the top of every page, a slate band. On a wide screen it has two rows, so the
     page below gets more room: the name and the strats, then Light/dark and Share on the right; the
     tabs along the bottom (the one you are on in celery), with the slot switch on the right. On a
-    narrower screen the slot switch and the tabs each get their own row. */
+    narrower screen the slot switch and the tabs each get their own row.
+    It stays at the top of the screen only on a wide screen. On a narrower one it is four rows tall,
+    so it scrolls away with the page and never covers the arena. */
 export function Header() {
   return (
-    <header className="sticky top-0 z-10 border-b-3 border-highlight bg-header text-header-foreground">
+    <header className="border-b-3 lg:sticky lg:top-0 lg:z-10 border-highlight bg-header text-header-foreground">
       <PageContainer className="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-2 pt-3">
         {/* The first row spans the whole width, so the strats fit beside the name. */}
         <div className="col-span-2 flex flex-wrap items-center gap-x-4 gap-y-2">
