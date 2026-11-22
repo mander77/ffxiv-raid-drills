@@ -55,6 +55,9 @@
   --later: oklch(0.952 0.023 299.365);
   --later-foreground: oklch(0.432 0.211 292.759);
   --cast: oklch(0.879 0.153 91.605);
+  /* The number in a stack icon (2, 4, R), so it stands out from the arrows: the bright amber of
+     the cast bar on the dark square in light mode, a deep orange on the pale square in dark mode. */
+  --count: oklch(0.879 0.153 91.605);
   /* The Home banner's gradient: the palette's sage in light mode, a pale green in dark mode, where
      it reads as light on the dark card. */
   --banner: oklch(0.548 0.077 151.159);
@@ -93,6 +96,7 @@
   --later: oklch(0.286 0.083 288.867);
   --later-foreground: oklch(0.825 0.088 294.575);
   --cast: oklch(0.542 0.1 84.955);
+  --count: oklch(0.6 0.19 45);
   --banner: oklch(0.962 0.043 156.743);
 }
 
@@ -142,6 +146,7 @@
   --color-later: var(--later);
   --color-later-foreground: var(--later-foreground);
   --color-cast: var(--cast);
+  --color-count: var(--count);
   --color-banner: var(--banner);
 }
 

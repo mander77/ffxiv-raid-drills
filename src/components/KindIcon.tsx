@@ -107,7 +107,7 @@ export function KindIcon({ kind, className, countClassName }: KindIconProps) {
   return (
     <span aria-hidden="true" className={cn("@container relative inline-grid size-4 place-items-center", className)}>
       <Icon className="size-full" />
-      <span className={cn("absolute font-display text-[70cqw] leading-none font-bold", countClassName)}>{count}</span>
+      <span className={cn("absolute font-sans text-[70cqw] leading-none font-bold", countClassName)}>{count}</span>
     </span>
   );
 }

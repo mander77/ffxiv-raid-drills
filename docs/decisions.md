@@ -345,7 +345,9 @@ Do not propose these again unless the owner brings them up.
   shows the kind's icon, and the mechanic's panel names it. The owner chose the kinds and the icons
   with Claude:
   - Stacks share one icon, four arrows from the corners coming together, with the number of
-    players in the middle in the cast colour (amber): 2 for a pair stack (Dance of Domination,
+    players in the middle, in Source Sans 3 bold (Saira Condensed's R looked like an A) and its own
+    colour, so it stands out from the arrows: bright amber on the dark square in light mode, deep
+    orange on the pale square in dark mode (owner's choice): 2 for a pair stack (Dance of Domination,
     Four-way Fireball), 4 for a light party stack, R for a role stack, where the roles decide who
     stacks (Raw Steel: scythe). A party stack, the whole party, has no number.
   - A line stack (Two-way Fireball) is its own kind. A wild charge is a line stack where the
