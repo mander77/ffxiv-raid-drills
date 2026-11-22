@@ -470,13 +470,13 @@ export const changes = (m: Drill): boolean => Boolean(m.random || m.variants || 
 
 /* ---------- map drills ---------- */
 export const BOSS: Boss = {x:50, y:50, f:0};
-/** Where the name of the weapon the boss holds goes: east of the weapon, above waymark B. */
-export const HELD_TAG: Point = [81, 44];
+/** Where the name of the weapon the boss holds goes: under his dot, inside the open rear of his
+    hitbox ring. The app's choice. */
+export const HELD_TAG: Point = [50, 58.5];
 /** The weapon the boss holds for Raw Steel Trophy: the same icon, at the same size, as the
-    weapons on the floor. It sits NE of him, between his hitbox ring, waymark B and the OT's
-    spot. The app's choice. */
+    weapons on the floor, on top of his dot. The app's choice. */
 export function heldWeapon(type: WeaponType): Overlay[] {
-  const x = 68, y = 44;
+  const x = BOSS.x, y = BOSS.y;
   // TS note: `t:type` is "axe" or "sword" here. TypeScript checks the object against both
   // matching members of the Overlay union, so one line covers both weapons.
   const icon: Overlay = type === "scythe" ? {t:"scythe", x, y, ux:1, uy:0, dx:0, dy:-1, held:true} : {t:type, x, y, ux:1, uy:0, held:true};

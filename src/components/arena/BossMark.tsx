@@ -6,7 +6,7 @@ import { RING } from "./Shape";
 const REAR = 45;
 /** The radius of his dot. It is wider than a weapon's badge, so when he stands on a weapon a red
     band shows around the badge's rim and you see where each one ends. The app's choice. */
-const DOT_R = 5.8;
+export const DOT_R = 5.8;
 const onRing = (deg: number, r: number): string => `${round2(r * Math.sin(deg * DEG))} ${round2(-r * Math.cos(deg * DEG))}`;
 
 export interface BossMarkProps {

@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { assert, test } from "vitest";
 import { WAYMARKS } from "../src/components/arena/Arena";
+import { DOT_R } from "../src/components/arena/BossMark";
 import { LearnPicture } from "../src/components/arena/LearnPicture";
 import { LEARN_PICTURES } from "../src/data/pictures";
 import { LEARN_CARDS } from "../src/data/questions";
@@ -55,6 +56,13 @@ const boxOf = (o: Overlay): Box | null => {
   return null;
 };
 const overlap = (a: Box, b: Box, pad: number): boolean => a[0] < b[2] - pad && b[0] < a[2] - pad && a[1] < b[3] - pad && b[1] < a[3] - pad;
+/** Whether a label's box reaches into the boss's round dot: the box's nearest point to his middle
+    is inside the dot, by more than `pad`. */
+const onDot = (b: Box, boss: { x: number; y: number }, pad: number): boolean => {
+  const nx = Math.min(Math.max(boss.x, b[0]), b[2]);
+  const ny = Math.min(Math.max(boss.y, b[1]), b[3]);
+  return Math.hypot(nx - boss.x, ny - boss.y) < DOT_R - pad;
+};
 const WAYMARK_BOXES: Box[] = WAYMARKS.map((w) => {
   const r = w.sq ? 3 : 3.2;
   return [w.x - r, w.y - r, w.x + r, w.y + r];
@@ -78,11 +86,10 @@ test("no label hides under a waymark or the boss, runs off the arena, or covers 
           const b = boxOf(o);
           return b ? [b] : [];
         });
-        const boss: Box | null = f.boss ? [f.boss.x - 3.4, f.boss.y - 3.4, f.boss.x + 3.4, f.boss.y + 3.4] : null;
         const where = `${item.id} ${s} ${view}`;
         boxes.forEach((b, i) => {
           if (WAYMARK_BOXES.some((w) => overlap(b, w, 0.2))) problems.push(`${where}: a label under a waymark`);
-          if (boss && overlap(b, boss, 0.2)) problems.push(`${where}: a label under the boss`);
+          if (f.boss && onDot(b, f.boss, 0.2)) problems.push(`${where}: a label on the boss's dot`);
           if (b[0] < -0.5 || b[2] > 100.5 || b[1] < -0.5 || b[3] > 100.5) problems.push(`${where}: a label off the arena`);
           if (boxes.slice(i + 1).some((c) => overlap(b, c, 0.4))) problems.push(`${where}: two labels on top of each other`);
         });

@@ -313,7 +313,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const meteor = (z: Zone): Overlay => aoe(zoneCenter(z), METEOR_R);
     return {...d, options:[hit(youIn(s, d.zone), [meteor(d.zone)]), hit(youIn(s, d2.zone), [meteor(d2.zone)]),
       hit(youAt(s, [64, 36]), [aoe([64, 36], METEOR_R)]), show([stackHit(stack), aoe([65, 35], METEOR_R), ...stack], [circle([65, 35], 10)])]}; },
-  "k-meteor-stack": () => { const ne = cluster([67, 33], NO_HEALERS, 3), sw = cluster([33, 67], NO_HEALERS, 3), under = ring(NO_HEALERS, 7.5, 0, 60), spread = ring(NO_HEALERS, 36, 30, 60);
+  "k-meteor-stack": () => { const ne = cluster([67, 33], NO_HEALERS, 3), sw = cluster([33, 67], NO_HEALERS, 3), under = ring(NO_HEALERS, 9, 0, 60), spread = ring(NO_HEALERS, 36, 30, 60);
     return {overlays:[{t:"rock", x:57, y:43}, {t:"rock", x:43, y:57}, target([43, 43]), target([26, 74])], boss:BOSS,
       after:[lineTo(CENTER, [65, 35])], answer:[circle([65, 35], 7)], options:[
         show([lineTo(CENTER, [67, 33]), ...ne], [circle([67, 33], 9)]),

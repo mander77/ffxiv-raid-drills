@@ -401,7 +401,7 @@ Do not propose these again unless the owner brings them up.
   he stands on a weapon, his dot shows through the clear badge, and a thin sand outline keeps the
   icon readable over it (owner's choice). His dot is wider than the badge, so a red band shows
   around the badge's rim and you see where each one ends (owner's choice). The held weapon in
-  Raw Steel Trophy is its icon alone, the same size as on the floor (one scythe icon across the app), NE of him with its name tag beside it (owner's choice). A weapon's name goes out to
+  Raw Steel Trophy is its icon alone, the same size as on the floor (one scythe icon across the app), on top of his dot, with its name tag under the dot (owner's choice). A weapon's name goes out to
   the side of its line, away from the arena center; in Practice, its order number goes in toward
   the center.
 - The boss turns smoothly to face his next target. He does not flip.
@@ -427,7 +427,7 @@ static wins.
 - Scythe: three cleaves. One cone on each tank, and one cone behind him that the rest of the party
   shares. Tanks spread, and the party stacks south behind him.
 - Axe: the reverse. A shared tank buster, and six spread hits. Tanks stack, and the party spreads.
-- The held weapon is drawn NE of the boss, between his ring and waymark B, with its name to its east.
+- The held weapon is drawn on top of the boss's dot, with its name under the dot.
 
 ### Assault Evolved (he jumps to the weapons)
 
