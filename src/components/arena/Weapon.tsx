@@ -100,10 +100,11 @@ function Glyph({ t }: GlyphProps) {
     <>
       {t === "sword" && (
         <>
-          <path className="glyph" d="M0 4.4 L0.9 3 L0.9 -1.2 L-0.9 -1.2 L-0.9 3 Z" />
-          <rect className="glyph" x="-3" y="-2.2" width="6" height="1.2" rx="0.3" />
-          <line className="glyph-line" x1="0" y1="-2.2" x2="0" y2="-3.9" />
-          <circle className="glyph" cy="-4.4" r="0.8" />
+          {/* A wide blade, point down, a gently bent crossguard, the grip and a round pommel. */}
+          <path className="glyph" d="M0 5 L1.3 3.2 L1.3 -1.4 L-1.3 -1.4 L-1.3 3.2 Z" />
+          <path className="glyph" d="M-3.6 -2.7 Q0 -1.5 3.6 -2.7 L3.4 -1.5 Q0 -0.5 -3.4 -1.5 Z" />
+          <line className="glyph-line" x1="0" y1="-1.8" x2="0" y2="-3.9" />
+          <circle className="glyph" cy="-4.4" r="1" />
         </>
       )}
       {t === "axe" && (
