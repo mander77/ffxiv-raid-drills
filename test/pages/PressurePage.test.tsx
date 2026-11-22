@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 // Pressure: the start screen, a quick round, the run, and a shared link to the player.
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, assert, beforeAll, beforeEach, test } from "vitest";
@@ -95,6 +95,19 @@ test("a shared link opens the player paused at its moment, on its mechanic", () 
   assert.ok(screen.getByRole("button", { name: "Play" }), "paused");
   assert.ok(screen.getByRole("heading", { name: "Assault Evolved" }));
   assert.ok(screen.getByText(/Paused/));
+});
+
+test("the slider shows the fight time, and its keys are its own", async () => {
+  open("/pressure/K7Q2?t=46");
+  const user = userEvent.setup();
+  const slider = screen.getByRole("slider", { name: "Fight time" });
+  await waitFor(() => assert.equal(slider.getAttribute("aria-valuenow"), "46"));
+  slider.focus();
+  await user.keyboard("{ArrowRight}");
+  // One step on, not 5 seconds: the window's arrow keys leave the slider alone.
+  await waitFor(() => assert.equal(slider.getAttribute("aria-valuenow"), "46.1"));
+  await user.keyboard(" ");
+  assert.ok(screen.getByRole("button", { name: "Play" }), "Space on the slider does not play");
 });
 
 test("a tick under the slider names its mechanic, and a click goes there", async () => {

@@ -60,7 +60,9 @@
   "overrides": [
     {
       "includes": ["src/components/ui/**"],
-      "linter": { "rules": { "a11y": { "useSemanticElements": "off" } } }
+      "linter": {
+        "rules": { "a11y": { "useSemanticElements": "off" }, "suspicious": { "noArrayIndexKey": "off" } }
+      }
     },
     {
       "includes": ["src/**", "test/**", "e2e/**", "!src/components/icons.tsx", "!src/components/ui/**"],

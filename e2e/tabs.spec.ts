@@ -198,8 +198,7 @@ test("Pressure: a shared link opens the player paused at its moment, and Space p
   await page.goto("/pressure/K7Q2?t=46");
   await expect(page.getByRole("heading", { name: "Assault Evolved" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
-  // The player writes "46.0". Chromium and WebKit give back "46", Firefox "46.0".
-  await expect(page.getByRole("slider", { name: "Fight time" })).toHaveValue(/^46(\.0)?$/);
+  await expect(page.getByRole("slider", { name: "Fight time" })).toHaveAttribute("aria-valuenow", "46");
   await page.keyboard.press("Space");
   await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
   // Playing, the address no longer holds a moment.

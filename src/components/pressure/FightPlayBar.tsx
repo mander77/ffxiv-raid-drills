@@ -1,4 +1,4 @@
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,6 +7,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useFightFrame } from "../../hooks/useFightFrame";
 import { SPEEDS, type Speed } from "../../stores/pressure";
@@ -20,8 +21,9 @@ export interface SliderMark {
   name: string;
 }
 
-/** The width of the slider's thumb in pixels, so a tick lines up with the thumb at its time. The
-    browsers draw it about this wide. */
+/** The width of the slider's thumb in pixels (size-4 in slider.tsx), so a tick lines up with the
+    thumb at its time: the Slider keeps its thumb inside the track, so the thumb's centre runs from
+    half a thumb in at the start to half a thumb in at the end. */
 const THUMB = 16;
 
 export interface FightPlayBarProps {
@@ -45,15 +47,10 @@ export interface FightPlayBarProps {
     name, click it to go there), then one row with play or pause, the time, the speed, and buttons
     for Start over, New fight and Settings. */
 export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpeed, settings, onRestart, onNewFight }: FightPlayBarProps) {
-  const slider = useRef<HTMLInputElement>(null);
   const time = useRef<HTMLSpanElement>(null);
-  /** True while you drag the slider, so the clock does not move it under your finger. */
-  const dragging = useRef(false);
 
-  // Each frame moves the slider and the time. The slider is an uncontrolled input: React sets its
-  // first value, and the frame loop and your drags move it after that.
+  // Each frame moves the time. The text changes through a ref, so the bar does not draw again.
   useFightFrame((s) => {
-    if (slider.current && !dragging.current) slider.current.value = s.t.toFixed(1);
     const text = `${clock(s.t)} / ${clock(end)}`;
     if (time.current && time.current.textContent !== text) time.current.textContent = text;
   });
@@ -61,23 +58,7 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
   return (
     // Thin, like a video player's controls: the slider across the top, the buttons in one row under it.
     <div className="rounded-lg border bg-card px-1.5 py-1">
-      <input
-        ref={slider}
-        type="range"
-        min={0}
-        max={end}
-        step={0.1}
-        defaultValue={0}
-        aria-label="Fight time"
-        className="block h-4 w-full accent-primary"
-        onPointerDown={() => {
-          dragging.current = true;
-        }}
-        onPointerUp={() => {
-          dragging.current = false;
-        }}
-        onChange={(e) => onSeek(Number(e.target.value))}
-      />
+      <FightTimeSlider end={end} onSeek={onSeek} />
       <div className="relative h-2">
         {marks.map((m) => (
           <Tick key={m.t} mark={m} left={`calc(${THUMB / 2}px + (100% - ${THUMB}px) * ${m.t / end})`} onSeek={onSeek} />
@@ -126,6 +107,53 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
         {settings}
       </div>
     </div>
+  );
+}
+
+interface FightTimeSliderProps {
+  end: number;
+  onSeek: (t: number) => void;
+}
+
+/** The slider for the fight time. It follows the fight clock, and dragging it, clicking its track
+    or the arrow keys on it move the clock. */
+function FightTimeSlider({ end, onSeek }: FightTimeSliderProps) {
+  const [t, setT] = useState(0);
+  /** True while you drag the slider, so the clock does not move it under your finger. */
+  const dragging = useRef(false);
+
+  // Each frame moves the slider to the fight time, to its step of 0.1 seconds. The state changes
+  // only when that step changes, so the slider draws again a few times a second, not every frame.
+  useFightFrame((s) => {
+    if (!dragging.current) setT(Math.round(s.t * 10) / 10);
+  });
+
+  return (
+    <Slider
+      aria-label="Fight time"
+      min={0}
+      max={end}
+      step={0.1}
+      value={[t]}
+      className="h-4"
+      onPointerDown={() => {
+        dragging.current = true;
+      }}
+      onValueChange={([v]) => {
+        setT(v);
+        onSeek(v);
+      }}
+      // The slider holds the pointer while you drag, so the pointer comes up on it.
+      onPointerUp={() => {
+        dragging.current = false;
+      }}
+      onPointerCancel={() => {
+        dragging.current = false;
+      }}
+      // The slider's keys are its own: the arrows move it a step, and Space does not play or pause
+      // the fight while it has the focus.
+      onKeyDown={(e) => e.stopPropagation()}
+    />
   );
 }
 

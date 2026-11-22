@@ -257,7 +257,8 @@ These steps put a branch on `main`, the live site.
     A colour a variant does not give comes from a new variant in the component (`cva`), as
     shadcn/ui's customization guide shows, not from `dark:` classes on top of a variant.
     `button.tsx` and `alert.tsx` each have two: `correct` and `incorrect`, the colours of an
-    answer after you answer. Keep them when the CLI updates the files.
+    answer after you answer. Keep them when the CLI updates the files. `slider.tsx` gives its
+    `aria-label` to the thumb, the element a screen reader reads as the slider; keep that too.
   - Tests (Testing Library, Playwright): find elements by role and text, as a user would.
 - The site is built with React, Tailwind CSS and shadcn/ui, in the usual React shape:
   - A component used by more than one page gets its own file in `src/components/`, named after
