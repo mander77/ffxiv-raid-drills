@@ -5,14 +5,8 @@ import type { LineType } from "../../lib/fightLine";
 import { CastButton } from "./CastButton";
 import { CastKey } from "./CastKey";
 import { CastSquare } from "./CastSquare";
+import { LOOK, SIZES } from "./lineLook";
 
-/** Where the now mark sits from the start of the box, how far the line goes on before it, the
-    room after the line at the end, and how far apart two casts stay at least, in pixels, down the
-    box ("y") and across it ("x"). The app's choice. */
-const SIZES = {
-  y: { now: 56, before: 40, end: 12, gap: 36 },
-  x: { now: 56, before: 40, end: 12, gap: 76 },
-} as const;
 /** A cast's square: it grows in its last seconds, and keeps that size as it goes past the now mark. */
 const square = (m: CastMark) => (
   <CastSquare
@@ -22,38 +16,6 @@ const square = (m: CastMark) => (
 );
 /** The seconds marked on the line. The app's choice. */
 const TICKS = [5, 10, 20] as const;
-
-/** The classes of each part, down the box and across it. Complete class names, so Tailwind finds
-    them. In the player a drag along the line moves the clock; a swipe the other way stays the
-    browser's. */
-const LOOK = {
-  y: {
-    section: "flex min-h-0 flex-col",
-    box: "min-h-0 flex-1",
-    drag: "touch-pan-x",
-    line: "left-7 w-0.5",
-    now: "left-3.5 h-1 w-8",
-    tick: "left-0 flex w-9 -translate-y-1/2 items-center justify-end gap-0.5",
-    list: "inset-x-0 top-0",
-    item: "top-0 right-2 left-3.5",
-    button: "flex w-full items-center gap-2.5 text-sm",
-    name: "min-w-0 truncate px-1",
-    key: "right-2 bottom-1.5",
-  },
-  x: {
-    section: "",
-    box: "h-24",
-    drag: "touch-pan-y",
-    line: "top-5.5 h-0.5",
-    now: "top-2 h-8 w-1 -translate-x-1/2",
-    tick: "bottom-0.5 -translate-x-1/2",
-    list: "inset-y-0 left-0",
-    item: "top-1.5 left-0 w-18",
-    button: "flex w-full flex-col items-center gap-1 text-xs",
-    name: "line-clamp-2 px-0.5 text-center leading-tight",
-    key: "right-2 bottom-0.5",
-  },
-} as const;
 
 export interface MovingLineProps {
   axis: "x" | "y";

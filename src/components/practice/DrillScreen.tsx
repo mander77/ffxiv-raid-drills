@@ -1,21 +1,30 @@
 import { Check, X } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
+import type { LineType } from "../../lib/fightLine";
 import { answerStep, type Pattern, type StepStatus, statusAfter } from "../../lib/practice";
 import { cn } from "../../lib/utils";
 import type { Drill, Point, StepResult } from "../../types";
-import { ArenaFrame } from "../arena/ArenaFrame";
+import { ArenaFrame, type ArenaFrameProps } from "../arena/ArenaFrame";
 import { LiveArena } from "../arena/LiveArena";
+import { FightLine } from "../fight-line/FightLine";
 import { HudPrompt } from "../HudPrompt";
 import { LastAnswer } from "../LastAnswer";
 import { RuleBox } from "../RuleBox";
 import { SetupText } from "../SetupText";
 import { StepChips } from "../StepChips";
 
+/** The fight line on Practice shows only the Practice mechanics. */
+const PRACTICE: readonly LineType[] = ["practice"];
+
 export interface DrillScreenProps {
   item: Drill;
   pattern: Pattern;
+  /** Names the try: the mechanic, its pattern, the slot and the count of tries. A new one starts
+      the screen fresh. */
+  tryKey: string;
   /** The place of the mechanic in the list, and how many there are. */
   i: number;
   count: number;
@@ -29,15 +38,20 @@ export interface DrillScreenProps {
   onNewPattern: () => void;
   /** Draw the mechanic again, so its weapons appear one at a time again. */
   onReplaySpawns: () => void;
+  /** Open another mechanic, from the fight line. */
+  onPick: (drill: string) => void;
 }
 
-/** The screen of one Practice mechanic (a drill): click where you stand on the arena, one step at a time. Above the arena:
-    the question with Show me, or why a spot was incorrect, or the result. Beside it: the mechanic, its
-    steps, the last answer and, at the end, the rule and the way on.
-    Give it a `key` per mechanic, pattern and try, so each starts fresh. */
+/** The screen of one Practice mechanic (a drill): click where you stand on the arena, one step at
+    a time. It has the layout of Pressure's player. On a wide screen: on the left, the question with
+    Show me (or why a spot was incorrect, or the result) over the mechanic, its steps, the last
+    answer and, at the end, the rule; on the right, a bar over the fight line, where you pick
+    another mechanic. On a narrow screen, the same in one column: the left side over the arena, the
+    right side under it, with the line sideways. */
 export function DrillScreen({
   item,
   pattern,
+  tryKey,
   i,
   count,
   canChange,
@@ -46,6 +60,7 @@ export function DrillScreen({
   onAgain,
   onNewPattern,
   onReplaySpawns,
+  onPick,
 }: DrillScreenProps) {
   const { scene: sc, k } = pattern;
   const [results, setResults] = useState<StepResult[]>([]);
@@ -54,6 +69,18 @@ export function DrillScreen({
   const [shown, setShown] = useState(false);
   /** Show me was used, so this try does not count in your score: it was learning, not a test. */
   const [helped, setHelped] = useState(false);
+  // A new try starts fresh. The screen is not given a key for it, so the fight line stays and
+  // slides to the next mechanic; its state is reset as react.dev shows for a prop that changes.
+  const [shownTry, setShownTry] = useState(tryKey);
+  if (shownTry !== tryKey) {
+    setShownTry(tryKey);
+    setResults([]);
+    setStatus("ask");
+    setShown(false);
+    setHelped(false);
+  }
+  /** A wide screen (lg, 1024 px and up): the columns sit beside the arena, as in Pressure. */
+  const wide = useMediaQuery("(min-width: 1024px)");
 
   const n = results.length;
   const done = n >= sc.steps.length;
@@ -138,66 +165,88 @@ export function DrillScreen({
     </HudPrompt>
   );
 
-  return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="space-y-3">
-        {hud}
-        <ArenaFrame>
-          <LiveArena
-            scene={sc}
-            k={k}
-            results={results}
-            showLast={status !== "ask" || done}
-            hint={shown && status !== "incorrect"}
-            onPointClick={handleArenaClick}
-            className="block h-auto w-full"
-          />
-        </ArenaFrame>
+  const panel = (
+    <section aria-label="The mechanic" className="space-y-3">
+      <div>
+        <p className="text-sm text-muted-foreground">
+          {item.phase} · {item.time}
+        </p>
+        <h2 className="font-display text-xl tracking-wide">{item.title}</h2>
       </div>
-      <Card>
-        <CardHeader>
-          <CardDescription>
-            {item.phase} · {i + 1} of {count}
-          </CardDescription>
-          <CardTitle className="font-display text-xl tracking-wide">{item.title}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <SetupText text={sc.setup} folded={n > 0} />
-          {multi && <StepChips count={sc.steps.length} results={results} />}
-          {!done && (
-            <div className="rounded-lg bg-muted px-3 py-2 text-sm">
-              {multi && (
-                <span className="block text-xs text-muted-foreground">
-                  Step {n + 1} of {sc.steps.length}
-                </span>
-              )}
-              <span className="font-medium">{sc.steps[n].q}</span>
-            </div>
-          )}
-          {/* The rule says why the spot is correct: at the end, and with Show me, which gives where. */}
-          {(done || shown) && <RuleBox rule={sc.rule} />}
-          {last && <LastAnswer ok={last.ok} question={sc.steps[n - 1].q} answer={sc.steps[n - 1].a} />}
-          <div className="flex flex-wrap gap-2">
-            {done && <Button onClick={onNextMechanic}>Next mechanic</Button>}
-            {done && (
-              <Button variant="outline" onClick={onAgain}>
-                Again
-              </Button>
-            )}
-            {!done && sc.spawnPlay && (
-              <Button variant="outline" onClick={onReplaySpawns}>
-                Watch the spawns again
-              </Button>
-            )}
-            {/* A mechanic with nothing random would look the same again, so it gets no New pattern. */}
-            {canChange && (
-              <Button variant="outline" onClick={onNewPattern}>
-                New pattern
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <SetupText key={tryKey} text={sc.setup} folded={n > 0} />
+      {multi && <StepChips count={sc.steps.length} results={results} />}
+      {/* The rule says why the spot is correct: at the end, and with Show me, which gives where. */}
+      {(done || shown) && <RuleBox rule={sc.rule} />}
+      {last && <LastAnswer ok={last.ok} question={sc.steps[n - 1].q} answer={sc.steps[n - 1].a} />}
+      {!done && sc.spawnPlay && (
+        <Button variant="outline" onClick={onReplaySpawns}>
+          Watch the spawns again
+        </Button>
+      )}
+    </section>
+  );
+  /** The bar over the fight line, in the place and the look of Pressure's bar. */
+  const bar = (
+    <div className="flex items-center gap-2 rounded-lg border bg-card py-1.5 pr-1.5 pl-3">
+      <span className="flex-1 text-sm text-muted-foreground">
+        Mechanic {i + 1} of {count}
+      </span>
+      <Button variant="outline" size="sm" onClick={onAgain}>
+        Again
+      </Button>
+      {/* A mechanic with nothing random would look the same again, so it gets no New pattern. */}
+      {canChange && (
+        <Button variant="outline" size="sm" onClick={onNewPattern}>
+          New pattern
+        </Button>
+      )}
     </div>
   );
+  /** The same places as in Pressure's player (see FightScreen). */
+  const sides: Partial<ArenaFrameProps> = wide
+    ? {
+        before: (
+          <div className="flex w-68 flex-col gap-3">
+            {hud}
+            <ScrollArea className="min-h-0 flex-1">{panel}</ScrollArea>
+          </div>
+        ),
+        beside: (
+          <div className="flex w-80 flex-col gap-2">
+            {bar}
+            <FightLine axis="y" types={PRACTICE} current={item.id} onPick={onPick} label="Mechanics" className="flex-1" />
+          </div>
+        ),
+        className: "mx-0 ml-68 mr-80 min-w-0 flex-1",
+      }
+    : {
+        over: (
+          <div className="space-y-3 pb-2">
+            {hud}
+            {panel}
+          </div>
+        ),
+        under: (
+          <div className="space-y-2">
+            {bar}
+            <FightLine axis="x" types={PRACTICE} current={item.id} onPick={onPick} label="Mechanics" />
+          </div>
+        ),
+        fill: true,
+      };
+  const arena = (
+    <ArenaFrame {...sides}>
+      <LiveArena
+        key={tryKey}
+        scene={sc}
+        k={k}
+        results={results}
+        showLast={status !== "ask" || done}
+        hint={shown && status !== "incorrect"}
+        onPointClick={handleArenaClick}
+        className="block h-auto w-full"
+      />
+    </ArenaFrame>
+  );
+  return wide ? <div className="flex justify-center">{arena}</div> : arena;
 }

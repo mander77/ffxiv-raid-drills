@@ -331,15 +331,21 @@ Do not propose these again unless the owner brings them up.
 - The map is the main thing on the screen. It grows until the whole arena fits in the window
   height, but it is never smaller than 420 px.
 - The mechanics are on the fight line (owner's choice), the same component as Pressure's casts
-  coming up, so both tabs draw the fight one way. It stands still on Practice and shows only the
-  Practice mechanics (`types={["practice"]}`), each at its first time, under its phase. A click
-  opens the mechanic; the one on screen is marked in celery and kept in view, without scrolling the
-  page. Beside the arena on a wide screen; on a phone it lies sideways above the arena, in place of
-  the old Back, Next and phase chips. It has no timer: Practice stays untimed, and Pressure is the
-  timed tab. Pressure's line shows every cast, as before, and no mechanic names for now.
+  coming up, so both tabs draw the fight one way. On Practice it shows only the Practice
+  mechanics (`types={["practice"]}`), each at its first time, and the fight clock does not move
+  it. The mechanic on screen rests at the now mark, marked in celery. You drag the line as in
+  Pressure's player, and the mechanic nearest the now mark opens when you let go; or you click a
+  mechanic. A long wait between two mechanics is cut short on the line, so they stay close enough
+  to drag between. Pressure's line shows every cast, as before, and no mechanic names for now.
+- Practice has the layout of Pressure's player (owner's choice), so the two tabs look and feel the
+  same. A wide screen: the prompt over the mechanic on the left of the arena, and a bar (which
+  mechanic, Again, New pattern) over the fight line on its right. A narrow screen: the same in one
+  column, the prompt and the mechanic over the arena, the bar and the line, sideways, under it. It
+  has no timer yet: Practice stays untimed, and Pressure is the timed tab.
 - Show me draws the correct spot in blue with the tag "Go here", shows the answer text in the bar and
   the rule in the panel. A try with Show me does not count in the score.
-- Again and Next mechanic are in the bar above the map after a mechanic.
+- Again and Next mechanic are in the prompt bar after a mechanic. Again and New pattern are also in
+  the bar over the fight line.
 
 ### Pressure: the quick round
 

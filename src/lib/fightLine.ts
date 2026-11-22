@@ -52,3 +52,15 @@ export const FIGHT_ROWS: readonly LineRow[] = [
     .sort((a, b) => a.order - b.order)
     .map((d): LineRow => ({ key: d.id, t: firstTime(d.time), when: d.time, name: d.title, phase: d.phase, cats: [], drill: d.id })),
 ].sort((a, b) => a.t - b.t);
+
+/** Where each row sits along a line that stands still, in pixels from the first: a second of the
+    fight is `perSecond` pixels, but two rows stay at least `gap` apart, so their names never
+    overlap, and at most `most`, so a long wait between mechanics does not leave a long empty line.
+    `times` are in fight order. */
+export function linePlaces(times: readonly number[], perSecond: number, gap: number, most: number): number[] {
+  let at = 0;
+  return times.map((t, k) => {
+    if (k > 0) at += Math.min(most, Math.max(gap, (t - times[k - 1]) * perSecond));
+    return at;
+  });
+}

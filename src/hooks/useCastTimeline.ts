@@ -1,7 +1,8 @@
-import { type HTMLAttributes, type PointerEvent, type RefCallback, type RefObject, useRef, useState } from "react";
+import { type RefCallback, type RefObject, useRef, useState } from "react";
 import { CASTS_AHEAD, CASTS_PAST, CASTS_SOON, type CastMark, castPositions, castsAhead, hitsGoneOff } from "../lib/fight";
 import { type LineType, shows } from "../lib/fightLine";
 import { useFightFrame } from "./useFightFrame";
+import { type DragHandlers, useLineDrag } from "./useLineDrag";
 
 /** Where a timeline of the casts coming up puts things, in pixels. */
 export interface CastTimelineLayout {
@@ -26,9 +27,6 @@ export interface CastControls {
   scrub: (t: number) => void;
 }
 
-/** The pointer handlers that let you drag the timer, for its box. */
-export type DragHandlers = Pick<HTMLAttributes<HTMLDivElement>, "onPointerDown" | "onPointerMove" | "onPointerUp" | "onPointerCancel">;
-
 export interface CastTimeline {
   /** Give it to the box the casts move in; its size sets the time scale. */
   box: RefObject<HTMLDivElement | null>;
@@ -40,18 +38,6 @@ export interface CastTimeline {
   itemRef: (i: number) => RefCallback<HTMLLIElement>;
   /** With controls: spread them on the box, so a drag moves the fight clock. */
   drag: DragHandlers;
-}
-
-/** How far a pointer moves, in pixels, before a press on the timer counts as a drag and not a
-    click. The app's choice. */
-const DRAG_FROM = 4;
-
-/** A press on the timer: where it started, the fight time then, and whether it is a drag yet. */
-interface Press {
-  id: number;
-  from: number;
-  t: number;
-  dragging: boolean;
 }
 
 /** The casts coming up, moving on every frame of the fight clock. Each frame moves every cast's
@@ -74,7 +60,8 @@ export function useCastTimeline(
   const [marks, setMarks] = useState<CastMark[]>([]);
   /** The fight time at the last frame, and the pixels per second of the line, for a drag. */
   const clock = useRef({ t: 0, perSecond: 1 });
-  const press = useRef<Press | null>(null);
+  /** The fight time when a drag started, while you drag. */
+  const dragFrom = useRef<number | null>(null);
 
   useFightFrame((s) => {
     const size = (axis === "y" ? box.current?.clientHeight : box.current?.clientWidth) ?? 0;
@@ -82,7 +69,7 @@ export function useCastTimeline(
     clock.current = { t: s.t, perSecond };
     // While you drag, the casts that went off stay in view as far back as the line goes before the
     // now mark, so you can drag back to them.
-    const dragging = press.current?.dragging ?? false;
+    const dragging = dragFrom.current !== null;
     const past = dragging ? Math.max(CASTS_PAST, nowAt / perSecond) : CASTS_PAST;
     const now = castsAhead(s, past).filter((m) => shows(m, types));
     // Draw again only when the casts in view change.
@@ -123,41 +110,21 @@ export function useCastTimeline(
     };
   }
 
-  /** Where the pointer is along the line. */
-  function along(e: PointerEvent<HTMLDivElement>): number {
-    return axis === "y" ? e.clientY : e.clientX;
-  }
-  // A press becomes a drag once it moves a few pixels; then the box holds the pointer, so the drag
-  // goes on outside it and the press does not click the cast it started on. The casts move up (or
-  // left) as the clock runs, so dragging up (or left) moves the clock on.
-  const drag: DragHandlers = controls
-    ? {
-        onPointerDown: (e) => {
-          if (e.button !== 0) return;
-          press.current = { id: e.pointerId, from: along(e), t: clock.current.t, dragging: false };
-        },
-        onPointerMove: (e) => {
-          const p = press.current;
-          if (!p || p.id !== e.pointerId) return;
-          const moved = along(e) - p.from;
-          if (!p.dragging) {
-            if (Math.abs(moved) < DRAG_FROM) return;
-            p.dragging = true;
-            e.currentTarget.setPointerCapture(e.pointerId);
-            controls.hold(true);
-          }
-          controls.scrub(p.t - moved / clock.current.perSecond);
-        },
-        onPointerUp: (e) => letGo(e.pointerId),
-        onPointerCancel: (e) => letGo(e.pointerId),
-      }
-    : {};
-  function letGo(id: number): void {
-    const p = press.current;
-    if (!p || p.id !== id) return;
-    press.current = null;
-    if (p.dragging) controls?.hold(false);
-  }
+  // The casts move up (or left) as the clock runs, so dragging up (or left) moves the clock on.
+  const drag = useLineDrag(
+    axis,
+    controls && {
+      start: () => {
+        dragFrom.current = clock.current.t;
+        controls.hold(true);
+      },
+      move: (moved) => controls.scrub((dragFrom.current ?? clock.current.t) - moved / clock.current.perSecond),
+      end: () => {
+        dragFrom.current = null;
+        controls.hold(false);
+      },
+    },
+  );
 
   return { box, nowMark, marks, itemRef, drag };
 }

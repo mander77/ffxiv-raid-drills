@@ -1,15 +1,13 @@
 // The Practice page (/practice/<mechanic>/<code>): one mechanic at a time, with no timer. Click where you
 // stand, and the arena shows the correct area. The code names the mechanic's pattern, so a link opens
-// the same one. The fight line (standing still, Practice mechanics only) opens a mechanic: beside
-// the arena on a wide screen, above it, sideways, on a narrow one.
+// the same one. The screen has the layout of Pressure's player, and its fight line (Practice
+// mechanics only) opens another mechanic.
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router";
-import { FightLine } from "../components/fight-line/FightLine";
 import { PageContainer } from "../components/PageContainer";
 import { DrillScreen } from "../components/practice/DrillScreen";
 import { RoundDone } from "../components/RoundDone";
 import { changes, DRILLS } from "../data/drills";
-import type { LineType } from "../lib/fightLine";
 import { buildPattern } from "../lib/practice";
 import { useProgressStore } from "../stores/progress";
 import { useSlotStore } from "../stores/slot";
@@ -18,9 +16,6 @@ import { isCode, newCode } from "../util";
 
 /** The mechanics, in fight order. */
 const IN_ORDER = [...DRILLS].sort((a, b) => a.order - b.order);
-
-/** The fight line on Practice shows only the Practice mechanics. */
-const PRACTICE: readonly LineType[] = ["practice"];
 
 /** The address of a mechanic with a new pattern. For clicks only: drawing must not make random
     codes, so a redirect uses the code the page made once (see `fresh`). */
@@ -95,25 +90,20 @@ export function PracticePage() {
     <main>
       <PageContainer className="space-y-6 py-6">
         {lede}
-        <div className="grid gap-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
-          <FightLine axis="y" types={PRACTICE} current={item.id} label="Mechanics" className="max-lg:hidden" />
-          <div className="min-w-0 space-y-4">
-            <FightLine axis="x" types={PRACTICE} current={item.id} label="Mechanics" className="lg:hidden" />
-            <DrillScreen
-              key={`${item.id}-${okCode}-${slot}-${tries}`}
-              item={item}
-              pattern={pattern}
-              i={i}
-              count={IN_ORDER.length}
-              canChange={changes(item)}
-              onScore={(ok) => record(item.id, ok, "practice", slot)}
-              onNextMechanic={goNext}
-              onAgain={() => setTries((t) => t + 1)}
-              onNewPattern={() => navigate(withNewCode(item.id))}
-              onReplaySpawns={() => setTries((t) => t + 1)}
-            />
-          </div>
-        </div>
+        <DrillScreen
+          tryKey={`${item.id}-${okCode}-${slot}-${tries}`}
+          item={item}
+          pattern={pattern}
+          i={i}
+          count={IN_ORDER.length}
+          canChange={changes(item)}
+          onScore={(ok) => record(item.id, ok, "practice", slot)}
+          onNextMechanic={goNext}
+          onAgain={() => setTries((t) => t + 1)}
+          onNewPattern={() => navigate(withNewCode(item.id))}
+          onReplaySpawns={() => setTries((t) => t + 1)}
+          onPick={(id) => navigate(withNewCode(id))}
+        />
       </PageContainer>
     </main>
   );

@@ -106,8 +106,11 @@ function showStill(line: React.ReactNode): HTMLElement {
   return screen.getByRole("navigation");
 }
 
-for (const axis of ["y", "x"] as const) {
-  test(`the still line (${axis}) with "practice" links every mechanic, in Practice order`, () => {
+for (const [axis, along] of [
+  ["y", "clientY"],
+  ["x", "clientX"],
+] as const) {
+  test(`the still line (${axis}) with "practice" links every mechanic, in Practice order, and marks the one on screen`, () => {
     const nav = showStill(<FightLine axis={axis} types={["practice"]} label="Mechanics" current={IN_ORDER[3].id} />);
     assert.equal(nav.getAttribute("aria-label"), "Mechanics");
     const links = within(nav).getAllByRole("link");
@@ -116,13 +119,33 @@ for (const axis of ["y", "x"] as const) {
       IN_ORDER.map((d) => `/practice/${d.id}`),
     );
     for (const d of IN_ORDER) assert.ok(within(nav).getByText(d.title));
-    // The mechanic on screen is marked, and only that one.
     assert.deepEqual(
       links.filter((a) => a.getAttribute("aria-current") === "step").map((a) => a.getAttribute("href")),
       [`/practice/${IN_ORDER[3].id}`],
     );
-    // One heading per phase.
-    assert.equal(within(nav).getAllByRole("heading").length, 4);
+  });
+
+  test(`the still line (${axis}): a click on a mechanic opens it`, () => {
+    const onPick = vi.fn();
+    const nav = showStill(<FightLine axis={axis} types={["practice"]} label="Mechanics" current={IN_ORDER[3].id} onPick={onPick} />);
+    fireEvent.click(within(nav).getByRole("link", { name: IN_ORDER[5].title }));
+    assert.deepEqual(onPick.mock.calls, [[IN_ORDER[5].id]]);
+  });
+
+  test(`the still line (${axis}): a drag opens the mechanic nearest the now mark when you let go`, () => {
+    const onPick = vi.fn();
+    const nav = showStill(<FightLine axis={axis} types={["practice"]} label="Mechanics" current={IN_ORDER[3].id} onPick={onPick} />);
+    const box = nav.firstElementChild as HTMLElement;
+    fireEvent.pointerDown(box, { pointerId: 1, button: 0, [along]: 300 });
+    // A small move is still a click.
+    fireEvent.pointerMove(box, { pointerId: 1, [along]: 298 });
+    fireEvent.pointerUp(box, { pointerId: 1, [along]: 298 });
+    assert.equal(onPick.mock.calls.length, 0);
+    // Dragging down (or right) brings the earlier mechanics to the now mark; far enough, the first.
+    fireEvent.pointerDown(box, { pointerId: 2, button: 0, [along]: 0 });
+    fireEvent.pointerMove(box, { pointerId: 2, [along]: 5000 });
+    fireEvent.pointerUp(box, { pointerId: 2, [along]: 5000 });
+    assert.deepEqual(onPick.mock.calls, [[IN_ORDER[0].id]]);
   });
 }
 

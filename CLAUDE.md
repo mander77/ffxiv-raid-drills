@@ -127,14 +127,17 @@ src/pages/           React pages, one per route: HomePage (/), LearnPage (/learn
                      CheatSheetPage (/sheet)
 src/components/fight-line/  the fight line, on Practice and Pressure: FightLine (one component, set
                      up per page: down the box or sideways, moving with the fight clock or
-                     standing still, and the types of rows it shows), MovingLine (the casts
-                     coming up, WoW-style squares rising to a now mark), StillLine (the whole
-                     fight, which you scroll; a Practice mechanic is a link), CastSquare (a row's
+                     not, and the types of rows it shows), MovingLine (the casts coming up,
+                     WoW-style squares rising to a now mark), StillLine (the whole fight, which
+                     you drag; the mechanic on screen rests at the now mark), lineLook (the
+                     sizes and classes both share), CastSquare (a row's
                      square: filled for a hit, outlined for the boss's cast, ink for a Practice
                      mechanic), CastKey (its key) and CastButton (a cast you click to go to it,
                      in the player)
-src/lib/fightLine.ts the fight line's rows: LineType, shows (which rows a line shows), FIGHT_ROWS
-src/components/practice/  Practice: DrillScreen (one drill's screen: clicks, Show me, the prompt and panel)
+src/lib/fightLine.ts the fight line's rows: LineType, shows (which rows a line shows), FIGHT_ROWS,
+                     linePlaces (where the rows sit on the line that the clock does not move)
+src/components/practice/  Practice: DrillScreen (one drill's screen, in the layout of Pressure's
+                     player: clicks, Show me, the prompt, the panel, the bar and the fight line)
 src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep, statusAfter, bossFor
 src/components/pressure/  Pressure: PressureStart, QuickRound, FightScreen (the run and the player:
                      frame loop, clicks, keys), FightArena, CastBar, FightPrompt, FightHud (the
@@ -147,7 +150,8 @@ src/lib/pressure.ts  the quick round's rules (weighted cards, the timer) and pla
 src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round), QuestionCard
                      (answers, previews, Lock in, keys, the timer of a timed card), TimerBar,
                      TimelinePicture
-src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useCastTimeline (the casts coming up, moving with the fight clock), useFightFrame (run code on
+src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useCastTimeline (the casts coming up, moving with the fight clock), useLineDrag (drag a
+                     fight line), useFightFrame (run code on
                      each frame of the fight clock), useMediaQuery, useFitToScreen, useTheme, useSectionInView (the section you have scrolled to)
 src/lib/             cn() for class names
 scripts/             setup.mjs (npm run setup), publish.mjs (npm run publish), wait-deploy.mjs
@@ -318,8 +322,8 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   parts a fight has; `Choices` are your settings, a pick or Random each (`CHOICE_ROWS`). The
   player's address calls them picks.
 - **Fight line**: the fight drawn as squares on a line (`FightLine`). On Pressure it moves with the
-  fight clock (the casts coming up, `MovingLine`); on Practice it stands still and opens a
-  mechanic (`StillLine`). Its **types** (`LineType`) are the ability categories and "practice",
+  fight clock (the casts coming up, `MovingLine`); on Practice the clock does not move it, and
+  you drag it or click a mechanic to open it (`StillLine`). Its **types** (`LineType`) are the ability categories and "practice",
   the Practice mechanics; with no types it shows every row.
 
 ## Rules for the content
