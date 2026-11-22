@@ -1,5 +1,6 @@
 import { type HTMLAttributes, type PointerEvent, type RefCallback, type RefObject, useRef, useState } from "react";
 import { CASTS_AHEAD, CASTS_PAST, CASTS_SOON, type CastMark, castPositions, castsAhead, hitsGoneOff } from "../lib/fight";
+import { type LineType, shows } from "../lib/fightLine";
 import { useFightFrame } from "./useFightFrame";
 
 /** Where a timeline of the casts coming up puts things, in pixels. */
@@ -57,8 +58,13 @@ interface Press {
     element through its ref, marks it past, soon or later (data-when), fades it out once it went
     off, and writes its seconds to go into its [data-secs] element. React draws again only when a
     cast comes into view or leaves it. When a hit goes off in a playing fight, the now mark flashes
-    in the hit's category colour and its square pops. CastList and CastStrip share it. */
-export function useCastTimeline({ axis, nowAt, end, gap }: CastTimelineLayout, controls?: CastControls): CastTimeline {
+    in the hit's category colour and its square pops. `types` keeps only the casts of those
+    categories (see shows); with none, every cast shows. FightLine's moving line uses it. */
+export function useCastTimeline(
+  { axis, nowAt, end, gap }: CastTimelineLayout,
+  controls?: CastControls,
+  types?: readonly LineType[],
+): CastTimeline {
   const box = useRef<HTMLDivElement>(null);
   /** The elements by cast, for the frame loop to move. */
   const items = useRef(new Map<number, HTMLLIElement>());
@@ -78,7 +84,7 @@ export function useCastTimeline({ axis, nowAt, end, gap }: CastTimelineLayout, c
     // now mark, so you can drag back to them.
     const dragging = press.current?.dragging ?? false;
     const past = dragging ? Math.max(CASTS_PAST, nowAt / perSecond) : CASTS_PAST;
-    const now = castsAhead(s, past);
+    const now = castsAhead(s, past).filter((m) => shows(m, types));
     // Draw again only when the casts in view change.
     setMarks((was) => (was.length === now.length && was.every((m, k) => m.i === now[k].i) ? was : now));
     const places = castPositions(now, size - end, nowAt, gap);

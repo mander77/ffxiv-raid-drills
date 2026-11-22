@@ -1,9 +1,12 @@
 // @vitest-environment happy-dom
-// The casts coming up: the line beside the arena (CastList) and the sideways one under it (CastStrip).
+// The fight line (FightLine): the one that moves with the fight clock on Pressure, beside the arena
+// and sideways under it, and the one that stands still on Practice.
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import { afterEach, assert, test, vi } from "vitest";
-import { CastList } from "../../src/components/pressure/CastList";
-import { CastStrip } from "../../src/components/pressure/CastStrip";
+import { FightLine } from "../../src/components/fight-line/FightLine";
+import { CATEGORIES, type Category, categoriesAt } from "../../src/data/abilities";
+import { DRILLS } from "../../src/data/drills";
 import { buildFight } from "../../src/data/fight";
 import type { CastControls } from "../../src/hooks/useCastTimeline";
 import { FightFrameContext, type FrameFn } from "../../src/hooks/useFightFrame";
@@ -31,11 +34,11 @@ function spyControls() {
   return { goTo: vi.fn(), hold: vi.fn(), scrub: vi.fn() } satisfies CastControls;
 }
 
-for (const [name, Timeline, axis] of [
-  ["the line beside the arena", CastList, "clientY"],
-  ["the sideways line under the arena", CastStrip, "clientX"],
+for (const [name, lineAxis, axis] of [
+  ["the line beside the arena", "y", "clientY"],
+  ["the sideways line under the arena", "x", "clientX"],
 ] as const) {
-  const timeline = <Timeline />;
+  const timeline = <FightLine axis={lineAxis} follow />;
   test(`${name} lists the casts of the next 30 seconds, with their seconds to go`, () => {
     const list = within(showAt(timeline, 46)).getByRole("list");
     const names = within(list)
@@ -59,7 +62,7 @@ for (const [name, Timeline, axis] of [
 
   test(`${name} in the player: a click on a cast goes to it`, () => {
     const controls = spyControls();
-    const box = showAt(<Timeline controls={controls} />, 46);
+    const box = showAt(<FightLine axis={lineAxis} follow controls={controls} />, 46);
     fireEvent.click(within(box).getByRole("button", { name: "Go to Assault Evolved 1" }));
     // Assault Evolved 1 goes off at 50.4.
     assert.closeTo(controls.goTo.mock.calls[0][0], 50.4, 0.05);
@@ -67,7 +70,7 @@ for (const [name, Timeline, axis] of [
 
   test(`${name} in the player: a drag holds the clock, moves it on, and lets go`, () => {
     const controls = spyControls();
-    const line = showAt(<Timeline controls={controls} />, 46).firstElementChild as HTMLElement;
+    const line = showAt(<FightLine axis={lineAxis} follow controls={controls} />, 46).firstElementChild as HTMLElement;
     fireEvent.pointerDown(line, { pointerId: 1, button: 0, [axis]: 100 });
     // A small move is still a click.
     fireEvent.pointerMove(line, { pointerId: 1, [axis]: 98 });
@@ -80,3 +83,51 @@ for (const [name, Timeline, axis] of [
     assert.deepEqual(controls.hold.mock.calls, [[true], [false]]);
   });
 }
+
+test("the moving line with types shows only the casts of those categories", () => {
+  // The categories of Assault Evolved 1, which goes off at 50.4.
+  const cats = categoriesAt(50.4);
+  assert.isNotEmpty(cats);
+  const other = (Object.keys(CATEGORIES) as Category[]).find((c) => !cats.includes(c)) as Category;
+  const names = (types: Category[]) =>
+    within(showAt(<FightLine axis="y" follow types={types} />, 46))
+      .queryAllByRole("listitem")
+      .map((li) => li.textContent ?? "");
+  assert.isTrue(names([cats[0]]).some((n) => n.includes("Assault Evolved 1")));
+  cleanup();
+  assert.isFalse(names([other]).some((n) => n.includes("Assault Evolved 1")));
+});
+
+/** The mechanics in Practice order. */
+const IN_ORDER = [...DRILLS].sort((a, b) => a.order - b.order);
+
+function showStill(line: React.ReactNode): HTMLElement {
+  render(<MemoryRouter>{line}</MemoryRouter>);
+  return screen.getByRole("navigation");
+}
+
+for (const axis of ["y", "x"] as const) {
+  test(`the still line (${axis}) with "practice" links every mechanic, in Practice order`, () => {
+    const nav = showStill(<FightLine axis={axis} types={["practice"]} label="Mechanics" current={IN_ORDER[3].id} />);
+    assert.equal(nav.getAttribute("aria-label"), "Mechanics");
+    const links = within(nav).getAllByRole("link");
+    assert.deepEqual(
+      links.map((a) => a.getAttribute("href")),
+      IN_ORDER.map((d) => `/practice/${d.id}`),
+    );
+    for (const d of IN_ORDER) assert.ok(within(nav).getByText(d.title));
+    // The mechanic on screen is marked, and only that one.
+    assert.deepEqual(
+      links.filter((a) => a.getAttribute("aria-current") === "step").map((a) => a.getAttribute("href")),
+      [`/practice/${IN_ORDER[3].id}`],
+    );
+    // One heading per phase.
+    assert.equal(within(nav).getAllByRole("heading").length, 4);
+  });
+}
+
+test("the still line with no types shows the abilities too, as rows that are not links", () => {
+  const nav = showStill(<FightLine axis="y" />);
+  assert.isNotEmpty(within(nav).getAllByText("Crown of Arcadia"));
+  assert.equal(within(nav).getAllByRole("link").length, IN_ORDER.length);
+});

@@ -330,8 +330,13 @@ Do not propose these again unless the owner brings them up.
 
 - The map is the main thing on the screen. It grows until the whole arena fits in the window
   height, but it is never smaller than 420 px.
-- On a phone the long list of mechanics becomes a bar with Back, Next and chips "Phase 1" to
-  "Phase 4".
+- The mechanics are on the fight line (owner's choice), the same component as Pressure's casts
+  coming up, so both tabs draw the fight one way. It stands still on Practice and shows only the
+  Practice mechanics (`types={["practice"]}`), each at its first time, under its phase. A click
+  opens the mechanic; the one on screen is marked in celery and kept in view, without scrolling the
+  page. Beside the arena on a wide screen; on a phone it lies sideways above the arena, in place of
+  the old Back, Next and phase chips. It has no timer: Practice stays untimed, and Pressure is the
+  timed tab. Pressure's line shows every cast, as before, and no mechanic names for now.
 - Show me draws the correct spot in blue with the tag "Go here", shows the answer text in the bar and
   the rule in the panel. A try with Show me does not count in the score.
 - Again and Next mechanic are in the bar above the map after a mechanic.

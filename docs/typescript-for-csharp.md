@@ -18,6 +18,7 @@ C# keeps type information at run time. TypeScript does not. When the code runs, 
 ## Feature map
 
 - String unions, such as `type Slot = "H1" | "H2"`. The closest C# match is an enum, but the values stay plain strings. See `src/types.ts`.
+- A union of a type and a literal: `type LineType = Category | "practice"` is every member of `Category` plus one more word, like an enum with one extra member. See `src/lib/fightLine.ts`.
 - Tuples, such as `type Point = [number, number]`. The closest C# match is a value tuple, `(double X, double Y)`. See `src/types.ts`.
 - Labeled tuples, such as `[t: number, name: string, cats: Category[], note: string, hit?: HitRule]`. The labels only name the positions for the reader. A `?` makes a position optional. See `Row` in `src/data/abilities.ts`.
 - `as const`. It keeps a literal value as narrow as possible: an array becomes a fixed, read-only tuple, and text keeps its exact value. `new Map(list.map(m => [m.id, m.title] as const))` needs it, because without it each pair is a plain `string[]`. See `COMPASS` in `src/geometry.ts`.

@@ -28,9 +28,8 @@ import { useProgressStore } from "../../stores/progress";
 import type { Point, Slot } from "../../types";
 import { ArenaFrame, type ArenaFrameProps } from "../arena/ArenaFrame";
 import { CategoryDots } from "../CategoryDots";
+import { FightLine } from "../fight-line/FightLine";
 import { CastBar } from "./CastBar";
-import { CastList } from "./CastList";
-import { CastStrip } from "./CastStrip";
 import { FightArena, type ShownHit } from "./FightArena";
 import { FightHud } from "./FightHud";
 import { FightPanel } from "./FightPanel";
@@ -304,7 +303,7 @@ export function FightScreen({
         beside: (
           <div className="flex w-80 flex-col gap-2">
             {controls}
-            <CastList className="flex-1" controls={mode === "watch" ? castControls : undefined} />
+            <FightLine axis="y" follow className="flex-1" controls={mode === "watch" ? castControls : undefined} />
           </div>
         ),
         className: "mx-0 ml-68 mr-80 min-w-0 flex-1",
@@ -325,7 +324,7 @@ export function FightScreen({
         under: (
           <div className="space-y-2">
             {controls}
-            <CastStrip controls={mode === "watch" ? castControls : undefined} />
+            <FightLine axis="x" follow controls={mode === "watch" ? castControls : undefined} />
           </div>
         ),
         fill: true,

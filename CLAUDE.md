@@ -125,16 +125,20 @@ src/components/ui/   shadcn/ui components, as the shadcn CLI writes them
 src/pages/           React pages, one per route: HomePage (/), LearnPage (/learn), PracticePage
                      (/practice), TimelinePage (/timeline), PressurePage (/pressure),
                      CheatSheetPage (/sheet)
-src/components/practice/  Practice: DrillList (wide screens), DrillNav (phones),
-                     DrillScreen (one drill's screen: clicks, Show me, the prompt and panel)
+src/components/fight-line/  the fight line, on Practice and Pressure: FightLine (one component, set
+                     up per page: down the box or sideways, moving with the fight clock or
+                     standing still, and the types of rows it shows), MovingLine (the casts
+                     coming up, WoW-style squares rising to a now mark), StillLine (the whole
+                     fight, which you scroll; a Practice mechanic is a link), CastSquare (a row's
+                     square: filled for a hit, outlined for the boss's cast, ink for a Practice
+                     mechanic), CastKey (its key) and CastButton (a cast you click to go to it,
+                     in the player)
+src/lib/fightLine.ts the fight line's rows: LineType, shows (which rows a line shows), FIGHT_ROWS
+src/components/practice/  Practice: DrillScreen (one drill's screen: clicks, Show me, the prompt and panel)
 src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep, statusAfter, bossFor
 src/components/pressure/  Pressure: PressureStart, QuickRound, FightScreen (the run and the player:
                      frame loop, clicks, keys), FightArena, CastBar, FightPrompt, FightHud (the
-                     two together, in the run),
-                     CastList (the casts coming up, WoW-style squares rising to a now mark), CastStrip (the same,
-                     sideways, under the arena on narrower screens), CastSquare (a cast's square: filled for
-                     a hit, outlined for the boss's cast), CastKey (its key) and CastButton (a cast you
-                     click to go to it, in the player), FightPanel, FightPlayBar, FightSettings (the Settings button
+                     two together, in the run), FightPanel, FightPlayBar, FightSettings (the Settings button
                      and its sheet of pattern picks),
                      RunScore and WatchDone (the end screens)
 src/lib/fight.ts     the fight clock's rules as plain functions: newFightState, tickFight, seek,
@@ -313,6 +317,10 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Pick**: one random part of the full fight, such as the first weapon order. `Picks` are the
   parts a fight has; `Choices` are your settings, a pick or Random each (`CHOICE_ROWS`). The
   player's address calls them picks.
+- **Fight line**: the fight drawn as squares on a line (`FightLine`). On Pressure it moves with the
+  fight clock (the casts coming up, `MovingLine`); on Practice it stands still and opens a
+  mechanic (`StillLine`). Its **types** (`LineType`) are the ability categories and "practice",
+  the Practice mechanics; with no types it shows every row.
 
 ## Rules for the content
 

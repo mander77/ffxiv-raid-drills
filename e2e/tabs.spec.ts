@@ -1,5 +1,5 @@
 // The site in every browser: each tab opens, the header scrolls away on a phone, a Learn card and a Timeline card can be answered,
-// the Group switch changes the slot, and Pressure runs a quick round and a shared link to the player.
+// the Group switch changes the slot, Practice's fight line opens a mechanic, and Pressure runs a quick round and a shared link to the player.
 import { expect, type Locator, test } from "@playwright/test";
 import { TABS } from "../src/tabs";
 
@@ -145,6 +145,25 @@ test("Practice: a correct click and an incorrect click on the arena", async ({ p
   await clickAt([-3, -5]);
   await expect(page.getByRole("status")).toHaveText("Not there");
 });
+
+for (const [screen, width] of [
+  ["a wide screen", 1280],
+  ["a phone", 375],
+] as const) {
+  test(`Practice on ${screen}: the fight line opens a mechanic, marks it and keeps it in view`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/practice/m-raw-axe");
+    // One line shows at a time: beside the arena on a wide screen, sideways above it on a phone.
+    const line = page.getByRole("navigation", { name: "Mechanics" }).filter({ visible: true });
+    await line.getByRole("link", { name: "Ecliptic Stampede: Four-way Fireball" }).click();
+    await expect(page).toHaveURL(/\/practice\/m-ecl-four\/[^/]+$/);
+    const on = line.locator("[aria-current=step]");
+    await expect(on).toHaveText(/Four-way Fireball/);
+    await expect(on).toBeInViewport();
+    // The page itself never scrolls sideways.
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+  });
+}
 
 test("Pressure: a quick round asks timed cards", async ({ page }) => {
   await page.goto("/pressure");
