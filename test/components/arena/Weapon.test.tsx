@@ -27,7 +27,7 @@ test("a sword rests along a line at its true angle, with its icon in the middle"
     ["x1", "y1", "x2", "y2"].map((k) => Number(line?.getAttribute(k))),
     [50, 70, 50, 88],
   );
-  assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(50 79) scale(1)");
+  assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(50 79)");
 });
 
 test("the scythe's blade reaches across the green safe ring, with its icon in the middle", () => {
@@ -35,7 +35,7 @@ test("the scythe's blade reaches across the green safe ring, with its icon in th
   const g = draw({ t: "scythe", x: 50, y: 21, ux: 1, uy: 0, dx: 0, dy: -1 });
   // The green ring is drawn 1.6 inside the 12.5 safe edge, so it is 10.9 from the middle.
   assert.include(g.querySelector(".blade")?.getAttribute("d"), "M-10.9 ");
-  assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(50 21) scale(1)");
+  assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(50 21)");
 });
 
 test("the scythe's icon is a curved handle with a curved blade, and no fill on the handle", () => {
@@ -48,8 +48,8 @@ test("the scythe's icon is a curved handle with a curved blade, and no fill on t
   assert.match(g.querySelector(".icon path.glyph")?.getAttribute("d") ?? "", /[QC].*[QC]/);
 });
 
-test("a held weapon is its icon alone, smaller, east of the point", () => {
-  const g = draw({ t: "axe", x: 63, y: 50, ux: 1, uy: 0, held: true });
+test("a held weapon is its icon alone, at the same size, on its point", () => {
+  const g = draw({ t: "axe", x: 68, y: 44, ux: 1, uy: 0, held: true });
   assert.isNull(g.querySelector(".rest"));
-  assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(67.5 50) scale(0.8)");
+  assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(68 44)");
 });

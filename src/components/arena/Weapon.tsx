@@ -21,10 +21,6 @@ const BADGE_R = 4.6;
 /** How big the icon is inside its badge. It leaves a gap to the badge's rim, so an icon's handle
     never runs into the line beneath when that line runs the same way. The app's choice. */
 const GLYPH_SCALE = 0.62;
-/** A held weapon's icon: how far east of the point its middle is, and how big it is. It fits
-    between his hitbox ring and waymark B. The app's choice. */
-const HELD_EAST = 4.5;
-const HELD_SCALE = 0.8;
 
 /** The weapon's long side on the floor: from the handle end to the tip. Without a turn, the sword
     and the axe lie across the line to the arena center, so their flat side faces the center. */
@@ -37,7 +33,7 @@ function floorLine(o: WeaponOverlay): Point {
 /** A boss weapon: a small upright icon that says which weapon, in the middle of a line drawn at
     the true angle the weapon rests at. The sword's and the axe's line is straight. The scythe's
     line tapers from the thick butt (H1's end) to the sharp point (H2's end), and is as long as the
-    green safe ring drawn when he lands on it is wide. A held weapon is its icon alone.
+    green safe ring drawn when he lands on it is wide. A held weapon is its icon alone, the same size.
     The icon's badge is clear, so what lies under it still shows; the line stops at the badge's
     rim, so the icon never runs into it. */
 export function Weapon({ overlay: o }: WeaponProps) {
@@ -46,7 +42,7 @@ export function Weapon({ overlay: o }: WeaponProps) {
   if (o.held) {
     return (
       <g className={`wpn ${o.t}`}>
-        <WeaponIcon t={o.t} at={[o.x + HELD_EAST, o.y]} scale={HELD_SCALE} />
+        <WeaponIcon t={o.t} at={[o.x, o.y]} />
       </g>
     );
   }
@@ -85,13 +81,12 @@ export function Weapon({ overlay: o }: WeaponProps) {
 interface WeaponIconProps {
   t: WeaponType;
   at: Point;
-  scale?: number;
 }
 
 /** A weapon's icon on its round badge, always upright and the same size. */
-function WeaponIcon({ t, at, scale = 1 }: WeaponIconProps) {
+function WeaponIcon({ t, at }: WeaponIconProps) {
   return (
-    <g className="icon" transform={`translate(${round2(at[0])} ${round2(at[1])}) scale(${scale})`}>
+    <g className="icon" transform={`translate(${round2(at[0])} ${round2(at[1])})`}>
       <circle className="badge" r={BADGE_R} />
       <g transform={`scale(${GLYPH_SCALE})`}>
         {/* A sand outline first, so the icon stays readable over the boss or an attack. */}
