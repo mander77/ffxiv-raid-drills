@@ -91,16 +91,18 @@ test("a Timeline card: one click answers, and the coming names show", async ({ p
   await expect(page.getByText("Correct answer.")).toBeVisible();
 });
 
-test("on the Cheat sheet, the corner buttons go back to the phase start and to the top", async ({ page }) => {
+test("on the Cheat sheet, the corner buttons go to the next section, the one before and the top", async ({ page }) => {
   await page.goto("/sheet");
-  const back = page.getByRole("navigation", { name: "Go back" });
-  await expect(back).toHaveCount(0);
+  const go = page.getByRole("navigation", { name: "Go to a section" });
+  await expect(go).toHaveCount(0);
   await page.getByText("Ecliptic puddles", { exact: true }).scrollIntoViewIfNeeded();
-  await back.getByRole("link", { name: "↑ Phase 4" }).click();
+  await go.getByRole("link", { name: "↓ Panic reset" }).click();
+  await expect(page.getByText("Feet: go to your spot for the next mechanic.")).toBeInViewport();
+  await go.getByRole("link", { name: "↑ Phase 4" }).click();
   await expect(page.getByRole("heading", { name: "Phase 4: Ecliptic Stampede" })).toBeInViewport();
-  await back.getByRole("link", { name: "↑ Top" }).click();
+  await go.getByRole("link", { name: "↑ Top" }).click();
   await expect(page.getByRole("heading", { name: "Every mechanic as H1" })).toBeInViewport();
-  await expect(back).toHaveCount(0);
+  await expect(go).toHaveCount(0);
 });
 
 test("the Group switch changes the slot on the Cheat sheet", async ({ page }) => {

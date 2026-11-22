@@ -393,8 +393,10 @@ Do not propose these again unless the owner brings them up.
   answer that differs between H1 and H2 (owner's choice: short rules plus your own answer). Then
   links to train it: Learn, each Practice drill, and the Timeline card whose answer is this
   mechanic. No Pressure link: the player needs a fight code, and its times move with the pattern.
-  The page is long, so once you scroll into the mechanics two buttons sit in the bottom right
-  corner: "↑ Phase N" back to the start of the phase you are in, and "↑ Top" (owner's ask). Then the panic reset, your timeline, the sources and
+  The page is long, so once you scroll to Phase 1, buttons sit in the bottom right corner: "↑"
+  the section before the one you are in, "↓" the next one, and "↑ Top" (owner's ask). The
+  sections are Phase 1 to 4, Panic reset and Timeline. Sources and Your progress are not stops:
+  they are short and end the page, so their headings never scroll up to the top. Then the panic reset, your timeline, the sources and
   your progress.
 
 ### Everywhere

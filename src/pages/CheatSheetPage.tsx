@@ -134,29 +134,47 @@ function Mechanics({ slot }: MechanicsProps) {
           </div>
         </section>
       ))}
-      <BackButtons />
     </section>
   );
 }
 
-/** The page addresses of the phase headings, in order. */
-const PHASE_IDS = PHASES.map((p) => phaseId(p.phase));
+/** The sections of the page in order, for the Back and Next buttons: the phases, the panic reset
+    and the timeline. Each id is the address of the section's heading. Sources and Your progress
+    are left out: they are short and end the page, so their headings never scroll up to the top,
+    and a jump to them would seem to do nothing. They come right after the timeline. */
+const SECTIONS: readonly { id: string; label: string }[] = [
+  ...PHASES.map((p) => ({ id: phaseId(p.phase), label: shortPhase(p.phase) })),
+  { id: "panic-reset", label: "Panic reset" },
+  { id: "timeline", label: "Timeline" },
+];
 
-/** How far from the top of the screen a phase heading counts as reached, in pixels: below the
+/** How far from the top of the screen a section heading counts as reached, in pixels: below the
     wide-screen header, which stays at the top. The app's choice. */
-const PHASE_REACHED = 150;
+const SECTION_REACHED = 150;
 
-/** Two buttons in the bottom corner, once you scroll into the mechanics: back to the start of the
-    phase you are in, and back to the top of the page. */
-function BackButtons() {
-  const inView = useSectionInView(PHASE_IDS, PHASE_REACHED);
+/** Buttons in the bottom corner, once you scroll to the first phase: back to the section before
+    the one you are in, on to the next section, and back to the top of the page. */
+function SectionButtons() {
+  const inView = useSectionInView(
+    SECTIONS.map((x) => x.id),
+    SECTION_REACHED,
+  );
   if (inView === null) return null;
-  const phase = PHASES[PHASE_IDS.indexOf(inView)].phase;
+  const i = SECTIONS.findIndex((x) => x.id === inView);
+  const back = SECTIONS[i - 1];
+  const next = SECTIONS[i + 1];
   return (
-    <nav aria-label="Go back" className="fixed right-4 bottom-4 z-10 flex gap-2">
-      <Button asChild size="sm" className="shadow-md">
-        <a href={`#${inView}`}>↑ {shortPhase(phase)}</a>
-      </Button>
+    <nav aria-label="Go to a section" className="fixed right-4 bottom-4 z-10 flex gap-2">
+      {back && (
+        <Button asChild size="sm" className="shadow-md">
+          <a href={`#${back.id}`}>↑ {back.label}</a>
+        </Button>
+      )}
+      {next && (
+        <Button asChild size="sm" className="shadow-md">
+          <a href={`#${next.id}`}>↓ {next.label}</a>
+        </Button>
+      )}
       <Button asChild size="sm" className="shadow-md">
         <a href="#top">↑ Top</a>
       </Button>
@@ -180,14 +198,17 @@ const SOURCES: readonly { href: string; label: string; note?: string }[] = [
 ];
 
 interface SectionProps {
+  /** The address of the section, when the Back and Next buttons jump to it. */
+  id?: string;
   title: string;
   children: ReactNode;
 }
 
-/** One card of the sheet, with its heading. */
-function Section({ title, children }: SectionProps) {
+/** One card of the sheet, with its heading. The wide-screen header stays at the top, so a jump to
+    the card stops below it. */
+function Section({ id, title, children }: SectionProps) {
   return (
-    <Card>
+    <Card id={id} className="scroll-mt-32">
       <CardHeader>
         <CardTitle className="font-display text-lg tracking-wide">{title}</CardTitle>
       </CardHeader>
@@ -229,7 +250,7 @@ export function CheatSheetPage() {
 
         <Mechanics slot={slot} />
 
-        <Section title="Panic reset">
+        <Section id="panic-reset" title="Panic reset">
           <ol className="list-decimal space-y-2 pl-6">
             <li>Feet: go to your spot for the next mechanic.</li>
             <li>Self: if you are low, heal or shield yourself.</li>
@@ -238,7 +259,7 @@ export function CheatSheetPage() {
           <p>Say it in your head: feet, self, team. If you are not sure, any of these beats standing still.</p>
         </Section>
 
-        <Section title={`Your timeline as ${slot}`}>
+        <Section id="timeline" title={`Your timeline as ${slot}`}>
           <CategoryKey />
           <Table className="min-w-[620px]">
             <TableHeader>
@@ -289,6 +310,7 @@ export function CheatSheetPage() {
         <Section title="Your progress">
           <Progress />
         </Section>
+        <SectionButtons />
       </PageContainer>
     </main>
   );
