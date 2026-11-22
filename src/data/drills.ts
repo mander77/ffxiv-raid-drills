@@ -565,7 +565,7 @@ export const DRILLS: readonly Drill[] = [
       boss:BOSS, overlays:[{t:"rock",x:43,y:43},{t:"rock",x:43,y:57},{t:"rock",x:26,y:74}],
       steps:[{q:"Where do you stand for this line stack?", z:{c:[35,35],r:7}, a:"NW, behind the NW rock (farther from the boss than the rock)."}],
       rule:"Stack behind a rock to break it. Keep the SW line whole."})},
-  {id:"m-meteor-4", order:16.3, phase:P2, time:"5:30 to 5:43", title:"Meteorain: last stack, then hide", kind:"wildCharge",
+  {id:"m-meteor-4", order:16.3, phase:P2, time:"5:30 to 5:43", title:"Meteorain: last stack", kind:"wildCharge",
     build:s=>({setup:"The last stack has no meteor baits. The rocks are NE (from R2) and three SW in a line.",
       boss:BOSS, overlays:[{t:"rock",x:57,y:43},{t:"rock",x:43,y:57},{t:"rock",x:26,y:74},{t:"rock",x:10,y:90}],
       steps:[

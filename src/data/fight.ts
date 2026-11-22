@@ -161,7 +161,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Meteorain: first stack", drills:["m-meteor-1"], scene:drill("m-meteor-1", s), k:0, from:292.1, due:[300.1]},
     {title:"Meteorain: your meteor", drills:["m-meteor-2"], scene:drill("m-meteor-2", s), k:0, from:301.3, due:[311.4]},
     {title:"Meteorain: third stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:312.0, due:[320.2]},
-    {title:"Meteorain: last stack, then hide", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:321.5, due:[330.2, 342.9]},
+    {title:"Meteorain: last stack", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:321.5, due:[330.2, 342.9]},
     {title:"Arena Split: line up", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:361.8, due:[375.9]},
     {title:"Arena Split: first towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:376.5, due:[389.0]},
     {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:504.0, due:[513.1, 514.7, 516.3]},
