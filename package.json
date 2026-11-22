@@ -3,7 +3,15 @@
   "private": true,
   "description": "Practice drills for Final Fantasy XIV raids",
   "type": "module",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.x",
+      "onFail": "error"
+    }
+  },
   "scripts": {
+    "setup": "node scripts/setup.mjs",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
@@ -11,7 +19,9 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "lint": "biome check",
-    "format": "biome check --write"
+    "format": "biome check --write",
+    "publish": "node scripts/publish.mjs",
+    "wait-deploy": "node scripts/wait-deploy.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.8",

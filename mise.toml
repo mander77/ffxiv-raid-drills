@@ -13,3 +13,8 @@ GIT_AUTHOR_NAME = false
 GIT_AUTHOR_EMAIL = false
 GIT_COMMITTER_NAME = false
 GIT_COMMITTER_EMAIL = false
+
+# For anyone who uses mise: `mise install` gets Node.js 24, the same major version as
+# .node-version (which CI and Cloudflare read). mise is optional.
+[tools]
+node = "24"

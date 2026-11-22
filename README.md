@@ -6,11 +6,21 @@ The site is written in TypeScript and built with Vite. If you know C# and are ne
 
 ## Set up
 
-You need Node.js 24, the version in `.node-version`. Install the tools once:
+You need git and Node.js 24 (the version in `.node-version`). Install them once, then open a new terminal:
+
+- Windows: `winget install Git.Git OpenJS.NodeJS.24`
+- macOS: `brew install git node@24`
+- Any OS: [mise](https://mise.jdx.dev) reads `mise.toml` (`mise install`). mise is optional.
+
+Then clone the repository and run one command in the clone. It works in any shell, PowerShell too:
 
 ```sh
-npm install
+npm run setup
 ```
+
+The setup installs the packages and the browsers for the browser tests, then runs the type check and the tests. At the end, it lists anything left to do, such as a missing git name and address for your commits. It shows your git identity but never changes it. This repository is public, so every commit shows that name and address: GitHub gives you a private noreply address at https://github.com/settings/emails.
+
+npm refuses to run with another Node.js major version (`devEngines` in `package.json`).
 
 ## Run the site on your computer
 
@@ -22,11 +32,13 @@ npm run dev
 
 ## Run the checks
 
-The type check uses the TypeScript compiler. The tests use Vitest. They test the arena geometry, the answer zone of each drill, and the answer of each question.
+The type check uses the TypeScript compiler. The tests use Vitest. They test the arena geometry, the answer zone of each drill, and the answer of each question. The browser tests use Playwright. The lint uses Biome.
 
 ```sh
 npm run typecheck
 npm test
+npm run e2e
+npm run lint
 ```
 
 ## Build
@@ -55,6 +67,7 @@ src/util.ts              small shared helpers
 src/geometry.ts          arena geometry
 src/data/                the fight: drills, pictures, questions, timeline, attacks
 test/                    Vitest tests
+scripts/                 setup, publish and wait-deploy (plain Node.js)
 e2e/                     Playwright browser tests
 ```
 
@@ -66,7 +79,7 @@ The data for the drills and the questions is in `src/data/`. Each item has a `bu
 2. Edit the item in `src/data/`.
 3. Run `npm run typecheck` and `npm test`.
 4. Run `npm run dev` and try the drill.
-5. Commit the change, then run `sh scripts/publish.sh` to push the branch.
+5. Commit the change and push the branch. Without write access, open a pull request.
 6. Open the Cloudflare preview of the branch at `https://<branch>.ffxiv-raid-drills.app/`. If it is correct, merge the branch into `main` and publish again.
 
 ## Publish
@@ -81,10 +94,18 @@ To test the Wrangler configuration without a deploy, run `npm run build`, then r
 npx wrangler deploy --dry-run
 ```
 
-The publish script runs the type check and the tests, then pushes the current branch as the repository owner. On `main`, it first waits for the branch's checks on that commit. The script ignores a `GH_TOKEN` or `GITHUB_TOKEN` in your shell. At the end, the script switches the GitHub CLI back to the account that was active before.
+The publish script (only for the owner, `mander77`) runs the type check, the tests and the lint, then pushes the current branch as the repository owner. On `main`, it first waits for the branch's checks on that commit. The script ignores a `GH_TOKEN` or `GITHUB_TOKEN` in your shell. At the end, the script switches the GitHub CLI back to the account that was active before.
+
+It needs the GitHub CLI, signed in as the owner (`gh auth login`, then `gh auth setup-git`).
 
 ```sh
-sh scripts/publish.sh
+npm run publish
+```
+
+To wait until a deploy serves a new build, give the site and the bundle name that `npm run build` printed:
+
+```sh
+npm run wait-deploy -- https://ffxiv-raid-drills.app index-AbCd1234.js
 ```
 
 ## Sources

@@ -247,8 +247,20 @@ make sure that each one still matches the code before you start it.
     each check looks at. The first check moved the page width into a `PageContainer` component
     (Tailwind advises a component over a string of classes), put the arena styles in the
     "components" cascade layer, and turned a function that returned JSX into a component.
-- Issue #11: make the repository self-contained. A new person should get Node 24, the GitHub CLI
-  and the other tools in one step after the clone.
+- Issue #11 (done, November 22): one step from a clone to a working set-up, for the owner and
+  for other contributors, on Windows, macOS and Linux. The owner chose:
+  - git and Node.js 24 are the only tools to install first. Then `npm run setup` (plain Node.js,
+    `scripts/setup.mjs`) checks the Node.js version, runs `npm ci`, installs the Playwright
+    browsers and runs the type check and the tests. `devEngines` in `package.json` makes npm
+    refuse another Node.js major version. Cloudflare and CI read `.node-version` (24).
+  - No dev container: it needs Docker (WSL2 on Windows), and the AI tools and worktrees the owner
+    uses run on the computer itself. It can come later, only for Codespaces.
+  - mise stays optional. `mise.toml` names Node.js 24 in `[tools]` for those who use it.
+  - The setup shows the commit identity but never sets it, because a contributor has their own.
+  - The GitHub CLI is optional: the setup gives a hint when it is missing or signed out. Only
+    publishing needs it, and a pull request needs only git.
+  - The publish and wait-deploy scripts moved from `sh` to Node.js (`npm run publish`,
+    `npm run wait-deploy`), so they run in PowerShell with no Git Bash step.
 - Party slots (#13, done). A slot has two parts, the light party (1 or 2) and the role (Tank,
   Healer, Melee, Ranged). Casters count as Ranged. The header shows both parts. The light party control is labelled "Group", with 1 and 2, as on wtfdig. The owner chose
   to show every role now: a role with no drills yet is greyed out, and pointing at it, focusing
@@ -533,7 +545,7 @@ static wins.
   repository admin role (only the owner) bypasses this ruleset only. It is a ruleset of its own,
   because a bypass covers a whole ruleset, and the CI rule must bind the owner too.
 - GitHub checks the commit a push to `main` ends on, by the CI run on that same commit when its
-  branch was pushed. So push the branch, wait for CI, then push `main`. `scripts/publish.sh` waits
+  branch was pushed. So push the branch, wait for CI, then push `main`. `npm run publish` waits
   for the two checks.
 - Branch previews come from GitHub Actions, not from Cloudflare's builds:
   `.github/workflows/preview.yml`, on branch pushes, with GitHub's `paths-ignore` filter (the

@@ -61,26 +61,30 @@ role.
 
 ## First time on a new computer
 
-A clone does not bring the repository's git config. Do these steps once, and make sure that each
-one worked before you go on:
+The tools are git and Node.js 24. Everything else comes from npm. The same steps work on
+Windows, macOS and Linux, and in any shell (PowerShell too):
 
-1. Install git, Node.js 24 and the GitHub CLI (`gh`). mise is optional.
-2. Sign in to the GitHub CLI as `mander77`: `gh auth login`. Then run `gh auth setup-git`, so git
-   uses the GitHub CLI to sign in.
-3. Clone the repository: `gh repo clone mander77/ffxiv-raid-drills`.
-4. In the clone, set the commit identity:
+1. Install git and Node.js 24 (Windows: `winget install Git.Git OpenJS.NodeJS.24`; macOS:
+   `brew install git node@24`; or mise, which reads `mise.toml`). Open a new terminal.
+2. Clone the repository and run `npm run setup` in the clone. It checks the Node.js version,
+   runs `npm ci`, installs the browsers for `npm run e2e`, runs the type check and the tests,
+   and ends with a "To do" list for anything it cannot fix itself.
+   `package.json` (`devEngines`) refuses any other Node.js major version.
+3. The setup only shows the commit identity; it never sets it. A clone does not bring the
+   repository's git config, so on the owner's computer set it in the clone:
    `git config user.name mander77` and
    `git config user.email 220622142+mander77@users.noreply.github.com`.
    Then run `git var GIT_AUTHOR_IDENT` and make sure that it shows this name and address.
-5. Run `npm ci`, then `npm run typecheck` and `npm test`. For the browser tests, run
-   `npx playwright install` once, then `npm run e2e`.
-6. If mise is installed, run `mise trust mise.toml` in the clone.
+4. To publish (the owner only), install the GitHub CLI (`winget install GitHub.cli`), run
+   `gh auth login` as `mander77`, then `gh auth setup-git`. The setup says if it is missing.
+5. If mise is installed, run `mise trust mise.toml` in the clone.
 
 ## Commands
 
 You need Node.js 24 (the version in `.node-version`).
 
 ```sh
+npm run setup       # first time: checks, install, test browsers, type check, tests
 npm ci              # install
 npm run dev         # local site; add -- --port 5174 --strictPort for a second checkout
 npm run typecheck   # tsc, strict
@@ -89,6 +93,8 @@ npm run e2e         # Playwright: browser tests in Chromium, Firefox and WebKit
 npm run lint        # Biome: lint and format check
 npm run format      # Biome: format and fix
 npm run build       # tsc, then Vite writes dist/
+npm run publish     # the owner: checks, then pushes the branch (see "How to publish")
+npm run wait-deploy -- <site> <bundle>   # waits until a deploy serves that bundle
 ```
 
 ## Code map
@@ -141,6 +147,8 @@ src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round)
 src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useCastTimeline (the casts coming up, moving with the fight clock), useFightFrame (run code on
                      each frame of the fight clock), useMediaQuery, useFitToScreen, useTheme
 src/lib/             cn() for class names
+scripts/             setup.mjs (npm run setup), publish.mjs (npm run publish), wait-deploy.mjs
+                     (npm run wait-deploy): plain Node.js, so they run the same on every OS
 src/types.ts         drills, steps, zones, overlays, questions
 src/party.ts         party slots: roles, light parties, slot names
 src/util.ts          helpers: bySlot, seeded random, pattern codes, shuffle, readingMs
@@ -186,13 +194,13 @@ These steps put a branch on `main`, the live site.
    `git merge-base --is-ancestor origin/main <branch>`. Another session can publish in between. If
    main moved, rebase the branch and check again.
 2. Run `npm run build` and note the bundle name, `dist/assets/index-<hash>.js`.
-3. From the branch checkout, run `sh scripts/publish.sh`. With mise installed, run it through mise
-   so the repository's `mise.toml` applies:
-   `mise -C <checkout> exec -- sh <checkout>/scripts/publish.sh`. The script runs the type check
-   and the tests, then pushes the branch as `mander77`. The push starts CI on GitHub.
+3. From the branch checkout, run `npm run publish` (any shell, PowerShell too). With mise
+   installed, run it through mise so the repository's `mise.toml` applies:
+   `mise -C <checkout> exec -- npm run publish`. The script runs the type check, the tests and
+   the lint, then pushes the branch as `mander77`. The push starts CI on GitHub.
 4. If the branch changed the app, wait for CI to pass, then ask the owner to approve the
    waiting Preview run on GitHub. Then run
-   `sh scripts/wait-deploy.sh https://<branch>.ffxiv-raid-drills.app index-<hash>.js` and
+   `npm run wait-deploy -- https://<branch>.ffxiv-raid-drills.app index-<hash>.js` and
    test the preview in a browser. A branch with only docs, tests or tooling gets no preview: skip
    this step.
 5. In the main checkout, make sure that it is on `main` and has no changes. Run
@@ -201,7 +209,7 @@ These steps put a branch on `main`, the live site.
    `main` that has not passed CI. Then it pushes and deletes every branch on GitHub that `main`
    already contains. A branch that merged `main` into itself must be rebased first, because `main`
    takes no merge commits.
-6. Run `sh scripts/wait-deploy.sh https://ffxiv-raid-drills.app index-<hash>.js` and check the
+6. Run `npm run wait-deploy -- https://ffxiv-raid-drills.app index-<hash>.js` and check the
    live site (again, only when the app changed). Then remove the worktree and delete the local
    branch.
 
@@ -339,8 +347,6 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
   has the decisions behind it.
 - Issue #29: use shadcn/ui Collapsible, Sonner, Progress and Item for parts the site built itself.
 - Issue #15: the white frame around the Home picture.
-- Issue #11: make the repository self-contained, so a clone plus one step gives every tool. Three
-  questions are open for the owner.
 - Issue #14: a script that imports fight times and attack sizes from cactbot and BossMod.
 - The issues were written before some later changes. Before you start one, make sure that it
   still matches the code.
