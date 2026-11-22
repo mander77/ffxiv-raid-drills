@@ -30,12 +30,12 @@ test("a sword rests along a line at its true angle, with its icon in the middle"
   assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(50 79) scale(1)");
 });
 
-test("the scythe's blade reaches across the green safe ring, with its icon at the butt", () => {
+test("the scythe's blade reaches across the green safe ring, with its icon in the middle", () => {
   // Butt to the west, point to the east.
   const g = draw({ t: "scythe", x: 50, y: 21, ux: 1, uy: 0, dx: 0, dy: -1 });
   // The green ring is drawn 1.6 inside the 12.5 safe edge, so it is 10.9 from the middle.
   assert.include(g.querySelector(".blade")?.getAttribute("d"), "M-10.9 ");
-  assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(39.1 21) scale(1)");
+  assert.equal(g.querySelector(".icon")?.getAttribute("transform"), "translate(50 21) scale(1)");
 });
 
 test("a held weapon is its icon alone, smaller, east of the point", () => {

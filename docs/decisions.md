@@ -373,11 +373,12 @@ Do not propose these again unless the owner brings them up.
 - Each boss weapon is a small upright icon on a round badge, sitting on a line drawn at the true
   angle the weapon rests at (`src/components/arena/Weapon.tsx`, one drawing for every screen). The
   owner chose this after trying detailed standing weapons, silhouettes and a cut in the floor: the
-  line shows the angle, the icon says which weapon, and nothing stretches as it turns. The sword
-  and the axe (a double-headed half-moon axe) sit in the middle of a straight line. The scythe's
-  line tapers from the butt, where its icon sits (H1's end), to the sharp point (H2's end), and is
-  as long as the green safe ring drawn when he lands on it is wide (owner's rule). The scythe icon
-  has its blade at the bottom, as it rests in the floor. Weapons have their own layer, over the
+  line shows the angle, the icon says which weapon, and nothing stretches as it turns. Every icon
+  sits in the middle of its line. The sword's and the axe's (a double-headed half-moon axe) line
+  is straight. The scythe's line tapers from the thick butt (H1's end) to the sharp point (H2's
+  end), and is as long as the green safe ring drawn when he lands on it is wide (owner's rule).
+  The scythe icon has its blade at the bottom, as it rests in the floor, and a small nub at the
+  butt. Each icon is drawn a little inside its badge, so a handle never runs into the line. Weapons have their own layer, over the
   waymarks they often land next to and under the boss and the player marks. The held weapon in
   Raw Steel Trophy is its icon alone, a little smaller, east of him. A weapon's name goes out to
   the side of its line, away from the arena center; in Practice, its order number goes in toward

@@ -31,10 +31,10 @@ function floorLine(o: WeaponOverlay): Point {
   return [-r[1], r[0]];
 }
 
-/** A boss weapon: a small upright icon that says which weapon, on a line drawn at the true angle
-    the weapon rests at. The sword and the axe sit in the middle of a straight line. The scythe's
-    line tapers from the butt, where its icon sits (H1's end), to the point (H2's end), and is as
-    long as the green safe ring drawn when he lands on it is wide. A held weapon is its icon alone. */
+/** A boss weapon: a small upright icon that says which weapon, in the middle of a line drawn at
+    the true angle the weapon rests at. The sword's and the axe's line is straight. The scythe's
+    line tapers from the thick butt (H1's end) to the sharp point (H2's end), and is as long as the
+    green safe ring drawn when he lands on it is wide. A held weapon is its icon alone. */
 export function Weapon({ overlay: o }: WeaponProps) {
   if (o.held) {
     return (
@@ -51,7 +51,7 @@ export function Weapon({ overlay: o }: WeaponProps) {
     return (
       <g className="wpn scythe">
         <path className="blade" transform={`matrix(${turn})`} d={`M${-half} -1.6 Q0 -1 ${half} 0 Q0 1 ${-half} 1.6 Z`} />
-        <WeaponIcon t="scythe" at={[o.x - u[0] * half, o.y - u[1] * half]} />
+        <WeaponIcon t="scythe" at={[o.x, o.y]} />
       </g>
     );
   }
