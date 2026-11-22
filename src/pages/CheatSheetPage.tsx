@@ -16,6 +16,7 @@ import { LEARN_PICTURES } from "../data/pictures";
 import { learnCard, practiceDrill, type ReferenceEntry, referenceByPhase, slotAnswer } from "../data/reference";
 import { CACTBOT_TIMELINE, WTFDIG } from "../data/sources";
 import { TIMELINE } from "../data/timeline";
+import { useSectionInView } from "../hooks/useSectionInView";
 import { useProgressStore } from "../stores/progress";
 import { useSlotStore } from "../stores/slot";
 import { tabOf } from "../tabs";
@@ -133,7 +134,33 @@ function Mechanics({ slot }: MechanicsProps) {
           </div>
         </section>
       ))}
+      <BackButtons />
     </section>
+  );
+}
+
+/** The page addresses of the phase headings, in order. */
+const PHASE_IDS = PHASES.map((p) => phaseId(p.phase));
+
+/** How far from the top of the screen a phase heading counts as reached, in pixels: below the
+    wide-screen header, which stays at the top. The app's choice. */
+const PHASE_REACHED = 150;
+
+/** Two buttons in the bottom corner, once you scroll into the mechanics: back to the start of the
+    phase you are in, and back to the top of the page. */
+function BackButtons() {
+  const inView = useSectionInView(PHASE_IDS, PHASE_REACHED);
+  if (inView === null) return null;
+  const phase = PHASES[PHASE_IDS.indexOf(inView)].phase;
+  return (
+    <nav aria-label="Go back" className="fixed right-4 bottom-4 z-10 flex gap-2">
+      <Button asChild size="sm" className="shadow-md">
+        <a href={`#${inView}`}>↑ {shortPhase(phase)}</a>
+      </Button>
+      <Button asChild size="sm" className="shadow-md">
+        <a href="#top">↑ Top</a>
+      </Button>
+    </nav>
   );
 }
 

@@ -392,7 +392,9 @@ Do not propose these again unless the owner brings them up.
   picture (576 px at 1280 px), on a phone under it. Under the rules, "As H1:" gives each Learn
   answer that differs between H1 and H2 (owner's choice: short rules plus your own answer). Then
   links to train it: Learn, each Practice drill, and the Timeline card whose answer is this
-  mechanic. No Pressure link: the player needs a fight code, and its times move with the pattern. Then the panic reset, your timeline, the sources and
+  mechanic. No Pressure link: the player needs a fight code, and its times move with the pattern.
+  The page is long, so once you scroll into the mechanics two buttons sit in the bottom right
+  corner: "↑ Phase N" back to the start of the phase you are in, and "↑ Top" (owner's ask). Then the panic reset, your timeline, the sources and
   your progress.
 
 ### Everywhere

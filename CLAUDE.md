@@ -144,7 +144,7 @@ src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round)
                      (answers, previews, Lock in, keys, the timer of a timed card), TimerBar,
                      TimelinePicture
 src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useCastTimeline (the casts coming up, moving with the fight clock), useFightFrame (run code on
-                     each frame of the fight clock), useMediaQuery, useFitToScreen, useTheme
+                     each frame of the fight clock), useMediaQuery, useFitToScreen, useTheme, useSectionInView (the section you have scrolled to)
 src/lib/             cn() for class names
 scripts/             setup.mjs (npm run setup), publish.mjs (npm run publish), wait-deploy.mjs
                      (npm run wait-deploy): plain Node.js, so they run the same on every OS
