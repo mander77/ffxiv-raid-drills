@@ -102,7 +102,7 @@ function Mechanics({ slot }: MechanicsProps) {
           <h3 id={phaseId(p.phase)} className="scroll-mt-32 font-display text-xl tracking-wide">
             {p.phase}
           </h3>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {p.entries.map((e) => (
               <MechanicCard key={e.name} entry={e} slot={slot} />
             ))}
