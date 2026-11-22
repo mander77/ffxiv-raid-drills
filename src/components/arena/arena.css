@@ -25,7 +25,6 @@
     --arena-tank: oklch(0.48 0.149 262.597);
     --arena-dps: oklch(0.479 0.138 23.906);
     --arena-rock: oklch(0.65 0.011 267.316);
-    --arena-cut: oklch(0.299 0.036 65.753);
     --arena-tornado: oklch(0.549 0.042 247.381);
     --arena-wm-red: oklch(0.584 0.183 26.81);
     --arena-wm-yellow: oklch(0.783 0.154 89.014);
@@ -209,12 +208,7 @@
     dominant-baseline: central;
   }
 
-  /* The weapons: dark silhouettes, each standing in a dark cut in the floor. */
-  .arena .wpn .cut {
-    stroke: var(--arena-cut);
-    stroke-width: 1.6;
-    stroke-linecap: round;
-  }
+  /* The weapons: dark silhouettes, standing upright. */
   .arena .wpn .body {
     fill: var(--arena-void);
   }

@@ -10,7 +10,7 @@ import { TurningBoss } from "./TurningBoss";
 import { ZoneArea } from "./ZoneArea";
 import { ZoneLabel } from "./ZoneLabel";
 
-/** How far below a weapon's cut in the floor its order number goes, under its name. The app's choice. */
+/** How far below a weapon's foot its order number goes, under its name. The app's choice. */
 const ORD_BELOW = 10;
 
 export interface LiveArenaProps {

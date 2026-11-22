@@ -24,7 +24,7 @@ export const FIRST_PUDDLE: Point = [50, 50 - OUTSIDE];
 /** Where a weapon's name goes, clear of the weapon, the waymark next to it and the spot where
     you stand at it. A weapon due north has waymark A right below it, so its name goes beside it,
     east. A weapon due east or west has its name out toward the edge, a little higher. Any other
-    goes just below its cut in the floor. The distances are the app's choice. */
+    goes just below its foot. The distances are the app's choice. */
 function weaponTagAt(p: Point): Point {
   const dx = p[0] - 50, dy = p[1] - 50;
   if(Math.abs(dx) < 8 && dy < 0) return [p[0] + 16, p[1]];
@@ -50,7 +50,7 @@ export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
   const scytheAxis = (w: Weapon, i: number): Point => w.axis ?? [-dirs[i][1], dirs[i][0]];
   const overlays: Overlay[] = [];
   W.forEach((w, i) => {
-    // Each weapon stands up from its cut in the floor, so its name goes below or beside it.
+    // Each weapon stands up from its foot, so its name goes below or beside it.
     const at = weaponTagAt(w.p);
     const tag: Overlay = {t:"tag", spawn:i, x:at[0], y:at[1], s:w.type.toUpperCase()};
     if(w.type === "scythe"){
@@ -185,7 +185,7 @@ export function facingNext(sc: Scene, n: number, boss: Boss): Boss {
    fight can pass in a set built with the player's choices. */
 export function assaultScene(A: JumpSet, s: Slot): Scene {
   return {
-    setup:"Three weapons are on the floor. The boss is in the middle, and the red arrow points at the weapon he faces. He jumps to that one first, then goes clockwise. For the sword, watch where he jumps from. For the scythe, read the weapon: the butt has the round knob, the point is the blade end.",
+    setup:"Three weapons are on the floor. The boss is in the middle, and the red arrow points at the weapon he faces. He jumps to that one first, then goes clockwise. For the sword, watch where he jumps from. For the scythe, read the weapon: the butt is the end with the upright handle, the point is the blade tip.",
     overlays:A.overlays,
     bossAt:n => A.states[Math.min(n, A.states.length - 1)],
     steps:A.steps,
@@ -469,7 +469,7 @@ export const BOSS: Boss = {x:50, y:50, f:0};
 /** Where the name of the weapon the boss holds goes, below the weapon. */
 export const HELD_TAG: Point = [75, 58.5];   // below waymark B, clear of the M2 axe spread spot
 /** The weapon the boss holds for Raw Steel Trophy: the same picture as the weapons on the floor,
-    upright at his east side just outside his hitbox, flat side toward you, with no cut in the floor. */
+    upright at his east side just outside his hitbox, flat side toward you. */
 export function heldWeapon(type: WeaponType): Overlay[] {
   const x = 63, y = 50;
   // TS note: `t:type` is "axe" or "sword" here. TypeScript checks the object against both

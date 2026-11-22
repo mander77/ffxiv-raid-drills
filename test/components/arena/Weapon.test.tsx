@@ -26,30 +26,32 @@ const matrixOf = (g: Element): number[] =>
     .split(" ")
     .map(Number);
 
-test("a weapon on the floor stands in a cut along its line, upright on the screen", () => {
+test("a weapon facing you stands upright on its point, at full width", () => {
   const g = draw({ t: "scythe", x: 50, y: 21, ux: 1, uy: 0, dx: 0, dy: -1 });
   assert.include(g.getAttribute("class"), "scythe");
-  assert.isNotNull(g.querySelector(".cut"));
-  // x along the floor line (east), y straight down the screen, standing on its point.
+  assert.isNotNull(g.querySelector(".body"));
   assert.deepEqual(matrixOf(g), [1, 0, 0, 1, 50, 21]);
 });
 
-test("a weapon whose line runs north to south is widened, so it never shows as a thin line", () => {
+test("a turned weapon gets narrower and tilts a little, but never taller", () => {
+  // Its line runs north to south: it is turned edge-on, so it is drawn at the least width.
   const [a, b, c, d] = matrixOf(draw({ t: "axe", x: 79, y: 50, ux: 0, uy: 1 }));
-  assert.isAtLeast(a, 0.45);
-  assert.equal(b, 1);
+  assert.equal(a, 0.4);
+  assert.isAbove(b, 0);
+  assert.isBelow(b, 0.5);
   assert.deepEqual([c, d], [0, 1]);
 });
 
-test("without a turn, the sword lies across the line to the arena center", () => {
-  // South of the center, so its line runs east to west.
+test("without a turn, the sword faces the arena center", () => {
+  // South of the center, so it faces north: full width, no tilt.
   const [a, b] = matrixOf(draw({ t: "sword", x: 50, y: 79 }));
   assert.equal(Math.abs(a), 1);
   assert.equal(b, 0);
 });
 
-test("a held weapon has no cut in the floor", () => {
-  const g = draw({ t: "axe", x: 63, y: 50, ux: 1, uy: 0, held: true });
-  assert.isNull(g.querySelector(".cut"));
-  assert.isNotNull(g.querySelector(".body"));
+test("a held weapon is drawn smaller, beside the point", () => {
+  const [a, , , d, e] = matrixOf(draw({ t: "axe", x: 63, y: 50, ux: 1, uy: 0, held: true }));
+  assert.isBelow(a, 1);
+  assert.isBelow(d, 1);
+  assert.isAbove(e, 63);
 });

@@ -370,18 +370,19 @@ Do not propose these again unless the owner brings them up.
 ### Everywhere
 
 - Player marks are always the top layer (see `LAYERS` in `src/components/arena/Arena.tsx`).
-- The weapons stand upright, as in the game: each is stuck blade-first in a short dark cut in the
-  floor, and the cut runs along its flat side, so you see which way it faces the boss. The owner
-  picked this look from mock-ups and game screenshots (`src/components/arena/Weapon.tsx`, one
-  drawing for every screen). Each is a plain dark silhouette, with no small parts: the owner
-  found the detailed steel version too busy. Scythe: the handle stands at the butt end (H1), and
-  the curved blade dips into the floor toward the point (H2) and curls up. Sword: a broad
-  greatsword, point down, with a wide crossguard. Axe: a double-headed half-moon axe, its lower
-  horns in the floor. A weapon always stands straight up the screen; one whose cut runs north to
-  south is drawn at least 60% wide, so it never shows as a thin line. The held weapon in Raw Steel Trophy has no cut and is drawn
-  smaller and narrower, between his ring and waymark B. A weapon's name goes below its cut,
-  beside it for a weapon due north (waymark A is below it), and out toward the edge for one due
-  east or west.
+- The weapons stand upright, as in the game, each a plain dark silhouette with no small parts
+  (`src/components/arena/Weapon.tsx`, one drawing for every screen). The owner picked the shapes
+  from mock-ups and game screenshots. Scythe: the handle stands at the butt end (H1), and the
+  curved blade dips into the floor toward the point (H2) and curls up. Sword: a broad greatsword,
+  point down, with a wide crossguard. Axe: a double-headed half-moon axe on a long handle, its
+  lower horns in the floor. A weapon is drawn as if from a raised camera south of the arena: as
+  it turns away from facing you it gets narrower (40% at the least) and its far end sits a little
+  higher, but its height never changes, so it never looks stretched. There is no line on the
+  floor: the owner tried a cut along the flat side and chose this instead. The held weapon in
+  Raw Steel Trophy is drawn smaller and narrower, between his ring and waymark B. A weapon's
+  name goes below it, beside it for a weapon due north (waymark A is below it), and out toward
+  the edge for one due east or west. The drawn sizes are the app's choice: no source gives the
+  weapons' size in the game.
 - The boss turns smoothly to face his next target. He does not flip.
 - "Saved for later" (purple) marks a mechanic shown early and resolved later, for example the
   first weapon during Void Stardust. It is never a spot to stand on.

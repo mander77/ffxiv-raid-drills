@@ -8,16 +8,21 @@ export interface WeaponProps {
   overlay: WeaponOverlay;
 }
 
-/** How wide a weapon is drawn at the least, as a share of its full width. A weapon stands straight
-    up the screen, as if you look north over the arena, so one whose line runs north to south
-    would be drawn edge-on as a thin line. It is widened to this share instead. The app's choice,
-    so every weapon shows its shape; its cut then turns slightly toward east-west. */
-const MIN_WIDTH = 0.6;
+/* A weapon stands upright, seen as if from a raised camera south of the arena. As it turns away
+   from facing you it gets narrower, and its far end sits a little higher. Its height never
+   changes, so it never looks stretched. */
 
-/** The weapon's line on the screen: its floor line, widened east-west to at least MIN_WIDTH. */
-function screenLine(u: Point): Point {
+/** How wide a weapon is drawn at the least, as a share of its full width, so one turned edge-on
+    still shows its shape. The app's choice. */
+const MIN_WIDTH = 0.4;
+/** How much higher on the screen the far end of a turned weapon sits, per unit of its line that
+    runs north or south. The app's choice: enough to show which way it turns, not enough to stretch. */
+const TILT = 0.35;
+
+/** The weapon's base on the screen, for a weapon whose line on the floor is u. */
+function screenBase(u: Point): Point {
   const side = u[0] < 0 ? -1 : 1;
-  return [side * Math.max(Math.abs(u[0]), MIN_WIDTH), u[1]];
+  return [side * Math.max(Math.abs(u[0]), MIN_WIDTH), u[1] * TILT];
 }
 
 /** The weapon's long side on the floor: from the handle end to the tip. Without a turn, the sword
@@ -28,8 +33,8 @@ function floorLine(o: WeaponOverlay): Point {
   return [-r[1], r[0]];
 }
 
-/** A boss weapon, stuck upright in the floor (or held, with no cut). It is drawn in its own frame:
-    x runs along its line on the floor, from the handle end to the tip, and -y is up. */
+/** A boss weapon, standing upright in the floor or held. It is drawn in its own frame: x runs
+    along its line on the floor, from the handle end to the tip, and -y is up. */
 export function Weapon({ overlay: o }: WeaponProps) {
   // SVG matrix(a b c d e f): x goes along (a, b), y along (c, d), and (e, f) is the origin.
   // y is always straight down the screen, so the weapon always stands upright.
@@ -40,26 +45,18 @@ export function Weapon({ overlay: o }: WeaponProps) {
     const [w, h] = HELD_SIZE;
     m = [w, 0, 0, h, o.x + REACH_BACK[o.t] * w, o.y + HELD_FOOT];
   } else {
-    // On the floor: it stands on the point, along its line.
-    const s = screenLine(floorLine(o));
+    // On the floor: it stands on the point, turned along its line.
+    const s = screenBase(floorLine(o));
     m = [s[0], s[1], 0, 1, o.x, o.y];
   }
   return (
     <g className={`wpn ${o.t}`} transform={`matrix(${m.map(round2).join(" ")})`}>
-      {!o.held && <line className="cut" x1={CUT[o.t][0]} y1="0" x2={CUT[o.t][1]} y2="0" />}
       {o.t === "scythe" && <ScytheDrawing />}
       {o.t === "sword" && <SwordDrawing />}
       {o.t === "axe" && <AxeDrawing />}
     </g>
   );
 }
-
-/** Where each weapon's cut in the floor starts and ends, along its line. */
-const CUT: Record<WeaponOverlay["t"], [number, number]> = {
-  scythe: [-8.5, 9],
-  sword: [-3.4, 3.4],
-  axe: [-8, 8],
-};
 
 /** A held weapon's width and height, as shares of its full size, so it fits between his ring and
     waymark B. The app's choice. */
@@ -97,7 +94,7 @@ function SwordDrawing() {
 function AxeDrawing() {
   return (
     <>
-      <line className="haft" x1="0" y1="0" x2="0" y2="-19" />
+      <line className="haft" x1="0" y1="0" x2="0" y2="-24" />
       <path
         className="body"
         d="M-1 -10.5 Q-4 -11 -6 -15.4 Q-12.4 -8 -6.2 0.6 Q-3.6 -3.4 -1 -3.5 Z M1 -10.5 Q4 -11 6 -15.4 Q12.4 -8 6.2 0.6 Q3.6 -3.4 1 -3.5 Z"
