@@ -14,7 +14,7 @@ export interface TimerBarProps {
 /** The colour of the bar while you read, while you decide, and in the last third. Complete class
     names, so Tailwind finds them. They colour the bar inside the Progress (its indicator). */
 const LOOK = {
-  reading: "*:data-[slot=progress-indicator]:bg-sky-500",
+  reading: "*:data-[slot=progress-indicator]:bg-hint-foreground",
   deciding: "*:data-[slot=progress-indicator]:bg-primary",
   low: "*:data-[slot=progress-indicator]:bg-destructive",
 } as const;

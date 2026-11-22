@@ -25,11 +25,13 @@ export function HitLabel({ hit }: HitLabelProps) {
   );
 }
 
-/** The colour of a result in the run. Complete class names, so Tailwind finds them. */
+/** The colour of a result in the run: the theme's answer pairs turned round, the strong colour as
+    the fill and the soft one as the text, so the label stands out on the pale arena. Complete
+    class names, so Tailwind finds them. */
 const RESULT_LOOK: Record<Answered["kind"], string> = {
-  ok: "bg-green-700",
-  bad: "bg-destructive",
-  slow: "bg-amber-600",
+  ok: "bg-success-foreground text-success",
+  bad: "bg-danger-foreground text-danger",
+  slow: "bg-warning-foreground text-warning",
 };
 const RESULT_TEXT: Record<Answered["kind"], string> = { ok: "✓ Correct", bad: "✗ Not there", slow: "✗ Too slow" };
 
@@ -43,7 +45,7 @@ export function RunResult({ kind }: RunResultProps) {
     <div
       role="status"
       className={cn(
-        "pointer-events-none absolute bottom-[6%] left-1/2 -translate-x-1/2 animate-flash-label rounded-full px-3.5 py-1 font-semibold whitespace-nowrap text-white",
+        "pointer-events-none absolute bottom-[6%] left-1/2 -translate-x-1/2 animate-flash-label rounded-full px-3.5 py-1 font-semibold whitespace-nowrap shadow-sm",
         RESULT_LOOK[kind],
       )}
     >

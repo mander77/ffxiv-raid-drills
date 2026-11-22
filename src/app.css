@@ -45,15 +45,18 @@
   --highlight-foreground: oklch(0.279 0.028 248.851);
   /* What an answer was, in shadcn's pairs: the name is the soft background, -foreground the
      text and border on it. Correct (green), incorrect (the destructive red on a soft red), too slow
-     (amber text, with no background) and saved for later (violet, as on the arena). Then the
-     fill of the boss's cast bar. */
+     (amber on a soft amber) and saved for later (violet, as on the arena). Then the arena's hints
+     (blue, as a preview on the arena) and the fill of the boss's cast bar. */
   --success: oklch(0.945 0.019 157.864);
   --success-foreground: oklch(0.496 0.108 156.526);
   --danger: oklch(0.948 0.02 25.172);
   --danger-foreground: var(--destructive);
+  --warning: oklch(0.962 0.059 95.617);
   --warning-foreground: oklch(0.555 0.146 48.998);
   --later: oklch(0.952 0.023 299.365);
   --later-foreground: oklch(0.432 0.211 292.759);
+  --hint: oklch(0.951 0.026 236.824);
+  --hint-foreground: oklch(0.588 0.158 241.966);
   --cast: oklch(0.879 0.153 91.605);
   /* The number in a stack icon (2, 4, R), so it stands out from the arrows: the bright amber of
      the cast bar on the dark square in light mode, a deep orange on the pale square in dark mode.
@@ -93,9 +96,12 @@
   --success-foreground: oklch(0.8 0.108 157.756);
   --danger: oklch(0.27 0.046 24.727);
   --danger-foreground: var(--destructive);
+  --warning: oklch(0.279 0.077 45.635);
   --warning-foreground: oklch(0.806 0.127 74.527);
   --later: oklch(0.286 0.083 288.867);
   --later-foreground: oklch(0.825 0.088 294.575);
+  --hint: oklch(0.293 0.066 243.157);
+  --hint-foreground: oklch(0.746 0.16 232.661);
   --cast: oklch(0.542 0.1 84.955);
   --count: oklch(0.6 0.19 45);
   --banner: oklch(0.962 0.043 156.743);
@@ -143,9 +149,12 @@
   --color-success-foreground: var(--success-foreground);
   --color-danger: var(--danger);
   --color-danger-foreground: var(--danger-foreground);
+  --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-later: var(--later);
   --color-later-foreground: var(--later-foreground);
+  --color-hint: var(--hint);
+  --color-hint-foreground: var(--hint-foreground);
   --color-cast: var(--cast);
   --color-count: var(--count);
   --color-banner: var(--banner);

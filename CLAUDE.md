@@ -103,8 +103,8 @@ index.html           the page: React draws into #root
 src/main.tsx         start-up: draws the React app (App.tsx) into #root
 src/App.tsx          the header and the routes (React Router): one page per path
 src/app.css          Tailwind and the shadcn/ui theme colours, light and dark (ink, slate header,
-                     celery highlight; success, danger, warning and later answers), the fonts, the
-                     ability category colours
+                     celery highlight; success, danger, warning and later answers; the blue hint),
+                     the fonts, the ability category colours
 src/tabs.ts          the tabs: path, label and one-line intro; tabOf
 src/share.ts         sharing the address of the page
 src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser

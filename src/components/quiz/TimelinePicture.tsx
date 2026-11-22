@@ -119,11 +119,7 @@ function TimelineRow({ fill, name, cats, when, now = false, correct = false }: T
         correct && "ring-2 ring-success-foreground",
       )}
     >
-      <i
-        aria-hidden="true"
-        className={cn("absolute inset-y-0 left-0", now ? "bg-muted" : "bg-sky-100 dark:bg-sky-950")}
-        style={{ width: `${fill * 100}%` }}
-      />
+      <i aria-hidden="true" className={cn("absolute inset-y-0 left-0", now ? "bg-muted" : "bg-hint")} style={{ width: `${fill * 100}%` }} />
       <span className="relative flex items-center gap-2">
         {name === null ? (
           <span className="tracking-widest text-muted-foreground">? ? ?</span>
