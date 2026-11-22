@@ -14,7 +14,8 @@ this file in the same commit.
   role (tanks, healers, melee, ranged and casters), each with its own slots (MT/OT, H1/H2, M1/M2,
   R1/R2). A new fight comes from data files, with little or no change to the engine code.
 - The site does not replace wtfdig. The owner likes the site's own diagrams, so the plan has a
-  reference view of every mechanic in fight order, for a second screen (issue #2).
+  reference view of every mechanic in fight order, for a second screen (issue #2), at the top of
+  the Cheat sheet.
 
 ## Planned work
 
@@ -22,10 +23,14 @@ The plans are GitHub issues in `mander77/ffxiv-raid-drills`. Read them with `gh 
 `gh issue view <number>`. The issues were written on November 20, before some later changes, so
 make sure that each one still matches the code before you start it.
 
-- Issue #2, the reference view: every mechanic in fight order, grouped by phase. Each one gets
-  the site's diagram for your role, a summary of one to three lines, and a link to wtfdig. Two
-  questions are still open for the owner: does it live on the Cheat sheet or in a new tab, and is
-  it one scrolling page or one mechanic at a time?
+- Issue #2, the reference view (November 22): it lives at the top of the Cheat sheet, in place of
+  "Positions to remember", not in a new tab, so the phone keeps its 2 x 3 tab grid. It is one
+  scrolling page, not one mechanic at a time, with a chip per phase to jump. Each mechanic gets
+  one key picture, not one per Learn card: 26 mechanics in fight order (`REFERENCE` in
+  `src/data/reference.ts`), each with the answer picture of one Learn card for your slot, the
+  one-line rules of its Learn cards (1 to 3), its time and a Learn link. Together they hold every
+  Learn card once. The text is the cards' own rules, so the sheet adds no strat text of its own.
+  The hand-written lines and the sword example picture went away (owner's choice).
 - Issues #18 to #22, label "rebuild": rebuild the site in React, one step per issue and per
   branch, in order. Each step brings its tabs back.
   - Why: the owner set new long-term goals. The site must be easy to maintain, simple, fast and
@@ -381,7 +386,10 @@ Do not propose these again unless the owner brings them up.
 - Home: "Start here" cards in learning order. The top picture is the answer picture of the Learn
   card `k-raw-first` (on a phone, a 110 px strip from the boss to the party stack). The owner's
   character picture is in About me with a wide crop of the face, the card and both arms.
-- Cheat sheet: one line per mechanic, written for your role, with a link to its Learn card.
+- Cheat sheet: first every mechanic in fight order, by phase, as cards: its time, a Learn answer
+  picture for your slot, its Learn cards' rules and a link to Learn. Three columns on a wide
+  screen, four from 1280 px, one on a phone. Then the panic reset, your timeline, the sources and
+  your progress.
 
 ### Everywhere
 

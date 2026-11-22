@@ -116,17 +116,6 @@
   .arena .turn {
     transition: transform 0.5s ease-in-out;
   }
-  .arena .ghost {
-    fill: none;
-    stroke: var(--arena-boss);
-    stroke-width: 0.5;
-    stroke-dasharray: 1 1;
-  }
-  .arena .jump {
-    stroke: var(--arena-ring);
-    stroke-width: 0.7;
-    stroke-dasharray: 1.6 1.2;
-  }
 
   /* Attacks. Each one is see-through, so where attacks overlap the colour gets darker. */
   .arena .aoe {

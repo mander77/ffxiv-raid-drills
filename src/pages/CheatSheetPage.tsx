@@ -1,4 +1,5 @@
-// The Cheat sheet page (/sheet): the panic reset, the positions and your timeline on one page.
+// The Cheat sheet page (/sheet): every mechanic with its picture, the panic reset and your timeline
+// on one page.
 // TS note: a .tsx file is TypeScript that may hold JSX, the HTML-like tags below. Each tag compiles
 // to a call to React, so the compiler checks every tag and attribute.
 import { type ReactNode, useState } from "react";
@@ -6,136 +7,111 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Arena } from "../components/arena/Arena";
-import { ArenaLabel } from "../components/arena/ArenaLabel";
-import { BossMark } from "../components/arena/BossMark";
-import { Shape } from "../components/arena/Shape";
-import { ZoneArea } from "../components/arena/ZoneArea";
+import { LearnPicture } from "../components/arena/LearnPicture";
 import { CategoryDots, categoryNames } from "../components/CategoryDots";
 import { CategoryKey } from "../components/CategoryKey";
 import { PageContainer } from "../components/PageContainer";
 import { timelineCategories } from "../data/abilities";
-import { swordCross, swordPocket } from "../data/attacks";
+import { LEARN_PICTURES } from "../data/pictures";
+import { learnCard, type ReferenceEntry, referenceByPhase } from "../data/reference";
 import { CACTBOT_TIMELINE, WTFDIG } from "../data/sources";
 import { TIMELINE } from "../data/timeline";
-import { addVec, leftOf, unit } from "../geometry";
 import { useProgressStore } from "../stores/progress";
 import { useSlotStore } from "../stores/slot";
 import { tabOf } from "../tabs";
-import type { Point, Slot } from "../types";
-import { bySlot } from "../util";
+import type { Slot } from "../types";
 
-/** The size of a sword pocket's label, in arena units. */
-const POCKET_LABEL = { w: 16, h: 4.6 };
+/** The phases of the fight in order, each with its mechanics. */
+const PHASES = referenceByPhase();
 
-interface SwordExampleProps {
-  slot: Slot;
-  className?: string;
+/** The short name of a phase, "Phase 1" from "Phase 1: Trophy Weapons", for its chip. */
+function shortPhase(phase: string): string {
+  return phase.split(":")[0];
 }
 
-/** A fixed sword example: the boss jumps west from the middle. The pockets on the side he came
-    from are the two stack spots. Yours is green, the other light party's is grey. */
-function SwordExample({ slot, className }: SwordExampleProps) {
-  const P: Point = [21, 50];
-  const d: Point = [-1, 0];
-  const L = leftOf(d);
-  const mine = bySlot(slot, { H1: 1, H2: -1 });
-  const pocket = (side: number): Point[] => swordPocket(P, d, [L[0] * side, L[1] * side]);
-  // Each pocket's label sits 29 units out from where he lands, behind his side.
-  const labelAt = (side: number): Point => addVec(P, unit(addVec([-d[0], -d[1]], [L[0] * side, L[1] * side])), 29);
+/** The page address of a phase's heading, "phase-1", so its chip can jump to it. */
+function phaseId(phase: string): string {
+  return shortPhase(phase).toLowerCase().replace(" ", "-");
+}
+
+interface MechanicCardProps {
+  entry: ReferenceEntry;
+  slot: Slot;
+}
+
+/** One mechanic: its time and name, its Learn answer picture for your slot, its rules and a link
+    to its Learn cards. */
+function MechanicCard({ entry, slot }: MechanicCardProps) {
+  const card = learnCard(entry.picture);
+  const fig = LEARN_PICTURES[entry.picture]?.(slot);
   return (
-    <Arena
-      label="Sword example. The boss jumps west from the middle. G1 takes the pocket behind his left side, G2 the pocket behind his right side."
-      className={className}
-      layers={{
-        // biome-ignore lint/suspicious/noArrayIndexKey: the pieces of the example never change order.
-        ground: swordCross(P, d).map((o, i) => <Shape key={i} overlay={o} />),
-        zones: (
-          <>
-            <ZoneArea zone={{ poly: pocket(1) }} look={mine === 1 ? "ok" : "other"} />
-            <ZoneArea zone={{ poly: pocket(-1) }} look={mine === -1 ? "ok" : "other"} />
-          </>
-        ),
-        // Where he stood in the middle, his jump, and where he lands.
-        boss: (
-          <>
-            <circle className="ghost" cx="50" cy="50" r="3.4" />
-            <line className="jump" x1="46" y1="50" x2="33" y2="50" />
-            <BossMark boss={{ x: P[0], y: P[1], f: 270 }} />
-          </>
-        ),
-        labels: (
-          <>
-            {/* Your own pocket's label is green; the other light party's is grey. */}
-            <ArenaLabel at={labelAt(1)} text="G1 / H1" {...POCKET_LABEL} look={mine === 1 ? "ok" : "other"} />
-            <ArenaLabel at={labelAt(-1)} text="G2 / H2" {...POCKET_LABEL} look={mine === -1 ? "ok" : "other"} />
-          </>
-        ),
-      }}
-    />
+    <Card className="gap-3 py-4">
+      <CardHeader className="px-4">
+        <CardTitle className="flex items-baseline gap-2">
+          <span className="font-mono text-sm text-muted-foreground tabular-nums">{card.time}</span>
+          <span className="font-display text-lg tracking-wide">{entry.name}</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 px-4">
+        {fig && (
+          <LearnPicture
+            fig={fig}
+            answered
+            label={`${entry.name} on the arena. The green area shows the answer.`}
+            className="mx-auto block h-auto w-full max-w-xs"
+          />
+        )}
+        <ul className="list-disc space-y-1 pl-5">
+          {entry.cards.map((id) => (
+            <li key={id}>{learnCard(id).build(slot).rule}</li>
+          ))}
+        </ul>
+        <Link
+          to={`/learn/${entry.cards[0]}`}
+          className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+          aria-label={`Learn ${entry.name}`}
+        >
+          Learn →
+        </Link>
+      </CardContent>
+    </Card>
   );
 }
 
-/** One line of "Positions to remember": the mechanic, and its rule for your slot in a sentence or two. */
-interface Rule {
-  name: string;
-  /** The Learn card with the detail. */
-  card: string;
-  text: (s: Slot) => string;
+interface MechanicsProps {
+  slot: Slot;
 }
 
-/** One short line per mechanic, in fight order, written for your role. */
-const RULES: readonly Rule[] = [
-  { name: "Weapon order", card: "k-first-weapon", text: () => "The first weapon is the one he faces. Then clockwise." },
-  {
-    name: "Sword",
-    card: "k-sword",
-    text: (s) =>
-      `Stand in the pocket behind him, on the side he jumped from. Yours is his ${bySlot(s, { H1: "left", H2: "right" })}, and your light party stacks on you.`,
-  },
-  {
-    name: "Scythe",
-    card: "k-scythe",
-    text: (s) => `Everyone stands close around him. You take the ${bySlot(s, { H1: "handle end", H2: "blade end" })}.`,
-  },
-  { name: "Axe", card: "k-axe", text: () => "The whole party stacks in the middle, out of the axe hit." },
-  {
-    name: "Ultimate Trophy Weapons",
-    card: "k-ult-spawn",
-    text: () => "First spawn south and a bit west: clockwise. A bit east: counterclockwise.",
-  },
-  {
-    name: "Void Stardust",
-    card: "k-void",
-    text: () => "Start north of him. Drop each puddle just outside the last, a small step clockwise. Then stack or spread.",
-  },
-  {
-    name: "Second weapon set",
-    card: "k-assault-2",
-    text: () =>
-      "Spot it before the puddles: the first is the one with its flat side square to him. Sword or scythe first: stack or spread toward it.",
-  },
-  {
-    name: "Comet spread",
-    card: "k-void-spread",
-    text: () => "Healers take any open spot, away from the tanks and melee and out of the last puddle.",
-  },
-  {
-    name: "Orbital Omen",
-    card: "k-orbital",
-    text: () => "Stay against his side, where the #2 lines cross. After #1, cross through him. After #2, cross back.",
-  },
-  {
-    name: "Meteorain, your meteor",
-    card: "k-meteor-drop",
-    text: (s) => bySlot(s, { H1: "Drop it NW, inside his hitbox.", H2: "Drop it SW, in line with the first SW rock, farther out." }),
-  },
-  {
-    name: "Meteorain, tanks",
-    card: "k-meteor-order",
-    text: () => "Their tethers are tank busters at 5:09, 5:19 and 5:29. Heal them after each one.",
-  },
-];
+/** Every mechanic in fight order, by phase, with a chip to jump to each phase. */
+function Mechanics({ slot }: MechanicsProps) {
+  return (
+    <section aria-labelledby="mechanics" className="space-y-4">
+      <h2 id="mechanics" className="font-display text-2xl tracking-wide">
+        Every mechanic as {slot}
+      </h2>
+      <nav aria-label="Go to a phase" className="flex flex-wrap gap-2">
+        {PHASES.map((p) => (
+          <Button key={p.phase} asChild variant="outline" size="sm">
+            <a href={`#${phaseId(p.phase)}`}>{shortPhase(p.phase)}</a>
+          </Button>
+        ))}
+      </nav>
+      {PHASES.map((p) => (
+        // The wide-screen header stays at the top, so a phase heading stops below it.
+        <section key={p.phase} aria-labelledby={phaseId(p.phase)} className="space-y-3">
+          <h3 id={phaseId(p.phase)} className="scroll-mt-32 font-display text-xl tracking-wide">
+            {p.phase}
+          </h3>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {p.entries.map((e) => (
+              <MechanicCard key={e.name} entry={e} slot={slot} />
+            ))}
+          </div>
+        </section>
+      ))}
+    </section>
+  );
+}
 
 /** A guide or a source, with an optional note after it. */
 const SOURCES: readonly { href: string; label: string; note?: string }[] = [
@@ -200,6 +176,8 @@ export function CheatSheetPage() {
       <PageContainer className="space-y-6 py-6">
         <p className="text-muted-foreground">{tabOf("/sheet")?.lede}</p>
 
+        <Mechanics slot={slot} />
+
         <Section title="Panic reset">
           <ol className="list-decimal space-y-2 pl-6">
             <li>Feet: go to your spot for the next mechanic.</li>
@@ -207,30 +185,6 @@ export function CheatSheetPage() {
             <li>Team: a hit soon? Heal the party.</li>
           </ol>
           <p>Say it in your head: feet, self, team. If you are not sure, any of these beats standing still.</p>
-        </Section>
-
-        <Section title="Positions to remember">
-          <div className="grid gap-6 md:grid-cols-2">
-            <ul className="list-disc space-y-2 pl-5">
-              {RULES.map((r) => (
-                <li key={r.name}>
-                  <span className="font-semibold">{r.name}:</span> {r.text(slot)}{" "}
-                  <Link
-                    to={`/learn/${r.card}`}
-                    className="text-sm font-medium whitespace-nowrap text-primary underline-offset-4 hover:underline"
-                  >
-                    Learn →
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <figure className="min-w-0">
-              <SwordExample slot={slot} className="mx-auto block h-auto w-full max-w-sm" />
-              <figcaption className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-                Example: he jumps west from the middle. The pockets on the side he came from are the two stack spots. Yours is green.
-              </figcaption>
-            </figure>
-          </div>
         </Section>
 
         <Section title={`Your timeline as ${slot}`}>

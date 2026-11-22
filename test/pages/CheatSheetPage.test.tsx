@@ -1,10 +1,11 @@
 // @vitest-environment happy-dom
 // TS note: the comment above makes Vitest run this file in happy-dom, a fake browser page, so the
 // component has a document to draw into. The other test files run in plain Node.
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, assert, test } from "vitest";
+import { REFERENCE } from "../../src/data/reference";
 import { TIMELINE } from "../../src/data/timeline";
 import { CheatSheetPage } from "../../src/pages/CheatSheetPage";
 import { useProgressStore } from "../../src/stores/progress";
@@ -27,26 +28,33 @@ test("the cheat sheet shows the timeline for your slot, one row per line", () =>
   assert.ok(screen.getByText("Your timeline as H2"));
   // One header row, then one row per timeline line.
   assert.equal(screen.getAllByRole("row").length, TIMELINE.length + 1);
-  assert.match(screen.getByText(/Stand in the pocket behind him/).textContent ?? "", /Yours is his right/);
 });
 
-test("H1 gets the other side", () => {
-  draw("H1");
-  assert.match(screen.getByText(/Stand in the pocket behind him/).textContent ?? "", /Yours is his left/);
+test("every mechanic has its picture, under its phase, for your slot", () => {
+  draw("H2");
+  assert.ok(screen.getByRole("heading", { name: "Every mechanic as H2" }));
+  assert.equal(screen.getAllByRole("img", { name: /on the arena/ }).length, REFERENCE.length);
+  const phase3 = screen.getByRole("region", { name: "Phase 3: Arena Split" });
+  assert.ok(within(phase3).getByRole("img", { name: /^Massive Meteor on the arena/ }));
+  // The rules are the Learn cards' rules, for your slot.
+  assert.ok(screen.getByText("Scythe: H1 at the butt, H2 at the point, close in."));
 });
 
-test("the sword picture marks your pocket for your slot", () => {
+test("each phase chip jumps to its phase", () => {
   draw("H1");
-  const picture = screen.getByRole("img", { name: /Sword example/ });
-  // Your label is green (zlabel); the other slot's is grey (zlabel other).
-  assert.match(picture.querySelector("g.zlabel:not(.other) text")?.textContent ?? "", /G1 \/ H1/);
+  const chips = within(screen.getByRole("navigation", { name: "Go to a phase" })).getAllByRole("link");
+  assert.deepEqual(
+    chips.map((c) => c.textContent),
+    ["Phase 1", "Phase 2", "Phase 3", "Phase 4"],
+  );
+  assert.equal(chips[2].getAttribute("href"), "#phase-3");
+  assert.ok(document.getElementById("phase-3"));
 });
 
-test("each rule links to its Learn card", () => {
+test("each mechanic links to its first Learn card", () => {
   draw("H1");
-  const links = screen.getAllByRole("link", { name: "Learn →" });
-  assert.equal(links.length, 11);
-  assert.equal(links[0].getAttribute("href"), "/learn/k-first-weapon");
+  assert.equal(screen.getAllByRole("link", { name: /^Learn / }).length, REFERENCE.length);
+  assert.equal(screen.getByRole("link", { name: "Learn Meteorain" }).getAttribute("href"), "/learn/k-meteor-order");
 });
 
 test("every source opens in a new tab", () => {
