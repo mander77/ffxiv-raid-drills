@@ -14,7 +14,7 @@ import { PageContainer } from "../components/PageContainer";
 import { timelineCategories } from "../data/abilities";
 import { LEARN_PICTURES } from "../data/pictures";
 import { learnCard, practiceDrill, type ReferenceEntry, referenceByPhase, slotAnswer } from "../data/reference";
-import { CACTBOT_TIMELINE, WTFDIG } from "../data/sources";
+import { SOURCES } from "../data/sources";
 import { TIMELINE } from "../data/timeline";
 import { useSectionInView } from "../hooks/useSectionInView";
 import { prefersLessMotion } from "../lib/dom";
@@ -222,21 +222,6 @@ function SectionButtons() {
     </nav>
   );
 }
-
-/** A guide or a source, with an optional note after it. */
-const SOURCES: readonly { href: string; label: string; note?: string }[] = [
-  { href: WTFDIG, label: "wtfdig M11S", note: "Your strats: Hector (Toxic), Kindred No Buddies, Fixed (3CJ)" },
-  { href: "https://www.youtube.com/watch?v=w1uuwzhyf5A", label: "Hector's video guide" },
-  { href: "https://raidplan.io/plan/HJAbE7fuWodELUSB", label: "Toxic Friends raidplan", note: "Phases 1 and 2" },
-  { href: "https://raidplan.io/plan/hvbysrfwvrc55ahz", label: "Kindred raidplan", note: "Arena Split" },
-  { href: "https://raidplan.io/plan/KXVlSGwV3zqON3CJ", label: "Fixed Stampede raidplan", note: "Ecliptic Stampede" },
-  {
-    href: "https://www.icy-veins.com/ffxiv/aac-heavyweight-m3-savage-raid-guide",
-    label: "Icy Veins M11S guide",
-    note: "Mechanic details, enrage at 11:00",
-  },
-  { href: CACTBOT_TIMELINE, label: "cactbot r11s timeline", note: "Times" },
-];
 
 interface SectionProps {
   /** The address of the section, for the buttons that jump to it. */

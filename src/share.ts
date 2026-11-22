@@ -1,4 +1,4 @@
-// Sharing the screen you are on. Every screen keeps its state in the address bar (see router.ts):
+// Sharing the screen you are on. Every screen keeps its state in the address bar (the routes in App.tsx):
 // a quiz card, a drill with its pattern code, a fight with its code, picks and moment. So sharing
 // the current address shares exactly what is on screen.
 

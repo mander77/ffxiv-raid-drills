@@ -19,7 +19,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), fightTitle()],
   // "@/components/ui/button" means src/components/ui/button. shadcn/ui writes its imports this way.
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
-  // Asset paths from the domain root (/assets/...). The app uses real paths such as /mech/k-sword,
+  // Asset paths from the domain root (/assets/...). The app uses real paths such as /learn/<card>,
   // so a relative path (./assets/...) would point inside that path and not find the files.
   base: "/",
   test: {

@@ -8,8 +8,8 @@
   // Serve the files that `npm run build` writes to dist/. No server code runs.
   "assets": {
     "directory": "./dist",
-    // A page address with no file behind it, such as /mech/k-sword, gets index.html, and the
-    // app reads the path itself (src/router.ts). Real files, such as /assets/..., still come first.
+    // A page address with no file behind it, such as /learn/<card>, gets index.html, and React
+    // Router reads the path in the browser. Real files, such as /assets/..., still come first.
     "not_found_handling": "single-page-application"
   },
   // Turns on preview deployments. Cloudflare runs `npx wrangler preview` for each branch

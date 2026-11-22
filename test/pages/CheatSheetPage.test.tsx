@@ -78,6 +78,12 @@ test("every source opens in a new tab", () => {
   assert.equal(wtfdig.getAttribute("target"), "_blank");
 });
 
+test("the sources name where the times and the attack sizes come from", () => {
+  draw("H1");
+  assert.ok(screen.getByRole("link", { name: "cactbot r11s timeline" }));
+  assert.ok(screen.getByRole("link", { name: "BossMod M11S module" }));
+});
+
 test("Your progress counts your slot's answers; Reset asks once, then erases every slot", async () => {
   useProgressStore.setState({
     scores: {
