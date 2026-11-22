@@ -21,7 +21,6 @@ on:
       - "scripts/**"
       - "playwright.config.ts"
       - "biome.json"
-      - "mise.toml"
       - "components.json"
       - ".gitignore"
       - ".gitattributes"

@@ -255,7 +255,9 @@ make sure that each one still matches the code before you start it.
     refuse another Node.js major version. Cloudflare and CI read `.node-version` (24).
   - No dev container: it needs Docker (WSL2 on Windows), and the AI tools and worktrees the owner
     uses run on the computer itself. It can come later, only for Codespaces.
-  - mise stays optional. `mise.toml` names Node.js 24 in `[tools]` for those who use it.
+  - No mise: the owner removed `mise.toml`. It only unset a work account's token and git
+    identity variables on one computer. The publish script clears the tokens itself, and
+    `git var GIT_AUTHOR_IDENT` shows when an environment variable wins over the git config.
   - The setup shows the commit identity but never sets it, because a contributor has their own.
   - The GitHub CLI is optional: the setup gives a hint when it is missing or signed out. Only
     publishing needs it, and a pull request needs only git.
@@ -518,7 +520,7 @@ static wins.
 - Build watch paths, how they match: Cloudflare drops the changed files that match an exclude path first, then builds if any file
   left matches an include path. Its wildcard `*` may stand only alone or at the start or end of
   a path. Include: `*`. Exclude: `docs/*`, `*.md`, `.github/*`, `.claude/*`, `skills-lock.json`,
-  `test/*`, `e2e/*`, `scripts/*`, `playwright.config.ts`, `biome.json`, `mise.toml`,
+  `test/*`, `e2e/*`, `scripts/*`, `playwright.config.ts`, `biome.json`,
   `components.json`, `.gitignore`, `.gitattributes`, `.nojekyll`. Everything else counts as the
   app (`src/`, `public/`, `index.html`, `package.json`, `package-lock.json`, `vite.config.ts`,
   `tsconfig.json`, `wrangler.jsonc`, `.node-version`), and so does any new file, so a forgotten

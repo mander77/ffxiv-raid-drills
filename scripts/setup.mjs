@@ -38,7 +38,6 @@ if (process.versions.node.split(".")[0] !== want) {
   console.error(`Install Node.js ${want}, open a new terminal, and run npm run setup again:`);
   console.error(`  Windows: winget install OpenJS.NodeJS.${want}`);
   console.error(`  macOS:   brew install node@${want}`);
-  console.error("  Any OS, with mise: mise install (it reads mise.toml)");
   process.exit(1);
 }
 console.log(`Node.js ${process.versions.node}: OK`);

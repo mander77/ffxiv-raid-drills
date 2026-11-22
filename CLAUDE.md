@@ -65,7 +65,7 @@ The tools are git and Node.js 24. Everything else comes from npm. The same steps
 Windows, macOS and Linux, and in any shell (PowerShell too):
 
 1. Install git and Node.js 24 (Windows: `winget install Git.Git OpenJS.NodeJS.24`; macOS:
-   `brew install git node@24`; or mise, which reads `mise.toml`). Open a new terminal.
+   `brew install git node@24`). Open a new terminal.
 2. Clone the repository and run `npm run setup` in the clone. It checks the Node.js version,
    runs `npm ci`, installs the browsers for `npm run e2e`, runs the type check and the tests,
    and ends with a "To do" list for anything it cannot fix itself.
@@ -77,7 +77,6 @@ Windows, macOS and Linux, and in any shell (PowerShell too):
    Then run `git var GIT_AUTHOR_IDENT` and make sure that it shows this name and address.
 4. To publish (the owner only), install the GitHub CLI (`winget install GitHub.cli`), run
    `gh auth login` as `mander77`, then `gh auth setup-git`. The setup says if it is missing.
-5. If mise is installed, run `mise trust mise.toml` in the clone.
 
 ## Commands
 
@@ -170,7 +169,6 @@ e2e/                 Playwright browser tests
 1. Make a branch from the latest `main`. When another session can use the main checkout, work in
    a git worktree, for example
    `git worktree add -b <branch> ../ffxiv-raid-drills-<name> origin/main`, and run `npm ci` there.
-   If mise is installed, run `mise trust <worktree>/mise.toml` once.
 2. Run the dev server and check the change in a browser at desktop width (1280 px) and phone width
    (375 px). Measure positions in the page. Do not guess.
 3. Run the type check, the tests (`npm test` and `npm run e2e`) and `npm run lint`.
@@ -194,10 +192,8 @@ These steps put a branch on `main`, the live site.
    `git merge-base --is-ancestor origin/main <branch>`. Another session can publish in between. If
    main moved, rebase the branch and check again.
 2. Run `npm run build` and note the bundle name, `dist/assets/index-<hash>.js`.
-3. From the branch checkout, run `npm run publish` (any shell, PowerShell too). With mise
-   installed, run it through mise so the repository's `mise.toml` applies:
-   `mise -C <checkout> exec -- npm run publish`. The script runs the type check, the tests and
-   the lint, then pushes the branch as `mander77`. The push starts CI on GitHub.
+3. From the branch checkout, run `npm run publish` (any shell, PowerShell too). The script runs
+   the type check, the tests and the lint, then pushes the branch as `mander77`. The push starts CI on GitHub.
 4. If the branch changed the app, wait for CI to pass, then ask the owner to approve the
    waiting Preview run on GitHub. Then run
    `npm run wait-deploy -- https://<branch>.ffxiv-raid-drills.app index-<hash>.js` and
@@ -219,8 +215,6 @@ These steps put a branch on `main`, the live site.
   `mander77 <220622142+mander77@users.noreply.github.com>`. Before your first commit, run
   `git var GIT_AUTHOR_IDENT`. If it shows another name or address, stop and fix it. Environment
   variables (`GIT_AUTHOR_*`, `GIT_COMMITTER_*`) win over the git config.
-- `mise.toml` unsets `GH_TOKEN`, `GITHUB_TOKEN` and the git identity variables in this
-  repository. It matters on a machine where the shell sets them for another account.
 - The publish script clears `GH_TOKEN` and `GITHUB_TOKEN`, switches the GitHub CLI to `mander77`
   and pushes through the GitHub CLI's credential helper. It needs `gh auth login` as `mander77`.
 - To read a Cloudflare build result without the dashboard, run

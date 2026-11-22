@@ -10,7 +10,6 @@ You need git and Node.js 24 (the version in `.node-version`). Install them once,
 
 - Windows: `winget install Git.Git OpenJS.NodeJS.24`
 - macOS: `brew install git node@24`
-- Any OS: [mise](https://mise.jdx.dev) reads `mise.toml` (`mise install`). mise is optional.
 
 Then clone the repository and run one command in the clone. It works in any shell, PowerShell too:
 
