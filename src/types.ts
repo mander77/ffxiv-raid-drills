@@ -13,7 +13,10 @@
 export type LightParty = 1 | 2;
 // TS note: a union of string literals, like a small C# enum whose values stay plain strings.
 export type Role = "Tank" | "Healer" | "Melee" | "Ranged";
-export interface PartySlot { lp: LightParty; role: Role }
+export interface PartySlot {
+  lp: LightParty;
+  role: Role;
+}
 export type SlotName = "MT" | "OT" | "H1" | "H2" | "M1" | "M2" | "R1" | "R2";
 /** The slots that have drills today: the two healers. Saved settings and links use these names. */
 // TS note: Extract keeps the members of a union that fit the second type, so Slot is "H1" | "H2".
@@ -35,12 +38,26 @@ type RectBox = [number, number, number, number];
     click, lighter green), "pick" (a preview or "Go here", blue), "other" (another slot's spot,
     grey), "later" (saved for later, purple) or "hit" (an area that gets hit, red). */
 export type ZoneLook = "ok" | "bad" | "pick" | "other" | "later" | "hit";
-export interface CircleZone { c: Point; r: number; look?: ZoneLook }
-export interface RectZone { rect: RectBox; look?: ZoneLook }
-interface PolyShape { poly: Point[]; look?: ZoneLook }
+export interface CircleZone {
+  c: Point;
+  r: number;
+  look?: ZoneLook;
+}
+export interface RectZone {
+  rect: RectBox;
+  look?: ZoneLook;
+}
+interface PolyShape {
+  poly: Point[];
+  look?: ZoneLook;
+}
 /** A zone decided by a rule. `show` is what the map draws after an answer. */
 // TS note: `(p: Point) => boolean` is a function type, like Func<Point, bool> in C#.
-export interface RuleZone { fn: (p: Point) => boolean; label: Point; show: Array<CircleZone | RectZone | PolyShape> }
+export interface RuleZone {
+  fn: (p: Point) => boolean;
+  label: Point;
+  show: Array<CircleZone | RectZone | PolyShape>;
+}
 
 // TS note: a union of object types. A Zone is one of the three shapes.
 // Before you use a field that only one shape has, you must check which shape you hold,
@@ -50,8 +67,14 @@ export type ZoneShape = CircleZone | RectZone | PolyShape | RuleZone;
 
 /* ---------- things drawn on the arena ---------- */
 
-interface At { x: number; y: number }
-interface Line extends At { x2: number; y2: number }
+interface At {
+  x: number;
+  y: number;
+}
+interface Line extends At {
+  x2: number;
+  y2: number;
+}
 
 // TS note: a "discriminated union". Every member has a `t` field with a different literal value.
 // In `switch (o.t)`, TypeScript knows which member you hold in each case, so `o.r` is allowed
@@ -89,12 +112,23 @@ export type ScytheOverlay = Extract<Overlay, { t: "scythe" }>;
 /** The boss marker. `f` is the facing in degrees clockwise from north; null hides the arrow. */
 // TS note: `number | null` must be stated. With "strict" on, null is not a valid number,
 // much like C# nullable reference types with warnings treated as errors.
-export interface Boss { x: number; y: number; f: number | null; d?: Point }
+export interface Boss {
+  x: number;
+  y: number;
+  f: number | null;
+  d?: Point;
+}
 
 /* ---------- map drills ---------- */
 
 /** One answered step. In the full fight, `missed` means time ran out with no click. */
-export interface StepResult { p: Point; ok: boolean; z: Zone; drop: Point | null; missed?: boolean }
+export interface StepResult {
+  p: Point;
+  ok: boolean;
+  z: Zone;
+  drop: Point | null;
+  missed?: boolean;
+}
 
 export interface Step {
   q: string;
@@ -180,16 +214,37 @@ export interface Drill {
 
 /** What one answer looks like on the arena, correct or incorrect: the pieces it adds, and the spots
     it marks. All answers draw in the same neutral colour, so a preview never gives away the answer. */
-export interface Preview { pieces: Overlay[]; zones?: ZoneShape[] }
+export interface Preview {
+  pieces: Overlay[];
+  zones?: ZoneShape[];
+}
 
 /** An arena picture for a quiz question. `overlays` and `boss` always show. `before` shows
     until you answer, unless an answer preview replaces it. After the answer, `after` draws what
     the mechanic does and the green `answer` zones show the correct spot. `options` holds one
     preview per answer, in the order the question lists them. `note` is a caption. */
-export interface Picture { overlays: Overlay[]; boss?: Boss; split?: boolean; before?: Overlay[]; after?: Overlay[]; answer?: ZoneShape[]; options?: Preview[]; note?: string }
+export interface Picture {
+  overlays: Overlay[];
+  boss?: Boss;
+  split?: boolean;
+  before?: Overlay[];
+  after?: Overlay[];
+  answer?: ZoneShape[];
+  options?: Preview[];
+  note?: string;
+}
 
-export interface Option { t: string; ok?: boolean }
-export interface Question { prompt: string; options: Option[]; why: string; rule: string; src?: string }
+export interface Option {
+  t: string;
+  ok?: boolean;
+}
+export interface Question {
+  prompt: string;
+  options: Option[];
+  why: string;
+  rule: string;
+  src?: string;
+}
 export interface QuizItem {
   id: string;
   order: number;
@@ -201,4 +256,8 @@ export interface QuizItem {
 /* ---------- timeline ---------- */
 
 /** One row of the cheat-sheet timeline. Its categories come from the ability list (timelineCategories). */
-export interface TimelineEvent { t: string; n: string; job: (s: Slot) => string }
+export interface TimelineEvent {
+  t: string;
+  n: string;
+  job: (s: Slot) => string;
+}

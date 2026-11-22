@@ -10,16 +10,20 @@ export type ShareResult = "shared" | "copied" | "shown" | "cancelled";
    Some browsers and embedded views block the Clipboard API; then the older copy from a hidden text
    field is tried, and if that fails too, a box shows the link to copy. */
 export async function shareLink(): Promise<ShareResult> {
-  const url = location.href, touch = window.matchMedia("(pointer: coarse)").matches;
+  const url = location.href,
+    touch = window.matchMedia("(pointer: coarse)").matches;
   try {
     // TS note: `"share" in navigator` checks at run time; older browsers do not have it.
-    if(touch && "share" in navigator){ await navigator.share({title:document.title, url}); return "shared"; }
+    if (touch && "share" in navigator) {
+      await navigator.share({ title: document.title, url });
+      return "shared";
+    }
     await navigator.clipboard.writeText(url);
     return "copied";
-  } catch(err){
+  } catch (err) {
     // Closing the share sheet without sharing is not an error to report.
-    if(err instanceof DOMException && err.name === "AbortError") return "cancelled";
-    if(copyByField(url)) return "copied";
+    if (err instanceof DOMException && err.name === "AbortError") return "cancelled";
+    if (copyByField(url)) return "copied";
     window.prompt("Copy this link:", url);
     return "shown";
   }
@@ -36,7 +40,11 @@ function copyByField(text: string): boolean {
   let ok = false;
   // TS note: execCommand is marked deprecated in the DOM types, but every browser still runs it,
   // and it is the only copy that works where the Clipboard API is blocked.
-  try { ok = document.execCommand("copy"); } catch { ok = false; }
+  try {
+    ok = document.execCommand("copy");
+  } catch {
+    ok = false;
+  }
   field.remove();
   return ok;
 }

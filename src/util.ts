@@ -17,7 +17,7 @@ export const random = (): number => rng();
 function seeded(seed: number): () => number {
   let a = seed >>> 0;
   return () => {
-    a = (a + 0x6D2B79F5) >>> 0;
+    a = (a + 0x6d2b79f5) >>> 0;
     let t = Math.imul(a ^ (a >>> 15), 1 | a);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
@@ -30,26 +30,33 @@ function seeded(seed: number): () => number {
 export function withSeed<T>(code: string, fn: () => T): T {
   const before = rng;
   rng = seeded(codeSeed(code));
-  try { return fn(); } finally { rng = before; }
+  try {
+    return fn();
+  } finally {
+    rng = before;
+  }
 }
 
 /* Pattern codes: 4 characters, without 0, O, 1 and I, which are easy to mix up. */
 const CODE_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
-export const newCode = (): string => Array.from({length:4}, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join("");
+export const newCode = (): string => Array.from({ length: 4 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join("");
 export const isCode = (s: string): boolean => /^[2-9A-HJ-NP-Z]{4}$/.test(s.toUpperCase());
 function codeSeed(code: string): number {
   let n = 0;
-  for(const ch of code.toUpperCase()) n = n * CODE_CHARS.length + Math.max(0, CODE_CHARS.indexOf(ch));
-  return n * 2654435761;   // spread nearby codes far apart
+  for (const ch of code.toUpperCase()) n = n * CODE_CHARS.length + Math.max(0, CODE_CHARS.indexOf(ch));
+  return n * 2654435761; // spread nearby codes far apart
 }
 
 export function shuffle<T>(a: T[]): T[] {
-  for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
   return a;
 }
 
 /** Time to read some text, in milliseconds: about 4 words a second, and at least 2 seconds. */
 export function readingMs(texts: string[]): number {
   const words = texts.join(" ").trim().split(/\s+/).length;
-  return Math.max(2000, Math.round(words / 4 * 1000));
+  return Math.max(2000, Math.round((words / 4) * 1000));
 }

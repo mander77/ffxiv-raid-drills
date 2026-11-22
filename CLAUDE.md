@@ -286,7 +286,9 @@ These steps put a branch on `main`, the live site.
     `icons.tsx` and follows the rules at its top.
   - Each component and page has a test in `test/components/` or `test/pages/`. Find elements by role and
     text, the way a player would.
-  - Add new files to `files.includes` in `biome.json`, so Biome checks them.
+  - Biome checks every file in `src/`, `test/`, `e2e/` and `scripts/` by itself (globs in
+    `files.includes` in `biome.json`), so a new file needs no entry. Only `src/data/` stays
+    out, except `fightInfo.ts` and `reference.ts`.
 - Leave the values in `src/data/` and `src/geometry.ts` as they are. They are checked against
   cactbot and BossMod. Names may change, with the owner's OK.
 - The player marks are always the top layer of an arena picture.

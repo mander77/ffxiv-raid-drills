@@ -66,8 +66,10 @@ make sure that each one still matches the code before you start it.
     `pages/` (one per route), `components/` (shared parts), `components/ui/` (shadcn/ui, as its
     CLI writes them), `hooks/`, `stores/` and `lib/`. Click logic lives in handlers, not in
     effects (React's "You might not need an effect").
-  - Biome checks the new code (`files.includes` in `biome.json`), not `src/data/` and the other
-    files kept from the old site.
+  - Biome checks every file in `src/`, `test/`, `e2e/` and `scripts/` (globs in `files.includes`
+    in `biome.json`), but not `src/data/` (except `fightInfo.ts` and `reference.ts`). The owner
+    chose to format the other files kept from the old site too (`party.ts`, `util.ts`,
+    `geometry.ts`, `types.ts`).
   - The bundle is 129 kB (gzip), from 61.5 kB for the old site with every tab. React DOM is about
     65 kB of that, and Radix and floating-ui, behind the tooltip and the toggles, about 35 kB.
   - Keep the `TS note:` comments, and add notes for the React features too.
