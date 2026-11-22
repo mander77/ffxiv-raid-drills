@@ -133,16 +133,18 @@ export interface Scene {
   spawnAhead?: number;
 }
 
-/** What you do in a Practice mechanic: spread out, stack, stack in a line from the boss, stand in
-    pairs, bait an attack (bring it to your spot, then step out), dodge, dodge a set order of
-    attacks, take a tower (one that knocks you back, too), line up behind a blocker for a wild
-    charge, act on what the boss showed earlier (saved for later), or get knocked back to your
-    spot. Practice's list of mechanics shows it as an icon. */
+/** What you do in a Practice mechanic: spread out, stack (the whole party, in pairs, in light
+    parties, or by role), stack in a line from the boss, bait an attack (bring it to your spot, then
+    step out), dodge, dodge a set order of attacks, take a tower (one that knocks you back, too),
+    line up behind a blocker for a wild charge, act on what the boss showed earlier (saved for
+    later), or get knocked back to your spot. Practice's list of mechanics shows it as an icon. */
 export type DrillKind =
   | "spread"
   | "stack"
+  | "pairStack"
+  | "lightPartyStack"
+  | "roleStack"
   | "lineStack"
-  | "pairs"
   | "bait"
   | "dodge"
   | "sequence"

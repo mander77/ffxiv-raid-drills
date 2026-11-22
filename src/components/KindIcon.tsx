@@ -1,4 +1,4 @@
-import { CircleArrowOutUpRight, createLucideIcon, Expand, History, type IconNode, type LucideIcon, Shrink } from "lucide-react";
+import { CircleArrowOutUpRight, createLucideIcon, Expand, History, type IconNode, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DrillKind } from "../types";
 
@@ -35,13 +35,17 @@ const Knockback = createLucideIcon("knockback", [
     knocks you back. Drawn the same way. */
 const TowerKnockback = createLucideIcon("tower-knockback", [["circle", { cx: "12", cy: "12", r: "6", key: "tower" }], ...PUSHED_OUT]);
 
-/** Pairs: two players (filled dots) in opposite corners, and one arrow from one to the other: go
-    to your partner. Drawn the same way. */
-const Pairs = createLucideIcon("pairs", [
-  ["circle", { cx: "3.5", cy: "20.5", r: "2", fill: "currentColor", key: "you" }],
-  ["circle", { cx: "20.5", cy: "3.5", r: "2", fill: "currentColor", key: "partner" }],
-  ["path", { d: "M6.5 17.5 15 9", key: "move" }],
-  ["path", { d: "M10 9h5v5", key: "move-head" }],
+/** A stack: four arrows from the corners, the players coming together, with the middle left open
+    for the number of players in the stack (see KINDS). Drawn the same way. */
+const Stack = createLucideIcon("stack", [
+  ["path", { d: "m1 1 6 6", key: "northwest" }],
+  ["path", { d: "M7 3v4H3", key: "northwest-head" }],
+  ["path", { d: "m23 1-6 6", key: "northeast" }],
+  ["path", { d: "M17 3v4h4", key: "northeast-head" }],
+  ["path", { d: "m1 23 6-6", key: "southwest" }],
+  ["path", { d: "M7 21v-4H3", key: "southwest-head" }],
+  ["path", { d: "m23 23-6-6", key: "southeast" }],
+  ["path", { d: "M17 21v-4h4", key: "southeast-head" }],
 ]);
 
 /** A tower: a player (a filled dot) standing in the spot (a ring). Drawn the same way. */
@@ -65,12 +69,16 @@ const DodgeSequence = createLucideIcon("dodge-sequence", [
   ["path", { d: "m18 14 3 3-3 3", key: "path-head" }],
 ]);
 
-/** The name and the icon of each kind of mechanic. */
-export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon }> = {
+/** The name and the icon of each kind of mechanic. A stack also has the number of its players, in
+    the middle of its icon: 2 for pairs, 4 for light parties, R when the roles decide; a stack of
+    the whole party has none. */
+export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon; count?: string }> = {
   spread: { name: "Spread", icon: Expand },
-  stack: { name: "Stack", icon: Shrink },
+  stack: { name: "Party stack", icon: Stack },
+  pairStack: { name: "Pair stack", icon: Stack, count: "2" },
+  lightPartyStack: { name: "Light party stack", icon: Stack, count: "4" },
+  roleStack: { name: "Role stack", icon: Stack, count: "R" },
   lineStack: { name: "Line stack", icon: LineStack },
-  pairs: { name: "Pairs", icon: Pairs },
   // You bring the hit to your spot, then step out of it before it goes off.
   bait: { name: "Bait", icon: CircleArrowOutUpRight },
   dodge: { name: "Dodge", icon: Dodge },
@@ -84,12 +92,22 @@ export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon }> = {
 
 export interface KindIconProps {
   kind: DrillKind;
+  /** The size and colour of the icon. */
   className?: string;
+  /** The colour of a stack's number, when it should stand out from the arrows. */
+  countClassName?: string;
 }
 
-/** The icon of what you do in a mechanic (spread, stack...). It is only a picture: the text next
-    to it, or a label, says the same in words. */
-export function KindIcon({ kind, className }: KindIconProps) {
-  const Icon = KINDS[kind].icon;
-  return <Icon aria-hidden="true" className={cn("size-4", className)} />;
+/** The icon of what you do in a mechanic (spread, stack...), with a stack's number in its middle.
+    It is only a picture: the text next to it, or a label, says the same in words. */
+export function KindIcon({ kind, className, countClassName }: KindIconProps) {
+  const { icon: Icon, count } = KINDS[kind];
+  if (!count) return <Icon aria-hidden="true" className={cn("size-4", className)} />;
+  // A container, so the number takes its size from the icon's: half its width, at any size.
+  return (
+    <span aria-hidden="true" className={cn("@container relative inline-grid size-4 place-items-center", className)}>
+      <Icon className="size-full" />
+      <span className={cn("absolute font-display text-[55cqw] leading-none font-bold", countClassName)}>{count}</span>
+    </span>
+  );
 }

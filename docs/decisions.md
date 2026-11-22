@@ -341,17 +341,22 @@ Do not propose these again unless the owner brings them up.
   between the two had props that worked in only one mode. They share the square (`CastSquare`)
   and the drag (`useLineDrag`). A filter by ability category was dropped with the one component,
   because neither needs it.
-- Each Practice mechanic has a kind (`Drill.kind`): what you do in it (spread, stack, line stack,
-  pairs, bait, dodge, dodge sequence, tower, knockback tower, wild charge, saved for later, knockback). Its square in the list shows the
-  kind's icon, and the mechanic's panel names it. Assault Evolved and the six Ultimate Trophy
-  Weapons are a dodge sequence (owner's name): the boss goes through the weapons in order. Saved
-  for later is only for a mechanic with a look-ahead step (Void Stardust), as the site uses the
-  words. A line stack (Meteorain's first and third stacks, Two-way Fireball) is its own kind, apart from
-  a stack (owner's choice). Arena Split: line up is a knockback to your platform (owner's choice).
-  A wild charge is a line stack where the first in line takes far more damage, so a tank or a
-  rock stands in front (owner's words); Meteorain's last stack is one. The fight has no hide
-  kind. Arena Split's first towers are knockback towers: you soak them, and they knock you
-  back. Tower stays for a plain tower, a common mechanic in other fights (owner's choice). The owner chose the icons with Claude.
+- Each Practice mechanic has a kind (`Drill.kind`): what you do in it. Its square in the list
+  shows the kind's icon, and the mechanic's panel names it. The owner chose the kinds and the icons
+  with Claude:
+  - Stacks share one icon, four arrows from the corners coming together, with the number of
+    players in the middle in the cast colour (amber): 2 for a pair stack (Dance of Domination,
+    Four-way Fireball), 4 for a light party stack, R for a role stack, where the roles decide who
+    stacks (Raw Steel: scythe). A party stack, the whole party, has no number.
+  - A line stack (Meteorain's first and third stacks, Two-way Fireball) is its own kind. A wild
+    charge is a line stack where the first in line takes far more damage, so a tank or a rock
+    stands in front (owner's words); Meteorain's last stack is one. The fight has no hide kind.
+  - Assault Evolved and the six Ultimate Trophy Weapons are a dodge sequence (owner's name): the
+    boss goes through the weapons in order. Saved for later is only for a mechanic with a
+    look-ahead step (Void Stardust), as the site uses the words.
+  - Arena Split: line up is a knockback to your platform. Arena Split's first towers are knockback
+    towers: you soak them, and they knock you back. Tower stays for a plain tower, a common
+    mechanic in other fights.
 - Practice has the layout of Pressure's player (owner's choice), so the two tabs look and feel the
   same. A wide screen: the prompt over the mechanic on the left of the arena, and a bar (which
   mechanic, Again, New pattern) over the list of mechanics on its right. A narrow screen: the same in one
