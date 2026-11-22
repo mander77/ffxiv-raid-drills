@@ -2,7 +2,7 @@
 // on one page.
 // TS note: a .tsx file is TypeScript that may hold JSX, the HTML-like tags below. Each tag compiles
 // to a call to React, so the compiler checks every tag and attribute.
-import { type ReactNode, useState } from "react";
+import { type ComponentProps, type MouseEvent, type ReactNode, useState } from "react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -141,6 +141,24 @@ const SECTIONS: readonly { id: string; label: string }[] = [
   { id: "timeline", label: "Timeline" },
 ];
 
+interface JumpLinkProps extends ComponentProps<"a"> {
+  /** The id of the section to scroll to, or "top" for the top of the page. */
+  to: string;
+}
+
+/** A link to a section of this page. A click scrolls there smoothly, unless the player asked
+    their system for less motion; then it jumps. Button's asChild passes its classes on to it. */
+function JumpLink({ to, ...props }: JumpLinkProps) {
+  function handleClick(e: MouseEvent<HTMLAnchorElement>): void {
+    e.preventDefault();
+    const behavior = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    if (to === "top") window.scrollTo({ top: 0, behavior });
+    // scrollIntoView keeps the section's scroll margin, so it stops below the wide-screen header.
+    else document.getElementById(to)?.scrollIntoView({ behavior });
+  }
+  return <a {...props} href={`#${to}`} onClick={handleClick} />;
+}
+
 /** Every section of the page, for the buttons at its top: the stops of Back and Next, then the
     two short cards that end the page. */
 const ALL_SECTIONS: readonly { id: string; label: string }[] = [
@@ -155,7 +173,7 @@ function SectionChips() {
     <nav aria-label="Sections on this page" className="flex flex-wrap gap-2">
       {ALL_SECTIONS.map((x) => (
         <Button key={x.id} asChild variant="outline" size="sm">
-          <a href={`#${x.id}`}>{x.label}</a>
+          <JumpLink to={x.id}>{x.label}</JumpLink>
         </Button>
       ))}
     </nav>
@@ -181,16 +199,16 @@ function SectionButtons() {
     <nav aria-label="Go to a section" className="fixed right-4 bottom-4 z-10 flex gap-2">
       {back && (
         <Button asChild size="sm" className="shadow-md">
-          <a href={`#${back.id}`}>↑ {back.label}</a>
+          <JumpLink to={back.id}>↑ {back.label}</JumpLink>
         </Button>
       )}
       {next && (
         <Button asChild size="sm" className="shadow-md">
-          <a href={`#${next.id}`}>↓ {next.label}</a>
+          <JumpLink to={next.id}>↓ {next.label}</JumpLink>
         </Button>
       )}
       <Button asChild size="sm" className="shadow-md">
-        <a href="#top">↑ Top</a>
+        <JumpLink to="top">↑ Top</JumpLink>
       </Button>
     </nav>
   );
