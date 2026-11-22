@@ -119,6 +119,8 @@ export function MechanicIcon({ kind, soak, className, countClassName }: Mechanic
       <span
         className={cn(
           "absolute font-sans font-bold",
+          // A tower's number goes up a little, into the column, clear of the ring.
+          soaked && "-translate-y-[6cqw]",
           // The size goes before leading-none: cn drops a line height that comes before a size.
           smallCount ? "text-[50cqw]" : "text-[70cqw]",
           "leading-none",
