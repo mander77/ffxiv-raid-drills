@@ -40,15 +40,13 @@ const Knockback = createLucideIcon("knockback", [
   ["path", { d: "M21 10v5h-5", key: "right-head" }],
 ]);
 
-/** A knockback tower: the tower's ring and dot, with a chevron on each side pushing out, since you
-    soak it and it knocks you back. Drawn the same way. */
+/** A knockback tower: the tower's ring, with a chevron on each side pushing out, since you soak it
+    and it knocks you back: west and east, as Arena Split sends you to the platforms. Drawn the
+    same way. */
 const TowerKnockback = createLucideIcon("tower-knockback", [
-  ["circle", { cx: "12", cy: "12", r: "4.5", key: "tower" }],
-  ["circle", { cx: "12", cy: "12", r: "1", key: "centre" }],
-  ["path", { d: "m9.5 4 2.5-2.5L14.5 4", key: "up" }],
-  ["path", { d: "m9.5 20 2.5 2.5 2.5-2.5", key: "down" }],
-  ["path", { d: "M4 9.5 1.5 12 4 14.5", key: "left" }],
-  ["path", { d: "m20 9.5 2.5 2.5-2.5 2.5", key: "right" }],
+  ["circle", { cx: "12", cy: "12", r: "6", key: "tower" }],
+  ["path", { d: "M3.5 9 1 12l2.5 3", key: "left" }],
+  ["path", { d: "m20.5 9 2.5 3-2.5 3", key: "right" }],
 ]);
 
 /** The name and the icon of each kind of mechanic. */
