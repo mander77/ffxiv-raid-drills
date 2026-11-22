@@ -15,8 +15,8 @@ import {
 import { cn } from "@/lib/utils";
 import type { DrillKind } from "../types";
 
-/** The name and the icon of each kind of mechanic. */
-export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon }> = {
+/** The name and the icon of each kind of mechanic. `flip` turns the icon upside down. */
+export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon; flip?: boolean }> = {
   spread: { name: "Spread", icon: Expand },
   stack: { name: "Stack", icon: Shrink },
   lineStack: { name: "Line stack", icon: EllipsisVertical },
@@ -27,7 +27,8 @@ export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon }> = {
   tower: { name: "Tower", icon: CircleDot },
   hide: { name: "Hide", icon: EyeOff },
   later: { name: "Saved for later", icon: History },
-  knockback: { name: "Knockback", icon: ArrowUpFromDot },
+  // Upside down: the dot is the boss, and the arrow pushes you away from it.
+  knockback: { name: "Knockback", icon: ArrowUpFromDot, flip: true },
 };
 
 export interface KindIconProps {
@@ -38,6 +39,6 @@ export interface KindIconProps {
 /** The icon of what you do in a mechanic (spread, stack...). It is only a picture: the text next
     to it, or a label, says the same in words. */
 export function KindIcon({ kind, className }: KindIconProps) {
-  const Icon = KINDS[kind].icon;
-  return <Icon aria-hidden="true" className={cn("size-4", className)} />;
+  const { icon: Icon, flip } = KINDS[kind];
+  return <Icon aria-hidden="true" className={cn("size-4", flip && "rotate-180", className)} />;
 }
