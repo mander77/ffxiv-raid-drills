@@ -48,6 +48,9 @@ export const CASTS_AHEAD = 30;
 export const CASTS_SOON = 6;
 export const CASTS_PAST = 2;
 export const TIMELINE_KEEP = 0.7;
+/** In the player, a click on a cast coming up goes this many seconds before it, so you see it
+    come and go off. The app's choice. */
+export const CAST_GO_LEAD = 3;
 
 /* ---------- the state of one run of the fight clock ---------- */
 
@@ -460,6 +463,8 @@ export interface CastMark {
   /** Its place in s.lines, which stays the same while it is in view. */
   i: number;
   name: string;
+  /** When it goes off, in fight seconds. */
+  t: number;
   cats: Category[];
   raidwide: boolean;
   /** The boss's own cast, which starts a mechanic, rather than a hit. */
@@ -468,12 +473,13 @@ export interface CastMark {
   left: number;
 }
 
-/** The casts in view: from CASTS_PAST seconds ago to CASTS_AHEAD seconds ahead, in time order. */
-export function castsAhead(s: FightState): CastMark[] {
+/** The casts in view: from `past` seconds ago (CASTS_PAST unless you say) to CASTS_AHEAD seconds
+    ahead, in time order. */
+export function castsAhead(s: FightState, past = CASTS_PAST): CastMark[] {
   return s.lines.flatMap((e, i) => {
     const left = e.t - s.t;
-    return left >= -CASTS_PAST && left <= CASTS_AHEAD
-      ? [{ i, name: e.name, cats: categoriesAt(e.t), raidwide: Boolean(e.raidwide), cast: Boolean(e.cast), left }]
+    return left >= -past && left <= CASTS_AHEAD
+      ? [{ i, name: e.name, t: e.t, cats: categoriesAt(e.t), raidwide: Boolean(e.raidwide), cast: Boolean(e.cast), left }]
       : [];
   });
 }

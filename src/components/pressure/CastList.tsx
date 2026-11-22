@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
-import { useCastTimeline } from "../../hooks/useCastTimeline";
+import { type CastControls, useCastTimeline } from "../../hooks/useCastTimeline";
 import { CASTS_AHEAD } from "../../lib/fight";
+import { CastButton } from "./CastButton";
 import { CastKey } from "./CastKey";
 import { CastSquare } from "./CastSquare";
 
@@ -15,6 +16,8 @@ const TICKS = [5, 10, 20] as const;
 
 export interface CastListProps {
   className?: string;
+  /** The player: click a cast to go to it, drag the timer to move the clock. */
+  controls?: CastControls;
 }
 
 /** The casts coming up, in the style of WoW's boss ability timeline: a line with each cast as a
@@ -22,14 +25,23 @@ export interface CastListProps {
     toward the now mark at the top as the fight clock runs; the gaps between them show the time
     between casts, and in their last seconds a square grows. A hit (damage going off) is a filled
     square with its name in bold; the boss's own cast, which starts a mechanic, is outlined (CastSquare).
-    shadcn/ui has no timeline, so this list is its own; useCastTimeline moves it. */
-export function CastList({ className }: CastListProps) {
-  const { box, nowMark, marks, itemRef } = useCastTimeline({ axis: "y", nowAt: NOW_Y, end: BOTTOM, gap: ROW_H });
+    shadcn/ui has no timeline, so this list is its own; useCastTimeline moves it. In the player you
+    can click a cast to go to it, or drag the line up and down to move the fight clock. */
+export function CastList({ className, controls }: CastListProps) {
+  const { box, nowMark, marks, itemRef, drag } = useCastTimeline({ axis: "y", nowAt: NOW_Y, end: BOTTOM, gap: ROW_H }, controls);
 
   return (
     // The play bar above it shows the fight time and the speed.
     <section aria-label="Casts coming up" className={cn("flex min-h-0 flex-col", className)}>
-      <div ref={box} className="relative min-h-0 flex-1 overflow-hidden rounded-lg border bg-card">
+      {/* In the player a drag up and down moves the clock; a sideways swipe stays the browser's. */}
+      <div
+        ref={box}
+        className={cn(
+          "relative min-h-0 flex-1 overflow-hidden rounded-lg border bg-card",
+          controls && "cursor-grab touch-pan-x select-none active:cursor-grabbing",
+        )}
+        {...drag}
+      >
         {/* The line, the now mark at its top, and the ticks. They sit by the box's height, in CSS. */}
         <div className="absolute left-7 w-0.5 bg-border" style={{ top: NOW_Y - ABOVE_NOW, bottom: BOTTOM }} aria-hidden="true" />
         <div
@@ -51,22 +63,24 @@ export function CastList({ className }: CastListProps) {
         ))}
         <ol className="absolute inset-x-0 top-0">
           {marks.map((m) => (
-            <li key={m.i} ref={itemRef(m.i)} className="group absolute top-0 right-2 left-3.5 flex items-center gap-2.5 text-sm">
-              {/* The square on the line, with the seconds inside: filled for a hit, outlined for a cast. */}
-              {/* It keeps the size of its last seconds as it goes past the now mark, so it does not jump. */}
-              <CastSquare
-                mark={m}
-                className="group-data-[when=past]:size-8 group-data-[when=past]:text-base group-data-[when=soon]:size-8 group-data-[when=soon]:text-base"
-              />
-              <span
-                className={cn(
-                  "min-w-0 truncate rounded px-1",
-                  m.cast ? "text-muted-foreground" : "font-semibold",
-                  m.raidwide && "bg-danger",
-                )}
-              >
-                {m.name}
-              </span>
+            <li key={m.i} ref={itemRef(m.i)} className="group absolute top-0 right-2 left-3.5">
+              <CastButton mark={m} onGoTo={controls?.goTo} className="flex w-full items-center gap-2.5 text-sm">
+                {/* The square on the line, with the seconds inside: filled for a hit, outlined for a cast. */}
+                {/* It keeps the size of its last seconds as it goes past the now mark, so it does not jump. */}
+                <CastSquare
+                  mark={m}
+                  className="group-data-[when=past]:size-8 group-data-[when=past]:text-base group-data-[when=soon]:size-8 group-data-[when=soon]:text-base"
+                />
+                <span
+                  className={cn(
+                    "min-w-0 truncate rounded px-1",
+                    m.cast ? "text-muted-foreground" : "font-semibold",
+                    m.raidwide && "bg-danger",
+                  )}
+                >
+                  {m.name}
+                </span>
+              </CastButton>
             </li>
           ))}
         </ol>

@@ -128,7 +128,8 @@ src/components/pressure/  Pressure: PressureStart, QuickRound, FightScreen (the 
                      two together, in the run),
                      CastList (the casts coming up, WoW-style squares rising to a now mark), CastStrip (the same,
                      sideways, under the arena on narrower screens), CastSquare (a cast's square: filled for
-                     a hit, outlined for the boss's cast) and CastKey (its key), FightPanel, FightPlayBar, FightSettings (the Settings button
+                     a hit, outlined for the boss's cast), CastKey (its key) and CastButton (a cast you
+                     click to go to it, in the player), FightPanel, FightPlayBar, FightSettings (the Settings button
                      and its sheet of pattern picks),
                      RunScore and WatchDone (the end screens)
 src/lib/fight.ts     the fight clock's rules as plain functions: newFightState, tickFight, seek,

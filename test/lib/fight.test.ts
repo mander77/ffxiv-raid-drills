@@ -192,7 +192,7 @@ describe("the HUD", () => {
   });
 
   test("a cast sits by its time, and close casts are pushed apart", () => {
-    const mark = (left: number) => ({ i: 0, name: "", cats: [], raidwide: false, cast: false, left });
+    const mark = (left: number) => ({ i: 0, name: "", t: 0, cats: [], raidwide: false, cast: false, left });
     // 330 pixels for 30 seconds after the now line at 30: 10 pixels a second.
     expect(castPositions([mark(0), mark(15), mark(30)], 330, 30, 20)).toEqual([30, 180, 330]);
     expect(castPositions([mark(5), mark(5.5)], 330, 30, 20)).toEqual([80, 100]);

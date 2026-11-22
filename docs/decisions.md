@@ -345,6 +345,17 @@ Do not propose these again unless the owner brings them up.
 - Click the map, or press Space, to pause or play. A "Paused" badge shows above the map.
 - The play bar (play, slider, speeds, Settings) sticks to the bottom of the screen while the arena
   is in view. Settings holds only the fight pattern picks.
+- The casts coming up move the fight clock too (owner's choices), next to the slider, which stays:
+  - Click a cast (or Tab to it and press Enter) to go 3 seconds before it, paused, so you see it
+    come and go off (`CAST_GO_LEAD`, the app's choice).
+  - Drag the line to move the clock, like scrubbing a video: up (or left on the sideways strip)
+    moves it on, the way the casts go. The clock waits while you hold it and plays on after if it
+    was playing. A press counts as a drag after 4 pixels; less is a click.
+  - While you drag, the casts that went off stay in view as far back as the line goes above (or
+    before) the now mark, so you can drag back to them. Let go, and they fade as before.
+  - On a phone only a sideways drag on the strip moves the clock; an up and down swipe still
+    scrolls the page (`touch-pan-y`).
+  - The run has none of this: it is scored, so it stays on the clock.
 - The green answer area has no "Correct spot" tag here.
 - The first weapon of Void Stardust is answered 4 seconds early and shows as "Saved for later"
   until its due time, so you have time to see it.

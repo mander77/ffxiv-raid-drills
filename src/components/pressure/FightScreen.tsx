@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { Fight, FightSeg } from "../../data/fight";
+import type { CastControls } from "../../hooks/useCastTimeline";
 import { FightFrameContext, type FrameFn, useFightFrame } from "../../hooks/useFightFrame";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import {
@@ -10,6 +11,7 @@ import {
   activeSeg,
   answerFightStep,
   askAt,
+  CAST_GO_LEAD,
   clickTarget,
   countdownOf,
   type FightMode,
@@ -93,6 +95,8 @@ export function FightScreen({
   const [hit, setHit] = useState<ShownHit | null>(null);
   const [result, setResult] = useState<{ n: number; kind: Answered["kind"] } | null>(null);
   const ended = useRef(false);
+  /** The player: whether the clock was paused when you took hold of the casts coming up. */
+  const pausedBeforeHold = useRef(false);
   /** Counts "Watch the spawns again": the arena draws anew, so its spawns play again. */
   const [replays, setReplays] = useState(0);
   const score = useProgressStore((s) => s.score);
@@ -162,6 +166,29 @@ export function FightScreen({
   function goToSeg(g: FightSeg): void {
     seekTo(sim.current.paused ? askAt(g, 0) : g.from);
   }
+  /** The player: what the casts coming up let you do. A click on a cast pauses a few seconds
+      before it, so you see it come; a drag moves the clock, which waits while you hold the timer
+      and plays on after if it was playing. */
+  const castControls: CastControls = {
+    goTo(t) {
+      const s = sim.current;
+      s.paused = true;
+      s.look = false;
+      seekTo(t - CAST_GO_LEAD);
+    },
+    hold(holding) {
+      const s = sim.current;
+      if (holding) {
+        pausedBeforeHold.current = s.paused;
+        s.paused = true;
+      } else {
+        s.paused = pausedBeforeHold.current;
+        onPause?.(s.paused ? s.t : null);
+      }
+      refresh();
+    },
+    scrub: seekTo,
+  };
   function restart(): void {
     sim.current = newFightState(mode, fight, { paused: sim.current.paused, stops });
     onPause?.(sim.current.paused ? 0 : null);
@@ -277,7 +304,7 @@ export function FightScreen({
         beside: (
           <div className="flex w-80 flex-col gap-2">
             {controls}
-            <CastList className="flex-1" />
+            <CastList className="flex-1" controls={mode === "watch" ? castControls : undefined} />
           </div>
         ),
         className: "mx-0 ml-68 mr-80 min-w-0 flex-1",
@@ -298,7 +325,7 @@ export function FightScreen({
         under: (
           <div className="space-y-2">
             {controls}
-            <CastStrip />
+            <CastStrip controls={mode === "watch" ? castControls : undefined} />
           </div>
         ),
         fill: true,

@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
-import { useCastTimeline } from "../../hooks/useCastTimeline";
+import { type CastControls, useCastTimeline } from "../../hooks/useCastTimeline";
 import { CASTS_AHEAD } from "../../lib/fight";
+import { CastButton } from "./CastButton";
 import { CastKey } from "./CastKey";
 import { CastSquare } from "./CastSquare";
 
@@ -15,19 +16,30 @@ const TICKS = [5, 10, 20] as const;
 
 export interface CastStripProps {
   className?: string;
+  /** The player: click a cast to go to it, drag the timer to move the clock. */
+  controls?: CastControls;
 }
 
 /** The casts coming up, sideways, for a screen with no room beside the arena: the same line as
     CastList, lying down. Each cast is a square in its category's colour with its seconds inside
     and its name wrapped under it; in its last seconds the square grows. The casts slide left
     toward the now mark as the fight clock runs, and a cast that went off fades out past it.
-    useCastTimeline moves it. */
-export function CastStrip({ className }: CastStripProps) {
-  const { box, nowMark, marks, itemRef } = useCastTimeline({ axis: "x", nowAt: NOW_X, end: END, gap: ITEM_W });
+    useCastTimeline moves it. In the player you can tap a cast to go to it, or drag the line
+    sideways to move the fight clock. */
+export function CastStrip({ className, controls }: CastStripProps) {
+  const { box, nowMark, marks, itemRef, drag } = useCastTimeline({ axis: "x", nowAt: NOW_X, end: END, gap: ITEM_W }, controls);
 
   return (
     <section aria-label="Casts coming up" className={className}>
-      <div ref={box} className="relative h-24 overflow-hidden rounded-lg border bg-card">
+      {/* In the player a sideways drag moves the clock; an up and down swipe still scrolls the page. */}
+      <div
+        ref={box}
+        className={cn(
+          "relative h-24 overflow-hidden rounded-lg border bg-card",
+          controls && "cursor-grab touch-pan-y select-none active:cursor-grabbing",
+        )}
+        {...drag}
+      >
         {/* The line through the squares, the now mark across it, and the ticks under it. */}
         <div className="absolute top-5.5 h-0.5 bg-border" style={{ left: NOW_X - BEFORE_NOW, right: END }} aria-hidden="true" />
         <div
@@ -48,25 +60,27 @@ export function CastStrip({ className }: CastStripProps) {
         ))}
         <ol className="absolute inset-y-0 left-0">
           {marks.map((m) => (
-            <li key={m.i} ref={itemRef(m.i)} className="group absolute top-1.5 left-0 flex w-18 flex-col items-center gap-1 text-xs">
-              {/* The square on the line, with the seconds inside: filled for a hit, outlined for a cast.
+            <li key={m.i} ref={itemRef(m.i)} className="group absolute top-1.5 left-0 w-18">
+              <CastButton mark={m} onGoTo={controls?.goTo} className="flex w-full flex-col items-center gap-1 text-xs">
+                {/* The square on the line, with the seconds inside: filled for a hit, outlined for a cast.
                   It grows in its last seconds, as in CastList, inside a slot of its largest size, so
                   it stays on the line and the name under it does not move. */}
-              <span className="flex size-8 items-center justify-center">
-                <CastSquare
-                  mark={m}
-                  className="group-data-[when=past]:size-8 group-data-[when=past]:text-base group-data-[when=soon]:size-8 group-data-[when=soon]:text-base"
-                />
-              </span>
-              <span
-                className={cn(
-                  "line-clamp-2 rounded px-0.5 text-center leading-tight",
-                  m.cast ? "text-muted-foreground" : "font-semibold",
-                  m.raidwide && "bg-danger",
-                )}
-              >
-                {m.name}
-              </span>
+                <span className="flex size-8 items-center justify-center">
+                  <CastSquare
+                    mark={m}
+                    className="group-data-[when=past]:size-8 group-data-[when=past]:text-base group-data-[when=soon]:size-8 group-data-[when=soon]:text-base"
+                  />
+                </span>
+                <span
+                  className={cn(
+                    "line-clamp-2 rounded px-0.5 text-center leading-tight",
+                    m.cast ? "text-muted-foreground" : "font-semibold",
+                    m.raidwide && "bg-danger",
+                  )}
+                >
+                  {m.name}
+                </span>
+              </CastButton>
             </li>
           ))}
         </ol>

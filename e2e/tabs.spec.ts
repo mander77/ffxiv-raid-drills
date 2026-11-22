@@ -153,3 +153,11 @@ test("Pressure: a shared link opens the player paused at its moment, and Space p
   // Playing, the address no longer holds a moment.
   await expect(page).toHaveURL(/\/pressure\/K7Q2$/);
 });
+
+test("Pressure: in the player, a click on a cast coming up pauses 3 seconds before it", async ({ page }) => {
+  await page.goto("/pressure/K7Q2?t=25");
+  await page.getByRole("region", { name: "Casts coming up" }).getByRole("button", { name: "Go to Assault Evolved 1" }).click();
+  // Assault Evolved 1 goes off at 50.4, so the clock stops at 47.4.
+  await expect(page).toHaveURL(/\/pressure\/K7Q2\?t=47\.4$/);
+  await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
+});
