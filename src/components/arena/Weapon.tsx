@@ -90,7 +90,7 @@ function ScytheDrawing() {
   return (
     <>
       <path className="body" d="M-8.4 -1.8 Q0.2 3.4 9.2 -5.4 Q0.2 -0.4 -8.4 -5 Z" />
-      <line className="haft" x1="-8.4" y1="-2" x2="-9.2" y2="-19" />
+      <line className="haft" x1="-8.4" y1="-2" x2="-9.2" y2="-26" />
     </>
   );
 }
