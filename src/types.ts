@@ -133,11 +133,22 @@ export interface Scene {
   spawnAhead?: number;
 }
 
-/** What you do in a Practice mechanic: spread out, stack, stand in pairs, bait an attack, dodge,
-    take a tower, hide behind something, dodge a set order of attacks, act on what the boss showed
-    earlier (saved for later), or go to your set spot. Practice's list of mechanics shows it as an
-    icon. */
-export type DrillKind = "spread" | "stack" | "pairs" | "bait" | "dodge" | "tower" | "hide" | "sequence" | "later" | "position";
+/** What you do in a Practice mechanic: spread out, stack, stack in a line from the boss, stand in
+    pairs, bait an attack, dodge, dodge a set order of attacks, take a tower, hide behind something,
+    act on what the boss showed earlier (saved for later), or get knocked back to your spot.
+    Practice's list of mechanics shows it as an icon. */
+export type DrillKind =
+  | "spread"
+  | "stack"
+  | "lineStack"
+  | "pairs"
+  | "bait"
+  | "dodge"
+  | "sequence"
+  | "tower"
+  | "hide"
+  | "later"
+  | "knockback";
 
 export interface Drill {
   id: string;

@@ -1,4 +1,17 @@
-import { Castle, Expand, EyeOff, Footprints, Hourglass, type LucideIcon, MapPin, Route, Shrink, Target, Users } from "lucide-react";
+import {
+  ArrowUpFromDot,
+  CircleDot,
+  Crosshair,
+  EllipsisVertical,
+  Expand,
+  EyeOff,
+  Footprints,
+  History,
+  type LucideIcon,
+  Route,
+  Shrink,
+  UsersRound,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DrillKind } from "../types";
 
@@ -6,14 +19,15 @@ import type { DrillKind } from "../types";
 export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon }> = {
   spread: { name: "Spread", icon: Expand },
   stack: { name: "Stack", icon: Shrink },
-  pairs: { name: "Pairs", icon: Users },
-  bait: { name: "Bait", icon: Target },
+  lineStack: { name: "Line stack", icon: EllipsisVertical },
+  pairs: { name: "Pairs", icon: UsersRound },
+  bait: { name: "Bait", icon: Crosshair },
   dodge: { name: "Dodge", icon: Footprints },
   sequence: { name: "Dodge sequence", icon: Route },
-  tower: { name: "Tower", icon: Castle },
+  tower: { name: "Tower", icon: CircleDot },
   hide: { name: "Hide", icon: EyeOff },
-  later: { name: "Saved for later", icon: Hourglass },
-  position: { name: "Position", icon: MapPin },
+  later: { name: "Saved for later", icon: History },
+  knockback: { name: "Knockback", icon: ArrowUpFromDot },
 };
 
 export interface KindIconProps {
