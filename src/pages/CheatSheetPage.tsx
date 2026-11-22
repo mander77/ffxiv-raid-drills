@@ -52,14 +52,14 @@ function MechanicCard({ entry, slot }: MechanicCardProps) {
           <span className="font-display text-lg tracking-wide">{entry.name}</span>
         </CardTitle>
       </CardHeader>
-      {/* On a wide screen the rules sit beside the picture; narrower, under it. */}
-      <CardContent className="flex flex-col gap-3 px-4 lg:flex-row lg:items-start lg:gap-4">
+      {/* The picture fills the card's width, and the rules go under it. */}
+      <CardContent className="space-y-3 px-4">
         {fig && (
           <LearnPicture
             fig={fig}
             answered
             label={`${entry.name} on the arena. The green area shows the answer.`}
-            className="mx-auto block h-auto w-full max-w-xs lg:mx-0 lg:w-1/2 lg:shrink-0"
+            className="block h-auto w-full"
           />
         )}
         <div className="space-y-3">

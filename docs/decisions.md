@@ -388,8 +388,8 @@ Do not propose these again unless the owner brings them up.
   character picture is in About me with a wide crop of the face, the card and both arms.
 - Cheat sheet: first every mechanic in fight order, by phase, as cards: its time, a Learn answer
   picture for your slot, its Learn cards' rules and a link to Learn. At most two columns, from
-  tablet width up (owner's choice: three and four were too many), one on a phone. From 1024 px the rules
-  sit beside the picture, so a wide card has no empty half. Then the panic reset, your timeline, the sources and
+  tablet width up (owner's choice: three and four were too many), one on a phone. The picture fills the
+  card's width (owner's choice: bigger arenas), and the rules go under it. Then the panic reset, your timeline, the sources and
   your progress.
 
 ### Everywhere
