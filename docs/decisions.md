@@ -398,8 +398,9 @@ Do not propose these again unless the owner brings them up.
   sections are Phase 1 to 4, Panic reset and Timeline. Sources and Your progress are not stops:
   they are short and end the page, so their headings never scroll up to the top. At the top of
   the page, one button per section jumps to it: the phases, Panic reset, Timeline, Sources and
-  Your progress (owner's ask). Every one of these buttons scrolls smoothly to its section
-  (owner's ask), or jumps when the system asks for reduced motion. Then the panic reset, your timeline, the sources and
+  Your progress (owner's ask). The buttons at the top jump at once; the corner buttons scroll
+  smoothly (owner's ask), or jump when the system asks for reduced motion. Then the panic reset,
+  your timeline, the sources and
   your progress.
 
 ### Everywhere

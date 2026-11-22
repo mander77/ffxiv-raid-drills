@@ -142,16 +142,19 @@ const SECTIONS: readonly { id: string; label: string }[] = [
 ];
 
 interface JumpLinkProps extends ComponentProps<"a"> {
-  /** The id of the section to scroll to, or "top" for the top of the page. */
+  /** The id of the section to go to, or "top" for the top of the page. */
   to: string;
+  /** True to scroll there smoothly; otherwise the page jumps there at once. */
+  smooth?: boolean;
 }
 
-/** A link to a section of this page. A click scrolls there smoothly, unless the player asked
-    their system for less motion; then it jumps. Button's asChild passes its classes on to it. */
-function JumpLink({ to, ...props }: JumpLinkProps) {
+/** A link to a section of this page. A click jumps there, or with `smooth` scrolls there, unless
+    the player asked their system for less motion. Button's asChild passes its classes on to it. */
+function JumpLink({ to, smooth = false, ...props }: JumpLinkProps) {
   function handleClick(e: MouseEvent<HTMLAnchorElement>): void {
     e.preventDefault();
-    const behavior = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    const calm = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const behavior = smooth && !calm ? "smooth" : "instant";
     if (to === "top") window.scrollTo({ top: 0, behavior });
     // scrollIntoView keeps the section's scroll margin, so it stops below the wide-screen header.
     else document.getElementById(to)?.scrollIntoView({ behavior });
@@ -199,16 +202,22 @@ function SectionButtons() {
     <nav aria-label="Go to a section" className="fixed right-4 bottom-4 z-10 flex gap-2">
       {back && (
         <Button asChild size="sm" className="shadow-md">
-          <JumpLink to={back.id}>↑ {back.label}</JumpLink>
+          <JumpLink to={back.id} smooth>
+            ↑ {back.label}
+          </JumpLink>
         </Button>
       )}
       {next && (
         <Button asChild size="sm" className="shadow-md">
-          <JumpLink to={next.id}>↓ {next.label}</JumpLink>
+          <JumpLink to={next.id} smooth>
+            ↓ {next.label}
+          </JumpLink>
         </Button>
       )}
       <Button asChild size="sm" className="shadow-md">
-        <JumpLink to="top">↑ Top</JumpLink>
+        <JumpLink to="top" smooth>
+          ↑ Top
+        </JumpLink>
       </Button>
     </nav>
   );
