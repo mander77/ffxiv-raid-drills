@@ -25,7 +25,6 @@
     --arena-tank: oklch(0.48 0.149 262.597);
     --arena-dps: oklch(0.479 0.138 23.906);
     --arena-rock: oklch(0.65 0.011 267.316);
-    --arena-steel: oklch(0.917 0.01 252.815);
     --arena-cut: oklch(0.299 0.036 65.753);
     --arena-tornado: oklch(0.549 0.042 247.381);
     --arena-wm-red: oklch(0.584 0.183 26.81);
@@ -210,41 +209,19 @@
     dominant-baseline: central;
   }
 
-  /* The weapons: steel blades and dark handles, each standing in a dark cut in the floor. The
-     dark outline keeps the steel sharp over the attacks. */
+  /* The weapons: dark silhouettes, each standing in a dark cut in the floor. */
   .arena .wpn .cut {
     stroke: var(--arena-cut);
-    stroke-width: 1.3;
+    stroke-width: 1.6;
     stroke-linecap: round;
   }
-  .arena .wpn .steel {
-    fill: var(--arena-steel);
-    stroke: var(--arena-void);
-    stroke-width: 0.45;
-    stroke-linejoin: round;
-  }
-  .arena .wpn .dark {
+  .arena .wpn .body {
     fill: var(--arena-void);
   }
   .arena .wpn .haft {
     stroke: var(--arena-void);
-    stroke-width: 1.4;
+    stroke-width: 2;
     stroke-linecap: round;
-  }
-  .arena .wpn .fuller {
-    stroke: var(--arena-void);
-    stroke-width: 0.4;
-  }
-  .arena .wpn .curl {
-    fill: none;
-    stroke: var(--arena-void);
-    stroke-width: 0.7;
-    stroke-linecap: round;
-  }
-  .arena .wpn .ring {
-    fill: none;
-    stroke: var(--arena-steel);
-    stroke-width: 0.45;
   }
 
   /* Labels: name tags, and the other players' role marks. */

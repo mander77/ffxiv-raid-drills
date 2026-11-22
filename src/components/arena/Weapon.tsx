@@ -12,7 +12,7 @@ export interface WeaponProps {
     up the screen, as if you look north over the arena, so one whose line runs north to south
     would be drawn edge-on as a thin line. It is widened to this share instead. The app's choice,
     so every weapon shows its shape; its cut then turns slightly toward east-west. */
-const MIN_WIDTH = 0.45;
+const MIN_WIDTH = 0.6;
 
 /** The weapon's line on the screen: its floor line, widened east-west to at least MIN_WIDTH. */
 function screenLine(u: Point): Point {
@@ -67,32 +67,28 @@ const HELD_SIZE: Point = [0.5, 0.7];
 /** How far below the point a held weapon's foot is. The app's choice. */
 const HELD_FOOT = 5;
 /** How far each drawing reaches back from its origin, toward the handle end. */
-const REACH_BACK: Record<WeaponOverlay["t"], number> = { scythe: 11.8, sword: 5.6, axe: 9.5 };
+const REACH_BACK: Record<WeaponOverlay["t"], number> = { scythe: 9.4, sword: 5.8, axe: 9.3 };
+
+// The drawings are plain dark silhouettes: the shape alone, with no small parts, so they stay
+// sharp at phone size and over the attacks.
 
 /** The scythe: the handle stands at the butt end, and the curved blade dips into the floor toward
-    the point, where its tip curls up. A small spike juts out behind the head. */
+    the point, where its tip curls up. */
 function ScytheDrawing() {
   return (
     <>
-      <path className="steel" d="M-7.2 -2.2 Q0.8 3 9.6 -4.8 L9.1 -5.3 Q0.6 -0.6 -7 -4.6 Z" />
-      <path className="steel" d="M-7.9 -4.2 L-11.8 -6.2 L-10.4 -3.6 L-7.6 -2.4 Z" />
-      <line className="haft" x1="-7.4" y1="-2.6" x2="-8.4" y2="-20" />
-      <rect className="dark" x="-9.4" y="-6.6" width="2.8" height="2.6" rx="0.5" />
-      <path className="curl" d="M-7.4 -7 q2.2 -0.6 2.4 -2.6" />
-      <circle className="dark" cx="-8.5" cy="-20.6" r="1.2" />
+      <path className="body" d="M-7.6 -1.8 Q1 3.4 10 -5.4 Q1 -0.4 -7.6 -5 Z" />
+      <line className="haft" x1="-7.6" y1="-2" x2="-8.4" y2="-19" />
     </>
   );
 }
 
-/** The sword: a broad greatsword, point down in the floor, with a wide crossguard and a long grip. */
+/** The sword: a broad greatsword, point down in the floor, with a wide crossguard and a grip. */
 function SwordDrawing() {
   return (
     <>
-      <path className="steel" d="M-2.3 0 L2.3 0 L2.5 -11 L-2.5 -11 Z" />
-      <line className="fuller" x1="0" y1="-1" x2="0" y2="-10.2" />
-      <path className="dark" d="M-5.6 -11 L5.6 -11 L4.4 -13 L-4.4 -13 Z" />
-      <line className="haft" x1="0" y1="-13" x2="0" y2="-17.2" />
-      <circle className="dark" cx="0" cy="-18" r="1.3" />
+      <path className="body" d="M-2.6 0 L2.6 0 L2.6 -11 L-2.6 -11 Z M-5.8 -11 L5.8 -11 L5.8 -13.2 L-5.8 -13.2 Z" />
+      <line className="haft" x1="0" y1="-13" x2="0" y2="-18" />
     </>
   );
 }
@@ -103,12 +99,9 @@ function AxeDrawing() {
     <>
       <line className="haft" x1="0" y1="0" x2="0" y2="-19" />
       <path
-        className="steel"
-        d="M-1.4 -10 Q-3.4 -11 -6 -15.4 Q-12.4 -8 -6.2 0.6 Q-3.4 -3.2 -1.4 -4 Z M1.4 -10 Q3.4 -11 6 -15.4 Q12.4 -8 6.2 0.6 Q3.4 -3.2 1.4 -4 Z"
+        className="body"
+        d="M-1 -10.5 Q-4 -11 -6 -15.4 Q-12.4 -8 -6.2 0.6 Q-3.6 -3.4 -1 -3.5 Z M1 -10.5 Q4 -11 6 -15.4 Q12.4 -8 6.2 0.6 Q3.6 -3.4 1 -3.5 Z"
       />
-      <rect className="dark" x="-1.6" y="-11" width="3.2" height="8" rx="0.6" />
-      <circle className="ring" cx="0" cy="-7" r="1.1" />
-      <circle className="dark" cx="0" cy="-19.8" r="1.3" />
     </>
   );
 }

@@ -51,5 +51,5 @@ test("without a turn, the sword lies across the line to the arena center", () =>
 test("a held weapon has no cut in the floor", () => {
   const g = draw({ t: "axe", x: 63, y: 50, ux: 1, uy: 0, held: true });
   assert.isNull(g.querySelector(".cut"));
-  assert.isNotNull(g.querySelector(".steel"));
+  assert.isNotNull(g.querySelector(".body"));
 });
