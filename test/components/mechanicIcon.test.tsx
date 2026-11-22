@@ -34,4 +34,7 @@ test("a tower shows how many players soak it, and nothing when the mechanic does
   assert.equal(screen.getByTitle(KINDS.towerKnockback.name).textContent, "2");
   cleanup();
   assert.equal(squareOf("tower").textContent, "");
+  cleanup();
+  render(<CastSquare mark={{ cats: [], kind: "tankTower", soak: 1 }} />);
+  assert.equal(screen.getByTitle(KINDS.tankTower.name).textContent, "1");
 });

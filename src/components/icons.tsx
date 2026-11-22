@@ -22,7 +22,7 @@
 //    arrow: you do not move yourself. A knockback tower is that wide, hollow arrow bursting up out
 //    of a tower's ring, with the number of players who soak it inside.
 // 6. A bar is a blocker that takes a hit for the others: a tank, a rock, a wall (a wild charge).
-// 7. A shield is a tank buster.
+// 7. A shield is a tank: a tank buster, or a tank tower (a tower shaped like the shield).
 // 8. A clock is timing: something you see now and act on later (saved for later).
 // 9. Every stack has the same arrows, from the corners into the middle. The middle says how many:
 //    2 (pairs), 4 (light parties), R (the roles decide), or nothing for the whole party. A shared
@@ -173,6 +173,13 @@ export const KnockbackIcon = createLucideIcon("knockback", [
 export const TowerIcon = createLucideIcon("tower", [
   ["ellipse", { cx: "12", cy: "20", rx: "11", ry: "3", key: "ring" }],
   ["path", { d: "M3.5 20 5 4h14l1.5 16", key: "column" }],
+]);
+
+/** A tank tower: a tower shaped like the tank buster's shield, its tip standing in the tower's
+    ring. The number of players who soak it goes inside the shield (MechanicIcon puts it there). */
+export const TankTowerIcon = createLucideIcon("tank-tower", [
+  ["ellipse", { cx: "12", cy: "20", rx: "11", ry: "3", key: "ring" }],
+  ["path", { d: "M12 20c-4.5-1.8-8-4.5-8-9.5V4.5c2.5 0 5.5-1.2 8-3.2 2.5 2 5.5 3.2 8 3.2v6c0 5-3.5 7.7-8 9.5", key: "shield" }],
 ]);
 
 /** A knockback tower: a wide, hollow arrow bursting up out of the tower's ring, its head curved and

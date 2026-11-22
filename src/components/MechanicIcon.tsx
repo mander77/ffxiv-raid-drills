@@ -17,6 +17,7 @@ import {
   StackIcon,
   StretchTetherIcon,
   TankBusterIcon,
+  TankTowerIcon,
   TowerIcon,
   WildChargeIcon,
 } from "./icons";
@@ -74,6 +75,14 @@ export const KINDS: Record<DrillKind, KindInfo> = {
     icon: KnockbackTowerIcon,
     // Smaller, in the middle of the arrow, clear of the ring.
     countLook: "-translate-y-[2cqw] text-[42cqw]",
+    soaked: true,
+  },
+  tankTower: {
+    name: "Tank tower",
+    meaning: "A tower only a tank soaks. The number says how many players soak it.",
+    icon: TankTowerIcon,
+    // In the shield's wide upper half, clear of its tip.
+    countLook: "-translate-y-[8cqw] text-[42cqw]",
     soaked: true,
   },
   wildCharge: {

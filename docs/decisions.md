@@ -367,11 +367,12 @@ Do not propose these again unless the owner brings them up.
     24 of its square's 28 pixels, so it reads larger. A
     tank buster is a player behind a shield; a shared tank buster puts the stack's number 2 in the
     shield, a little smaller, since the shield's middle is narrower. The owner turned down the
-    sheet's tether (no drill needs it), its hide behind cover (the fight has no hide kind), its safe
-    side and its tank tower.
+    sheet's tether (no drill needs it), its hide behind cover (the fight has no hide kind), and its safe
+    side. A tank tower came later (owner's choice): a tower shaped like the tank buster's shield,
+    its tip in the ring, with the soak number inside.
   - Void Stardust and Ecliptic Stampede: start are puddle drop sequences (owner's choice). Saved for
     later keeps its icon and its kind, though no drill uses it now.
-  - Stretch tether, tank buster and shared tank buster are kinds with no drill yet, like Tower: the
+  - Stretch tether, tank buster, shared tank buster and tank tower are kinds with no drill yet, like Tower: the
     owner wants them ready for later roles. Arena Split's tethers stretch, but its first towers stay
     knockback towers, because you click a tower there.
   - Stacks share one icon, four arrows from the corners coming together, with the number of
