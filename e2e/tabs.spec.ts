@@ -1,6 +1,6 @@
 // The site in every browser: each tab opens, the header scrolls away on a phone, a Learn card and a Timeline card can be answered,
 // the Group switch changes the slot, and Pressure runs a quick round and a shared link to the player.
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, test } from "@playwright/test";
 import { TABS } from "../src/tabs";
 
 test("each tab opens from the header", async ({ page }) => {
@@ -66,12 +66,22 @@ test("in dark mode, the correct answer shows green and an incorrect pick red", a
   await page.getByRole("button", { name: /The party stacks north/ }).click();
   await page.getByRole("button", { name: "Lock in answer" }).click();
   // The dark values of --success and --danger in app.css.
-  await expect(page.getByRole("button", { name: /Tanks spread, and the party stacks south/ })).toHaveCSS(
-    "background-color",
-    "rgb(23, 58, 42)",
-  );
-  await expect(page.getByRole("button", { name: /The party stacks north/ })).toHaveCSS("background-color", "rgb(58, 29, 27)");
+  await expect
+    .poll(() => oklchOf(page.getByRole("button", { name: /Tanks spread, and the party stacks south/ })))
+    .toEqual(closeTo(0.317, 0.05, 161.729));
+  await expect.poll(() => oklchOf(page.getByRole("button", { name: /The party stacks north/ }))).toEqual(closeTo(0.27, 0.046, 24.727));
 });
+
+// The numbers of an element's oklch background colour. Browsers write them with more or fewer
+// digits (WebKit: 161.729004), so the test compares them to 3 decimal places, as app.css writes them.
+async function oklchOf(locator: Locator): Promise<number[]> {
+  const color = await locator.evaluate((el) => getComputedStyle(el).backgroundColor);
+  return (color.match(/^oklch\((.*)\)$/)?.[1] ?? "").split(" ").map(Number);
+}
+
+function closeTo(...numbers: number[]) {
+  return numbers.map((n) => expect.closeTo(n, 3));
+}
 
 test("a Timeline card: one click answers, and the coming names show", async ({ page }) => {
   await page.goto("/timeline");

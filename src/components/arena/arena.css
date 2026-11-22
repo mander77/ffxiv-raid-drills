@@ -7,29 +7,29 @@
 /* biome-ignore-all lint/style/noDescendingSpecificity: each rule targets its own class; see above. */
 @layer components {
   .arena {
-    --arena-sand: #f8f2e6;
-    --arena-sand-line: #e7dbc2;
-    --arena-edge: #b49c6c;
-    --arena-void: #2a2e35;
-    --arena-aoe: #e9781c;
-    --arena-aoe-fill: rgb(233 120 28 / 0.3);
-    --arena-line-aoe: #4f95cf;
-    --arena-boss: #5b1a12;
-    --arena-ring: #c2362b;
-    --arena-ok: #1b7448;
-    --arena-pick: #1c6fc4;
-    --arena-later: #7048e8;
-    --arena-miss: #a8261d;
-    --arena-text: #131a2b;
-    --arena-text-2: #465166;
-    --arena-tank: #2d58b0;
-    --arena-dps: #9c3535;
-    --arena-rock: #8c8f96;
-    --arena-tornado: #5e7489;
-    --arena-wm-red: #d2413b;
-    --arena-wm-yellow: #e0b21e;
-    --arena-wm-blue: #2e76b8;
-    --arena-wm-purple: #8350be;
+    --arena-sand: oklch(0.963 0.017 84.587);
+    --arena-sand-line: oklch(0.894 0.036 85.407);
+    --arena-edge: oklch(0.703 0.071 84.154);
+    --arena-void: oklch(0.3 0.014 261.706);
+    --arena-aoe: oklch(0.69 0.167 52.506);
+    --arena-aoe-fill: oklch(0.69 0.167 52.506 / 0.3);
+    --arena-line-aoe: oklch(0.649 0.112 245.732);
+    --arena-boss: oklch(0.322 0.097 30.168);
+    --arena-ring: oklch(0.544 0.179 28.857);
+    --arena-ok: oklch(0.496 0.108 156.526);
+    --arena-pick: oklch(0.54 0.153 253.398);
+    --arena-later: oklch(0.542 0.227 287.798);
+    --arena-miss: oklch(0.481 0.168 28.973);
+    --arena-text: oklch(0.22 0.035 266.478);
+    --arena-text-2: oklch(0.434 0.038 263.211);
+    --arena-tank: oklch(0.48 0.149 262.597);
+    --arena-dps: oklch(0.479 0.138 23.906);
+    --arena-rock: oklch(0.65 0.011 267.316);
+    --arena-tornado: oklch(0.549 0.042 247.381);
+    --arena-wm-red: oklch(0.584 0.183 26.81);
+    --arena-wm-yellow: oklch(0.783 0.154 89.014);
+    --arena-wm-blue: oklch(0.553 0.125 249.557);
+    --arena-wm-purple: oklch(0.541 0.168 302.527);
     --arena-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   }
 
@@ -88,7 +88,7 @@
   .arena .wm-red text,
   .arena .wm-blue text,
   .arena .wm-purple text {
-    fill: #fff;
+    fill: oklch(1 0 0);
   }
   .arena .wm-yellow text {
     fill: var(--arena-text);
@@ -139,7 +139,7 @@
     opacity: 0.4;
   }
   .arena .lanesoft {
-    fill: rgb(233 120 28 / 0.14);
+    fill: oklch(0.69 0.167 52.506 / 0.14);
   }
   .arena .lineaoe {
     stroke: var(--arena-line-aoe);
@@ -152,7 +152,7 @@
     stroke-width: 0.7;
   }
   .arena .puddle {
-    fill: rgb(194 54 43 / 0.38);
+    fill: oklch(0.544 0.179 28.857 / 0.38);
     stroke: var(--arena-ring);
     stroke-width: 0.3;
   }
@@ -164,7 +164,7 @@
     stroke-dasharray: 1.4 0.9;
   }
   .arena .guide {
-    stroke: #fff;
+    stroke: oklch(1 0 0);
     stroke-width: 0.6;
     stroke-dasharray: 1.6 1.2;
     opacity: 0.9;
@@ -178,15 +178,15 @@
     stroke-linecap: round;
   }
   .arena .tornado circle {
-    fill: rgb(94 116 137 / 0.18);
+    fill: oklch(0.549 0.042 247.381 / 0.18);
   }
   .arena .rock {
     fill: var(--arena-rock);
-    stroke: #5f636b;
+    stroke: oklch(0.499 0.014 264.444);
     stroke-width: 0.4;
   }
   .arena .tower circle.out {
-    fill: rgb(255 255 255 / 0.35);
+    fill: oklch(1 0 0 / 0.35);
     stroke: var(--arena-text);
     stroke-width: 0.45;
     stroke-dasharray: 1.2 0.9;
@@ -196,7 +196,7 @@
     opacity: 0.55;
   }
   .arena .portal ellipse {
-    fill: #fff;
+    fill: oklch(1 0 0);
     stroke: var(--arena-text-2);
     stroke-width: 0.35;
   }
@@ -215,7 +215,7 @@
     stroke-linejoin: round;
   }
   .arena .scy .halo {
-    stroke: #fff;
+    stroke: oklch(1 0 0);
     stroke-width: 3;
     opacity: 0.9;
   }
@@ -225,7 +225,7 @@
   }
   .arena .scy .butt {
     fill: var(--arena-boss);
-    stroke: #fff;
+    stroke: oklch(1 0 0);
     stroke-width: 0.5;
   }
   .arena .wpn path {
@@ -233,8 +233,8 @@
     stroke-linejoin: round;
   }
   .arena .wpn .halo {
-    fill: #fff;
-    stroke: #fff;
+    fill: oklch(1 0 0);
+    stroke: oklch(1 0 0);
     stroke-width: 3;
     opacity: 0.9;
   }
@@ -245,7 +245,7 @@
   }
   .arena .wpn .knob {
     fill: var(--arena-boss);
-    stroke: #fff;
+    stroke: oklch(1 0 0);
     stroke-width: 0.5;
   }
 
@@ -254,7 +254,7 @@
     fill: var(--arena-text);
   }
   .arena .tag text {
-    fill: #fff;
+    fill: oklch(1 0 0);
     font-family: var(--arena-mono);
     font-size: 2.6px;
     text-anchor: middle;
@@ -262,11 +262,11 @@
     letter-spacing: 0.1px;
   }
   .arena .mk rect {
-    stroke: #fff;
+    stroke: oklch(1 0 0);
     stroke-width: 0.35;
   }
   .arena .mk text {
-    fill: #fff;
+    fill: oklch(1 0 0);
     font-family: var(--arena-mono);
     font-size: 2.3px;
     text-anchor: middle;
@@ -289,23 +289,23 @@
     stroke-dasharray: 1.6 1;
   }
   .arena .zone.ok {
-    fill: rgb(27 116 72 / 0.22);
+    fill: oklch(0.496 0.108 156.526 / 0.22);
     stroke: var(--arena-ok);
   }
   .arena .zone.pick {
-    fill: rgb(28 111 196 / 0.2);
+    fill: oklch(0.54 0.153 253.398 / 0.2);
     stroke: var(--arena-pick);
   }
   .arena .zone.other {
-    fill: rgb(70 81 102 / 0.1);
+    fill: oklch(0.434 0.038 263.211 / 0.1);
     stroke: var(--arena-text-2);
   }
   .arena .zone.later {
-    fill: rgb(112 72 232 / 0.16);
+    fill: oklch(0.542 0.227 287.798 / 0.16);
     stroke: var(--arena-later);
   }
   .arena .zone.hit {
-    fill: rgb(194 54 43 / 0.22);
+    fill: oklch(0.544 0.179 28.857 / 0.22);
     stroke: var(--arena-ring);
     stroke-dasharray: none;
     stroke-width: 0.3;
@@ -323,7 +323,7 @@
     fill: var(--arena-pick);
   }
   .arena .zlabel text {
-    fill: #fff;
+    fill: oklch(1 0 0);
     font-weight: 700;
     font-size: 3.2px;
     text-anchor: middle;
@@ -341,7 +341,7 @@
   }
   /* After an incorrect click the correct area shows in a lighter green. */
   .arena .zone.bad {
-    fill: rgb(27 116 72 / 0.16);
+    fill: oklch(0.496 0.108 156.526 / 0.16);
     stroke: var(--arena-ok);
   }
   /* Your click: a dot with a ring, red when the spot was incorrect. */
@@ -404,20 +404,20 @@
     opacity: 0;
   }
   .arena .hitfx.raid {
-    fill: rgb(210 54 43 / 0.5);
+    fill: oklch(0.572 0.194 28.814 / 0.5);
     animation: arena-flash 0.7s ease-out forwards;
   }
   .arena .hitfx.shared {
     animation: arena-flash 0.6s ease-out forwards;
   }
   .arena .hitfx.shared.target {
-    fill: rgb(28 126 214 / 0.35);
+    fill: oklch(0.586 0.159 251.258 / 0.35);
   }
   .arena .hitfx.shared.spot {
-    fill: rgb(194 154 0 / 0.4);
+    fill: oklch(0.703 0.144 90.04 / 0.4);
   }
   .arena .hitfx.enrage {
-    fill: rgb(110 14 10 / 0.75);
+    fill: oklch(0.347 0.13 28.701 / 0.75);
     animation: arena-flash 1.6s ease-out forwards;
   }
   .arena .buster {
@@ -438,7 +438,7 @@
     pointer-events: none;
   }
   .arena .runhalo {
-    fill: #fff;
+    fill: oklch(1 0 0);
     opacity: 0.75;
   }
   .arena .runpath {
@@ -448,7 +448,7 @@
     stroke-linecap: round;
   }
   .arena .runnext {
-    fill: rgb(255 255 255 / 0.4);
+    fill: oklch(1 0 0 / 0.4);
     stroke: var(--arena-pick);
     stroke-width: 0.7;
   }
