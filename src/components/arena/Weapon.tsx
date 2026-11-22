@@ -1,4 +1,4 @@
-import { type ReactNode, useId } from "react";
+import type { ReactNode } from "react";
 import { SCYTHE_SAFE } from "../../data/attacks";
 import { round2, unit } from "../../geometry";
 import type { Overlay, Point } from "../../types";
@@ -14,8 +14,6 @@ export interface WeaponProps {
 
 /** Half the length of the line a sword or an axe rests along. The app's choice. */
 const LINE_HALF = 9;
-/** Half the size of the square a weapon's mask covers: more than its longest line. */
-const MASK_HALF = 16;
 /** The radius of the round badge each weapon's icon sits on. The app's choice. */
 const BADGE_R = 4.6;
 /** How big the icon is inside its badge. It leaves a gap to the badge's rim, so an icon's handle
@@ -34,11 +32,9 @@ function floorLine(o: WeaponOverlay): Point {
     the true angle the weapon rests at. The sword's and the axe's line is straight. The scythe's
     line tapers from the thick butt (H1's end) to the sharp point (H2's end), and is as long as the
     green safe ring drawn when he lands on it is wide. A held weapon is its icon alone, the same size.
-    The icon's badge is clear, so what lies under it still shows; the line stops at the badge's
-    rim, so the icon never runs into it. */
+    The icon's badge is filled with sand, so the dark icon stays readable on the boss's dark dot
+    and the line never runs into the icon. */
 export function Weapon({ overlay: o }: WeaponProps) {
-  // Each weapon gets its own mask id, so two weapons on one page never share one.
-  const gap = `${useId()}-gap`;
   if (o.held) {
     return (
       <g className={`wpn ${o.t}`}>
@@ -64,15 +60,10 @@ export function Weapon({ overlay: o }: WeaponProps) {
       />
     );
   }
-  // The mask shows everything around the weapon except the inside of its badge.
-  const box = { x: o.x - MASK_HALF, y: o.y - MASK_HALF, width: 2 * MASK_HALF, height: 2 * MASK_HALF };
+  // The icon's filled badge goes over the middle of the line.
   return (
     <g className={`wpn ${o.t}`}>
-      <mask id={gap} maskUnits="userSpaceOnUse" {...box}>
-        <rect {...box} fill="white" />
-        <circle cx={round2(o.x)} cy={round2(o.y)} r={BADGE_R} fill="black" />
-      </mask>
-      <g mask={`url(#${gap})`}>{line}</g>
+      {line}
       <WeaponIcon t={o.t} at={[o.x, o.y]} />
     </g>
   );

@@ -386,8 +386,8 @@ Do not propose these again unless the owner brings them up.
 ### Everywhere
 
 - Player marks are always the top layer (see `LAYERS` in `src/components/arena/Arena.tsx`).
-- Each boss weapon is a small upright icon on a clear round badge (only its rim shows, so attacks
-  and the floor stay visible under it; the line stops at the rim), sitting on a line drawn at the true
+- Each boss weapon is a small upright icon on a round badge filled with sand (the badge covers the
+  middle of its line), sitting on a line drawn at the true
   angle the weapon rests at (`src/components/arena/Weapon.tsx`, one drawing for every screen). The
   owner chose this after trying detailed standing weapons, silhouettes and a cut in the floor: the
   line shows the angle, the icon says which weapon, and nothing stretches as it turns. Every icon
@@ -398,9 +398,10 @@ Do not propose these again unless the owner brings them up.
   that sweeps from its top and hooks down past the middle, so it does not read as a 7 (owner's
   pick over an L-shaped scythe, a blade at the bottom and a shorter blade). Each icon is drawn a little inside its badge, so a handle never runs into the line. Weapons have their own layer, over the
   waymarks they often land next to and over the boss, under the labels and the player marks. When
-  he stands on a weapon, his dot shows through the clear badge, and a thin sand outline keeps the
-  icon readable over it (owner's choice). His dot is wider than the badge, so a red band shows
-  around the badge's rim and you see where each one ends (owner's choice). The held weapon in
+  he stands on a weapon, the dark icon sits on its sand badge, with a red band of his dot around
+  it: his dot is wider than the badge (owner's choice, over a clear badge that left a dark icon on
+  his dark dot, a light icon only on the boss, and a brighter dot). A thin sand outline round the
+  icon keeps it readable over an attack. The held weapon in
   Raw Steel Trophy is its icon alone, the same size as on the floor (one scythe icon across the app), on top of his dot, with its name tag under the dot (owner's choice). A weapon's name goes out to
   the side of its line, away from the arena center; in Practice, its order number goes in toward
   the center.
