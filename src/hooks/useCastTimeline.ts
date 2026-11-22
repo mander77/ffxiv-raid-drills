@@ -120,9 +120,9 @@ export function useCastTimeline({ axis, nowAt, end, gap }: CastTimelineLayout, c
     },
   );
 
-  // The mouse wheel moves the clock too, as a drag does: a wheel step moves the line as many pixels
-  // as it says, so the casts move with it. Down (or right) moves the clock on. Only the player has
-  // it; in the run the wheel scrolls the page.
+  // The mouse wheel moves the clock too, a little slower than a drag (WHEEL_SPEED), so a step is a
+  // few seconds. Down (or right) moves the clock on. Only the player has it; in the run the wheel
+  // scrolls the page.
   const onWheel = useEffectEvent((e: WheelEvent) => {
     if (!controls) return;
     // A wheel that counts in lines (deltaMode 1), not pixels: a line is about 16 pixels.
@@ -130,7 +130,7 @@ export function useCastTimeline({ axis, nowAt, end, gap }: CastTimelineLayout, c
     const delta = (axis === "x" && e.deltaX !== 0 ? e.deltaX : e.deltaY) * scale;
     if (delta === 0) return;
     e.preventDefault();
-    controls.scrub(clock.current.t + delta / clock.current.perSecond);
+    controls.scrub(clock.current.t + (delta * WHEEL_SPEED) / clock.current.perSecond);
   });
   const hasControls = controls !== undefined;
   // The wheel listener goes on the box itself, not through React: React's wheel handler is passive,
@@ -145,6 +145,10 @@ export function useCastTimeline({ axis, nowAt, end, gap }: CastTimelineLayout, c
 
   return { box, nowMark, marks, itemRef, drag };
 }
+
+/** How far the line moves for a wheel step, as a share of the pixels the wheel says: a step of
+    about 100 pixels moves the clock about 3 seconds. The app's choice. */
+const WHEEL_SPEED = 1 / 3;
 
 /** How long the flash and the pop last, in milliseconds, and when in that time they are largest
     (a share of it). The app's choice. */

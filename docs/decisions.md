@@ -414,8 +414,8 @@ Do not propose these again unless the owner brings them up.
     was playing. A press counts as a drag after 4 pixels; less is a click.
   - While you drag, the casts that went off stay in view as far back as the line goes above (or
     before) the now mark, so you can drag back to them. Let go, and they fade as before.
-  - The mouse wheel over the line moves the clock too (owner's choice): down moves it on, as
-    far as the line moves, and the page does not scroll under it.
+  - The mouse wheel over the line moves the clock too (owner's choice): down moves it on, about
+    3 seconds a step (`WHEEL_SPEED`), and the page does not scroll under it.
   - On a phone only a sideways drag on the strip moves the clock; an up and down swipe still
     scrolls the page (`touch-pan-y`).
   - The run has none of this: it is scored, so it stays on the clock.
