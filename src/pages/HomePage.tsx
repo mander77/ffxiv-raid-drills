@@ -15,6 +15,9 @@ import { useSlotStore } from "../stores/slot";
     fight, with the party's spot in green and you in it. */
 const HERO_CARD = "k-raw-first";
 
+/** The strats in one phrase, such as "A, B and C". */
+const STRAT_LIST = `${FIGHT_INFO.strats.slice(0, -1).join(", ")} and ${FIGHT_INFO.strats.at(-1)}`;
+
 /** A card under "Start here": one tab, in the order to learn the fight. */
 interface StartCard {
   path: string;
@@ -100,10 +103,7 @@ export function HomePage() {
           )}
           <div className="space-y-3">
             <h2 className="font-display text-3xl tracking-wide text-balance">Practice savage mechanics without a party</h2>
-            <p>
-              Learn the mechanics, practice where you stand, then do it all fast. The answers follow Hector (Toxic), Kindred No Buddies and
-              Fixed (3CJ) Ecliptic.
-            </p>
+            <p>Learn the mechanics, practice where you stand, then do it all fast. The answers follow {STRAT_LIST}.</p>
             <p>
               You are set as <span className="font-semibold">{slot}</span>. Change it with the Group switch at the top. Your progress stays
               in this browser.

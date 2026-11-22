@@ -43,5 +43,5 @@ test("the header names the fight and the strats the positions follow", () => {
   const tags = within(list)
     .getAllByRole("listitem")
     .map((li) => li.textContent);
-  assert.deepEqual(tags, ["M11S The Tyrant (Savage)", "Hector/Toxic", "Kindred No Buddies split", "Fixed (3CJ) Ecliptic"]);
+  assert.deepEqual(tags, ["M11S The Tyrant (Savage)", "Hector (Toxic)", "Kindred No Buddies", "Fixed (3CJ)"]);
 });

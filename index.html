@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<!-- The fight's names, as in FIGHT_INFO (src/data/fightInfo.ts). Change both together. -->
+<!-- The build writes FIGHT_INFO.short (src/data/fightInfo.ts) for %FIGHT_SHORT% (vite.config.ts).
+     The description names the fight by hand: change it with FIGHT_INFO. -->
 <meta name="description" content="Practice drills for Final Fantasy XIV raids. Current fight: M11S (The Tyrant, Savage) for healers: learn the mechanics and your positions, then practice them under time pressure.">
 <meta name="robots" content="noindex">
-<title>FFXIV Raid Drills &middot; M11S</title>
+<title>FFXIV Raid Drills &middot; %FIGHT_SHORT%</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <!-- Light or dark mode before the page draws, so it never flashes light. ThemeProvider
      keeps the choice under the same name; "system" follows the computer. -->

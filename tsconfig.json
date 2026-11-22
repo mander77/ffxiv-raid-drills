@@ -10,6 +10,8 @@
     "types": ["vite/client"],
     // Resolve imports the way Vite does, so "./util" finds util.ts.
     "moduleResolution": "bundler",
+    // Allows "./src/data/fightInfo.ts" with its extension, as Vite's config loader asks for.
+    "allowImportingTsExtensions": true,
     "moduleDetection": "force",
     // Requires `import type` for type-only imports, so tools can drop them safely.
     "verbatimModuleSyntax": true,
