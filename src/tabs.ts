@@ -1,6 +1,8 @@
 // The tabs of the site, in the order a player learns the fight. Each rebuild step adds its tab
 // here, with its page in src/pages/ and its route in App.tsx.
 
+import { FIGHT_INFO } from "./data/fightInfo";
+
 export interface TabInfo {
   /** The address of the tab, such as "/sheet". */
   path: string;
@@ -10,7 +12,7 @@ export interface TabInfo {
 }
 
 export const TABS: readonly TabInfo[] = [
-  { path: "/", label: "Home", lede: "Practice M11S, The Tyrant (Savage), as a healer, away from the raid." },
+  { path: "/", label: "Home", lede: `Practice ${FIGHT_INFO.short}, ${FIGHT_INFO.full}, as a healer, away from the raid.` },
   { path: "/learn", label: "Learn", lede: "What each mechanic does, and what you do in it. Pick an answer to see it on the picture." },
   { path: "/practice", label: "Practice", lede: "Click where you stand. One mechanic at a time, no timer." },
   { path: "/timeline", label: "Timeline", lede: "Which mechanic comes next in the fight." },

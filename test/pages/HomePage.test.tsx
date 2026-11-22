@@ -19,4 +19,5 @@ test("Home links to the tabs that exist, in order, and shows your slot", () => {
   assert.match(screen.getByText(/You are set as/).textContent ?? "", /You are set as H2./);
   assert.ok(screen.getByRole("img", { name: /your spot is the green area/ }));
   assert.ok(screen.getByRole("img", { name: /My character/ }));
+  assert.ok(screen.getByText("Today: M11S healers. Coming later: ranged, melee, tanks and more fights."));
 });

@@ -23,6 +23,7 @@
       "playwright.config.ts",
       "scripts/**",
       "test/pictures.test.tsx",
+      "src/data/fightInfo.ts",
       "src/data/reference.ts",
       "test/reference.test.ts",
       "test/stores/**",

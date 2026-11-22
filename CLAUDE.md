@@ -159,6 +159,7 @@ src/types.ts         drills, steps, zones, overlays, questions
 src/party.ts         party slots: roles, light parties, slot names
 src/util.ts          helpers: bySlot, seeded random, pattern codes, shuffle, readingMs
 src/geometry.ts      arena geometry: zones, rotation, inZone
+src/data/fightInfo.ts  the fight's names and the strats (FIGHT_INFO), for the header and Home
 src/data/drills.ts   Practice drills (DRILLS), scenes, safe spots, stack and spread rules
 src/data/pictures.ts Learn card pictures (LEARN_PICTURES)
 src/data/questions.ts  Learn cards (LEARN_CARDS, LEARN_GROUPS) and Timeline cards (TIMELINE_CARDS)

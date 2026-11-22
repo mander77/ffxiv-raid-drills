@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { FIGHT_INFO } from "../data/fightInfo";
 import { ModeToggle } from "./ModeToggle";
 import { PageContainer } from "./PageContainer";
 import { ShareButton } from "./ShareButton";
@@ -6,7 +7,7 @@ import { SlotSwitch } from "./SlotSwitch";
 import { TabNav } from "./TabNav";
 
 /** The fight and the strats the positions follow, as tags beside the site name. */
-const STRATS = ["M11S The Tyrant (Savage)", "Hector/Toxic", "Kindred No Buddies split", "Fixed (3CJ) Ecliptic"];
+const STRATS = [`${FIGHT_INFO.short} ${FIGHT_INFO.full}`, ...FIGHT_INFO.strats];
 
 /** The header at the top of every page, a slate band. On a wide screen it has two rows, so the
     page below gets more room: the name and the strats, then Light/dark and Share on the right; the

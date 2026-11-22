@@ -5,6 +5,7 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/comp
 import { LearnPicture } from "../components/arena/LearnPicture";
 import { PageContainer } from "../components/PageContainer";
 import { DRILLS } from "../data/drills";
+import { FIGHT_INFO } from "../data/fightInfo";
 import { LEARN_PICTURES } from "../data/pictures";
 import { LEARN_CARDS, TIMELINE_CARDS } from "../data/questions";
 import { BOSSMOD, CACTBOT, WTFDIG } from "../data/sources";
@@ -149,7 +150,7 @@ export function HomePage() {
               <p key={p}>{p}</p>
             ))}
             <p className="rounded-lg bg-muted px-3 py-2 text-sm">
-              Today: M11S healers. Coming later: ranged, melee, tanks and more fights.
+              Today: {FIGHT_INFO.short} healers. Coming later: ranged, melee, tanks and more fights.
             </p>
             <p className="text-sm text-muted-foreground">
               Positions follow the <OutLink href={WTFDIG}>wtfdig guide</OutLink>; attack sizes come from{" "}
