@@ -489,6 +489,12 @@ Do not propose these again unless the owner brings them up.
   incorrect pick red, in light and dark mode alike: the answer buttons use the Button variants
   `correct` and `incorrect`, which the site added to `src/components/ui/button.tsx` the way
   shadcn/ui's customization guide shows. The outline variant's own dark-mode colours hid them.
+- Scores are kept per slot (owner's choice): the correct answers differ by slot, so H1 and H2
+  answers never mix. The quick round picks its weak cards from your slot's scores, and the
+  Cheat sheet counts your slot's answers. Reset erases every slot.
+- Every saved store (slot, progress, Pressure settings) has a `version` in its persist options.
+  When the saved shape changes, raise the version and say in `migrate` what happens to old data.
+  While the site is in development, old data may simply be dropped.
 
 ## Fight facts and strat corrections
 

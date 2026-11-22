@@ -62,7 +62,7 @@ test("a quick round asks 12 timed cards, and an answer counts in its score only"
   assert.ok(screen.getByText("Read"), "the timer starts with the time to read");
   const answers = within(screen.getByRole("group", { name: "Answers" })).getAllByRole("button");
   await user.click(answers[0]);
-  const scores = Object.values(useProgressStore.getState().scores);
+  const scores = Object.values(useProgressStore.getState().scores.H1 ?? {});
   assert.deepEqual(
     scores.map((s) => s.seen),
     [1],

@@ -42,6 +42,10 @@ export const usePressureStore = create<PressureState>()(
       name: "raid-drills-pressure",
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({ secs: s.secs, stops: s.stops, choices: s.choices, speed: s.speed }),
+      // The shape of the saved data. merge checks each value, so saved data of another version
+      // goes to merge as it is.
+      version: 1,
+      migrate: (saved) => saved,
       // A saved value the app does not know (an old or edited one) falls back to the default.
       merge: (saved, current) => {
         const s = (saved ?? {}) as Partial<PressureState>;

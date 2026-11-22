@@ -18,7 +18,7 @@ import { CACTBOT_TIMELINE, WTFDIG } from "../data/sources";
 import { TIMELINE } from "../data/timeline";
 import { useSectionInView } from "../hooks/useSectionInView";
 import { prefersLessMotion } from "../lib/dom";
-import { useProgressStore } from "../stores/progress";
+import { scoresOf, useProgressStore } from "../stores/progress";
 import { useSlotStore } from "../stores/slot";
 import { tabOf } from "../tabs";
 import type { Slot } from "../types";
@@ -258,9 +258,14 @@ function Section({ id, title, children }: SectionProps) {
   );
 }
 
-/** How many questions and drills you answered, and Reset, which asks once before it erases. */
-function YourProgress() {
-  const seen = useProgressStore((st) => Object.keys(st.scores).length);
+interface YourProgressProps {
+  slot: Slot;
+}
+
+/** How many questions and drills you answered in your slot, and Reset, which asks once before it
+    erases the progress of every slot. */
+function YourProgress({ slot }: YourProgressProps) {
+  const seen = useProgressStore((st) => Object.keys(scoresOf(st, slot)).length);
   const reset = useProgressStore((st) => st.reset);
   const [confirm, setConfirm] = useState(false);
   function handleReset(): void {
@@ -273,7 +278,9 @@ function YourProgress() {
   }
   return (
     <>
-      <p>You answered {seen} different items so far. Progress stays in this browser only.</p>
+      <p>
+        You answered {seen} different items as {slot} so far. Progress stays in this browser only.
+      </p>
       <Button variant={confirm ? "destructive" : "outline"} onClick={handleReset}>
         {confirm ? "Click again to erase progress" : "Reset my progress"}
       </Button>
@@ -350,7 +357,7 @@ export function CheatSheetPage() {
           </ul>
         </Section>
         <Section id="progress" title="Your progress">
-          <YourProgress />
+          <YourProgress slot={slot} />
         </Section>
         <SectionButtons />
       </PageContainer>

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { quickRound } from "../../lib/pressure";
 import { usePressureStore } from "../../stores/pressure";
-import { useProgressStore } from "../../stores/progress";
+import { scoresOf, useProgressStore } from "../../stores/progress";
 import { useSlotStore } from "../../stores/slot";
 import { QuestionCard } from "../quiz/QuestionCard";
 import { Tally } from "../Tally";
@@ -29,21 +29,21 @@ export function QuickRound({ onBack }: QuickRoundProps) {
   const secs = usePressureStore((s) => s.secs);
   const score = useProgressStore((s) => s.score);
   // The cards are picked once per round, when it starts.
-  const [cards, setCards] = useState(() => quickRound(useProgressStore.getState().scores));
+  const [cards, setCards] = useState(() => quickRound(scoresOf(useProgressStore.getState(), slot)));
   const [i, setI] = useState(0);
   const [counts, setCounts] = useState<Counts>(NO_COUNTS);
 
   function again(): void {
-    setCards(quickRound(useProgressStore.getState().scores));
+    setCards(quickRound(scoresOf(useProgressStore.getState(), slot)));
     setI(0);
     setCounts(NO_COUNTS);
   }
   function handleAnswer(id: string, ok: boolean): void {
-    score(id, ok);
+    score(id, ok, slot);
     setCounts((c) => (ok ? { ...c, correct: c.correct + 1 } : { ...c, incorrect: c.incorrect + 1 }));
   }
   function handleTimeout(id: string): void {
-    score(id, false);
+    score(id, false, slot);
     setCounts((c) => ({ ...c, froze: c.froze + 1 }));
   }
 

@@ -64,7 +64,7 @@ test("a Learn answer shows on the picture first, then Lock in answers it", async
   assert.ok(screen.getByRole("img", { name: /Arena picture of answer/ }), "the picture shows the picked answer");
   await user.click(lock);
   assert.ok(screen.getByText("Correct answer.", { exact: false }));
-  assert.deepEqual(useProgressStore.getState().scores[LEARN[0].id], { seen: 1, correct: 1 });
+  assert.deepEqual(useProgressStore.getState().scores.H1?.[LEARN[0].id], { seen: 1, correct: 1 });
   assert.ok(screen.getByRole("img", { name: /green area shows the answer/ }));
 });
 

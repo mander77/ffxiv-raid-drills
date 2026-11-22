@@ -78,19 +78,22 @@ test("every source opens in a new tab", () => {
   assert.equal(wtfdig.getAttribute("target"), "_blank");
 });
 
-test("Reset my progress asks once, then erases the progress", async () => {
+test("Your progress counts your slot's answers; Reset asks once, then erases every slot", async () => {
   useProgressStore.setState({
     scores: {
-      "k-sword": { seen: 2, correct: 1 },
-      "k-axe": { seen: 1, correct: 1 },
+      H1: {
+        "k-sword": { seen: 2, correct: 1 },
+        "k-axe": { seen: 1, correct: 1 },
+      },
+      H2: { "k-sword": { seen: 1, correct: 0 } },
     },
   });
   draw("H1");
   const user = userEvent.setup();
-  assert.ok(screen.getByText(/You answered 2 different items/));
+  assert.ok(screen.getByText(/You answered 2 different items as H1/));
   await user.click(screen.getByRole("button", { name: "Reset my progress" }));
   assert.equal(Object.keys(useProgressStore.getState().scores).length, 2, "the first click only asks");
   await user.click(screen.getByRole("button", { name: "Click again to erase progress" }));
-  assert.equal(Object.keys(useProgressStore.getState().scores).length, 0);
+  assert.deepEqual(useProgressStore.getState().scores, {});
   assert.ok(screen.getByText(/You answered 0 different items/));
 });

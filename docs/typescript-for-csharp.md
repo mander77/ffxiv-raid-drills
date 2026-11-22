@@ -34,6 +34,7 @@ C# keeps type information at run time. TypeScript does not. When the code runs, 
 - `satisfies`. It checks that a value fits a type, but keeps the value's own, narrower type. With `as const` it checks a fixed list and keeps every exact value. C# has no direct match. See `NAMES` in `src/party.ts` and `CHOICE_ROWS` in `src/data/fight.ts`.
 - Type guards, such as `(s: unknown): s is Slot`. Where the function returns true, the compiler treats `s` as a `Slot`, like `if (x is Slot s)` in C#. The check itself is plain code you write, so it must match the type. See `isSlot` in `src/party.ts`.
 - `Record<K, V>`. An object used as a map, like `Dictionary<K, V>`. When `K` is a union, the compiler requires an entry for every member. See `DOT` in `src/components/CategoryDots.tsx`.
+- `Partial<T>`. The same type with every property optional. `Partial<Record<Slot, V>>` is a map that may have an entry for each slot, like a `Dictionary<Slot, V>` that starts empty. See `Scores` in `src/stores/progress.ts`.
 - `?.`, `??` and `??=`. They work as in C#. See `o.r ?? TOWER_R` in `src/components/arena/Shape.tsx` and `groups[o.spawn] ??= []` in `src/components/arena/LiveArena.tsx`.
 - `unknown` and `any`. `unknown` is like `object`: you must check the value before you use it. `any` is like `dynamic`: it turns checking off. This project does not use `any`. See `src/util.ts`.
 - Modules. Each file is a module. `export` makes a name public, and `import { name } from "./file"` brings it in. There are no namespaces. The closest C# match is a file-scoped namespace plus `using`.

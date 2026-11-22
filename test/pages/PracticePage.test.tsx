@@ -74,7 +74,7 @@ test("a correct click answers the step and counts in your score", () => {
   open(`/practice/${FIRST.id}/${CODE}`);
   clickAt(firstRightSpot());
   assert.ok(screen.getByText("Correct", { selector: "[role=status]" }));
-  assert.deepEqual(useProgressStore.getState().scores[FIRST.id], { seen: 1, correct: 1 });
+  assert.deepEqual(useProgressStore.getState().scores.H1?.[FIRST.id], { seen: 1, correct: 1 });
   assert.ok(arena().querySelector(".zlabel"), "the correct spot is tagged");
 });
 
@@ -86,7 +86,7 @@ test("Show me draws the spot, and a try with it does not count", async () => {
   assert.equal(screen.getByRole("button", { name: "Hide" }).getAttribute("aria-pressed"), "true");
   clickAt(firstRightSpot());
   assert.ok(screen.getByText("Correct", { selector: "[role=status]" }));
-  assert.isUndefined(useProgressStore.getState().scores[FIRST.id]);
+  assert.isUndefined(useProgressStore.getState().scores.H1?.[FIRST.id]);
 });
 
 test("an incorrect spot says so and counts, and Reset starts over", async () => {
@@ -95,7 +95,7 @@ test("an incorrect spot says so and counts, and Reset starts over", async () => 
   clickAt([-40, -40]);
   assert.ok(screen.getAllByText("Not there").length > 0);
   assert.ok(arena().querySelector(".pick.bad"), "your click shows in red");
-  assert.deepEqual(useProgressStore.getState().scores[FIRST.id], { seen: 1, correct: 0 });
+  assert.deepEqual(useProgressStore.getState().scores.H1?.[FIRST.id], { seen: 1, correct: 0 });
   await user.click(screen.getByRole("button", { name: "Reset" }));
   assert.isNull(arena().querySelector(".pick"), "a fresh try");
   assert.equal(where(), `/practice/${FIRST.id}/${CODE}`, "the same pattern");

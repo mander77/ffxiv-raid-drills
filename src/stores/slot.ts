@@ -31,6 +31,10 @@ export const useSlotStore = create<SlotState>()(
         const slot = (saved as Partial<SlotState> | undefined)?.slot;
         return { ...current, slot: isSlot(slot) ? slot : "H1" };
       },
+      // The shape of the saved data. merge checks each value, so saved data of another version
+      // goes to merge as it is.
+      version: 1,
+      migrate: (saved) => saved,
     },
   ),
 );

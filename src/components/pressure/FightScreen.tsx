@@ -113,7 +113,7 @@ export function FightScreen({
   function showAnswer(a: Answered | null): void {
     if (!a || mode !== "run") return;
     setResult((was) => ({ n: (was?.n ?? 0) + 1, kind: a.kind }));
-    if (a.scored) score(a.scored.drill, a.scored.allCorrect);
+    if (a.scored) score(a.scored.drill, a.scored.allCorrect, slot);
   }
 
   // One step of the clock per animation frame.
