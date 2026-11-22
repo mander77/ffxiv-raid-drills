@@ -67,7 +67,7 @@ test("Practice with no mechanic opens the first one with a new pattern code", ()
 test("a link with a code keeps that pattern", () => {
   open(`/practice/${FIRST.id}/${CODE}`);
   assert.equal(where(), `/practice/${FIRST.id}/${CODE}`);
-  assert.ok(arena());
+  assert.ok(screen.getByRole("img", { name: "Arena map. Click where you stand." }), "the arena says a click picks your spot");
 });
 
 test("a correct click answers the step and counts in your score", () => {

@@ -44,3 +44,14 @@ test("the Correct spot label stays out of the boss's ring", () => {
     ny = Math.max(y, Math.min(by, y + h));
   assert.isAbove(Math.hypot(nx - bx, ny - by), 12.5);
 });
+
+test("the arena's name says that a click picks where you stand, only when it does", () => {
+  const { scene, k } = afterFirstJump();
+  const { rerender } = render(<LiveArena scene={scene} k={k} results={[]} showLast={false} hint={false} onPointClick={() => {}} />);
+  assert.ok(screen.getByRole("img", { name: "Arena map. Click where you stand." }));
+  // Watch the correct moves: a click pauses the player, so the name leaves it out.
+  rerender(<LiveArena scene={scene} k={k} results={[]} showLast={false} hint={false} onPointClick={() => {}} pickSpot={false} />);
+  assert.ok(screen.getByRole("img", { name: "Arena map." }));
+  rerender(<LiveArena scene={scene} k={k} results={[]} showLast={false} hint={false} />);
+  assert.ok(screen.getByRole("img", { name: "Arena map." }));
+});

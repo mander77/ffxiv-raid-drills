@@ -127,7 +127,7 @@ test("Practice: a correct click and an incorrect click on the arena", async ({ p
   if (!zone) throw new Error("no zone");
   const correct = zoneCenter(rotZone(zone, pattern.k));
 
-  const arena = page.getByRole("img", { name: /Arena map/ });
+  const arena = page.getByRole("img", { name: "Arena map. Click where you stand." });
   /** Click a spot given in arena units: the picture's own screen matrix turns it into pixels. */
   const clickAt = async (p: number[]): Promise<void> => {
     const at = await arena.evaluate((svg: SVGSVGElement, q) => {

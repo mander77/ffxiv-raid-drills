@@ -322,6 +322,7 @@ export function FightScreen({
         view={view}
         slot={slot}
         correctLabel={mode === "run"}
+        pickSpot={mode === "run"}
         hit={hit}
         replay={replays}
         onPointClick={handlePointClick}

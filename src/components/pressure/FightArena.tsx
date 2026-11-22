@@ -24,6 +24,8 @@ export interface FightArenaProps {
   slot: Slot;
   /** The run: label the last correct answer "Correct spot". */
   correctLabel: boolean;
+  /** The run: a click picks your spot. On the player, a click pauses it. */
+  pickSpot: boolean;
   /** The last hit, for its flash or tank buster. */
   hit: ShownHit | null;
   /** A new number draws the arena anew, so a mechanic's spawns play again. */
@@ -34,7 +36,7 @@ export interface FightArenaProps {
 
 /** The arena of the full fight: the mechanic on the clock, with the flash of each hit, the
     countdown ring around the boss and your moving marker. */
-export function FightArena({ view: v, slot, correctLabel, hit, replay, onPointClick, className }: FightArenaProps) {
+export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay, onPointClick, className }: FightArenaProps) {
   const g = v.si;
   const bossAt: Point = v.boss ? [v.boss.x, v.boss.y] : [50, 50];
   return (
@@ -49,6 +51,7 @@ export function FightArena({ view: v, slot, correctLabel, hit, replay, onPointCl
       boss={v.boss}
       wentOff={(i) => v.wentOff[i] ?? false}
       correctLabel={correctLabel}
+      pickSpot={pickSpot}
       target={v.target}
       onPointClick={onPointClick}
       className={cn("cursor-pointer", className)}

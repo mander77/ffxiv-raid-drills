@@ -35,6 +35,9 @@ export interface LiveArenaProps {
   /** Label the last correct answer "Correct spot". Watch the correct moves leaves it out: your marker
       walks into each spot. */
   correctLabel?: boolean;
+  /** A click picks your spot, so the arena's name says "Click where you stand". Watch the correct
+      moves leaves it out: there a click pauses the player. */
+  pickSpot?: boolean;
   /** The correct area of your marker's next spot, in blue (Watch the correct moves). */
   target?: Zone | null;
   /** What the fight draws over the arena: the flash of a hit, the countdown ring, a tank buster. */
@@ -57,6 +60,7 @@ export function LiveArena({
   boss: placed,
   wentOff,
   correctLabel = true,
+  pickSpot = true,
   target,
   effects,
   runner,
@@ -154,7 +158,7 @@ export function LiveArena({
 
   return (
     <Arena
-      label={done ? "Arena map. The mechanic is done." : "Arena map. Click to choose a spot."}
+      label={arenaLabel(done, pickSpot && onPointClick !== undefined)}
       split={sc.split}
       className={cn("live", done && "locked", sc.spawnPlay && "play", className)}
       onPointClick={done ? undefined : onPointClick}
@@ -215,4 +219,11 @@ export function LiveArena({
       }}
     />
   );
+}
+
+/** The arena's name for screen readers. A click picks a spot on a map, which keys cannot, so
+    the name says what a click does. */
+function arenaLabel(done: boolean, pickSpot: boolean): string {
+  if (done) return "Arena map. The mechanic is done.";
+  return pickSpot ? "Arena map. Click where you stand." : "Arena map.";
 }
