@@ -10,7 +10,7 @@ import { CastSquare } from "../CastSquare";
 // TS note: reduce builds the list of phases, each with its mechanics, in fight order.
 const PHASES = [...DRILLS]
   .sort((a, b) => a.order - b.order)
-  .reduce<{ name: string; drills: Drill[] }[]>((acc, d) => {
+  .reduce<{ name: Drill["phase"]; drills: Drill[] }[]>((acc, d) => {
     const last = acc[acc.length - 1];
     if (last && last.name === d.phase) last.drills.push(d);
     else acc.push({ name: d.phase, drills: [d] });

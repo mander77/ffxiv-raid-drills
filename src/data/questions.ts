@@ -1,11 +1,11 @@
 // Quiz questions: the mechanics (Learn), and questions made from the timeline (Timeline).
 import { bySlot, shuffle } from "../util";
-import { P1, P2, P3, P4, TIMELINE } from "./timeline";
+import { P1, P2, P3, P4, type Phase, TIMELINE } from "./timeline";
 import { tlAbilities } from "./abilities";
 import type { Question, QuizItem, Slot, TimelineEvent } from "../types";
 
 /* ---------- mechanic questions ---------- */
-function mq(id: string, order: number, phase: string, time: string, build: (s: Slot) => Question): QuizItem {
+function mq(id: string, order: number, phase: Phase, time: string, build: (s: Slot) => Question): QuizItem {
   return {id, order, phase, time, build};
 }
 export const LEARN_CARDS: QuizItem[] = [

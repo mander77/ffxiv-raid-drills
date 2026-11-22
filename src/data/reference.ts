@@ -102,8 +102,8 @@ export function slotAnswer(id: string, slot: Slot): string | undefined {
 }
 
 /** The phases in fight order, each with its entries. */
-export function referenceByPhase(): Array<{ phase: string; entries: ReferenceEntry[] }> {
-  const out: Array<{ phase: string; entries: ReferenceEntry[] }> = [];
+export function referenceByPhase(): Array<{ phase: QuizItem["phase"]; entries: ReferenceEntry[] }> {
+  const out: Array<{ phase: QuizItem["phase"]; entries: ReferenceEntry[] }> = [];
   for (const e of REFERENCE) {
     const phase = learnCard(e.picture).phase;
     const last = out.at(-1);

@@ -5,6 +5,8 @@
 // so nothing here exists at run time. Other files bring these names in with
 // `import type { ... }`, which tells the compiler that the import is for type checking only.
 
+import type { Phase } from "./data/timeline";
+
 /* ---------- party slots ---------- */
 // A party slot has two parts: the light party (1 or 2) and the role in it. Its short name comes
 // from both: Tank 1 and 2 are MT and OT, Healer 1 and 2 are H1 and H2, Melee M1 and M2, Ranged
@@ -191,7 +193,7 @@ export type DrillKind =
 export interface Drill {
   id: string;
   order: number;
-  phase: string;
+  phase: Phase;
   time: string;
   title: string;
   /** What you do in it. */
@@ -248,7 +250,8 @@ export interface Question {
 export interface QuizItem {
   id: string;
   order: number;
-  phase: string;
+  /** The phase of a Learn card, or "Timeline" on every Timeline card. */
+  phase: Phase | "Timeline";
   time: string;
   build: (s: Slot) => Question;
 }

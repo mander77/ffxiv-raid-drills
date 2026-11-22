@@ -2,7 +2,14 @@
 import { bySlot } from "../util";
 import type { TimelineEvent } from "../types";
 
-export const P1 = "Phase 1: Trophy Weapons", P2 = "Phase 2: Meteorain", P3 = "Phase 3: Arena Split", P4 = "Phase 4: Ecliptic Stampede";
+/** The phases of the fight in order, by this app's names. Drills, cards and the ability list
+    take their phase from here. */
+export const PHASE_NAMES = ["Phase 1: Trophy Weapons", "Phase 2: Meteorain", "Phase 3: Arena Split", "Phase 4: Ecliptic Stampede"] as const;
+// TS note: `(typeof PHASE_NAMES)[number]` is the union of the list's values: "Phase 1: Trophy
+// Weapons" | "Phase 2: Meteorain" | ... It works because `as const` keeps each exact text. A
+// misspelt phase in a drill or card is then a type error. P1 to P4 keep their exact types too.
+export type Phase = (typeof PHASE_NAMES)[number];
+export const [P1, P2, P3, P4] = PHASE_NAMES;
 
 /* ---------- timeline (cactbot r11s timeline, rounded to the second) ---------- */
 export const TIMELINE: readonly TimelineEvent[] = [

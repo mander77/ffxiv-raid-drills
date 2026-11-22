@@ -6,7 +6,7 @@
 // sheet runs up to 3 seconds later in the later phases. Where a sheet row has no colour (a row
 // with two abilities, for example), it takes the colours of the abilities it names.
 // The notes are written for this app.
-import { P1, P2, P3, P4, TIMELINE } from "./timeline";
+import { P1, P2, P3, P4, type Phase, TIMELINE } from "./timeline";
 import { sec } from "../time";
 
 /** The enrage (Heartbreaker), in seconds into the fight: the last line of the cactbot timeline,
@@ -94,7 +94,7 @@ const DANCE: HitRule = {times:{n:7, gap:0.7, name:"Dance of Domination"}};
 const KICK: HitRule = {shared:true, lines:"Heartbreak Kick"};
 
 /** The ability list, one entry per phase. The phases use this app's names. */
-export const PHASES: readonly {name: string; rows: Ability[]}[] = [
+export const PHASES: readonly {name: Phase; rows: Ability[]}[] = [
   {name:P1, rows:rows([
     [10.6, "Crown of Arcadia", ["raid"], N.crown],
     [17.7, "Raw Steel Trophy", ["mech"], N.rawTrophy],
@@ -185,7 +185,7 @@ export const PHASES: readonly {name: string; rows: Ability[]}[] = [
 ];
 
 /** Every row in one list, with its phase. The ability list numbers its rows by this order. */
-export const ABILITIES: Array<Ability & {phase: string}> = PHASES.flatMap(p => p.rows.map(a => ({...a, phase:p.name})));
+export const ABILITIES: Array<Ability & {phase: Phase}> = PHASES.flatMap(p => p.rows.map(a => ({...a, phase:p.name})));
 
 /** The categories of the abilities at t seconds, for a line of the fight timeline. */
 export const categoriesAt = (t: number): Category[] => [...new Set(ABILITIES.filter(a => Math.abs(a.t - t) < 0.05).flatMap(a => a.cats))];
