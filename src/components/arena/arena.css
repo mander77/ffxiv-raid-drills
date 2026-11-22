@@ -25,6 +25,8 @@
     --arena-tank: oklch(0.48 0.149 262.597);
     --arena-dps: oklch(0.479 0.138 23.906);
     --arena-rock: oklch(0.65 0.011 267.316);
+    --arena-steel: oklch(0.917 0.01 252.815);
+    --arena-cut: oklch(0.299 0.036 65.753);
     --arena-tornado: oklch(0.549 0.042 247.381);
     --arena-wm-red: oklch(0.584 0.183 26.81);
     --arena-wm-yellow: oklch(0.783 0.154 89.014);
@@ -208,45 +210,41 @@
     dominant-baseline: central;
   }
 
-  /* The weapons: a white halo under a dark icon, so they stay sharp over the attacks. */
-  .arena .scy path {
-    fill: none;
+  /* The weapons: steel blades and dark handles, each standing in a dark cut in the floor. The
+     dark outline keeps the steel sharp over the attacks. */
+  .arena .wpn .cut {
+    stroke: var(--arena-cut);
+    stroke-width: 1.3;
     stroke-linecap: round;
+  }
+  .arena .wpn .steel {
+    fill: var(--arena-steel);
+    stroke: var(--arena-void);
+    stroke-width: 0.45;
     stroke-linejoin: round;
   }
-  .arena .scy .halo {
-    stroke: oklch(1 0 0);
-    stroke-width: 3;
-    opacity: 0.9;
+  .arena .wpn .dark {
+    fill: var(--arena-void);
   }
-  .arena .scy .ink {
-    stroke: var(--arena-boss);
+  .arena .wpn .haft {
+    stroke: var(--arena-void);
     stroke-width: 1.4;
-  }
-  .arena .scy .butt {
-    fill: var(--arena-boss);
-    stroke: oklch(1 0 0);
-    stroke-width: 0.5;
-  }
-  .arena .wpn path {
     stroke-linecap: round;
-    stroke-linejoin: round;
   }
-  .arena .wpn .halo {
-    fill: oklch(1 0 0);
-    stroke: oklch(1 0 0);
-    stroke-width: 3;
-    opacity: 0.9;
+  .arena .wpn .fuller {
+    stroke: var(--arena-void);
+    stroke-width: 0.4;
   }
-  .arena .wpn .ink {
-    fill: var(--arena-boss);
-    stroke: var(--arena-boss);
-    stroke-width: 1.2;
+  .arena .wpn .curl {
+    fill: none;
+    stroke: var(--arena-void);
+    stroke-width: 0.7;
+    stroke-linecap: round;
   }
-  .arena .wpn .knob {
-    fill: var(--arena-boss);
-    stroke: oklch(1 0 0);
-    stroke-width: 0.5;
+  .arena .wpn .ring {
+    fill: none;
+    stroke: var(--arena-steel);
+    stroke-width: 0.45;
   }
 
   /* Labels: name tags, and the other players' role marks. */

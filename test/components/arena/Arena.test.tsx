@@ -44,7 +44,7 @@ test("pieces go to their layers: attacks under weapons, tags to labels, role mar
   const layer = (l: string): Element | null => document.querySelector(`[data-layer="${l}"]`);
   assert.deepEqual(
     [...(layer("ground")?.children ?? [])].map((e) => e.getAttribute("class")),
-    ["aoe", "wpn"],
+    ["aoe", "wpn sword"],
   );
   assert.equal(layer("labels")?.textContent, "SWORD");
   assert.equal(layer("marks")?.textContent, "H1");

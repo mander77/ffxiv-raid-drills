@@ -21,6 +21,17 @@ const OUTSIDE = HITBOX + 4.5;
 /** The first Void Stardust puddle: north of the boss, just outside his hitbox. */
 export const FIRST_PUDDLE: Point = [50, 50 - OUTSIDE];
 
+/** Where a weapon's name goes, clear of the weapon, the waymark next to it and the spot where
+    you stand at it. A weapon due north has waymark A right below it, so its name goes beside it,
+    east. A weapon due east or west has its name out toward the edge, a little higher. Any other
+    goes just below its cut in the floor. The distances are the app's choice. */
+function weaponTagAt(p: Point): Point {
+  const dx = p[0] - 50, dy = p[1] - 50;
+  if(Math.abs(dx) < 8 && dy < 0) return [p[0] + 16, p[1]];
+  if(Math.abs(dy) < 8) return [p[0] + Math.sign(dx) * 13, p[1] - 6];
+  return [p[0], p[1] + 5.5];
+}
+
 /* A jump set: the boss starts in the middle and jumps to each weapon in order.
    He faces the way he jumped, so relative north at each weapon = his travel direction. */
 export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
@@ -39,16 +50,15 @@ export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
   const scytheAxis = (w: Weapon, i: number): Point => w.axis ?? [-dirs[i][1], dirs[i][0]];
   const overlays: Overlay[] = [];
   W.forEach((w, i) => {
+    // Each weapon stands up from its cut in the floor, so its name goes below or beside it.
+    const at = weaponTagAt(w.p);
+    const tag: Overlay = {t:"tag", spawn:i, x:at[0], y:at[1], s:w.type.toUpperCase()};
     if(w.type === "scythe"){
       const u = scytheAxis(w, i), d: Point = [u[1], -u[0]];
-      // A turned scythe can face any way, so its label goes outward, clear of the waymarks.
-      const tag = w.axis ? addVec(w.p, unit([w.p[0] - 50, w.p[1] - 50]), 14) : addVec(w.p, d, -9);
-      overlays.push({t:"scythe", spawn:i, x:w.p[0], y:w.p[1], ux:u[0], uy:u[1], dx:d[0], dy:d[1]}, {t:"tag", spawn:i, x:tag[0], y:tag[1], s:"SCYTHE"});
+      overlays.push({t:"scythe", spawn:i, x:w.p[0], y:w.p[1], ux:u[0], uy:u[1], dx:d[0], dy:d[1]}, tag);
     } else {
-      // A turned icon or the upright sword reaches farther, so the label sits farther out.
-      const out = addVec(w.p, unit([w.p[0] - 50, w.p[1] - 50]), w.axis ? 13 : w.type === "sword" ? 12.5 : 7.5);
       const turn = w.axis ? {ux:w.axis[0], uy:w.axis[1]} : {};
-      overlays.push({t:"tag", spawn:i, x:out[0], y:out[1], s:w.type.toUpperCase()}, {t:w.type, spawn:i, x:w.p[0], y:w.p[1], ...turn});
+      overlays.push(tag, {t:w.type, spawn:i, x:w.p[0], y:w.p[1], ...turn});
     }
   });
   const HW = SWORD_HALF, side = bySlot(s, {H1:1, H2:-1}), own = bySlot(s, {H1:"left", H2:"right"});
@@ -458,13 +468,13 @@ export const changes = (m: Drill): boolean => Boolean(m.random || m.variants || 
 export const BOSS: Boss = {x:50, y:50, f:0};
 /** Where the name of the weapon the boss holds goes, below the weapon. */
 export const HELD_TAG: Point = [75, 58.5];   // below waymark B, clear of the M2 axe spread spot
-/** The weapon the boss holds for Raw Steel Trophy: the same icon as the weapons on the floor,
-    upright at his east side just outside his hitbox, with the head or blade turned east. */
+/** The weapon the boss holds for Raw Steel Trophy: the same picture as the weapons on the floor,
+    upright at his east side just outside his hitbox, flat side toward you, with no cut in the floor. */
 export function heldWeapon(type: WeaponType): Overlay[] {
   const x = 63, y = 50;
   // TS note: `t:type` is "axe" or "sword" here. TypeScript checks the object against both
   // matching members of the Overlay union, so one line covers both weapons.
-  const icon: Overlay = type === "scythe" ? {t:"scythe", x, y, ux:0, uy:-1, dx:1, dy:0} : {t:type, x, y, ux:0, uy:-1};
+  const icon: Overlay = type === "scythe" ? {t:"scythe", x, y, ux:1, uy:0, dx:0, dy:-1, held:true} : {t:type, x, y, ux:1, uy:0, held:true};
   return [icon, {t:"tag", x:HELD_TAG[0], y:HELD_TAG[1], s:type.toUpperCase()}];
 }
 /* Raw Steel Trophy, axe: the tanks stack in front of the boss for a shared buster, and the other

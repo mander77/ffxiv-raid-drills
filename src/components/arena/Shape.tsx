@@ -1,6 +1,7 @@
 import { HITBOX, TOWER_R } from "../../data/attacks";
-import { addVec, round2, unit } from "../../geometry";
+import { round2 } from "../../geometry";
 import type { Overlay, Point } from "../../types";
+import { Weapon } from "./Weapon";
 
 /** "x,y" for an SVG points or path list, to 2 decimals. */
 const pt = (p: Point): string => `${round2(p[0])},${round2(p[1])}`;
@@ -75,48 +76,10 @@ export function Shape({ overlay: o }: ShapeProps) {
           </text>
         </g>
       );
-    case "scythe": {
-      const P: Point = [o.x, o.y];
-      const u: Point = [o.ux, o.uy];
-      const d: Point = [o.dx, o.dy];
-      const B = addVec(P, u, -10);
-      const K = addVec(P, u, 8);
-      const C = addVec(addVec(K, d, 6), u, 1.5);
-      const T = addVec(addVec(K, d, 10), u, -3);
-      const path = `M${pt(B)} L${pt(K)} Q${pt(C)} ${pt(T)}`;
-      return (
-        <g className="scy">
-          <path className="halo" d={path} />
-          <path className="ink" d={path} />
-          <circle className="butt" cx={round2(B[0])} cy={round2(B[1])} r="1.5" />
-        </g>
-      );
-    }
+    case "scythe":
     case "axe":
-    case "sword": {
-      // u is the long side (handle end to tip), d is across it. Unless the drill turns the icon,
-      // the sword stands upright, point down, and the axe lies across the line to the arena center.
-      const P: Point = [o.x, o.y];
-      const r = unit([o.x - 50, o.y - 50]);
-      const u: Point = o.ux != null && o.uy != null ? [o.ux, o.uy] : o.t === "sword" ? [0, 1] : [-r[1], r[0]];
-      const d: Point = [u[1], -u[0]];
-      const at = (a: number, b: number): string => pt(addVec(addVec(P, u, a), d, b));
-      const path =
-        o.t === "axe"
-          ? // Handle across, then a curved head near one end with its edge toward the center.
-            `M${at(-8, 0)} L${at(7.5, 0)} M${at(5, 0)} L${at(3.2, -5.6)} Q${at(6.6, -8.4)} ${at(10, -5.6)} L${at(8.2, 0)} Z`
-          : // Pointed blade, crossguard, grip and pommel.
-            `M${at(-2.5, 0.9)} L${at(7.6, 0.9)} L${at(9.8, 0)} L${at(7.6, -0.9)} L${at(-2.5, -0.9)} Z` +
-            ` M${at(-2.5, 3.4)} L${at(-2.5, -3.4)} M${at(-2.5, 0)} L${at(-6.6, 0)}`;
-      const knob = addVec(P, u, o.t === "axe" ? -8 : -7.4);
-      return (
-        <g className="wpn">
-          <path className="halo" d={path} />
-          <path className="ink" d={path} />
-          <circle className="knob" cx={round2(knob[0])} cy={round2(knob[1])} r="1.1" />
-        </g>
-      );
-    }
+    case "sword":
+      return <Weapon overlay={o} />;
     case "band":
       return <line className="aoeband" x1={round2(o.x)} y1={round2(o.y)} x2={round2(o.x2)} y2={round2(o.y2)} strokeWidth={o.w} />;
     case "lane":

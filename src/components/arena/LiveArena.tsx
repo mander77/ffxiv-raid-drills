@@ -10,6 +10,9 @@ import { TurningBoss } from "./TurningBoss";
 import { ZoneArea } from "./ZoneArea";
 import { ZoneLabel } from "./ZoneLabel";
 
+/** How far below a weapon's cut in the floor its order number goes, under its name. The app's choice. */
+const ORD_BELOW = 10;
+
 export interface LiveArenaProps {
   scene: Scene;
   /** How many quarter turns the arena is turned. */
@@ -87,7 +90,7 @@ export function LiveArena({
           <Shape key={j} overlay={rotOverlay(o, k)} />
         ))}
         {sc.spawnPlay && pos && "x" in pos && (
-          <text className="ord" x={round2(pos.x + 4.5)} y={round2(pos.y + 4.5)}>
+          <text className="ord" x={round2(pos.x)} y={round2(pos.y + ORD_BELOW)}>
             {i + 1}
           </text>
         )}

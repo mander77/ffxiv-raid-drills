@@ -112,7 +112,7 @@ src/components/      React components: Header, PageContainer, SlotSwitch, ShareB
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
                      StepChips, SetupText, Tally, ChipRow, HudPrompt
 src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, clicks), Shape (one
-                     attack, weapon or mark), BossMark, ZoneArea (a zone's coloured area),
+                     attack, weapon or mark), Weapon (a boss weapon standing in the floor), BossMark, ZoneArea (a zone's coloured area),
                      ArenaLabel (a name tag), ZoneLabel (a label placed over a zone), LearnPicture
                      (a Learn picture), LiveArena (the live arena), ArenaFrame (the one size rule for
                      every arena you play on), TurningBoss, arena.css
@@ -338,7 +338,7 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
 - The React rebuild (issues #18 to #22, label "rebuild") is done and live. `docs/decisions.md`
   has the decisions behind it.
 - Issue #29: use shadcn/ui Collapsible, Sonner, Progress and Item for parts the site built itself.
-- Issue #27: clearer weapon pictures. Issue #15: the white frame around the Home picture.
+- Issue #15: the white frame around the Home picture.
 - Issue #11: make the repository self-contained, so a clone plus one step gives every tool. Three
   questions are open for the owner.
 - Issue #14: a script that imports fight times and attack sizes from cactbot and BossMod.

@@ -8,7 +8,7 @@
 import { bySlot, withSeed } from "../util";
 import { markRole, partyOf } from "../party";
 import { angOf, polar, rotOverlay, zoneCenter } from "../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, type JumpSet, type Weapon, type WeaponType } from "./drills";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, type Weapon, type WeaponType } from "./drills";
 import { PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, lineTo, swordCross } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
@@ -114,11 +114,6 @@ function jump(s: Slot, type: WeaponType, a: number) {
   return {fig, b, at:[b.x, b.y] as Point, zone:st.z, zoneOther:st2.z, hits:st.reveal ?? [], stand:st.stand, standOther:st2.stand};
 }
 
-/** A run's pieces with each weapon's name outside it (41 units out), clear of the order
-    numbers that go between the weapon and the boss. */
-const named = (R: JumpSet): Overlay[] => [...R.overlays.filter(o => o.t !== "tag"),
-  ...R.W.map((w, i): Overlay => ({...tag(...at(w.a, 41), w.type.toUpperCase()), spawn:i}))];
-
 // TS note: Array<[number, WeaponType]> is an array of pairs. Each `[a, type]` in map() unpacks
 // one pair, so the code reads like the data.
 const weapons = (list: Array<[number, WeaponType]>): Weapon[] => list.map(([a, type]): Weapon => ({a, p:atAngle(a), type}));
@@ -136,7 +131,7 @@ const ultSet = (s: Slot) => buildJumpSet(s, weapons(ULT));
 /** The pieces of the weapons whose spawn index passes `keep`, with their order numbers. */
 function ultPart(s: Slot, keep: (i: number) => boolean): Overlay[] {
   const R = ultSet(s);
-  return [...named(R).filter(o => o.spawn != null && keep(o.spawn)), ...R.W.map((w, i) => numAt(w, String(i + 1))).filter((_o, i) => keep(i))];
+  return [...R.overlays.filter(o => o.spawn != null && keep(o.spawn)), ...R.W.map((w, i) => numAt(w, String(i + 1))).filter((_o, i) => keep(i))];
 }
 /** Order labels for weapon spots with no weapon drawn yet ([angle, label] pairs, where the order
     numbers go), and the boss's jumps through those spots after the first weapon (south, slightly west). */
@@ -187,7 +182,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([tag(...HELD_TAG, "AXE OR SCYTHE")]),
       show([...swordCross(CENTER, [0, -1]), ...heldWeapon("sword")])]}; },
   "k-first-weapon": s => { const R = buildJumpSet(s, weapons([[315, "scythe"], [90, "axe"], [180, "sword"]])), W = R.W;
-    return {overlays:named(R), boss:R.states[0], after:inOrder(W, [0, 1, 2]), answer:[circle(W[0].p, 9)], options:[
+    return {overlays:R.overlays, boss:R.states[0], after:inOrder(W, [0, 1, 2]), answer:[circle(W[0].p, 9)], options:[
       show(inOrder(W, [0, 1, 2]), [circle(W[0].p, 9)]),
       show([...path([W[2].p]), numAt(W[2], "1"), say("ALWAYS THE SWORD FIRST", 8)], [circle(W[2].p, 9)]),
       show([mark(66, 42, "MT", "T"), ...inOrder(W, [1, 0, 2])], [circle(W[1].p, 9)]),
@@ -221,14 +216,14 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([stackHit(stackedMarks), ...stackedMarks]), hit(youAt(s, [50, 58], 9), [donut(CENTER, FAKE.voidDonut)])]}; },
   "k-void-sprint": s => { const R = buildJumpSet(s, faceApproach(weapons([[270, "scythe"]]))), toward = cometSpread(s, R.W[0].p)(VOID_RESULTS), lb = zoneCenter(toward);
     const waitAt = bySlot<Point>(s, {H1:[83, 50], H2:[50, 83]});
-    return {overlays:[...PUDDLE_PIECES, ...named(R), ...FIXED_SPREAD_MARKS], boss:STILL, after:[aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], answer:[toward],
+    return {overlays:[...PUDDLE_PIECES, ...R.overlays, ...FIXED_SPREAD_MARKS], boss:STILL, after:[aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], answer:[toward],
       note:"Example: the first weapon of the second set is a scythe in the west.", options:[
         show([aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], [toward]),
         show([aoe(waitAt, SPREAD_R), you(s, waitAt), say("WAIT FOR HIS FACING", 8)], [cometSpread(s)(VOID_RESULTS)]),
         youAt(s, [70, 44]),
         show([RAIDWIDE, ...stackedMarks, say("MITIGATE, STAY PUT", 8)])]}; },
   "k-assault-2": s => { const R = buildJumpSet(s, faceApproach(weapons([[135, "scythe"], [270, "axe"], [0, "sword"]]))), W = R.W;
-    return {overlays:named(R), boss:STILL, after:inOrder(W, [0, 1, 2]), answer:[circle(W[0].p, 9)], options:[
+    return {overlays:R.overlays, boss:STILL, after:inOrder(W, [0, 1, 2]), answer:[circle(W[0].p, 9)], options:[
       show(inOrder(W, [0, 1, 2]), [circle(W[0].p, 9)]),
       show([...inOrder(W, [1, 2, 0]), say("THE ONE HE FACED IN SET 1", 94)], [circle(W[1].p, 9)]),
       show(inOrder(W, [2, 1, 0]), [circle(W[2].p, 9)]),

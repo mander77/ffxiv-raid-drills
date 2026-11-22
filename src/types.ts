@@ -67,14 +67,15 @@ type OverlayShape =
   | ({ t: "rock" } & At)
   | ({ t: "tower"; r?: number } & At)
   | ({ t: "target" } & At)
-  /** ux, uy turn the icon: its long side, from the handle end to the tip. */
-  | ({ t: "axe"; ux?: number; uy?: number } & At)
-  | ({ t: "sword"; ux?: number; uy?: number } & At)
+  /** ux, uy turn the weapon: its long side on the floor, from the handle end to the tip. `held`
+      is a weapon in the boss's hand, drawn without the cut in the floor. */
+  | ({ t: "axe"; ux?: number; uy?: number; held?: boolean } & At)
+  | ({ t: "sword"; ux?: number; uy?: number; held?: boolean } & At)
   | ({ t: "puddle"; r: number } & At)
   | ({ t: "tag"; s: string } & At)
   | ({ t: "mark"; l: string; r: MarkRole } & At)
   | ({ t: "portal"; vert: boolean; n: number } & At)
-  | ({ t: "scythe"; ux: number; uy: number; dx: number; dy: number } & At)
+  | ({ t: "scythe"; ux: number; uy: number; dx: number; dy: number; held?: boolean } & At)
   | { t: "lane"; rect: RectBox; soft?: boolean }
   | { t: "poly"; pts: Point[] }
   // The inner edge of the scythe's donut, drawn as a green outline.

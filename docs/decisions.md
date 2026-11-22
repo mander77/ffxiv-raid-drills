@@ -370,6 +370,18 @@ Do not propose these again unless the owner brings them up.
 ### Everywhere
 
 - Player marks are always the top layer (see `LAYERS` in `src/components/arena/Arena.tsx`).
+- The weapons stand upright, as in the game: each is stuck blade-first in a short dark cut in the
+  floor, and the cut runs along its flat side, so you see which way it faces the boss. The owner
+  picked this look from mock-ups and game screenshots (`src/components/arena/Weapon.tsx`, one
+  drawing for every screen). Scythe: the handle stands at the butt end (H1), the curved blade
+  dips into the floor toward the point (H2) and curls up, with a small spike behind the head.
+  Sword: a broad greatsword, point down, with a wide crossguard. Axe: a double-headed half-moon
+  axe, its lower horns in the floor. Blades are steel, handles dark. A weapon always stands
+  straight up the screen; one whose cut runs north to south is drawn at least 45% wide, so it
+  never shows as a thin line. The held weapon in Raw Steel Trophy has no cut and is drawn
+  smaller and narrower, between his ring and waymark B. A weapon's name goes below its cut,
+  beside it for a weapon due north (waymark A is below it), and out toward the edge for one due
+  east or west.
 - The boss turns smoothly to face his next target. He does not flip.
 - "Saved for later" (purple) marks a mechanic shown early and resolved later, for example the
   first weapon during Void Stardust. It is never a spot to stand on.
