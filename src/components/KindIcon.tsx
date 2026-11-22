@@ -1,5 +1,4 @@
 import {
-  ArrowUpFromDot,
   CircleArrowOutUpRight,
   CircleDot,
   createLucideIcon,
@@ -31,8 +30,20 @@ const WildCharge = createLucideIcon("wild-charge", [
   ["path", { d: "m7 14 5 5 5-5", key: "bottom" }],
 ]);
 
-/** The name and the icon of each kind of mechanic. `flip` turns the icon upside down. */
-export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon; flip?: boolean }> = {
+/** A knockback: the boss as a dot, with arrows pushing away from it: straight down, and down to
+    each side at 45 degrees. Drawn the same way. */
+const Knockback = createLucideIcon("knockback", [
+  ["circle", { cx: "12", cy: "3", r: "1", key: "boss" }],
+  ["path", { d: "M12 7v14", key: "down" }],
+  ["path", { d: "m8 17 4 4 4-4", key: "down-head" }],
+  ["path", { d: "M10 6 4 12", key: "left" }],
+  ["path", { d: "M4 7v5h5", key: "left-head" }],
+  ["path", { d: "m14 6 6 6", key: "right" }],
+  ["path", { d: "M20 7v5h-5", key: "right-head" }],
+]);
+
+/** The name and the icon of each kind of mechanic. */
+export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon }> = {
   spread: { name: "Spread", icon: Expand },
   stack: { name: "Stack", icon: Shrink },
   lineStack: { name: "Line stack", icon: LineStack },
@@ -44,8 +55,7 @@ export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon; flip?: b
   tower: { name: "Tower", icon: CircleDot },
   wildCharge: { name: "Wild charge", icon: WildCharge },
   later: { name: "Saved for later", icon: History },
-  // Upside down: the dot is the boss, and the arrow pushes you away from it.
-  knockback: { name: "Knockback", icon: ArrowUpFromDot, flip: true },
+  knockback: { name: "Knockback", icon: Knockback },
 };
 
 export interface KindIconProps {
@@ -56,6 +66,6 @@ export interface KindIconProps {
 /** The icon of what you do in a mechanic (spread, stack...). It is only a picture: the text next
     to it, or a label, says the same in words. */
 export function KindIcon({ kind, className }: KindIconProps) {
-  const { icon: Icon, flip } = KINDS[kind];
-  return <Icon aria-hidden="true" className={cn("size-4", flip && "rotate-180", className)} />;
+  const Icon = KINDS[kind].icon;
+  return <Icon aria-hidden="true" className={cn("size-4", className)} />;
 }
