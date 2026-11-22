@@ -19,7 +19,7 @@
 // 4. Arrows are a move the players make themselves (spread, dodge, a stack coming together, puddles
 //    dropped in a row, a tether pulled apart).
 // 5. A knockback is a burst (where it comes from) and a wide, hollow arrow (the push), never a thin
-//    arrow: you do not move yourself. A knockback tower is a tower with a burst line out of each top corner.
+//    arrow: you do not move yourself. A knockback tower is a tower with a knockback burst, two lines, at each top corner.
 // 6. A bar is a blocker that takes a hit for the others: a tank, a rock, a wall (a wild charge).
 // 7. A shield is a tank buster.
 // 8. A clock is timing: something you see now and act on later (saved for later).
@@ -171,17 +171,19 @@ export const KnockbackIcon = createLucideIcon("knockback", [
     players who soak it (MechanicIcon puts it there). */
 const TOWER: IconNode = [
   ["ellipse", { cx: "12", cy: "20", rx: "11", ry: "3", key: "ring" }],
-  ["path", { d: "M3.5 20 5 4h14l1.5 16", key: "column" }],
+  ["path", { d: "M3.5 20 5 6h14l1.5 14", key: "column" }],
 ];
 
 export const TowerIcon = createLucideIcon("tower", TOWER);
 
-/** A knockback tower: the tower with a burst line out of each top corner, since you soak it and it
-    knocks you back. */
+/** A knockback tower: the tower with a burst at each top corner, two short lines as on the
+    knockback, apart from the tower, since you soak it and it knocks you back. */
 export const KnockbackTowerIcon = createLucideIcon("knockback-tower", [
   ...TOWER,
-  ["path", { d: "M3.5 3 1.5 1", key: "burst-west" }],
-  ["path", { d: "m20.5 3 2-2", key: "burst-east" }],
+  ["path", { d: "M4.2 3.9 3.4 1.6", key: "burst-west-up" }],
+  ["path", { d: "M2.9 5.2 0.6 4.4", key: "burst-west-out" }],
+  ["path", { d: "m19.8 3.9.8-2.3", key: "burst-east-up" }],
+  ["path", { d: "m21.1 5.2 2.3-.8", key: "burst-east-out" }],
 ]);
 
 /** A stretch tether: two players (filled dots) joined by a tether, and the arrow of their moving

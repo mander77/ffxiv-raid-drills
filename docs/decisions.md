@@ -361,7 +361,7 @@ Do not propose these again unless the owner brings them up.
     rule of its own (owner's choice), since neither an arrow (your own move) nor chevrons (a hit)
     said it: a burst at the top left, a wide arrow down to the player at the bottom right. A tower
     is a wide column in its ring, with room for the number of players who soak it (each mechanic
-    gives it, Drill.soak); a knockback tower is the same tower with a burst line out of each top corner
+    gives it, Drill.soak); a knockback tower is the same tower with a burst of two lines at each top corner
     (the owner found a splash of lines too loud and chevrons out of the ring did not look good). A
     tank buster is a player behind a shield; a shared tank buster puts the stack's number 2 in the
     shield, a little smaller, since the shield's middle is narrower. The owner turned down the

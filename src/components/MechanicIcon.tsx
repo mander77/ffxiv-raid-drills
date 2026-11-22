@@ -31,8 +31,7 @@ export interface KindInfo {
   count?: string;
   /** The number is smaller, for an icon with a narrow middle. */
   smallCount?: boolean;
-  /** A tower: each mechanic gives its own number, how many players soak it (Drill.soak), and the
-      number sits higher, in the column above the ring. */
+  /** A tower: each mechanic gives its own number, how many players soak it (Drill.soak). */
   soaked?: boolean;
 }
 
@@ -120,8 +119,6 @@ export function MechanicIcon({ kind, soak, className, countClassName }: Mechanic
       <span
         className={cn(
           "absolute font-sans font-bold",
-          // A tower's number goes up, into the column, clear of the ring.
-          soaked && "-translate-y-[6cqw]",
           // The size goes before leading-none: cn drops a line height that comes before a size.
           smallCount ? "text-[50cqw]" : "text-[70cqw]",
           "leading-none",
