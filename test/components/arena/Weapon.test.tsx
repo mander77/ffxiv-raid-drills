@@ -30,22 +30,22 @@ test("a weapon facing you stands upright on its point, at full width", () => {
   const g = draw({ t: "scythe", x: 50, y: 21, ux: 1, uy: 0, dx: 0, dy: -1 });
   assert.include(g.getAttribute("class"), "scythe");
   assert.isNotNull(g.querySelector(".body"));
-  assert.deepEqual(matrixOf(g), [1, 0, 0, 1, 50, 21]);
+  assert.deepEqual(matrixOf(g), [0.8, 0, 0, 0.8, 50, 21]);
 });
 
 test("a turned weapon gets narrower and tilts a little, but never taller", () => {
   // Its line runs north to south: it is turned edge-on, so it is drawn at the least width.
   const [a, b, c, d] = matrixOf(draw({ t: "axe", x: 79, y: 50, ux: 0, uy: 1 }));
-  assert.equal(a, 0.4);
+  assert.equal(a, 0.32);
   assert.isAbove(b, 0);
   assert.isBelow(b, 0.5);
-  assert.deepEqual([c, d], [0, 1]);
+  assert.deepEqual([c, d], [0, 0.8]);
 });
 
 test("without a turn, the sword faces the arena center", () => {
   // South of the center, so it faces north: full width, no tilt.
   const [a, b] = matrixOf(draw({ t: "sword", x: 50, y: 79 }));
-  assert.equal(Math.abs(a), 1);
+  assert.equal(Math.abs(a), 0.8);
   assert.equal(b, 0);
 });
 

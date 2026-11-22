@@ -381,7 +381,8 @@ Do not propose these again unless the owner brings them up.
   floor: the owner tried a cut along the flat side and chose this instead. The held weapon in
   Raw Steel Trophy is drawn smaller and narrower, between his ring and waymark B. A weapon's
   name goes below it, beside it for a weapon due north (waymark A is below it), and out toward
-  the edge for one due east or west. The drawn sizes are the app's choice: no source gives the
+  the edge for one due east or west. The drawn sizes are the app's choice (set by eye, 80% of the
+  first drawing after the owner found them too big): no source gives the
   weapons' size in the game.
 - The boss turns smoothly to face his next target. He does not flip.
 - "Saved for later" (purple) marks a mechanic shown early and resolved later, for example the

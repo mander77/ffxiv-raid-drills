@@ -12,6 +12,10 @@ export interface WeaponProps {
    from facing you it gets narrower, and its far end sits a little higher. Its height never
    changes, so it never looks stretched. */
 
+/** How big a weapon on the floor is drawn, as a share of its drawing. No source gives the
+    weapons' size in the game, so this is the app's choice, set by eye next to the waymarks. */
+const SIZE = 0.8;
+
 /** How wide a weapon is drawn at the least, as a share of its full width, so one turned edge-on
     still shows its shape. The app's choice. */
 const MIN_WIDTH = 0.4;
@@ -47,7 +51,7 @@ export function Weapon({ overlay: o }: WeaponProps) {
   } else {
     // On the floor: it stands on the point, turned along its line.
     const s = screenBase(floorLine(o));
-    m = [s[0], s[1], 0, 1, o.x, o.y];
+    m = [s[0] * SIZE, s[1] * SIZE, 0, SIZE, o.x, o.y];
   }
   return (
     <g className={`wpn ${o.t}`} transform={`matrix(${m.map(round2).join(" ")})`}>
