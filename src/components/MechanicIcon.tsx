@@ -110,7 +110,7 @@ export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon; count?: 
   knockback: { name: "Knockback", icon: Knockback },
 };
 
-export interface KindIconProps {
+export interface MechanicIconProps {
   kind: DrillKind;
   /** The size and colour of the icon. */
   className?: string;
@@ -120,7 +120,7 @@ export interface KindIconProps {
 
 /** The icon of what you do in a mechanic (spread, stack...), with a stack's number in its middle.
     It is only a picture: the text next to it, or a label, says the same in words. */
-export function KindIcon({ kind, className, countClassName }: KindIconProps) {
+export function MechanicIcon({ kind, className, countClassName }: MechanicIconProps) {
   const { icon: Icon, count } = KINDS[kind];
   if (!count) return <Icon aria-hidden="true" className={cn("size-4", className)} />;
   // A container, so the number takes its size from the icon's: 70 percent of its width, at any size.

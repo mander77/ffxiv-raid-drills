@@ -346,7 +346,7 @@ Do not propose these again unless the owner brings them up.
   with Claude:
   - The icons follow rules (the owner's): a ring is a spot, a filled dot a player, chevrons a
     hit or push from the boss, arrows a move you make, a bar a blocker, a clock timing. The full
-    list, with how to draw a new icon, is at the top of src/components/KindIcon.tsx.
+    list, with how to draw a new icon, is at the top of src/components/MechanicIcon.tsx.
   - Stacks share one icon, four arrows from the corners coming together, with the number of
     players in the middle, in Source Sans 3 bold (Saira Condensed's R looked like an A) and its own
     colour, so it stands out from the arrows: bright amber on the dark square in light mode, deep

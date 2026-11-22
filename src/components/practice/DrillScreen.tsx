@@ -10,8 +10,8 @@ import type { Drill, Point, StepResult } from "../../types";
 import { ArenaFrame, type ArenaFrameProps } from "../arena/ArenaFrame";
 import { LiveArena } from "../arena/LiveArena";
 import { HudPrompt } from "../HudPrompt";
-import { KINDS, KindIcon } from "../KindIcon";
 import { LastAnswer } from "../LastAnswer";
+import { KINDS, MechanicIcon } from "../MechanicIcon";
 import { RuleBox } from "../RuleBox";
 import { SetupText } from "../SetupText";
 import { StepChips } from "../StepChips";
@@ -173,7 +173,7 @@ export function DrillScreen({
       </div>
       {/* What you do, with the icon the list of mechanics shows for it. */}
       <Badge variant="secondary">
-        <KindIcon kind={item.kind} />
+        <MechanicIcon kind={item.kind} countClassName="text-count-badge" />
         {KINDS[item.kind].name}
       </Badge>
       <SetupText key={tryKey} text={sc.setup} folded={n > 0} />

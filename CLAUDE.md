@@ -113,7 +113,7 @@ src/stores/pressure.ts  your Pressure settings: seconds to decide, stops, patter
 src/components/      React components: Header, PageContainer, SlotSwitch, ShareButton (a toast
                      says the link was copied), TabNav, ThemeProvider and ModeToggle (light and
                      dark mode),
-                     CategoryDots and CategoryKey (the ability category colours), KindIcon (the
+                     CategoryDots and CategoryKey (the ability category colours), MechanicIcon (the
                      icon of a mechanic's kind), CastSquare (a row's square on Pressure's casts
                      coming up and Practice's list: filled for a hit, outlined for the boss's
                      cast, ink with its kind's icon for a mechanic), RoundDone,
@@ -304,7 +304,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Mark**: a player's mark on the arena, or the boss (`BossMark`).
 - **Kind**: what you do in a Practice mechanic: spread, a stack (party, pair, light party or role
   stack), line stack, bait, dodge, dodge sequence, tower, knockback tower, wild charge, saved for
-  later or knockback (`DrillKind`, `Drill.kind`). `KindIcon` draws its icon; the rules for
+  later or knockback (`DrillKind`, `Drill.kind`). `MechanicIcon` draws its icon; the rules for
   the icons are at the top of its file. Not a category.
 - **Category**: an ability category of the timeline (raid damage, tank damage...).
   `CategoryDots` draws its coloured dots.

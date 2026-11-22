@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import type { Category } from "../data/abilities";
 import type { DrillKind } from "../types";
 import { CATEGORY_BG, CATEGORY_BORDER } from "./CategoryDots";
-import { KINDS, KindIcon } from "./KindIcon";
+import { KINDS, MechanicIcon } from "./MechanicIcon";
 
 export interface CastSquareProps {
   /** The row's categories (the first one colours the square), whether it is the boss's own cast,
@@ -34,7 +34,7 @@ export function CastSquare({ mark, className }: CastSquareProps) {
       )}
       title={mark.kind && KINDS[mark.kind].name}
     >
-      {mark.kind && <KindIcon kind={mark.kind} className="size-5" countClassName="text-count" />}
+      {mark.kind && <MechanicIcon kind={mark.kind} className="size-5" countClassName="text-count" />}
     </span>
   );
 }
