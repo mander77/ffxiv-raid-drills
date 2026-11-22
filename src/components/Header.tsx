@@ -59,11 +59,17 @@ export function Header() {
 function TitleIcon() {
   return (
     <svg viewBox="0 0 32 32" className="size-7 shrink-0" aria-hidden="true">
-      <rect width="32" height="32" rx="7" fill="#f8f2e6" />
-      <path d="M9.28 24.22 A9.5 9.5 0 1 1 22.72 24.22" fill="none" stroke="#c2362b" strokeWidth="2.4" strokeLinecap="round" />
-      <path d="M4.4 17.5 H8.4 M23.6 17.5 H27.6" stroke="#c2362b" strokeWidth="2.4" strokeLinecap="round" />
-      <path d="M16 3 L21 9.6 H11 Z" fill="#c2362b" />
-      <circle cx="16" cy="17.5" r="3.8" fill="#5b1a12" />
+      <rect width="32" height="32" rx="7" fill="oklch(0.963 0.017 84.587)" />
+      <path
+        d="M9.28 24.22 A9.5 9.5 0 1 1 22.72 24.22"
+        fill="none"
+        stroke="oklch(0.544 0.179 28.857)"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+      />
+      <path d="M4.4 17.5 H8.4 M23.6 17.5 H27.6" stroke="oklch(0.544 0.179 28.857)" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M16 3 L21 9.6 H11 Z" fill="oklch(0.544 0.179 28.857)" />
+      <circle cx="16" cy="17.5" r="3.8" fill="oklch(0.322 0.097 30.168)" />
     </svg>
   );
 }
