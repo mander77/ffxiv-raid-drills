@@ -1,7 +1,7 @@
-import { Share } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { shareLink } from "../share";
+import { ShareIcon } from "./icons";
 
 export interface ShareButtonProps {
   className?: string;
@@ -16,7 +16,7 @@ export function ShareButton({ className }: ShareButtonProps) {
 
   return (
     <Button variant="ghost" size="sm" title="Share a link to this page as it is now" onClick={handleClick} className={className}>
-      <Share aria-hidden="true" />
+      <ShareIcon aria-hidden="true" />
       Share
     </Button>
   );

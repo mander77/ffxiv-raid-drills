@@ -61,6 +61,21 @@
     {
       "includes": ["src/components/ui/**"],
       "linter": { "rules": { "a11y": { "useSemanticElements": "off" } } }
+    },
+    {
+      "includes": ["src/**", "test/**", "e2e/**", "!src/components/icons.tsx", "!src/components/ui/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": { "lucide-react": "Import icons from src/components/icons.tsx, where each icon has a name by its meaning." }
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "css": {

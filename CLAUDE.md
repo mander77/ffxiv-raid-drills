@@ -113,8 +113,9 @@ src/stores/pressure.ts  your Pressure settings: seconds to decide, stops, patter
 src/components/      React components: Header, PageContainer, SlotSwitch, ShareButton (a toast
                      says the link was copied), TabNav, ThemeProvider and ModeToggle (light and
                      dark mode),
-                     CategoryDots and CategoryKey (the ability category colours), MechanicIcon (the
-                     icon of a mechanic's kind), CastSquare (a row's square on Pressure's casts
+                     CategoryDots and CategoryKey (the ability category colours), icons (every icon
+                     the site uses, named by its meaning, and the rules they follow), MechanicIcon
+                     (the icon of a mechanic's kind), CastSquare (a row's square on Pressure's casts
                      coming up and Practice's list: filled for a hit, outlined for the boss's
                      cast, ink with its kind's icon for a mechanic), RoundDone,
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
@@ -273,6 +274,10 @@ These steps put a branch on `main`, the live site.
     and variants (`<Button variant="outline">`). Use Tailwind's standard sizes and colours
     (`text-sm`, `text-muted-foreground`), not exact pixels. The owner chose the default look over
     the old site's look.
+  - Icons come from `src/components/icons.tsx`, each named by its meaning (`ResetIcon`,
+    `NextMechanicIcon`), never straight from `lucide-react`; lint stops a direct import. Only the
+    shadcn/ui files in `ui/` import lucide themselves, as the CLI writes them. A new icon goes in
+    `icons.tsx` and follows the rules at its top.
   - Each component and page has a test in `test/components/` or `test/pages/`. Find elements by role and
     text, the way a player would.
   - Add new files to `files.includes` in `biome.json`, so Biome checks them.
@@ -306,7 +311,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Kind**: what you do in a Practice mechanic: spread, a stack (party, pair, light party or role
   stack), line stack, bait, dodge, dodge sequence, tower, knockback tower, wild charge, saved for
   later or knockback (`DrillKind`, `Drill.kind`). `MechanicIcon` draws its icon; the rules for
-  the icons are at the top of its file. Not a category.
+  the icons are at the top of `src/components/icons.tsx`. Not a category.
 - **Category**: an ability category of the timeline (raid damage, tank damage...).
   `CategoryDots` draws its coloured dots.
 - **Picture**: an arena picture with its data (`Picture`, `LEARN_PICTURES`, `LearnPicture`).

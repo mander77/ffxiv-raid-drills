@@ -1,4 +1,3 @@
-import { ChevronDown, Pause, Play, RotateCcw, Shuffle } from "lucide-react";
 import { type ReactNode, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +12,7 @@ import { useFightFrame } from "../../hooks/useFightFrame";
 import { SPEEDS, type Speed } from "../../stores/pressure";
 import { clock } from "../../time";
 import { IconButton } from "../IconButton";
+import { NewFightIcon, OpenMenuIcon, PauseIcon, PlayIcon, ResetIcon } from "../icons";
 
 /** A mechanic's start, marked under the slider. */
 export interface SliderMark {
@@ -87,7 +87,7 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
         <Tooltip>
           <TooltipTrigger asChild>
             <Button size="icon-sm" aria-label={paused ? "Play" : "Pause"} onClick={onPlay}>
-              {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+              {paused ? <PlayIcon aria-hidden="true" /> : <PauseIcon aria-hidden="true" />}
             </Button>
           </TooltipTrigger>
           {/* The keys, for the keyboard: they show when you point at the button. */}
@@ -98,7 +98,7 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" aria-label={`Speed: ${speed}x`} className="tabular-nums">
               {speed}x
-              <ChevronDown aria-hidden="true" />
+              <OpenMenuIcon aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -118,10 +118,10 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
           </DropdownMenuContent>
         </DropdownMenu>
         <IconButton label="Start over" onClick={onRestart}>
-          <RotateCcw aria-hidden="true" />
+          <ResetIcon aria-hidden="true" />
         </IconButton>
         <IconButton label="New fight" onClick={onNewFight}>
-          <Shuffle aria-hidden="true" />
+          <NewFightIcon aria-hidden="true" />
         </IconButton>
         {settings}
       </div>

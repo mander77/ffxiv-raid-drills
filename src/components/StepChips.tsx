@@ -1,5 +1,5 @@
-import { Check, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { CorrectIcon, IncorrectIcon } from "./icons";
 
 export interface StepChipsProps {
   /** How many steps the mechanic has. */
@@ -24,7 +24,7 @@ export function StepChips({ count, results }: StepChipsProps) {
           <li key={i} aria-label={label}>
             <Badge variant={r ? (r.ok ? "secondary" : "destructive") : i === now ? "default" : "outline"}>
               {i + 1}
-              {r && (r.ok ? <Check aria-hidden="true" /> : <X aria-hidden="true" />)}
+              {r && (r.ok ? <CorrectIcon aria-hidden="true" /> : <IncorrectIcon aria-hidden="true" />)}
             </Badge>
           </li>
         );

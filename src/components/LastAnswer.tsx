@@ -1,5 +1,5 @@
-import { CircleCheck, CircleX } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CorrectAnswerIcon, IncorrectAnswerIcon } from "./icons";
 
 export interface LastAnswerProps {
   /** True when the spot was correct. */
@@ -14,7 +14,7 @@ export interface LastAnswerProps {
 export function LastAnswer({ ok, question, answer }: LastAnswerProps) {
   return (
     <Alert variant={ok ? "default" : "destructive"}>
-      {ok ? <CircleCheck aria-hidden="true" /> : <CircleX aria-hidden="true" />}
+      {ok ? <CorrectAnswerIcon aria-hidden="true" /> : <IncorrectAnswerIcon aria-hidden="true" />}
       <AlertTitle>{ok ? "Correct" : "Not there"}</AlertTitle>
       <AlertDescription>
         <p>

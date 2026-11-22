@@ -1,5 +1,5 @@
-import { Lightbulb } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { RuleIcon } from "./icons";
 
 export interface RuleBoxProps {
   /** The rule of the mechanic: why the correct spot is the one to stand in. */
@@ -10,7 +10,7 @@ export interface RuleBoxProps {
 export function RuleBox({ rule }: RuleBoxProps) {
   return (
     <Alert>
-      <Lightbulb aria-hidden="true" />
+      <RuleIcon aria-hidden="true" />
       <AlertTitle>Rule</AlertTitle>
       <AlertDescription>{rule}</AlertDescription>
     </Alert>

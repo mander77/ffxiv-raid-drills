@@ -1,4 +1,3 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect } from "react";
 import { Navigate, useNavigate, useParams } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { type RoundTab, useProgressStore } from "../../stores/progress";
 import { useSlotStore } from "../../stores/slot";
 import type { QuizItem } from "../../types";
 import { ChipRow } from "../ChipRow";
+import { NextCardIcon, PreviousCardIcon } from "../icons";
 import { RoundDone } from "../RoundDone";
 import { QuestionCard } from "./QuestionCard";
 
@@ -87,7 +87,7 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
         </p>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" aria-label="Back a card" disabled={i <= 0} onClick={() => navigate(link(items[i - 1].id))}>
-            <ChevronLeft aria-hidden="true" />
+            <PreviousCardIcon aria-hidden="true" />
             Back
           </Button>
           <Button
@@ -98,7 +98,7 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
             onClick={() => navigate(link(items[i + 1].id))}
           >
             Next
-            <ChevronRight aria-hidden="true" />
+            <NextCardIcon aria-hidden="true" />
           </Button>
         </div>
       </div>

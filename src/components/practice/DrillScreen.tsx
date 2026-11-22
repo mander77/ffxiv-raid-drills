@@ -1,4 +1,3 @@
-import { ArrowRight, Check, RotateCcw, X } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { ArenaFrame, type ArenaFrameProps } from "../arena/ArenaFrame";
 import { LiveArena } from "../arena/LiveArena";
 import { HudPrompt } from "../HudPrompt";
 import { IconButton } from "../IconButton";
+import { CorrectIcon, IncorrectIcon, NextMechanicIcon, ResetIcon } from "../icons";
 import { LastAnswer } from "../LastAnswer";
 import { KINDS, MechanicIcon } from "../MechanicIcon";
 import { RuleBox } from "../RuleBox";
@@ -125,7 +125,7 @@ export function DrillScreen({
   /** Reset: the same pattern from its first step. Always in the bar at the top of the left side. */
   const reset = (
     <IconButton label="Reset" variant="outline" onClick={onReset}>
-      <RotateCcw aria-hidden="true" />
+      <ResetIcon aria-hidden="true" />
     </IconButton>
   );
   const hud = done ? (
@@ -136,21 +136,21 @@ export function DrillScreen({
       )}
     >
       {allCorrect ? (
-        <Check aria-hidden="true" className="text-success-foreground" />
+        <CorrectIcon aria-hidden="true" className="text-success-foreground" />
       ) : (
-        <X aria-hidden="true" className="text-danger-foreground" />
+        <IncorrectIcon aria-hidden="true" className="text-danger-foreground" />
       )}
       <p className="flex-1 text-sm font-semibold" role="status">
         {allCorrect ? (multi ? "All steps correct" : "Correct") : multi ? `${correct} of ${sc.steps.length} correct` : "Not there"}
       </p>
       <IconButton label="Next mechanic" variant="default" onClick={onNextMechanic}>
-        <ArrowRight aria-hidden="true" />
+        <NextMechanicIcon aria-hidden="true" />
       </IconButton>
       {reset}
     </div>
   ) : status === "incorrect" && last ? (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-danger-foreground bg-danger px-3 py-2">
-      <X aria-hidden="true" className="text-danger-foreground" />
+      <IncorrectIcon aria-hidden="true" className="text-danger-foreground" />
       <p className="flex-1 text-sm" role="status">
         <span className="font-semibold">Not there.</span> {sc.steps[n - 1].a}
       </p>

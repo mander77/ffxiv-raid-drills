@@ -51,8 +51,9 @@ make sure that each one still matches the code before you start it.
   - The stack: React 19, TypeScript and Vite; Tailwind CSS v4 and shadcn/ui (Radix) with its
     standard theme; React Router for the routes; Zustand with `persist` for state kept in the
     browser; Vitest and Testing Library for unit tests; Playwright on Chromium, Firefox and
-    WebKit for browser tests; Biome to lint and format; lucide-react for icons. Hosting stays on
-    Cloudflare.
+    WebKit for browser tests; Biome to lint and format; lucide-react for icons, all of them
+    through one file, src/components/icons.tsx, named by their meaning (owner's choice).
+    Hosting stays on Cloudflare.
   - Keep `src/data/` and `src/geometry.ts` as they are. They are checked against cactbot and
     BossMod.
   - The arena stays SVG, drawn by React components, not a canvas or a game library. The full
@@ -346,7 +347,7 @@ Do not propose these again unless the owner brings them up.
   with Claude:
   - The icons follow rules (the owner's): a ring is a spot, a filled dot a player, chevrons a
     hit or push from the boss, arrows a move you make, a bar a blocker, a clock timing. The full
-    list, with how to draw a new icon, is at the top of src/components/MechanicIcon.tsx.
+    list, with how to draw a new icon, is at the top of src/components/icons.tsx.
   - Stacks share one icon, four arrows from the corners coming together, with the number of
     players in the middle, in Source Sans 3 bold (Saira Condensed's R looked like an A) and its own
     colour, so it stands out from the arrows: bright amber on the dark square in light mode, deep

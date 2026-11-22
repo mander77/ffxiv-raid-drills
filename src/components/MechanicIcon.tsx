@@ -1,113 +1,41 @@
-// The icons of the kinds of mechanic, and the rules they follow (the owner's), so a new icon reads
-// the same way as the others:
-//
-// What a shape means
-// 1. A ring is a spot on the floor (a tower, the spot a bait leaves).
-// 2. A filled dot is a player.
-// 3. Chevrons are a hit or a push from the boss, toward the players (a line stack, a knockback).
-// 4. Arrows are a move the players make themselves (spread, dodge, a stack coming together).
-// 5. A bar is a blocker that takes a hit for the others: a tank, a rock, a wall (a wild charge).
-// 6. A clock is timing: something you see now and act on later (saved for later).
-// 7. Every stack has the same arrows, from the corners into the middle. The middle says how many:
-//    2 (pairs), 4 (light parties), R (the roles decide), or nothing for the whole party. The number
-//    is in the body font, bold, in its own colour (--count in app.css), so it stands out.
-// 8. When an icon has a direction, the boss is at the top and the hit runs down, away from it.
-//
-// How an icon is drawn
-// 9. Lucide's style: a 24 by 24 grid, a 2 pixel stroke, round ends and corners. Use a lucide icon
-//    when one says it; otherwise draw one here with lucide's createLucideIcon.
-// 10. Few lines, about five at most: it must read at 20 pixels in its square on the list. Check it
-//    there, in the browser, in light and dark mode, before you keep it.
-import { CircleArrowOutUpRight, createLucideIcon, Expand, History, type IconNode, type LucideIcon } from "lucide-react";
+// The icon of each kind of mechanic, with its name, and the component that draws it. The icons
+// themselves, and the rules they follow, are in icons.tsx.
 import { cn } from "@/lib/utils";
 import type { DrillKind } from "../types";
-
-/** A line stack: three chevrons, the hit running down the line. Lucide's ChevronsDown has two, so
-    this one is drawn in its style (a 24 by 24 grid, the same stroke) with its createLucideIcon,
-    and takes the same size and colour as the others. */
-const LineStack = createLucideIcon("line-stack", [
-  ["path", { d: "m7 3 5 5 5-5", key: "top" }],
-  ["path", { d: "m7 9 5 5 5-5", key: "middle" }],
-  ["path", { d: "m7 15 5 5 5-5", key: "bottom" }],
-]);
-
-/** A wild charge: the line stack's chevrons with a bar in front, the tank or rock that takes the
-    first, biggest hit. Drawn the same way. */
-const WildCharge = createLucideIcon("wild-charge", [
-  ["path", { d: "M5 3h14", key: "front" }],
-  ["path", { d: "m7 8 5 5 5-5", key: "top" }],
-  ["path", { d: "m7 14 5 5 5-5", key: "bottom" }],
-]);
-
-/** The chevrons of both knockbacks: pushing out to the northwest and southeast corners. */
-const PUSHED_OUT: IconNode = [
-  ["path", { d: "M2 8V2h6", key: "northwest" }],
-  ["path", { d: "M22 16v6h-6", key: "southeast" }],
-];
-
-/** A knockback: a player (a filled dot), pushed out by the boss's chevrons. Drawn the same way. */
-const Knockback = createLucideIcon("knockback", [
-  ["circle", { cx: "12", cy: "12", r: "3", fill: "currentColor", key: "boss" }],
-  ...PUSHED_OUT,
-]);
-
-/** A knockback tower: the tower's ring with the knockback's chevrons, since you soak it and it
-    knocks you back. Drawn the same way. */
-const TowerKnockback = createLucideIcon("tower-knockback", [["circle", { cx: "12", cy: "12", r: "6", key: "tower" }], ...PUSHED_OUT]);
-
-/** A stack: four arrows from the corners, the players coming together, with the middle left open
-    for the number of players in the stack (see KINDS). Drawn the same way. */
-const Stack = createLucideIcon("stack", [
-  ["path", { d: "m1 1 5 5", key: "northwest" }],
-  ["path", { d: "M6 2v4H2", key: "northwest-head" }],
-  ["path", { d: "m23 1-5 5", key: "northeast" }],
-  ["path", { d: "M18 2v4h4", key: "northeast-head" }],
-  ["path", { d: "m1 23 5-5", key: "southwest" }],
-  ["path", { d: "M6 22v-4H2", key: "southwest-head" }],
-  ["path", { d: "m23 23-5-5", key: "southeast" }],
-  ["path", { d: "M18 22v-4h4", key: "southeast-head" }],
-]);
-
-/** A tower: a player (a filled dot) standing in the spot (a ring). Drawn the same way. */
-const Tower = createLucideIcon("tower", [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "spot" }],
-  ["circle", { cx: "12", cy: "12", r: "3", fill: "currentColor", key: "player" }],
-]);
-
-/** A dodge: a player (a filled dot) stepping aside, an arrow of their own. Drawn the same way. */
-const Dodge = createLucideIcon("dodge", [
-  ["circle", { cx: "5", cy: "12", r: "3", fill: "currentColor", key: "player" }],
-  ["path", { d: "M10 12h11", key: "step" }],
-  ["path", { d: "m17 8 4 4-4 4", key: "step-head" }],
-]);
-
-/** A dodge sequence: a player (a filled dot) and the path they take, turning, to an arrow: several
-    moves in order. Drawn the same way. */
-const DodgeSequence = createLucideIcon("dodge-sequence", [
-  ["circle", { cx: "4", cy: "5", r: "2.5", fill: "currentColor", key: "player" }],
-  ["path", { d: "M7 5h10a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h14", key: "path" }],
-  ["path", { d: "m18 14 3 3-3 3", key: "path-head" }],
-]);
+import {
+  BaitIcon,
+  DodgeIcon,
+  DodgeSequenceIcon,
+  KnockbackIcon,
+  KnockbackTowerIcon,
+  LineStackIcon,
+  type LucideIcon,
+  SavedForLaterIcon,
+  SpreadIcon,
+  StackIcon,
+  TowerIcon,
+  WildChargeIcon,
+} from "./icons";
 
 /** The name and the icon of each kind of mechanic. A stack also has the number of its players, in
     the middle of its icon: 2 for pairs, 4 for light parties, R when the roles decide; a stack of
     the whole party has none. */
 export const KINDS: Record<DrillKind, { name: string; icon: LucideIcon; count?: string }> = {
-  spread: { name: "Spread", icon: Expand },
-  stack: { name: "Party stack", icon: Stack },
-  pairStack: { name: "Pair stack", icon: Stack, count: "2" },
-  lightPartyStack: { name: "Light party stack", icon: Stack, count: "4" },
-  roleStack: { name: "Role stack", icon: Stack, count: "R" },
-  lineStack: { name: "Line stack", icon: LineStack },
+  spread: { name: "Spread", icon: SpreadIcon },
+  stack: { name: "Party stack", icon: StackIcon },
+  pairStack: { name: "Pair stack", icon: StackIcon, count: "2" },
+  lightPartyStack: { name: "Light party stack", icon: StackIcon, count: "4" },
+  roleStack: { name: "Role stack", icon: StackIcon, count: "R" },
+  lineStack: { name: "Line stack", icon: LineStackIcon },
   // You bring the hit to your spot, then step out of it before it goes off.
-  bait: { name: "Bait", icon: CircleArrowOutUpRight },
-  dodge: { name: "Dodge", icon: Dodge },
-  sequence: { name: "Dodge sequence", icon: DodgeSequence },
-  tower: { name: "Tower", icon: Tower },
-  towerKnockback: { name: "Knockback tower", icon: TowerKnockback },
-  wildCharge: { name: "Wild charge", icon: WildCharge },
-  later: { name: "Saved for later", icon: History },
-  knockback: { name: "Knockback", icon: Knockback },
+  bait: { name: "Bait", icon: BaitIcon },
+  dodge: { name: "Dodge", icon: DodgeIcon },
+  sequence: { name: "Dodge sequence", icon: DodgeSequenceIcon },
+  tower: { name: "Tower", icon: TowerIcon },
+  towerKnockback: { name: "Knockback tower", icon: KnockbackTowerIcon },
+  wildCharge: { name: "Wild charge", icon: WildChargeIcon },
+  later: { name: "Saved for later", icon: SavedForLaterIcon },
+  knockback: { name: "Knockback", icon: KnockbackIcon },
 };
 
 export interface MechanicIconProps {

@@ -1,4 +1,3 @@
-import { GripVertical, Settings2 } from "lucide-react";
 import { type KeyboardEvent, type PointerEvent, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +16,7 @@ import { cn } from "@/lib/utils";
 import type { WeaponType } from "../../data/drills";
 import { CHOICE_ROWS, type Choices, choicesText, cleanChoices, RANDOM } from "../../data/fight";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
+import { DragHandleIcon, SettingsIcon } from "../icons";
 
 export interface FightSettingsProps {
   code: string;
@@ -39,7 +39,7 @@ export function FightSettings({ code, choices, onChange }: FightSettingsProps) {
         <TooltipTrigger asChild>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon-sm" aria-label="Settings">
-              <Settings2 aria-hidden="true" />
+              <SettingsIcon aria-hidden="true" />
             </Button>
           </SheetTrigger>
         </TooltipTrigger>
@@ -223,7 +223,7 @@ function WeaponOrderRow({ label, value, onChange }: WeaponOrderRowProps) {
             onPointerUp={random ? undefined : handlePointerUp}
             onPointerCancel={random ? undefined : handlePointerUp}
           >
-            {!random && <GripVertical aria-hidden="true" className="size-4 text-muted-foreground" />}
+            {!random && <DragHandleIcon aria-hidden="true" className="size-4 text-muted-foreground" />}
             <b className="tabular-nums">{random ? "?" : i + 1}</b>
             {WEAPON_NAMES[w]}
           </li>
