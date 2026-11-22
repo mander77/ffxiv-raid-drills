@@ -381,9 +381,10 @@ Do not propose these again unless the owner brings them up.
   floor: the owner tried a cut along the flat side and chose this instead. The held weapon in
   Raw Steel Trophy is drawn smaller and narrower, between his ring and waymark B. A weapon's
   name goes below it, beside it for a weapon due north (waymark A is below it), and out toward
-  the edge for one due east or west. The drawn sizes are the app's choice (set by eye, 80% of the
-  first drawing after the owner found them too big): no source gives the
-  weapons' size in the game.
+  the edge for one due east or west. The drawn sizes are the app's choice, set by eye (no source
+  gives the weapons' size in the game): the sword and axe at 80% of the first drawing, the scythe
+  at 65% and centred, so it fits inside the boss's hitbox ring when he lands on it, with room for
+  H1 and H2 at its butt and point (owner's rule).
 - The boss turns smoothly to face his next target. He does not flip.
 - "Saved for later" (purple) marks a mechanic shown early and resolved later, for example the
   first weapon during Void Stardust. It is never a spot to stand on.

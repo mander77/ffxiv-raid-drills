@@ -26,11 +26,11 @@ const matrixOf = (g: Element): number[] =>
     .split(" ")
     .map(Number);
 
-test("a weapon facing you stands upright on its point, at full width", () => {
+test("a scythe facing you stands upright on its point, drawn small enough to fit his hitbox", () => {
   const g = draw({ t: "scythe", x: 50, y: 21, ux: 1, uy: 0, dx: 0, dy: -1 });
   assert.include(g.getAttribute("class"), "scythe");
   assert.isNotNull(g.querySelector(".body"));
-  assert.deepEqual(matrixOf(g), [0.8, 0, 0, 0.8, 50, 21]);
+  assert.deepEqual(matrixOf(g), [0.65, 0, 0, 0.65, 50, 21]);
 });
 
 test("a turned weapon gets narrower and tilts a little, but never taller", () => {

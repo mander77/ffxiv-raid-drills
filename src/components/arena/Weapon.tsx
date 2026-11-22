@@ -12,9 +12,11 @@ export interface WeaponProps {
    from facing you it gets narrower, and its far end sits a little higher. Its height never
    changes, so it never looks stretched. */
 
-/** How big a weapon on the floor is drawn, as a share of its drawing. No source gives the
-    weapons' size in the game, so this is the app's choice, set by eye next to the waymarks. */
-const SIZE = 0.8;
+/** How big each weapon on the floor is drawn, as a share of its drawing. No source gives the
+    weapons' size in the game, so this is the app's choice, set by eye next to the waymarks. The
+    scythe is smaller: it fits inside the boss's hitbox ring when he lands on it, with room for H1
+    and H2 at its butt and point (their spots are 9.5 units out, see buildJumpSet). */
+const SIZE: Record<WeaponOverlay["t"], number> = { scythe: 0.65, sword: 0.8, axe: 0.8 };
 
 /** How wide a weapon is drawn at the least, as a share of its full width, so one turned edge-on
     still shows its shape. The app's choice. */
@@ -51,7 +53,8 @@ export function Weapon({ overlay: o }: WeaponProps) {
   } else {
     // On the floor: it stands on the point, turned along its line.
     const s = screenBase(floorLine(o));
-    m = [s[0] * SIZE, s[1] * SIZE, 0, SIZE, o.x, o.y];
+    const k = SIZE[o.t];
+    m = [s[0] * k, s[1] * k, 0, k, o.x, o.y];
   }
   return (
     <g className={`wpn ${o.t}`} transform={`matrix(${m.map(round2).join(" ")})`}>
@@ -68,7 +71,7 @@ const HELD_SIZE: Point = [0.5, 0.7];
 /** How far below the point a held weapon's foot is. The app's choice. */
 const HELD_FOOT = 5;
 /** How far each drawing reaches back from its origin, toward the handle end. */
-const REACH_BACK: Record<WeaponOverlay["t"], number> = { scythe: 9.4, sword: 5.8, axe: 9.3 };
+const REACH_BACK: Record<WeaponOverlay["t"], number> = { scythe: 10.2, sword: 5.8, axe: 9.3 };
 
 // The drawings are plain dark silhouettes: the shape alone, with no small parts, so they stay
 // sharp at phone size and over the attacks.
@@ -78,8 +81,8 @@ const REACH_BACK: Record<WeaponOverlay["t"], number> = { scythe: 9.4, sword: 5.8
 function ScytheDrawing() {
   return (
     <>
-      <path className="body" d="M-7.6 -1.8 Q1 3.4 10 -5.4 Q1 -0.4 -7.6 -5 Z" />
-      <line className="haft" x1="-7.6" y1="-2" x2="-8.4" y2="-19" />
+      <path className="body" d="M-8.4 -1.8 Q0.2 3.4 9.2 -5.4 Q0.2 -0.4 -8.4 -5 Z" />
+      <line className="haft" x1="-8.4" y1="-2" x2="-9.2" y2="-19" />
     </>
   );
 }
