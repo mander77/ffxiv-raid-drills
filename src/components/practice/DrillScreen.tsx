@@ -5,15 +5,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { isPageKey } from "../../lib/dom";
 import { answerStep, type Pattern, type StepStatus, statusAfter } from "../../lib/practice";
-import { cn } from "../../lib/utils";
 import type { Drill, Point, StepResult } from "../../types";
 import { ArenaFrame, type ArenaFrameProps } from "../arena/ArenaFrame";
 import { LiveArena } from "../arena/LiveArena";
 import { HudPrompt } from "../HudPrompt";
 import { IconButton } from "../IconButton";
-import { CorrectIcon, IncorrectIcon, NextMechanicIcon, ResetIcon } from "../icons";
+import { NextMechanicIcon, ResetIcon } from "../icons";
 import { LastAnswer } from "../LastAnswer";
 import { KINDS, MechanicIcon } from "../MechanicIcon";
+import { ResultBar } from "../ResultBar";
 import { RuleBox } from "../RuleBox";
 import { SetupText } from "../SetupText";
 import { StepChips } from "../StepChips";
@@ -130,17 +130,7 @@ export function DrillScreen({
     </IconButton>
   );
   const hud = done ? (
-    <div
-      className={cn(
-        "flex flex-wrap items-center gap-3 rounded-lg border px-3 py-2",
-        allCorrect ? "border-success-foreground bg-success" : "border-danger-foreground bg-danger",
-      )}
-    >
-      {allCorrect ? (
-        <CorrectIcon aria-hidden="true" className="text-success-foreground" />
-      ) : (
-        <IncorrectIcon aria-hidden="true" className="text-danger-foreground" />
-      )}
+    <ResultBar ok={allCorrect}>
       <p className="flex-1 text-sm font-semibold" role="status">
         {allCorrect ? (multi ? "All steps correct" : "Correct") : multi ? `${correct} of ${sc.steps.length} correct` : "Not there"}
       </p>
@@ -148,10 +138,9 @@ export function DrillScreen({
         <NextMechanicIcon aria-hidden="true" />
       </IconButton>
       {reset}
-    </div>
+    </ResultBar>
   ) : status === "incorrect" && last ? (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-danger-foreground bg-danger px-3 py-2">
-      <IncorrectIcon aria-hidden="true" className="text-danger-foreground" />
+    <ResultBar ok={false}>
       <p className="flex-1 text-sm" role="status">
         <span className="font-semibold">Not there.</span> {sc.steps[n - 1].a}
       </p>
@@ -159,7 +148,7 @@ export function DrillScreen({
         Next step
       </Button>
       {reset}
-    </div>
+    </ResultBar>
   ) : (
     // Show me: the correct spot for this step, and its answer in place of the question. Your next
     // click still answers.

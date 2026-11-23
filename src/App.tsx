@@ -1,5 +1,5 @@
 // The app: the header, then the page for the address. React Router picks the page.
-// Each tab has its page here, and so does the icons page, which no link leads to. Any other address
+// Each tab has its page here, and so does the styles page, which no link leads to. Any other address
 // opens Home.
 import { Navigate, Route, Routes } from "react-router";
 import { Header } from "./components/Header";
@@ -10,10 +10,10 @@ import { useScrollToTopOnNewTab } from "./hooks/useScrollToTopOnNewTab";
 import { useTheme } from "./hooks/useTheme";
 import { CheatSheetPage } from "./pages/CheatSheetPage";
 import { HomePage } from "./pages/HomePage";
-import { IconsPage } from "./pages/IconsPage";
 import { LearnPage } from "./pages/LearnPage";
 import { PracticePage } from "./pages/PracticePage";
 import { PressurePage } from "./pages/PressurePage";
+import { StylesPage } from "./pages/StylesPage";
 import { TimelinePage } from "./pages/TimelinePage";
 
 export function App() {
@@ -32,7 +32,7 @@ export function App() {
           <Route path="/timeline/:card?" element={<TimelinePage />} />
           <Route path="/pressure/:code?/:picks?" element={<PressurePage />} />
           <Route path="/sheet" element={<CheatSheetPage />} />
-          <Route path="/icons" element={<IconsPage />} />
+          <Route path="/styles" element={<StylesPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <ThemedToaster />

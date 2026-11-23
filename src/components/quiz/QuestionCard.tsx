@@ -1,5 +1,4 @@
 import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,6 +11,7 @@ import { shuffle } from "../../util";
 import { ArenaFrame } from "../arena/ArenaFrame";
 import { LearnPicture } from "../arena/LearnPicture";
 import { RuleBox } from "../RuleBox";
+import { AnswerButton } from "./AnswerButton";
 import { TimelinePicture, timelineRowOf } from "./TimelinePicture";
 import { TimerBar } from "./TimerBar";
 
@@ -233,62 +233,6 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
         {answers}
       </div>
     </div>
-  );
-}
-
-type AnswerState = "open" | "picked" | "correct" | "incorrect" | "other";
-
-interface AnswerButtonProps {
-  n: number;
-  text: string;
-  state: AnswerState;
-  /** The explanation, under the correct answer after you answer. */
-  why?: string;
-  /** For a Learn card before the answer: true when this answer is the picked one. */
-  pressed?: boolean;
-  onClick: () => void;
-  /** Called with true when you point at the answer or move to it with Tab, false when you leave. */
-  onPoint: (on: boolean) => void;
-}
-
-/** One answer: its number key, its text, and after the answer, whether it was correct. */
-function AnswerButton({ n, text, state, why, pressed, onClick, onPoint }: AnswerButtonProps) {
-  const done = state === "correct" || state === "incorrect" || state === "other";
-  return (
-    <Button
-      variant={state === "correct" || state === "incorrect" ? state : "outline"}
-      aria-pressed={pressed}
-      disabled={done}
-      onClick={onClick}
-      onMouseEnter={() => onPoint(true)}
-      onMouseLeave={() => onPoint(false)}
-      onFocus={() => onPoint(true)}
-      onBlur={() => onPoint(false)}
-      className={cn(
-        "h-auto w-full items-start justify-start gap-3 py-2 text-left whitespace-normal disabled:opacity-100",
-        state === "picked" && "border-primary ring-2 ring-primary",
-        state === "other" && "opacity-60",
-      )}
-    >
-      <Badge variant="secondary" className="font-mono">
-        {n}
-      </Badge>
-      <span className="space-y-1">
-        <span className="block">
-          {text}
-          {state === "incorrect" && (
-            <Badge variant="destructive" className="ml-2">
-              Your pick
-            </Badge>
-          )}
-        </span>
-        {why && (
-          <span className="block font-normal text-muted-foreground">
-            <span className="font-semibold text-success-foreground">Correct answer.</span> {why}
-          </span>
-        )}
-      </span>
-    </Button>
   );
 }
 

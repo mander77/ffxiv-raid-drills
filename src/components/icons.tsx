@@ -36,7 +36,7 @@
 //    when one says it; otherwise draw one here with lucide's createLucideIcon.
 // 12. Few lines, about five, eight at most: a mechanic's icon must read at 24 pixels in its square
 //    on the list. Check it there, in the browser, in light and dark mode, before you keep it.
-// 13. Every icon here is on the icons page (/icons, IconsPage) with what it means; a test fails
+// 13. Every icon here is on the styles page (/styles, StylesPage) with what it means; a test fails
 //    when one is missing. The page shows them side by side, large and at their real size.
 import { createLucideIcon, type IconNode } from "lucide-react";
 

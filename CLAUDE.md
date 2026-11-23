@@ -53,8 +53,9 @@ claim on the live site before you act on it.
 | Pressure | `/pressure`, `/pressure/<code>[/<picks>][?t=<s>]` | A quick round of 12 timed cards, or the full fight: the run (you click) and Watch the correct moves (the player). The player's address names its fight, its picks and, paused, its moment. |
 | Cheat sheet | `/sheet` | Every mechanic in fight order with its picture, rules, your own answer and links to train it, the timeline for your role, sources and your progress. |
 
-The icons page, `/icons`, has no tab and no link: it shows every icon the site uses, with what it
-means and which mechanics use it. Check it when you add or change an icon. Any other address opens
+The styles page, `/styles`, has no tab and no link: it shows how the site shows an answer (the real
+components), and every icon the site uses, with what it means and which mechanics use it. Check it
+when you add or change an icon or an answer style. Any other address opens
 Home, including the old site's addresses (`/mech/...`, `/map/...`).
 
 The slot switch is in the header: the role (only Healer works today; the others show "not yet
@@ -121,7 +122,8 @@ src/components/      React components: Header, PageContainer, SlotSwitch, ShareB
                      coming up and Practice's list: filled for a hit, outlined for the boss's
                      cast, ink with its kind's icon for a mechanic), RoundDone,
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
-                     StepChips, SetupText, Tally, ChipRow, HudPrompt, IconButton (a button with
+                     StepChips, SetupText, Tally, ChipRow, HudPrompt, ResultBar (how you did, over a Practice
+                     mechanic), IconButton (a button with
                      only an icon, named by its tooltip)
 src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, clicks), Shape (one
                      attack, weapon or mark), Weapon (a boss weapon: its icon on the line it rests along), BossMark, ZoneArea (a zone's coloured area),
@@ -131,7 +133,7 @@ src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, click
 src/components/ui/   shadcn/ui components, as the shadcn CLI writes them
 src/pages/           React pages, one per route: HomePage (/), LearnPage (/learn), PracticePage
                      (/practice), TimelinePage (/timeline), PressurePage (/pressure),
-                     CheatSheetPage (/sheet), IconsPage (/icons, no link leads to it)
+                     CheatSheetPage (/sheet), StylesPage (/styles, no link leads to it)
 src/components/practice/  Practice: DrillScreen (one drill's screen, in the layout of Pressure's
                      player: clicks, Show me, the prompt, the panel, the bar and the list),
                      MechanicList (the mechanics under their phases: a click opens one)
@@ -148,7 +150,8 @@ src/lib/fight.ts     the fight clock's rules as plain functions: newFightState, 
                      answerFightStep, viewOf, promptOf, castOf, castsAhead, castPositions
 src/lib/pressure.ts  the quick round's rules (weighted cards, the timer) and playerLink
 src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round), QuestionCard
-                     (answers, previews, Lock in, keys, the timer of a timed card), TimerBar,
+                     (answers, previews, Lock in, keys, the timer of a timed card), AnswerButton
+                     (one answer, before and after you answer), TimerBar,
                      TimelinePicture
 src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useCastTimeline (the casts coming up, moving with the fight clock), useLineDrag (drag the
                      casts coming up, or the list of mechanics), useFightFrame (run code on

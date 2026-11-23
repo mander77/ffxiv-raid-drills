@@ -1,16 +1,13 @@
-// The icons page (/icons): every icon the site uses, with what it means. No tab or link leads here;
-// it is a reference for the owner, to check the icons side by side in light and dark mode.
+// The styles page (/styles): how the site shows an answer, and every icon it uses, with what each
+// one means. No tab or link leads here; it is a reference for the owner, to check the styles side by
+// side in light and dark mode. Each sample is the site's own component, so it shows the real style.
 import type { ComponentProps, ReactNode } from "react";
 import "../components/arena/arena.css";
 import { Weapon } from "../components/arena/Weapon";
 import { CastSquare } from "../components/CastSquare";
 import {
-  CorrectAnswerIcon,
-  CorrectIcon,
   DarkModeIcon,
   DragHandleIcon,
-  IncorrectAnswerIcon,
-  IncorrectIcon,
   LightModeIcon,
   type LucideIcon,
   NewFightIcon,
@@ -22,12 +19,17 @@ import {
   PlayIcon,
   PreviousCardIcon,
   ResetIcon,
-  RuleIcon,
   SettingsIcon,
   ShareIcon,
 } from "../components/icons";
+import { LastAnswer } from "../components/LastAnswer";
 import { KINDS, MechanicIcon } from "../components/MechanicIcon";
 import { PageContainer } from "../components/PageContainer";
+import { AnswerButton } from "../components/quiz/AnswerButton";
+import { ResultBar } from "../components/ResultBar";
+import { RuleBox } from "../components/RuleBox";
+import { StepChips } from "../components/StepChips";
+import { Tally } from "../components/Tally";
 import { DRILLS } from "../data/drills";
 import type { DrillKind } from "../types";
 
@@ -40,16 +42,6 @@ interface InterfaceIcon {
 
 /** The icons of the buttons and signs, grouped as icons.tsx groups them. */
 const INTERFACE_GROUPS: readonly { title: string; icons: readonly InterfaceIcon[] }[] = [
-  {
-    title: "Answers",
-    icons: [
-      { icon: CorrectIcon, name: "Correct", meaning: "A correct answer or step." },
-      { icon: IncorrectIcon, name: "Incorrect", meaning: "An incorrect answer or step." },
-      { icon: CorrectAnswerIcon, name: "Correct answer", meaning: "The last answer was correct." },
-      { icon: IncorrectAnswerIcon, name: "Incorrect answer", meaning: "The last answer was incorrect." },
-      { icon: RuleIcon, name: "Rule", meaning: "The rule of a mechanic." },
-    ],
-  },
   {
     title: "Moving on",
     icons: [
@@ -100,18 +92,104 @@ const WEAPONS: readonly { overlay: ComponentProps<typeof Weapon>["overlay"]; nam
 /** The number a tower's icon shows on this page, as an example. */
 const EXAMPLE_SOAK = 2;
 
+/** A sample answer's buttons do nothing. */
+function noop(): void {}
+
+/** How the site shows an answer, each with the component that draws it. */
+const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode }[] = [
+  {
+    name: "Answers before you answer",
+    meaning: "An answer to pick, and on a Learn card, the one you picked before Lock in.",
+    sample: (
+      <div className="space-y-2">
+        <AnswerButton n={1} text="An answer to pick." state="open" onClick={noop} onPoint={noop} />
+        <AnswerButton n={2} text="The answer you picked." state="picked" pressed onClick={noop} onPoint={noop} />
+      </div>
+    ),
+  },
+  {
+    name: "Answers after you answer",
+    meaning: "The correct answer in green, with why; your pick in red when it was not; the others faded.",
+    sample: (
+      <div className="space-y-2">
+        <AnswerButton n={1} text="The correct answer." state="correct" why="Why it is correct." onClick={noop} onPoint={noop} />
+        <AnswerButton n={2} text="Your incorrect pick." state="incorrect" onClick={noop} onPoint={noop} />
+        <AnswerButton n={3} text="Another answer." state="other" onClick={noop} onPoint={noop} />
+      </div>
+    ),
+  },
+  {
+    name: "Result bar",
+    meaning: "Over a Practice mechanic: how you did, with a check mark or a cross.",
+    sample: (
+      <div className="space-y-2">
+        <ResultBar ok>
+          <p className="flex-1 text-sm font-semibold">All steps correct</p>
+        </ResultBar>
+        <ResultBar ok={false}>
+          <p className="flex-1 text-sm">
+            <span className="font-semibold">Not there.</span> Where you should have stood.
+          </p>
+        </ResultBar>
+      </div>
+    ),
+  },
+  {
+    name: "Last answer",
+    meaning: "The step before: correct or not, its question and its answer.",
+    sample: (
+      <div className="space-y-2">
+        <LastAnswer ok question="The question." answer="The correct answer." />
+        <LastAnswer ok={false} question="The question." answer="The correct answer." />
+      </div>
+    ),
+  },
+  {
+    name: "Steps",
+    meaning: "One chip per step: correct, incorrect, the step you are on, and the steps to come.",
+    sample: <StepChips count={4} results={[{ ok: true }, { ok: false }]} />,
+  },
+  {
+    name: "Rule",
+    meaning: "The rule of a mechanic, after the answer.",
+    sample: <RuleBox rule="Why the correct spot is the one to stand in." />,
+  },
+  {
+    name: "Tally",
+    meaning: "The counts at the end of a round: correct, incorrect, and too slow.",
+    sample: <Tally correct={9} incorrect={2} missed={1} missedLabel="Too slow" />,
+  },
+];
+
 /** The titles of the Practice mechanics of a kind, in fight order. */
 function drillsOf(kind: DrillKind): string[] {
   return DRILLS.filter((d) => d.kind === kind).map((d) => d.title);
 }
 
-export function IconsPage() {
+export function StylesPage() {
   return (
     <PageContainer className="space-y-10 py-6">
       <header className="space-y-1">
-        <h1 className="font-display text-3xl font-bold">Icons</h1>
-        <p className="text-muted-foreground">Every icon on the site, and what it means.</p>
+        <h1 className="font-display text-3xl font-bold">Styles</h1>
+        <p className="text-muted-foreground">How the site shows an answer, and every icon it uses.</p>
       </header>
+
+      <section className="space-y-4" aria-labelledby="answers">
+        <h2 id="answers" className="font-display text-2xl font-bold">
+          Answers
+        </h2>
+        <ul className="grid gap-3 lg:grid-cols-2">
+          {ANSWER_STYLES.map((a) => (
+            <li key={a.name} className="space-y-3 rounded-lg border bg-card p-4">
+              <div className="space-y-1">
+                <h3 className="font-semibold">{a.name}</h3>
+                <p className="text-sm text-muted-foreground">{a.meaning}</p>
+              </div>
+              {a.sample}
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section className="space-y-4" aria-labelledby="kinds">
         <h2 id="kinds" className="font-display text-2xl font-bold">
