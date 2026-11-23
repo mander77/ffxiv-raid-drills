@@ -55,7 +55,7 @@ function Mechanic({ view: v, fight, g, onGoTo, onSpawns }: MechanicProps) {
   return (
     <div className="space-y-3">
       <h2 className="font-display text-xl tracking-wide">{g.title}</h2>
-      {g.scene.setup && <SetupText key={v.si} text={g.scene.setup} folded={j > 0} />}
+      {g.scene.setup.length > 0 && <SetupText lines={g.scene.setup} ordered={g.scene.ordered} />}
       {n > 1 && <StepChips count={n} results={res} />}
       {!done && (
         <div className="rounded-lg border p-3 text-sm">
@@ -78,7 +78,7 @@ function Mechanic({ view: v, fight, g, onGoTo, onSpawns }: MechanicProps) {
       {j > 0 && <LastAnswer ok={res[j - 1].ok} question={watchQuestion(g.scene.steps[j - 1].q)} answer={g.scene.steps[j - 1].a} />}
       {done ? (
         <>
-          {g.scene.rule && <RuleBox rule={g.scene.rule} />}
+          {g.scene.rule.length > 0 && <RuleBox rule={g.scene.rule} />}
           <div className="flex flex-wrap items-center gap-3">
             {nx && (
               // A mechanic's name can be longer than the column: the button wraps, which shadcn's does not.

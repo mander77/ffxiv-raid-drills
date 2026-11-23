@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { LearnPicture } from "../components/arena/LearnPicture";
 import { CategoryDots, categoryNames } from "../components/CategoryDots";
 import { CategoryKey } from "../components/CategoryKey";
+import { LineList } from "../components/LineList";
 import { PageContainer } from "../components/PageContainer";
 import { timelineCategories } from "../data/abilities";
 import { LEARN_PICTURES } from "../data/pictures";
@@ -54,6 +55,8 @@ function MechanicCard({ entry, slot }: MechanicCardProps) {
   const card = learnCard(entry.picture);
   const fig = LEARN_PICTURES[entry.picture]?.(slot);
   const yours = entry.cards.map((id) => slotAnswer(id, slot)).filter((a) => a !== undefined);
+  // Every rule line of its cards, each once: two cards can share a line.
+  const rules = [...new Set(entry.cards.flatMap((id) => learnCard(id).build(slot).rule))];
   return (
     <Card className="gap-3 py-4">
       <CardHeader className="px-4">
@@ -73,11 +76,7 @@ function MechanicCard({ entry, slot }: MechanicCardProps) {
           />
         )}
         <div className="min-w-0 space-y-4">
-          <ul className="list-disc space-y-1 pl-5">
-            {entry.cards.map((id) => (
-              <li key={id}>{learnCard(id).build(slot).rule}</li>
-            ))}
-          </ul>
+          <LineList lines={rules} className="space-y-1" />
           {yours.map((answer) => (
             <p key={answer}>
               <span className="font-semibold">As {slot}:</span> {answer}
@@ -317,7 +316,9 @@ export function CheatSheetPage() {
                         {categoryNames(cats)}
                       </div>
                     </TableCell>
-                    <TableCell className="align-top whitespace-normal">{e.job(slot)}</TableCell>
+                    <TableCell className="align-top whitespace-normal">
+                      <LineList lines={e.job(slot)} />
+                    </TableCell>
                   </TableRow>
                 );
               })}

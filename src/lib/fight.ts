@@ -304,7 +304,7 @@ export function tickFight(s: FightState, dt: number, speed: number): Tick {
 
 /** Between mechanics the arena is empty, but it is two platforms from Flatliner until the Crown
     of Arcadia that joins them again. */
-const IDLE: Scene = { setup: "", rule: "", steps: [], overlays: [], boss: { x: 50, y: 50, f: null } };
+const IDLE: Scene = { setup: [], rule: [], steps: [], overlays: [], boss: { x: 50, y: 50, f: null } };
 const IDLE_SPLIT: Scene = { ...IDLE, split: true };
 
 /** What the arena and the panel show at this moment. It changes only now and then, so the screen

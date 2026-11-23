@@ -118,7 +118,7 @@ const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode
     meaning: "The correct answer in green, with why; your pick in red when it was not; the others faded.",
     sample: (
       <div className="space-y-2">
-        <AnswerButton n={1} text="The correct answer." state="correct" why="Why it is correct." onClick={noop} onPoint={noop} />
+        <AnswerButton n={1} text="The correct answer." state="correct" why={["Why it is correct."]} onClick={noop} onPoint={noop} />
         <AnswerButton n={2} text="Your incorrect pick." state="incorrect" onClick={noop} onPoint={noop} />
         <AnswerButton n={3} text="Another answer." state="other" onClick={noop} onPoint={noop} />
       </div>
@@ -162,7 +162,7 @@ const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode
   {
     name: "Rule",
     meaning: "The rule of a mechanic, after the answer.",
-    sample: <RuleBox rule="Why the correct spot is the one to stand in." />,
+    sample: <RuleBox rule={["Why the correct spot is the one to stand in."]} />,
   },
   {
     name: "Tally",

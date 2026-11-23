@@ -200,7 +200,7 @@ export function DrillScreen({
           </Badge>
         ))}
       </div>
-      <SetupText key={tryKey} text={sc.setup} folded={n > 0} />
+      <SetupText lines={sc.setup} ordered={sc.ordered} />
       {multi && <StepChips count={sc.steps.length} results={results} />}
       {/* The rule says why the spot is correct: at the end, and with Show me, which gives where. */}
       {(done || shown) && <RuleBox rule={sc.rule} />}

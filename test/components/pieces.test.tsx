@@ -1,7 +1,6 @@
 // @vitest-environment happy-dom
 // The pieces that Learn, Practice and the full fight share.
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { afterEach, assert, test } from "vitest";
 import { ChipRow } from "../../src/components/ChipRow";
 import { LastAnswer } from "../../src/components/LastAnswer";
@@ -12,11 +11,13 @@ import { Tally } from "../../src/components/Tally";
 
 afterEach(cleanup);
 
-test("RuleBox shows the rule under its heading", () => {
-  render(<RuleBox rule="Stand <south>." />);
+test("RuleBox shows the rule under its heading, one list item per line", () => {
+  render(<RuleBox rule={["Stand <south>.", "Then go west."]} />);
   assert.ok(screen.getByRole("alert"));
   assert.ok(screen.getByText("Rule"));
   assert.ok(screen.getByText("Stand <south>."), "text, not HTML");
+  const lines = screen.getAllByRole("listitem").map((li) => li.textContent);
+  assert.deepEqual(lines, ["Stand <south>.", "Then go west."]);
 });
 
 test("LastAnswer says Correct or Not there, with the question and the correct answer", () => {
@@ -34,22 +35,20 @@ test("StepChips marks each answered step and the step you are on", () => {
   assert.deepEqual(steps, ["Step 1, correct", "Step 2, incorrect", "Step 3, now", "Step 4"]);
 });
 
-test("SetupText shows in full at first, then folds with More and Less", async () => {
-  render(<SetupText text="He jumps." folded={false} />);
+test("SetupText shows every line at once, with no button to open it", () => {
+  render(<SetupText lines={["He jumps.", "He cleaves."]} />);
   assert.isNull(screen.queryByRole("button"));
-  cleanup();
-  render(<SetupText text="He jumps." folded={true} />);
-  const user = userEvent.setup();
-  assert.include(screen.getByText("He jumps.").className, "line-clamp-2");
-  assert.equal(screen.getByRole("button", { name: "More" }).getAttribute("aria-expanded"), "false");
-  await user.click(screen.getByRole("button", { name: "More" }));
-  assert.notInclude(screen.getByText("He jumps.").className, "line-clamp-2");
-  const less = screen.getByRole("button", { name: "Less" });
-  assert.equal(less.getAttribute("aria-expanded"), "true");
-  assert.ok(
-    document.getElementById(less.getAttribute("aria-controls") ?? "")?.textContent?.includes("He jumps."),
-    "the button controls the text",
+  const list = screen.getByRole("list");
+  assert.equal(list.tagName, "UL", "bulleted");
+  assert.deepEqual(
+    screen.getAllByRole("listitem").map((li) => li.textContent),
+    ["He jumps.", "He cleaves."],
   );
+});
+
+test("SetupText numbers the lines when they happen in order", () => {
+  render(<SetupText lines={["He jumps.", "He cleaves."]} ordered />);
+  assert.equal(screen.getByRole("list").tagName, "OL");
 });
 
 test("Tally shows each count under its name", () => {

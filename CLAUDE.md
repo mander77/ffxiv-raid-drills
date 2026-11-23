@@ -124,7 +124,8 @@ src/components/      React components: Header, Footer (links to the pages that a
                      coming up and Practice's list: filled for a hit, outlined for the boss's
                      cast, ink with its kind's icon for a mechanic), RoundDone,
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
-                     StepChips, SetupText, Tally, ChipRow, PromptBar (the question and its buttons,
+                     StepChips, SetupText, LineList (mechanic text as a bulleted or numbered
+                     list, one short line each), Tally, ChipRow, PromptBar (the question and its buttons,
                      then how the answer went, on every tab that asks), StickyBar (keeps a prompt
                      bar at the top of a narrow screen), IconButton (a button with
                      only an icon, named by its tooltip)
@@ -170,6 +171,7 @@ src/util.ts          helpers: bySlot, seeded random, pattern codes, shuffle, rea
 src/geometry.ts      arena geometry: zones, rotation, inZone
 src/data/fightInfo.ts  the fight's names and the strats (FIGHT_INFO), for the header and Home
 src/data/drills.ts   Practice drills (DRILLS), scenes, safe spots, stack and spread rules
+src/data/rules.ts    rule lines that a drill and a Learn card both show, written once
 src/data/pictures.ts Learn card pictures (LEARN_PICTURES)
 src/data/questions.ts  Learn cards (LEARN_CARDS, LEARN_GROUPS) and Timeline cards (TIMELINE_CARDS)
 src/data/fight.ts    the full fight: segments, due times, pattern picks and codes
@@ -371,6 +373,8 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   resolves later (a look-ahead step, `Step.lookAhead`). "The run" is the scored full fight. "Watch the
   correct moves" is the replay.
 - Never quiz an exact raidwide time. Ask which one comes next and whether it is soon.
+- Mechanic text (a setup, a rule, a card's explanation, the timeline's "what you do") is a list of
+  short lines (`Lines`), one step or fact each, 16 words at most. Never write it as a paragraph.
 
 ## Planned work
 

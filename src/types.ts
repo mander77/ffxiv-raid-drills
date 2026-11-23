@@ -156,9 +156,17 @@ export interface Step {
   leave?: Overlay | null;
 }
 
+/** Text in short lines, one step or fact each. A screen shows it as a list.
+    TS note: `readonly string[]` is an array that the code may read but not change, like
+    IReadOnlyList<string> in C#. */
+export type Lines = readonly string[];
+
 export interface Scene {
-  setup: string;
-  rule: string;
+  /** What happens in the mechanic, one step per line. */
+  setup: Lines;
+  /** True when the setup lines happen in order: the screen numbers them. */
+  ordered?: boolean;
+  rule: Lines;
   steps: Step[];
   overlays: Overlay[];
   boss?: Boss;
@@ -255,8 +263,8 @@ export interface Option {
 export interface Question {
   prompt: string;
   options: Option[];
-  why: string;
-  rule: string;
+  why: Lines;
+  rule: Lines;
   src?: string;
 }
 export interface QuizItem {
@@ -274,5 +282,6 @@ export interface QuizItem {
 export interface TimelineEvent {
   t: string;
   n: string;
-  job: (s: Slot) => string;
+  /** What you do, one short line each. */
+  job: (s: Slot) => Lines;
 }

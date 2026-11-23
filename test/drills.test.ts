@@ -19,6 +19,7 @@ import {
 } from "../src/data/drills";
 import { angOf, inZone, zoneCenter } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, StepResult, Zone } from "../src/types";
+import { assertLines } from "./lines";
 
 const REPEATS = 300;
 const SLOTS: Slot[] = ["H1", "H2"];
@@ -36,7 +37,8 @@ test("every map drill builds for both slots and every variant", () => {
         const sc = m.build(s, v);
         assert.isAbove(sc.steps.length, 0, m.id);
         for (const st of sc.steps) assert.ok(st.z || st.zf, `${m.id}: step without a zone`);
-        assert.ok(sc.setup && sc.rule, m.id);
+        assertLines(sc.setup, `${m.id} setup`);
+        assertLines(sc.rule, `${m.id} rule`);
       }
 });
 

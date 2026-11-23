@@ -31,7 +31,7 @@ const SHOWS: { [K in keyof Picks]: (f: Fight, v: string) => boolean } = {
     const g = f.segs.find((x) => x.drills[0] === "m-ecl-two" || x.drills[0] === "m-ecl-four");
     return Boolean(g && g.drills[0] === `m-ecl-${v}` && g.title.endsWith(v === "four" ? "Four-way Fireball" : "Two-way Fireball"));
   },
-  wall: (f, v) => f.segs[f.segs.length - 1].scene.setup.includes(`${v.toUpperCase()} wall`),
+  wall: (f, v) => f.segs[f.segs.length - 1].scene.setup.some((line) => line.includes(`${v.toUpperCase()} wall`)),
 };
 
 test("each choice gives the chosen pattern, in every run", () => {

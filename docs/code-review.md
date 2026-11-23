@@ -116,8 +116,8 @@ WHAT TO LOOK FOR
 
 LIBRARIES AND COMPONENTS
 Ask what code we wrote ourselves that an established library or a shadcn/ui component could
-replace. SetupText, ShareButton, TimerBar and the RunScore list already moved to Collapsible,
-Sonner, Progress and Item. Examples of what to check next:
+replace. ShareButton, TimerBar and the RunScore list already moved to Sonner, Progress and Item.
+Examples of what to check next:
 - Our own ThemeProvider, while next-themes is already a dependency (only sonner.tsx uses it).
 - The drag code in useLineDrag and the weapon order cards (for example dnd-kit).
 - Seeded random numbers and pattern codes (src/util.ts), geometry and SVG helpers

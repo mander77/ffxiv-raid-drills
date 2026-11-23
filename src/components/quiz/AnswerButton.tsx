@@ -2,6 +2,7 @@ import type { Ref } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { Lines } from "../../types";
 
 /** Where an answer stands: open to pick, picked (a Learn card before Lock in), and after the
     answer, correct, your incorrect pick, or one of the others. */
@@ -11,8 +12,8 @@ export interface AnswerButtonProps {
   n: number;
   text: string;
   state: AnswerState;
-  /** The explanation, under the correct answer after you answer. */
-  why?: string;
+  /** The explanation, one short line each, under the correct answer after you answer. */
+  why?: Lines;
   /** For a Learn card before the answer: true when this answer is the picked one. */
   pressed?: boolean;
   onClick: () => void;
@@ -62,7 +63,13 @@ export function AnswerButton({ n, text, state, why, pressed, onClick, onPoint, r
         </span>
         {why && (
           <span className="block font-normal text-muted-foreground">
-            <span className="font-semibold text-success-foreground">Correct answer.</span> {why}
+            <span className="block font-semibold text-success-foreground">Correct answer.</span>
+            {/* A button may hold only inline content, so each line is a span shown as a list item. */}
+            {why.map((line) => (
+              <span key={line} className="ml-5 list-item list-disc">
+                {line}
+              </span>
+            ))}
           </span>
         )}
       </span>

@@ -129,7 +129,7 @@ make sure that each one still matches the code before you start it.
     the `rebuild` branch is no longer used: new work branches from `main`. The old site's
     addresses open Home, and its saved scores and settings (`m11s.` keys) do not carry over.
   - Issue #29: four hand-built parts are now shadcn/ui components. The More/Less setup text is a
-    Collapsible, Share confirms a copied link with a Sonner toast (the Toaster is in `App.tsx`,
+    Collapsible (removed again in issue #58: the setup now always shows in full), Share confirms a copied link with a Sonner toast (the Toaster is in `App.tsx`,
     light theme), the quick round's timer is a Progress, and the end of the run lists the
     mechanics to practice as Items. shadcn's Progress keeps `value` for the bar's width only, so
     `TimerBar` passes `aria-valuenow` too. Biome's `useSemanticElements` rule is off for
@@ -314,6 +314,15 @@ Do not propose these again unless the owner brings them up.
 - Go as the language. The site is TypeScript with Vite.
 
 ## Screens
+
+- Mechanic text is short lines in a list, not a paragraph (owner's choice, issue #58): the setup,
+  the rule, a Learn card's explanation and the timeline's "what you do". Each line holds one step
+  or fact, 16 words at most (a test checks it). A setup whose steps happen in order is numbered
+  (`Scene.ordered`); everything else is bulleted.
+- The setup always shows in full. It does not fold after the first answer, and it has no More or
+  Less (owner's choice: the player must see every step at a glance, with no click). This replaces
+  the Collapsible from issue #29.
+- A rule that a drill and a Learn card both show is written once, in `src/data/rules.ts`.
 
 ### Learn
 

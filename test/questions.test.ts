@@ -5,6 +5,7 @@ import { TIMELINE } from "../src/data/timeline";
 import { sec } from "../src/time";
 import type { Slot } from "../src/types";
 import { readingMs } from "../src/util";
+import { assertLines } from "./lines";
 
 const ALL = [...LEARN_CARDS, ...TIMELINE_CARDS];
 const SLOTS: Slot[] = ["H1", "H2"];
@@ -15,7 +16,9 @@ test("every question has one correct answer and no repeated options", () => {
       const q = item.build(s);
       assert.equal(q.options.filter((o) => o.ok).length, 1, item.id);
       assert.equal(new Set(q.options.map((o) => o.t)).size, q.options.length, item.id);
-      assert.ok(q.prompt && q.why && q.rule, item.id);
+      assert.ok(q.prompt, item.id);
+      assertLines(q.why, `${item.id} why`);
+      assertLines(q.rule, `${item.id} rule`);
     }
 });
 
