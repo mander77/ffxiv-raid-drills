@@ -144,20 +144,23 @@ export const LineStackIcon = createLucideIcon("line-stack", [
   ["circle", { cx: "17", cy: "19", r: "2", className: PLAYER, key: "third" }],
 ]);
 
-/** A wild charge: a line stack whose first player is a tank (a shield, rule 7), who takes the
-    first, biggest hit for the others behind. */
+/** A wild charge: a line stack whose first player is a tank, who takes the first, biggest hit for
+    the others behind: a player behind a shield, as on the tank buster (rule 7), in the highlight
+    colour. The shield is an outline with a thinner stroke, so its shape reads at list size. */
 export const WildChargeIcon = createLucideIcon("wild-charge", [
   ...LINE_HIT,
   [
     "path",
     {
-      d: "M17 1.5c1 .8 2.1 1.2 3.2 1.2v2.4c0 2.1-1.5 3.2-3.2 3.9-1.7-.7-3.2-1.8-3.2-3.9V2.7c1.1 0 2.2-.4 3.2-1.2z",
-      className: PLAYER,
-      key: "tank",
+      d: "M17 1c1.4 1 2.9 1.5 4.5 1.5v3.2c0 2.8-2 4.4-4.5 5.3-2.5-.9-4.5-2.5-4.5-5.3V2.5c1.6 0 3.1-.5 4.5-1.5z",
+      className: "stroke-count",
+      strokeWidth: 1.5,
+      key: "tank-shield",
     },
   ],
-  ["circle", { cx: "17", cy: "14", r: "2", className: PLAYER, key: "second" }],
-  ["circle", { cx: "17", cy: "20.5", r: "2", className: PLAYER, key: "third" }],
+  ["circle", { cx: "17", cy: "5.6", r: "1.2", className: "fill-count stroke-none", key: "tank" }],
+  ["circle", { cx: "17", cy: "15", r: "1.8", className: PLAYER, key: "second" }],
+  ["circle", { cx: "17", cy: "20.8", r: "1.8", className: PLAYER, key: "third" }],
 ]);
 
 /** A bait: you are the target, a player (a filled dot) in a crosshair, and you bring the hit to
