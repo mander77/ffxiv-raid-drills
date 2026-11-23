@@ -179,14 +179,18 @@ export const BaitIcon = createLucideIcon("bait", [
   ["path", { d: "M19 12h3", key: "east" }],
 ]);
 
-/** A puddle drop sequence: three spots on the floor (rings), and the curved arrow of the player
-    walking on as they drop them. */
+/** A puddle drop sequence: three puddle spots on the floor (rings), each with the player who baits
+    it (a filled dot), and the curved arrow of the player walking on as they drop them. The dot has
+    no stroke, so a gap shows between it and its ring at list size. */
 export const PuddleDropIcon = createLucideIcon("puddle-drop", [
-  ["circle", { cx: "5", cy: "19", r: "2.5", key: "first" }],
-  ["circle", { cx: "12", cy: "15", r: "2.5", key: "second" }],
-  ["circle", { cx: "19", cy: "11", r: "2.5", key: "third" }],
-  ["path", { d: "M3 11C5 5 11 2.5 18 4", key: "walk" }],
-  ["path", { d: "m15 1 3 3-3 3", key: "walk-head" }],
+  ["circle", { cx: "4.4", cy: "19.6", r: "3.2", key: "first" }],
+  ["circle", { cx: "4.4", cy: "19.6", r: "1.4", className: "fill-count stroke-none", key: "first-player" }],
+  ["circle", { cx: "12", cy: "14.6", r: "3.2", key: "second" }],
+  ["circle", { cx: "12", cy: "14.6", r: "1.4", className: "fill-count stroke-none", key: "second-player" }],
+  ["circle", { cx: "19.6", cy: "9.6", r: "3.2", key: "third" }],
+  ["circle", { cx: "19.6", cy: "9.6", r: "1.4", className: "fill-count stroke-none", key: "third-player" }],
+  ["path", { d: "M3 11C5 6 9 4 14 4", key: "walk" }],
+  ["path", { d: "m11 1 3 3-3 3", key: "walk-head" }],
 ]);
 
 /** A knockback: a burst at the top left, where it comes from, and the wide arrow that throws the
