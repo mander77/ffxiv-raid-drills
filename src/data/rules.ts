@@ -8,7 +8,7 @@ export const RAW_STEEL_RULE: Lines = [
 ];
 
 export const ORBITAL_RULE: Lines = [
-  "Hector's dodge: stay against the boss hitbox.",
+  "Hector's dodge: stay in max melee.",
   "Start at his side, where the #2 lines cross.",
   "After #1 and Fire and Fury: cross to the opposite middle square.",
   "After #2: cross back and stay.",

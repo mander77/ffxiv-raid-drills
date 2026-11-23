@@ -30,7 +30,7 @@ export const REFERENCE: readonly ReferenceEntry[] = [
   { name: "Scythe", picture: "k-scythe", cards: ["k-scythe"], drills: ["m-assault"] },
   { name: "Void Stardust", picture: "k-void", cards: ["k-void", "k-void-target", "k-void-spread"], drills: ["m-void"], timeline: "n-2" },
   { name: "Second weapon set", picture: "k-assault-2", cards: ["k-void-sprint", "k-assault-2"], drills: ["m-void"], timeline: "n-3" },
-  { name: "Void Stardust, second time", picture: "k-void-2", cards: ["k-void-2"], drills: ["m-void"], timeline: "n-4" },
+  { name: "Void Stardust (second time)", picture: "k-void-2", cards: ["k-void-2"], drills: ["m-void"], timeline: "n-4" },
   {
     name: "Dance of Domination",
     picture: "k-dance-pair",
@@ -39,7 +39,7 @@ export const REFERENCE: readonly ReferenceEntry[] = [
     timeline: "n-6",
   },
   {
-    name: "Raw Steel Trophy, second time",
+    name: "Raw Steel Trophy (second time)",
     picture: "k-raw-second",
     cards: ["k-raw-second"],
     drills: ["m-raw-axe", "m-raw-scythe"],

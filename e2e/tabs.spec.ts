@@ -1,5 +1,5 @@
 // The site in every browser: each tab opens, the header scrolls away on a phone, a Learn card and a Timeline card can be answered,
-// the Group switch changes the slot, a click on Practice's list of mechanics opens one, and Pressure runs a quick round and a shared link to the player.
+// the Light party switch changes the slot, a click on Practice's list of mechanics opens one, and Pressure runs a quick round and a shared link to the player.
 import { expect, type Locator, test } from "@playwright/test";
 import { TABS } from "../src/tabs";
 
@@ -50,7 +50,7 @@ test("on a phone the tab button and the slot switch share one row", async ({ pag
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/sheet");
   const button = await page.getByRole("button", { name: "Tabs. You are on Cheat sheet" }).boundingBox();
-  const group = await page.getByRole("radiogroup", { name: "Group" }).boundingBox();
+  const group = await page.getByRole("radiogroup", { name: "Light party" }).boundingBox();
   // The same row: the switch sits on the button's line, not above it.
   expect(Math.abs((group?.y ?? 0) - (button?.y ?? 0))).toBeLessThan(8);
 });
@@ -152,7 +152,7 @@ test("on the Cheat sheet, the corner buttons go to the next section, the one bef
   await expect(go).toHaveCount(0);
 });
 
-test("the Group switch changes the slot on the Cheat sheet", async ({ page }) => {
+test("the Light party switch changes the slot on the Cheat sheet", async ({ page }) => {
   await page.goto("/sheet");
   await expect(page.getByText("Your timeline as H1")).toBeVisible();
   await page.getByRole("radio", { name: "2" }).click();

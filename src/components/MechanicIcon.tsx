@@ -44,7 +44,7 @@ export interface KindInfo {
     shield is narrower than the stack's. */
 export const KINDS: Record<DrillKind, KindInfo> = {
   spread: { name: "Spread", meaning: "Spread out, away from the others.", icon: SpreadIcon },
-  stack: { name: "Party stack", meaning: "The whole party stacks on one spot.", icon: PartyStackIcon },
+  stack: { name: "Party stack", meaning: "The party stacks on one spot.", icon: PartyStackIcon },
   pairStack: { name: "Pair stack", meaning: "Stack in twos.", icon: StackIcon, count: "2" },
   lightPartyStack: {
     name: "Light party stack",

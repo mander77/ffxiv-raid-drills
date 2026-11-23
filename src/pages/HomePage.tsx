@@ -105,8 +105,8 @@ export function HomePage() {
             <h2 className="font-display text-3xl tracking-wide text-balance">Practice savage mechanics without a party</h2>
             <p>Learn the mechanics, practice where you stand, then do it all fast. The answers follow {STRAT_LIST}.</p>
             <p>
-              You are set as <span className="font-semibold">{slot}</span>. Change it with the Group switch at the top. Your progress stays
-              in this browser.
+              You are set as <span className="font-semibold">{slot}</span>. Change it with the Light party switch at the top. Your progress
+              stays in this browser.
             </p>
           </div>
         </section>

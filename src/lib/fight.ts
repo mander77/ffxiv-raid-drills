@@ -407,7 +407,7 @@ export function promptOf(s: FightState): Prompt {
       : x.missed
         ? "Too slow"
         : ahead
-          ? "Not that one. Look ahead: the purple one is the first weapon."
+          ? "Not there. Look ahead: the purple one is the first weapon."
           : "Not there. The green area was correct.";
     return { look: x.ok ? "ok" : "bad", count: x.ok ? "✓" : "✗", text, ring: null };
   }

@@ -229,7 +229,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show(inOrder(W, [2, 1, 0]), [circle(W[2].p, 9)]),
       show([you(s, [24, 33]), ...path([W[1].p]), numAt(W[1], "1")], [circle(W[1].p, 9)])]}; },
   "k-void-2": s => { const gaps = cometSpread(s)(VOID_RESULTS), pairs = pairsAt(GAPS), me = you(s, zoneCenter(gaps));
-    return {overlays:[...PUDDLE_PIECES, tag(50, 8, "1ST ENDED: STACK")], boss:BOSS, after:[tag(50, 94, "2ND ENDS: SPREAD"), ...spreadHits([...FIXED_SPREAD_MARKS, me]), ...FIXED_SPREAD_MARKS, me], answer:[gaps], options:[
+    return {overlays:[...PUDDLE_PIECES, tag(50, 8, "FIRST ENDED: STACK")], boss:BOSS, after:[tag(50, 94, "SECOND ENDS: SPREAD"), ...spreadHits([...FIXED_SPREAD_MARKS, me]), ...FIXED_SPREAD_MARKS, me], answer:[gaps], options:[
       show([...spreadHits([...FIXED_SPREAD_MARKS, me]), ...FIXED_SPREAD_MARKS, me], [gaps]),
       show([stackHit(stackedMarks), ...stackedMarks]),
       show([...pairs.map(p => stackHit(p)), ...pairs.flat()]),
@@ -241,7 +241,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     return {overlays:[tag(50, 8, "DANCE OF DOMINATION")], boss:d.boss, after:[RAIDWIDE, ...d.overlays, ...bySlot(s, {H1:pairs[0], H2:pairs[1]}), tag(50, 16, "7 HITS, THEN PAIRS")], answer:d.answer, options:[
       show([RAIDWIDE, ...d.hits, ...tankPairs, ...pairs.map(p => stackHit(p)), ...pairs.flat(), tag(50, 16, "7 RAIDWIDES, THEN PAIRS")]),
       show([aoe([50, 36], FAKE.buster), mark(50, 36, "MT", "T"), target([50, 36]), tag(50, 16, "ONE TANK BUSTER")]),
-      show([RAIDWIDE, tag(50, 16, "EVERYONE TO 1 HP")]),
+      show([RAIDWIDE, tag(50, 16, "PARTY TO 1 HP")]),
       show([...d.overlays, tag(50, 16, "NO DAMAGE")])]}; },
   // The lines are turned so the open side is east. Then "new north" lands on a different side for each answer.
   "k-dance-north": s => { const lines = fromDrill("m-dance", s).overlays.map(o => rotOverlay(o, 3)), open = rect(88, 12, 100, 88);
@@ -280,7 +280,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-gwof": () => { const line: Overlay = {t:"band", x:50, y:50, x2:50, y2:-20, w:WALL_W}, tanks: Point = [50, 33], stack = cluster([30, 66], NONTANK, 3);
     const spread = ring(NONTANK, 26, 60, 48), tankMarks = [mark(47, 33, "MT", "T"), mark(53, 33, "OT", "T")];
     return {overlays:tankMarks, boss:BOSS, after:[line, say("2 TANK BUSTERS", 8)], answer:[circle(tanks, 7)],
-      note:"Heal the tanks (green). The fire line stays on the floor, so keep out of it.", options:[
+      note:"Heal the tanks (green). The fire trail stays on the floor, so keep out of it.", options:[
         show([line, say("2 TANK BUSTERS", 8)], [circle(tanks, 7)]),
         show([RAIDWIDE, say("RAIDWIDE", 8)]),
         show([stackHit(stack), ...stack, target([30, 66]), say("STACK ON A HEALER", 94)]),
@@ -296,7 +296,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const route = [guide(a.label, b.label), tag(a.label[0], a.label[1], "START"), tag(b.label[0], b.label[1], "#2")];
     const first = O.steps[0].reveal ?? [];
     return {overlays:O.overlays, boss:BOSS, after:route, answer:[a, b],
-      note:"One pattern. Start where the #2 lines cross. After #1, cross the hitbox. After #2, cross back.", options:[
+      note:"One pattern. Start where the #2 lines cross. After #1, cross under the boss. After #2, cross back.", options:[
         show([...first, ...route], [a, b]), hit(youAt(s, [50, 96]), [aoe(CENTER, FAKE.circle)]), youAt(s, [50, 36]), youAt(s, [50, 64])]}; },
   "k-meteor-order": s => {
     const SETS: Point[][] = [[[57, 43], [43, 57]], [[43, 43], [26, 74]], [[10, 90], [62, 38]]];
@@ -347,7 +347,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const breath = (p: Point): Overlay => coneTo(CENTER, p, 8, 60), corner = bySlot<Point>(s, {H1:[14, 25], H2:[86, 75]}), edge = bySlot<Point>(s, {H1:[3, 40], H2:[97, 60]});
     const nextTo = bySlot<Point>(s, {H1:[12, 45], H2:[88, 55]}), middle = bySlot<Point>(s, {H1:[13, 50], H2:[87, 50]});
     return {overlays:[], split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[12, 50], H2:[88, 50]}))], answer:markers.map(p => circle(p, 6.5)),
-      note:"Markers go to a corner of your number marker. Tethers go to the platform edge. Ask your lead which corner: outer or inner.", options:[
+      note:"Markers go to a corner of your number waymark. Tethers go to the platform edge. Ask your lead which corner: outer or inner.", options:[
         show([breath(corner), you(s, corner)], markers.map(p => circle(p, 6.5))),
         show([breath(edge), you(s, edge)], [bySlot(s, {H1:rect(0, 10, 5, 90), H2:rect(95, 10, 100, 90)})]),
         show([breath(nextTo), you(s, nextTo), mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T"), guide(tethered, CENTER)]),
@@ -355,7 +355,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-split-towers23": s => { const d = fromDrill("m-split-tower", s), last = bySlot<Point>(s, {H1:[19, 88], H2:[81, 12]});
     const answer = bySlot(s, {H1:TOWER_SW, H2:TOWER_NE}), first = bySlot(s, {H1:TOWER_NW, H2:TOWER_SE}), odd = bySlot(s, {H1:TOWER_NE, H2:TOWER_SW});
     return {overlays:[...d.overlays, you(s, last)], split:true, boss:BOSS, after:[guide(last, answer)], answer:[circle(answer, TOWER_R)],
-      note:"Example: your last tether or marker was in the " + bySlot(s, {H1:"southwest", H2:"northeast"}) + " quadrant.", options:[
+      note:"Example: your last tether or marker was in the " + bySlot(s, {H1:"SW", H2:"NE"}) + " quadrant.", options:[
         show([guide(last, answer)], [circle(answer, TOWER_R)]),
         show([guide(last, first)], [circle(first, TOWER_R)]),
         show([guide(last, odd), say("CLOSEST TO THE BOSS?", 8)], [circle(odd, TOWER_R)]),
@@ -395,7 +395,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const labels = (who: string[]): Preview => { const i = who.indexOf(s); return show(T.map((p, k) => tag(p[0], p[1], who[k])), i >= 0 ? [circle(T[i], TOWER_R)] : []); };
     const correct = labels(["H1", "H2", "R1", "R2"]);
     return {overlays:T.map(([x, y]): Overlay => ({t:"tower", x, y})), boss:BOSS, after:correct.pieces, answer:correct.zones,
-      note:"Example tower spots. Count clockwise from A: H1 takes the first tower, then H2, R1 and R2.", options:[
+      note:"Example tower spots. Count clockwise from A: H1 soaks the first tower, then H2, R1 and R2.", options:[
         correct, labels(["R1", "H2", "H1", "R2"]), labels(["M1", "M2", "?", "?"]), labels(["MT", "OT", "MT", "OT"])]}; },
   // The tether goes to the player in the middle of the tower, so it draws from the boss to whoever the answer puts there.
   // M1 stands on the tower's edge. The answers put you in the middle, just inside the edge,
@@ -407,7 +407,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-ecl-tether": s => { const tower: Point = [50, 13], wall: Point = [50, 94];
     return {overlays:[{t:"tower", x:tower[0], y:tower[1]}], boss:BOSS, before:[you(s, tower)],
       after:[guide(tower, wall), guide(wall, [6, 94]), you(s, [6, 94])], answer:[circle([6, 94], 6)],
-      note:"Example: your tower is north. Take the tether to the south wall, then clockwise into the southwest corner.", options:[
+      note:"Example: your tower is north. Take the tether to the south wall, then clockwise into the SW corner.", options:[
         show([guide(tower, wall), guide(wall, [6, 94]), you(s, [6, 94])], [circle([6, 94], 6)]),
         youAt(s, tower, 6),
         show([guide(tower, CENTER), you(s, [50, 60])], [circle(CENTER, 10)]),
@@ -427,6 +427,6 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       note:"Example spot. The tanks soak the tower, and you heal them between the hits.", options:[
         show([aoe(tower, TOWER_R), ...tanks, say("5, THEN 6, THEN 7 HITS", 8)], [circle(tower, TOWER_R)]),
         show([aoe(tower, TOWER_R), you(s, tower), say("YOU SOAK IT ALONE", 8)], [circle(tower, TOWER_R)]),
-        show([...tanks, say("RAISE EVERYONE", 8)]),
+        show([...tanks, say("RAISE THE PARTY", 8)]),
         show([RAIDWIDE, ...tanks, say("IT IS THE ENRAGE", 8)])]}; }
 };

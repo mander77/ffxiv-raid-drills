@@ -60,7 +60,7 @@ on an icon's card opens it zoomed in. Check it when you add or change an icon or
 Any other address opens Home, including the old site's addresses (`/mech/...`, `/map/...`).
 
 The slot switch is in the header: the role (only Healer works today; the others show "not yet
-available") and the group, which is the light party (1 or 2, as wtfdig names it). Each drill and question builds its answer for the
+available") and the light party (1 or 2; wtfdig calls it the group). Each drill and question builds its answer for the
 role.
 
 ## First time on a new computer
@@ -375,6 +375,26 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   with "Look ahead:". It replaced "Saved for later". "The run" is the scored full fight. "Watch the
   correct moves" is the replay.
 - Never quiz an exact raidwide time. Ask which one comes next and whether it is soon.
+- Player words. One idea has one phrase on screen (owner's choices, issue #58):
+  - The boss's hitbox: only "under the boss" and "max melee". Never "hitbox", "hitbox ring",
+    "against the hitbox" or "melee range". The scythe's "close in" is its own distance.
+  - "the party" for all eight players (not "the group", "everyone" or "the whole party"). "Every
+    player" only for something each player gets on their own. "Light party 1" and "Light party 2",
+    never G1, G2 or "static". "Supports (tanks and healers)" on its first use in each list. Role
+    pairs in this order: "tanks and melee", "healers and ranged".
+  - Stacks by the kind names: party stack, light party stack, pair stack, line stack. The sword is
+    a light party stack; Four-way Fireball is a pair stack.
+  - Directions: an intercardinal short (NW, SSE, relative SW), a cardinal as a word (north).
+    "middle" for the arena's middle, "dead center" only in a tower.
+  - "directly behind the boss" for his back. "butt" is only the scythe's handle end.
+  - "waymark" for a marker on the floor; "marker" is on a player.
+  - Meteorain: a "meteor" while a player carries it, a "rock" on the floor, "break" a rock, and a
+    "row" of rocks. "line" is only for line AoEs and line stacks; "lineup" for Flatliner, "fire
+    trail" for Great Wall of Fire.
+  - Towers are "soaked". Knockback: "get knocked to the other platform".
+  - "shared tank buster"; "Mitigate it."; "Heal the party."; "(second time)" and "the opposite of
+    the first"; ordinals as words ("second", not "2nd"), except the Orbital #1 to #4.
+  - A missed spot on the arena is "Not there"; a missed card answer is "Not this one".
 - Mechanic text (a setup, a rule, a step's answer, a card's explanation, the timeline's "what you
   do") is a list of short lines (`Lines`), one step or fact each, 16 words at most. Never write it
   as a paragraph. A step's first answer line is the move itself: the prompt bar and the HUD show

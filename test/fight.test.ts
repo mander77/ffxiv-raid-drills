@@ -97,7 +97,7 @@ test("the second Raw Steel Trophy and the second Void Stardust go the other way"
     const raw = f.segs.filter((g) => g.title.startsWith("Raw Steel Trophy")).map((g) => g.title.split(": ")[1]);
     assert.sameMembers(raw, ["axe", "scythe"]);
     const first = f.segs.find((g) => g.title.startsWith("Void Stardust into"))?.scene.steps[4].q ?? "";
-    const again = f.segs.find((g) => g.title === "Void Stardust again")?.scene.steps[3].q ?? "";
+    const again = f.segs.find((g) => g.title === "Void Stardust (second time)")?.scene.steps[3].q ?? "";
     assert.notEqual(/Comet/.test(first), /Comet/.test(again), "one spread and one stack");
   }
 });
