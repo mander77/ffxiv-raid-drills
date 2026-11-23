@@ -51,10 +51,19 @@ interface TryState {
   shown: boolean;
   /** Show me was used, so this try does not count in your score: it was learning, not a test. */
   helped: boolean;
+  /** After the try: the step you review with the step chips, or null for the result. */
+  at: number | null;
 }
 
 /** A try with no answers yet. */
-const freshTry = (tryKey: string): TryState => ({ tryKey, results: [], status: "ask", shown: false, helped: false });
+const freshTry = (tryKey: string): TryState => ({
+  tryKey,
+  results: [],
+  status: "ask",
+  shown: false,
+  helped: false,
+  at: null,
+});
 
 /** The screen of one Practice mechanic (a drill): click where you stand on the arena, one step at
     a time. It has the layout of Pressure's player. On a wide screen: on the left, the question with
@@ -81,9 +90,9 @@ export function DrillScreen({
   // first draw, so the screen never draws a new mechanic with the last one's answers. The screen
   // is not given a key for a new try, so the list of mechanics stays where it is, under your pointer.
   const [saved, setSaved] = useState(() => freshTry(tryKey));
-  const { results, status, shown, helped } = saved.tryKey === tryKey ? saved : freshTry(tryKey);
+  const { results, status, shown, helped, at } = saved.tryKey === tryKey ? saved : freshTry(tryKey);
   /** Changes this try's state; a change names only the fields it sets. */
-  const update = (change: Partial<TryState>): void => setSaved({ tryKey, results, status, shown, helped, ...change });
+  const update = (change: Partial<TryState>): void => setSaved({ tryKey, results, status, shown, helped, at, ...change });
   /** A wide screen (lg, 1024 px and up): the columns sit beside the arena, as in Pressure. */
   const wide = useMediaQuery("(min-width: 1024px)");
 
@@ -106,10 +115,27 @@ export function DrillScreen({
     update({ shown: !shown, helped: helped || !shown });
   }
   const nextStep = (): void => update({ status: "ask" });
+  /** After the try, the step chips show a step: the arena and the prompt bar as they were then. */
+  const goToStep = (step: number): void => update({ at: step });
+  /** Try from here: answer the step on screen and the ones after it again. The answers before it
+      stay. A part of a try does not count in your score, as with Show me. */
+  function handleTryFromHere(): void {
+    if (at === null) return;
+    update({ results: results.slice(0, at), status: "ask", shown: false, helped: true, at: null });
+  }
 
   // Enter: Next step after an answer, or Next mechanic at the end. Enter on a button is its click.
+  // After the try, the arrows go to the step before or after; from the result, to the last or the first.
   const onKey = useEffectEvent((e: KeyboardEvent) => {
-    if (e.key !== "Enter" || !isPageKey(e)) return;
+    if (!isPageKey(e)) return;
+    if (done && multi && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+      e.preventDefault();
+      const back = e.key === "ArrowLeft";
+      const end = sc.steps.length - 1;
+      goToStep(at === null ? (back ? end : 0) : Math.max(0, Math.min(end, at + (back ? -1 : 1))));
+      return;
+    }
+    if (e.key !== "Enter") return;
     if (done) {
       e.preventDefault();
       onNextMechanic();
@@ -134,15 +160,42 @@ export function DrillScreen({
   );
   // Each state of the bar has its own key, so the bar is drawn new when the state changes: the
   // Reset you just clicked is a new button then, and its tooltip does not stay open over the arena.
-  const hud = done ? (
+  const nextMechanic = (
+    <IconButton label="Next mechanic" variant="default" onClick={onNextMechanic}>
+      <NextMechanicIcon aria-hidden="true" />
+    </IconButton>
+  );
+  /** After the try, the step the chips show (its place and your answer), or null for the result. */
+  const seen = done && at !== null ? { at, r: results[at] } : null;
+  const hud = seen ? (
+    <PromptBar
+      key="review"
+      tone={seen.r.ok ? "correct" : "incorrect"}
+      actions={
+        <>
+          <Button size="sm" variant="outline" onClick={handleTryFromHere}>
+            Try from here
+          </Button>
+          {nextMechanic}
+          {reset}
+        </>
+      }
+    >
+      {/* Short, beside three buttons: the step's answer shows in full under the chips. */}
+      <p role="status">
+        <span className="block">
+          Step {seen.at + 1}/{sc.steps.length}
+        </span>{" "}
+        <span className="font-semibold">{seen.r.ok ? "Correct" : "Not there"}</span>
+      </p>
+    </PromptBar>
+  ) : done ? (
     <PromptBar
       key="done"
       tone={allCorrect ? "correct" : "incorrect"}
       actions={
         <>
-          <IconButton label="Next mechanic" variant="default" onClick={onNextMechanic}>
-            <NextMechanicIcon aria-hidden="true" />
-          </IconButton>
+          {nextMechanic}
           {reset}
         </>
       }
@@ -205,10 +258,12 @@ export function DrillScreen({
         ))}
       </div>
       <SetupText lines={sc.setup} ordered={sc.ordered} />
-      {multi && <StepChips count={sc.steps.length} results={results} />}
+      {/* During the try the chips only show how far you got; after it, they go to a step. */}
+      {multi && <StepChips count={sc.steps.length} results={results} at={at ?? undefined} onPick={done ? goToStep : undefined} />}
+      {/* Your answer goes under the chips: the last one, or the step the chips show. */}
+      {seen ? <LastAnswer ok={seen.r.ok} answer={sc.steps[seen.at].a} /> : last && <LastAnswer ok={last.ok} answer={sc.steps[n - 1].a} />}
       {/* The rule says why the spot is correct: at the end, and with Show me, which gives where. */}
       {(done || shown) && <RuleBox rule={sc.rule} />}
-      {last && <LastAnswer ok={last.ok} answer={sc.steps[n - 1].a} />}
       {!done && sc.spawnPlay && (
         <Button variant="outline" onClick={onReplaySpawns}>
           Watch the spawns again
@@ -267,10 +322,12 @@ export function DrillScreen({
         key={tryKey}
         scene={sc}
         k={k}
-        results={results}
+        // A step under review: the arena as it was when you answered it, and no clicks.
+        results={seen ? results.slice(0, seen.at + 1) : results}
         showLast={status !== "ask" || done}
         hint={shown && status !== "incorrect"}
-        onPointClick={handleArenaClick}
+        onPointClick={seen ? undefined : handleArenaClick}
+        pickSpot={!seen}
         className="block h-auto w-full"
       />
     </ArenaFrame>

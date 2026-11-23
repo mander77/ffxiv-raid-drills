@@ -5,6 +5,7 @@ import {
   answerFightStep,
   askAt,
   askFrom,
+  CAST_GO_LEAD,
   CASTS_AHEAD,
   castOf,
   castPositions,
@@ -17,9 +18,11 @@ import {
   promptOf,
   RESULT_HOLD,
   seek,
+  stepGoAt,
   TELL_HOLD,
   tickFight,
   viewOf,
+  watchAt,
   watchQuestion,
 } from "../../src/lib/fight";
 
@@ -131,6 +134,23 @@ describe("Watch the correct moves", () => {
     for (let i = 0; i < 100_000 && !done; i++) done = tickFight(s, 0.05, 2).done;
     expect(done).toBe(true);
     for (const res of s.results) expect(res.every((r) => r.ok)).toBe(true);
+  });
+
+  test("a step chip goes to its step, a few seconds before its correct move, back or on", () => {
+    for (const from of ["start", "end"] as const) {
+      const s = newFightState("watch", fight(), { paused: true });
+      s.fight.segs.forEach((g, si) => {
+        if (g.due.length < 2) return;
+        g.due.forEach((_d, j) => {
+          if (from === "end") seek(s, s.fight.end);
+          seek(s, stepGoAt(g, j));
+          tickFight(s, 0, 1);
+          expect(watchAt(g, j) - s.t).toBeLessThanOrEqual(CAST_GO_LEAD);
+          expect(activeSeg(s.fight, s.t)).toBe(si);
+          expect(s.results[si].length, `${from}: ${g.title}, step ${j + 1}`).toBe(j);
+        });
+      });
+    }
   });
 
   test("going back forgets the answers to the hits after that moment", () => {

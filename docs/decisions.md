@@ -451,6 +451,20 @@ Do not propose these again unless the owner brings them up.
 - Reset (start the same pattern again) is always in the prompt bar on the left, as an icon button
   with a tooltip (owner's choice); after a mechanic, Next mechanic sits beside it, as an icon too.
   The bar over the list of mechanics has no Again: one restart button, in one place.
+- The step chips (owner's rule for the whole app): while the site tests you, you go forward only;
+  in review, a chip takes you to a step. A chip that is a button looks like Learn's chips (round);
+  a chip that only shows progress is a badge.
+  - During a try the chips are badges: a check, a cross, the step you are on. Nothing jumps. Show
+    me covers the step you are on, and Watch the correct moves covers the whole mechanic.
+  - After the try they are buttons. A click, or the arrow keys, shows that step: the arena as it
+    was (the boss, the puddles down, your click, the green area), its answer under the chips, and
+    "Step 2/4, Not there" in the bar. The step shown has a ring, apart from its check or cross.
+  - Try from here, in the bar, answers the step shown and the ones after it again; the answers
+    before it stay. It does not count in the score, as with Show me (the app's choice: the first
+    try already counted). A mechanic with one step has no chips, so no Try from here.
+  - Reset keeps one meaning: start the whole mechanic again.
+  - The answer card sits under the chips, over the rule, so the step you review and its answer
+    are together.
 
 ### Pressure: the quick round
 
@@ -503,6 +517,9 @@ Do not propose these again unless the owner brings them up.
     scrolls the page (`touch-pan-y`).
   - The run has none of this: it is scored, so it stays on the clock.
 - The green answer area has no "Correct spot" tag here.
+- The step chips are always buttons here, since the player tests nothing. A click goes to that
+  step, paused, 3 seconds before its correct move (`CAST_GO_LEAD`, as for a cast), but not before
+  the step is asked, so you land on that step (`stepGoAt`). The step asked has a ring.
 - The first weapon of Void Stardust is answered 4 seconds early and shows as "Look ahead"
   until its due time, so you have time to see it.
 

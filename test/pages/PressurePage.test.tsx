@@ -157,3 +157,14 @@ test("between mechanics, Jump to next mechanic goes to the mechanic named above 
   await userEvent.setup().click(screen.getByRole("button", { name: "Jump to next mechanic" }));
   assert.ok(screen.getByRole("heading", { name: "Void Stardust into the Second Weapons" }));
 });
+
+test("in the player the step chips are buttons: a click goes to that step, paused", async () => {
+  open("/pressure/K7Q2?t=46");
+  const steps = within(screen.getByRole("list", { name: "Steps" }));
+  assert.equal(steps.getByRole("button", { name: "Step 1" }).getAttribute("aria-current"), "step", "the step asked");
+  await userEvent.setup().click(steps.getByRole("button", { name: "Step 3" }));
+  assert.ok(screen.getByRole("heading", { name: "Assault Evolved" }));
+  assert.ok(screen.getByText("Step 3 of 3", { exact: false }));
+  assert.ok(screen.getByRole("button", { name: "Play" }), "paused");
+  assert.equal(steps.getByRole("button", { name: /^Step 3/ }).getAttribute("aria-current"), "step");
+});

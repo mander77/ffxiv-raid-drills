@@ -354,6 +354,9 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Prompt bar**: the bar with the question and its buttons (`PromptBar`), the same on Learn,
   Timeline, the quick round and Practice. After the answer it turns green or red and says how
   it went. On a narrow screen a `StickyBar` keeps it at the top of the screen.
+- **Review**: after a try (and always in Watch the correct moves), the step chips (`StepChips`
+  with `onPick`) go to a step. During a test they only show progress. **Try from here** answers
+  the step shown and the ones after it again.
 
 ## Rules for the content
 

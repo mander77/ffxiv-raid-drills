@@ -279,6 +279,8 @@ These words name parts of the site. `CLAUDE.md`, "Words in the code", has the na
 | the run | The scored full fight. Only this. | |
 | Watch the correct moves | The replay of the full fight. | |
 | Show me | The button that shows the correct spot. | |
+| step chips | One chip per step of a mechanic: badges during a try, buttons in review. | |
+| Try from here | After a try: answer the step shown and the ones after it again. | Retry, Redo |
 | phase | Phase 1 to 4 of the fight. Nothing else. | |
 | tab | Home, Learn, Practice, Timeline, Pressure, Cheat sheet. | |
 

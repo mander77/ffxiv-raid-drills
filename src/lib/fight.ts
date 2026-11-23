@@ -147,6 +147,19 @@ export function askAt(g: FightSeg, j: number): number {
   return Math.max(g.from, Math.min(g.due[j] - 0.1, ready));
 }
 
+/** The player: when it gives the correct move of step j. At its hit, or a look-ahead step
+    LOOK_SHOW seconds before it. */
+export const watchAt = (g: FightSeg, j: number): number => (g.scene.steps[j].lookAhead ? Math.max(g.from, g.due[j] - LOOK_SHOW) : g.due[j]);
+
+/** The player: where a click on step chip j goes. CAST_GO_LEAD seconds before its correct move,
+    as for a cast coming up, but not before the step is asked, and never past its move, so you
+    land on step j itself. */
+export function stepGoAt(g: FightSeg, j: number): number {
+  const asked = Math.max(askAt(g, j), j > 0 ? watchAt(g, j - 1) : g.from);
+  const move = watchAt(g, j);
+  return Math.min(move - 0.05, Math.max(asked, move - CAST_GO_LEAD));
+}
+
 /** The tell: when step j of a mechanic can be answered in the run. A weapon that waits for the
     boss's turn waits TELL_HOLD seconds more, so you see the arrow swing. */
 export function askFrom(g: FightSeg, j: number): number {
@@ -278,7 +291,7 @@ export function tickFight(s: FightState, dt: number, speed: number): Tick {
   f.segs.forEach((g, si) => {
     const j = s.results[si].length;
     if (j >= g.due.length || s.t < g.from) return;
-    const at = s.mode === "watch" && g.scene.steps[j].lookAhead ? Math.max(g.from, g.due[j] - LOOK_SHOW) : g.due[j];
+    const at = s.mode === "watch" ? watchAt(g, j) : g.due[j];
     if (s.mode === "watch" && s.t >= at) {
       const a = answerFightStep(s, si, s.route.find((x) => x.si === si && x.j === j)?.p ?? null);
       if (a) out.answers.push(a);

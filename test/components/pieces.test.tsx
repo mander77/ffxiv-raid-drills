@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 // The pieces that Learn, Practice and the full fight share.
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, assert, test } from "vitest";
 import { ChipRow } from "../../src/components/ChipRow";
 import { LastAnswer } from "../../src/components/LastAnswer";
@@ -36,6 +37,22 @@ test("StepChips marks each answered step and the step you are on", () => {
   render(<StepChips count={4} results={[{ ok: true }, { ok: false }]} />);
   const steps = screen.getAllByRole("listitem").map((li) => li.getAttribute("aria-label"));
   assert.deepEqual(steps, ["Step 1, correct", "Step 2, incorrect", "Step 3, now", "Step 4"]);
+});
+
+test("StepChips in review are buttons: a click or an arrow key goes to a step, and the one shown is marked", async () => {
+  const picked: number[] = [];
+  render(<StepChips count={3} results={[{ ok: true }, { ok: false }]} at={1} onPick={(i) => picked.push(i)} />);
+  const chips = screen.getAllByRole("button");
+  assert.deepEqual(
+    chips.map((b) => b.getAttribute("aria-label")),
+    ["Step 1, correct", "Step 2, incorrect", "Step 3"],
+  );
+  assert.equal(chips[1].getAttribute("aria-current"), "step");
+  const user = userEvent.setup();
+  await user.click(chips[0]);
+  await user.keyboard("{ArrowRight}");
+  await user.keyboard("{ArrowLeft}{ArrowLeft}");
+  assert.deepEqual(picked, [0, 1, 0], "an arrow before the first step does nothing");
 });
 
 test("SetupText shows every line at once, with no button to open it", () => {

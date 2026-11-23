@@ -151,3 +151,60 @@ test("a click in the list on a mechanic with fewer steps than you answered opens
   assert.ok(screen.getByRole("heading", { name: DANCE.title }));
   assert.ok(screen.getByRole("button", { name: "Show me" }), "the new mechanic asks its first step");
 });
+
+/** The step chips, as buttons, after a try. */
+const stepButtons = (): HTMLElement[] => within(screen.getByRole("list", { name: "Steps" })).queryAllByRole("button", { name: /^Step \d/ });
+
+test("during a try the step chips only show progress; after it, a chip shows that step", async () => {
+  if (!VOID) throw new Error("no m-void");
+  const steps = buildPattern(VOID, "H1", CODE).scene.steps;
+  open(`/practice/${VOID.id}/${CODE}`);
+  await answerOff(2);
+  assert.lengthOf(stepButtons(), 0, "no chip is a button during the try");
+  await answerOff(steps.length - 2);
+  assert.lengthOf(stepButtons(), steps.length, "every chip is a button after the try");
+  assert.ok(screen.getByText(`0 of ${steps.length} correct`), "the result shows first");
+
+  const user = userEvent.setup();
+  await user.click(stepButtons()[1]);
+  assert.equal(stepButtons()[1].getAttribute("aria-current"), "step");
+  assert.ok(
+    screen.getAllByRole("status").some((s) => s.textContent === `Step 2/${steps.length} Not there`),
+    "the bar names the step and how it went",
+  );
+  assert.ok(screen.getByRole("img", { name: "Arena map." }), "the arena takes no clicks in review");
+  assert.lengthOf(arena().querySelectorAll(".pick"), 1, "your click of that step shows");
+
+  await user.keyboard("{ArrowRight}");
+  assert.equal(stepButtons()[2].getAttribute("aria-current"), "step", "the arrow goes on, from the chip");
+  assert.equal(document.activeElement, stepButtons()[2], "the focus goes with it");
+});
+
+test("Try from here keeps the answers before the step and asks it again, without a score", async () => {
+  if (!VOID) throw new Error("no m-void");
+  const steps = buildPattern(VOID, "H1", CODE).scene.steps;
+  open(`/practice/${VOID.id}/${CODE}`);
+  await answerOff(steps.length);
+  const scored = useProgressStore.getState().scores.H1?.[VOID.id];
+  const user = userEvent.setup();
+  await user.click(stepButtons()[2]);
+  await user.click(screen.getByRole("button", { name: "Try from here" }));
+  assert.ok(screen.getByText(`3/${steps.length}`), "step 3 is asked");
+  assert.ok(screen.getByRole("listitem", { name: "Step 2, incorrect" }), "the answers before it stay");
+  assert.ok(screen.getByRole("listitem", { name: "Step 3, now" }));
+  assert.lengthOf(stepButtons(), 0, "the chips are badges again");
+  await answerOff(steps.length - 2);
+  assert.lengthOf(stepButtons(), steps.length, "the try is done again");
+  assert.deepEqual(useProgressStore.getState().scores.H1?.[VOID.id], scored, "the part try did not count");
+});
+
+test("Reset after a review starts the whole mechanic again", async () => {
+  if (!VOID) throw new Error("no m-void");
+  open(`/practice/${VOID.id}/${CODE}`);
+  await answerOff(buildPattern(VOID, "H1", CODE).scene.steps.length);
+  const user = userEvent.setup();
+  await user.click(stepButtons()[1]);
+  await user.click(screen.getByRole("button", { name: "Reset" }));
+  assert.ok(screen.getByRole("listitem", { name: "Step 1, now" }));
+  assert.ok(screen.getByRole("button", { name: "Show me" }));
+});

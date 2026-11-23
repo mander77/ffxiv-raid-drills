@@ -18,6 +18,8 @@ export interface FightPanelProps {
   fight: Fight;
   /** Go to a mechanic. */
   onGoTo: (g: FightSeg) => void;
+  /** Go to step j of a mechanic, paused. */
+  onGoToStep: (g: FightSeg, j: number) => void;
   /** Watch the spawns of the mechanic again. */
   onSpawns: () => void;
 }
@@ -25,12 +27,12 @@ export interface FightPanelProps {
 /** The mechanic on the arena, in the player. Its setup shows in full, the steps show as
     chips, and at the end the rule shows with the way on to the next mechanic. Between mechanics:
     the next mechanic and the next ability. */
-export function FightPanel({ view: v, fight, onGoTo, onSpawns }: FightPanelProps) {
+export function FightPanel({ view: v, fight, onGoTo, onGoToStep, onSpawns }: FightPanelProps) {
   const g = v.si >= 0 ? fight.segs[v.si] : null;
   return (
     <section aria-label="The correct moves">
       {g ? (
-        <Mechanic view={v} fight={fight} g={g} onGoTo={onGoTo} onSpawns={onSpawns} />
+        <Mechanic view={v} fight={fight} g={g} onGoTo={onGoTo} onGoToStep={onGoToStep} onSpawns={onSpawns} />
       ) : (
         <Between paused={v.paused} fight={fight} onGoTo={onGoTo} />
       )}
@@ -43,11 +45,13 @@ interface MechanicProps {
   fight: Fight;
   g: FightSeg;
   onGoTo: (g: FightSeg) => void;
+  /** Go to step j of a mechanic, paused. */
+  onGoToStep: (g: FightSeg, j: number) => void;
   onSpawns: () => void;
 }
 
 /** The mechanic on the arena: its setup, its steps, the step asked and the last answer. */
-function Mechanic({ view: v, fight, g, onGoTo, onSpawns }: MechanicProps) {
+function Mechanic({ view: v, fight, g, onGoTo, onGoToStep, onSpawns }: MechanicProps) {
   const res = v.results;
   const j = res.length;
   const n = g.due.length;
@@ -57,7 +61,8 @@ function Mechanic({ view: v, fight, g, onGoTo, onSpawns }: MechanicProps) {
     <div className="space-y-3">
       <h2 className="font-display text-xl tracking-wide">{g.title}</h2>
       {g.scene.setup.length > 0 && <SetupText lines={g.scene.setup} ordered={g.scene.ordered} />}
-      {n > 1 && <StepChips count={n} results={res} />}
+      {/* The player tests nothing, so its chips always go to a step. */}
+      {n > 1 && <StepChips count={n} results={res} at={done ? undefined : j} onPick={(i) => onGoToStep(g, i)} />}
       {!done && (
         <div className="rounded-lg border p-3 text-sm">
           <p className="text-muted-foreground">

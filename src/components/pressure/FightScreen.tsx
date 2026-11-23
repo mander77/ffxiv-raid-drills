@@ -19,6 +19,7 @@ import {
   newFightState,
   nextSeg,
   seek,
+  stepGoAt,
   tickFight,
   viewOf,
 } from "../../lib/fight";
@@ -164,6 +165,13 @@ export function FightScreen({
   function goToSeg(g: FightSeg): void {
     seekTo(sim.current.paused ? askAt(g, 0) : g.from);
   }
+  /** The player: a click on a step chip goes to that step, paused. */
+  function goToStep(g: FightSeg, j: number): void {
+    const s = sim.current;
+    s.paused = true;
+    s.look = false;
+    seekTo(stepGoAt(g, j));
+  }
   /** The player: what the casts coming up let you do. A click on a cast pauses a few seconds
       before it, so you see it come; a drag moves the clock, which waits while you hold the timer
       and plays on after if it was playing. */
@@ -260,7 +268,9 @@ export function FightScreen({
       onNewFight={() => onNewFight?.(sim.current.t)}
     />
   );
-  const mechanicPanel = <FightPanel view={view} fight={fight} onGoTo={goToSeg} onSpawns={() => setReplays((n) => n + 1)} />;
+  const mechanicPanel = (
+    <FightPanel view={view} fight={fight} onGoTo={goToSeg} onGoToStep={goToStep} onSpawns={() => setReplays((n) => n + 1)} />
+  );
   /** The bar for the mode: the player's play bar, or the run's bar. */
   const controls = mode === "watch" ? playBar : runBar;
 
