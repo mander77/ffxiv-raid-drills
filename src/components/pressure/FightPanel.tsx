@@ -8,6 +8,7 @@ import { activeSeg, type FightView, nextSeg, upcoming, watchQuestion } from "../
 import { clock } from "../../time";
 import { CategoryDots, categoryNames } from "../CategoryDots";
 import { LastAnswer } from "../LastAnswer";
+import { LineList } from "../LineList";
 import { RuleBox } from "../RuleBox";
 import { SetupText } from "../SetupText";
 import { StepChips } from "../StepChips";
@@ -21,7 +22,7 @@ export interface FightPanelProps {
   onSpawns: () => void;
 }
 
-/** The mechanic on the arena, in the player. Its setup folds after the first hit, the steps show as
+/** The mechanic on the arena, in the player. Its setup shows in full, the steps show as
     chips, and at the end the rule shows with the way on to the next mechanic. Between mechanics:
     the next mechanic and the next ability. */
 export function FightPanel({ view: v, fight, onGoTo, onSpawns }: FightPanelProps) {
@@ -70,12 +71,11 @@ function Mechanic({ view: v, fight, g, onGoTo, onSpawns }: MechanicProps) {
           </p>
           <p className="font-medium">{watchQuestion(g.scene.steps[j].q)}</p>
           {/* The player shows the correct move with its question; your marker walks there. */}
-          <p className="mt-1.5">
-            <span className="font-semibold text-success-foreground">Correct move:</span> {g.scene.steps[j].a}
-          </p>
+          <p className="mt-1.5 font-semibold text-success-foreground">Correct move:</p>
+          <LineList lines={g.scene.steps[j].a} />
         </div>
       )}
-      {j > 0 && <LastAnswer ok={res[j - 1].ok} question={watchQuestion(g.scene.steps[j - 1].q)} answer={g.scene.steps[j - 1].a} />}
+      {j > 0 && <LastAnswer ok={res[j - 1].ok} answer={g.scene.steps[j - 1].a} />}
       {done ? (
         <>
           {g.scene.rule.length > 0 && <RuleBox rule={g.scene.rule} />}

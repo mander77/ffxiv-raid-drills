@@ -36,7 +36,10 @@ test("every map drill builds for both slots and every variant", () => {
       for (const v of m.variants ?? [null]) {
         const sc = m.build(s, v);
         assert.isAbove(sc.steps.length, 0, m.id);
-        for (const st of sc.steps) assert.ok(st.z || st.zf, `${m.id}: step without a zone`);
+        for (const st of sc.steps) {
+          assert.ok(st.z || st.zf, `${m.id}: step without a zone`);
+          assertLines(st.a, `${m.id} answer`);
+        }
         assertLines(sc.setup, `${m.id} setup`);
         assertLines(sc.rule, `${m.id} rule`);
       }
@@ -279,7 +282,7 @@ test("Void Stardust into the second weapons: every correct spot is inside its zo
         if (!("fn" in z)) throw new Error("the stack or spread zone is a rule zone");
         assert.ok(inZone(z.label, z), `${v}: the shown spot is correct`);
         // The pick answer starts "The axe, ..." when the axe goes first.
-        if (v === "stack" && "c" in pick && !sc.steps[0].a.startsWith("The axe")) {
+        if (v === "stack" && "c" in pick && !sc.steps[0].a[0].startsWith("The axe")) {
           // In max melee range (8.5 yalms), out of the last puddle. It gets as close as it can to
           // your safe spot for the first weapon, which can be off to the weapon's side.
           assert.isAtMost(dist(z.label, [50, 50]), 21.25, "the stack is in max melee range");

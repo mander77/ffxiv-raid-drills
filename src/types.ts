@@ -134,7 +134,9 @@ export interface StepResult {
 
 export interface Step {
   q: string;
-  a: string;
+  /** The correct move, one short line each. The first line is the move itself: a prompt bar or
+      the HUD shows only that line. The other lines add details. */
+  a: Lines;
   /** A fixed zone, or zf to build the zone from earlier answers. */
   z?: Zone;
   zf?: (results: StepResult[]) => Zone;

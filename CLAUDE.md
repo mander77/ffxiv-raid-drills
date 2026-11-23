@@ -373,8 +373,10 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   resolves later (a look-ahead step, `Step.lookAhead`). "The run" is the scored full fight. "Watch the
   correct moves" is the replay.
 - Never quiz an exact raidwide time. Ask which one comes next and whether it is soon.
-- Mechanic text (a setup, a rule, a card's explanation, the timeline's "what you do") is a list of
-  short lines (`Lines`), one step or fact each, 16 words at most. Never write it as a paragraph.
+- Mechanic text (a setup, a rule, a step's answer, a card's explanation, the timeline's "what you
+  do") is a list of short lines (`Lines`), one step or fact each, 16 words at most. Never write it
+  as a paragraph. A step's first answer line is the move itself: the prompt bar and the HUD show
+  only that line, and the Correct or Not there card shows them all.
 
 ## Planned work
 

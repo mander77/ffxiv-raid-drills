@@ -161,7 +161,7 @@ export function DrillScreen({
       }
     >
       <p role="status">
-        <span className="font-semibold">Not there.</span> {sc.steps[n - 1].a}
+        <span className="font-semibold">Not there.</span> {sc.steps[n - 1].a[0]}
       </p>
     </PromptBar>
   ) : (
@@ -179,7 +179,7 @@ export function DrillScreen({
         </>
       }
     >
-      <p className="font-medium">{shown ? sc.steps[n].a : sc.steps[n].q}</p>
+      <p className="font-medium">{shown ? sc.steps[n].a[0] : sc.steps[n].q}</p>
     </PromptBar>
   );
 
@@ -204,7 +204,7 @@ export function DrillScreen({
       {multi && <StepChips count={sc.steps.length} results={results} />}
       {/* The rule says why the spot is correct: at the end, and with Show me, which gives where. */}
       {(done || shown) && <RuleBox rule={sc.rule} />}
-      {last && <LastAnswer ok={last.ok} question={sc.steps[n - 1].q} answer={sc.steps[n - 1].a} />}
+      {last && <LastAnswer ok={last.ok} answer={sc.steps[n - 1].a} />}
       {!done && sc.spawnPlay && (
         <Button variant="outline" onClick={onReplaySpawns}>
           Watch the spawns again

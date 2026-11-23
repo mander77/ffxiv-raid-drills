@@ -42,10 +42,10 @@ test("polar finds the point at an angle clockwise from north, and dist measures 
 });
 
 test("stepZone gives a step's fixed zone, or builds it from the answers so far", () => {
-  const fixed: Step = { q: "", a: "", z: { c: [50, 50], r: 5 } };
+  const fixed: Step = { q: "", a: [], z: { c: [50, 50], r: 5 } };
   assert.deepEqual(stepZone(fixed, []), { c: [50, 50], r: 5 });
-  const built: Step = { q: "", a: "", zf: (res: StepResult[]) => ({ c: res[0].p, r: 3 }) };
+  const built: Step = { q: "", a: [], zf: (res: StepResult[]) => ({ c: res[0].p, r: 3 }) };
   const res: StepResult[] = [{ p: [10, 20], ok: true, z: { c: [10, 20], r: 3 }, drop: null }];
   assert.deepEqual(stepZone(built, res), { c: [10, 20], r: 3 });
-  assert.isUndefined(stepZone({ q: "", a: "" }, []));
+  assert.isUndefined(stepZone({ q: "", a: [] }, []));
 });

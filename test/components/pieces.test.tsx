@@ -20,12 +20,15 @@ test("RuleBox shows the rule under its heading, one list item per line", () => {
   assert.deepEqual(lines, ["Stand <south>.", "Then go west."]);
 });
 
-test("LastAnswer says Correct or Not there, with the question and the correct answer", () => {
-  render(<LastAnswer ok={true} question="Where?" answer="North." />);
+test("LastAnswer says Correct or Not there, with the correct move as a list", () => {
+  render(<LastAnswer ok={true} answer={["North.", "Stack on H1."]} />);
   assert.ok(screen.getByText("Correct"));
-  assert.match(screen.getByRole("alert").textContent ?? "", /Where\? North\./);
+  assert.deepEqual(
+    screen.getAllByRole("listitem").map((li) => li.textContent),
+    ["North.", "Stack on H1."],
+  );
   cleanup();
-  render(<LastAnswer ok={false} question="Where?" answer="North." />);
+  render(<LastAnswer ok={false} answer={["North."]} />);
   assert.ok(screen.getByText("Not there"));
 });
 

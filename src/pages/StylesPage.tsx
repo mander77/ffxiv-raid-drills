@@ -149,8 +149,8 @@ const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode
     meaning: "The step before: correct or not, its question and its answer.",
     sample: (
       <div className="space-y-2">
-        <LastAnswer ok question="The question." answer="The correct answer." />
-        <LastAnswer ok={false} question="The question." answer="The correct answer." />
+        <LastAnswer ok answer={["The correct move.", "A detail."]} />
+        <LastAnswer ok={false} answer={["The correct move.", "A detail."]} />
       </div>
     ),
   },

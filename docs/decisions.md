@@ -316,13 +316,15 @@ Do not propose these again unless the owner brings them up.
 ## Screens
 
 - Mechanic text is short lines in a list, not a paragraph (owner's choice, issue #58): the setup,
-  the rule, a Learn card's explanation and the timeline's "what you do". Each line holds one step
+  the rule, a step's answer, a Learn card's explanation and the timeline's "what you do". Each line holds one step
   or fact, 16 words at most (a test checks it). A setup whose steps happen in order is numbered
   (`Scene.ordered`); everything else is bulleted.
 - The setup always shows in full. It does not fold after the first answer, and it has no More or
   Less (owner's choice: the player must see every step at a glance, with no click). This replaces
   the Collapsible from issue #29.
 - A rule that a drill and a Learn card both show is written once, in `src/data/rules.ts`.
+- The Correct and Not there card after a step shows the correct move as a list. It does not repeat
+  the step's question: the prompt bar has just asked it.
 
 ### Learn
 

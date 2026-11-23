@@ -412,8 +412,8 @@ export function promptOf(s: FightState): Prompt {
     return { look: x.ok ? "ok" : "bad", count: x.ok ? "✓" : "✗", text, ring: null };
   }
   if (g && held >= 0) {
-    // Saved for later: the look-ahead answer up to its first colon or full stop.
-    const a = g.scene.steps[held].a;
+    // Saved for later: the first line of the look-ahead answer, up to its first colon or full stop.
+    const a = g.scene.steps[held].a[0];
     const cut = a.search(/[:.]/);
     const what = cut > 0 ? a.slice(0, cut) : a;
     return { look: "later", count: "✓", text: `Saved for later: ${what.charAt(0).toLowerCase()}${what.slice(1)}.`, ring: null };
@@ -430,7 +430,8 @@ export function promptOf(s: FightState): Prompt {
     return {
       look: urgent ? "urgent" : "ask",
       count: s.paused ? `${j + 1}/${g.due.length}` : left.toFixed(1),
-      text: watch ? g.scene.steps[j].a : g.scene.steps[j].q,
+      // The HUD has room for the move itself: the first line of the answer.
+      text: watch ? g.scene.steps[j].a[0] : g.scene.steps[j].q,
       ring: s.paused ? null : { empty: 1 - Math.min(1, left / Math.max(0.1, g.due[j] - start)), urgent: left <= URGENT && !watch },
     };
   }

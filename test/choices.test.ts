@@ -11,7 +11,7 @@ const seg = (f: Fight, title: string) => {
 };
 const WEAPON = new Set(["axe", "sword", "scythe"]);
 /** The weapons in the order the boss takes them, read from the step answers ("Axe, east: ..."). */
-const orderIn = (steps: Array<{ a: string }>): string => steps.map((st) => st.a.split(",")[0].toLowerCase()).join("-");
+const orderIn = (steps: Array<{ a: readonly string[] }>): string => steps.map((st) => st.a[0].split(",")[0].toLowerCase()).join("-");
 
 /* What the arena shows for each pick, read from the built scenes, not only from f.picks. */
 const SHOWS: { [K in keyof Picks]: (f: Fight, v: string) => boolean } = {
@@ -21,7 +21,7 @@ const SHOWS: { [K in keyof Picks]: (f: Fight, v: string) => boolean } = {
   // The Void Stardust stretch asks for the first weapon, then the puddles, then all three weapons.
   set2: (f, v) =>
     orderIn(seg(f, "Void Stardust into").scene.steps.slice(5)) === v &&
-    seg(f, "Void Stardust into").scene.steps[0].a.startsWith(`The ${v.split("-")[0]},`),
+    seg(f, "Void Stardust into").scene.steps[0].a[0].startsWith(`The ${v.split("-")[0]},`),
   // The first of the six weapons spawns south and slightly west for clockwise, slightly east otherwise.
   ult: (f, v) => {
     const o = seg(f, "Ultimate Trophy Weapons").scene.overlays.find((x) => x.spawn === 0 && WEAPON.has(x.t));

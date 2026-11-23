@@ -148,7 +148,7 @@ describe("Watch the correct moves", () => {
     const g = s.fight.segs[0];
     s.t = g.due[0] - 1;
     const p = promptOf(s);
-    expect(p.text).toBe(g.scene.steps[0].a);
+    expect(p.text).toBe(g.scene.steps[0].a[0]);
     expect(p.look).toBe("ask");
     expect(p.ring?.urgent).toBe(false);
   });
