@@ -144,9 +144,10 @@ const asDrops = (ps: Point[]): StepResult[] => ps.map(p => ({p, ok:true, z:{c:p,
 const PUDDLES: Point[] = [1, 2].reduce((ps: Point[]) => [...ps, zoneCenter(nextPuddle(asDrops(ps)))], [[50, 33]]);
 const PUDDLE_PIECES = PUDDLES.map(p => puddle(p));
 const VOID_RESULTS = asDrops(PUDDLES);
-/** The party stacked past the third puddle, below waymark B. */
-const STACK_SPOT: Point = [75, 66];
-const stackedMarks = cluster(STACK_SPOT, ALL, 2);
+/** The party stacked one more step clockwise, just past the third puddle, in max melee: the
+    drill's stack spot for these puddles (nextPuddle), moved up a unit so the marks clear waymark C. */
+const STACK_SPOT: Point = [48, 66];
+const stackedMarks = cluster(STACK_SPOT, ALL);
 /** Where a role stands in that stack. */
 const inStack = (l: string): Point => { const i = ALL.findIndex(w => w[0] === l), m = stackedMarks[i]; return m.t === "mark" ? [m.x, m.y] : STACK_SPOT; };
 /** Pair spots at the four cardinals, just outside the waymarks. */
@@ -214,12 +215,12 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     return {overlays:[...PUDDLE_PIECES, ...FIXED_SPREAD_MARKS], boss:BOSS, after:[...spreadWith(zoneCenter(gaps)), you(s, zoneCenter(gaps))], answer:[gaps], options:[
       hit(youIn(s, gaps), spreadWith(zoneCenter(gaps))), hit(youAt(s, [37, 71]), spreadWith([37, 71])),
       show([stackHit(stackedMarks), ...stackedMarks]), hit(youAt(s, [50, 58], 9), [donut(CENTER, FAKE.voidDonut)])]}; },
-  "k-void-sprint": s => { const R = buildJumpSet(s, faceApproach(weapons([[270, "scythe"]]))), toward = cometSpread(s, R.W[0].p)(VOID_RESULTS), lb = zoneCenter(toward);
-    const waitAt = bySlot<Point>(s, {H1:[83, 50], H2:[50, 83]});
-    return {overlays:[...PUDDLE_PIECES, ...R.overlays, ...FIXED_SPREAD_MARKS], boss:STILL, after:[aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], answer:[toward],
-      note:"Example: the first weapon of the second set is a scythe in the west.", options:[
-        show([aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], [toward]),
-        show([aoe(waitAt, SPREAD_R), you(s, waitAt), say("WAIT FOR HIS FACING", 8)], [cometSpread(s)(VOID_RESULTS)]),
+  "k-void-sprint": s => { const R = buildJumpSet(s, faceApproach(weapons([[180, "scythe"]]))), open = cometSpread(s)(VOID_RESULTS), lb = zoneCenter(open);
+    const waitAt = bySlot<Point>(s, {H1:[83, 50], H2:[50, 17]});
+    return {overlays:[...PUDDLE_PIECES, ...R.overlays, ...FIXED_SPREAD_MARKS], boss:STILL, after:[aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], answer:[open],
+      note:"Example: the first weapon of the second set is a scythe in the south.", options:[
+        show([aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], [open]),
+        show([aoe(waitAt, SPREAD_R), you(s, waitAt), say("WAIT FOR HIS FACING", 8)], [open]),
         youAt(s, [70, 44]),
         show([RAIDWIDE, ...stackedMarks, say("MITIGATE, STAY PUT", 8)])]}; },
   "k-assault-2": s => { const R = buildJumpSet(s, faceApproach(weapons([[135, "scythe"], [270, "axe"], [0, "sword"]]))), W = R.W;

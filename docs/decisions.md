@@ -610,18 +610,20 @@ static wins.
 
 ### Void Stardust
 
-- Puddles: start north of the boss. Drop each one just outside the last, a small step clockwise.
+- Puddles: start north of the boss. Drop each one just outside the last, a small step clockwise,
+  in max melee.
 - A puddle (Cometite in BossMod) has a 3.0-second cast and goes off once. The drops are 2 seconds
   apart, so at the stack or spread only the third puddle is still on the floor. The map fades each
   puddle 3 seconds after it drops.
-- The stack after the puddles follows three rules, in this order:
-  1. In max melee range of the boss, for uptime.
-  2. Not on a puddle that is still on the floor.
-  3. As close as you can get to your safe spot for the next weapon.
+- Crushing Comet stack: one more step clockwise, just past the third puddle, where a fourth
+  puddle would go. The same for both Void Stardusts. It is clear of the third puddle by its place.
+- Every puddle and the stack stay in the boss's max melee range (owner, 2026-11-23).
 - Comet spread: healers and ranged take any open spot. Tanks and melee each take a fixed spot:
-  MT NW, OT NE, M1 SW, M2 SE.
-- If the first weapon of the second set is a sword or a scythe, stack or spread toward it. For a
-  long run, use Sprint, a movement ability or a scholar's Expedient.
+  MT NW, OT NE, M1 SW, M2 SE. The map shows the open ground as four slices, one for each side
+  of the boss between the fixed spots, out to the arena edge.
+- The stack and the spread do not move toward the first weapon of the second set (owner,
+  2026-11-23: an earlier rule did). For a long run, use Sprint, a movement ability or a
+  scholar's Expedient.
 - The second Void Stardust: the boss stays on the third weapon. The group starts at his butt,
   directly behind him, and goes clockwise around him.
 
