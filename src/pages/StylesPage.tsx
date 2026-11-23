@@ -1,5 +1,5 @@
 // The styles page (/styles): how the site shows an answer, and every icon it uses, with what each
-// one means. No tab or link leads here; it is a reference for the owner, to check the styles side by
+// one means. No tab leads here, only the footer; it is a reference for the owner, to check the styles side by
 // side in light and dark mode. Each sample is the site's own component, so it shows the real style.
 // A click on an icon's card opens it zoomed in.
 import type { ComponentProps, ReactNode } from "react";
@@ -171,80 +171,82 @@ function drillsOf(kind: DrillKind): string[] {
 
 export function StylesPage() {
   return (
-    <PageContainer className="space-y-10 py-6">
-      <header className="space-y-1">
-        <h1 className="font-display text-3xl font-bold">Styles</h1>
-        <p className="text-muted-foreground">How the site shows an answer, and every icon it uses.</p>
-      </header>
+    <main>
+      <PageContainer className="space-y-10 py-6">
+        <header className="space-y-1">
+          <h1 className="font-display text-3xl font-bold">Styles</h1>
+          <p className="text-muted-foreground">How the site shows an answer, and every icon it uses.</p>
+        </header>
 
-      <section className="space-y-4" aria-labelledby="answers">
-        <h2 id="answers" className="font-display text-2xl font-bold">
-          Answers
-        </h2>
-        <ul className="grid gap-3 lg:grid-cols-2">
-          {ANSWER_STYLES.map((a) => (
-            <li key={a.name} className="space-y-3 rounded-lg border bg-card p-4">
-              <div className="space-y-1">
-                <h3 className="font-semibold">{a.name}</h3>
-                <p className="text-sm text-muted-foreground">{a.meaning}</p>
-              </div>
-              {a.sample}
-            </li>
-          ))}
-        </ul>
-      </section>
+        <section className="space-y-4" aria-labelledby="answers">
+          <h2 id="answers" className="font-display text-2xl font-bold">
+            Answers
+          </h2>
+          <ul className="grid gap-3 lg:grid-cols-2">
+            {ANSWER_STYLES.map((a) => (
+              <li key={a.name} className="space-y-3 rounded-lg border bg-card p-4">
+                <div className="space-y-1">
+                  <h3 className="font-semibold">{a.name}</h3>
+                  <p className="text-sm text-muted-foreground">{a.meaning}</p>
+                </div>
+                {a.sample}
+              </li>
+            ))}
+          </ul>
+        </section>
 
-      <section className="space-y-4" aria-labelledby="kinds">
-        <h2 id="kinds" className="font-display text-2xl font-bold">
-          Kinds of mechanic
-        </h2>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {(Object.keys(KINDS) as DrillKind[]).map((kind) => (
-            <KindItem key={kind} kind={kind} />
-          ))}
-        </ul>
-      </section>
-
-      {INTERFACE_GROUPS.map((group) => (
-        <section key={group.title} className="space-y-4">
-          <h2 className="font-display text-2xl font-bold">{group.title}</h2>
+        <section className="space-y-4" aria-labelledby="kinds">
+          <h2 id="kinds" className="font-display text-2xl font-bold">
+            Kinds of mechanic
+          </h2>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {group.icons.map(({ icon: Icon, name, meaning }) => (
+            {(Object.keys(KINDS) as DrillKind[]).map((kind) => (
+              <KindItem key={kind} kind={kind} />
+            ))}
+          </ul>
+        </section>
+
+        {INTERFACE_GROUPS.map((group) => (
+          <section key={group.title} className="space-y-4">
+            <h2 className="font-display text-2xl font-bold">{group.title}</h2>
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {group.icons.map(({ icon: Icon, name, meaning }) => (
+                <IconItem
+                  key={name}
+                  picture={<Icon aria-hidden="true" className="size-6" />}
+                  zoomed={<Icon aria-hidden="true" className="size-48" />}
+                  name={name}
+                  meaning={meaning}
+                />
+              ))}
+            </ul>
+          </section>
+        ))}
+
+        <section className="space-y-4">
+          <h2 className="font-display text-2xl font-bold">The boss's weapons</h2>
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {WEAPONS.map((w) => (
               <IconItem
-                key={name}
-                picture={<Icon aria-hidden="true" className="size-6" />}
-                zoomed={<Icon aria-hidden="true" className="size-48" />}
-                name={name}
-                meaning={meaning}
+                key={w.name}
+                picture={
+                  <svg className="arena size-12" viewBox="44.5 44.5 11 11" aria-hidden="true">
+                    <Weapon overlay={w.overlay} />
+                  </svg>
+                }
+                zoomed={
+                  <svg className="arena size-56" viewBox="44.5 44.5 11 11" aria-hidden="true">
+                    <Weapon overlay={w.overlay} />
+                  </svg>
+                }
+                name={w.name}
+                meaning={w.meaning}
               />
             ))}
           </ul>
         </section>
-      ))}
-
-      <section className="space-y-4">
-        <h2 className="font-display text-2xl font-bold">The boss's weapons</h2>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {WEAPONS.map((w) => (
-            <IconItem
-              key={w.name}
-              picture={
-                <svg className="arena size-12" viewBox="44.5 44.5 11 11" aria-hidden="true">
-                  <Weapon overlay={w.overlay} />
-                </svg>
-              }
-              zoomed={
-                <svg className="arena size-56" viewBox="44.5 44.5 11 11" aria-hidden="true">
-                  <Weapon overlay={w.overlay} />
-                </svg>
-              }
-              name={w.name}
-              meaning={w.meaning}
-            />
-          ))}
-        </ul>
-      </section>
-    </PageContainer>
+      </PageContainer>
+    </main>
   );
 }
 

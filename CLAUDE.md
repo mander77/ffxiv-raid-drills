@@ -53,10 +53,11 @@ claim on the live site before you act on it.
 | Pressure | `/pressure`, `/pressure/<code>[/<picks>][?t=<s>]` | A quick round of 12 timed cards, or the full fight: the run (you click) and Watch the correct moves (the player). The player's address names its fight, its picks and, paused, its moment. |
 | Cheat sheet | `/sheet` | Every mechanic in fight order with its picture, rules, your own answer and links to train it, the timeline for your role, sources and your progress. |
 
-The styles page, `/styles`, has no tab and no link: it shows how the site shows an answer (the real
+The footer, at the bottom of every page, links to the pages that are not tabs. The styles page,
+`/styles`, has no tab; the footer links to it. It shows how the site shows an answer (the real
 components), and every icon the site uses, with what it means and which mechanics use it. A click
-on an icon's card opens it zoomed in. Check it when you add or change an icon or an answer style. Any other address opens
-Home, including the old site's addresses (`/mech/...`, `/map/...`).
+on an icon's card opens it zoomed in. Check it when you add or change an icon or an answer style.
+Any other address opens Home, including the old site's addresses (`/mech/...`, `/map/...`).
 
 The slot switch is in the header: the role (only Healer works today; the others show "not yet
 available") and the group, which is the light party (1 or 2, as wtfdig names it). Each drill and question builds its answer for the
@@ -113,7 +114,8 @@ src/share.ts         sharing the address of the page
 src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser
 src/stores/progress.ts  your scores (kept in the browser) and the round of Learn, Practice and Timeline
 src/stores/pressure.ts  your Pressure settings: seconds to decide, stops, pattern picks, speed
-src/components/      React components: Header, PageContainer, SlotSwitch, ShareButton (a toast
+src/components/      React components: Header, Footer (links to the pages that are not tabs),
+                     PageContainer, SlotSwitch, ShareButton (a toast
                      says the link was copied), TabNav, ThemeProvider and ModeToggle (light and
                      dark mode),
                      CategoryDots and CategoryKey (the ability category colours), icons (every icon
@@ -133,7 +135,7 @@ src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, click
 src/components/ui/   shadcn/ui components, as the shadcn CLI writes them
 src/pages/           React pages, one per route: HomePage (/), LearnPage (/learn), PracticePage
                      (/practice), TimelinePage (/timeline), PressurePage (/pressure),
-                     CheatSheetPage (/sheet), StylesPage (/styles, no link leads to it)
+                     CheatSheetPage (/sheet), StylesPage (/styles, linked from the footer)
 src/components/practice/  Practice: DrillScreen (one drill's screen, in the layout of Pressure's
                      player: clicks, Show me, the prompt, the panel, the bar and the list),
                      MechanicList (the mechanics under their phases: a click opens one)
