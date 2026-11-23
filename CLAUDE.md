@@ -321,7 +321,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Step**: one question of a drill. Its **status** (`StepStatus`) is ask, correct or incorrect.
 - **Phase**: a phase of the fight (Phase 1 to 4), and nothing else.
 - **Look ahead**: a step where you spot something early and act on it later (`Step.lookAhead`).
-  The screen says "Look ahead", at the start of the line, every time.
+  The screen says "Look Ahead", at the start of the line, every time.
 - **Look**: the colour of a zone's area or a label (`ZoneLook`, `LabelLook`).
 - **Zone**: a spot on the arena. `ZoneArea` draws its area, `ZoneLabel` its label.
 - **Overlay**: a piece drawn on the arena (an attack, a weapon, a tag, a player mark); `Shape`
@@ -370,9 +370,9 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   `src/data/pictures.ts`). Give it a name and a comment that says it is the app's choice.
 - Never change a strat, a position or a rule without the owner. When a source and the owner
   disagree, ask.
-- Words: "pattern", not "layout". "Look ahead" is a mechanic that the boss shows early and
+- Words: "pattern", not "layout". "Look Ahead" is a mechanic that the boss shows early and
   resolves later (`Step.lookAhead`). Any line that tells the player to spot something early starts
-  with "Look ahead:". It replaced "Saved for later". "The run" is the scored full fight. "Watch the
+  with "Look Ahead:". It replaced "Saved for later". "The run" is the scored full fight. "Watch the
   correct moves" is the replay.
 - Never quiz an exact raidwide time. Ask which one comes next and whether it is soon.
 - Player words. One idea has one phrase on screen (owner's choices, issue #58):
@@ -382,8 +382,12 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
     player" only for something each player gets on their own. "Light party 1" and "Light party 2",
     never G1, G2 or "static". "Supports (tanks and healers)" on its first use in each list. Role
     pairs in this order: "tanks and melee", "healers and ranged".
-  - Stacks by the kind names: party stack, light party stack, pair stack, line stack. The sword is
-    a light party stack; Four-way Fireball is a pair stack.
+  - Mechanic names are in Title Case everywhere: the kind names on the icons (Party Stack, Light
+    Party Stack, Pair Stack, Line Stack, Shared Tank Buster, Look Ahead...), also inside a sentence
+    ("a Party Stack on a healer"), and every mechanic title ("Raw Steel Trophy: Axe", "Void
+    Stardust (Second Time)"). Small words stay lower case (a, and, into, of, or, the). A verb stays
+    lower case: "the party stacks". The game's own names stay as the game writes them (Two-way
+    Fireball). The sword is a Light Party Stack; Four-way Fireball is a Pair Stack.
   - Directions: an intercardinal short (NW, SSE, relative SW), a cardinal as a word (north).
     "middle" for the arena's middle, "dead center" only in a tower.
   - "directly behind the boss" for his back. "butt" is only the scythe's handle end.
@@ -392,7 +396,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
     "row" of rocks. "line" is only for line AoEs and line stacks; "lineup" for Flatliner, "fire
     trail" for Great Wall of Fire.
   - Towers are "soaked". Knockback: "get knocked to the other platform".
-  - "shared tank buster"; "Mitigate it."; "Heal the party."; "(second time)" and "the opposite of
+  - "shared tank buster"; "Mitigate it."; "Heal the party."; "(Second Time)" and "the opposite of
     the first"; ordinals as words ("second", not "2nd"), except the Orbital #1 to #4.
   - A missed spot on the arena is "Not there"; a missed card answer is "Not this one".
 - Mechanic text (a setup, a rule, a step's answer, a card's explanation, the timeline's "what you

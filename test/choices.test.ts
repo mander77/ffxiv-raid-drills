@@ -15,7 +15,7 @@ const orderIn = (steps: Array<{ a: readonly string[] }>): string => steps.map((s
 
 /* What the arena shows for each pick, read from the built scenes, not only from f.picks. */
 const SHOWS: { [K in keyof Picks]: (f: Fight, v: string) => boolean } = {
-  raw: (f, v) => f.segs[0].title === `Raw Steel Trophy: ${v}`,
+  raw: (f, v) => f.segs[0].title.toLowerCase() === `raw steel trophy: ${v}`,
   void: (f, v) => /Comet/.test(seg(f, "Void Stardust into").scene.steps[4].q) === (v === "spread"),
   set1: (f, v) => orderIn(seg(f, "Assault Evolved").scene.steps) === v,
   // The Void Stardust stretch asks for the first weapon, then the puddles, then all three weapons.

@@ -323,6 +323,8 @@ Do not propose these again unless the owner brings them up.
   Less (owner's choice: the player must see every step at a glance, with no click). This replaces
   the Collapsible from issue #29.
 - A rule that a drill and a Learn card both show is written once, in `src/data/rules.ts`.
+- Mechanic names are in Title Case everywhere, on the icons and in the text (owner's choice, issue
+  #58). The rule is in CLAUDE.md, "Player words".
 - One idea has one phrase on screen (owner's choices, issue #58). The list is in CLAUDE.md, "Player
   words". The owner chose "under the boss" and "max melee" as the only hitbox words, "light party
   1/2" over G1/G2 and "static", "soaked" for towers, "Supports (tanks and healers)" explained on

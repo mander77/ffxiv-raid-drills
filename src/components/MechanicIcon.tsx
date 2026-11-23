@@ -44,28 +44,28 @@ export interface KindInfo {
     shield is narrower than the stack's. */
 export const KINDS: Record<DrillKind, KindInfo> = {
   spread: { name: "Spread", meaning: "Spread out, away from the others.", icon: SpreadIcon },
-  stack: { name: "Party stack", meaning: "The party stacks on one spot.", icon: PartyStackIcon },
-  pairStack: { name: "Pair stack", meaning: "Stack in twos.", icon: StackIcon, count: "2" },
+  stack: { name: "Party Stack", meaning: "The party stacks on one spot.", icon: PartyStackIcon },
+  pairStack: { name: "Pair Stack", meaning: "Stack in twos.", icon: StackIcon, count: "2" },
   lightPartyStack: {
-    name: "Light party stack",
+    name: "Light Party Stack",
     meaning: "Stack with your light party of four.",
     icon: StackIcon,
     count: "4",
   },
-  roleStack: { name: "Role stack", meaning: "Stack by role: the roles decide who stacks.", icon: StackIcon, count: "R" },
-  lineStack: { name: "Line stack", meaning: "Stand in the line from the boss to the marked player.", icon: LineStackIcon },
+  roleStack: { name: "Role Stack", meaning: "Stack by role: the roles decide who stacks.", icon: StackIcon, count: "R" },
+  lineStack: { name: "Line Stack", meaning: "Stand in the line from the boss to the marked player.", icon: LineStackIcon },
   bait: { name: "Bait", meaning: "You are the target: bring the hit to where it should go.", icon: BaitIcon },
   puddles: {
-    name: "Puddle drop sequence",
+    name: "Puddle Drop Sequence",
     meaning: "Drop several puddles in order, walking on as each one lands.",
     icon: PuddleDropIcon,
   },
   protean: {
-    name: "Proteans (clock spots)",
+    name: "Proteans (Clock Spots)",
     meaning: "Take your clock spot around the boss, so your protean cone hits no one else.",
     icon: ProteanIcon,
   },
-  sequence: { name: "Dodge sequence", meaning: "Dodge a set order of attacks.", icon: DodgeSequenceIcon },
+  sequence: { name: "Dodge Sequence", meaning: "Dodge a set order of attacks.", icon: DodgeSequenceIcon },
   tower: {
     name: "Tower",
     meaning: "Stand in a tower to soak it. The number says how many players soak it.",
@@ -75,7 +75,7 @@ export const KINDS: Record<DrillKind, KindInfo> = {
     soaked: true,
   },
   towerKnockback: {
-    name: "Knockback tower",
+    name: "Knockback Tower",
     meaning: "Soak a tower that knocks you back. The number says how many players soak it.",
     icon: KnockbackTowerIcon,
     // Smaller, in the middle of the arrow, clear of the ring.
@@ -83,7 +83,7 @@ export const KINDS: Record<DrillKind, KindInfo> = {
     soaked: true,
   },
   tankTower: {
-    name: "Tank tower",
+    name: "Tank Tower",
     meaning: "A tower only a tank soaks. The number says how many players soak it.",
     icon: TankTowerIcon,
     // In the shield's wide upper half, clear of its tip.
@@ -91,20 +91,20 @@ export const KINDS: Record<DrillKind, KindInfo> = {
     soaked: true,
   },
   wildCharge: {
-    name: "Wild charge",
-    meaning: "A line stack with a tank or a rock in front, to take the biggest hit.",
+    name: "Wild Charge",
+    meaning: "A Line Stack with a tank or a rock in front, to take the biggest hit.",
     icon: WildChargeIcon,
   },
-  later: { name: "Look ahead", meaning: "Spot it early. Act on it later.", icon: LookAheadIcon },
+  later: { name: "Look Ahead", meaning: "Spot it early. Act on it later.", icon: LookAheadIcon },
   knockback: { name: "Knockback", meaning: "Stand where the knockback throws you to your spot.", icon: KnockbackIcon },
   stretchTether: {
-    name: "Stretch tether",
+    name: "Stretch Tether",
     meaning: "Move away from the other end of your tether until it is long enough.",
     icon: StretchTetherIcon,
   },
-  tankBuster: { name: "Tank buster", meaning: "A heavy hit on one tank.", icon: TankBusterIcon },
+  tankBuster: { name: "Tank Buster", meaning: "A heavy hit on one tank.", icon: TankBusterIcon },
   sharedTankBuster: {
-    name: "Shared tank buster",
+    name: "Shared Tank Buster",
     meaning: "A heavy hit that two tanks share.",
     icon: SharedTankBusterIcon,
     count: "2",

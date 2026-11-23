@@ -43,8 +43,8 @@ test("the timeline runs in time order", () => {
 
 test("a next-mechanic card never offers a second time before the first time", () => {
   const pointsBack = [
-    ["Raw Steel Trophy (second time)", "Raw Steel Trophy (axe or scythe)"],
-    ["Assault Evolved (second set)", "Trophy Weapons, then Assault Evolved"],
+    ["Raw Steel Trophy (Second Time)", "Raw Steel Trophy (Axe or Scythe)"],
+    ["Assault Evolved (Second Set)", "Trophy Weapons, Then Assault Evolved"],
     ["Void Stardust (second time)", "Trophy Weapons and Void Stardust"],
   ];
   for (const [later, first] of pointsBack) {

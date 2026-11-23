@@ -36,7 +36,7 @@ for (const [axis, along] of [
     // Each mechanic's square names what you do in it, for a pointer that rests on it.
     assert.equal(
       within(nav)
-        .getByRole("link", { name: /Raw Steel Trophy: axe$/ })
+        .getByRole("link", { name: /Raw Steel Trophy: Axe$/ })
         .querySelector("[title]")
         ?.getAttribute("title"),
       "Spread",

@@ -42,7 +42,7 @@ test("the styles page names every kind of mechanic and the boss's weapons", () =
 
 test("a click on an icon's card opens it zoomed in, in a dialog named after it", async () => {
   render(<StylesPage />);
-  await userEvent.click(screen.getByRole("button", { name: "Wild charge" }));
-  const dialog = screen.getByRole("dialog", { name: "Wild charge" });
+  await userEvent.click(screen.getByRole("button", { name: "Wild Charge" }));
+  const dialog = screen.getByRole("dialog", { name: "Wild Charge" });
   assert.ok(dialog.querySelector("svg.lucide-wild-charge"));
 });

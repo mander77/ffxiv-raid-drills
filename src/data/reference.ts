@@ -29,8 +29,8 @@ export const REFERENCE: readonly ReferenceEntry[] = [
   { name: "Axe", picture: "k-axe", cards: ["k-axe"], drills: ["m-assault"] },
   { name: "Scythe", picture: "k-scythe", cards: ["k-scythe"], drills: ["m-assault"] },
   { name: "Void Stardust", picture: "k-void", cards: ["k-void", "k-void-target", "k-void-spread"], drills: ["m-void"], timeline: "n-2" },
-  { name: "Second weapon set", picture: "k-assault-2", cards: ["k-void-sprint", "k-assault-2"], drills: ["m-void"], timeline: "n-3" },
-  { name: "Void Stardust (second time)", picture: "k-void-2", cards: ["k-void-2"], drills: ["m-void"], timeline: "n-4" },
+  { name: "Second Weapon Set", picture: "k-assault-2", cards: ["k-void-sprint", "k-assault-2"], drills: ["m-void"], timeline: "n-3" },
+  { name: "Void Stardust (Second Time)", picture: "k-void-2", cards: ["k-void-2"], drills: ["m-void"], timeline: "n-4" },
   {
     name: "Dance of Domination",
     picture: "k-dance-pair",
@@ -39,7 +39,7 @@ export const REFERENCE: readonly ReferenceEntry[] = [
     timeline: "n-6",
   },
   {
-    name: "Raw Steel Trophy (second time)",
+    name: "Raw Steel Trophy (Second Time)",
     picture: "k-raw-second",
     cards: ["k-raw-second"],
     drills: ["m-raw-axe", "m-raw-scythe"],
@@ -59,13 +59,13 @@ export const REFERENCE: readonly ReferenceEntry[] = [
   },
   { name: "Triple Tyrannhilation", picture: "k-triple", cards: ["k-triple"], drills: ["m-meteor-4"], timeline: "n-15" },
   { name: "Arena Split", picture: "k-split-side", cards: ["k-split-side"], drills: ["m-split-line"], timeline: "n-16" },
-  { name: "Knockback tower", picture: "k-split-kb", cards: ["k-split-kb", "k-split-fb"], drills: ["m-split-tower"], timeline: "n-17" },
-  { name: "Markers and tethers", picture: "k-split-corner", cards: ["k-split-corner", "k-split-towers23"], drills: [] },
+  { name: "Knockback Tower", picture: "k-split-kb", cards: ["k-split-kb", "k-split-fb"], drills: ["m-split-tower"], timeline: "n-17" },
+  { name: "Markers and Tethers", picture: "k-split-corner", cards: ["k-split-corner", "k-split-towers23"], drills: [] },
   { name: "Massive Meteor", picture: "k-massive", cards: ["k-massive"], drills: [], timeline: "n-18" },
   { name: "Arcadion Avalanche", picture: "k-slab", cards: ["k-slab"], drills: [], timeline: "n-19" },
   { name: "Ecliptic Stampede", picture: "k-ecl-start", cards: ["k-ecl-start", "k-ecl-adjust"], drills: ["m-ecl-start"], timeline: "n-24" },
-  { name: "Ecliptic towers", picture: "k-ecl-center", cards: ["k-ecl-prio", "k-ecl-center", "k-ecl-tether"], drills: [] },
-  { name: "Ecliptic puddles", picture: "k-ecl-two", cards: ["k-ecl-two", "k-ecl-four"], drills: ["m-ecl-two", "m-ecl-four"] },
+  { name: "Ecliptic Towers", picture: "k-ecl-center", cards: ["k-ecl-prio", "k-ecl-center", "k-ecl-tether"], drills: [] },
+  { name: "Ecliptic Puddles", picture: "k-ecl-two", cards: ["k-ecl-two", "k-ecl-four"], drills: ["m-ecl-two", "m-ecl-four"] },
   { name: "Heartbreak Kick", picture: "k-hb", cards: ["k-hb"], drills: [], timeline: "n-26" },
 ];
 

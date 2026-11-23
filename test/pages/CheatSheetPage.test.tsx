@@ -59,8 +59,8 @@ test("each mechanic links to the tabs that train it", () => {
     links.map((l) => [l.textContent, l.getAttribute("href")]),
     [
       ["Learn", "/learn/k-raw-first"],
-      ["Practice: axe", "/practice/m-raw-axe"],
-      ["Practice: scythe", "/practice/m-raw-scythe"],
+      ["Practice: Axe", "/practice/m-raw-axe"],
+      ["Practice: Scythe", "/practice/m-raw-scythe"],
       ["Timeline", "/timeline/n-0"],
     ],
   );

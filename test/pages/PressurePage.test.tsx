@@ -122,11 +122,11 @@ test("the slider shows the fight time, and its keys are its own", async () => {
 test("a tick under the slider names its mechanic, and a click goes there", async () => {
   open("/pressure/K7Q2?t=46");
   const user = userEvent.setup();
-  const tick = screen.getByRole("button", { name: "Jump to Void Stardust (second time)" });
+  const tick = screen.getByRole("button", { name: "Jump to Void Stardust (Second Time)" });
   await user.hover(tick);
-  assert.ok(await screen.findByRole("tooltip", { name: "Void Stardust (second time)" }));
+  assert.ok(await screen.findByRole("tooltip", { name: "Void Stardust (Second Time)" }));
   await user.click(tick);
-  assert.ok(screen.getByRole("heading", { name: "Void Stardust (second time)" }));
+  assert.ok(screen.getByRole("heading", { name: "Void Stardust (Second Time)" }));
 });
 
 test("a pick in Settings goes in the address, and the moment stays", async () => {
@@ -153,7 +153,7 @@ test("the player's address holds the code, the picks and the moment", () => {
 test("between mechanics, Jump to next mechanic goes to the mechanic named above it", async () => {
   open("/pressure/K7Q2?t=66");
   // The panel fills in the next mechanic on the first frame of the fight clock.
-  assert.ok(await screen.findByText(/Next mechanic: Void Stardust into the second weapons/));
+  assert.ok(await screen.findByText(/Next mechanic: Void Stardust into the Second Weapons/));
   await userEvent.setup().click(screen.getByRole("button", { name: "Jump to next mechanic" }));
-  assert.ok(screen.getByRole("heading", { name: "Void Stardust into the second weapons" }));
+  assert.ok(screen.getByRole("heading", { name: "Void Stardust into the Second Weapons" }));
 });

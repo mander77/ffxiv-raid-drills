@@ -142,7 +142,7 @@ test("on the Cheat sheet, the corner buttons go to the next section, the one bef
   await page.goto("/sheet");
   const go = page.getByRole("navigation", { name: "Go to a section" });
   await expect(go).toHaveCount(0);
-  await page.getByText("Ecliptic puddles", { exact: true }).scrollIntoViewIfNeeded();
+  await page.getByText("Ecliptic Puddles", { exact: true }).scrollIntoViewIfNeeded();
   await go.getByRole("link", { name: "↓ Panic reset" }).click();
   await expect(page.getByText("Feet: go to your spot for the next mechanic.")).toBeInViewport();
   await go.getByRole("link", { name: "↑ Phase 4" }).click();
@@ -202,7 +202,7 @@ for (const [screen, width] of [
     await page.goto("/practice/m-assault/K7Q2");
     // One line shows at a time: beside the arena on a wide screen, sideways under it on a phone.
     const line = page.getByRole("navigation", { name: "Mechanics" }).filter({ visible: true });
-    const link = line.getByRole("link", { name: "Raw Steel Trophy: scythe" });
+    const link = line.getByRole("link", { name: "Raw Steel Trophy: Scythe" });
     /** Where the mechanic sits inside the line, whatever the page's scroll. */
     const inLine = () =>
       link.evaluate((a: HTMLElement) => {
@@ -212,7 +212,7 @@ for (const [screen, width] of [
     const before = await inLine();
     await link.click();
     await expect(page).toHaveURL(/\/practice\/m-raw-scythe\/[^/]+$/);
-    await expect(line.locator("[aria-current=step]")).toHaveText(/scythe/);
+    await expect(line.locator("[aria-current=step]")).toHaveText(/Scythe/);
     // The mechanic you clicked stays under your pointer: the line does not move.
     expect(await inLine()).toEqual(before);
     // With a mouse, a drag along the line scrolls it, and opens nothing.

@@ -57,6 +57,8 @@ export const RANDOM: Choices = {raw:"random", void:"random", set1:"random", set2
 
 /** The six weapon orders, as [value, text]: "sword-axe-scythe" shows as "Sword, axe, scythe". */
 const orderText = (o: string): string => { const s = o.split("-").join(", "); return s.charAt(0).toUpperCase() + s.slice(1); };
+/** A one-word part of a mechanic's name, with a capital first letter: "axe" gives "Axe". */
+const titleCase = (w: string): string => w.charAt(0).toUpperCase() + w.slice(1);
 const ORDER_LIST: readonly WeaponOrder[] = ["sword-axe-scythe", "sword-scythe-axe", "axe-sword-scythe", "axe-scythe-sword", "scythe-sword-axe", "scythe-axe-sword"];
 const ORDERS = ORDER_LIST.map(o => [o, orderText(o)] as const);
 
@@ -132,16 +134,16 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   /* Each click is due when the hit that checks it lands, in seconds into the fight. A scene
      appears when its cast starts (cactbot's StartsUsing or the ability before it). */
   const segs: FightSeg[] = [
-    {title:"Raw Steel Trophy: " + w1, drills:["m-raw-" + w1], scene:drill("m-raw-" + w1, s), k:0, from:15.7, due:[25.1]},
+    {title:"Raw Steel Trophy: " + titleCase(w1), drills:["m-raw-" + w1], scene:drill("m-raw-" + w1, s), k:0, from:15.7, due:[25.1]},
     {title:"Assault Evolved", drills:["m-assault"], scene:assault1, k:0, from:38.4, turn:face1 != null ? {at:48.2 - CAST, f:face1, weapons:A1.steps.length} : undefined, due:[50.4, 55.5, 60.6]},
     // The second set of weapons spawns when this Void Stardust starts, and the drill runs through all three.
-    {title:"Void Stardust into the second weapons", drills:["m-void"], scene:voidIntoWeapons(s, !stackFirst, A2), k:0, from:72.7,
+    {title:"Void Stardust into the Second Weapons", drills:["m-void"], scene:voidIntoWeapons(s, !stackFirst, A2), k:0, from:72.7,
       turn:{at:92.7 - CAST, f:A2.W[0].a, weapons:A2.steps.length}, due:[79.8, ...placed([83.9, 85.9, 87.9]), 89.9, 94.9, 100.0, 105.1], pre:FIRST_PUDDLE},
-    {title:"Void Stardust (second time)", drills:[], scene:voidAgain(s, stackFirst, lastBoss), k:0, from:106, due:[...placed([110.2, 112.2, 114.2]), 116.2], pre:behind(lastBoss)},
+    {title:"Void Stardust (Second Time)", drills:[], scene:voidAgain(s, stackFirst, lastBoss), k:0, from:106, due:[...placed([110.2, 112.2, 114.2]), 116.2], pre:behind(lastBoss)},
     // The lines on the floor show only just after the 7th and last hit (2:25.5), so the scene
     // with the lines appears then, not at the Trophy cast. Until then the arena stays empty.
     {title:"Dance of Domination", drills:["m-dance"], scene:drill("m-dance", s), k:Math.floor(random() * 4), from:146.0, due:[150.5]},
-    {title:"Raw Steel Trophy: " + w2, drills:["m-raw-" + w2], scene:drill("m-raw-" + w2, s), k:0, from:156.4, due:[163.8]}
+    {title:"Raw Steel Trophy: " + titleCase(w2), drills:["m-raw-" + w2], scene:drill("m-raw-" + w2, s), k:0, from:156.4, due:[163.8]}
   ];
   // Ultimate Trophy Weapons is built here, after the Dance of Domination turn, as it always was.
   const U = buildUltimate(s, c.ult === "random" ? undefined : c.ult === "cw");
@@ -158,14 +160,14 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   const fireball = four ? "Four-way Fireball" : "Two-way Fireball", ecl = four ? "m-ecl-four" : "m-ecl-two";
   segs.push(
     {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:266.1, due:[275.2, 276.8, 278.4]},
-    {title:"Meteorain: first line stack", drills:["m-meteor-1"], scene:drill("m-meteor-1", s), k:0, from:292.1, due:[300.1]},
-    {title:"Meteorain: your meteor", drills:["m-meteor-2"], scene:drill("m-meteor-2", s), k:0, from:301.3, due:[311.4]},
-    {title:"Meteorain: third line stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:312.0, due:[320.2]},
-    {title:"Meteorain: last line stack", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:321.5, due:[330.2, 342.9]},
-    {title:"Arena Split: lineup", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:361.8, due:[375.9]},
-    {title:"Arena Split: first towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:376.5, due:[389.0]},
+    {title:"Meteorain: First Line Stack", drills:["m-meteor-1"], scene:drill("m-meteor-1", s), k:0, from:292.1, due:[300.1]},
+    {title:"Meteorain: Your Meteor", drills:["m-meteor-2"], scene:drill("m-meteor-2", s), k:0, from:301.3, due:[311.4]},
+    {title:"Meteorain: Third Line Stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:312.0, due:[320.2]},
+    {title:"Meteorain: Last Line Stack", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:321.5, due:[330.2, 342.9]},
+    {title:"Arena Split: Lineup", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:361.8, due:[375.9]},
+    {title:"Arena Split: First Towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:376.5, due:[389.0]},
     {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:504.0, due:[513.1, 514.7, 516.3]},
-    {title:"Ecliptic Stampede: start", drills:["m-ecl-start"], scene:drill("m-ecl-start", s), k:0, from:527.0, due:[541.2]},
+    {title:"Ecliptic Stampede: Start", drills:["m-ecl-start"], scene:drill("m-ecl-start", s), k:0, from:527.0, due:[541.2]},
     {title:"Ecliptic Stampede: " + fireball, drills:[ecl], scene:drill(ecl, s, wall), k:0, from:557.5, due:[571.1]}
   );
   /* The timeline lines, with cactbot's names. Where the arena is the test, the names stay as
