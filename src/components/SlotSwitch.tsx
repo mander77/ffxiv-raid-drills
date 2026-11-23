@@ -1,4 +1,4 @@
-import { type ComponentProps, type MouseEvent, useEffect, useId, useState } from "react";
+import { type ComponentProps, type MouseEvent, type ReactNode, useEffect, useId, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTimeout } from "@/hooks/useTimeout";
@@ -49,13 +49,11 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
 
   return (
     <div className={cn("flex flex-wrap items-end justify-end gap-x-2 gap-y-2", className)}>
-      {/* Each switch has its name in small text above it (owner's choice), so it takes no width
-          and the switch fits beside the tab button on a phone. */}
-      <div className="flex flex-col gap-0.5">
-        <span id={roleLabel} className="text-xs leading-none">
-          Role
-        </span>
-        <ToggleGroup type="single" variant="outline" size="sm" value={me.role} aria-labelledby={roleLabel}>
+      {/* Each switch sits in a box with its name set into the top border (owner's choice), so it
+          takes no width and the row stays about as tall as the tabs. */}
+      <BandGroup labelId={roleLabel} label="Role">
+        {/* A small gap between the buttons, so each one keeps its own rounded corners. */}
+        <ToggleGroup type="single" size="sm" spacing={0.5} value={me.role} aria-labelledby={roleLabel}>
           {ROLES.map(({ role, short, ready }) => {
             const text = (
               <>
@@ -87,15 +85,12 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
             );
           })}
         </ToggleGroup>
-      </div>
-      <div className="flex flex-col gap-0.5">
-        <span id={groupLabel} className="text-xs leading-none">
-          Group
-        </span>
+      </BandGroup>
+      <BandGroup labelId={groupLabel} label="Group">
         <ToggleGroup
           type="single"
-          variant="outline"
           size="sm"
+          spacing={0.5}
           value={String(me.lp)}
           aria-labelledby={groupLabel}
           // A click on the group you have already picked gives "", which keeps it.
@@ -106,13 +101,34 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
           }}
         >
           {([1, 2] as const).map((lp) => (
-            <BandToggleItem key={lp} value={String(lp)} title={slotName({ lp, role: me.role })} className="min-w-9">
+            <BandToggleItem key={lp} value={String(lp)} title={slotName({ lp, role: me.role })} className="min-w-7">
               {lp}
             </BandToggleItem>
           ))}
         </ToggleGroup>
-      </div>
+      </BandGroup>
     </div>
+  );
+}
+
+interface BandGroupProps {
+  /** The id of the label, for the switch's aria-labelledby. */
+  labelId: string;
+  label: string;
+  children: ReactNode;
+}
+
+/** A box round one switch on the header's band, with the switch's name set into its top border
+    (a fieldset and its legend, the standard labelled group). The name sits half on the line, so it
+    can be a readable size and adds only half its height to the box. */
+function BandGroup({ labelId, label, children }: BandGroupProps) {
+  return (
+    <fieldset className="rounded-md border border-header-foreground/40 px-1 pb-0.5">
+      <legend id={labelId} className="mb-0.5 px-1 text-xs leading-none font-medium">
+        {label}
+      </legend>
+      {children}
+    </fieldset>
   );
 }
 
@@ -122,7 +138,7 @@ function BandToggleItem({ className, ...props }: ComponentProps<typeof ToggleGro
   return (
     <ToggleGroupItem
       className={cn(
-        "border-header-foreground/40 text-header-foreground hover:bg-white/10 hover:text-header-foreground data-[state=on]:bg-highlight data-[state=on]:text-highlight-foreground",
+        "h-6 min-w-6 px-1.5 text-xs text-header-foreground hover:bg-white/10 hover:text-header-foreground data-[state=on]:bg-highlight data-[state=on]:text-highlight-foreground",
         className,
       )}
       {...props}

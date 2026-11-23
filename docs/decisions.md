@@ -278,7 +278,7 @@ make sure that each one still matches the code before you start it.
   - `npm run publish -- main` puts the branch on `main` from its own worktree. The owner chose
     this after a publish from the main checkout clashed with another session working there.
 - Party slots (#13, done). A slot has two parts, the light party (1 or 2) and the role (Tank,
-  Healer, Melee, Ranged). Casters count as Ranged. The header shows both parts. The light party control is "Group", with 1 and 2, as on wtfdig. Since November 23 "Role" and "Group" are small labels above their switches, not beside them (owner's choice), so the switch fits beside the tab button on a phone; the switch sits on the right. The owner chose
+  Healer, Melee, Ranged). Casters count as Ranged. The header shows both parts. The light party control is "Group", with 1 and 2, as on wtfdig. Since November 23 each switch sits in its own box, a fieldset with "Role" or "Group" set into its top border in 12 px text (owner's choices, over smaller labels above the switch, which were hard to read). The buttons are 24 px, with a small gap so each keeps its rounded corners, and the box is a little taller than the tabs (41 px against 36 px). So the switch fits beside the tab button on a phone; it sits on the right. The owner chose
   to show every role now: a role with no drills yet is greyed out, and pointing at it, focusing
   it or tapping it shows "not yet available". Saved settings and links keep the short names
   (H1, H2). `ROLES` in `src/party.ts` marks which roles are ready.

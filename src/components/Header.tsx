@@ -54,7 +54,7 @@ export function Header() {
         <div className="col-span-2 flex flex-wrap-reverse items-start justify-between gap-x-2 gap-y-2">
           <TabNav className="max-lg:hidden" />
           <TabMenu className="lg:hidden" />
-          <SlotSwitch className="grow pb-1" />
+          <SlotSwitch className="grow pb-0.5" />
         </div>
       </PageContainer>
     </header>
