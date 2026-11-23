@@ -1,4 +1,4 @@
-import { ENRAGE, PHASES, timelineCategories } from "../../data/abilities";
+import { ABILITIES, ENRAGE, PHASES, timelineCategories } from "../../data/abilities";
 import { TIMELINE } from "../../data/timeline";
 import { cn } from "../../lib/utils";
 import { clock, sec } from "../../time";
@@ -19,6 +19,14 @@ const STRIP = PHASES.map((p, k) => {
   const end = next ? Math.min(...next.rows.map((a) => a.t)) : ENRAGE;
   return { name: p.name.split(": ")[1] ?? p.name, start, end };
 });
+
+/** The phase (0 to 3) of the ability nearest to `now`. TIMELINE times are rounded to the second,
+    so a row at the start of a phase can sit a fraction before the phase's exact first time;
+    comparing it with the phase bounds would put it in the phase before. */
+function phaseAt(now: number): number {
+  const nearest = ABILITIES.reduce((best, a) => (Math.abs(a.t - now) < Math.abs(best.t - now) ? a : best));
+  return PHASES.findIndex((p) => p.name === nearest.phase);
+}
 
 /** The timeline row a Timeline card asks about (ids "n-<row>" and "r-<row>": row <row> just
     happened), or null for any other card. */
@@ -42,10 +50,7 @@ export function TimelinePicture({ row, answered, correctName }: TimelinePictureP
   const now = sec(TIMELINE[row].t);
   const correct = TIMELINE.findIndex((e, x) => x > row && e.n === correctName);
   const last = Math.min(TIMELINE.length - 1, row + MAX_ROWS, Math.max(row + MIN_ROWS, correct));
-  const phase = Math.max(
-    0,
-    STRIP.findIndex((p) => now >= p.start && now < p.end),
-  );
+  const phase = phaseAt(now);
   const rows = Array.from({ length: last - row }, (_x, k) => row + 1 + k);
 
   return (

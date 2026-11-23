@@ -31,7 +31,7 @@ test("a timed card: when the time to read and decide runs out, you froze", () =>
   });
   assert.equal(onTimeout.mock.calls.length, 1);
   assert.equal(onAnswer.mock.calls.length, 0);
-  assert.ok(screen.getByText("Too slow: the time ran out."));
+  assert.ok(screen.getByText("Froze: the time ran out."));
   assert.ok(screen.getByRole("button", { name: "Next" }));
 });
 

@@ -59,7 +59,8 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
     // Thin, like a video player's controls: the slider across the top, the buttons in one row under it.
     <div className="rounded-lg border bg-card px-1.5 py-1">
       <FightTimeSlider end={end} onSeek={onSeek} />
-      <div className="relative h-2">
+      {/* The ticks' row is as tall as a tick's target, which is wider than the line it draws. */}
+      <div className="relative h-4">
         {marks.map((m) => (
           <Tick key={m.t} mark={m} left={`calc(${THUMB / 2}px + (100% - ${THUMB}px) * ${m.t / end})`} onSeek={onSeek} />
         ))}
@@ -174,7 +175,7 @@ function Tick({ mark, left, onSeek }: TickProps) {
           type="button"
           tabIndex={-1}
           aria-label={`Jump to ${mark.name}`}
-          className="group absolute inset-y-0 flex w-2 -translate-x-1/2 cursor-pointer justify-center"
+          className="group absolute inset-y-0 flex w-3 -translate-x-1/2 cursor-pointer justify-center"
           style={{ left }}
           onClick={() => onSeek(mark.t)}
         >

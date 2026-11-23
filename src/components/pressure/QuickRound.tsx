@@ -9,7 +9,7 @@ import { QuestionCard } from "../quiz/QuestionCard";
 import { Tally } from "../Tally";
 
 export interface QuickRoundProps {
-  /** Back to the start of Pressure, to change the speed. */
+  /** Back to the start of Pressure: Quit, or Change speed at the end. */
   onBack: () => void;
 }
 
@@ -82,9 +82,15 @@ export function QuickRound({ onBack }: QuickRoundProps) {
       slot={slot}
       decideSecs={secs}
       top={
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">Quick round</span> · Card {i + 1} of {cards.length}
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">Quick round</span> · Card {i + 1} of {cards.length}
+          </p>
+          {/* Quit: back to the start. Each answer so far is already in your scores. */}
+          <Button variant="outline" size="sm" onClick={onBack}>
+            Quit
+          </Button>
+        </div>
       }
       onAnswer={(ok) => handleAnswer(item.id, ok)}
       onTimeout={() => handleTimeout(item.id)}

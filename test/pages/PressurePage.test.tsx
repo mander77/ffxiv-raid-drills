@@ -72,6 +72,15 @@ test("a quick round asks 12 timed cards, and an answer counts in its score only"
   assert.ok(screen.getByText(/Card 2 of 12/));
 });
 
+test("Quit ends a quick round and goes back to the start", async () => {
+  open("/pressure");
+  const user = userEvent.setup();
+  await user.click(screen.getByRole("button", { name: "Start" }));
+  await user.click(screen.getByRole("button", { name: "Quit" }));
+  assert.ok(screen.getByText("Timed questions"));
+  assert.equal(screen.queryByText(/Card 1 of 12/), null);
+});
+
 test("Start the run opens the run on /pressure, and Quit with no answer goes back", async () => {
   open("/pressure");
   const user = userEvent.setup();

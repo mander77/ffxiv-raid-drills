@@ -51,7 +51,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
   /** The answer you point at or move to with Tab. It shows on the picture while you do. */
   const [hover, setHover] = useState<number | null>(null);
   const next = useRef<HTMLButtonElement>(null);
-  /** A timed card: its timer, made once, and whether the time ran out (too slow). */
+  /** A timed card: its timer, made once, and whether the time ran out (you froze). */
   const [timer] = useState(() => (decideSecs ? timerOf([q.prompt, ...q.options.map((o) => o.t)], decideSecs) : null));
   const [slow, setSlow] = useState(false);
 
@@ -123,65 +123,74 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
 
   const okPick = pick !== null && opts[pick].ok === true;
   const prompt = <h2 className="text-xl font-semibold text-balance">{q.prompt}</h2>;
+  const choices = (
+    <fieldset className="space-y-2">
+      <legend className="sr-only">Answers</legend>
+      {opts.map((o, i) => (
+        <AnswerButton
+          key={o.t}
+          n={i + 1}
+          text={o.t}
+          state={!answered ? (previews && sel === i ? "picked" : "open") : o.ok ? "correct" : i === pick ? "incorrect" : "other"}
+          why={answered && o.ok ? q.why : undefined}
+          pressed={previews && !answered ? sel === i : undefined}
+          onClick={() => handleOptionClick(i)}
+          onPoint={(on) => previews && !answered && setHover(on ? i : null)}
+        />
+      ))}
+    </fieldset>
+  );
+  /** After the answer: how it went, the rule and the source. */
+  const feedback = answered && (
+    <>
+      <p className={cn(slow ? "font-medium text-warning-foreground" : "sr-only")} role="status">
+        {slow ? "Froze: the time ran out." : okPick ? "Correct." : "Not this one."}
+      </p>
+      <RuleBox rule={q.rule} />
+      {q.src && <p className="text-xs text-muted-foreground">Source: {q.src}</p>}
+    </>
+  );
+  /** What you do next: Next after the answer, Lock in before it, or the keys. */
+  const actions = answered ? (
+    <ActionBar>
+      <Button ref={next} onClick={onNext}>
+        Next
+      </Button>
+      <KeyHint>
+        <Kbd>Enter</Kbd> next
+      </KeyHint>
+    </ActionBar>
+  ) : previews ? (
+    // On a phone the answers sit under the picture, so Lock in stays in a bar at the bottom.
+    <ActionBar pinned={sel !== null}>
+      <Button disabled={sel === null} onClick={() => sel !== null && lockIn(sel)}>
+        Lock in answer
+      </Button>
+      <p className="text-sm text-muted-foreground">
+        Pick an answer to see it on the picture.
+        <KeyHint>
+          {" "}
+          <Kbd>1</Kbd> to <Kbd>{opts.length}</Kbd> pick, <Kbd>Enter</Kbd> lock in.
+        </KeyHint>
+      </p>
+    </ActionBar>
+  ) : (
+    <KeyHint>
+      Press <Kbd>1</Kbd> to <Kbd>{opts.length}</Kbd> or click an answer.
+    </KeyHint>
+  );
   const answers = (
     <div className="space-y-4">
-      <fieldset className="space-y-2">
-        <legend className="sr-only">Answers</legend>
-        {opts.map((o, i) => (
-          <AnswerButton
-            key={o.t}
-            n={i + 1}
-            text={o.t}
-            state={!answered ? (previews && sel === i ? "picked" : "open") : o.ok ? "correct" : i === pick ? "incorrect" : "other"}
-            why={answered && o.ok ? q.why : undefined}
-            pressed={previews && !answered ? sel === i : undefined}
-            onClick={() => handleOptionClick(i)}
-            onPoint={(on) => previews && !answered && setHover(on ? i : null)}
-          />
-        ))}
-      </fieldset>
-
-      {answered ? (
-        <>
-          <p className={cn(slow ? "font-medium text-warning-foreground" : "sr-only")} role="status">
-            {slow ? "Too slow: the time ran out." : okPick ? "Correct." : "Not this one."}
-          </p>
-          <RuleBox rule={q.rule} />
-          {q.src && <p className="text-xs text-muted-foreground">Source: {q.src}</p>}
-          <ActionBar>
-            <Button ref={next} onClick={onNext}>
-              Next
-            </Button>
-            <KeyHint>
-              <Kbd>Enter</Kbd> next
-            </KeyHint>
-          </ActionBar>
-        </>
-      ) : previews ? (
-        // On a phone the answers sit under the picture, so Lock in stays in a bar at the bottom.
-        <ActionBar pinned={sel !== null}>
-          <Button disabled={sel === null} onClick={() => sel !== null && lockIn(sel)}>
-            Lock in answer
-          </Button>
-          <p className="text-sm text-muted-foreground">
-            Pick an answer to see it on the picture.
-            <KeyHint>
-              {" "}
-              <Kbd>1</Kbd> to <Kbd>{opts.length}</Kbd> pick, <Kbd>Enter</Kbd> lock in.
-            </KeyHint>
-          </p>
-        </ActionBar>
-      ) : (
-        <KeyHint>
-          Press <Kbd>1</Kbd> to <Kbd>{opts.length}</Kbd> or click an answer.
-        </KeyHint>
-      )}
+      {choices}
+      {feedback}
+      {actions}
     </div>
   );
 
   // A wide screen, with an arena picture: the question and the answers in a column against the
   // arena's floor, lined up with its top and bottom, as on Practice; it scrolls when a long rule
-  // does not fit. The arena gets the height the question took above it.
+  // does not fit. Lock in and Next sit under the scrolling part, so they are always in view. The
+  // arena gets the height the question took above it.
   if (wide && arena) {
     return (
       <div className="space-y-4">
@@ -190,13 +199,17 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
         <div className="flex justify-center">
           <ArenaFrame
             before={
-              <ScrollArea className="w-80">
-                <div className="space-y-4">
-                  {prompt}
-                  {answers}
-                  {note && <p className="text-sm text-muted-foreground">{note}</p>}
-                </div>
-              </ScrollArea>
+              <div className="flex w-80 flex-col gap-4">
+                <ScrollArea className="min-h-0 flex-1">
+                  <div className="space-y-4">
+                    {prompt}
+                    {choices}
+                    {feedback}
+                    {note && <p className="text-sm text-muted-foreground">{note}</p>}
+                  </div>
+                </ScrollArea>
+                {actions}
+              </div>
             }
             className="mx-0 ml-80 min-w-0 flex-1"
           >

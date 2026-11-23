@@ -194,13 +194,27 @@ export const LEARN_CARDS: QuizItem[] = [
 const isRaidwide = (i: number): boolean => tlAbilities(i)[0]?.cats.includes("raid") ?? false;
 // Each raidwide name once. Crown of Arcadia happens six times, so the Set removes the repeats.
 const RAIDWIDE_NAMES = [...new Set(TIMELINE.filter((_e, i) => isRaidwide(i)).map(e => e.n))];
+/** Rows whose names point back to an earlier row (the other weapon, the second time), with the row
+    they point back to. Before that row has happened, such a name gives the answer away as
+    incorrect, so it is not offered as an incorrect answer. */
+const POINTS_BACK: Record<string, string> = {
+  "Raw Steel Trophy (the other weapon)": "Raw Steel Trophy (axe or scythe)",
+  "Assault Evolved (second set)": "Trophy Weapons, then Assault Evolved",
+  "Void Stardust (second time)": "Trophy Weapons and Void Stardust",
+};
+/** Whether row e can be an incorrect answer on the card for row i: anything, except a name that
+    points back to a row that has not happened yet. */
+const canOffer = (e: TimelineEvent, i: number): boolean => {
+  const first = POINTS_BACK[e.n];
+  return first === undefined || TIMELINE.findIndex(x => x.n === first) <= i;
+};
 export const TIMELINE_CARDS: QuizItem[] = [];
 TIMELINE.slice(0, -1).forEach((ev, i) => {
   TIMELINE_CARDS.push({id:"n-" + i, order:i, phase:"Timeline", time:ev.t, build:s => {
     const correct = TIMELINE[i + 1];
     const names = new Set([correct.n, ev.n]);
     const picks: TimelineEvent[] = [];
-    shuffle(TIMELINE.slice()).forEach(e => { if(picks.length < 3 && !names.has(e.n)){ names.add(e.n); picks.push(e); } });
+    shuffle(TIMELINE.slice()).forEach(e => { if(picks.length < 3 && !names.has(e.n) && canOffer(e, i)){ names.add(e.n); picks.push(e); } });
     return {prompt:ev.n + " (" + ev.t + ") just happened. What comes next?",
       options:[{t:correct.n, ok:true}, ...picks.map(p => ({t:p.n}))],
       why:"Next is " + correct.n + " at " + correct.t + ". " + correct.job(s),

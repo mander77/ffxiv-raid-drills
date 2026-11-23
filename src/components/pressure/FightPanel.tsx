@@ -4,7 +4,7 @@ import { Kbd } from "@/components/ui/kbd";
 import { ABILITIES } from "../../data/abilities";
 import type { Fight, FightSeg } from "../../data/fight";
 import { useFightFrame } from "../../hooks/useFightFrame";
-import { activeSeg, type FightView, nextSeg, upcoming } from "../../lib/fight";
+import { activeSeg, type FightView, nextSeg, upcoming, watchQuestion } from "../../lib/fight";
 import { clock } from "../../time";
 import { CategoryDots, categoryNames } from "../CategoryDots";
 import { LastAnswer } from "../LastAnswer";
@@ -68,14 +68,14 @@ function Mechanic({ view: v, fight, g, onGoTo, onSpawns }: MechanicProps) {
               </>
             )}
           </p>
-          <p className="font-medium">{g.scene.steps[j].q}</p>
+          <p className="font-medium">{watchQuestion(g.scene.steps[j].q)}</p>
           {/* The player shows the correct move with its question; your marker walks there. */}
           <p className="mt-1.5">
             <span className="font-semibold text-success-foreground">Correct move:</span> {g.scene.steps[j].a}
           </p>
         </div>
       )}
-      {j > 0 && <LastAnswer ok={res[j - 1].ok} question={g.scene.steps[j - 1].q} answer={g.scene.steps[j - 1].a} />}
+      {j > 0 && <LastAnswer ok={res[j - 1].ok} question={watchQuestion(g.scene.steps[j - 1].q)} answer={g.scene.steps[j - 1].a} />}
       {done ? (
         <>
           {g.scene.rule && <RuleBox rule={g.scene.rule} />}

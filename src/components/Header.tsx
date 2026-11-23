@@ -13,7 +13,7 @@ const STRATS = [`${FIGHT_INFO.short} ${FIGHT_INFO.full}`, ...FIGHT_INFO.strats];
     page below gets more room: the name and the strats, then Light/dark and Share on the right; the
     tabs along the bottom (the one you are on in celery), with the slot switch on the right. On a
     narrower screen the slot switch and the tabs each get their own row.
-    It stays at the top of the screen only on a wide screen. On a narrower one it is four rows tall,
+    It stays at the top of the screen only on a wide screen. On a phone it is five rows tall,
     so it scrolls away with the page and never covers the arena. */
 export function Header() {
   return (
@@ -47,7 +47,7 @@ export function Header() {
         </div>
         {/* The tabs come first, so on a wide screen they sit on the left of the last row. On a
             narrower screen they move under the slot switch. */}
-        <TabNav className="self-end max-lg:order-last max-lg:col-span-2" />
+        <TabNav className="self-end max-lg:order-last max-lg:col-span-2 max-sm:pb-2" />
         <SlotSwitch className="justify-self-end pb-1.5 max-lg:col-span-2 max-lg:pb-0 max-sm:justify-self-stretch" />
       </PageContainer>
     </header>

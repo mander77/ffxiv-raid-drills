@@ -20,9 +20,21 @@ import {
   TELL_HOLD,
   tickFight,
   viewOf,
+  watchQuestion,
 } from "../../src/lib/fight";
 
 const fight = () => buildFight("H1", "K7Q2");
+
+test("the player asks without telling you to click", () => {
+  expect(watchQuestion("Click where the party stacks.")).toBe("Where the party stacks.");
+  expect(watchQuestion("Click your pair spot.")).toBe("Your pair spot.");
+  expect(watchQuestion("Which line stack do you join? Click it.")).toBe("Which line stack do you join?");
+  expect(watchQuestion("The stack went off. The boss goes to the first weapon. Click where you go.")).toBe(
+    "The stack went off. The boss goes to the first weapon. Where you go.",
+  );
+  expect(watchQuestion("Second weapon: click where you go.")).toBe("Second weapon: where you go.");
+  expect(watchQuestion("Where do you bait?")).toBe("Where do you bait?");
+});
 
 describe("where the fight is", () => {
   test("a mechanic is on the arena from its start until 3 seconds after its last hit", () => {

@@ -383,6 +383,15 @@ export interface Prompt {
   ring: { empty: number; urgent: boolean } | null;
 }
 
+/** A step's question as the player shows it. You watch there and do not click, so "Click it." goes,
+    and "Click where the party stacks." reads "Where the party stacks.". */
+export function watchQuestion(q: string): string {
+  return q
+    .replace(/\s*Click it\.$/, "")
+    .replace(/(^|\. )Click (\S)/g, (_m, before: string, first: string) => before + first.toUpperCase())
+    .replace(/: click /g, ": ");
+}
+
 export function promptOf(s: FightState): Prompt {
   const f = s.fight;
   const si = activeSeg(f, s.t);

@@ -31,6 +31,29 @@ test("on a phone the header scrolls away, so the whole arena is in view", async 
   await expect(page.getByRole("banner")).not.toBeInViewport({ ratio: 0.5 });
 });
 
+test("on a phone every tab is in view, in two rows of three", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto("/");
+  const links = page.getByRole("navigation", { name: "Tabs" }).getByRole("link");
+  const boxes = await Promise.all((await links.all()).map((l) => l.boundingBox()));
+  for (const b of boxes) {
+    expect(b).not.toBeNull();
+    expect((b?.x ?? 0) + (b?.width ?? 0)).toBeLessThanOrEqual(375);
+  }
+  const rows = new Set(boxes.map((b) => Math.round(b?.y ?? 0)));
+  expect(rows.size).toBe(2);
+});
+
+test("on a wide screen, Next stays in view after a Learn card's answer", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/learn/k-raw-first");
+  await expect(page.getByRole("button", { name: "Lock in answer" })).toBeVisible();
+  await page.keyboard.press("1");
+  await page.getByRole("button", { name: "Lock in answer" }).click();
+  // The card's own Next, under the answers: not the Next card button at the top.
+  await expect(page.getByRole("button", { name: "Next", exact: true })).toBeInViewport({ ratio: 1 });
+});
+
 test("on a wide screen the header stays at the top", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/sheet");

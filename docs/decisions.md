@@ -169,7 +169,7 @@ make sure that each one still matches the code before you start it.
     takes two rows on a wide screen (the strats beside the name, Role and Group beside the tabs),
     so the arena gets more room.
   - The header stays at the top of the screen only on a wide screen (lg and up), where it is two
-    rows. On a narrower screen it is four rows (199 px at 375 x 812, a quarter of a phone) and
+    rows. On a narrower screen it is five rows (247 px at 375 x 812, with the tabs in two rows) and
     covered the top of the arena, so there it scrolls away with the page. NN/g, Smashing Magazine
     and Adobe all advise against a tall sticky header on a phone. A header that hides on scroll
     down and comes back on scroll up is the next step, if players miss the tabs on a phone.
@@ -325,6 +325,8 @@ Do not propose these again unless the owner brings them up.
 - Back, Next and one chip per mechanic (`LEARN_GROUPS` in `src/data/questions.ts`). A test makes sure
   that each card is in exactly one chip.
 - On a phone, Lock in answer and Next stay in a bar at the bottom of the screen.
+- On a wide screen, Lock in answer and Next sit under the column's scrolling part, so a long
+  answer or rule never pushes them off the screen (UX review, November 23).
 
 ### Timeline
 
@@ -332,6 +334,12 @@ Do not propose these again unless the owner brings them up.
   line "Coming up: the names show after you answer." A strip shows P1 to P4 and where you are.
 - When the next raidwide is the same one again (Crown of Arcadia comes five times), the answer says
   "Crown of Arcadia again".
+- The incorrect answers are random rows of the timeline. A row whose name points back to an
+  earlier row ("the other weapon", "second set", "second time") is not offered before that
+  earlier row has happened, because the name gives it away (`POINTS_BACK` in
+  `src/data/questions.ts`).
+- The phase on a card is the phase of the ability nearest the card's time. The timeline's times
+  are rounded, so Orbital Omen (4:26) was shown in Phase 1 before.
 
 ### Practice
 
@@ -412,6 +420,9 @@ Do not propose these again unless the owner brings them up.
 ### Pressure: the quick round
 
 - 12 timed questions from Learn and Timeline. One click per answer, no preview.
+- Quit, beside "Card 1 of 12", goes back to the start. The answers so far stay in your scores.
+- When the time runs out, you froze: the card says "Froze: the time ran out.", as the setup and
+  the counts say. The run keeps "Too slow" for a hit you did not answer in time.
 - On a phone the answers come before the picture, so all of them are on screen at the start of
   the timer.
 
@@ -436,6 +447,10 @@ Do not propose these again unless the owner brings them up.
 
 - A replay. A marker with your role runs the correct spots. You do not click answers.
 - The HUD gives the correct move (the step's answer text), and nothing turns red.
+- You do not click in the player, so its step box drops "Click" from the question: "Click where
+  the party stacks." shows as "Where the party stacks." (`watchQuestion` in `src/lib/fight.ts`).
+- Each mechanic's tick under the slider is a 12 x 16 px target. The ticks can be 4 px apart, so a
+  wider target would cover the next one.
 - Click the map, or press Space, to pause or play. A "Paused" badge shows above the map.
 - The play bar (play, slider, speeds, Settings) sticks to the bottom of the screen while the arena
   is in view. Settings holds only the fight pattern picks.

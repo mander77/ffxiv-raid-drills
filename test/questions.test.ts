@@ -38,6 +38,26 @@ test("the timeline runs in time order", () => {
   for (let i = 1; i < TIMELINE.length; i++) assert.isAbove(sec(TIMELINE[i].t), sec(TIMELINE[i - 1].t), TIMELINE[i].n);
 });
 
+test("a next-mechanic card never offers a second time before the first time", () => {
+  const pointsBack = [
+    ["Raw Steel Trophy (the other weapon)", "Raw Steel Trophy (axe or scythe)"],
+    ["Assault Evolved (second set)", "Trophy Weapons, then Assault Evolved"],
+    ["Void Stardust (second time)", "Trophy Weapons and Void Stardust"],
+  ];
+  for (const [later, first] of pointsBack) {
+    const firstAt = TIMELINE.findIndex((e) => e.n === first);
+    assert.isAtLeast(firstAt, 0, first);
+    for (let i = 0; i < firstAt; i++) {
+      const item = TIMELINE_CARDS.find((x) => x.id === `n-${i}`);
+      // The incorrect answers are random, so build each card many times.
+      for (let k = 0; k < 50; k++) {
+        const options = item?.build("H1").options.map((o) => o.t) ?? [];
+        assert.notInclude(options, later, `n-${i}`);
+      }
+    }
+  }
+});
+
 test("next-raidwide questions ask for the name, not the exact time", () => {
   const raidwide = TIMELINE_CARDS.filter((x) => x.id.startsWith("r-"));
   assert.isAbove(raidwide.length, 0);
