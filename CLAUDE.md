@@ -320,7 +320,8 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   "wrong": "right" is only a direction, so write "directly behind", not "right behind".
 - **Step**: one question of a drill. Its **status** (`StepStatus`) is ask, correct or incorrect.
 - **Phase**: a phase of the fight (Phase 1 to 4), and nothing else.
-- **Look-ahead**: a step that is saved for later (`Step.lookAhead`).
+- **Look ahead**: a step where you spot something early and act on it later (`Step.lookAhead`).
+  The screen says "Look ahead", at the start of the line, every time.
 - **Look**: the colour of a zone's area or a label (`ZoneLook`, `LabelLook`).
 - **Zone**: a spot on the arena. `ZoneArea` draws its area, `ZoneLabel` its label.
 - **Overlay**: a piece drawn on the arena (an attack, a weapon, a tag, a player mark); `Shape`
@@ -328,7 +329,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Mark**: a player's mark on the arena, or the boss (`BossMark`).
 - **Kind**: what you do in a Practice mechanic: spread, a stack (party, pair, light party or role
   stack), line stack, bait, puddle drop sequence, proteans (clock spots), dodge sequence, tower,
-  knockback tower, tank tower, wild charge, saved for later, knockback, stretch tether, tank buster
+  knockback tower, tank tower, wild charge, look ahead, knockback, stretch tether, tank buster
   or shared tank buster (`DrillKind`, `Drill.kind`). A mechanic that can end in more than one way
   has several kinds (the weapons: party stack, proteans, light party stack); `kindsOf` gives them.
   `MechanicIcon` draws its icon; the rules for
@@ -369,8 +370,9 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   `src/data/pictures.ts`). Give it a name and a comment that says it is the app's choice.
 - Never change a strat, a position or a rule without the owner. When a source and the owner
   disagree, ask.
-- Words: "pattern", not "layout". "Saved for later" is a mechanic that the boss shows early and
-  resolves later (a look-ahead step, `Step.lookAhead`). "The run" is the scored full fight. "Watch the
+- Words: "pattern", not "layout". "Look ahead" is a mechanic that the boss shows early and
+  resolves later (`Step.lookAhead`). Any line that tells the player to spot something early starts
+  with "Look ahead:". It replaced "Saved for later". "The run" is the scored full fight. "Watch the
   correct moves" is the replay.
 - Never quiz an exact raidwide time. Ask which one comes next and whether it is soon.
 - Mechanic text (a setup, a rule, a step's answer, a card's explanation, the timeline's "what you

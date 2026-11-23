@@ -38,7 +38,7 @@ type RectBox = [number, number, number, number];
 // The `?` in `look?` means the field is optional. Its type is `ZoneLook | undefined`.
 /** The colour of a zone's area: "ok" (the correct spot, green), "bad" (the correct spot after an incorrect
     click, lighter green), "pick" (a preview or "Go here", blue), "other" (another slot's spot,
-    grey), "later" (saved for later, purple) or "hit" (an area that gets hit, red). */
+    grey), "later" (look ahead, purple) or "hit" (an area that gets hit, red). */
 export type ZoneLook = "ok" | "bad" | "pick" | "other" | "later" | "hit";
 export interface CircleZone {
   c: Point;
@@ -183,7 +183,7 @@ export interface Scene {
     parties, or by role), stack in a line from the boss, bait an attack (bring it to where it should
     go), drop puddles in order, take your clock spot for proteans, dodge a set order of attacks, take a tower (one that knocks
     you back, or one for a tank), line up behind a blocker for a wild charge, act on what the boss showed earlier
-    (saved for later), get knocked back to your spot, stretch a tether, or take a tank buster alone
+    (look ahead), get knocked back to your spot, stretch a tether, or take a tank buster alone
     or shared. Practice's list of mechanics shows it as an icon. */
 export type DrillKind =
   | "spread"

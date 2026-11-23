@@ -428,7 +428,7 @@ Do not propose these again unless the owner brings them up.
     first in line takes far more damage, so a tank or a rock stands in front (owner's words);
     every Meteorain stack is one. The fight has no hide kind.
   - Assault Evolved and the six Ultimate Trophy Weapons are a dodge sequence (owner's name): the
-    boss goes through the weapons in order. Saved for later is only for a mechanic with a
+    boss goes through the weapons in order. Look ahead is only for a mechanic with a
     look-ahead step, as the site uses the words.
   - Arena Split: line up is a knockback to your platform. Arena Split's first towers are knockback
     towers: you soak them, and they knock you back. Tower stays for a plain tower, a common
@@ -497,7 +497,7 @@ Do not propose these again unless the owner brings them up.
     scrolls the page (`touch-pan-y`).
   - The run has none of this: it is scored, so it stays on the clock.
 - The green answer area has no "Correct spot" tag here.
-- The first weapon of Void Stardust is answered 4 seconds early and shows as "Saved for later"
+- The first weapon of Void Stardust is answered 4 seconds early and shows as "Look ahead"
   until its due time, so you have time to see it.
 
 ### Home and Cheat sheet
@@ -547,12 +547,14 @@ Do not propose these again unless the owner brings them up.
   blade, a gently bent crossguard and a round pommel (owner's choices).
 - When the boss jumps onto a weapon (Practice and Pressure), the picture stays clear (owner's
   choice): the weapon he stands on loses its name tag (his ring on its icon says which one), the
-  weapons he has left fade, and the "Correct spot", "Go here" and "Saved for later" labels move
+  weapons he has left fade, and the "Correct spot", "Go here" and "Look ahead" labels move
   straight out from him past his ring, so they never cover him or the weapon. A weapon on a
   waymark still covers the waymark: the owner chose to keep that.
 - The boss turns smoothly to face his next target. He does not flip.
-- "Saved for later" (purple) marks a mechanic shown early and resolved later, for example the
-  first weapon during Void Stardust. It is never a spot to stand on.
+- "Look ahead" (purple) marks a mechanic shown early and resolved later, for example the
+  first weapon during Void Stardust. It is never a spot to stand on. Every line that tells you to
+  spot something early starts with "Look ahead:" (owner's choice, issue #58). It replaced "Saved
+  for later", which new players did not understand.
 - Below lg (1024 px) the tabs are one button with the tab you are on, in celery like a tab
   ("☰ Learn"). It opens a sheet from the left with the six tabs (`TabMenu`, shadcn's Sheet). The
   owner chose it over two rows of three, which took a quarter of a phone's screen, and over a tab

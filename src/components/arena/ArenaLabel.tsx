@@ -3,7 +3,7 @@ import { round2 } from "../../geometry";
 import type { Point, ZoneLook } from "../../types";
 
 /** The colour of a label: green for your spot ("ok"), grey for another slot's spot ("other"), blue
-    for "Go here" ("pick"), purple for a spot saved for later ("later"). The same colours as a
+    for "Go here" ("pick"), purple for a look-ahead spot ("later"). The same colours as a
     zone's area. */
 // TS note: Extract keeps the members of a union that fit, here four of ZoneLook's six.
 export type LabelLook = Extract<ZoneLook, "ok" | "other" | "pick" | "later">;

@@ -48,7 +48,7 @@ WHAT TO LOOK FOR
    5 seconds?
 2. Navigation: are tab names, buttons and next steps clear? Are there dead ends?
 3. Reading load: blocks of text longer than 2 lines, jargon, and unexplained terms or
-   abbreviations (for example H1/H2, strat names, "Saved for later").
+   abbreviations (for example H1/H2, strat names, "Look ahead").
 4. Feedback: does the user always know what happened, what state the app is in (playing,
    paused, done), and what to do next? Does the answer change when they switch H1 and H2,
    and can they tell?

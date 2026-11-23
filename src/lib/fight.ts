@@ -1,6 +1,6 @@
 // The rules of the full fight's clock, as plain functions: when a step can be answered, when the
 // run skips ahead, when a result shows, the 3-2-1 before a mechanic, and the look-ahead answer
-// that is saved for later. The fight screen calls them on every frame; the tests call them too.
+// to look ahead to. The fight screen calls them on every frame; the tests call them too.
 
 import { type Category, categoriesAt } from "../data/abilities";
 import { PUDDLE_LIFE } from "../data/attacks";
@@ -159,7 +159,7 @@ export function askFrom(g: FightSeg, j: number): number {
 export const showingResult = (s: FightState, g: FightSeg, n: number): boolean =>
   s.mode === "run" && n > 0 && n < g.due.length && s.t < s.answeredAt + RESULT_SHOW;
 
-/** Saved for later: on the player, from the early answer of a look-ahead step until its due time,
+/** Look ahead: on the player, from the early answer of a look-ahead step until its due time,
     the answer holds the screen. Returns that step, or -1. */
 export function lookHold(s: FightState, si: number): number {
   if (s.mode !== "watch" || si < 0) return -1;
@@ -407,16 +407,16 @@ export function promptOf(s: FightState): Prompt {
       : x.missed
         ? "Too slow"
         : ahead
-          ? "Not that one. The purple one is the weapon to save for later."
+          ? "Not that one. Look ahead: the purple one is the first weapon."
           : "Not there. The green area was correct.";
     return { look: x.ok ? "ok" : "bad", count: x.ok ? "✓" : "✗", text, ring: null };
   }
   if (g && held >= 0) {
-    // Saved for later: the first line of the look-ahead answer, up to its first colon or full stop.
+    // Look ahead: the first line of the look-ahead answer, up to its first colon or full stop.
     const a = g.scene.steps[held].a[0];
     const cut = a.search(/[:.]/);
     const what = cut > 0 ? a.slice(0, cut) : a;
-    return { look: "later", count: "✓", text: `Saved for later: ${what.charAt(0).toLowerCase()}${what.slice(1)}.`, ring: null };
+    return { look: "later", count: "✓", text: `Look ahead: ${what.charAt(0).toLowerCase()}${what.slice(1)}.`, ring: null };
   }
   if (g && j < g.due.length && s.t < askFrom(g, j))
     // The tell: a weapon question waits for the boss to turn to the first weapon.

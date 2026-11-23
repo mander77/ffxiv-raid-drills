@@ -26,7 +26,7 @@
 // 6. Players lined up are dots in a row (a line stack). A tank who takes the first hit for the
 //    others is the tank's shield in the first player's place (a wild charge).
 // 7. A shield is a tank: a tank buster, or a tank tower (a tower shaped like the shield).
-// 8. A clock is timing: something you see now and act on later (saved for later).
+// 8. A clock is timing: something you see now and act on later (look ahead).
 // 9. Every stack has arrows from the corners into the middle. The middle says how many: 2 (pairs),
 //    4 (light parties), R (the roles decide). The whole party's stack has no number, so its arrows
 //    meet close in the middle: the inverse of spread. A shared
@@ -115,8 +115,8 @@ const PLAYER = "fill-count stroke-count";
 export {
   // Spread out: arrows out to the corners.
   Expand as SpreadIcon,
-  // Saved for later: a clock that turns back.
-  History as SavedForLaterIcon,
+  // Look ahead: a clock that turns back.
+  History as LookAheadIcon,
   // A party stack: arrows in from the corners to the middle, the inverse of spread.
   Shrink as PartyStackIcon,
 } from "lucide-react";

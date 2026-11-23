@@ -266,7 +266,7 @@
   }
 
   /* Where to stand: the correct answer is green, a preview or "Go here" is blue, the other slot's spot
-     is grey, a spot saved for later is purple, and an area that gets hit is red. */
+     is grey, a look-ahead spot is purple, and an area that gets hit is red. */
   .arena .zone {
     stroke-width: 0.7;
     stroke-dasharray: 1.6 1;

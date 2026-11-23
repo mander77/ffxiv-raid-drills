@@ -208,7 +208,7 @@ export function ultimateScene(U: JumpSet): Scene {
     setup:["Everyone is at 1 HP after Charybdistopia.",
       "Six weapons spawn one after another. The boss resolves them in spawn order.",
       "Three show now. Each hit brings in the next one.",
-      "Watch where the first one spawns: south and slightly west = clockwise.",
+      "Look ahead: where does the first one spawn?", "South and slightly west = clockwise.",
       "South and slightly east = counterclockwise."],
     spawnPlay:true, spawnAhead:3, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,
     rule:["First weapon south: slightly west = clockwise, slightly east = counterclockwise.",
@@ -439,9 +439,9 @@ const safeSpot = (st: Step): Point | null => { const z = st.z ?? st.zf?.([]); re
 export function voidIntoWeapons(s: Slot, spread: boolean, A: JumpSet): Scene {
   const first = A.W[0], sprint = first.type !== "axe", where = COMPASS[Math.round(first.a / 45) % 8];
   const steps: Step[] = [
-    // A look-ahead: you spot the first weapon now, so you know what to do when the puddles are
+    // Look ahead: you spot the first weapon now, so you know what to do when the puddles are
     // done, but you go to A for the first puddle, not to the weapon.
-    {q:"Before the puddles: which weapon goes first after Void Stardust? Click it.", z:{c:first.p, r:9}, lookAhead:true,
+    {q:"Look ahead: which weapon goes first after Void Stardust? Click it.", z:{c:first.p, r:9}, lookAhead:true,
       a:["The " + first.type + ", " + where + ": its flat side is square to the boss.",
         sprint ? "Sword or scythe first: a sprint. The stack or spread moves toward it." : "Axe first: the party stacks in the middle. The usual spots work."]},
     ...voidSteps(s, spread, sprint ? first.p : null, CENTER, NORTH_START, safeSpot(A.steps[0])),
@@ -460,7 +460,7 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: JumpSet): Scene {
     // The boss stays in the middle for the pick, the puddles and the stack or spread (5 steps).
     bossAt:n => A.states[Math.max(0, Math.min(n - 5, A.states.length - 1))],
     steps,
-    rule:["Before the puddles: find the first weapon. Its flat side is square to the boss.",
+    rule:["Look ahead: find the first weapon before the puddles.", "Its flat side is square to the boss.",
       "Puddles: start north. Each one just outside the last, clockwise.",
       "Sword or scythe first: stack or spread toward it.",
       "If it is far: use Expedient, Sprint or a movement ability.",

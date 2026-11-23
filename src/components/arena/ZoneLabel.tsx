@@ -8,7 +8,7 @@ import { ArenaLabel, type LabelLook } from "./ArenaLabel";
     colour. */
 export const ZONE_LABELS = {
   correct: { text: "Correct spot", w: 17, look: "ok" },
-  later: { text: "Saved for later", w: 24, look: "later" },
+  later: { text: "Look ahead", w: 16, look: "later" },
   go: { text: "Go here", w: 14, look: "pick" },
 } as const satisfies Record<string, { text: string; w: number; look: LabelLook }>;
 

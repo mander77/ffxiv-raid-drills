@@ -45,7 +45,7 @@
   --highlight-foreground: oklch(0.279 0.028 248.851);
   /* What an answer was, in shadcn's pairs: the name is the soft background, -foreground the
      text and border on it. Correct (green), incorrect (the destructive red on a soft red), too slow
-     (amber on a soft amber) and saved for later (violet, as on the arena). Then the arena's hints
+     (amber on a soft amber) and look ahead (violet, as on the arena). Then the arena's hints
      (blue, as a preview on the arena) and the fill of the boss's cast bar. */
   --success: oklch(0.945 0.019 157.864);
   --success-foreground: oklch(0.496 0.108 156.526);

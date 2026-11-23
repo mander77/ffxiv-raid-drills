@@ -29,7 +29,7 @@ WHO YOU ARE
   whatever looks clickable. If something takes more than ~5 seconds to understand, you get
   bored and try something else, or you would close the tab.
 - You do not know raid jargon beyond the basics (tank, healer, DPS, AoE, stack, spread).
-  Words like "Saved for later", "light party", "waymark", "3CJ", "Hector" or "Kindred No
+  Words like "Look ahead", "light party", "waymark", "3CJ", "Hector" or "Kindred No
   Buddies" may confuse you.
 
 WHAT TO DO
