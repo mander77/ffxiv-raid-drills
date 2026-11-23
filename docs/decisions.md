@@ -24,7 +24,7 @@ The plans are GitHub issues in `mander77/ffxiv-raid-drills`. Read them with `gh 
 make sure that each one still matches the code before you start it.
 
 - Issue #2, the reference view (November 22): it lives at the top of the Cheat sheet, in place of
-  "Positions to remember", not in a new tab, so the phone keeps its 2 x 3 tab grid. It is one
+  "Positions to remember", not in a new tab, so the phone keeps its short list of tabs. It is one
   scrolling page, not one mechanic at a time. Each mechanic gets
   one key picture, not one per Learn card: 26 mechanics in fight order (`REFERENCE` in
   `src/data/reference.ts`), each with the answer picture of one Learn card for your slot, the
@@ -169,8 +169,8 @@ make sure that each one still matches the code before you start it.
     takes two rows on a wide screen (the strats beside the name, Role and Group beside the tabs),
     so the arena gets more room.
   - The header stays at the top of the screen only on a wide screen (lg and up), where it is two
-    rows. On a narrower screen it is five rows (247 px at 375 x 812, with the tabs in two rows) and
-    covered the top of the arena, so there it scrolls away with the page. NN/g, Smashing Magazine
+    rows. On a narrower screen it is three rows (159 px at 390 x 844) and covered the top of the
+    arena, so there it scrolls away with the page. NN/g, Smashing Magazine
     and Adobe all advise against a tall sticky header on a phone. A header that hides on scroll
     down and comes back on scroll up is the next step, if players miss the tabs on a phone.
   - Pressure on a wide screen (lg and up): the arena has the left column to itself, from the top;
@@ -217,6 +217,10 @@ make sure that each one still matches the code before you start it.
   - On an extra-wide screen the mechanic's column touches the arena too (owner's choice): it sits
     against the floor's left edge (`ArenaFrame`'s `before` column), from the floor's top to its
     bottom, so the arena and its two columns read as one piece in the middle of the page.
+  - On a screen taller than the arena, the side columns of Practice and Pressure start at the
+    floor's top and run on down to the bottom of the screen, so a list is not cut off at the floor
+    (owner's choice, November 23; `tallSides` on `ArenaFrame`). They are never shorter than the
+    floor. Learn's column keeps the floor's height, so Next stays beside the arena.
   - The player has two layouts, never a mix (owner's choice: the columns sit either both beside the
     arena or above and below it). Wide (lg, 1024 px and up): the mechanic against the floor on the
     left, the play bar over the casts coming up on the right. Narrower: one column, the cast bar
@@ -274,7 +278,7 @@ make sure that each one still matches the code before you start it.
   - `npm run publish -- main` puts the branch on `main` from its own worktree. The owner chose
     this after a publish from the main checkout clashed with another session working there.
 - Party slots (#13, done). A slot has two parts, the light party (1 or 2) and the role (Tank,
-  Healer, Melee, Ranged). Casters count as Ranged. The header shows both parts. The light party control is labelled "Group", with 1 and 2, as on wtfdig. The owner chose
+  Healer, Melee, Ranged). Casters count as Ranged. The header shows both parts. The light party control is "Group", with 1 and 2, as on wtfdig. Since November 23 the words "Role" and "Group" are only for screen readers (owner's choice), so the switch fits beside the tab button on a phone; the switch sits on the right. The owner chose
   to show every role now: a role with no drills yet is greyed out, and pointing at it, focusing
   it or tapping it shows "not yet available". Saved settings and links keep the short names
   (H1, H2). `ROLES` in `src/party.ts` marks which roles are ready.
@@ -524,8 +528,13 @@ Do not propose these again unless the owner brings them up.
 - The boss turns smoothly to face his next target. He does not flip.
 - "Saved for later" (purple) marks a mechanic shown early and resolved later, for example the
   first weapon during Void Stardust. It is never a spot to stand on.
-- On a phone the six tabs show as two rows of three, and keyboard hints do not show on touch
-  screens.
+- Below lg (1024 px) the tabs are one button with the tab you are on, in celery like a tab
+  ("☰ Learn"). It opens a sheet from the left with the six tabs (`TabMenu`, shadcn's Sheet). The
+  owner chose it over two rows of three, which took a quarter of a phone's screen, and over a tab
+  bar at the bottom (six tabs are too many, and it would cover Learn's Lock in bar). The Role and
+  Group switch sits on the button's row when it fits (a 375 px phone and up) and moves above it
+  when not.
+- Keyboard hints do not show on touch screens.
 - Start over and New fight are buttons, not text links.
 - An answer is "correct" or "incorrect", on screen and in the code, never "right" or "wrong"
   (owner's choice). "Right" means only the direction: "directly behind", not "right behind";

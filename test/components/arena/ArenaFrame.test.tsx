@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, assert, test, vi } from "vitest";
 import { ARENA_ASPECT } from "../../../src/components/arena/Arena";
-import { ArenaFrame } from "../../../src/components/arena/ArenaFrame";
+import { ArenaFrame, sideColumnHeight } from "../../../src/components/arena/ArenaFrame";
 
 afterEach(() => {
   cleanup();
@@ -47,7 +47,26 @@ test("a column beside the arena sits against the floor's right edge, as tall as 
   // The floor ends at 104 of the picture's 108 units across, and runs from 6 to 106 of 110 down.
   assert.equal(column.style.left, `calc(${(104 / 108) * 100}% + 0.5rem)`);
   assert.equal(column.style.top, `${(6 / 110) * 100}%`);
-  assert.equal(column.style.bottom, `${(4 / 110) * 100}%`);
+  assert.include(column.getAttribute("style"), `calc(100% - ${(6 / 110) * 100}% - ${(4 / 110) * 100}%)`);
+  assert.notInclude(column.getAttribute("style"), "max(");
+});
+
+test("tall side columns run on to the bottom of the screen, and the frame keeps their room", () => {
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 200, 100, 100));
+  Object.defineProperty(window, "innerHeight", { configurable: true, value: 800 });
+  render(
+    <ArenaFrame tallSides beside={<p>list</p>}>
+      <p>arena</p>
+    </ArenaFrame>,
+  );
+  // 800 - 200 - 24 (the margin) = 576 pixels of room, which the frame keeps for the column.
+  const frame = screen.getByText("arena").parentElement?.parentElement as HTMLElement;
+  assert.equal(frame.style.minHeight, "576px");
+  // The column is never shorter than the floor. (happy-dom drops a max() style, so the rule is
+  // checked as text.)
+  const top = `${(6 / 110) * 100}%`;
+  assert.equal(sideColumnHeight(576), `max(calc(100% - ${top} - ${(4 / 110) * 100}%), calc(576px - ${top}))`);
+  assert.equal(sideColumnHeight(undefined), `calc(100% - ${top} - ${(4 / 110) * 100}%)`);
 });
 
 test("a column before the arena sits against the floor's left edge", () => {

@@ -96,6 +96,8 @@ export {
 export {
   // The choice that is picked in a menu.
   Check as PickedIcon,
+  // Open the list of tabs, on a phone: three lines.
+  Menu as TabMenuIcon,
   // Dark mode.
   Moon as DarkModeIcon,
   // Share the address of the page.

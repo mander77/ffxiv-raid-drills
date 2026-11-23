@@ -23,6 +23,7 @@ import {
   ResetIcon,
   SettingsIcon,
   ShareIcon,
+  TabMenuIcon,
 } from "../components/icons";
 import { LastAnswer } from "../components/LastAnswer";
 import { KINDS, MechanicIcon } from "../components/MechanicIcon";
@@ -68,6 +69,7 @@ const INTERFACE_GROUPS: readonly { title: string; icons: readonly InterfaceIcon[
   {
     title: "The header",
     icons: [
+      { icon: TabMenuIcon, name: "Tabs", meaning: "Open the list of tabs, on a phone." },
       { icon: ShareIcon, name: "Share", meaning: "Copy the address of the page." },
       { icon: LightModeIcon, name: "Light mode", meaning: "Switch to light mode." },
       { icon: DarkModeIcon, name: "Dark mode", meaning: "Switch to dark mode." },

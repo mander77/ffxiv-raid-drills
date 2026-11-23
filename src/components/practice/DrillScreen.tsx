@@ -218,6 +218,8 @@ export function DrillScreen({
             <MechanicList axis="y" current={item.id} onPick={onPick} className="flex-1" />
           </div>
         ),
+        // On a tall screen the list of mechanics runs on to the bottom of the screen.
+        tallSides: true,
         className: "mx-0 ml-80 mr-80 min-w-0 flex-1",
       }
     : {

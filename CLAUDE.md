@@ -116,7 +116,7 @@ src/stores/progress.ts  your scores (kept in the browser) and the round of Learn
 src/stores/pressure.ts  your Pressure settings: seconds to decide, stops, pattern picks, speed
 src/components/      React components: Header, Footer (links to the pages that are not tabs),
                      PageContainer, SlotSwitch, ShareButton (a toast
-                     says the link was copied), TabNav, ThemeProvider and ModeToggle (light and
+                     says the link was copied), TabNav, TabMenu (the tabs as one button below lg), ThemeProvider and ModeToggle (light and
                      dark mode),
                      CategoryDots and CategoryKey (the ability category colours), icons (every icon
                      the site uses, named by its meaning, and the rules they follow), MechanicIcon

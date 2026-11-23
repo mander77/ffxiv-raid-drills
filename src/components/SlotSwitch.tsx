@@ -48,9 +48,11 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
   }, []);
 
   return (
-    <div className={cn("flex flex-wrap items-center justify-end gap-x-4 gap-y-2 max-sm:justify-between", className)}>
+    <div className={cn("flex flex-wrap items-center justify-end gap-x-2 gap-y-2", className)}>
       <div className="flex items-center gap-2">
-        <span id={roleLabel} className="text-sm">
+        {/* The words "Role" and "Group" are only for screen readers (owner's choice), so the switch
+            fits beside the tab button on a phone. */}
+        <span id={roleLabel} className="sr-only">
           Role
         </span>
         <ToggleGroup type="single" variant="outline" size="sm" value={me.role} aria-labelledby={roleLabel}>
@@ -87,7 +89,7 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
         </ToggleGroup>
       </div>
       <div className="flex items-center gap-2">
-        <span id={groupLabel} className="text-sm">
+        <span id={groupLabel} className="sr-only">
           Group
         </span>
         <ToggleGroup

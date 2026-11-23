@@ -35,6 +35,9 @@ export interface ArenaFrameProps {
   /** The same on the left: a column directly against the floor's left edge. Keep room for it on the
       left of the frame. */
   before?: ReactNode;
+  /** The `before` and `beside` columns run on below the floor, down to the bottom of the screen,
+      when the screen is taller than the arena. They are never shorter than the floor. */
+  tallSides?: boolean;
   className?: string;
 }
 
@@ -49,6 +52,14 @@ const FLOOR_LEFT_FROM_RIGHT = pct(ARENA_VIEW.width + ARENA_VIEW.x, ARENA_VIEW.wi
     beside it is wide. */
 const FLOOR_SIDE = pct(-ARENA_VIEW.x, ARENA_VIEW.width);
 
+/** The CSS height of a side column. It starts at the floor's top and ends at the floor's bottom, or,
+    given the room from the frame's top to the bottom of the screen, there when that is lower.
+    Percentages are shares of the picture's height, as the column's `top` is. */
+export function sideColumnHeight(room: number | undefined): string {
+  const floor = `calc(100% - ${FLOOR_TOP} - ${FLOOR_BOTTOM})`;
+  return room === undefined ? floor : `max(${floor}, calc(${room}px - ${FLOOR_TOP}))`;
+}
+
 /** The size of every arena you play on, on Learn, Practice and Pressure: as large as its column,
     but never taller than the room from its top down to the bottom of the screen, so the whole
     arena is in view, and never wider than ARENA_MAX. On a short screen it keeps at least
@@ -56,13 +67,29 @@ const FLOOR_SIDE = pct(-ARENA_VIEW.x, ARENA_VIEW.width);
     scrolls. Things drawn over the arena (the 3-2-1, a result) can sit in it with absolute
     positions. What sits against the floor (`over`, `under`, `before`, `beside`) lines up with
     the floor's edges in the picture, not with the picture's room for the compass. */
-export function ArenaFrame({ children, below = 0, over, under, beside, before, fill = false, className }: ArenaFrameProps) {
+export function ArenaFrame({
+  children,
+  below = 0,
+  over,
+  under,
+  beside,
+  before,
+  fill = false,
+  tallSides = false,
+  className,
+}: ArenaFrameProps) {
   const [ref, height] = useFitToScreen<HTMLDivElement>(below + SCREEN_MARGIN);
+  const sideHeight = sideColumnHeight(tallSides ? height : undefined);
   return (
     <div
       ref={ref}
       className={cn("relative mx-auto w-full", className)}
-      style={{ maxWidth: fill || height === undefined ? ARENA_MAX : Math.max(ARENA_MIN, Math.min(ARENA_MAX, height * ARENA_ASPECT)) }}
+      style={{
+        maxWidth: fill || height === undefined ? ARENA_MAX : Math.max(ARENA_MIN, Math.min(ARENA_MAX, height * ARENA_ASPECT)),
+        // Tall side columns hang below the picture; the frame keeps their room, so what comes
+        // after it on the page (the footer) starts below them.
+        minHeight: tallSides ? height : undefined,
+      }}
     >
       {over && <div style={{ marginInline: FLOOR_SIDE }}>{over}</div>}
       <div className="relative">
@@ -72,13 +99,13 @@ export function ArenaFrame({ children, below = 0, over, under, beside, before, f
         {before && (
           <div
             className="absolute flex justify-end"
-            style={{ right: `calc(${FLOOR_LEFT_FROM_RIGHT} + 0.5rem)`, top: FLOOR_TOP, bottom: FLOOR_BOTTOM }}
+            style={{ right: `calc(${FLOOR_LEFT_FROM_RIGHT} + 0.5rem)`, top: FLOOR_TOP, height: sideHeight }}
           >
             {before}
           </div>
         )}
         {beside && (
-          <div className="absolute flex" style={{ left: `calc(${FLOOR_RIGHT} + 0.5rem)`, top: FLOOR_TOP, bottom: FLOOR_BOTTOM }}>
+          <div className="absolute flex" style={{ left: `calc(${FLOOR_RIGHT} + 0.5rem)`, top: FLOOR_TOP, height: sideHeight }}>
             {beside}
           </div>
         )}

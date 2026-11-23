@@ -31,17 +31,41 @@ test("on a phone the header scrolls away, so the whole arena is in view", async 
   await expect(page.getByRole("banner")).not.toBeInViewport({ ratio: 0.5 });
 });
 
-test("on a phone every tab is in view, in two rows of three", async ({ page }) => {
+test("on a phone one button opens the tabs, and a tab goes there", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto("/");
-  const links = page.getByRole("navigation", { name: "Tabs" }).getByRole("link");
-  const boxes = await Promise.all((await links.all()).map((l) => l.boundingBox()));
-  for (const b of boxes) {
-    expect(b).not.toBeNull();
-    expect((b?.x ?? 0) + (b?.width ?? 0)).toBeLessThanOrEqual(375);
-  }
-  const rows = new Set(boxes.map((b) => Math.round(b?.y ?? 0)));
-  expect(rows.size).toBe(2);
+  await page.goto("/learn");
+  // The row of tabs is hidden; the button names the tab you are on.
+  await expect(page.getByRole("navigation", { name: "Tabs" })).toBeHidden();
+  const button = page.getByRole("button", { name: "Tabs. You are on Learn" });
+  await expect(button).toBeInViewport();
+  await button.click();
+  const sheet = page.getByRole("dialog", { name: "Tabs" });
+  await sheet.getByRole("link", { name: "Cheat sheet" }).click();
+  await expect(page).toHaveURL(/\/sheet$/);
+  await expect(sheet).toBeHidden();
+  await expect(page.getByRole("button", { name: "Tabs. You are on Cheat sheet" })).toBeVisible();
+});
+
+test("on a phone the tab button and the slot switch share one row", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/sheet");
+  const button = await page.getByRole("button", { name: "Tabs. You are on Cheat sheet" }).boundingBox();
+  const group = await page.getByRole("radiogroup", { name: "Group" }).boundingBox();
+  // The same row: the switch sits on the button's line, not above it.
+  expect(Math.abs((group?.y ?? 0) - (button?.y ?? 0))).toBeLessThan(8);
+});
+
+test("on a tall wide screen, Practice's list of mechanics runs on to the bottom of the screen", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 1000 });
+  await page.goto("/practice");
+  const list = page.getByRole("navigation", { name: "Mechanics" });
+  await expect(list).toBeVisible();
+  const box = await list.boundingBox();
+  // The arena is about 360 pixels tall here; the list goes on to the screen's bottom margin.
+  expect((box?.y ?? 0) + (box?.height ?? 0)).toBeGreaterThan(900);
+  // The footer starts below it.
+  const footer = await page.getByRole("contentinfo").boundingBox();
+  expect(footer?.y ?? 0).toBeGreaterThanOrEqual((box?.y ?? 0) + (box?.height ?? 0));
 });
 
 test("on a wide screen, Next stays in view after a Learn card's answer", async ({ page }) => {

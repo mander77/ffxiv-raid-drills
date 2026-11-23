@@ -4,6 +4,7 @@ import { ModeToggle } from "./ModeToggle";
 import { PageContainer } from "./PageContainer";
 import { ShareButton } from "./ShareButton";
 import { SlotSwitch } from "./SlotSwitch";
+import { TabMenu } from "./TabMenu";
 import { TabNav } from "./TabNav";
 
 /** The fight and the strats the positions follow, as tags beside the site name. */
@@ -12,8 +13,9 @@ const STRATS = [`${FIGHT_INFO.short} ${FIGHT_INFO.full}`, ...FIGHT_INFO.strats];
 /** The header at the top of every page, a slate band. On a wide screen it has two rows, so the
     page below gets more room: the name and the strats, then Light/dark and Share on the right; the
     tabs along the bottom (the one you are on in celery), with the slot switch on the right. On a
-    narrower screen the slot switch and the tabs each get their own row.
-    It stays at the top of the screen only on a wide screen. On a phone it is five rows tall,
+    narrower screen the tabs are one button that opens them (TabMenu), beside the slot switch when
+    they fit, under it when not.
+    It stays at the top of the screen only on a wide screen. On a phone it is three or four rows tall,
     so it scrolls away with the page and never covers the arena. */
 export function Header() {
   return (
@@ -45,10 +47,15 @@ export function Header() {
             ))}
           </ul>
         </div>
-        {/* The tabs come first, so on a wide screen they sit on the left of the last row. On a
-            narrower screen they move under the slot switch. */}
-        <TabNav className="self-end max-lg:order-last max-lg:col-span-2 max-sm:pb-2" />
-        <SlotSwitch className="justify-self-end pb-1.5 max-lg:col-span-2 max-lg:pb-0 max-sm:justify-self-stretch" />
+        {/* The last row: the tabs on the left, joined to the line under the header, and the slot
+            switch on the right. Below lg the tabs do not fit beside the switch, so one button with
+            the tab you are on opens them (TabMenu). The row wraps upward (wrap-reverse) when it
+            is too narrow: the switch moves above, and the tab stays on the line. */}
+        <div className="col-span-2 flex flex-wrap-reverse items-start justify-between gap-x-2 gap-y-2">
+          <TabNav className="max-lg:hidden" />
+          <TabMenu className="lg:hidden" />
+          <SlotSwitch className="grow pb-1" />
+        </div>
       </PageContainer>
     </header>
   );

@@ -291,6 +291,8 @@ export function FightScreen({
             <CastList axis="y" className="flex-1" controls={mode === "watch" ? castControls : undefined} />
           </div>
         ),
+        // On a tall screen the side columns run on to the bottom of the screen.
+        tallSides: true,
         className: "mx-0 ml-80 mr-80 min-w-0 flex-1",
       }
     : {
