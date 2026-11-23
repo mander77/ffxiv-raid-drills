@@ -31,7 +31,6 @@ const LOOK = {
     list: "py-1",
     line: "inset-y-0 left-5.25 w-0.5",
     row: "flex items-center gap-2.5 px-2 py-1 text-sm",
-    wide: "",
     name: "min-w-0",
   },
   x: {
@@ -41,11 +40,17 @@ const LOOK = {
     list: "flex px-1 pb-1",
     line: "inset-x-0 top-4.25 h-0.5",
     row: "flex w-20 flex-col items-center gap-1 px-0.5 pt-1 pb-1 text-center text-xs leading-tight",
-    // A mechanic with three squares (the weapons) needs a wider row across.
-    wide: "w-24",
     name: "line-clamp-2",
   },
 } as const;
+
+/** The tilt of each square in a fan of squares, by how many there are: the outer ones lean out,
+    the middle one sits a little higher, like a hand of cards. Complete class names, so Tailwind
+    finds them. */
+const FAN: Record<number, readonly string[]> = {
+  2: ["-rotate-6", "rotate-6"],
+  3: ["-rotate-12 translate-y-0.5", "-translate-y-0.5", "rotate-12 translate-y-0.5"],
+};
 
 export interface MechanicListProps {
   /** Which way the list runs: "y" down the box, beside the arena; "x" across it, under the arena
@@ -182,13 +187,12 @@ function Row({ drill: d, axis, current, onRef, onClick }: RowProps) {
         "rounded-md outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring",
         "aria-[current=step]:bg-highlight aria-[current=step]:font-semibold aria-[current=step]:text-highlight-foreground",
         look.row,
-        kinds.length > 1 && look.wide,
       )}
     >
-      {/* One square per kind it can be, side by side. */}
-      <span className="flex shrink-0 gap-1">
-        {kinds.map((kind) => (
-          <CastSquare key={kind} mark={{ cats: NO_CATS, kind, soak: d.soak }} />
+      {/* One square per kind it can be, fanned like a hand of cards when there are several. */}
+      <span className={cn("flex shrink-0", kinds.length > 1 && "-space-x-4 px-1")}>
+        {kinds.map((kind, i) => (
+          <CastSquare key={kind} mark={{ cats: NO_CATS, kind, soak: d.soak }} className={FAN[kinds.length]?.[i]} />
         ))}
       </span>
       <span className={look.name}>

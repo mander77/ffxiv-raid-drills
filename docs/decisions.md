@@ -373,7 +373,7 @@ Do not propose these again unless the owner brings them up.
     its tip in the ring, with the soak number inside.
   - Assault Evolved and Ultimate Trophy Weapons show every way a weapon can end, as three kinds side
     by side (owner's choice): the axe is a party stack, the scythe proteans (clock spots), the sword
-    a light party stack. Orbital Omen is a dodge sequence, and Dodge is no longer a kind (owner's
+    a light party stack, fanned like a hand of cards in the list (owner's choice). Orbital Omen is a dodge sequence, and Dodge is no longer a kind (owner's
     choice: it is not a mechanic of its own). The party stack, with no number, has lucide's Shrink,
     the inverse of spread, since it needs no room in the middle (owner's choice).
   - Void Stardust and Ecliptic Stampede: start are puddle drop sequences (owner's choice). Saved for
