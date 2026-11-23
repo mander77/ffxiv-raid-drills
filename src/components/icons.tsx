@@ -18,7 +18,7 @@
 //    players is (rule 9): what stands for players stands out the same way.
 // 3. Chevrons are a hit from the boss, running down the line toward the players (a line stack, a
 //    wild charge).
-// 4. Arrows are a move the players make themselves (spread, dodge, a stack coming together, puddles
+// 4. Arrows are a move the players make themselves (spread, a dodge, a stack coming together, puddles
 //    dropped in a row, a tether pulled apart).
 // 5. A knockback is a burst (where it comes from) and a wide, hollow arrow (the push), never a thin
 //    arrow: you do not move yourself. A knockback tower is that wide, hollow arrow bursting up out
@@ -27,8 +27,9 @@
 //    others is the tank's shield in the first player's place (a wild charge).
 // 7. A shield is a tank: a tank buster, or a tank tower (a tower shaped like the shield).
 // 8. A clock is timing: something you see now and act on later (saved for later).
-// 9. Every stack has the same arrows, from the corners into the middle. The middle says how many:
-//    2 (pairs), 4 (light parties), R (the roles decide), or nothing for the whole party. A shared
+// 9. Every stack has arrows from the corners into the middle. The middle says how many: 2 (pairs),
+//    4 (light parties), R (the roles decide). The whole party's stack has no number, so its arrows
+//    meet close in the middle: the inverse of spread. A shared
 //    tank buster's shield takes a number the same way, and so does a tower's column: how many
 //    players soak it (Drill.soak). The number is in the body font, bold, in the highlight colour
 //    (--count in app.css), so it stands out (MechanicIcon draws it).
@@ -114,6 +115,8 @@ export {
   Expand as SpreadIcon,
   // Saved for later: a clock that turns back.
   History as SavedForLaterIcon,
+  // A party stack: arrows in from the corners to the middle, the inverse of spread.
+  Shrink as PartyStackIcon,
 } from "lucide-react";
 
 /** A stack: four arrows from the corners, the players coming together, with the middle left open
@@ -248,11 +251,17 @@ export const TankBusterIcon = createLucideIcon("tank-buster", [
     it (MechanicIcon puts it there), as a stack does. */
 export const SharedTankBusterIcon = createLucideIcon("shared-tank-buster", SHIELD);
 
-/** A dodge: a player (a filled dot) stepping aside, an arrow of their own. */
-export const DodgeIcon = createLucideIcon("dodge", [
-  ["circle", { cx: "5", cy: "12", r: "3", className: PLAYER, key: "player" }],
-  ["path", { d: "M10 12h11", key: "step" }],
-  ["path", { d: "m17 8 4 4-4 4", key: "step-head" }],
+/** Proteans: the players (filled dots) on their eight clock spots, in a ring around the boss's
+    spot (a ring, rule 1), each taking their own protean cone. */
+export const ProteanIcon = createLucideIcon("protean", [
+  ["circle", { cx: "12", cy: "12", r: "2.5", key: "boss" }],
+  ...Array.from({ length: 8 }, (_x, k): IconNode[number] => {
+    const a = (k * Math.PI) / 4;
+    return [
+      "circle",
+      { cx: (12 + 9 * Math.sin(a)).toFixed(2), cy: (12 - 9 * Math.cos(a)).toFixed(2), r: "1.4", className: PLAYER, key: `spot-${k}` },
+    ];
+  }),
 ]);
 
 /** A dodge sequence: a player (a filled dot) and the path they take, turning, to an arrow: several

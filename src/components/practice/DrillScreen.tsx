@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { isPageKey } from "../../lib/dom";
-import { answerStep, type Pattern, type StepStatus, statusAfter } from "../../lib/practice";
+import { answerStep, kindsOf, type Pattern, type StepStatus, statusAfter } from "../../lib/practice";
 import type { Drill, Point, StepResult } from "../../types";
 import { ArenaFrame, type ArenaFrameProps } from "../arena/ArenaFrame";
 import { LiveArena } from "../arena/LiveArena";
@@ -168,11 +168,15 @@ export function DrillScreen({
         </p>
         <h2 className="font-display text-xl tracking-wide">{item.title}</h2>
       </div>
-      {/* What you do, with the icon the list of mechanics shows for it. */}
-      <Badge>
-        <MechanicIcon kind={item.kind} soak={item.soak} />
-        {KINDS[item.kind].name}
-      </Badge>
+      {/* What you do, with the icon the list of mechanics shows for it: one badge per kind it can be. */}
+      <div className="flex flex-wrap gap-1.5">
+        {kindsOf(item).map((kind) => (
+          <Badge key={kind}>
+            <MechanicIcon kind={kind} soak={item.soak} />
+            {KINDS[kind].name}
+          </Badge>
+        ))}
+      </div>
       <SetupText key={tryKey} text={sc.setup} folded={n > 0} />
       {multi && <StepChips count={sc.steps.length} results={results} />}
       {/* The rule says why the spot is correct: at the end, and with Show me, which gives where. */}

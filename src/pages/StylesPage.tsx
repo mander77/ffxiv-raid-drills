@@ -33,6 +33,7 @@ import { RuleBox } from "../components/RuleBox";
 import { StepChips } from "../components/StepChips";
 import { Tally } from "../components/Tally";
 import { DRILLS } from "../data/drills";
+import { kindsOf } from "../lib/practice";
 import type { DrillKind } from "../types";
 
 /** An icon of the site's buttons and signs, with its name and what it means. */
@@ -165,7 +166,7 @@ const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode
 
 /** The titles of the Practice mechanics of a kind, in fight order. */
 function drillsOf(kind: DrillKind): string[] {
-  return DRILLS.filter((d) => d.kind === kind).map((d) => d.title);
+  return DRILLS.filter((d) => kindsOf(d).includes(kind)).map((d) => d.title);
 }
 
 export function StylesPage() {

@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { cn } from "@/lib/utils";
 import { DRILLS } from "../../data/drills";
 import { useLineDrag } from "../../hooks/useLineDrag";
+import { kindsOf } from "../../lib/practice";
 import type { Drill } from "../../types";
 import { CastSquare } from "../CastSquare";
 
@@ -30,6 +31,7 @@ const LOOK = {
     list: "py-1",
     line: "inset-y-0 left-5.25 w-0.5",
     row: "flex items-center gap-2.5 px-2 py-1 text-sm",
+    wide: "",
     name: "min-w-0",
   },
   x: {
@@ -39,6 +41,8 @@ const LOOK = {
     list: "flex px-1 pb-1",
     line: "inset-x-0 top-4.25 h-0.5",
     row: "flex w-20 flex-col items-center gap-1 px-0.5 pt-1 pb-1 text-center text-xs leading-tight",
+    // A mechanic with three squares (the weapons) needs a wider row across.
+    wide: "w-24",
     name: "line-clamp-2",
   },
 } as const;
@@ -166,6 +170,7 @@ interface RowProps {
 /** One mechanic: its square, when it happens and its name, as a link to it. */
 function Row({ drill: d, axis, current, onRef, onClick }: RowProps) {
   const look = LOOK[axis];
+  const kinds = kindsOf(d);
   return (
     <Link
       ref={current ? onRef : undefined}
@@ -177,9 +182,15 @@ function Row({ drill: d, axis, current, onRef, onClick }: RowProps) {
         "rounded-md outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring",
         "aria-[current=step]:bg-highlight aria-[current=step]:font-semibold aria-[current=step]:text-highlight-foreground",
         look.row,
+        kinds.length > 1 && look.wide,
       )}
     >
-      <CastSquare mark={{ cats: NO_CATS, kind: d.kind, soak: d.soak }} />
+      {/* One square per kind it can be, side by side. */}
+      <span className="flex shrink-0 gap-1">
+        {kinds.map((kind) => (
+          <CastSquare key={kind} mark={{ cats: NO_CATS, kind, soak: d.soak }} />
+        ))}
+      </span>
       <span className={look.name}>
         {axis === "y" && <span className="block font-mono text-[11px] text-muted-foreground">{d.time}</span>}
         {d.title}

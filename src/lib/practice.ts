@@ -2,7 +2,7 @@
 // a step with a click. The Practice page and its tests both use them.
 import { facingNext } from "../data/drills";
 import { inZone, rotOverlay, rotZone, stepZone, zoneCenter } from "../geometry";
-import type { Boss, Drill, Point, Scene, Slot, StepResult } from "../types";
+import type { Boss, Drill, DrillKind, Point, Scene, Slot, StepResult } from "../types";
 import { random, withSeed } from "../util";
 
 /** A mechanic's pattern: its scene, and `k`, how many quarter turns the arena is turned. */
@@ -13,6 +13,12 @@ export interface Pattern {
 
 /** Build a mechanic's pattern from its code. The code seeds every random choice, so the same code
     builds the same pattern: a link with a code opens the pattern it names. */
+/** Each kind a mechanic can be, in order: one for most, several for a weapon mechanic (each
+    weapon is a party stack, proteans or a light party stack). */
+export function kindsOf(drill: Drill): readonly DrillKind[] {
+  return typeof drill.kind === "string" ? [drill.kind] : drill.kind;
+}
+
 export function buildPattern(item: Drill, slot: Slot, code: string): Pattern {
   return withSeed(code, () => {
     const v = item.variants ? item.variants[Math.floor(random() * item.variants.length)] : null;

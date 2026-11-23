@@ -1,7 +1,7 @@
 import { assert, test } from "vitest";
 import { DRILLS } from "../../src/data/drills";
 import { inZone, rotZone, stepZone, zoneCenter } from "../../src/geometry";
-import { answerStep, buildPattern, statusAfter } from "../../src/lib/practice";
+import { answerStep, buildPattern, kindsOf, statusAfter } from "../../src/lib/practice";
 import type { Point, StepResult } from "../../src/types";
 
 /** The middle of the correct area of the next step, which is always inside it. */
@@ -50,4 +50,15 @@ test("an incorrect spot waits for Next step, and its puddle drops in the correct
   assert.isFalse(incorrect.ok);
   assert.isTrue(inZone(incorrect.drop, incorrect.z), "the puddle goes where it should have gone");
   assert.equal(statusAfter(pattern.scene, [...results, incorrect]), results.length + 1 < pattern.scene.steps.length ? "incorrect" : "ask");
+});
+
+test("a weapon mechanic is a party stack, proteans or a light party stack; most mechanics are one kind", () => {
+  const byId = (id: string) => {
+    const d = DRILLS.find((x) => x.id === id);
+    if (!d) throw new Error(`no mechanic ${id}`);
+    return d;
+  };
+  assert.deepEqual(kindsOf(byId("m-assault")), ["stack", "protean", "lightPartyStack"]);
+  assert.deepEqual(kindsOf(byId("m-ultimate")), ["stack", "protean", "lightPartyStack"]);
+  assert.deepEqual(kindsOf(byId("m-orbital")), ["sequence"]);
 });

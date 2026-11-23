@@ -171,7 +171,7 @@ export interface Scene {
 
 /** What you do in a Practice mechanic: spread out, stack (the whole party, in pairs, in light
     parties, or by role), stack in a line from the boss, bait an attack (bring it to where it should
-    go), drop puddles in order, dodge, dodge a set order of attacks, take a tower (one that knocks
+    go), drop puddles in order, take your clock spot for proteans, dodge a set order of attacks, take a tower (one that knocks
     you back, or one for a tank), line up behind a blocker for a wild charge, act on what the boss showed earlier
     (saved for later), get knocked back to your spot, stretch a tether, or take a tank buster alone
     or shared. Practice's list of mechanics shows it as an icon. */
@@ -184,7 +184,7 @@ export type DrillKind =
   | "lineStack"
   | "bait"
   | "puddles"
-  | "dodge"
+  | "protean"
   | "sequence"
   | "tower"
   | "towerKnockback"
@@ -202,8 +202,12 @@ export interface Drill {
   phase: Phase;
   time: string;
   title: string;
-  /** What you do in it. */
-  kind: DrillKind;
+  /** What you do in it. A mechanic that can end in more than one way (a weapon is a party stack,
+      proteans or a light party stack) lists each kind it can be, in the order the list shows them.
+      kindsOf (lib/practice.ts) gives the list either way. */
+  // TS note: `A | readonly A[]` is a union type: one value, or a list. C# would need two
+  // properties or an overload; here the code checks which one it has (Array.isArray).
+  kind: DrillKind | readonly DrillKind[];
   /** A tower: how many players soak each tower. Its icon shows the number. */
   soak?: number;
   /** The arena turns a random number of quarter turns. */

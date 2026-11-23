@@ -371,6 +371,11 @@ Do not propose these again unless the owner brings them up.
     sheet's tether (no drill needs it), its hide behind cover (the fight has no hide kind), and its safe
     side. A tank tower came later (owner's choice): a tower shaped like the tank buster's shield,
     its tip in the ring, with the soak number inside.
+  - Assault Evolved and Ultimate Trophy Weapons show every way a weapon can end, as three kinds side
+    by side (owner's choice): the axe is a party stack, the scythe proteans (clock spots), the sword
+    a light party stack. Orbital Omen is a dodge sequence, and Dodge is no longer a kind (owner's
+    choice: it is not a mechanic of its own). The party stack, with no number, has lucide's Shrink,
+    the inverse of spread, since it needs no room in the middle (owner's choice).
   - Void Stardust and Ecliptic Stampede: start are puddle drop sequences (owner's choice). Saved for
     later keeps its icon and its kind, though no drill uses it now.
   - Stretch tether, tank buster, shared tank buster and tank tower are kinds with no drill yet, like Tower: the

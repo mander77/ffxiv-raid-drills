@@ -521,7 +521,7 @@ export const DRILLS: readonly Drill[] = [
       boss:BOSS, overlays:[...heldWeapon("scythe"),{t:"mark",x:37,y:36,l:"MT",r:"T"},{t:"mark",x:63,y:36,l:"OT",r:"T"}],
       steps:[{q:"Click where the party stacks.", z:SCYTHE_STACK, a:"South, directly behind the boss, inside the shared cone.", reveal:SCYTHE_CLEAVES}],
       rule:"Scythe: three cleaves. The tanks spread to the front, and the party stacks behind."})},
-  {id:"m-assault", order:3, random:true, follows:{pick:"set1"}, phase:P1, time:"0:48", title:"Assault Evolved: three weapons", kind:"sequence",
+  {id:"m-assault", order:3, random:true, follows:{pick:"set1"}, phase:P1, time:"0:48", title:"Assault Evolved: three weapons", kind:["stack", "protean", "lightPartyStack"],
     build:(s, _v, pick)=>assaultScene(buildAssault(s, orderFrom(pick)), s)},
   // One drill for the whole stretch: the weapons spawn at 1:13, Void Stardust runs, then the boss
   // takes the same three weapons. A separate drill for the weapons would show a different set.
@@ -534,14 +534,14 @@ export const DRILLS: readonly Drill[] = [
         // The lines explode as the pairs land (Hurricane Explosion, 10 yalms wide).
         reveal:DANCE_LINES.map((l): Overlay => ({t:"band", ...l, w:HURRICANE_W}))}],
       rule:"Open side = new south. H1 and R1 relative SW, H2 and R2 relative SE."})},
-  {id:"m-ultimate", order:11.5, random:true, follows:{pick:"ult"}, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: six weapons", kind:"sequence",
+  {id:"m-ultimate", order:11.5, random:true, follows:{pick:"ult"}, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: six weapons", kind:["stack", "protean", "lightPartyStack"],
     build:(s, _v, pick)=>ultimateScene(buildUltimate(s, pick ? pick === "cw" : undefined))},
   {id:"m-tornado", order:12, phase:P1, time:"3:46", title:"Ultimate Trophy Weapons: tornadoes", kind:"bait",
     build:s=>({setup:"The sixth weapon resolved. Four tornadoes sit on the cardinals. Each one cones its two closest players.",
       boss:BOSS, overlays:[{t:"tornado",x:50,y:16},{t:"tornado",x:20,y:50},{t:"tornado",x:80,y:50},{t:"tornado",x:50,y:84}],
       steps:[{q:"Click your tornado bait spot.", z:bySlot(s, {H1:{c:[12,42],r:6.5}, H2:{c:[88,58],r:6.5}}), a:bySlot(s, {H1:"West tornado, on its north side.", H2:"East tornado, on its south side."})}],
       rule:"Supports stand on the left, DPS on the right, as you face in from your tornado."})},
-  {id:"m-orbital", order:15, random:true, phase:P2, time:"4:26 and 8:24", title:"Orbital Omen", kind:"dodge",
+  {id:"m-orbital", order:15, random:true, phase:P2, time:"4:26 and 8:24", title:"Orbital Omen", kind:"sequence",
     build:s=>{ const O = buildOrbital(); return {
       setup:"Orbital Omen. The main tank points the boss north. Portals on the north and east edges fire lines across the arena in the order shown (1 to 4). Fire and Fury cleaves his front and back just after the #1 lines. Use Hector's dodge: stay against his hitbox and cross it to the middle square the next lines miss.",
       boss:BOSS, overlays:O.overlays, steps:O.steps,

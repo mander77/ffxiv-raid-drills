@@ -4,12 +4,13 @@ import { cn } from "@/lib/utils";
 import type { DrillKind } from "../types";
 import {
   BaitIcon,
-  DodgeIcon,
   DodgeSequenceIcon,
   KnockbackIcon,
   KnockbackTowerIcon,
   LineStackIcon,
   type LucideIcon,
+  PartyStackIcon,
+  ProteanIcon,
   PuddleDropIcon,
   SavedForLaterIcon,
   SharedTankBusterIcon,
@@ -43,7 +44,7 @@ export interface KindInfo {
     shield is narrower than the stack's. */
 export const KINDS: Record<DrillKind, KindInfo> = {
   spread: { name: "Spread", meaning: "Spread out, away from the others.", icon: SpreadIcon },
-  stack: { name: "Party stack", meaning: "The whole party stacks on one spot.", icon: StackIcon },
+  stack: { name: "Party stack", meaning: "The whole party stacks on one spot.", icon: PartyStackIcon },
   pairStack: { name: "Pair stack", meaning: "Stack in twos.", icon: StackIcon, count: "2" },
   lightPartyStack: {
     name: "Light party stack",
@@ -59,7 +60,11 @@ export const KINDS: Record<DrillKind, KindInfo> = {
     meaning: "Drop several puddles in order, walking on as each one lands.",
     icon: PuddleDropIcon,
   },
-  dodge: { name: "Dodge", meaning: "Step out of the attack.", icon: DodgeIcon },
+  protean: {
+    name: "Proteans (clock spots)",
+    meaning: "Take your clock spot around the boss, so your protean cone hits no one else.",
+    icon: ProteanIcon,
+  },
   sequence: { name: "Dodge sequence", meaning: "Dodge a set order of attacks.", icon: DodgeSequenceIcon },
   tower: {
     name: "Tower",
