@@ -4,7 +4,6 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, assert, test } from "vitest";
 import { ChipRow } from "../../src/components/ChipRow";
-import { HudPrompt } from "../../src/components/HudPrompt";
 import { LastAnswer } from "../../src/components/LastAnswer";
 import { RuleBox } from "../../src/components/RuleBox";
 import { SetupText } from "../../src/components/SetupText";
@@ -80,15 +79,4 @@ test("ChipRow fades each edge that has more chips past it", async () => {
   row.scrollLeft = 200;
   fireEvent.scroll(row);
   assert.include(row.className, "to_right,transparent,black_2rem)]");
-});
-
-test("HudPrompt shows the count, the text and the button", () => {
-  render(
-    <HudPrompt count="2/4" text="Where do you stand?">
-      <button type="button">Show me</button>
-    </HudPrompt>,
-  );
-  assert.ok(screen.getByText("2/4"));
-  assert.ok(screen.getByText("Where do you stand?"));
-  assert.ok(screen.getByRole("button", { name: "Show me" }));
 });

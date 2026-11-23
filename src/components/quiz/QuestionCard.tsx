@@ -10,7 +10,9 @@ import type { Option, QuizItem, Slot } from "../../types";
 import { shuffle } from "../../util";
 import { ArenaFrame } from "../arena/ArenaFrame";
 import { LearnPicture } from "../arena/LearnPicture";
+import { PromptBar } from "../PromptBar";
 import { RuleBox } from "../RuleBox";
+import { StickyBar } from "../StickyBar";
 import { AnswerButton } from "./AnswerButton";
 import { TimelinePicture, timelineRowOf } from "./TimelinePicture";
 import { TimerBar } from "./TimerBar";
@@ -55,6 +57,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
   const [hover, setHover] = useState<number | null>(null);
   const next = useRef<HTMLButtonElement>(null);
   const correct = useRef<HTMLButtonElement>(null);
+  const rule = useRef<HTMLDivElement>(null);
   /** A timed card: its timer, made once, and whether the time ran out (you froze). */
   const [timer] = useState(() => (decideSecs ? timerOf([q.prompt, ...q.options.map((o) => o.t)], decideSecs) : null));
   const [slow, setSlow] = useState(false);
@@ -82,13 +85,15 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
     else lockIn(i);
   }
 
-  // After the answer, Next takes the focus, so Enter goes on. On a wide screen the answers scroll
-  // in their own column under Next and the rule, so the correct answer, with its explanation,
-  // scrolls into view there.
+  // After the answer, Next takes the focus, so Enter goes on, and what changed scrolls into view.
+  // On a wide screen the rule sits under the prompt bar, always in view, and the answers scroll in
+  // their own column, so the correct answer, with its explanation, scrolls into view there. On a
+  // narrow screen the rule sits over the answers, under the sticky bar: it scrolls into view.
   useEffect(() => {
     if (!answered) return;
     next.current?.focus({ preventScroll: true });
     if (window.matchMedia(WIDE).matches) correct.current?.scrollIntoView({ block: "nearest" });
+    else rule.current?.scrollIntoView({ block: "nearest" });
   }, [answered]);
 
   // The keyboard: a number key picks an answer (or answers, without previews), and Enter locks in
@@ -130,7 +135,32 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
   const note = answered && fig?.note;
 
   const okPick = pick !== null && opts[pick].ok === true;
-  const prompt = <h2 className="text-xl font-semibold text-balance">{q.prompt}</h2>;
+  /** The prompt bar: the question with Lock in, then how the answer went with Next. */
+  const bar = (
+    <PromptBar
+      tone={!answered ? "ask" : okPick ? "correct" : "incorrect"}
+      actions={
+        answered ? (
+          <Button ref={next} size="sm" onClick={onNext}>
+            Next
+          </Button>
+        ) : (
+          previews && (
+            <Button size="sm" disabled={sel === null} onClick={() => sel !== null && lockIn(sel)}>
+              Lock in
+            </Button>
+          )
+        )
+      }
+    >
+      {answered && (
+        <p className="font-semibold" role="status">
+          {slow ? "Froze: the time ran out." : okPick ? "Correct." : "Not this one."}
+        </p>
+      )}
+      <h2 className={cn("text-balance", answered ? "text-muted-foreground" : "text-base font-semibold")}>{q.prompt}</h2>
+    </PromptBar>
+  );
   const choices = (
     <fieldset className="space-y-2">
       <legend className="sr-only">Answers</legend>
@@ -149,40 +179,26 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
       ))}
     </fieldset>
   );
-  /** After the answer: how it went, the rule and the source. */
+  /** After the answer: the rule and the source. */
   const feedback = answered && (
     <>
-      <p className={cn(slow ? "font-medium text-warning-foreground" : "sr-only")} role="status">
-        {slow ? "Froze: the time ran out." : okPick ? "Correct." : "Not this one."}
-      </p>
-      <RuleBox rule={q.rule} />
+      <RuleBox ref={rule} rule={q.rule} />
       {q.src && <p className="text-xs text-muted-foreground">Source: {q.src}</p>}
     </>
   );
-  /** What you do next: Next after the answer, Lock in before it, or the keys. */
-  const actions = answered ? (
-    <ActionBar>
-      <Button ref={next} onClick={onNext}>
-        Next
-      </Button>
-      <KeyHint>
-        <Kbd>Enter</Kbd> next
-      </KeyHint>
-    </ActionBar>
+  /** The keys, under the answers. They hide on a touch screen. */
+  const keys = answered ? (
+    <KeyHint>
+      <Kbd>Enter</Kbd> next
+    </KeyHint>
   ) : previews ? (
-    // On a phone the answers sit under the picture, so Lock in stays in a bar at the bottom.
-    <ActionBar pinned={sel !== null}>
-      <Button disabled={sel === null} onClick={() => sel !== null && lockIn(sel)}>
-        Lock in answer
-      </Button>
-      <p className="text-sm text-muted-foreground">
-        Pick an answer to see it on the picture.
-        <KeyHint>
-          {" "}
-          <Kbd>1</Kbd> to <Kbd>{opts.length}</Kbd> pick, <Kbd>Enter</Kbd> lock in.
-        </KeyHint>
-      </p>
-    </ActionBar>
+    <p className="text-sm text-muted-foreground">
+      Pick an answer to see it on the picture, then Lock in.
+      <KeyHint>
+        {" "}
+        <Kbd>1</Kbd> to <Kbd>{opts.length}</Kbd> pick, <Kbd>Enter</Kbd> lock in.
+      </KeyHint>
+    </p>
   ) : (
     <KeyHint>
       Press <Kbd>1</Kbd> to <Kbd>{opts.length}</Kbd> or click an answer.
@@ -193,16 +209,15 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
     <div className="space-y-4">
       {feedback}
       {choices}
-      {actions}
+      {keys}
     </div>
   );
 
-  // A wide screen, with an arena picture: the question and the answers in a column against the
-  // arena's floor, lined up with its top and bottom, as on Practice; it scrolls when a long rule
-  // does not fit, and runs on to the bottom of a tall screen, as on Practice. Lock in and Next sit
-  // at its top, where Practice has its buttons, and after the answer the rule sits under them, so
-  // both are always in view; the question and the answers scroll under them. The arena gets the
-  // height the question took above it.
+  // A wide screen, with an arena picture: a column against the arena's floor, lined up with its
+  // top, as on Practice, running on to the bottom of a tall screen. The prompt bar sits at its
+  // top, where Practice has its bar, and after the answer the rule sits under it, so both are
+  // always in view; the answers scroll under them. The arena gets the height the question took
+  // above it.
   if (wide && arena) {
     return (
       <div className="space-y-4">
@@ -212,12 +227,12 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
           <ArenaFrame
             before={
               <div className="flex w-80 flex-col gap-4">
-                {actions}
+                {bar}
                 {feedback}
                 <ScrollArea className="min-h-0 flex-1">
                   <div className="space-y-4">
-                    {prompt}
                     {choices}
+                    {keys}
                     {note && <p className="text-sm text-muted-foreground">{note}</p>}
                   </div>
                 </ScrollArea>
@@ -242,11 +257,13 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
     <TimelinePicture row={row} answered={answered} correctName={correctName} />
   ) : null;
 
+  // The card's box holds the whole card, so the prompt bar sticks to the top of the screen until
+  // you have scrolled past all of it.
   return (
-    <div className="space-y-4 max-md:pb-20">
+    <div className="space-y-4">
       {top}
       {timer && <TimerBar timer={timer} stopped={answered} onTimeout={handleTimeout} />}
-      {prompt}
+      <StickyBar>{bar}</StickyBar>
       {/* A Learn card's arena picture gets the wide column; a Timeline card's picture the narrow one. */}
       <div
         className={cn(
@@ -258,28 +275,6 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
         {picture && <div className="md:order-last">{picture}</div>}
         {answers}
       </div>
-    </div>
-  );
-}
-
-interface ActionBarProps {
-  children: ReactNode;
-  /** On a phone, keep the bar at the bottom of the screen. */
-  pinned?: boolean;
-}
-
-/** The row of actions under the answers. */
-function ActionBar({ children, pinned = true }: ActionBarProps) {
-  return (
-    <div
-      className={cn(
-        "flex flex-wrap items-center gap-3",
-        // Fixed to the screen, not sticky: the answers sit below the picture, so a sticky bar would
-        // stay inside their column, off screen.
-        pinned && "max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-10 max-md:border-t max-md:bg-background max-md:px-4 max-md:py-3",
-      )}
-    >
-      {children}
     </div>
   );
 }

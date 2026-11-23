@@ -71,9 +71,9 @@ test("on a tall wide screen, Practice's list of mechanics runs on to the bottom 
 test("on a wide screen, Next stays in view after a Learn card's answer", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/learn/k-raw-first");
-  await expect(page.getByRole("button", { name: "Lock in answer" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Lock in" })).toBeVisible();
   await page.keyboard.press("1");
-  await page.getByRole("button", { name: "Lock in answer" }).click();
+  await page.getByRole("button", { name: "Lock in" }).click();
   // The card's own Next, under the answers: not the Next card button at the top.
   await expect(page.getByRole("button", { name: "Next", exact: true })).toBeInViewport({ ratio: 1 });
 });
@@ -96,10 +96,10 @@ test("a Learn card: pick an answer, lock it in, and go on", async ({ page }) => 
   await expect(page).toHaveURL(/\/learn\/[\w-]+$/);
   const first = page.url();
   // Wait for the card, so its keys listen before the test presses one.
-  await expect(page.getByRole("button", { name: "Lock in answer" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Lock in" })).toBeVisible();
   await page.keyboard.press("1");
   await expect(page.getByRole("img", { name: "Arena picture of answer 1." })).toBeVisible();
-  await page.getByRole("button", { name: "Lock in answer" }).click();
+  await page.getByRole("button", { name: "Lock in" }).click();
   await expect(page.getByRole("img", { name: "Arena picture. The green area shows the answer." })).toBeVisible();
   await expect(page.getByText("Correct answer.")).toBeVisible();
   await page.getByRole("button", { name: "Next", exact: true }).click();
@@ -111,7 +111,7 @@ test("in dark mode, the correct answer shows green and an incorrect pick red", a
   await page.emulateMedia({ colorScheme: "dark" });
   await page.goto("/learn/k-raw-first");
   await page.getByRole("button", { name: /The party stacks north/ }).click();
-  await page.getByRole("button", { name: "Lock in answer" }).click();
+  await page.getByRole("button", { name: "Lock in" }).click();
   // The dark values of --success and --danger in app.css.
   await expect
     .poll(() => oklchOf(page.getByRole("button", { name: /Tanks spread, and the party stacks south/ })))

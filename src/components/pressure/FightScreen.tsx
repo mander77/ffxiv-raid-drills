@@ -295,27 +295,33 @@ export function FightScreen({
         tallSides: true,
         className: "mx-0 ml-80 mr-80 min-w-0 flex-1",
       }
-    : {
-        over: (
-          <div className="space-y-3 pb-2">
-            {mode === "watch" ? (
-              <>
-                <CastBar />
-                {mechanicPanel}
-              </>
-            ) : (
-              <FightHud />
-            )}
-          </div>
-        ),
-        under: (
-          <div className="space-y-2">
-            {controls}
-            <CastList axis="x" controls={mode === "watch" ? castControls : undefined} />
-          </div>
-        ),
-        fill: true,
-      };
+    : mode === "watch"
+      ? {
+          over: (
+            <div className="space-y-3 pb-2">
+              <CastBar />
+              {mechanicPanel}
+            </div>
+          ),
+          under: (
+            <div className="space-y-2">
+              {controls}
+              <CastList axis="x" controls={castControls} />
+            </div>
+          ),
+          fill: true,
+        }
+      : {
+          // The run's prompt sticks to the top of the screen, like the prompt bar on the other tabs.
+          bar: <FightHud />,
+          under: (
+            <div className="space-y-2">
+              {controls}
+              <CastList axis="x" />
+            </div>
+          ),
+          fill: true,
+        };
   const arena = (
     // On a wide screen the whole arena fits on the screen. Below that, it fills its column (`fill`)
     // and the page scrolls, as on a phone.

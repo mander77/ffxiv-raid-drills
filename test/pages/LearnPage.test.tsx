@@ -55,7 +55,7 @@ test("Learn with no card opens the first card", () => {
 test("a Learn answer shows on the picture first, then Lock in answers it", async () => {
   open(`/learn/${LEARN[0].id}`);
   const user = userEvent.setup();
-  const lock = screen.getByRole("button", { name: "Lock in answer" });
+  const lock = screen.getByRole("button", { name: "Lock in" });
   assert.isTrue(lock.hasAttribute("disabled"), "nothing to lock in yet");
   const correct = answers().find((b) => b.textContent?.includes(correctOf(LEARN[0].id)));
   if (!correct) throw new Error("no correct answer");

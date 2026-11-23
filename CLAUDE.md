@@ -124,8 +124,9 @@ src/components/      React components: Header, Footer (links to the pages that a
                      coming up and Practice's list: filled for a hit, outlined for the boss's
                      cast, ink with its kind's icon for a mechanic), RoundDone,
                      and the pieces Learn, Practice and the fight share: RuleBox, LastAnswer,
-                     StepChips, SetupText, Tally, ChipRow, HudPrompt, ResultBar (how you did, over a Practice
-                     mechanic), IconButton (a button with
+                     StepChips, SetupText, Tally, ChipRow, PromptBar (the question and its buttons,
+                     then how the answer went, on every tab that asks), StickyBar (keeps a prompt
+                     bar at the top of a narrow screen), IconButton (a button with
                      only an icon, named by its tooltip)
 src/components/arena/  the arena pictures: Arena (floor, waymarks, layers, clicks), Shape (one
                      attack, weapon or mark), Weapon (a boss weapon: its icon on the line it rests along), BossMark, ZoneArea (a zone's coloured area),
@@ -347,6 +348,9 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Casts coming up**: Pressure's line of casts that moves with the fight clock (`CastList`).
   Practice's **list of mechanics** (`MechanicList`) looks like it but stands still: it is for
   picking a mechanic. They share the square (`CastSquare`) and the drag (`useLineDrag`).
+- **Prompt bar**: the bar with the question and its buttons (`PromptBar`), the same on Learn,
+  Timeline, the quick round and Practice. After the answer it turns green or red and says how
+  it went. On a narrow screen a `StickyBar` keeps it at the top of the screen.
 
 ## Rules for the content
 

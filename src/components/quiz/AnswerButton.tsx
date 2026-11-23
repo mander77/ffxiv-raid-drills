@@ -40,8 +40,11 @@ export function AnswerButton({ n, text, state, why, pressed, onClick, onPoint, r
       onFocus={() => onPoint(true)}
       onBlur={() => onPoint(false)}
       className={cn(
-        "h-auto w-full items-start justify-start gap-3 py-2 text-left whitespace-normal disabled:opacity-100",
+        // scroll-mt keeps it clear of the sticky prompt bar when it is scrolled into view.
+        "h-auto w-full scroll-mt-24 items-start justify-start gap-3 py-2 text-left whitespace-normal disabled:opacity-100",
         state === "picked" && "border-primary ring-2 ring-primary",
+        // The correct answer glows once when it shows, so the eye goes to it.
+        state === "correct" && "motion-safe:animate-attention",
         state === "other" && "opacity-60",
       )}
     >

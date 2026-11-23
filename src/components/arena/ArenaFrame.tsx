@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useFitToScreen } from "../../hooks/useFitToScreen";
+import { StickyBar } from "../StickyBar";
 import { ARENA_ASPECT, ARENA_VIEW } from "./Arena";
 
 /** The widest an arena gets, in pixels. The app's choice: wider only adds scrolling. */
@@ -26,6 +27,9 @@ export interface ArenaFrameProps {
   under?: ReactNode;
   /** What sits directly over the picture, as wide as the floor. */
   over?: ReactNode;
+  /** The prompt bar, over `over`, as wide as the floor. Below lg it sticks to the top of the screen
+      until the frame has scrolled past, so it stays in view over the arena and what is under it. */
+  bar?: ReactNode;
   /** The arena fills its column, up to ARENA_MAX, however tall the screen is: the page scrolls to
       it, as on a phone. */
   fill?: boolean;
@@ -71,6 +75,7 @@ export function ArenaFrame({
   children,
   below = 0,
   over,
+  bar,
   under,
   beside,
   before,
@@ -91,6 +96,12 @@ export function ArenaFrame({
         minHeight: tallSides ? height : undefined,
       }}
     >
+      {/* The bar sticks inside the whole frame: a sticky box stays only inside its parent. */}
+      {bar && (
+        <StickyBar className="mb-1" style={{ marginInline: FLOOR_SIDE }}>
+          {bar}
+        </StickyBar>
+      )}
       {over && <div style={{ marginInline: FLOOR_SIDE }}>{over}</div>}
       <div className="relative">
         {children}

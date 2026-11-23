@@ -328,13 +328,23 @@ Do not propose these again unless the owner brings them up.
 - Cards whose answer is your own spot show your role marker on the answer picture.
 - Back, Next and one chip per mechanic (`LEARN_GROUPS` in `src/data/questions.ts`). A test makes sure
   that each card is in exactly one chip.
-- On a phone, Lock in answer and Next stay in a bar at the bottom of the screen.
-- On a wide screen, Lock in answer and Next sit at the top of the column, over the question,
-  where Practice has its buttons (owner's choice, November 23). After the answer the rule sits
-  right under them, so a player sees it at once; the question and the answers scroll under both,
-  and the correct answer, with its explanation, scrolls into view. On a phone the rule comes just
-  above the answers. Before, the rule came after the answers and was often off the screen, so
-  players did not know it was there (owner's report).
+- One prompt bar on every tab that asks something (owner's choice, November 23, "Option A"): Learn,
+  Timeline, Pressure's quick round and Practice share `PromptBar`. It holds the question (with
+  Practice's step count), Lock in, and after the answer Next. The owner wanted navigation the same
+  on every tab, and the eye drawn to what changed, at every width.
+  - On a wide screen it sits at the top of the column beside the arena, where Practice had its bar.
+    On a narrow screen it sits over the picture and sticks to the top of the screen while you
+    scroll (`StickyBar`; the header scrolls away there). The run's prompt sticks the same way.
+  - After the answer the bar turns green or red with a check or a cross and says how it went
+    ("Correct.", "Not this one.", "Froze: the time ran out."), where the eye already is. The bar,
+    the rule and the correct answer glow once in celery (`animate-attention`; not with reduced
+    motion).
+  - The rule comes right under the bar on a wide screen and just over the answers on a narrow
+    one, and scrolls into view; on a wide screen the correct answer, with its explanation, scrolls
+    into view in the column. Before, the rule came after the answers and was often off the
+    screen, so players did not know it was there (owner's report).
+  - This replaced the bar fixed to the bottom of a phone screen (Lock in and Next), which moved
+    the button from the top on a wide screen to the bottom on a phone. Lock in is now "Lock in".
 
 ### Timeline
 

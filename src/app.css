@@ -188,6 +188,24 @@
   }
 }
 
+/* What just changed after an answer (the prompt bar's result, the rule, the correct answer) glows
+   once in the celery highlight, so the eye goes to it. As a Tailwind name: animate-attention. Use
+   it with motion-safe:, so it does not run when the system asks for less motion. */
+@theme {
+  --animate-attention: attention 1.2s ease-out 1;
+  @keyframes attention {
+    0% {
+      box-shadow: 0 0 0 0 var(--highlight);
+    }
+    25% {
+      box-shadow: 0 0 0 5px var(--highlight);
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -8,12 +8,11 @@ import { answerStep, kindsOf, type Pattern, type StepStatus, statusAfter } from 
 import type { Drill, Point, StepResult } from "../../types";
 import { ArenaFrame, type ArenaFrameProps } from "../arena/ArenaFrame";
 import { LiveArena } from "../arena/LiveArena";
-import { HudPrompt } from "../HudPrompt";
 import { IconButton } from "../IconButton";
 import { NextMechanicIcon, ResetIcon } from "../icons";
 import { LastAnswer } from "../LastAnswer";
 import { KINDS, MechanicIcon } from "../MechanicIcon";
-import { ResultBar } from "../ResultBar";
+import { PromptBar } from "../PromptBar";
 import { RuleBox } from "../RuleBox";
 import { SetupText } from "../SetupText";
 import { StepChips } from "../StepChips";
@@ -129,35 +128,59 @@ export function DrillScreen({
       <ResetIcon aria-hidden="true" />
     </IconButton>
   );
+  // Each state of the bar has its own key, so the bar is drawn new when the state changes: the
+  // Reset you just clicked is a new button then, and its tooltip does not stay open over the arena.
   const hud = done ? (
-    <ResultBar ok={allCorrect}>
-      <p className="flex-1 text-sm font-semibold" role="status">
+    <PromptBar
+      key="done"
+      tone={allCorrect ? "correct" : "incorrect"}
+      actions={
+        <>
+          <IconButton label="Next mechanic" variant="default" onClick={onNextMechanic}>
+            <NextMechanicIcon aria-hidden="true" />
+          </IconButton>
+          {reset}
+        </>
+      }
+    >
+      <p className="font-semibold" role="status">
         {allCorrect ? (multi ? "All steps correct" : "Correct") : multi ? `${correct} of ${sc.steps.length} correct` : "Not there"}
       </p>
-      <IconButton label="Next mechanic" variant="default" onClick={onNextMechanic}>
-        <NextMechanicIcon aria-hidden="true" />
-      </IconButton>
-      {reset}
-    </ResultBar>
+    </PromptBar>
   ) : status === "incorrect" && last ? (
-    <ResultBar ok={false}>
-      <p className="flex-1 text-sm" role="status">
+    <PromptBar
+      key="step"
+      tone="incorrect"
+      actions={
+        <>
+          <Button size="sm" onClick={nextStep}>
+            Next step
+          </Button>
+          {reset}
+        </>
+      }
+    >
+      <p role="status">
         <span className="font-semibold">Not there.</span> {sc.steps[n - 1].a}
       </p>
-      <Button size="sm" onClick={nextStep}>
-        Next step
-      </Button>
-      {reset}
-    </ResultBar>
+    </PromptBar>
   ) : (
     // Show me: the correct spot for this step, and its answer in place of the question. Your next
     // click still answers.
-    <HudPrompt count={`${n + 1}/${sc.steps.length}`} text={shown ? sc.steps[n].a : sc.steps[n].q}>
-      <Button size="sm" variant="outline" aria-pressed={shown} onClick={handleShowMe}>
-        {shown ? "Hide" : "Show me"}
-      </Button>
-      {reset}
-    </HudPrompt>
+    <PromptBar
+      key="ask"
+      count={`${n + 1}/${sc.steps.length}`}
+      actions={
+        <>
+          <Button size="sm" variant="outline" aria-pressed={shown} onClick={handleShowMe}>
+            {shown ? "Hide" : "Show me"}
+          </Button>
+          {reset}
+        </>
+      }
+    >
+      <p className="font-medium">{shown ? sc.steps[n].a : sc.steps[n].q}</p>
+    </PromptBar>
   );
 
   const panel = (
@@ -223,12 +246,9 @@ export function DrillScreen({
         className: "mx-0 ml-80 mr-80 min-w-0 flex-1",
       }
     : {
-        over: (
-          <div className="space-y-3 pb-2">
-            {hud}
-            {panel}
-          </div>
-        ),
+        // The prompt bar sticks to the top of the screen while you scroll down to the arena.
+        bar: hud,
+        over: <div className="pb-2">{panel}</div>,
         under: (
           <div className="space-y-2">
             {bar}

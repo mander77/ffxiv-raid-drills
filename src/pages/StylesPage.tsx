@@ -4,6 +4,7 @@
 // A click on an icon's card opens it zoomed in.
 import type { ComponentProps, ReactNode } from "react";
 import "../components/arena/arena.css";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Weapon } from "../components/arena/Weapon";
 import { CastSquare } from "../components/CastSquare";
@@ -28,8 +29,8 @@ import {
 import { LastAnswer } from "../components/LastAnswer";
 import { KINDS, MechanicIcon } from "../components/MechanicIcon";
 import { PageContainer } from "../components/PageContainer";
+import { PromptBar } from "../components/PromptBar";
 import { AnswerButton } from "../components/quiz/AnswerButton";
-import { ResultBar } from "../components/ResultBar";
 import { RuleBox } from "../components/RuleBox";
 import { StepChips } from "../components/StepChips";
 import { Tally } from "../components/Tally";
@@ -124,18 +125,22 @@ const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode
     ),
   },
   {
-    name: "Result bar",
-    meaning: "Over a Practice mechanic: how you did, with a check mark or a cross.",
+    name: "Prompt bar",
+    meaning:
+      "The question and its button, in the same place on Learn, Timeline, Practice and the quick round. After the answer it turns green or red, says how it went and glows once. On a phone it stays at the top of the screen.",
     sample: (
       <div className="space-y-2">
-        <ResultBar ok>
-          <p className="flex-1 text-sm font-semibold">All steps correct</p>
-        </ResultBar>
-        <ResultBar ok={false}>
-          <p className="flex-1 text-sm">
+        <PromptBar count="1/2" actions={<Button size="sm">Lock in</Button>}>
+          <p className="font-medium">The question.</p>
+        </PromptBar>
+        <PromptBar tone="correct" actions={<Button size="sm">Next</Button>}>
+          <p className="font-semibold">Correct.</p>
+        </PromptBar>
+        <PromptBar tone="incorrect" actions={<Button size="sm">Next</Button>}>
+          <p>
             <span className="font-semibold">Not there.</span> Where you should have stood.
           </p>
-        </ResultBar>
+        </PromptBar>
       </div>
     ),
   },
