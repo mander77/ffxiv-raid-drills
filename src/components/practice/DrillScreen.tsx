@@ -41,6 +41,21 @@ export interface DrillScreenProps {
   onPick: (drill: string) => void;
 }
 
+/** One try at a mechanic: the answers so far, and Show me. */
+interface TryState {
+  /** The try this state belongs to (`DrillScreenProps.tryKey`). */
+  tryKey: string;
+  results: StepResult[];
+  status: StepStatus;
+  /** Show me is on: the correct spot for the step asked shows in blue. */
+  shown: boolean;
+  /** Show me was used, so this try does not count in your score: it was learning, not a test. */
+  helped: boolean;
+}
+
+/** A try with no answers yet. */
+const freshTry = (tryKey: string): TryState => ({ tryKey, results: [], status: "ask", shown: false, helped: false });
+
 /** The screen of one Practice mechanic (a drill): click where you stand on the arena, one step at
     a time. It has the layout of Pressure's player. On a wide screen: on the left, the question with
     Show me (or why a spot was incorrect, or the result) over the mechanic, its steps, the last
@@ -62,22 +77,13 @@ export function DrillScreen({
   onPick,
 }: DrillScreenProps) {
   const { scene: sc, k } = pattern;
-  const [results, setResults] = useState<StepResult[]>([]);
-  const [status, setStatus] = useState<StepStatus>("ask");
-  /** Show me is on: the correct spot for the step asked shows in blue. */
-  const [shown, setShown] = useState(false);
-  /** Show me was used, so this try does not count in your score: it was learning, not a test. */
-  const [helped, setHelped] = useState(false);
-  // A new try starts fresh. The screen is not given a key for it, so the list of mechanics stays
-  // where it is, under your pointer; the screen's state is reset as react.dev shows for a prop that changes.
-  const [shownTry, setShownTry] = useState(tryKey);
-  if (shownTry !== tryKey) {
-    setShownTry(tryKey);
-    setResults([]);
-    setStatus("ask");
-    setShown(false);
-    setHelped(false);
-  }
+  // The state of a try is kept with the try it belongs to. A new try reads fresh state from its
+  // first draw, so the screen never draws a new mechanic with the last one's answers. The screen
+  // is not given a key for a new try, so the list of mechanics stays where it is, under your pointer.
+  const [saved, setSaved] = useState(() => freshTry(tryKey));
+  const { results, status, shown, helped } = saved.tryKey === tryKey ? saved : freshTry(tryKey);
+  /** Changes this try's state; a change names only the fields it sets. */
+  const update = (change: Partial<TryState>): void => setSaved({ tryKey, results, status, shown, helped, ...change });
   /** A wide screen (lg, 1024 px and up): the columns sit beside the arena, as in Pressure. */
   const wide = useMediaQuery("(min-width: 1024px)");
 
@@ -92,16 +98,14 @@ export function DrillScreen({
     const r = answerStep(sc, k, results, p);
     if (!r) return;
     const next = [...results, r];
-    setResults(next);
-    setStatus(statusAfter(sc, next));
-    setShown(false);
+    update({ results: next, status: statusAfter(sc, next), shown: false });
     if (next.length >= sc.steps.length && !helped) onScore(next.every((x) => x.ok));
   }
   function handleShowMe(): void {
-    setShown(!shown);
-    if (!shown) setHelped(true);
+    // Show me makes the try a helped one, and Hide does not undo that.
+    update({ shown: !shown, helped: helped || !shown });
   }
-  const nextStep = (): void => setStatus("ask");
+  const nextStep = (): void => update({ status: "ask" });
 
   // Enter: Next step after an answer, or Next mechanic at the end. Enter on a button is its click.
   const onKey = useEffectEvent((e: KeyboardEvent) => {
