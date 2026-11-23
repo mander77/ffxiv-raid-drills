@@ -19,6 +19,9 @@ import { TimerBar } from "./TimerBar";
     which its preview on the picture follows. */
 type ShownOption = Option & { k: number };
 
+/** A wide screen (lg, 1024 px and up): a card with an arena picture has the layout of Practice. */
+const WIDE = "(min-width: 1024px)";
+
 export interface QuestionCardProps {
   item: QuizItem;
   slot: Slot;
@@ -51,6 +54,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
   /** The answer you point at or move to with Tab. It shows on the picture while you do. */
   const [hover, setHover] = useState<number | null>(null);
   const next = useRef<HTMLButtonElement>(null);
+  const correct = useRef<HTMLButtonElement>(null);
   /** A timed card: its timer, made once, and whether the time ran out (you froze). */
   const [timer] = useState(() => (decideSecs ? timerOf([q.prompt, ...q.options.map((o) => o.t)], decideSecs) : null));
   const [slow, setSlow] = useState(false);
@@ -78,9 +82,13 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
     else lockIn(i);
   }
 
-  // After the answer, Next takes the focus, so Enter goes on.
+  // After the answer, Next takes the focus, so Enter goes on. On a wide screen the answers scroll
+  // in their own column under Next and the rule, so the correct answer, with its explanation,
+  // scrolls into view there.
   useEffect(() => {
-    if (answered) next.current?.focus({ preventScroll: true });
+    if (!answered) return;
+    next.current?.focus({ preventScroll: true });
+    if (window.matchMedia(WIDE).matches) correct.current?.scrollIntoView({ block: "nearest" });
   }, [answered]);
 
   // The keyboard: a number key picks an answer (or answers, without previews), and Enter locks in
@@ -112,7 +120,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
   }, []);
 
   /** A wide screen (lg, 1024 px and up): a card with an arena picture has the layout of Practice. */
-  const wide = useMediaQuery("(min-width: 1024px)");
+  const wide = useMediaQuery(WIDE);
   const pictureLabel = answered
     ? "Arena picture. The green area shows the answer."
     : preview && shown !== null
@@ -129,6 +137,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
       {opts.map((o, i) => (
         <AnswerButton
           key={o.t}
+          ref={o.ok ? correct : undefined}
           n={i + 1}
           text={o.t}
           state={!answered ? (previews && sel === i ? "picked" : "open") : o.ok ? "correct" : i === pick ? "incorrect" : "other"}
@@ -179,18 +188,21 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
       Press <Kbd>1</Kbd> to <Kbd>{opts.length}</Kbd> or click an answer.
     </KeyHint>
   );
+  // After the answer the rule comes first, over the answers, so it is the first thing you see.
   const answers = (
     <div className="space-y-4">
-      {choices}
       {feedback}
+      {choices}
       {actions}
     </div>
   );
 
   // A wide screen, with an arena picture: the question and the answers in a column against the
   // arena's floor, lined up with its top and bottom, as on Practice; it scrolls when a long rule
-  // does not fit. Lock in and Next sit under the scrolling part, so they are always in view. The
-  // arena gets the height the question took above it.
+  // does not fit, and runs on to the bottom of a tall screen, as on Practice. Lock in and Next sit
+  // at its top, where Practice has its buttons, and after the answer the rule sits under them, so
+  // both are always in view; the question and the answers scroll under them. The arena gets the
+  // height the question took above it.
   if (wide && arena) {
     return (
       <div className="space-y-4">
@@ -200,17 +212,18 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
           <ArenaFrame
             before={
               <div className="flex w-80 flex-col gap-4">
+                {actions}
+                {feedback}
                 <ScrollArea className="min-h-0 flex-1">
                   <div className="space-y-4">
                     {prompt}
                     {choices}
-                    {feedback}
                     {note && <p className="text-sm text-muted-foreground">{note}</p>}
                   </div>
                 </ScrollArea>
-                {actions}
               </div>
             }
+            tallSides
             className="mx-0 ml-80 min-w-0 flex-1"
           >
             <figure>{arena}</figure>

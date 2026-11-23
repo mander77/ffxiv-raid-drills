@@ -217,10 +217,10 @@ make sure that each one still matches the code before you start it.
   - On an extra-wide screen the mechanic's column touches the arena too (owner's choice): it sits
     against the floor's left edge (`ArenaFrame`'s `before` column), from the floor's top to its
     bottom, so the arena and its two columns read as one piece in the middle of the page.
-  - On a screen taller than the arena, the side columns of Practice and Pressure start at the
-    floor's top and run on down to the bottom of the screen, so a list is not cut off at the floor
-    (owner's choice, November 23; `tallSides` on `ArenaFrame`). They are never shorter than the
-    floor. Learn's column keeps the floor's height, so Next stays beside the arena.
+  - On a screen taller than the arena, the side columns of Practice, Pressure and Learn start at
+    the floor's top and run on down to the bottom of the screen, so a list or an answer is not cut
+    off at the floor (owner's choice, November 23; `tallSides` on `ArenaFrame`). They are never
+    shorter than the floor.
   - The player has two layouts, never a mix (owner's choice: the columns sit either both beside the
     arena or above and below it). Wide (lg, 1024 px and up): the mechanic against the floor on the
     left, the play bar over the casts coming up on the right. Narrower: one column, the cast bar
@@ -278,7 +278,7 @@ make sure that each one still matches the code before you start it.
   - `npm run publish -- main` puts the branch on `main` from its own worktree. The owner chose
     this after a publish from the main checkout clashed with another session working there.
 - Party slots (#13, done). A slot has two parts, the light party (1 or 2) and the role (Tank,
-  Healer, Melee, Ranged). Casters count as Ranged. The header shows both parts. The light party control is "Group", with 1 and 2, as on wtfdig. Since November 23 the words "Role" and "Group" are only for screen readers (owner's choice), so the switch fits beside the tab button on a phone; the switch sits on the right. The owner chose
+  Healer, Melee, Ranged). Casters count as Ranged. The header shows both parts. The light party control is "Group", with 1 and 2, as on wtfdig. Since November 23 "Role" and "Group" are small labels above their switches, not beside them (owner's choice), so the switch fits beside the tab button on a phone; the switch sits on the right. The owner chose
   to show every role now: a role with no drills yet is greyed out, and pointing at it, focusing
   it or tapping it shows "not yet available". Saved settings and links keep the short names
   (H1, H2). `ROLES` in `src/party.ts` marks which roles are ready.
@@ -329,8 +329,12 @@ Do not propose these again unless the owner brings them up.
 - Back, Next and one chip per mechanic (`LEARN_GROUPS` in `src/data/questions.ts`). A test makes sure
   that each card is in exactly one chip.
 - On a phone, Lock in answer and Next stay in a bar at the bottom of the screen.
-- On a wide screen, Lock in answer and Next sit under the column's scrolling part, so a long
-  answer or rule never pushes them off the screen (UX review, November 23).
+- On a wide screen, Lock in answer and Next sit at the top of the column, over the question,
+  where Practice has its buttons (owner's choice, November 23). After the answer the rule sits
+  right under them, so a player sees it at once; the question and the answers scroll under both,
+  and the correct answer, with its explanation, scrolls into view. On a phone the rule comes just
+  above the answers. Before, the rule came after the answers and was often off the screen, so
+  players did not know it was there (owner's report).
 
 ### Timeline
 

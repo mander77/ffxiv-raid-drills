@@ -1,3 +1,4 @@
+import type { Ref } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,14 +18,19 @@ export interface AnswerButtonProps {
   onClick: () => void;
   /** Called with true when you point at the answer or move to it with Tab, false when you leave. */
   onPoint: (on: boolean) => void;
+  /** The button's element, for the card to scroll it into view. */
+  // TS note: Ref<T> is anything React accepts as a ref: an object from useRef, or a function. In
+  // React 19 a component takes `ref` as a plain prop.
+  ref?: Ref<HTMLButtonElement>;
 }
 
 /** One answer on a question card: its number key, its text, and after the answer, whether it was
     correct. */
-export function AnswerButton({ n, text, state, why, pressed, onClick, onPoint }: AnswerButtonProps) {
+export function AnswerButton({ n, text, state, why, pressed, onClick, onPoint, ref }: AnswerButtonProps) {
   const done = state === "correct" || state === "incorrect" || state === "other";
   return (
     <Button
+      ref={ref}
       variant={state === "correct" || state === "incorrect" ? state : "outline"}
       aria-pressed={pressed}
       disabled={done}
