@@ -353,7 +353,8 @@ Do not propose these again unless the owner brings them up.
   with Claude:
   - The icons follow rules (the owner's): a ring is a spot, a tower a column standing in its
     ring, a filled dot a player (in the highlight colour, like the number of players: owner's choice), chevrons a hit from the boss, arrows a move you make, a burst and a
-    wide hollow arrow a knockback, a bar a blocker, a shield a tank buster, a clock timing. The full
+    wide hollow arrow a knockback, a row of dots players lined up (a line stack; a wild charge puts
+    the tank's shield first), a shield a tank, a clock timing. The full
     list, with how to draw a new icon, is at the top of src/components/icons.tsx.
   - The owner chose several icons from a generated sheet of extra mechanic icons, redrawn in
     lucide's line style: a bait is a player in a crosshair (you are the target), and a puddle drop

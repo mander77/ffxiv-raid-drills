@@ -16,13 +16,15 @@
 //    in its ring.
 // 2. A filled dot is a player, in the highlight colour (--count in app.css), as the number of
 //    players is (rule 9): what stands for players stands out the same way.
-// 3. Chevrons are a hit from the boss, toward the players (a line stack, a wild charge).
+// 3. Chevrons are a hit from the boss, running down the line toward the players (a line stack, a
+//    wild charge).
 // 4. Arrows are a move the players make themselves (spread, dodge, a stack coming together, puddles
 //    dropped in a row, a tether pulled apart).
 // 5. A knockback is a burst (where it comes from) and a wide, hollow arrow (the push), never a thin
 //    arrow: you do not move yourself. A knockback tower is that wide, hollow arrow bursting up out
 //    of a tower's ring, with the number of players who soak it inside.
-// 6. A bar is a blocker that takes a hit for the others: a tank, a rock, a wall (a wild charge).
+// 6. Players lined up are dots in a row (a line stack). A tank who takes the first hit for the
+//    others is the tank's shield in the first player's place (a wild charge).
 // 7. A shield is a tank: a tank buster, or a tank tower (a tower shaped like the shield).
 // 8. A clock is timing: something you see now and act on later (saved for later).
 // 9. Every stack has the same arrows, from the corners into the middle. The middle says how many:
@@ -127,19 +129,35 @@ export const StackIcon = createLucideIcon("stack", [
   ["path", { d: "M18 22v-4h4", key: "southeast-head" }],
 ]);
 
-/** A line stack: three chevrons, the hit running down the line. Lucide's ChevronsDown has two. */
+/** The hit running down a line: three chevrons on the left. */
+const LINE_HIT: IconNode = [
+  ["path", { d: "m2 3 4 4 4-4", key: "hit-top" }],
+  ["path", { d: "m2 9 4 4 4-4", key: "hit-middle" }],
+  ["path", { d: "m2 15 4 4 4-4", key: "hit-bottom" }],
+];
+
+/** A line stack: the hit running down the line, beside the players lined up in it. */
 export const LineStackIcon = createLucideIcon("line-stack", [
-  ["path", { d: "m7 3 5 5 5-5", key: "top" }],
-  ["path", { d: "m7 9 5 5 5-5", key: "middle" }],
-  ["path", { d: "m7 15 5 5 5-5", key: "bottom" }],
+  ...LINE_HIT,
+  ["circle", { cx: "17", cy: "5", r: "2", className: PLAYER, key: "first" }],
+  ["circle", { cx: "17", cy: "12", r: "2", className: PLAYER, key: "second" }],
+  ["circle", { cx: "17", cy: "19", r: "2", className: PLAYER, key: "third" }],
 ]);
 
-/** A wild charge: the line stack's chevrons with a bar in front, the tank or rock that takes the
-    first, biggest hit. */
+/** A wild charge: a line stack whose first player is a tank (a shield, rule 7), who takes the
+    first, biggest hit for the others behind. */
 export const WildChargeIcon = createLucideIcon("wild-charge", [
-  ["path", { d: "M5 3h14", key: "front" }],
-  ["path", { d: "m7 8 5 5 5-5", key: "top" }],
-  ["path", { d: "m7 14 5 5 5-5", key: "bottom" }],
+  ...LINE_HIT,
+  [
+    "path",
+    {
+      d: "M17 1.5c1 .8 2.1 1.2 3.2 1.2v2.4c0 2.1-1.5 3.2-3.2 3.9-1.7-.7-3.2-1.8-3.2-3.9V2.7c1.1 0 2.2-.4 3.2-1.2z",
+      className: PLAYER,
+      key: "tank",
+    },
+  ],
+  ["circle", { cx: "17", cy: "14", r: "2", className: PLAYER, key: "second" }],
+  ["circle", { cx: "17", cy: "20.5", r: "2", className: PLAYER, key: "third" }],
 ]);
 
 /** A bait: you are the target, a player (a filled dot) in a crosshair, and you bring the hit to
