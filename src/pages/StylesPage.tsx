@@ -1,8 +1,10 @@
 // The styles page (/styles): how the site shows an answer, and every icon it uses, with what each
 // one means. No tab or link leads here; it is a reference for the owner, to check the styles side by
 // side in light and dark mode. Each sample is the site's own component, so it shows the real style.
+// A click on an icon's card opens it zoomed in.
 import type { ComponentProps, ReactNode } from "react";
 import "../components/arena/arena.css";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Weapon } from "../components/arena/Weapon";
 import { CastSquare } from "../components/CastSquare";
 import {
@@ -207,7 +209,13 @@ export function StylesPage() {
           <h2 className="font-display text-2xl font-bold">{group.title}</h2>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {group.icons.map(({ icon: Icon, name, meaning }) => (
-              <IconItem key={name} picture={<Icon aria-hidden="true" className="size-6" />} name={name} meaning={meaning} />
+              <IconItem
+                key={name}
+                picture={<Icon aria-hidden="true" className="size-6" />}
+                zoomed={<Icon aria-hidden="true" className="size-48" />}
+                name={name}
+                meaning={meaning}
+              />
             ))}
           </ul>
         </section>
@@ -224,6 +232,11 @@ export function StylesPage() {
                   <Weapon overlay={w.overlay} />
                 </svg>
               }
+              zoomed={
+                <svg className="arena size-56" viewBox="44.5 44.5 11 11" aria-hidden="true">
+                  <Weapon overlay={w.overlay} />
+                </svg>
+              }
               name={w.name}
               meaning={w.meaning}
             />
@@ -236,18 +249,35 @@ export function StylesPage() {
 
 interface IconItemProps {
   picture: ReactNode;
+  /** The picture zoomed in, for the dialog a click on the card opens. */
+  zoomed: ReactNode;
   name: string;
   meaning: string;
   children?: ReactNode;
 }
 
-/** One icon: its picture, its name and what it means. */
-function IconItem({ picture, name, meaning, children }: IconItemProps) {
+/** One icon: its picture, its name and what it means. A click anywhere on the card opens a dialog
+    with the picture zoomed in. The name is the button, stretched over the card, so the card keeps
+    its heading and a screen reader hears one button named after the icon. */
+function IconItem({ picture, zoomed, name, meaning, children }: IconItemProps) {
   return (
-    <li className="flex gap-4 rounded-lg border bg-card p-4">
+    <li className="relative flex gap-4 rounded-lg border bg-card p-4 transition-colors has-[button:hover]:bg-accent">
       <div className="flex shrink-0 items-start gap-2">{picture}</div>
       <div className="min-w-0 space-y-1">
-        <h3 className="font-semibold">{name}</h3>
+        <Dialog>
+          <h3 className="font-semibold">
+            <DialogTrigger className="text-left after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring">
+              {name}
+            </DialogTrigger>
+          </h3>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{name}</DialogTitle>
+              <DialogDescription>{meaning}</DialogDescription>
+            </DialogHeader>
+            <div className="flex items-end justify-center gap-4 py-4">{zoomed}</div>
+          </DialogContent>
+        </Dialog>
         <p className="text-sm text-muted-foreground">{meaning}</p>
         {children}
       </div>
@@ -271,6 +301,14 @@ function KindItem({ kind }: KindItemProps) {
         <>
           <span className="flex size-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <MechanicIcon kind={kind} soak={soak} className="size-10" />
+          </span>
+          <CastSquare mark={{ cats: [], kind, soak }} />
+        </>
+      }
+      zoomed={
+        <>
+          <span className="flex size-56 items-center justify-center rounded-3xl bg-primary text-primary-foreground">
+            <MechanicIcon kind={kind} soak={soak} className="size-48" />
           </span>
           <CastSquare mark={{ cats: [], kind, soak }} />
         </>

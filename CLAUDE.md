@@ -54,8 +54,8 @@ claim on the live site before you act on it.
 | Cheat sheet | `/sheet` | Every mechanic in fight order with its picture, rules, your own answer and links to train it, the timeline for your role, sources and your progress. |
 
 The styles page, `/styles`, has no tab and no link: it shows how the site shows an answer (the real
-components), and every icon the site uses, with what it means and which mechanics use it. Check it
-when you add or change an icon or an answer style. Any other address opens
+components), and every icon the site uses, with what it means and which mechanics use it. A click
+on an icon's card opens it zoomed in. Check it when you add or change an icon or an answer style. Any other address opens
 Home, including the old site's addresses (`/mech/...`, `/map/...`).
 
 The slot switch is in the header: the role (only Healer works today; the others show "not yet

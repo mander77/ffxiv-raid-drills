@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 // The styles page: every icon of icons.tsx is on it, so a new icon cannot be left off.
 import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, assert, test } from "vitest";
 import * as icons from "../../src/components/icons";
 import { KINDS } from "../../src/components/MechanicIcon";
@@ -37,4 +38,11 @@ test("the styles page names every kind of mechanic and the boss's weapons", () =
   render(<StylesPage />);
   for (const { name } of Object.values(KINDS)) assert.ok(screen.getByRole("heading", { name }));
   for (const name of ["Axe", "Scythe", "Sword"]) assert.ok(screen.getByRole("heading", { name }));
+});
+
+test("a click on an icon's card opens it zoomed in, in a dialog named after it", async () => {
+  render(<StylesPage />);
+  await userEvent.click(screen.getByRole("button", { name: "Wild charge" }));
+  const dialog = screen.getByRole("dialog", { name: "Wild charge" });
+  assert.ok(dialog.querySelector("svg.lucide-wild-charge"));
 });
