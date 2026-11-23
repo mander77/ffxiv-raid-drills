@@ -14,7 +14,8 @@
 // What a shape means
 // 1. A ring is a spot on the floor (the spot a bait leaves, a puddle). A tower is a column standing
 //    in its ring.
-// 2. A filled dot is a player.
+// 2. A filled dot is a player, in the highlight colour (--count in app.css), as the number of
+//    players is (rule 9): what stands for players stands out the same way.
 // 3. Chevrons are a hit from the boss, toward the players (a line stack, a wild charge).
 // 4. Arrows are a move the players make themselves (spread, dodge, a stack coming together, puddles
 //    dropped in a row, a tether pulled apart).
@@ -27,8 +28,8 @@
 // 9. Every stack has the same arrows, from the corners into the middle. The middle says how many:
 //    2 (pairs), 4 (light parties), R (the roles decide), or nothing for the whole party. A shared
 //    tank buster's shield takes a number the same way, and so does a tower's column: how many
-//    players soak it (Drill.soak). The number is in the body font, bold, in
-//    its own colour (--count in app.css), so it stands out (MechanicIcon draws it).
+//    players soak it (Drill.soak). The number is in the body font, bold, in the highlight colour
+//    (--count in app.css), so it stands out (MechanicIcon draws it).
 // 10. When an icon has a direction, the boss is at the top and the hit runs down, away from it.
 //
 // How an icon is drawn
@@ -102,6 +103,10 @@ export {
 
 /* ---------- the kinds of mechanic (see MechanicIcon) ---------- */
 
+/** A player's dot: filled, in the highlight colour (rule 2). A class wins over the icon's own
+    stroke colour, so the dot keeps its colour wherever the icon is drawn. */
+const PLAYER = "fill-count stroke-count";
+
 export {
   // Spread out: arrows out to the corners.
   Expand as SpreadIcon,
@@ -141,7 +146,7 @@ export const WildChargeIcon = createLucideIcon("wild-charge", [
     where it should go. Lucide's LocateFixed, with the player filled in. */
 export const BaitIcon = createLucideIcon("bait", [
   ["circle", { cx: "12", cy: "12", r: "7", key: "crosshair" }],
-  ["circle", { cx: "12", cy: "12", r: "2.5", fill: "currentColor", key: "player" }],
+  ["circle", { cx: "12", cy: "12", r: "2.5", className: PLAYER, key: "player" }],
   ["path", { d: "M12 2v3", key: "north" }],
   ["path", { d: "M12 19v3", key: "south" }],
   ["path", { d: "M2 12h3", key: "west" }],
@@ -165,7 +170,7 @@ export const KnockbackIcon = createLucideIcon("knockback", [
   ["path", { d: "m3.16 3.16 2.21 2.21", key: "burst-middle" }],
   ["path", { d: "M0.95 7.14 4.05 7.58", key: "burst-south" }],
   ["path", { d: "m9.35 6.7 3.53 3.53 2.66-2.65v7.96H7.58l2.65-2.66L6.7 9.35z", key: "push" }],
-  ["circle", { cx: "19", cy: "19", r: "3", fill: "currentColor", key: "player" }],
+  ["circle", { cx: "19", cy: "19", r: "3", className: PLAYER, key: "player" }],
 ]);
 
 /** A tower: a wide column standing in its ring on the floor, with room inside for the number of
@@ -193,8 +198,8 @@ export const KnockbackTowerIcon = createLucideIcon("knockback-tower", [
 /** A stretch tether: two players (filled dots) joined by a tether, and the arrow of their moving
     apart to stretch it. */
 export const StretchTetherIcon = createLucideIcon("stretch-tether", [
-  ["circle", { cx: "5", cy: "17", r: "3", fill: "currentColor", key: "west-player" }],
-  ["circle", { cx: "19", cy: "17", r: "3", fill: "currentColor", key: "east-player" }],
+  ["circle", { cx: "5", cy: "17", r: "3", className: PLAYER, key: "west-player" }],
+  ["circle", { cx: "19", cy: "17", r: "3", className: PLAYER, key: "east-player" }],
   ["path", { d: "M8 17h8", key: "tether" }],
   ["path", { d: "M3 7h18", key: "apart" }],
   ["path", { d: "m6 4-3 3 3 3", key: "apart-west" }],
@@ -215,7 +220,7 @@ const SHIELD: IconNode = [
 /** A tank buster: a player (a filled dot) behind a shield. */
 export const TankBusterIcon = createLucideIcon("tank-buster", [
   ...SHIELD,
-  ["circle", { cx: "12", cy: "12", r: "3", fill: "currentColor", key: "player" }],
+  ["circle", { cx: "12", cy: "12", r: "3", className: PLAYER, key: "player" }],
 ]);
 
 /** A shared tank buster: the shield, with the middle left open for the number of tanks who share
@@ -224,7 +229,7 @@ export const SharedTankBusterIcon = createLucideIcon("shared-tank-buster", SHIEL
 
 /** A dodge: a player (a filled dot) stepping aside, an arrow of their own. */
 export const DodgeIcon = createLucideIcon("dodge", [
-  ["circle", { cx: "5", cy: "12", r: "3", fill: "currentColor", key: "player" }],
+  ["circle", { cx: "5", cy: "12", r: "3", className: PLAYER, key: "player" }],
   ["path", { d: "M10 12h11", key: "step" }],
   ["path", { d: "m17 8 4 4-4 4", key: "step-head" }],
 ]);
@@ -232,7 +237,7 @@ export const DodgeIcon = createLucideIcon("dodge", [
 /** A dodge sequence: a player (a filled dot) and the path they take, turning, to an arrow: several
     moves in order. */
 export const DodgeSequenceIcon = createLucideIcon("dodge-sequence", [
-  ["circle", { cx: "4", cy: "5", r: "2.5", fill: "currentColor", key: "player" }],
+  ["circle", { cx: "4", cy: "5", r: "2.5", className: PLAYER, key: "player" }],
   ["path", { d: "M7 5h10a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h14", key: "path" }],
   ["path", { d: "m18 14 3 3-3 3", key: "path-head" }],
 ]);

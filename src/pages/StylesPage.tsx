@@ -270,7 +270,7 @@ function KindItem({ kind }: KindItemProps) {
       picture={
         <>
           <span className="flex size-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <MechanicIcon kind={kind} soak={soak} className="size-10" countClassName="text-count" />
+            <MechanicIcon kind={kind} soak={soak} className="size-10" />
           </span>
           <CastSquare mark={{ cats: [], kind, soak }} />
         </>

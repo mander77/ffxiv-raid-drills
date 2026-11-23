@@ -113,13 +113,11 @@ export interface MechanicIconProps {
   soak?: number;
   /** The size and colour of the icon. */
   className?: string;
-  /** The colour of a stack's number, when it should stand out from the arrows. */
-  countClassName?: string;
 }
 
 /** The icon of what you do in a mechanic (spread, stack...), with a stack's number in its middle.
     It is only a picture: the text next to it, or a label, says the same in words. */
-export function MechanicIcon({ kind, soak, className, countClassName }: MechanicIconProps) {
+export function MechanicIcon({ kind, soak, className }: MechanicIconProps) {
   const { icon: Icon, countLook, soaked } = KINDS[kind];
   const count = soaked ? soak?.toString() : KINDS[kind].count;
   if (!count) return <Icon aria-hidden="true" className={cn("size-4", className)} />;
@@ -130,11 +128,11 @@ export function MechanicIcon({ kind, soak, className, countClassName }: Mechanic
       <Icon className="size-full" />
       <span
         className={cn(
-          "absolute font-sans font-bold",
+          // The number of players, in the highlight colour, like a player's dot (icons.tsx, rule 2).
+          "absolute font-sans font-bold text-count",
           // The size goes before leading-none: cn drops a line height that comes before a size.
           countLook ?? "text-[70cqw]",
           "leading-none",
-          countClassName,
         )}
       >
         {count}

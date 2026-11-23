@@ -352,7 +352,7 @@ Do not propose these again unless the owner brings them up.
   shows the kind's icon, and the mechanic's panel names it. The owner chose the kinds and the icons
   with Claude:
   - The icons follow rules (the owner's): a ring is a spot, a tower a column standing in its
-    ring, a filled dot a player, chevrons a hit from the boss, arrows a move you make, a burst and a
+    ring, a filled dot a player (in the highlight colour, like the number of players: owner's choice), chevrons a hit from the boss, arrows a move you make, a burst and a
     wide hollow arrow a knockback, a bar a blocker, a shield a tank buster, a clock timing. The full
     list, with how to draw a new icon, is at the top of src/components/icons.tsx.
   - The owner chose several icons from a generated sheet of extra mechanic icons, redrawn in
