@@ -144,6 +144,14 @@
   .arena .aim .head {
     fill: var(--arena-aim);
   }
+  /* Where a knockback pushes you: the same arrow in the arena's dark text colour, so it stands
+     out on the light floor and is never mistaken for a cone's aim. */
+  .arena .aim.push .shaft {
+    stroke: var(--arena-text);
+  }
+  .arena .aim.push .head {
+    fill: var(--arena-text);
+  }
   .arena .aoeband {
     stroke: var(--arena-aoe);
     opacity: 0.4;

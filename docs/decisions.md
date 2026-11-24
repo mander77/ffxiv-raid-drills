@@ -75,16 +75,18 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
   choice. The import keeps such an ability, with its text; it does not stop.
 - A cone keeps three points on its round edge up to 90 degrees, as M11S's `cleave` draws it. A
   wider cone gets one more point for each 45 degrees.
-- A knockback is drawn as guides (thin white dashes) out from its source, as M11S draws its
-  knockbacks today. A tower can show its soak count in its middle (`soak`), and a puddle can
-  carry its life in seconds (`life`).
+- A knockback has its own overlay (`{t:"knockback"}`): bold dark arrows with arrowheads on a
+  light outline, out from its source (owner's request). Thin white guides were too faint to see.
+  M11S still draws its knockbacks as guides until the second pull request moves it.
+- A tower can show its soak count in its middle (`soak`), and a puddle can carry its life in
+  seconds (`life`).
 - On the styles page, "Knockback Arrows" and "Tower to Soak" have these names because the
   mechanic kinds "Knockback" and "Tower" already have cards there.
-- On the styles page, each kind of mechanic that resolves with one standard attack shows that
-  attack beside its icon, with "Attack: <name>" (owner's request). Stacks and spreads show a
-  circle, line stacks and wild charges a line, proteans eight cones out from the boss (owner's request), towers a tower, puddle drops a
-  puddle, and a knockback its arrows. Chains, tethers, tank busters, baits, dodge sequences and
-  look ahead show none: they end in more than one attack, or in none.
+- Rejected: an attack's picture beside each mechanic kind's icon on the styles page. A kind does
+  not always map to one attack. Every attack is in the Standard Attacks section instead (owner's
+  choice).
+- The Cone sample covers a small wedge (60 degrees, 16 yalms), so it reads as a cone and not
+  as half the arena (owner's request).
 
 ## Planned work
 

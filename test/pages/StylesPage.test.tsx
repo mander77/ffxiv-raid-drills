@@ -93,13 +93,17 @@ test("the styles page draws each standard attack, and the mark of an unknown siz
   assert.equal(attacks.querySelector(".tower text")?.textContent, "2", "a tower shows its soak count");
 });
 
-test("a kind of mechanic shows the standard attack it resolves with, where one fits", () => {
+test("proteans come out from the boss, and a knockback shows bold arrows", () => {
   render(<StylesPage />);
   const card = (name: string) => screen.getByRole("heading", { level: 3, name }).closest("li");
-  assert.ok(card("Line Stack")?.textContent?.includes("Attack: Line"));
-  assert.ok(card("Puddle Drop Sequence")?.querySelector(".puddle"), "the puddle beside the icon");
-  const proteans = card("Proteans (Clock Spots)");
-  assert.equal(proteans?.querySelectorAll("polygon.aoe").length, 8, "eight cones beside the icon");
+  const proteans = card("Proteans");
+  assert.equal(proteans?.querySelectorAll("polygon.aoe").length, 8, "eight cones");
   assert.ok(proteans?.querySelector(".bosscore"), "out from the boss");
-  assert.notInclude(card("Pair Tether")?.textContent ?? "", "Attack:", "a tether has no one attack");
+  assert.equal(card("Knockback Arrows")?.querySelectorAll(".aim.push").length, 8, "eight bold arrows");
+});
+
+test("the mechanic cards show their icons only, with no attack on the arena", () => {
+  render(<StylesPage />);
+  const card = screen.getByRole("heading", { level: 3, name: "Proteans (Clock Spots)" }).closest("li");
+  assert.notOk(card?.querySelector("svg.arena"));
 });

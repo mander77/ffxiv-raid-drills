@@ -93,6 +93,8 @@ type OverlayShape =
   | ({ t: "tether" } & Line)
   // Where a cone points: an arrow from its source (x, y) out to (x2, y2).
   | ({ t: "aim" } & Line)
+  // Where a knockback pushes you: a bold dark arrow from (x, y) out to (x2, y2).
+  | ({ t: "knockback" } & Line)
   | ({ t: "tornado" } & At)
   | ({ t: "rock" } & At)
   /** `soak` is how many players the tower needs; the tower shows it in the middle. */
