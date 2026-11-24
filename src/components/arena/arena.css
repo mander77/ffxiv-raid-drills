@@ -13,6 +13,7 @@
     --arena-void: oklch(0.3 0.014 261.706);
     --arena-aoe: oklch(0.69 0.167 52.506);
     --arena-aoe-fill: oklch(0.69 0.167 52.506 / 0.3);
+    --arena-aim: oklch(0.52 0.16 45);
     --arena-line-aoe: oklch(0.649 0.112 245.732);
     --arena-boss: oklch(0.322 0.097 30.168);
     --arena-ring: oklch(0.544 0.179 28.857);
@@ -123,13 +124,22 @@
     stroke: var(--arena-aoe);
     stroke-width: 0.4;
   }
-  /* Where a cone points: an arrow from its source, in the attack's colour. */
-  .arena .aim line {
-    stroke: var(--arena-aoe);
-    stroke-width: 0.8;
+  /* Where a cone points: a bold arrow from its source, darker than the attack, on a light outline
+     so it stands out on the cone. */
+  .arena .aim .halo {
+    fill: var(--arena-sand);
+    stroke: var(--arena-sand);
+    stroke-width: 2.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
-  .arena .aim polygon {
-    fill: var(--arena-aoe);
+  .arena .aim .shaft {
+    fill: none;
+    stroke: var(--arena-aim);
+    stroke-width: 1.4;
+  }
+  .arena .aim .head {
+    fill: var(--arena-aim);
   }
   .arena .aoeband {
     stroke: var(--arena-aoe);
