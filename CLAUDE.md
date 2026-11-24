@@ -322,6 +322,10 @@ rebase, run CI or approve a preview again when `main` moves.
   `test/sources.test.ts` fails on a time that matches no cactbot line or cast start, and on a
   time in the text that is not a cactbot line rounded to the second. Its list `SCENE_STARTS`
   holds the values that are still questions for the owner.
+- `test/answers.test.ts` fails when a drill's correct spot stands in an attack of its step, or
+  in a dropped puddle still on the floor. When `reveal` shows an attack the player takes (a
+  stack, a bait, their own cone), set `Step.hits` to the attacks that must miss them. Never
+  move a spot to make it pass: ask the owner, and list the case in its `KNOWN` until they answer.
 - The player marks are always the top layer of an arena picture.
 - New attack sizes go in `src/data/attacks.ts`, not in a drill or a picture.
 - A drill pattern comes from a seeded code (`withSeed`), so the same code builds the same pattern.

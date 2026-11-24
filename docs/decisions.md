@@ -762,6 +762,18 @@ static wins.
   - The tornado cones and Fire Breath are drawn at BossMod's sizes: a 90-degree cone, 60 yalms
     long, and a line 6 yalms wide. The proximity AoE stays a small circle where it lands, the
     app's choice: the real one covers the whole arena.
+- Issue #100 (November 24): `test/answers.test.ts` answers every drill with its correct spot,
+  for both slots and 30 pattern codes. It fails when the spot is in an attack of that step, or
+  in a dropped puddle that is still on the floor. The puddle times come from the full fight
+  (`due`, and `drop.life` from BossMod).
+  - `reveal` was not enough: it also shows the attacks that the player takes on purpose (a
+    stack, a bait, their own protean cone). So a step can list `hits`, the attacks that must
+    miss the correct spot. Five places set it: the scythe weapon (the donut and the other seven
+    cones), Raw Steel Trophy's scythe (the two tank cones), the tornadoes (the other seven
+    cones), and Two-way and Four-way Fireball (the other Line Stacks). Nothing draws `hits`.
+  - A scene's `overlays` count only for their puddles, at every step: the other attacks there
+    can go off much later.
+  - The first run found no correct spot in an attack.
 
 ## Hosting
 
