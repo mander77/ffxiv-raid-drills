@@ -10,6 +10,7 @@ import {
   LineStackIcon,
   LookAheadIcon,
   type LucideIcon,
+  PairTetherIcon,
   PartyStackIcon,
   ProteanIcon,
   PuddleDropIcon,
@@ -101,6 +102,11 @@ export const KINDS: Record<DrillKind, KindInfo> = {
     name: "Stretch Tether",
     meaning: "Move away from the other end of your tether until it is long enough.",
     icon: StretchTetherIcon,
+  },
+  pairTether: {
+    name: "Pair Tether",
+    meaning: "Stay close to the player you are tethered to while you both move.",
+    icon: PairTetherIcon,
   },
   tankBuster: { name: "Tank Buster", meaning: "A heavy hit on one tank.", icon: TankBusterIcon },
   sharedTankBuster: {

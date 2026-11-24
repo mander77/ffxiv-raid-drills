@@ -332,8 +332,8 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Mark**: a player's mark on the arena, or the boss (`BossMark`).
 - **Kind**: what you do in a Practice mechanic: spread, a stack (party, pair, light party or role
   stack), line stack, bait, puddle drop sequence, proteans (clock spots), dodge sequence, tower,
-  knockback tower, tank tower, wild charge, look ahead, knockback, stretch tether, tank buster
-  or shared tank buster (`DrillKind`, `Drill.kind`). A mechanic that can end in more than one way
+  knockback tower, tank tower, wild charge, look ahead, knockback, stretch tether, pair
+  tether, tank buster or shared tank buster (`DrillKind`, `Drill.kind`). A mechanic that can end in more than one way
   has several kinds (the weapons: party stack, proteans, light party stack); `kindsOf` gives them.
   `MechanicIcon` draws its icon; the rules for
   the icons are at the top of `src/components/icons.tsx`. Not a category.

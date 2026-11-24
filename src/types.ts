@@ -183,8 +183,8 @@ export interface Scene {
     parties, or by role), stack in a line from the boss, bait an attack (bring it to where it should
     go), drop puddles in order, take your clock spot for proteans, dodge a set order of attacks, soak a tower (one that knocks
     you back, or one for a tank), line up behind a blocker for a wild charge, act on what the boss showed earlier
-    (look ahead), get knocked back to your spot, stretch a tether, or take a tank buster alone
-    or shared. Practice's list of mechanics shows it as an icon. */
+    (look ahead), get knocked back to your spot, stretch a tether, stay close to the player
+    you are tethered to, or take a tank buster alone or shared. Practice's list of mechanics shows it as an icon. */
 export type DrillKind =
   | "spread"
   | "stack"
@@ -203,6 +203,7 @@ export type DrillKind =
   | "later"
   | "knockback"
   | "stretchTether"
+  | "pairTether"
   | "tankBuster"
   | "sharedTankBuster";
 
