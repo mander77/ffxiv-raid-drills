@@ -1,6 +1,18 @@
 import { assert, test } from "vitest";
 import { RANDOM } from "../src/data/fights/m11s/fight";
-import { clickRoute, correctRoute, LOOK, MOVEMENT_SPEED, REACT, REST_GAP, runnerAt, HOME as START, type Stop } from "../src/data/route";
+import {
+  clickRoute,
+  correctRoute,
+  LOOK,
+  MOVEMENT_SPEED,
+  REACT,
+  REST_GAP,
+  runnerAt,
+  HOME as START,
+  type Stop,
+  THROW_TIME,
+  thrownTo,
+} from "../src/data/route";
 import { inZone, rotZone } from "../src/geometry";
 import type { Point, Slot, StepResult } from "../src/types";
 import { newCode } from "../src/util";
@@ -220,4 +232,33 @@ test("your own click: the marker runs to the spot when you click it, not before"
   // Half a second after the click it is half a second of running on its way.
   assert.closeTo(dist(runnerAt(route, tClick + 0.5).at, START), MOVEMENT_SPEED * 0.5, 1e-6);
   assert.isTrue(near(runnerAt(route, g.due[0]).at, p), "on the spot when the weapon hits");
+});
+
+test("a tower's knockback throws the runner straight away from the tower, to where it lands", () => {
+  const tower: Point = [11, 77],
+    route: Stop[] = [
+      { p: [16, 77], hit: 10, show: 0, si: 0, j: 0, knock: { from: tower, dist: 57.5 } },
+      { p: [80, 50], hit: 20, show: 10, si: 1, j: 0 },
+    ],
+    land: Point = [16 + 57.5, 77];
+  assert.ok(near(runnerAt(route, 9.9).at, [16, 77]), "on the spot until the hit");
+  assert.ok(near(runnerAt(route, 10 + THROW_TIME / 2).at, [16 + 57.5 / 2, 77]), "halfway through the throw");
+  assert.ok(near(runnerAt(route, 10 + THROW_TIME).at, land), "where the throw lands");
+  // From the landing, it runs on to the next spot after its reaction time.
+  assert.ok(near(runnerAt(route, 10 + THROW_TIME + REACT).at, land), "it leaves from where it landed");
+  assert.ok(near(thrownTo(tower, 57.5, [16, 77]), land));
+});
+
+test("in the full fight, every Arena Split tower throws the runner onto a platform", () => {
+  for (const s of SLOTS)
+    for (let i = 0; i < 20; i++) {
+      const f = buildFight(s, newCode(), RANDOM),
+        knocks = correctRoute(f).filter((st) => st.knock);
+      assert.equal(knocks.length, 3, `${s}: the first towers, the second towers and Arcadion Avalanche`);
+      for (const st of knocks) {
+        const at = runnerAt(correctRoute(f), st.hit + THROW_TIME + 0.01).at,
+          onPlatform = at[1] >= 0 && at[1] <= 100 && (at[0] <= 35 ? at[0] >= -15 : at[0] >= 65 && at[0] <= 115);
+        assert.ok(onPlatform, `${s}: lands on a platform at (${at.map((v) => v.toFixed(1))})`);
+      }
+    }
 });

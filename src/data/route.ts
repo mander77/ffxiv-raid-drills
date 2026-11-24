@@ -7,7 +7,7 @@
 // center (100, 100) and the numbered marks about 16.3 yalms out, which is where this app draws them
 // (25 and about 41 units out). So 1 unit is 0.4 yalm, and the arena is 40 x 40 yalms. No guide
 // states the size; this follows from the waymarks.
-import { dist, inZone, rot, rotZone, stepZone, zoneCenter } from "../geometry";
+import { addVec, dist, inZone, rot, rotZone, stepZone, zoneCenter } from "../geometry";
 import type { Fight, FightSeg, Point, StepResult, Zone } from "../types";
 
 /** Normal movement speed, about 6 yalms a second, in arena units a second (6 / 0.4). Tune it here. */
@@ -24,14 +24,27 @@ export const HOME: Point = [50, 56];
 /** A quiet stretch at least this long (seconds from a hit to the next mechanic) sends the player
     to HOME, when the next mechanic has no pre-position of its own. */
 export const REST_GAP = 8;
+/** How long a knockback takes to throw you to where you land, in seconds: the app's choice, a
+    quick flight that you can follow by eye. */
+export const THROW_TIME = 0.6;
 
 /** One stop on the route: the spot `p`, the hit at `hit` (seconds into the fight) that the spot is
     for, and `show`, when that mechanic appears on the arena. `si` and `j` say which segment and
     step of the fight it answers. `pre` is the segment's own pre-position, when it has one: a
     first move known in advance. A `lookAhead` stop is a look-ahead step: it has an answer (the
     click), but the player does not move there, so the runner skips it. `click` is when you
-    clicked the spot, for a route made of your own clicks: the runner goes there only then. */
-export interface Stop { p: Point; hit: number; show: number; si: number; j: number; pre?: Point; lookAhead?: boolean; click?: number }
+    clicked the spot, for a route made of your own clicks: the runner goes there only then.
+    `knock` is a knockback at the hit: it throws the runner `dist` units straight away from `from`. */
+export interface Stop { p: Point; hit: number; show: number; si: number; j: number; pre?: Point; lookAhead?: boolean; click?: number; knock?: {from: Point; dist: number} }
+
+/** Where a knockback from `from` throws a player standing at p: `d` units straight away from it. */
+export const thrownTo = (from: Point, d: number, p: Point): Point => {
+  const r = dist(p, from);
+  return r < 1e-6 ? p : addVec(p, [(p[0] - from[0]) / r, (p[1] - from[1]) / r], d);
+};
+/** A step's knockback, turned with the arena, for its stop. */
+const knockOf = (k: {from: Point; dist: number} | undefined, turn: number): Pick<Stop, "knock"> =>
+  k ? {knock:{from:rot(k.from, turn), dist:k.dist}} : {};
 
 
 /** When step j of a mechanic appears for the player: when the mechanic does, but a weapon only
@@ -65,7 +78,7 @@ export function correctRoute(f: Fight): Stop[] {
       const z = rotZone(base, g.k), p = st.stand && !st.lookAhead ? rot(st.stand, g.k) : middleOf(z, from);
       res.push({p, ok:inZone(p, z), z, drop:st.drop ? p : null});
       if(!st.lookAhead) from = p;   // a look-ahead does not move the player
-      return [{p, hit:g.due[j], show:showOf(g, j), si, j, ...(pre ? {pre} : {}), ...(st.lookAhead ? {lookAhead:true} : {})}];
+      return [{p, hit:g.due[j], show:showOf(g, j), si, j, ...(pre ? {pre} : {}), ...(st.lookAhead ? {lookAhead:true} : {}), ...knockOf(st.knock, g.k)}];
     });
   }).sort((a, b) => a.hit - b.hit);
 }
@@ -76,7 +89,7 @@ export function correctRoute(f: Fight): Stop[] {
 export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Point; t?: number}>): Stop[] {
   return clicks.flatMap((c): Stop[] => {
     const g = f.segs[c.si], hit = g?.due[c.j];
-    return g && hit != null ? [{p:c.p, hit, show:showOf(g, c.j), si:c.si, j:c.j, ...(c.t != null ? {click:c.t} : {}), lookAhead:g.scene.steps[c.j]?.lookAhead}] : [];
+    return g && hit != null ? [{p:c.p, hit, show:showOf(g, c.j), si:c.si, j:c.j, ...(c.t != null ? {click:c.t} : {}), lookAhead:g.scene.steps[c.j]?.lookAhead, ...knockOf(g.scene.steps[c.j]?.knock, g.k)}] : [];
   }).sort((a, b) => a.hit - b.hit);
 }
 
@@ -87,7 +100,8 @@ export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Po
     you clicked (but not before the hit of the spot it stands on). Before a mechanic with its
     own pre-position (Stop.pre), it goes there just after the last hit. Before any other
     mechanic, after a quiet stretch of REST_GAP seconds or more, it goes to HOME. Look-ahead
-    stops are skipped: the player does not move for them. */
+    stops are skipped: the player does not move for them. A stop with a knockback throws the
+    runner at its hit, over THROW_TIME, to where it lands; it moves on from there. */
 export function runnerAt(route: Stop[], t: number): {at: Point; target: Stop | null} {
   const moves = route.filter(s => !s.lookAhead);
   const target = moves.find(s => s.hit > t && s.show <= t) ?? null;
@@ -110,6 +124,14 @@ export function runnerAt(route: Stop[], t: number): {at: Point; target: Stop | n
     }
     const step = leg(s.p, Math.max(lastHit + REACT, s.click ?? s.show + LOOK));
     if(step) return {at:step, target};
+    if(s.knock){
+      if(t < s.hit) return {at, target};
+      const from = at, land = thrownTo(s.knock.from, s.knock.dist, at), k = (t - s.hit) / THROW_TIME;
+      if(k < 1) return {at:[from[0] + (land[0] - from[0]) * k, from[1] + (land[1] - from[1]) * k], target};
+      at = land;
+      lastHit = s.hit + THROW_TIME;
+      continue;
+    }
     lastHit = s.hit;
   }
   return {at, target};

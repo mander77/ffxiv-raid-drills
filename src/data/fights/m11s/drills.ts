@@ -5,6 +5,7 @@ import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCen
 import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, gust, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
+import { thrownTo } from "../../route";
 import type { Boss, Drill, Lines, Overlay, Point, RectZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../../../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
@@ -827,10 +828,7 @@ function buildTowerHalf(side: SplitSide, end: SplitEnd, knock: Knock): Zone {
   return {fn, label:fn(best) ? best : nearestTo(best, fn) ?? best, show:rayArea(c, degs.map(g => g + from), part).map(poly => ({poly}))};
 }
 /** Where a tower at c knocks a player standing at p: TOWER_KNOCKBACK straight away from c. */
-export const knockedFrom = (c: Point, p: Point): Point => {
-  const r = dist(p, c);
-  return r < 1e-6 ? p : addVec(p, [(p[0] - c[0]) / r, (p[1] - c[1]) / r], TOWER_KNOCKBACK);
-};
+export const knockedFrom = (c: Point, p: Point): Point => thrownTo(c, TOWER_KNOCKBACK, p);
 /** How close to a platform's edge a landing may be, and how far out from a tower's middle a
     spot must be to have a clear way out: the app's choice. */
 const LAND_MARGIN = 2.5, TOWER_CORE = 1;
@@ -862,7 +860,7 @@ export function firstTowersScene(s: Slot, tether: {portal: Point} | null): Scene
   return {setup:["Four towers appear: two on each platform.", "Every player soaks a tower.", tether ? "You have a tether this time." : "No tether this time."],
     split:true, boss:BOSS, overlays:[...SPLIT_TOWERS, ...(tether ? [{t:"portal", x:tether.portal[0], y:tether.portal[1], vert:false} as const] : [])],
     ...(tether ? {tether:{portal:tether.portal, you:mark}} : {}),
-    steps:[{q:"Where in your tower do you stand?", zf:() => towerHalf(home, end, knock),
+    steps:[{q:"Where in your tower do you stand?", zf:() => towerHalf(home, end, knock), knock:{from:at, dist:TOWER_KNOCKBACK},
       a:[...towerAnswer(home, end, knock, tether !== null), bySlot(s, {H1:"Your tower is the SW one, with M1.", H2:"Your tower is the SE one, with M2."})]}],
     rule:TOWER_RULE};
 }
@@ -877,7 +875,7 @@ export function splitTowers(s: Slot, side: SplitSide, end: SplitEnd, tether: {po
     // With a tether, your mark is the tether's end, drawn with it.
     overlays:mine ? [...SPLIT_TOWERS, {t:"portal", x:mine.portal[0], y:mine.portal[1], vert:false}] : [...SPLIT_TOWERS, mark],
     ...(mine ? {tether:mine} : {}),
-    steps:[{q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, knock),
+    steps:[{q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, knock), knock:{from:SPLIT_TOWER[side][end], dist:TOWER_KNOCKBACK},
       a:[...towerAnswer(side, end, knock, tether !== null), "Your tower is in the quadrant you ended in."]}],
     rule:["Towers: the quadrant you ended the last tethers and markers in.", ...TOWER_RULE]};
 }
@@ -904,7 +902,7 @@ export function avalancheScene(s: Slot, side: SplitSide, end: SplitEnd, face: Sp
   return {setup:["The boss faces the " + face + " platform: he grabs it.", "Towers appear, one in each quadrant.", "Then he turns and slams the platform down."], ordered:true,
     split:true, boss:{x:50, y:50, f}, overlays:[...SPLIT_TOWERS, lastSpot(s, side, end)],
     steps:[
-      {q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, side === back ? "along" : "across"),
+      {q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, side === back ? "along" : "across"), knock:{from:SPLIT_TOWER[side][end], dist:TOWER_KNOCKBACK},
         a:[side === back
           ? "The " + way(knockDir(side, end, "along")) + " side of the " + quadrant(side, end) + " tower: stay on this platform."
           : "The " + way(knockDir(side, end, "across")) + " side of the " + quadrant(side, end) + " tower: get knocked across.",

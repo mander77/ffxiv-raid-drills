@@ -168,6 +168,9 @@ export interface Step {
   /** Every puddle dropped before this step has gone off by the time it is asked, so Practice
       fades them then. The full fight times each puddle itself. */
   puddlesOff?: boolean;
+  /** A knockback at this step's hit: it throws you `dist` units straight away from `from`. The
+      full fight's moving marker shows the throw. */
+  knock?: { from: Point; dist: number };
   /** Drawn after this step is answered. */
   reveal?: Overlay[];
   /** The attacks of this step that the correct spot must stay out of, when they are not all of

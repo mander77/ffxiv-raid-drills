@@ -825,6 +825,11 @@ static wins.
 
 ### The moving marker (data/route.ts)
 
+- A knockback throws it (`Step.knock`, `THROW_TIME`): at an Arena Split tower's hit it flies
+  straight away from the tower's middle, 23 yalms (BossMod), over 0.6 seconds (the app's choice),
+  in Watch the Correct Moves and in the run. Then it moves on from where it landed (the owner,
+  November 2026).
+
 - It runs to the middle of each spot, never to the edge, because an edge can clip the next player.
   The sword is the exception: it stands at its best spot near the inner corner.
 - It leaves a spot 0.2 seconds after the hit, starts for a new mechanic 0.5 seconds after it shows,
