@@ -350,12 +350,13 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
         show([breath(edge), you(s, edge)], [bySlot(s, {H1:rect(0, 38, 6, 62), H2:rect(94, 38, 100, 62)})]),
         show([breath(start), you(s, start), tank, guide(tethered, CENTER), tag(tethered[0], tethered[1] + bySlot(s, {H1:6, H2:-6}), "TETHER")]),
         show([breath(start), you(s, start), say("STAND STILL", 8)])]}; },
-  "k-split-corner": s => { const markers = bySlot<Point[]>(s, {H1:[[9, 19], [9, 81]], H2:[[91, 19], [91, 81]]}), tethered = bySlot<Point>(s, {H1:[12, 38], H2:[88, 62]});
-    const breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W), corner = bySlot<Point>(s, {H1:[14, 25], H2:[86, 75]}), edge = bySlot<Point>(s, {H1:[3, 40], H2:[97, 60]});
+  "k-split-corner": s => { // The outer corner of each number waymark on your platform, toward the arena's corner.
+    const markers = bySlot<Point[]>(s, {H1:[[3.5, 13.5], [3.5, 86.5]], H2:[[96.5, 13.5], [96.5, 86.5]]}), tethered = bySlot<Point>(s, {H1:[12, 38], H2:[88, 62]});
+    const breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W), corner = bySlot<Point>(s, {H1:[3.5, 13.5], H2:[96.5, 86.5]}), edge = bySlot<Point>(s, {H1:[3, 40], H2:[97, 60]});
     const nextTo = bySlot<Point>(s, {H1:[12, 45], H2:[88, 55]}), middle = bySlot<Point>(s, {H1:[13, 50], H2:[87, 50]});
-    return {overlays:[], split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[12, 50], H2:[88, 50]}))], answer:markers.map(p => circle(p, 6.5)),
-      note:"Markers go to a corner of your number waymark. Tethers go to the platform edge. Ask your lead which corner: outer or inner.", options:[
-        show([breath(corner), you(s, corner)], markers.map(p => circle(p, 6.5))),
+    return {overlays:[], split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[12, 50], H2:[88, 50]}))], answer:markers.map(p => circle(p, 4.5)),
+      note:"Markers go to the outer corner of your number waymark. Tethers go to the platform edge.", options:[
+        show([breath(corner), you(s, corner)], markers.map(p => circle(p, 4.5))),
         show([breath(edge), you(s, edge)], [bySlot(s, {H1:rect(0, 10, 5, 90), H2:rect(95, 10, 100, 90)})]),
         show([breath(nextTo), you(s, nextTo), mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T"), guide(tethered, CENTER)]),
         hit(youAt(s, middle, 6), [breath(middle)])]}; },
