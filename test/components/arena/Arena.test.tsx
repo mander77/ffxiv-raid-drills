@@ -73,8 +73,13 @@ test("an aim is an arrow on the ground, drawn over the cone it points along", ()
     ["aoe", "aim"],
   );
   const aim = ground?.querySelector(".aim");
-  assert.equal(aim?.querySelectorAll("line").length, 1, "the shaft");
-  assert.include(aim?.querySelector("polygon")?.getAttribute("points") ?? "", "4,34", "the head ends at the tip");
+  assert.deepEqual(
+    [...(aim?.children ?? [])].map((e) => e.getAttribute("class")),
+    ["halo", "shaft", "head"],
+    "a light outline under the arrow",
+  );
+  assert.match(aim?.querySelector(".shaft")?.getAttribute("d") ?? "", /^M20,50 /, "the shaft starts at the source");
+  assert.match(aim?.querySelector(".head")?.getAttribute("d") ?? "", /^M4,34 /, "the head ends at the tip");
 });
 
 test("the boss shows his facing only when he has one", () => {

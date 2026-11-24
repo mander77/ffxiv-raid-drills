@@ -118,18 +118,22 @@ interface AimProps {
 
 /** How long the arrowhead of an aim is, and how wide each side of it is, in arena units. The
     app's choice, for the picture. */
-const HEAD_LEN = 2.6;
-const HEAD_HALF = 1.6;
+const HEAD_LEN = 4.2;
+const HEAD_HALF = 2.8;
 
-/** An arrow from a cone's source along its middle, so a wide cone shows where it comes from. */
+/** An arrow from a cone's source along its middle, so a wide cone shows where it comes from. It
+    is drawn twice: a light outline first, so it stands out on the cone, then the arrow. */
 function Aim({ from, to }: AimProps) {
   const d = unit([to[0] - from[0], to[1] - from[1]]);
   const back: Point = [to[0] - d[0] * HEAD_LEN, to[1] - d[1] * HEAD_LEN];
   const side = (s: number): Point => [back[0] - d[1] * HEAD_HALF * s, back[1] + d[0] * HEAD_HALF * s];
+  const shaft = `M${pt(from)} L${pt(back)}`;
+  const head = `M${pt(to)} L${pt(side(1))} L${pt(side(-1))} Z`;
   return (
     <g className="aim">
-      <line x1={round2(from[0])} y1={round2(from[1])} x2={round2(back[0])} y2={round2(back[1])} />
-      <polygon points={[to, side(1), side(-1)].map(pt).join(" ")} />
+      <path className="halo" d={`${shaft} ${head}`} />
+      <path className="shaft" d={shaft} />
+      <path className="head" d={head} />
     </g>
   );
 }
