@@ -769,6 +769,9 @@ static wins.
   - Each round: everyone goes in close, to the middle of the platform's inner edge, to bait the
     puddles; without a tether you bait Fire Breath there first. Then each player goes to their
     end of the platform (owner's answers, November 2026):
+    - Your end is where the tower threw you, and you bait the puddles toward it (the owner,
+      November 2026): across, you land at your tower's end; staying, at the other end. In the
+      full fight your portal is then in the other half.
     - With a tether, your end is the one away from your portal. The four tether portals are just
       outside the outer walls, two on each side, at the ends or near the middle (Hector's video,
       12:34). Your portal is on the other platform's side. The tether goes to the north or south

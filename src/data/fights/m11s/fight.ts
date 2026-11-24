@@ -165,24 +165,29 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
      close when the first puddle's cast starts (cactbot's "--meteor 1--"), after the Fire Breath
      markers. Each puddle drops when its cast starts ("--meteor 1--" to "--meteor 3--") and goes
      off 3 seconds later (MajesticMeteorAOE). The tethers and markers resolve with Fire Breath.
-     Your end of the platform: with a tether, the end away from your portal (random); without
-     one, the end you were knocked to. The side portal lines cover a random half of each
+     Your end of the platform is where the tower threw you: across, you land at the tower's end;
+     staying, at the other end. You bait the puddles toward it, and your portal is in the other
+     half, so a tether ends away from it. The side portal lines cover a random half of each
      platform each round. The side whose tether portals are near the ends is random each round,
      and so are the other tethered players and the side of your portal; in the second round the
      tethers swap. Then the boss faces a random platform and turns to the other over a random
      side. */
   const t1 = choose(c.tether, random() < 0.5 ? "first" : "second") === "first";
   const end = (): SplitEnd => random() < 0.5 ? "north" : "south";
-  const portal1 = end(), portal2 = end(), face: SplitSide = random() < 0.5 ? "west" : "east", swing = end();
+  // Two draws that once picked your end in a tether round, kept so the picks after them keep their codes.
+  end(); end();
+  const face: SplitSide = random() < 0.5 ? "west" : "east", swing = end();
   const cover1 = randomHalf(), cover2 = randomHalf(), ends1 = randomEndsSide(), ends2 = randomEndsSide();
   const others1 = randomOthers(s, t1 ? 3 : 4), others2 = swappedOthers(s, others1);
   // The side of your tether's portal in each round: you end on the platform across from it.
   const portalSide1 = randomEndsSide(), portalSide2 = randomEndsSide();
-  // Without a tether the tower knocks you along your platform, to its other end: in round 1 from
-  // your first tower, in round 2 from the tower where round 1 ended.
-  const home = homeSide(s);
-  const end1 = t1 ? portal1 : otherEnd(firstTowerEnd(s)), side1 = t1 ? otherSide(portalSide1) : home;
-  const end2 = t1 ? otherEnd(end1) : portal2, side2 = t1 ? side1 : otherSide(portalSide2);
+  // Where a tower throws you: across (a tether whose portal is on your side) keeps you at the
+  // tower's end; staying (no tether, or a portal already across) sends you to the other end.
+  // Round 1 starts at your first tower, round 2 at the tower where round 1 ended.
+  const home = homeSide(s), tower1 = firstTowerEnd(s);
+  const thrownEnd = (side: SplitSide, at: SplitEnd, portalSide: SplitSide | null): SplitEnd => portalSide === side ? at : otherEnd(at);
+  const end1 = thrownEnd(home, tower1, t1 ? portalSide1 : null), side1 = t1 ? otherSide(portalSide1) : home;
+  const end2 = thrownEnd(side1, end1, t1 ? null : portalSide2), side2 = t1 ? side1 : otherSide(portalSide2);
   const WRATH = "Majestic Meteowrath/Majestic Meteorain/Fire Breath";
   const round = (n: number): number[] => [cactbot("--meteor 1--", n), cactbot("--meteor 2--", n), cactbot("--meteor 3--", n), cactbot(WRATH, n)];
   // The first towers come with the round 1 tethers: yours, if you have one, shows from the start,
