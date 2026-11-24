@@ -2,7 +2,7 @@
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6, `ENRAGE`).
-import { DRILLS, SPLIT_INNER, avalancheScene, homeSide, massiveScene, otherSide, splitRound, splitTowers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
+import { DRILLS, SPLIT_INNER, avalancheScene, firstTowerEnd, homeSide, massiveScene, otherSide, randomHalf, splitRound, splitTowers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
 import { ABILITIES, ENRAGE, FIGHT_END, type Category } from "./abilities";
 import { newCode, random, withSeed } from "../util";
 import { nearClock } from "../time";
@@ -188,19 +188,25 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
      platform; no tether leaves you on the same one. Everyone is in close when the first puddle's
      cast starts (cactbot's "--meteor 1--"), after the Fire Breath markers. Each puddle drops
      when its cast starts ("--meteor 1--" to "--meteor 3--") and goes off 3 seconds later
-     (MajesticMeteorAOE). The tethers and markers resolve with Fire Breath. The portal lines
-     leave a random end of your platform safe each round. Then the boss faces a random platform
-     and turns to the other over a random side. */
+     (MajesticMeteorAOE). The tethers and markers resolve with Fire Breath. Your end of the
+     platform: with a tether, the end away from your portal (random); without one, the end you
+     were knocked to, which is your tower's end. The side portal lines cover a random half of
+     each platform each round. Then the boss faces a random platform and turns to the other over
+     a random side. */
   const t1 = choose(c.tether, random() < 0.5 ? "first" : "second") === "first";
   const end = (): SplitEnd => random() < 0.5 ? "north" : "south";
-  const end1 = end(), end2 = end(), face: SplitSide = random() < 0.5 ? "west" : "east", swing = end();
+  const portal1 = end(), portal2 = end(), face: SplitSide = random() < 0.5 ? "west" : "east", swing = end();
+  const cover1 = randomHalf(), cover2 = randomHalf();
+  // Round 1 without a tether: the end of your first tower. Round 2 without one: you soaked the
+  // tower where round 1 ended, and it knocked you along the same platform.
+  const end1 = t1 ? portal1 : firstTowerEnd(s), end2 = t1 ? end1 : portal2;
   const side1 = t1 ? otherSide(homeSide(s)) : homeSide(s), side2 = otherSide(homeSide(s));
   const WRATH = "Majestic Meteowrath/Majestic Meteorain/Fire Breath";
   const round = (n: number): number[] => [cactbot("--meteor 1--", n), cactbot("--meteor 2--", n), cactbot("--meteor 3--", n), cactbot(WRATH, n)];
   segs.push(
-    {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, t1, side1, end1), k:0, from:cactbot("Explosion", 6), due:round(1)},
+    {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, t1, side1, end1, cover1), k:0, from:cactbot("Explosion", 6), due:round(1)},
     {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, !t1, side1, end1), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
-    {title:"Arena Split: Fire Breath (Second Time)", drills:["m-split-fire"], scene:splitRound(s, !t1, side2, end2), k:0, from:cactbot("Explosion", 7), due:round(2)},
+    {title:"Arena Split: Fire Breath (Second Time)", drills:["m-split-fire"], scene:splitRound(s, !t1, side2, end2, cover2), k:0, from:cactbot("Explosion", 7), due:round(2)},
     {title:"Massive Meteor", drills:["m-massive"], scene:massiveScene(side2), k:0, from:cactbot("Massive Meteor (castbar)"), due:[cactbot("Massive Meteor x5")],
       // The cast gives about a second, so the party waits in close, where the stack goes.
       pre:zoneCenter(SPLIT_INNER[side2])},

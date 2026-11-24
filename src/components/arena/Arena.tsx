@@ -1,6 +1,7 @@
 import "./arena.css";
-import { type MouseEvent, type ReactNode, useId } from "react";
+import { Fragment, type MouseEvent, type ReactNode, useId, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { PLATFORM_X, SPLIT_HALF_W } from "../../data/attacks";
 import type { Overlay, Point } from "../../types";
 import { hitsFirst, isWeapon, Shape } from "./Shape";
 
@@ -52,6 +53,37 @@ function Waymarks() {
   ));
 }
 
+/** A split arena is wider than the square one (its platforms reach past 0 and 100), so it is
+    drawn smaller about the arena's center, to fit the same box. Every piece on it shrinks with
+    it, so each size stays true to the others. */
+const SPLIT_SCALE = 50 / SPLIT_HALF_W;
+const SPLIT_TRANSFORM = `translate(50 50) scale(${SPLIT_SCALE}) translate(-50 -50)`;
+/** The floor of a split arena: from the west platform's outer edge to the east one's. */
+const SPLIT_LEFT = 50 - SPLIT_HALF_W;
+
+interface FloorProps {
+  split: boolean;
+  /** The id of the tile pattern. */
+  tiles: string;
+}
+
+/** The floor: one square, or the two platforms of the Arena Split with the void between them. */
+function Floor({ split, tiles }: FloorProps) {
+  const rects: (readonly [number, number])[] = split ? Object.values(PLATFORM_X) : [[0, 100]];
+  return (
+    <>
+      {split && <rect className="voidr" x={PLATFORM_X.west[1]} y="0" width={PLATFORM_X.east[0] - PLATFORM_X.west[1]} height="100" />}
+      {rects.map(([x0, x1]) => (
+        <Fragment key={x0}>
+          <rect className="floor" x={x0} y="0" width={x1 - x0} height="100" />
+          <rect x={x0} y="0" width={x1 - x0} height="100" fill={`url(#${tiles})`} />
+          <rect className="edge" x={x0} y="0" width={x1 - x0} height="100" />
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
 /** The picture's viewBox, in arena units: the 100 by 100 floor, with room around it for the
     compass (6 above, 4 on the other sides). */
 export const ARENA_VIEW = { x: -4, y: -6, width: 108, height: 110 } as const;
@@ -63,10 +95,11 @@ export interface ArenaProps {
   label: string;
   /** What to draw in each layer. */
   layers: Partial<Record<Layer, ReactNode>>;
-  /** The arena split down the middle, with the void between the halves. */
+  /** The Arena Split: two platforms with the void between them, drawn smaller to fit. */
   split?: boolean;
   className?: string;
-  /** Called with the spot you click, in arena units (0 to 100 on each side). */
+  /** Called with the spot you click, in arena units (0 to 100 on each side; on a split arena,
+      past 0 and 100 on the platforms). */
   onPointClick?: (p: Point) => void;
 }
 
@@ -77,6 +110,8 @@ export function Arena({ label, layers, split = false, className, onPointClick }:
   const id = useId();
   const clip = `${id}-clip`;
   const tiles = `${id}-tiles`;
+  // The group that holds the floor and the pieces: a click is read in its units.
+  const world = useRef<SVGGElement>(null);
   const all: Partial<Record<Layer, ReactNode>> = { ...layers, waymarks: <Waymarks /> };
   return (
     // Choosing a spot on the arena is a pointing task with no keyboard form; the page's buttons
@@ -87,36 +122,36 @@ export function Arena({ label, layers, split = false, className, onPointClick }:
       aria-label={label}
       viewBox={`${ARENA_VIEW.x} ${ARENA_VIEW.y} ${ARENA_VIEW.width} ${ARENA_VIEW.height}`}
       role="img"
-      onClick={onPointClick && ((e) => onPointClick(toArena(e)))}
+      onClick={onPointClick && ((e) => onPointClick(toArena(e, world.current)))}
     >
       <defs>
         <clipPath id={clip}>
-          <rect x="0" y="0" width="100" height="100" />
+          {split ? <rect x={SPLIT_LEFT} y="0" width={SPLIT_HALF_W * 2} height="100" /> : <rect x="0" y="0" width="100" height="100" />}
         </clipPath>
         <pattern id={tiles} width="12.5" height="12.5" patternUnits="userSpaceOnUse">
           <path className="tileline" d="M12.5 0H0V12.5" />
         </pattern>
       </defs>
-      <rect className="floor" x="0" y="0" width="100" height="100" />
-      <rect x="0" y="0" width="100" height="100" fill={`url(#${tiles})`} />
-      {split && <rect className="voidr" x="25.5" y="0" width="49" height="100" />}
-      <rect className="edge" x="0" y="0" width="100" height="100" />
       <text className="compass" x="50" y="-2.2">
         N
       </text>
-      {LAYERS.map((l) => (
-        <g key={l} data-layer={l} clipPath={CLIPPED.has(l) ? `url(#${clip})` : undefined}>
-          {all[l]}
-        </g>
-      ))}
+      <g ref={world} transform={split ? SPLIT_TRANSFORM : undefined}>
+        <Floor split={split} tiles={tiles} />
+        {LAYERS.map((l) => (
+          <g key={l} data-layer={l} clipPath={CLIPPED.has(l) ? `url(#${clip})` : undefined}>
+            {all[l]}
+          </g>
+        ))}
+      </g>
     </svg>
   );
 }
 
-/** The spot of a click on the picture, in arena units. The screen matrix of the svg turns page
-    pixels into its viewBox units, whatever size the picture has on screen. */
-function toArena(e: MouseEvent<SVGSVGElement>): Point {
-  const ctm = e.currentTarget.getScreenCTM();
+/** The spot of a click on the picture, in arena units. The screen matrix of the group that holds
+    the floor turns page pixels into its units, whatever size the picture has on screen and
+    however the split arena is scaled. */
+function toArena(e: MouseEvent<SVGSVGElement>, world: SVGGElement | null): Point {
+  const ctm = (world ?? e.currentTarget).getScreenCTM();
   if (!ctm) return [Number.NaN, Number.NaN];
   const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
   return [q.x, q.y];

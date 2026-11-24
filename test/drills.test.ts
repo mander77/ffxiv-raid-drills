@@ -1,4 +1,5 @@
 import { assert, test } from "vitest";
+import { PLATFORM_X, PORTAL_LINE_X } from "../src/data/attacks";
 import {
   assaultScene,
   avalancheScene,
@@ -17,6 +18,7 @@ import {
   jumpsNext,
   nextPuddle,
   type SplitEnd,
+  type SplitHalf,
   type SplitSide,
   splitRound,
   splitTowers,
@@ -476,59 +478,94 @@ test("Dance of Domination: every pair spot is clear of the 10-yalm Hurricane Exp
 });
 
 /** True when p is on the west (or east) platform, or at its north (or south) end. */
-const onSide = (p: Point, side: SplitSide): boolean => (side === "west" ? p[0] <= 25.5 : p[0] >= 74.5);
+const onSide = (p: Point, side: SplitSide): boolean => p[0] >= PLATFORM_X[side][0] && p[0] <= PLATFORM_X[side][1];
 const atEnd = (p: Point, end: SplitEnd): boolean => (end === "north" ? p[1] < 50 : p[1] > 50);
+/** True when p is in the inner (or outer) half of its platform's width. */
+const inHalf = (p: Point, side: SplitSide, half: SplitHalf): boolean => {
+  const mid = (PLATFORM_X[side][0] + PLATFORM_X[side][1]) / 2,
+    inner = side === "west" ? p[0] >= mid : p[0] <= mid;
+  return half === "inner" ? inner : !inner;
+};
 const SIDES: SplitSide[] = ["west", "east"],
-  ENDS: SplitEnd[] = ["north", "south"];
+  ENDS: SplitEnd[] = ["north", "south"],
+  HALVES: SplitHalf[] = ["inner", "outer"];
 
-test("Arena Split: a round puts you in close, then at the safe end of your platform", () => {
+test("Arena Split: the platforms and the portal lines are BossMod's", () => {
+  const yalms = (u: number): number => u / 2.5;
+  // Each platform is 20 yalms wide, with a 12-yalm gap between them (BossMod's Flatliner file).
+  for (const side of SIDES) assert.equal(yalms(PLATFORM_X[side][1] - PLATFORM_X[side][0]), 20, side);
+  assert.equal(yalms(PLATFORM_X.east[0] - PLATFORM_X.west[1]), 12, "the gap");
+  // Each portal line covers exactly one half of a platform's width, from end to end.
+  for (const [x0, x1] of PORTAL_LINE_X) {
+    const side: SplitSide = x0 < 50 ? "west" : "east",
+      half = HALVES.find((h) => inHalf([x0 + 0.1, 50], side, h) && inHalf([x1 - 0.1, 50], side, h));
+    assert.ok(half, `the line from ${x0} to ${x1} covers one half of the ${side} platform`);
+  }
+});
+
+test("Arena Split: a round puts you in close, then at your end, out of the portal lines", () => {
   for (const s of SLOTS)
     for (const side of SIDES)
       for (const end of ENDS)
-        for (const tether of [true, false]) {
-          const sc = splitRound(s, tether, side, end);
-          // Answer each step at its shown spot, as the moving marker does.
-          const results: StepResult[] = [];
-          for (const st of sc.steps) {
-            const z = zoneOf(st.zf ? st.zf(results) : st.z),
-              p = zoneCenter(z);
-            assert.ok(inZone(p, z), st.q);
-            results.push({ p, ok: true, z, drop: st.drop ? p : null });
+        for (const covered of HALVES)
+          for (const tether of [true, false]) {
+            const sc = splitRound(s, tether, side, end, covered),
+              what = `${s} ${side} ${end} ${covered} ${tether ? "tether" : "marker"}`;
+            // Answer each step at its shown spot, as the moving marker does.
+            const results: StepResult[] = [];
+            for (const st of sc.steps) {
+              const z = zoneOf(st.zf ? st.zf(results) : st.z),
+                p = zoneCenter(z);
+              assert.ok(inZone(p, z), `${what}: ${st.q}`);
+              results.push({ p, ok: true, z, drop: st.drop ? p : null });
+            }
+            const [p1, p2, p3, lineup] = results.map((r) => r.p);
+            assert.ok(onSide(p1, side) && Math.abs(p1[1] - 50) < 1, "in close, at the middle of the inner edge");
+            assert.ok(inHalf(p1, side, "inner"), "the first puddle is in the inner half");
+            // Each puddle goes just outside the last, toward your end, tight against the inner edge.
+            for (const [a, b] of [
+              [p1, p2],
+              [p2, p3],
+            ]) {
+              assert.ok(Math.hypot(b[0] - a[0], b[1] - a[1]) >= 15, "just outside the last puddle");
+              assert.ok(end === "north" ? b[1] < a[1] : b[1] > a[1], `toward the ${end} end`);
+              const gap = side === "west" ? PLATFORM_X.west[1] - b[0] : b[0] - PLATFORM_X.east[0];
+              assert.ok(gap >= 0 && gap <= 6.5, "tight against the inner edge");
+            }
+            assert.deepEqual(
+              results.map((r) => r.drop !== null),
+              [true, true, true, false],
+              "three puddles",
+            );
+            assert.ok(onSide(lineup, side) && atEnd(lineup, end), `${what}: the ${end} end`);
+            assert.ok(inHalf(lineup, side, covered === "inner" ? "outer" : "inner"), `${what}: out of the portal lines`);
+            assert.ok(Math.hypot(lineup[0] - p3[0], lineup[1] - p3[1]) >= 15, "out of the third puddle");
+            // The portal lines show with the lineup question.
+            assert.ok(
+              sc.steps[3].cue?.some((o) => o.t === "lane"),
+              "the portal lines",
+            );
+            // A tether stretches at the wall; a marker goes to the wall-side corner of the number waymark.
+            if (tether) assert.ok(end === "north" ? lineup[1] <= 5 : lineup[1] >= 95, `${what}: at the wall`);
+            else {
+              const wm: Point = [side === "west" ? 9 : 91, end === "north" ? 19 : 81];
+              assert.ok(Math.abs(lineup[0] - wm[0]) <= 6.5 && Math.abs(lineup[1] - wm[1]) <= 6.5, `${what}: at the waymark`);
+              assert.ok(end === "north" ? lineup[1] < wm[1] : lineup[1] > wm[1], `${what}: its wall-side corner`);
+            }
+            // The third puddle as far toward your end and as far out as it may go: a clear spot is still left.
+            for (const x of side === "west"
+              ? [PLATFORM_X.west[1] - 6.5, PLATFORM_X.west[1]]
+              : [PLATFORM_X.east[0], PLATFORM_X.east[0] + 6.5]) {
+              const third = zoneOf(sc.steps[2].zf?.(results.slice(0, 2))),
+                dir = end === "north" ? -1 : 1,
+                far = Array.from({ length: 13 }, (_x, i): Point => [x, p2[1] + dir * (21 - i * 0.5)]).find((q) => inZone(q, third));
+              if (!far) continue;
+              const worst = [...results.slice(0, 2), { ...results[2], p: far, drop: far }],
+                z4 = zoneOf(sc.steps[3].zf?.(worst));
+              assert.ok(inZone(zoneCenter(z4), z4), `${what}: a clear spot is left`);
+            }
+            for (const st of sc.steps) assertLines(st.a, sc.setup.join(" "));
           }
-          const [p1, p2, p3, lineup] = results.map((r) => r.p);
-          assert.ok(onSide(p1, side) && Math.abs(p1[1] - 50) < 1, "in close, at the middle of the inner edge");
-          // Each puddle goes just outside the last, toward the safe end, still at the inner edge.
-          for (const [a, b] of [
-            [p1, p2],
-            [p2, p3],
-          ]) {
-            assert.ok(Math.hypot(b[0] - a[0], b[1] - a[1]) >= 15, "just outside the last puddle");
-            assert.ok(end === "north" ? b[1] < a[1] : b[1] > a[1], `toward the ${end} end`);
-            assert.ok(side === "west" ? b[0] >= 19 && b[0] <= 25.5 : b[0] >= 74.5 && b[0] <= 81, "at the inner edge");
-          }
-          assert.deepEqual(
-            results.map((r) => r.drop !== null),
-            [true, true, true, false],
-            "three puddles",
-          );
-          assert.ok(onSide(lineup, side) && atEnd(lineup, end), `${tether ? "tether" : "marker"}: the ${end} end`);
-          assert.ok(Math.hypot(lineup[0] - p3[0], lineup[1] - p3[1]) >= 15, "out of the third puddle");
-          // A tether stretches at the outer edge; a marker goes to the outer corner of the number waymark.
-          if (tether) assert.ok(side === "west" ? lineup[0] <= 5 : lineup[0] >= 95, "the outer edge");
-          else {
-            const wm: Point = side === "west" ? [9, end === "north" ? 19 : 81] : [91, end === "north" ? 19 : 81];
-            assert.ok(Math.abs(lineup[0] - wm[0]) <= 6.5 && Math.abs(lineup[1] - wm[1]) <= 6.5, "at the waymark");
-            assert.ok(side === "west" ? lineup[0] < wm[0] : lineup[0] > wm[0], "its outer corner");
-          }
-          // The third puddle as far out as it may go: the tether or marker still has a clear spot.
-          const third = zoneOf(sc.steps[2].zf?.(results.slice(0, 2))),
-            out: Point = [side === "west" ? 19 : 81, p3[1]];
-          assert.ok(inZone(out, third), "the outermost third puddle is correct");
-          const worst = [...results.slice(0, 2), { ...results[2], p: out, drop: out }],
-            z4 = zoneOf(sc.steps[3].zf?.(worst));
-          assert.ok(inZone(zoneCenter(z4), z4), "a clear spot is left");
-          for (const st of sc.steps) assertLines(st.a, sc.setup.join(" "));
-        }
 });
 
 test("Arena Split: the towers are in the quadrant you ended in", () => {

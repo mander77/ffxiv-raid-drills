@@ -6,7 +6,7 @@
 // ability's shape in yalms. Each size is read from source.gen.ts (`npm run import:sources`), by
 // the BossMod ability it belongs to. The arena is 40 yalms across and 100 units in this app.
 import { addVec, angOf, leftOf, polar, unit } from "../geometry";
-import { BOSSMOD_ACTORS } from "./source.gen";
+import { BOSSMOD_ACTORS, BOSSMOD_SPLIT } from "./source.gen";
 import { bossmod } from "./sources";
 import type { Overlay, Point, Puddle } from "../types";
 
@@ -71,6 +71,24 @@ export const METEOR_R = yalms(bossmod("CosmicKiss").range);
 export const RAIDWIDE_R = 72;
 /** An Atomic Impact hit in Ecliptic Stampede, and the fire puddle it leaves ("range 5 circle"). */
 export const ATOMIC_R = yalms(bossmod("AtomicImpact").range);
+
+/* The Arena Split (BossMod's Flatliner file): two platforms, west and east of the boss, wider
+   together than the square arena. The arena's center stays at 50, so the platforms reach past
+   0 and 100. Each platform is as long as the arena (0 to 100). */
+const SPLIT = BOSSMOD_SPLIT;
+/** Each platform's west and east edges. */
+export const PLATFORM_X = {
+  west: [50 - yalms(SPLIT.platformCenter + SPLIT.platformHalfWidth), 50 - yalms(SPLIT.platformCenter - SPLIT.platformHalfWidth)],
+  east: [50 + yalms(SPLIT.platformCenter - SPLIT.platformHalfWidth), 50 + yalms(SPLIT.platformCenter + SPLIT.platformHalfWidth)],
+} as const satisfies Record<"west" | "east", readonly [number, number]>;
+/** Half the split arena's width, from the boss to the outer edge of a platform. */
+export const SPLIT_HALF_W = yalms(SPLIT.platformCenter + SPLIT.platformHalfWidth);
+/** The side portal lines (Majestic Meteorain, "range 60 width 10 rect"): each one runs the whole
+    length of a platform and covers this west to east range, half the platform's width. */
+export const PORTAL_LINE_X: readonly (readonly [number, number])[] = SPLIT.lines.map((x) => {
+  const half = yalms(bossmod("MajesticMeteorainRect").width) / 2;
+  return [50 + yalms(x) - half, 50 + yalms(x) + half] as const;
+});
 
 /** A circle that hits everything inside it. */
 export const aoe = (c: Point, r: number): Overlay => ({t:"aoe", x:c[0], y:c[1], r});
