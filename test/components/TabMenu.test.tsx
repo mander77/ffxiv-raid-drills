@@ -40,10 +40,10 @@ test("a tap on a tab goes there and closes the list", async () => {
   );
   const user = userEvent.setup();
   await user.click(screen.getByRole("button", { name: /You are on Home/ }));
-  await user.click(screen.getByRole("link", { name: "Cheat sheet" }));
+  await user.click(screen.getByRole("link", { name: "Cheat Sheet" }));
   assert.equal(screen.getByTestId("where").textContent, "/sheet");
   assert.equal(screen.queryByRole("dialog"), null);
-  assert.ok(screen.getByRole("button", { name: /You are on Cheat sheet/ }));
+  assert.ok(screen.getByRole("button", { name: /You are on Cheat Sheet/ }));
 });
 
 test("a page that is not a tab shows Tabs on the button", () => {

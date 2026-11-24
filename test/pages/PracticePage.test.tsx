@@ -81,7 +81,7 @@ test("a correct click answers the step and counts in your score", () => {
 test("Show me draws the spot, and a try with it does not count", async () => {
   open(`/practice/${FIRST.id}/${CODE}`);
   const user = userEvent.setup();
-  await user.click(screen.getByRole("button", { name: "Show me" }));
+  await user.click(screen.getByRole("button", { name: "Show Me" }));
   assert.ok(arena().querySelector(".zone.pick"), "the correct area shows in blue");
   assert.equal(screen.getByRole("button", { name: "Hide" }).getAttribute("aria-pressed"), "true");
   clickAt(firstRightSpot());
@@ -114,7 +114,7 @@ async function answerOff(steps: number): Promise<void> {
   const user = userEvent.setup();
   for (let s = 0; s < steps; s++) {
     clickAt([-40, -40]);
-    const next = screen.queryByRole("button", { name: "Next step" });
+    const next = screen.queryByRole("button", { name: "Next Step" });
     if (next) await user.click(next);
   }
 }
@@ -127,18 +127,18 @@ test("Void Stardust has more steps than Dance of Domination after it, which the 
 });
 
 for (const [how, go] of [
-  ["Next mechanic", () => userEvent.setup().click(screen.getByRole("button", { name: "Next mechanic" }))],
+  ["Next Mechanic", () => userEvent.setup().click(screen.getByRole("button", { name: "Next Mechanic" }))],
   ["Enter", () => userEvent.setup().keyboard("{Enter}")],
 ] as const) {
   test(`${how} after a mechanic with many steps opens a shorter one at its first step`, async () => {
     if (!VOID || !DANCE) throw new Error("no m-void or m-dance");
     open(`/practice/${VOID.id}/${CODE}`);
     await answerOff(buildPattern(VOID, "H1", CODE).scene.steps.length);
-    assert.ok(screen.getByRole("button", { name: "Next mechanic" }), "the mechanic is done");
+    assert.ok(screen.getByRole("button", { name: "Next Mechanic" }), "the mechanic is done");
     await go();
     assert.match(where() ?? "", new RegExp(`^/practice/${DANCE.id}/`));
     assert.ok(screen.getByRole("heading", { name: DANCE.title }));
-    assert.ok(screen.getByRole("button", { name: "Show me" }), "the new mechanic asks its first step");
+    assert.ok(screen.getByRole("button", { name: "Show Me" }), "the new mechanic asks its first step");
   });
 }
 
@@ -149,7 +149,7 @@ test("a click in the list on a mechanic with fewer steps than you answered opens
   await userEvent.setup().click(screen.getAllByRole("link", { name: new RegExp(`${DANCE.title}$`) })[0]);
   assert.match(where() ?? "", new RegExp(`^/practice/${DANCE.id}/`));
   assert.ok(screen.getByRole("heading", { name: DANCE.title }));
-  assert.ok(screen.getByRole("button", { name: "Show me" }), "the new mechanic asks its first step");
+  assert.ok(screen.getByRole("button", { name: "Show Me" }), "the new mechanic asks its first step");
 });
 
 /** The step chips, as buttons, after a try. */
@@ -188,7 +188,7 @@ test("Try from here keeps the answers before the step and asks it again, without
   const scored = useProgressStore.getState().scores.H1?.[VOID.id];
   const user = userEvent.setup();
   await user.click(stepButtons()[2]);
-  await user.click(screen.getByRole("button", { name: "Try from here" }));
+  await user.click(screen.getByRole("button", { name: "Try From Here" }));
   assert.ok(screen.getByText(`3/${steps.length}`), "step 3 is asked");
   assert.ok(screen.getByRole("listitem", { name: "Step 2, incorrect" }), "the answers before it stay");
   assert.ok(screen.getByRole("listitem", { name: "Step 3, now" }));
@@ -206,5 +206,5 @@ test("Reset after a review starts the whole mechanic again", async () => {
   await user.click(stepButtons()[1]);
   await user.click(screen.getByRole("button", { name: "Reset" }));
   assert.ok(screen.getByRole("listitem", { name: "Step 1, now" }));
-  assert.ok(screen.getByRole("button", { name: "Show me" }));
+  assert.ok(screen.getByRole("button", { name: "Show Me" }));
 });

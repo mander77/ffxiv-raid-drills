@@ -18,7 +18,7 @@ test("one link per tab, and the tab of the address is marked", () => {
     links.map((a) => a.textContent),
     TABS.map((t) => t.label),
   );
-  const sheet = screen.getByRole("link", { name: "Cheat sheet" });
+  const sheet = screen.getByRole("link", { name: "Cheat Sheet" });
   assert.equal(sheet.getAttribute("href"), "/sheet");
   assert.equal(sheet.getAttribute("aria-current"), "page");
 });

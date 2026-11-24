@@ -42,7 +42,7 @@ WHAT TO DO
    - Learn what happens in the fight and where you stand.
    - Practice one mechanic you got wrong.
    - Do the "whole fight" thing under time pressure.
-   - Watch the correct moves for the fight, and skip to one mechanic you want to see again.
+   - Watch the Correct Moves for the fight, and skip to one mechanic you want to see again.
    - Find something you could keep open on a second screen during the raid.
    - Send your static a link to something useful.
 5. Spend about 20 to 30 minutes, or stop early if you would have given up for real.

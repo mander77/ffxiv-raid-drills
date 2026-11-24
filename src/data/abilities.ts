@@ -1,4 +1,4 @@
-// Every M11S ability in cast order: the ability list. The Timeline cards, the Cheat sheet's
+// Every M11S ability in cast order: the ability list. The Timeline cards, the Cheat Sheet's
 // timeline and the fight's timeline lines take their phases and colour marks from it.
 // The rows, their grouping and the colour categories follow Exia's DT raid timeline sheet
 // (Google Sheets 1oG1SwNQ_Ncz2-1pOZrE9Y_A-2yECKD2ULNGpwvKtKho, tab M11S, 01/08/2026).

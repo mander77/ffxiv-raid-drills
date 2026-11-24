@@ -41,7 +41,7 @@ export function RunScore({ fight, results, stopped, onAgain, onWatch }: RunScore
         {misses.length ? (
           <section aria-labelledby="practice-these" className="space-y-2">
             <h3 id="practice-these" className="font-semibold">
-              Practice these
+              Practice These
             </h3>
             <ItemGroup aria-labelledby="practice-these" className="rounded-lg border">
               {misses.map((g, i) => (
@@ -54,7 +54,7 @@ export function RunScore({ fight, results, stopped, onAgain, onWatch }: RunScore
                     {g.drills[0] && (
                       <ItemActions>
                         <Button variant="outline" size="sm" asChild>
-                          <Link to={`/practice/${g.drills[0]}`}>Practice it</Link>
+                          <Link to={`/practice/${g.drills[0]}`}>Practice It</Link>
                         </Button>
                       </ItemActions>
                     )}
@@ -69,9 +69,9 @@ export function RunScore({ fight, results, stopped, onAgain, onWatch }: RunScore
           </p>
         )}
         <div className="flex flex-wrap gap-3">
-          <Button onClick={onAgain}>Run again</Button>
+          <Button onClick={onAgain}>Run Again</Button>
           <Button variant="outline" onClick={onWatch}>
-            Watch the correct moves
+            Watch the Correct Moves
           </Button>
         </div>
       </CardContent>

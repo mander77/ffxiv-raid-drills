@@ -17,7 +17,7 @@ test("the site name goes back to Home", async () => {
           <Header />
           <Routes>
             <Route path="/" element={<p>Home page</p>} />
-            <Route path="/sheet" element={<p>Cheat sheet page</p>} />
+            <Route path="/sheet" element={<p>Cheat Sheet page</p>} />
           </Routes>
         </TooltipProvider>
       </ThemeProvider>

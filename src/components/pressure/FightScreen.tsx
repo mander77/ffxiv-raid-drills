@@ -96,7 +96,7 @@ export function FightScreen({
   const ended = useRef(false);
   /** The player: whether the clock was paused when you took hold of the casts coming up. */
   const pausedBeforeHold = useRef(false);
-  /** Counts "Watch the spawns again": the arena draws anew, so its spawns play again. */
+  /** Counts "Watch the Spawns Again": the arena draws anew, so its spawns play again. */
   const [replays, setReplays] = useState(0);
   const score = useProgressStore((s) => s.score);
   /** A wide screen (lg, 1024 px and up): the run's cast bar, prompt and bar sit beside the arena,

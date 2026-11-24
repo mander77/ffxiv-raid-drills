@@ -60,7 +60,7 @@ test("Settings: a pick and Set all to Random", async () => {
   await user.click(within(screen.getByRole("radiogroup", { name: "Ecliptic Fireball" })).getByRole("radio", { name: "Two-way" }));
   assert.equal(onChange.mock.calls[0][0].fireball, "two");
   assert.equal(onChange.mock.calls[0][0].ult, "cw", "the other picks stay");
-  await user.click(screen.getByRole("button", { name: "Set all to Random" }));
+  await user.click(screen.getByRole("button", { name: "Set All to Random" }));
   assert.deepEqual(onChange.mock.calls[1][0], RANDOM);
 });
 
@@ -91,9 +91,9 @@ test("after the run: the score, and a Practice link for each mechanic with a mis
   );
   assert.ok(screen.getByText("0 of 1 spots correct"));
   assert.ok(screen.getByText(`Full fight · Stopped at mechanic 1 of ${fight.segs.length}`));
-  const list = screen.getByRole("list", { name: "Practice these" });
+  const list = screen.getByRole("list", { name: "Practice These" });
   assert.equal(within(list).getAllByRole("listitem").length, 1);
-  const link = within(list).getByRole("link", { name: "Practice it" });
+  const link = within(list).getByRole("link", { name: "Practice It" });
   assert.equal(link.getAttribute("href"), `/practice/${fight.segs[0].drills[0]}`);
 });
 
@@ -101,7 +101,7 @@ test("after watching: run the same fight or watch again", async () => {
   const onRun = vi.fn();
   render(<WatchDone summary="Axe first." onRun={onRun} onWatch={() => {}} />);
   assert.ok(screen.getByText("Axe first."));
-  await userEvent.setup().click(screen.getByRole("button", { name: "Run this fight" }));
+  await userEvent.setup().click(screen.getByRole("button", { name: "Run This Fight" }));
   assert.equal(onRun.mock.calls.length, 1);
 });
 

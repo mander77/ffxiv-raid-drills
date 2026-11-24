@@ -20,9 +20,9 @@ export function WatchDone({ summary, onRun, onWatch }: WatchDoneProps) {
       <CardContent className="space-y-4">
         <p className="text-sm">{summary}</p>
         <div className="flex flex-wrap gap-3">
-          <Button onClick={onRun}>Run this fight</Button>
+          <Button onClick={onRun}>Run This Fight</Button>
           <Button variant="outline" onClick={onWatch}>
-            Watch again
+            Watch Again
           </Button>
         </div>
       </CardContent>

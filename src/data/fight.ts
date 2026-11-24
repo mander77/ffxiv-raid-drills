@@ -17,7 +17,7 @@ interface TLEvent { t: number; name: string; raidwide?: boolean; cast?: boolean 
 export interface FightSeg {
   title: string;
   /** The Practice drills this stretch tests. Its result counts toward the first one's score,
-      and the end screen links to it with "Practice it". */
+      and the end screen links to it with "Practice It". */
   drills: string[];
   scene: Scene;
   /** Quarter turns of the arena, for mechanics that turn (Dance of Domination). */

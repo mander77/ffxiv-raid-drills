@@ -56,7 +56,7 @@ const CATEGORY_MEANING: Record<Category, string> = {
     (a test checks the page names each kind once). */
 const KIND_GROUPS: readonly { title: string; kinds: readonly DrillKind[] }[] = [
   { title: "Spread and Stacks", kinds: ["spread", "stack", "pairStack", "lightPartyStack", "roleStack"] },
-  { title: "Lines from the Boss", kinds: ["lineStack", "wildCharge"] },
+  { title: "Lines From the Boss", kinds: ["lineStack", "wildCharge"] },
   { title: "Towers", kinds: ["tower", "towerKnockback", "tankTower"] },
   { title: "Tethers", kinds: ["chains", "pairTether"] },
   { title: "Tank Busters", kinds: ["tankBuster", "sharedTankBuster"] },
@@ -159,7 +159,7 @@ const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode
       "The question and its button, in the same place on Learn, Timeline, Practice and the quick round. After the answer it turns green or red, says how it went and glows once. On a phone it stays at the top of the screen.",
     sample: (
       <div className="space-y-2">
-        <PromptBar count="1/2" actions={<Button size="sm">Lock in</Button>}>
+        <PromptBar count="1/2" actions={<Button size="sm">Lock In</Button>}>
           <p className="font-medium">The question.</p>
         </PromptBar>
         <PromptBar tone="correct" actions={<Button size="sm">Next</Button>}>

@@ -127,7 +127,7 @@ describe("the run", () => {
   });
 });
 
-describe("Watch the correct moves", () => {
+describe("Watch the Correct Moves", () => {
   test("answers every step correct by itself, at the given speed", () => {
     const s = newFightState("watch", fight());
     let done = false;

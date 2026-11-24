@@ -161,7 +161,7 @@ export function DrillScreen({
   // Each state of the bar has its own key, so the bar is drawn new when the state changes: the
   // Reset you just clicked is a new button then, and its tooltip does not stay open over the arena.
   const nextMechanic = (
-    <IconButton label="Next mechanic" variant="default" onClick={onNextMechanic}>
+    <IconButton label="Next Mechanic" variant="default" onClick={onNextMechanic}>
       <NextMechanicIcon aria-hidden="true" />
     </IconButton>
   );
@@ -174,7 +174,7 @@ export function DrillScreen({
       actions={
         <>
           <Button size="sm" variant="outline" onClick={handleTryFromHere}>
-            Try from here
+            Try From Here
           </Button>
           {nextMechanic}
           {reset}
@@ -211,7 +211,7 @@ export function DrillScreen({
       actions={
         <>
           <Button size="sm" onClick={nextStep}>
-            Next step
+            Next Step
           </Button>
           {reset}
         </>
@@ -230,7 +230,7 @@ export function DrillScreen({
       actions={
         <>
           <Button size="sm" variant="outline" aria-pressed={shown} onClick={handleShowMe}>
-            {shown ? "Hide" : "Show me"}
+            {shown ? "Hide" : "Show Me"}
           </Button>
           {reset}
         </>
@@ -266,7 +266,7 @@ export function DrillScreen({
       {(done || shown) && <RuleBox rule={sc.rule} />}
       {!done && sc.spawnPlay && (
         <Button variant="outline" onClick={onReplaySpawns}>
-          Watch the spawns again
+          Watch the Spawns Again
         </Button>
       )}
     </section>
@@ -280,7 +280,7 @@ export function DrillScreen({
       {/* A mechanic with nothing random would look the same again, so it gets no New pattern. */}
       {canChange && (
         <Button variant="outline" size="sm" onClick={onNewPattern}>
-          New pattern
+          New Pattern
         </Button>
       )}
     </div>

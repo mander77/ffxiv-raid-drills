@@ -55,7 +55,7 @@ test("Learn with no card opens the first card", () => {
 test("a Learn answer shows on the picture first, then Lock in answers it", async () => {
   open(`/learn/${LEARN[0].id}`);
   const user = userEvent.setup();
-  const lock = screen.getByRole("button", { name: "Lock in" });
+  const lock = screen.getByRole("button", { name: "Lock In" });
   assert.isTrue(lock.hasAttribute("disabled"), "nothing to lock in yet");
   const correct = answers().find((b) => b.textContent?.includes(correctOf(LEARN[0].id)));
   if (!correct) throw new Error("no correct answer");
@@ -108,6 +108,6 @@ test("after the last card the round ends with the score, and Go again starts ove
   await user.click(screen.getByRole("button", { name: "Next" }));
   assert.equal(where(), "/timeline");
   assert.ok(screen.getByText("Round done"));
-  await user.click(screen.getByRole("button", { name: "Go again" }));
+  await user.click(screen.getByRole("button", { name: "Go Again" }));
   assert.equal(where(), `/timeline/${TIMELINE[0].id}`);
 });

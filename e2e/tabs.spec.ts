@@ -40,16 +40,16 @@ test("on a phone one button opens the tabs, and a tab goes there", async ({ page
   await expect(button).toBeInViewport();
   await button.click();
   const sheet = page.getByRole("dialog", { name: "Tabs" });
-  await sheet.getByRole("link", { name: "Cheat sheet" }).click();
+  await sheet.getByRole("link", { name: "Cheat Sheet" }).click();
   await expect(page).toHaveURL(/\/sheet$/);
   await expect(sheet).toBeHidden();
-  await expect(page.getByRole("button", { name: "Tabs. You are on Cheat sheet" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Tabs. You are on Cheat Sheet" })).toBeVisible();
 });
 
 test("on a phone the tab button and the slot switch share one row", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/sheet");
-  const button = await page.getByRole("button", { name: "Tabs. You are on Cheat sheet" }).boundingBox();
+  const button = await page.getByRole("button", { name: "Tabs. You are on Cheat Sheet" }).boundingBox();
   const group = await page.getByRole("radiogroup", { name: "Light party" }).boundingBox();
   // The same row: the switch sits on the button's line, not above it.
   expect(Math.abs((group?.y ?? 0) - (button?.y ?? 0))).toBeLessThan(8);
@@ -71,9 +71,9 @@ test("on a tall wide screen, Practice's list of mechanics runs on to the bottom 
 test("on a wide screen, Next stays in view after a Learn card's answer", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/learn/k-raw-first");
-  await expect(page.getByRole("button", { name: "Lock in" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Lock In" })).toBeVisible();
   await page.keyboard.press("1");
-  await page.getByRole("button", { name: "Lock in" }).click();
+  await page.getByRole("button", { name: "Lock In" }).click();
   // The card's own Next, under the answers: not the Next card button at the top.
   await expect(page.getByRole("button", { name: "Next", exact: true })).toBeInViewport({ ratio: 1 });
 });
@@ -96,10 +96,10 @@ test("a Learn card: pick an answer, lock it in, and go on", async ({ page }) => 
   await expect(page).toHaveURL(/\/learn\/[\w-]+$/);
   const first = page.url();
   // Wait for the card, so its keys listen before the test presses one.
-  await expect(page.getByRole("button", { name: "Lock in" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Lock In" })).toBeVisible();
   await page.keyboard.press("1");
   await expect(page.getByRole("img", { name: "Arena picture of answer 1." })).toBeVisible();
-  await page.getByRole("button", { name: "Lock in" }).click();
+  await page.getByRole("button", { name: "Lock In" }).click();
   await expect(page.getByRole("img", { name: "Arena picture. The green area shows the answer." })).toBeVisible();
   await expect(page.getByText("Correct answer.")).toBeVisible();
   await page.getByRole("button", { name: "Next", exact: true }).click();
@@ -111,7 +111,7 @@ test("in dark mode, the correct answer shows green and an incorrect pick red", a
   await page.emulateMedia({ colorScheme: "dark" });
   await page.goto("/learn/k-raw-first");
   await page.getByRole("button", { name: /The party stacks north/ }).click();
-  await page.getByRole("button", { name: "Lock in" }).click();
+  await page.getByRole("button", { name: "Lock In" }).click();
   // The dark values of --success and --danger in app.css.
   await expect
     .poll(() => oklchOf(page.getByRole("button", { name: /Tanks spread, and the party stacks south/ })))
@@ -138,7 +138,7 @@ test("a Timeline card: one click answers, and the coming names show", async ({ p
   await expect(page.getByText("Correct answer.")).toBeVisible();
 });
 
-test("on the Cheat sheet, the corner buttons go to the next section, the one before and the top", async ({ page }) => {
+test("on the Cheat Sheet, the corner buttons go to the next section, the one before and the top", async ({ page }) => {
   await page.goto("/sheet");
   const go = page.getByRole("navigation", { name: "Go to a section" });
   await expect(go).toHaveCount(0);
@@ -152,7 +152,7 @@ test("on the Cheat sheet, the corner buttons go to the next section, the one bef
   await expect(go).toHaveCount(0);
 });
 
-test("the Light party switch changes the slot on the Cheat sheet", async ({ page }) => {
+test("the Light party switch changes the slot on the Cheat Sheet", async ({ page }) => {
   await page.goto("/sheet");
   await expect(page.getByText("Your timeline as H1")).toBeVisible();
   await page.getByRole("radio", { name: "2" }).click();
@@ -199,13 +199,13 @@ test("Practice: Next mechanic after Void Stardust's eight steps opens Dance of D
   // A click in the arena's corner is off every spot: each step is incorrect, then Next step.
   for (let s = 1; s <= 8; s++) {
     await arena.click({ position: { x: 4, y: 4 } });
-    if (s < 8) await page.getByRole("button", { name: "Next step" }).click();
+    if (s < 8) await page.getByRole("button", { name: "Next Step" }).click();
   }
   await expect(page.getByRole("status")).toHaveText(/of 8 correct/);
-  await page.getByRole("button", { name: "Next mechanic" }).click();
+  await page.getByRole("button", { name: "Next Mechanic" }).click();
   await expect(page).toHaveURL(/\/practice\/m-dance\/[^/]+$/);
   await expect(page.getByRole("heading", { name: "Dance of Domination" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Show me" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Show Me" })).toBeVisible();
 });
 
 for (const [screen, width] of [

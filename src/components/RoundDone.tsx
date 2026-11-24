@@ -20,7 +20,7 @@ export function RoundDone({ correct, done, onAgain }: RoundDoneProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">Your progress stays in this browser.</p>
-        <Button onClick={onAgain}>Go again</Button>
+        <Button onClick={onAgain}>Go Again</Button>
       </CardContent>
     </Card>
   );

@@ -52,7 +52,7 @@ const START: readonly StartCard[] = [
     about: "All of it fast: timed questions, or the whole fight on the clock.",
     count: "Quick round or full fight",
   },
-  { path: "/sheet", name: "Cheat sheet", about: "Everything on one page.", count: "One page" },
+  { path: "/sheet", name: "Cheat Sheet", about: "Everything on one page.", count: "One page" },
 ];
 
 /** Why the tool exists, in the author's words. */

@@ -86,14 +86,14 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
           <span className="font-semibold text-foreground">{item.phase}</span> · {item.time} · Card {i + 1} of {items.length}
         </p>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" aria-label="Back a card" disabled={i <= 0} onClick={() => navigate(link(items[i - 1].id))}>
+          <Button variant="outline" size="sm" aria-label="Back a Card" disabled={i <= 0} onClick={() => navigate(link(items[i - 1].id))}>
             <PreviousCardIcon aria-hidden="true" />
             Back
           </Button>
           <Button
             variant="outline"
             size="sm"
-            aria-label="Next card"
+            aria-label="Next Card"
             disabled={i >= items.length - 1}
             onClick={() => navigate(link(items[i + 1].id))}
           >

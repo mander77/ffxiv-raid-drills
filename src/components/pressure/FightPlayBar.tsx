@@ -99,10 +99,10 @@ export function FightPlayBar({ end, marks, paused, speed, onPlay, onSeek, onSpee
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
-        <IconButton label="Start over" onClick={onRestart}>
+        <IconButton label="Start Over" onClick={onRestart}>
           <ResetIcon aria-hidden="true" />
         </IconButton>
-        <IconButton label="New fight" onClick={onNewFight}>
+        <IconButton label="New Fight" onClick={onNewFight}>
           <NewFightIcon aria-hidden="true" />
         </IconButton>
         {settings}

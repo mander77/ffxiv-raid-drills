@@ -1,4 +1,4 @@
-// The reference on the Cheat sheet: every mechanic in fight order, each with one Learn picture, the
+// The reference on the Cheat Sheet: every mechanic in fight order, each with one Learn picture, the
 // rule lines of its Learn cards, and the Practice drills and Timeline card that train it. The time
 // and the phase come from the picture's card.
 

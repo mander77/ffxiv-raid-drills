@@ -25,7 +25,7 @@ export function ModeToggle({ className }: ModeToggleProps) {
         <Button variant="ghost" size="icon" className={cn("relative", className)}>
           <LightModeIcon aria-hidden="true" className="scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
           <DarkModeIcon aria-hidden="true" className="absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-          <span className="sr-only">Light or dark mode</span>
+          <span className="sr-only">Light or Dark Mode</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
