@@ -81,11 +81,11 @@ test("Tally shows each count under its name", () => {
 
 test("ChipRow fades each edge that has more chips past it", async () => {
   render(
-    <ChipRow label="Go to a mechanic">
+    <ChipRow label="Go to a Mechanic">
       <button type="button">A</button>
     </ChipRow>,
   );
-  const row = screen.getByRole("group", { name: "Go to a mechanic" });
+  const row = screen.getByRole("group", { name: "Go to a Mechanic" });
   // happy-dom does no layout, so give the row a size: 100 wide, with 300 of chips.
   Object.defineProperty(row, "clientWidth", { value: 100 });
   Object.defineProperty(row, "scrollWidth", { value: 300 });

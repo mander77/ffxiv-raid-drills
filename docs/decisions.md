@@ -84,7 +84,7 @@ make sure that each one still matches the code before you start it.
     (`/learn/k-sword`), and `/learn` alone opens the card you were on, or the first one. Your
     scores are in a Zustand store (`src/stores/progress.ts`) under "raid-drills-progress"; each
     tab's round count (correct of done) is kept until you reload, and an answer for another slot
-    starts a new round. Home's "Start here" cards link only to tabs that exist. On a phone the
+    starts a new round. Home's "Start Here" cards link only to tabs that exist. On a phone the
     Lock In bar is fixed to the bottom of the screen once you pick an answer: a sticky bar would
     stay inside the answers' column, under the picture, off screen.
   - Rebuild 4 (#21): Practice is back. The address always names the pattern
@@ -286,7 +286,7 @@ make sure that each one still matches the code before you start it.
 
 ## What the reviews say must not change
 
-- The Home "Start here" cards, in learning order.
+- The Home "Start Here" cards, in learning order.
 - The Learn picture with the answer drawn on it. A player who skips the text still gets the
   answer from the picture.
 - Practice's Show Me with the blue "Go here" area. It teaches before it tests.
@@ -329,7 +329,7 @@ Do not propose these again unless the owner brings them up.
 - One idea has one phrase on screen (owner's choices, issue #58). The list is in `docs/vocabulary.md`. The owner chose "under the boss" and "max melee" as the only hitbox words, "light party
   1/2" over G1/G2 and "static", "soaked" for towers, "Supports (tanks and healers)" explained on
   first use, "light party stack" for the sword and "pair stack" for Four-way Fireball. The header
-  switch is now "Light party", not "Group".
+  switch is now "Light Party", not "Group".
 - The Correct and Not there card after a step shows the correct move as a list. It does not repeat
   the step's question: the prompt bar has just asked it.
 
@@ -463,9 +463,9 @@ Do not propose these again unless the owner brings them up.
   - After the try they are buttons. A click, or the arrow keys, shows that step: the arena as it
     was (the boss, the puddles down, your click, the green area), its answer under the chips, and
     "Step 2/4, Not there" in the bar. The step shown has a ring, apart from its check or cross.
-  - Try From Here, in the bar, answers the step shown and the ones after it again; the answers
+  - Try from Here, in the bar, answers the step shown and the ones after it again; the answers
     before it stay. It does not count in the score, as with Show Me (the app's choice: the first
-    try already counted). A mechanic with one step has no chips, so no Try From Here.
+    try already counted). A mechanic with one step has no chips, so no Try from Here.
   - Reset keeps one meaning: start the whole mechanic again.
   - The answer card sits under the chips, over the rule, so the step you review and its answer
     are together.
@@ -529,9 +529,9 @@ Do not propose these again unless the owner brings them up.
 
 ### Home and Cheat Sheet
 
-- Home: "Start here" cards in learning order. The top picture is the answer picture of the Learn
+- Home: "Start Here" cards in learning order. The top picture is the answer picture of the Learn
   card `k-raw-first` (on a phone, a 110 px strip from the boss to the party stack). The owner's
-  character picture is in About me with a wide crop of the face, the card and both arms.
+  character picture is in About Me with a wide crop of the face, the card and both arms.
 - Cheat Sheet: first every mechanic in fight order, by phase, as cards: its time, a Learn answer
   picture for your slot, its Learn cards' rules and a link to Learn. One card per row (owner's
   choice, after four, three and two per row): from tablet width the text sits beside a big

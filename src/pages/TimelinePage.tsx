@@ -24,7 +24,7 @@ export function TimelinePage() {
     <main>
       <PageContainer className="space-y-6 py-6">
         <p className="text-muted-foreground">{tabOf("/timeline")?.lede}</p>
-        <QuizDeck tab="timeline" items={CARDS} chips={CHIPS} chipLabel="Go to a phase" />
+        <QuizDeck tab="timeline" items={CARDS} chips={CHIPS} chipLabel="Go to a Phase" />
       </PageContainer>
     </main>
   );

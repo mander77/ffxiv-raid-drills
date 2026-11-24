@@ -19,7 +19,7 @@ export function LearnPage() {
     <main>
       <PageContainer className="space-y-6 py-6">
         <p className="text-muted-foreground">{tabOf("/learn")?.lede}</p>
-        <QuizDeck tab="learn" items={CARDS} chips={CHIPS} chipLabel="Go to a mechanic" previewAnswers />
+        <QuizDeck tab="learn" items={CARDS} chips={CHIPS} chipLabel="Go to a Mechanic" previewAnswers />
       </PageContainer>
     </main>
   );

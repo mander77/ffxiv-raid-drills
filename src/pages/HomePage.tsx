@@ -1,4 +1,4 @@
-// The Home page (/): what the site does, a card that links to each tab, and About me.
+// The Home page (/): what the site does, a card that links to each tab, and About Me.
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,7 @@ const HERO_CARD = "k-raw-first";
 /** The strats in one phrase, such as "A, B and C". */
 const STRAT_LIST = `${FIGHT_INFO.strats.slice(0, -1).join(", ")} and ${FIGHT_INFO.strats.at(-1)}`;
 
-/** A card under "Start here": one tab, in the order to learn the fight. */
+/** A card under "Start Here": one tab, in the order to learn the fight. */
 interface StartCard {
   path: string;
   name: string;
@@ -102,17 +102,17 @@ export function HomePage() {
             </div>
           )}
           <div className="space-y-3">
-            <h2 className="font-display text-3xl tracking-wide text-balance">Practice savage mechanics without a party</h2>
+            <h2 className="font-display text-3xl tracking-wide text-balance">Practice Savage Mechanics Without a Party</h2>
             <p>Learn the mechanics, practice where you stand, then do it all fast. The answers follow {STRAT_LIST}.</p>
             <p>
-              You are set as <span className="font-semibold">{slot}</span>. Change it with the Light party switch at the top. Your progress
+              You are set as <span className="font-semibold">{slot}</span>. Change it with the Light Party switch at the top. Your progress
               stays in this browser.
             </p>
           </div>
         </section>
 
         <section className="space-y-3">
-          <h2 className="font-display text-2xl tracking-wide">Start here</h2>
+          <h2 className="font-display text-2xl tracking-wide">Start Here</h2>
           <p className="text-sm text-muted-foreground">Go in order.</p>
           <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {START.map((c) => (
@@ -140,12 +140,12 @@ export function HomePage() {
           </ol>
         </section>
 
-        {/* About me: the text, and my character beside it. On a phone the picture goes on top. It
+        {/* About Me: the text, and my character beside it. On a phone the picture goes on top. It
             matches the banner: the same gradient, from the picture's side (top right), and the
             picture in the same frame. */}
         <section className="flex flex-col-reverse gap-6 rounded-xl border bg-linear-225 from-banner/60 to-card to-60% p-6 shadow-sm sm:flex-row sm:items-center dark:from-banner">
           <div className="min-w-0 flex-1 space-y-3">
-            <h2 className="font-display text-2xl tracking-wide">About me</h2>
+            <h2 className="font-display text-2xl tracking-wide">About Me</h2>
             {ABOUT_ME.map((p) => (
               <p key={p}>{p}</p>
             ))}

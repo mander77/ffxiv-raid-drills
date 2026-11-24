@@ -112,7 +112,7 @@ function Mechanics({ slot }: MechanicsProps) {
   return (
     <section aria-labelledby="mechanics" className="space-y-4">
       <h2 id="mechanics" className="font-display text-2xl tracking-wide">
-        Every mechanic as {slot}
+        Every Mechanic as {slot}
       </h2>
       {PHASES.map((p) => (
         // The wide-screen header stays at the top, so a phase heading stops below it.
@@ -292,7 +292,7 @@ export function CheatSheetPage() {
           <p>Say it in your head: feet, self, team. If you are not sure, any of these beats standing still.</p>
         </Section>
 
-        <Section id="timeline" title={`Your timeline as ${slot}`}>
+        <Section id="timeline" title={`Your Timeline as ${slot}`}>
           <CategoryKey />
           <Table className="min-w-[620px]">
             <TableHeader>

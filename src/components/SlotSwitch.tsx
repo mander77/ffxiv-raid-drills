@@ -86,7 +86,7 @@ export function SlotSwitch({ className }: SlotSwitchProps) {
           })}
         </ToggleGroup>
       </BandGroup>
-      <BandGroup labelId={groupLabel} label="Light party">
+      <BandGroup labelId={groupLabel} label="Light Party">
         <ToggleGroup
           type="single"
           size="sm"

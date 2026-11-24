@@ -1,5 +1,5 @@
 // The site in every browser: each tab opens, the header scrolls away on a phone, a Learn card and a Timeline card can be answered,
-// the Light party switch changes the slot, a click on Practice's list of mechanics opens one, and Pressure runs a quick round and a shared link to the player.
+// the Light Party switch changes the slot, a click on Practice's list of mechanics opens one, and Pressure runs a quick round and a shared link to the player.
 import { expect, type Locator, test } from "@playwright/test";
 import { TABS } from "../src/tabs";
 
@@ -50,7 +50,7 @@ test("on a phone the tab button and the slot switch share one row", async ({ pag
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/sheet");
   const button = await page.getByRole("button", { name: "Tabs. You are on Cheat Sheet" }).boundingBox();
-  const group = await page.getByRole("radiogroup", { name: "Light party" }).boundingBox();
+  const group = await page.getByRole("radiogroup", { name: "Light Party" }).boundingBox();
   // The same row: the switch sits on the button's line, not above it.
   expect(Math.abs((group?.y ?? 0) - (button?.y ?? 0))).toBeLessThan(8);
 });
@@ -88,7 +88,7 @@ test("on a wide screen the header stays at the top", async ({ page }) => {
 test("an address with no page opens Home", async ({ page }) => {
   await page.goto("/mech/k-sword");
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("heading", { name: "Start here" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Start Here" })).toBeVisible();
 });
 
 test("a Learn card: pick an answer, lock it in, and go on", async ({ page }) => {
@@ -148,18 +148,18 @@ test("on the Cheat Sheet, the corner buttons go to the next section, the one bef
   await go.getByRole("link", { name: "↑ Phase 4" }).click();
   await expect(page.getByRole("heading", { name: "Phase 4: Ecliptic Stampede" })).toBeInViewport();
   await go.getByRole("link", { name: "↑ Top" }).click();
-  await expect(page.getByRole("heading", { name: "Every mechanic as H1" })).toBeInViewport();
+  await expect(page.getByRole("heading", { name: "Every Mechanic as H1" })).toBeInViewport();
   await expect(go).toHaveCount(0);
 });
 
-test("the Light party switch changes the slot on the Cheat Sheet", async ({ page }) => {
+test("the Light Party switch changes the slot on the Cheat Sheet", async ({ page }) => {
   await page.goto("/sheet");
-  await expect(page.getByText("Your timeline as H1")).toBeVisible();
+  await expect(page.getByText("Your Timeline as H1")).toBeVisible();
   await page.getByRole("radio", { name: "2" }).click();
-  await expect(page.getByText("Your timeline as H2")).toBeVisible();
+  await expect(page.getByText("Your Timeline as H2")).toBeVisible();
   // The slot stays after a reload.
   await page.reload();
-  await expect(page.getByText("Your timeline as H2")).toBeVisible();
+  await expect(page.getByText("Your Timeline as H2")).toBeVisible();
 });
 
 test("Practice: a correct click and an incorrect click on the arena", async ({ page }) => {
