@@ -202,3 +202,17 @@ test("Arena Split: each Majestic Meteor puddle goes off at its cactbot hit", () 
     assert.isUndefined(g.scene.steps[3].drop);
   });
 });
+
+test("Arena Split: a round 1 tether shows from the first towers, before the knockback", () => {
+  for (const s of SLOTS)
+    for (let i = 0; i < REPEATS; i++) {
+      const f = buildFight(s),
+        towers = f.segs.find((g) => g.title === "Arena Split: First Towers"),
+        round1 = f.segs.find((g) => g.title === "Arena Split: Fire Breath");
+      if (!towers || !round1) throw new Error("no first towers or round 1");
+      // The tether comes before the tower's knockback (its hit) and is the same tether as round 1's.
+      assert.isBelow(towers.from, towers.due[0], `${s}: shown before the knockback`);
+      assert.deepEqual(towers.scene.tether?.portal, round1.scene.tether?.portal, `${s}: the round 1 tether`);
+      assert.include(towers.scene.setup.join(" "), round1.scene.tether ? "You have a tether" : "No tether", s);
+    }
+});

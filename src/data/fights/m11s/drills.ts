@@ -788,6 +788,20 @@ export function splitRound(s: Slot, r: SplitRound): Scene {
     rule:SPLIT_ROUND_RULE};
 }
 
+/** The first towers. In the full fight the tethers come with them (cactbot's "--tethers--"), so
+    `tether` says whether you have one this round: with a portal, your tether runs from it to you
+    from the start, so you see it before the knockback. Practice leaves it out. */
+export function firstTowersScene(s: Slot, tether?: {portal: Point} | null): Scene {
+  const home = homeSide(s), at = SPLIT_TOWER[home][firstTowerEnd(s)];
+  const mark: Extract<Overlay, {t: "mark"}> = {t:"mark", x:at[0], y:at[1], l:s, r:"H"};
+  return {setup:["Four towers appear: two on each platform.", "Every player soaks a tower.",
+      ...(tether === undefined ? [] : [tether ? "You have a tether this time." : "No tether this time."])],
+    split:true, boss:BOSS, overlays:[...SPLIT_TOWERS, ...(tether ? [{t:"portal", x:tether.portal[0], y:tether.portal[1], vert:false} as const] : [])],
+    ...(tether ? {tether:{portal:tether.portal, you:mark}} : {}),
+    steps:[{q:"Which tower do you soak?", z:{c:at, r:TOWER_R}, a:bySlot(s, {H1:["The SW tower, with M1."], H2:["The SE tower, with M2."]})}],
+    rule:["Tethered: get knocked to the other platform.", "Not tethered: get knocked to the same platform."]};
+}
+
 /** The second towers: soak the tower in the quadrant where you ended the first round. With a
     tether, it runs from `portal`, on your own platform's side, to your mark. */
 export function splitTowers(s: Slot, tether: boolean, side: SplitSide, end: SplitEnd, portal?: Point): Scene {
@@ -910,10 +924,7 @@ export const DRILLS: readonly Drill[] = [
       steps:[{q:"Click your lineup spot.", z:bySlot(s, {H1:{rect:[PLATFORM_X.west[0],52,PLATFORM_X.west[1],92]}, H2:{rect:[PLATFORM_X.east[0],52,PLATFORM_X.east[1],92]}}), a:bySlot(s, {H1:["West platform (light party 1), south end.", "Healers and melee go south."], H2:["East platform (light party 2), south end.", "Healers and melee go south."]})}],
       rule:["Light party 1 west, light party 2 east.", "Tanks and ranged north, healers and melee south."]})},
   {id:"m-split-tower", order:19, phase:P3, time:"6:29", title:"Arena Split: First Towers", kind:"towerKnockback", soak:2,
-    build:s=>({setup:["Four towers appear: two on each platform.", "Every player soaks a tower."],
-      split:true, boss:BOSS, overlays:[{t:"tower",x:11,y:23},{t:"tower",x:89,y:23},{t:"tower",x:11,y:77},{t:"tower",x:89,y:77}],
-      steps:[{q:"Which tower do you soak?", z:bySlot(s, {H1:{c:[11,77],r:TOWER_R}, H2:{c:[89,77],r:TOWER_R}}), a:bySlot(s, {H1:["The SW tower, with M1."], H2:["The SE tower, with M2."]})}],
-      rule:["Tethered: get knocked to the other platform.", "Not tethered: get knocked to the same platform."]})},
+    build:s=>firstTowersScene(s)},
   // The first round: a tether knocked you to the other platform, no tether left you on your own.
   {id:"m-split-fire", order:19.1, variants:["tether", "marker"], random:true, phase:P3, time:"6:35", title:"Arena Split: Fire Breath", kind:["bait", "chains"],
     build:(s, v)=>{ const tether = v === "tether", home = homeSide(s);

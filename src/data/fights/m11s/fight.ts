@@ -2,7 +2,7 @@
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6, `ENRAGE`).
-import { DRILLS, SPLIT_INNER, avalancheScene, firstTowerEnd, homeSide, massiveScene, otherEnd, otherSide, portalAt, randomEndsSide, randomHalf, randomOthers, splitRound, splitTowers, swappedOthers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
+import { DRILLS, SPLIT_INNER, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, massiveScene, otherEnd, otherSide, portalAt, randomEndsSide, randomHalf, randomOthers, splitRound, splitTowers, swappedOthers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
 import { ABILITIES, ENRAGE, FIGHT_END } from "./abilities";
 import { newCode, random, withSeed } from "../../../util";
 import { nearClock } from "../../../time";
@@ -151,6 +151,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Meteorain: Third Line Stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:cactbot("--tethers--", 2), due:[cactbot("Fearsome Fireball", 3)]},
     {title:"Meteorain: Last Line Stack", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:cactbot("Cosmic Kiss", 3), due:[cactbot("Fearsome Fireball", 4), cactbot("Triple Tyrannhilation")]},
     {title:"Arena Split: Lineup", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:cactbot("Flatliner (split)"), due:[cactbot("Majestic Meteor")]},
+    // Its scene comes with the rest of Arena Split below, once the tether round is known.
     {title:"Arena Split: First Towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:cactbot("--tethers--", 3), due:[cactbot("Explosion", 6)]},
     {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)", 2), due:[cactbot("Orbital Omen 1", 2), cactbot("Orbital Omen 2", 2), cactbot("Orbital Omen 3", 2)]},
     {title:"Ecliptic Stampede: Start", drills:["m-ecl-start"], scene:drill("m-ecl-start", s), k:0, from:cactbot("--middle--", 7), due:[cactbot("Atomic Impact 1")]},
@@ -178,6 +179,11 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   const side1 = t1 ? otherSide(homeSide(s)) : homeSide(s), side2 = otherSide(homeSide(s));
   const WRATH = "Majestic Meteowrath/Majestic Meteorain/Fire Breath";
   const round = (n: number): number[] => [cactbot("--meteor 1--", n), cactbot("--meteor 2--", n), cactbot("--meteor 3--", n), cactbot(WRATH, n)];
+  // The first towers come with the round 1 tethers: yours, if you have one, shows from the start,
+  // so you can see before the knockback that it sends you to the other platform. Its portal is
+  // on your own platform's side, in the half away from where round 1 ends.
+  const first = segs.find(g => g.drills[0] === "m-split-tower");
+  if (first) first.scene = firstTowersScene(s, t1 ? {portal:portalAt(homeSide(s), otherEnd(end1), ends1)} : null);
   segs.push(
     {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, {tether:t1, side:side1, end:end1, covered:cover1, endsSide:ends1, others:others1}), k:0, from:cactbot("Explosion", 6), due:round(1)},
     {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, !t1, side1, end1, portalAt(side1, otherEnd(end2), ends2)), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
