@@ -163,6 +163,11 @@ export interface Step {
   clearDrops?: boolean;
   /** Drawn after this step is answered. */
   reveal?: Overlay[];
+  /** The attacks of this step that the correct spot must stay out of, when they are not all of
+      `reveal`: `reveal` can also show an attack the player takes on purpose, such as a stack, a
+      bait or their own protean cone. Without it, every attack in `reveal` counts. Only
+      test/answers.test.ts reads it; nothing draws it. */
+  hits?: Overlay[];
   /** Drawn from the moment this step's question shows until the drill ends. */
   cue?: Overlay[];
   leave?: Overlay | null;
