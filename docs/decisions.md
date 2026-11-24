@@ -53,7 +53,8 @@ drafts a new fight). M11S is still the only fight, so nothing changed for the pl
   working while the app has no real users, so saved progress of version 1 is dropped. The
   pattern codes still build the same patterns: every `random()` call stays in its order.
 - Not done yet: `scripts/import-sources.mjs` still has one set of pins (issue #94). The full
-  fight's engine still knows the Arena Split (`Fight.split`, `ArenaSizes.split`) and the boss
+  fight's engine still knows the Arena Split (`Fight.split`, and `ArenaSizes.split` with its
+  platforms, portals and tether stretch distance) and the boss
   weapons (`ArenaSizes.scytheSafe`); a fight without them gives `[0, 0]` and leaves `split` out.
 
 ## Planned work
