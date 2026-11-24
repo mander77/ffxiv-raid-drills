@@ -31,9 +31,9 @@
     --arena-wm-yellow: oklch(0.783 0.154 89.014);
     --arena-wm-blue: oklch(0.553 0.125 249.557);
     --arena-wm-purple: oklch(0.541 0.168 302.527);
-    /* The number of players on a dark ground, as the mechanic icons show it in dark mode (--count
-       in app.css). */
-    --arena-count: oklch(0.879 0.153 91.605);
+    /* The players' highlight colour, as the mechanic icons show a player (--count in app.css,
+       light mode). */
+    --arena-count: oklch(0.6 0.19 45);
     --arena-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
     /* A tether: red until it is stretched, then blue (the owner's choice, as in the game). */
     --arena-tether: oklch(0.577 0.215 27.325);
@@ -230,24 +230,12 @@
     fill: var(--arena-text);
     opacity: 0.55;
   }
-  /* A tower's soak count: a round badge on its ring, with the tower icon and the number of
-     players in its column. The column is filled dark and the number is light, so it reads small. */
-  .arena .tower .soak .badge {
-    fill: oklch(1 0 0);
-    stroke: var(--arena-text);
-    stroke-width: 0.4;
-  }
-  .arena .tower .icon {
-    color: var(--arena-text);
-  }
-  .arena .tower .soak .icon path {
-    fill: var(--arena-text);
-  }
-  .arena .tower text {
+  /* A tower's soak count: one dot per player around its ring, in the players' highlight colour,
+     as in the mechanic icons, with a light edge so it stands out on the dashed ring. */
+  .arena .tower .soak .player {
     fill: var(--arena-count);
-    font-weight: 700;
-    text-anchor: middle;
-    dominant-baseline: central;
+    stroke: oklch(1 0 0);
+    stroke-width: 0.4;
   }
   /* An attack whose size no source gives yet: a dashed grey ring and a "?", never the orange of a
      real attack, so it cannot pass for a real size. */

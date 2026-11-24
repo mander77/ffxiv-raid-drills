@@ -80,10 +80,11 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
 - A knockback has its own overlay (`{t:"knockback"}`): wide, hollow arrows out from its source,
   like the push in the knockback icons (icons.tsx, rule 5; owner's request). Thin white guides
   were too faint to see.
-- A tower can show its soak count (`soak`): a small round badge on its ring, with the tower icon
-  and the number in its column. The column is filled dark and the number is the light highlight
-  colour, so it reads at a phone's size (owner's choices: in the tower's middle a waymark
-  covered it; a pill with the number beside the icon took too much room). A puddle can
+- A tower can show its soak count (`soak`): one dot per player, spaced evenly around its ring,
+  the first at the top, in the players' highlight colour (icons.tsx, rule 2: a dot is a player).
+  Owner's choice, after trying the tower icon with a number (in the middle a waymark covered it;
+  on the ring the number was too small, or the badge took too much room or did not match the
+  app) and the dots in a pill. A puddle can
   carry its life in seconds (`life`).
 - On the styles page, "Knockback Arrows" and "Tower to Soak" have these names because the
   mechanic kinds "Knockback" and "Tower" already have cards there.
@@ -106,11 +107,9 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
   length the app had picked (80 or 150 units), and the sword's arms at its range (40 yalms) in
   place of 150 units. A check that cuts each changed line to the arena found all 2,572 the same
   inside it, and every cone keeps its edges. No size, zone, answer or step changed.
-- The Arena Split towers (the split and Arcadion Avalanche) show their soak count, 2, from the
-  drills' own `soak` (owner's choice). The count is a badge on the tower's ring, not in its
-  middle, because the waymarks 1 to 4 stand on the tower centres and covered it (owner's
-  choice). The Ecliptic Stampede and Heartbreak Kick towers show none: no source or drill gives
-  their count yet.
+- The Arena Split towers (the split and Arcadion Avalanche) show their soak count, 2 dots, from
+  the drills' own `soak` (owner's choice). The Ecliptic Stampede and Heartbreak Kick towers
+  show none: no source or drill gives their count yet.
 - M11S's knockbacks stay guides. Those guides show where each player is thrown, which the
   standard knockback (arrows out from a source) does not.
 

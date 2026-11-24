@@ -90,16 +90,16 @@ test("the styles page draws each standard attack, and the mark of an unknown siz
     ],
   );
   assert.ok(attacks.querySelector(".unknown"), "the size unknown mark");
-  assert.equal(attacks.querySelector(".tower text")?.textContent, "2", "a tower shows its soak count");
+  assert.equal(attacks.querySelectorAll(".tower .soak .player").length, 2, "a tower shows one dot per player who soaks it");
 });
 
-test("proteans are eight cones, a knockback shows hollow arrows, and a tower its icon", () => {
+test("proteans are eight cones, a knockback shows hollow arrows, and a tower one dot per player", () => {
   render(<StylesPage />);
   const card = (name: string) => screen.getByRole("heading", { level: 3, name }).closest("li");
   const proteans = card("Proteans");
   assert.equal(proteans?.querySelectorAll("polygon.aoe").length, 8, "eight cones");
   assert.equal(card("Knockback Arrows")?.querySelectorAll("polygon.push").length, 8, "eight hollow arrows");
-  assert.ok(card("Tower to Soak")?.querySelector(".tower svg.lucide-tower"), "the tower icon in the middle");
+  assert.equal(card("Tower to Soak")?.querySelectorAll(".tower .soak .player").length, 2, "two dots on the ring");
 });
 
 test("the mechanic cards show their icons only, with no attack on the arena", () => {
