@@ -82,6 +82,10 @@ Windows, macOS and Linux, and in any shell (PowerShell too):
    Then run `git var GIT_AUTHOR_IDENT` and make sure that it shows this name and address.
 4. To publish (the owner only), install the GitHub CLI (`winget install GitHub.cli`), run
    `gh auth login` as `mander77`, then `gh auth setup-git`. The setup says if it is missing.
+5. For Claude Code, install the TypeScript language server:
+   `npm install -g typescript-language-server typescript`. The `typescript-lsp` plugin needs it.
+   The setup says if it is missing. When Claude Code first opens the repository, it asks you to
+   trust it and to install the plugins in `.claude/settings.json`. Say yes.
 
 ## Commands
 
@@ -433,3 +437,13 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
   https://ui.shadcn.com/docs/skills). It loads by itself when you work on shadcn/ui parts and
   reads the project's set-up with `npx shadcn@latest info`. `skills-lock.json` pins its version.
   To update it: `npx skills update shadcn -p -y`. Keep its files as the tool writes them.
+- `.claude/settings.json`: turns on four plugins from Anthropic's official marketplace
+  (`claude-plugins-official`) for every session in the repository:
+  - `context7`: the current docs of React, Tailwind CSS, shadcn/ui, Vitest and Playwright, for
+    step 4 of "How to work with the owner".
+  - `typescript-lsp`: type errors and go to definition in Claude Code. It needs
+    `typescript-language-server` (see "First time on a new computer").
+  - `playwright`: a browser that Claude drives, to check a change at 1280 px and 375 px and to
+    measure positions in the page. It is not `npm run e2e`.
+  - `claude-md-management`: checks this file against the code, and `/revise-claude-md` adds what
+    a session learned.
