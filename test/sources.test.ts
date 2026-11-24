@@ -6,9 +6,11 @@
 import { assert, test } from "vitest";
 import { ABILITIES, ENRAGE } from "../src/data/abilities";
 import * as ATTACKS from "../src/data/attacks";
+import { DRILLS } from "../src/data/drills";
 import { buildFight, cleanChoices } from "../src/data/fight";
+import { LEARN_CARDS, TIMELINE_CARDS } from "../src/data/questions";
 import { BOSSMOD_ABILITIES, BOSSMOD_ACTORS, BOSSMOD_ARENA_HALF, CACTBOT_LINES } from "../src/data/source.gen";
-import { bossmod, cactbot, type LineName } from "../src/data/sources";
+import { bossmod } from "../src/data/sources";
 import { TIMELINE } from "../src/data/timeline";
 import { nearClock } from "../src/time";
 import type { Slot } from "../src/types";
@@ -29,18 +31,11 @@ const isCastStart = (t: number): boolean =>
 /** Every time as text (such as "0:11"), to the nearest second, that a cactbot line gives. */
 const LINE_CLOCKS = new Set(CACTBOT_LINES.map((l) => nearClock(l.t)));
 
-/** When a mechanic appears on the arena, where it is not a cactbot line or a cast start. The
-    owner has not said yet which line each one follows. */
-const SCENE_STARTS = [106, 146.0, 312.0, 321.5, 376.5, 557.5];
-/** Times in the text that are typed by hand, with the cactbot line each one stands for. That
-    line does not round to the text: 55.5 is 0:56 to the nearest second, not 0:55. */
-const TYPED_CLOCKS: Record<string, [LineName, number]> = {
-  "0:55": ["Assault Evolved 2", 1],
-  "1:00": ["Assault Evolved 3", 1],
-  "3:14": ["Assault Evolved 1", 3],
-  "8:10": ["Great Wall of Fire (castbar)", 2],
-  "10:33": ["Heartbreak Kick", 3],
-};
+/** When a mechanic appears on the arena, where it is not a cactbot line or a cast start: no line
+    comes between the mechanic before it and its own first hit. A question for the owner. */
+const SCENE_STARTS = [106];
+/** The times such as "0:11" in a line of text. */
+const clocks = (line: string): string[] => line.match(/\b\d{1,2}:\d\d\b/g) ?? [];
 
 /** Every full fight the choices can make: each Raw Steel Trophy weapon and each Fireball. */
 function everyFight() {
@@ -81,14 +76,18 @@ test("each scene start that matches no source is still a question for the owner"
   for (const t of SCENE_STARTS) assert.notOk(isLine(t) || isCastStart(t), `${t} is a source time now: use it`);
 });
 
-test("every time in the cheat sheet's timeline rounds from a cactbot line", () => {
-  for (const s of SLOTS)
-    for (const row of TIMELINE) {
-      const texts = [row.t, ...row.job(s).flatMap((line) => line.match(/\b\d{1,2}:\d\d\b/g) ?? [])];
-      for (const t of texts) assert.ok(LINE_CLOCKS.has(t) || t in TYPED_CLOCKS, `${row.n}: ${t}`);
+test("every time the text shows is a cactbot line, to the nearest second", () => {
+  const texts: [string, string][] = [];
+  for (const s of SLOTS) {
+    for (const row of TIMELINE) for (const line of [row.t, ...row.job(s)]) texts.push([row.n, line]);
+    for (const c of [...LEARN_CARDS, ...TIMELINE_CARDS]) {
+      const q = c.build(s);
+      for (const line of [c.time, q.prompt, ...q.options.map((o) => o.t), ...q.why, ...q.rule]) texts.push([c.id, line]);
     }
-  for (const [t, [line, n]] of Object.entries(TYPED_CLOCKS))
-    assert.notEqual(nearClock(cactbot(line, n)), t, `${line} rounds to ${t} now: use it`);
+    for (const m of DRILLS) texts.push([m.id, m.time]);
+  }
+  assert.isAbove(texts.length, 200, "the test reads the text");
+  for (const [where, line] of texts) for (const t of clocks(line)) assert.ok(LINE_CLOCKS.has(t), `${where}: ${t}`);
 });
 
 test("each attack size is BossMod's, and one size stands for each group of attacks", () => {

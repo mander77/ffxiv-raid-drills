@@ -9,7 +9,7 @@ import { bySlot, withSeed } from "../util";
 import { markRole, partyOf } from "../party";
 import { angOf, polar, rotOverlay, zoneCenter } from "../geometry";
 import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, type Weapon, type WeaponType } from "./drills";
-import { PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, lineTo, swordCross } from "./attacks";
+import { BREATH_W, GUST_HALF, GUST_LEN, PROXIMITY_DOT, PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, lineTo, swordCross } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
 type Who = [string, MarkRole];
@@ -269,9 +269,9 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...spotTags(cw, false), say("ALL SIX AT ONCE", 8)])]}; },
   // Each tornado cones its two closest players, so a bait draws a cone from that tornado to you.
   "k-ult-tornado": s => { const d = fromDrill("m-tornado", s), d2 = fromDrill("m-tornado", other(s));
-    const own = bySlot<Point>(s, {H1:[20, 50], H2:[80, 50]}), oth = bySlot<Point>(s, {H1:[80, 50], H2:[20, 50]}), cone = (from: Point, z: Zone): Overlay => coneTo(from, zoneCenter(z), 14, 22);
+    const own = bySlot<Point>(s, {H1:[20, 50], H2:[80, 50]}), oth = bySlot<Point>(s, {H1:[80, 50], H2:[20, 50]}), cone = (from: Point, z: Zone): Overlay => coneTo(from, zoneCenter(z), GUST_HALF, GUST_LEN);
     return {...d, options:[hit(youIn(s, d.zone), [cone(own, d.zone)]), hit(youIn(s, d2.zone), [cone(oth, d2.zone)]),
-      hit(youAt(s, [40, 16], 6.5), [coneTo([50, 16], [40, 16], 14, 22)]), youAt(s, [57, 57], 9)]}; },
+      hit(youAt(s, [40, 16], 6.5), [coneTo([50, 16], [40, 16], GUST_HALF, GUST_LEN)]), youAt(s, [57, 57], 9)]}; },
   "k-ult-touch": s => { const d = fromDrill("m-tornado", s), me = bySlot<Point>(s, {H1:[12, 42], H2:[88, 58]}), into = bySlot<Point>(s, {H1:[20, 50], H2:[80, 50]});
     // The words go on the side of the tornado away from your mark: below it for H1, above it for H2.
     const dy = bySlot(s, {H1:1, H2:-1}), near = (a: string, b?: string): Overlay[] => [tag(into[0], into[1] + 9 * dy, a), ...(b ? [tag(into[0], into[1] + 14 * dy, b)] : [])];
@@ -335,9 +335,9 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([you(s, me), guide(me, same)], [bySlot(s, {H1:WEST, H2:EAST})]),
       show([you(s, bySlot<Point>(s, {H1:[19, 50], H2:[81, 50]})), say("NO TOWER", 8)]),
       show([you(s, me), guide(me, CENTER)], [circle(CENTER, 10)])]}; },
-  // Fire Breath is a cone from the boss to each marked player.
+  // Fire Breath is a line from the boss through each marked player.
   "k-split-fb": s => { const start = bySlot<Point>(s, {H1:[10, 50], H2:[90, 50]}), inner = bySlot<Point>(s, {H1:[20, 42], H2:[80, 58]}), edge = bySlot<Point>(s, {H1:[4, 50], H2:[96, 50]});
-    const tethered = bySlot<Point>(s, {H1:[10, 57], H2:[90, 43]}), tank = mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T"), breath = (p: Point): Overlay => coneTo(CENTER, p, 12, 60);
+    const tethered = bySlot<Point>(s, {H1:[10, 57], H2:[90, 43]}), tank = mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T"), breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W);
     return {overlays:[], split:true, boss:BOSS, before:[you(s, start)], after:[breath(inner), you(s, inner)],
       answer:[bySlot(s, {H1:rect(15, 38, 25.5, 62), H2:rect(74.5, 38, 85, 62)})], options:[
         show([breath(inner), you(s, inner)], [bySlot(s, {H1:rect(15, 38, 25.5, 62), H2:rect(74.5, 38, 85, 62)})]),
@@ -345,7 +345,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
         show([breath(start), you(s, start), tank, guide(tethered, CENTER), tag(tethered[0], tethered[1] + bySlot(s, {H1:6, H2:-6}), "TETHER")]),
         show([breath(start), you(s, start), say("STAND STILL", 8)])]}; },
   "k-split-corner": s => { const markers = bySlot<Point[]>(s, {H1:[[9, 19], [9, 81]], H2:[[91, 19], [91, 81]]}), tethered = bySlot<Point>(s, {H1:[12, 38], H2:[88, 62]});
-    const breath = (p: Point): Overlay => coneTo(CENTER, p, 8, 60), corner = bySlot<Point>(s, {H1:[14, 25], H2:[86, 75]}), edge = bySlot<Point>(s, {H1:[3, 40], H2:[97, 60]});
+    const breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W), corner = bySlot<Point>(s, {H1:[14, 25], H2:[86, 75]}), edge = bySlot<Point>(s, {H1:[3, 40], H2:[97, 60]});
     const nextTo = bySlot<Point>(s, {H1:[12, 45], H2:[88, 55]}), middle = bySlot<Point>(s, {H1:[13, 50], H2:[87, 50]});
     return {overlays:[], split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[12, 50], H2:[88, 50]}))], answer:markers.map(p => circle(p, 6.5)),
       note:"Markers go to a corner of your number waymark. Tethers go to the platform edge. Ask your lead which corner: outer or inner.", options:[
@@ -388,7 +388,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       hit(youAt(s, [38, 22]), [target([38, 22]), target([25, 25]), target([75, 25])])]}; },
   "k-ecl-adjust": () => { const up = (x: number): Overlay => guide([x, 74], [x, 36]);
     return {overlays:[mark(25, 25, "R1", "D"), mark(75, 25, "R2", "D"), target([25, 74]), target([75, 74]), mark(25, 74, "H1", "H"), mark(75, 74, "H2", "H"),
-      aoe([66, 93], 5), tag(66, 85, "PROXIMITY")], boss:BOSS, after:[up(75)], answer:[circle([75, 74], 7)],
+      aoe([66, 93], PROXIMITY_DOT), tag(66, 85, "PROXIMITY")], boss:BOSS, after:[up(75)], answer:[circle([75, 74], 7)],
       note:"Example: the proximity AoE is closer to H2, so H2 moves north.", options:[
         show([up(75)], [circle([75, 74], 7)]), show([up(25)], [circle([25, 74], 7)]), show([say("NOBODY MOVES", 8)]), show([up(25), up(75)], [circle([25, 74], 7), circle([75, 74], 7)])]}; },
   "k-ecl-prio": s => { const T: Point[] = [[50, 13], [87, 50], [50, 87], [13, 50]];

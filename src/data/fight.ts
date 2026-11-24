@@ -138,7 +138,9 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   // The boss after the third weapon of the second set. He stays there for the second Void Stardust.
   const lastBoss = A2.states[A2.states.length - 1];
   /* Each click is due when the hit that checks it lands, in seconds into the fight. A scene
-     appears when its cast starts (cactbot's StartsUsing or the ability before it). */
+     appears when its cast starts (cactbot's StartsUsing or the ability before it). When the
+     mechanic before it ends just then, the scene waits for the first cactbot line after that
+     mechanic's last hit, so its result stays on the arena for a moment. */
   const segs: FightSeg[] = [
     {title:"Raw Steel Trophy: " + titleCase(w1), drills:["m-raw-" + w1], scene:drill("m-raw-" + w1, s), k:0, from:castStart("RawSteelTrophyAxe", "Raw Steel Trophy (Scythe/Axe)"), due:[cactbot("Heavy Hitter (Scythe)/Impact x6 (Axe)")]},
     {title:"Assault Evolved", drills:["m-assault"], scene:assault1, k:0, from:cactbot("Trophy Weapons"), turn:face1 != null ? {at:castStart("AssaultEvolvedLongCast", "Assault Evolved"), f:face1, weapons:A1.steps.length} : undefined, due:SET1},
@@ -146,10 +148,12 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Void Stardust into the Second Weapons", drills:["m-void"], scene:voidIntoWeapons(s, !stackFirst, A2), k:0, from:cactbot("Trophy Weapons", 2),
       turn:{at:castStart("AssaultEvolvedLongCast", "Assault Evolved", 2), f:A2.W[0].a, weapons:A2.steps.length},
       due:[cactbot("Void Stardust"), ...placed(puddles(1)), cactbot("Comet"), ...SET2], pre:FIRST_PUDDLE},
+    // 1:46 is typed by hand: no cactbot line comes between the last weapon (1:45.1) and the first
+    // puddle (1:47.2). A question for the owner.
     {title:"Void Stardust (Second Time)", drills:[], scene:voidAgain(s, stackFirst, lastBoss), k:0, from:106, due:[...placed(puddles(2)), cactbot("Comet", 2)], pre:behind(lastBoss)},
-    // The lines on the floor show only just after the 7th and last hit (2:25.5), so the scene
-    // with the lines appears then, not at the Trophy cast. Until then the arena stays empty.
-    {title:"Dance of Domination", drills:["m-dance"], scene:drill("m-dance", s), k:Math.floor(random() * 4), from:146.0, due:[cactbot("Eye of the Hurricane")]},
+    // The lines on the floor show only with the 7th and last hit, so the scene with the lines
+    // appears then, not at the Trophy cast. Until then the arena stays empty.
+    {title:"Dance of Domination", drills:["m-dance"], scene:drill("m-dance", s), k:Math.floor(random() * 4), from:cactbot("Dance of Domination 7"), due:[cactbot("Eye of the Hurricane")]},
     {title:"Raw Steel Trophy: " + titleCase(w2), drills:["m-raw-" + w2], scene:drill("m-raw-" + w2, s), k:0, from:cactbot("Raw Steel Trophy Axe", 2), due:[cactbot("Heavy Hitter (Scythe)", 2)]}
   ];
   // Ultimate Trophy Weapons is built here, after the Dance of Domination turn, as it always was.
@@ -169,13 +173,13 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)"), due:[cactbot("Orbital Omen 1"), cactbot("Orbital Omen 2"), cactbot("Orbital Omen 3")]},
     {title:"Meteorain: First Line Stack", drills:["m-meteor-1"], scene:drill("m-meteor-1", s), k:0, from:cactbot("Meteorain"), due:[cactbot("Fearsome Fireball")]},
     {title:"Meteorain: Your Meteor", drills:["m-meteor-2"], scene:drill("m-meteor-2", s), k:0, from:cactbot("Cosmic Kiss"), due:[cactbot("Cosmic Kiss", 2)]},
-    {title:"Meteorain: Third Line Stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:312.0, due:[cactbot("Fearsome Fireball", 3)]},
-    {title:"Meteorain: Last Line Stack", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:321.5, due:[cactbot("Fearsome Fireball", 4), cactbot("Triple Tyrannhilation")]},
+    {title:"Meteorain: Third Line Stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:cactbot("--tethers--", 2), due:[cactbot("Fearsome Fireball", 3)]},
+    {title:"Meteorain: Last Line Stack", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:cactbot("Cosmic Kiss", 3), due:[cactbot("Fearsome Fireball", 4), cactbot("Triple Tyrannhilation")]},
     {title:"Arena Split: Lineup", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:cactbot("Flatliner (split)"), due:[cactbot("Majestic Meteor")]},
-    {title:"Arena Split: First Towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:376.5, due:[cactbot("Explosion", 6)]},
+    {title:"Arena Split: First Towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:cactbot("--tethers--", 3), due:[cactbot("Explosion", 6)]},
     {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)", 2), due:[cactbot("Orbital Omen 1", 2), cactbot("Orbital Omen 2", 2), cactbot("Orbital Omen 3", 2)]},
     {title:"Ecliptic Stampede: Start", drills:["m-ecl-start"], scene:drill("m-ecl-start", s), k:0, from:cactbot("--middle--", 7), due:[cactbot("Atomic Impact 1")]},
-    {title:"Ecliptic Stampede: " + fireball, drills:[ecl], scene:drill(ecl, s, wall), k:0, from:557.5, due:[cactbot("Two-way Fireball / Four-way Fireball")]}
+    {title:"Ecliptic Stampede: " + fireball, drills:[ecl], scene:drill(ecl, s, wall), k:0, from:cactbot("Weighty Impact"), due:[cactbot("Two-way Fireball / Four-way Fireball")]}
   );
   /* The timeline lines, with cactbot's names. Where the arena is the test, the names stay as
      general as cactbot's before it syncs: "Comet/Crushing Comet", "Assault Evolved 1". */

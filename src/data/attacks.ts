@@ -46,6 +46,17 @@ export const HURRICANE_W = yalms(bossmod("HurricaneExplosion").width);
     cone") and of the cone the party shares ("range 60 45-degree cone"), in degrees. */
 export const RAW_TANK_HALF = bossmod("RawSteelScytheBuster").angle / 2;
 export const RAW_STACK_HALF = bossmod("RawSteelScytheHeavyHitter").angle / 2;
+/** Each tornado's cone in Ultimate Trophy Weapons (Powerful Gust, "range 60 90-degree cone"):
+    half its angle, in degrees, and its length. */
+export const GUST_HALF = bossmod("PowerfulGust").angle / 2;
+export const GUST_LEN = yalms(bossmod("PowerfulGust").range);
+/** Fire Breath in the Arena Split: a line from the boss through each marked player, this wide
+    ("range 60 width 6 rect"). */
+export const BREATH_W = yalms(bossmod("FireBreathRect").width);
+/** Where the Mammoth Meteor proximity AoE lands, drawn as a small circle. This size is the app's
+    choice: the attack itself ("range 60 circle") covers the whole arena and hurts less with
+    distance, so a circle its size would hide the point of the picture. */
+export const PROXIMITY_DOT = 5;
 /** The Great Wall of Fire line buster: its full width ("range 60 width 6 rect"). */
 export const WALL_W = yalms(bossmod("GreatWallOfFireRect").width);
 /** Every tower: the Arena Split towers (Explosion), the Ecliptic Stampede towers and Heartbreak
