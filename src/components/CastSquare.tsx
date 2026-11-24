@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { Category } from "../data/abilities";
 import type { DrillKind } from "../types";
-import { CATEGORY_BG, CATEGORY_BORDER } from "./CategoryDots";
+import { CATEGORY_BG, CATEGORY_BORDER } from "./CategoryIcons";
 import { KINDS, MechanicIcon } from "./MechanicIcon";
 
 export interface CastSquareProps {

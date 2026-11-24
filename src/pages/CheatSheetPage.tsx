@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LearnPicture } from "../components/arena/LearnPicture";
-import { CategoryDots, categoryNames } from "../components/CategoryDots";
+import { CategoryIcons, categoryNames } from "../components/CategoryIcons";
 import { CategoryKey } from "../components/CategoryKey";
 import { LineList } from "../components/LineList";
 import { PageContainer } from "../components/PageContainer";
@@ -303,7 +303,7 @@ export function CheatSheetPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {/* Each row shows the ability list's marks for what it covers, with the same colour key. */}
+              {/* Each row shows the ability list's category icons for what it covers, with the same key. */}
               {TIMELINE.map((e, i) => {
                 const cats = timelineCategories(i);
                 return (
@@ -312,7 +312,7 @@ export function CheatSheetPage() {
                     <TableCell className="min-w-[170px] align-top font-medium whitespace-normal">
                       {e.n}
                       <div className="mt-1 flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
-                        <CategoryDots cats={cats} size="md" />
+                        <CategoryIcons cats={cats} />
                         {categoryNames(cats)}
                       </div>
                     </TableCell>

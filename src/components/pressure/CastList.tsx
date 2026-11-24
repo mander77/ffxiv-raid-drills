@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { type CastControls, useCastTimeline } from "../../hooks/useCastTimeline";
 import { CASTS_AHEAD, type CastMark } from "../../lib/fight";
 import { CastSquare } from "../CastSquare";
+import { CategoryIcons } from "../CategoryIcons";
 import { CastButton } from "./CastButton";
 import { CastKey } from "./CastKey";
 
@@ -63,8 +64,8 @@ export interface CastListProps {
 }
 
 /** The casts coming up, on a line that moves with the fight clock, in the style of WoW's
-    boss ability timeline. Each cast is a square in its category's colour with its seconds inside
-    and its name beside it ("y") or under it ("x"). The squares move toward the now mark as the
+    boss ability timeline. Each cast is a square in its category's colour with its seconds inside,
+    and its name, after its category icons, beside it ("y") or under it ("x"). The squares move toward the now mark as the
     clock runs; the gaps between them show the time between casts, and in their last seconds a
     square grows. A hit (damage going off) is a filled square with its name in bold; the boss's own
     cast is outlined. useCastTimeline moves it. In the player you can click a cast to go to it, or
@@ -115,7 +116,9 @@ export function CastList({ axis, controls, className }: CastListProps) {
                     seconds as it goes past the now mark, so it does not jump. Sideways, it grows
                     inside a slot of its largest size, so the name under it does not move. */}
                 {axis === "x" ? <span className="flex size-8 items-center justify-center">{square(m)}</span> : square(m)}
+                {/* The category icons go before the name, so the square keeps its seconds. */}
                 <span className={cn("rounded", look.name, m.cast ? "text-muted-foreground" : "font-semibold", m.raidwide && "bg-danger")}>
+                  <CategoryIcons cats={m.cats} className="mr-1" />
                   {m.name}
                 </span>
               </CastButton>

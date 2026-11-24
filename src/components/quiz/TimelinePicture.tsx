@@ -3,7 +3,7 @@ import { TIMELINE } from "../../data/timeline";
 import { cn } from "../../lib/utils";
 import { clock, sec } from "../../time";
 import type { QuizItem } from "../../types";
-import { CategoryDots } from "../CategoryDots";
+import { CategoryIcons } from "../CategoryIcons";
 
 /** At least this many rows show after the one that just happened, and at most MAX_ROWS. */
 const MIN_ROWS = 5;
@@ -130,7 +130,7 @@ function TimelineRow({ fill, name, cats, when, now = false, correct = false }: T
           <span className="tracking-widest text-muted-foreground">? ? ?</span>
         ) : (
           <>
-            <CategoryDots cats={cats} />
+            <CategoryIcons cats={cats} />
             {name}
           </>
         )}

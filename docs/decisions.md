@@ -99,7 +99,7 @@ make sure that each one still matches the code before you start it.
     Practice mechanic is a drill (`Drill`, `DRILLS`, `DrillRun`); Learn and Timeline cards are
     `LEARN_CARDS` and `TIMELINE_CARDS`; "phase" means only a fight phase, so a step's state is its
     status; `look` is a colour, so a look-ahead step is `Step.lookAhead`; the ability categories
-    are spelled out (`Category`, `CategoryDots`); `f1` (which rounds to 2 decimals) is `round2`.
+    are spelled out (`Category`, `CategoryIcons`); `f1` (which rounds to 2 decimals) is `round2`.
     Only names changed, never a value, in `src/data/` too, with the owner's OK.
   - Rebuild 5 (#22): Pressure is back: the quick round, the run and Watch the correct moves, with
     shared player links (`/pressure/<code>[/<picks>][?t=<s>]`). The fight clock's rules (the skip
@@ -193,7 +193,8 @@ make sure that each one still matches the code before you start it.
     it, then the cast bar over the mechanic. The run keeps the cast bar over the prompt.
   - The casts coming up (CastList) look like WoW Midnight's boss ability timeline, by the owner's
     choice, but rise to a now mark at the top instead of falling to the bottom: a line, each cast a
-    square in its category's colour with its seconds inside and its name beside it, ticks at 5, 10
+    square in its category's colour with its seconds inside and its name beside it, after its
+    category icons, ticks at 5, 10
     and 20 seconds, and a bigger square in the last 5 seconds. Before that it was a list moving
     toward a now line: the gaps show the time between casts, close casts are pushed apart so names never
     overlap, the last 6 seconds are bold, and a cast fades above the line for 2 seconds. shadcn/ui
@@ -547,6 +548,16 @@ Do not propose these again unless the owner brings them up.
 
 ### Everywhere
 
+- Each ability category has its own icon (`CategoryIcons`, rule 14 in `icons.tsx`), so no place
+  tells the categories apart by colour alone: Raid damage two chevrons over three players, Tank
+  damage the tank buster's shield, Positioning a map pin, Avoidable AoE a ring with an arrow out,
+  Targeted AoE a crosshair, Mechanic a puzzle piece, Enrage a skull. The icon keeps its category's
+  colour as a second cue (owner's choice). A row with two categories shows both icons. In the
+  casts coming up the square keeps its colour and its seconds, and the icons go before the name
+  (owner's pick over an icon in the square with the seconds after the name). The hit flash on the
+  now mark keeps the category colour. The name of a hit over the arena draws its icon in the
+  label's text colour, where some category colours would not show; dark mode lifts Enrage's dark
+  red, which was lost on the dark background.
 - Player marks are always the top layer (see `LAYERS` in `src/components/arena/Arena.tsx`).
 - Each boss weapon is a small upright icon on a round badge filled with sand (the badge covers the
   middle of its line), sitting on a line drawn at the true
