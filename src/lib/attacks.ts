@@ -80,6 +80,12 @@ export function standardAttacks(arenaHalf: number) {
     return { t: "poly", pts: [from, ...edge] };
   }
 
+  /** Proteans (clock spots): `count` cones out from `from`, one on each player, evenly around it.
+      The first points toward `facing`. Each is `angle` degrees wide and `range` long. */
+  function proteans(from: Point, angle: number, range: number, count = 8, facing = 0): Overlay[] {
+    return Array.from({ length: count }, (_, i) => cone(from, facing + (360 * i) / count, angle, range));
+  }
+
   /** A line from `from` toward `facing`, `length` long and `width` wide in all. It can start
       `back` yalms behind `from`. */
   function line(from: Point, facing: number, length: number, width: number, back = 0): Overlay {
@@ -155,7 +161,7 @@ export function standardAttacks(arenaHalf: number) {
     }
   }
 
-  return { yalms, raidwide, circle, donut, cone, line, cross, halfArena, knockback, puddle, tower, unknown, fromBossmod };
+  return { yalms, raidwide, circle, donut, cone, proteans, line, cross, halfArena, knockback, puddle, tower, unknown, fromBossmod };
 }
 
 /** The set of standard attacks of one arena. */
