@@ -728,8 +728,10 @@ static wins.
   downloads no browser and runs no `apt-get`, and a Dependabot update moves the image with the
   package. `npx playwright install --with-deps` once hung for 10 minutes on a slow Ubuntu mirror
   and blocked `main`. A browser cache was not chosen: the Playwright docs say it saves little,
-  and it does not cover the system libraries, which were the slow part. Actions are pinned to a
-  commit, the token can only read, and a newer push cancels an older run of the same pull
+  and it does not cover the system libraries, which were the slow part. On CI the browser tests
+  run fully parallel on 4 workers (the runner's CPUs), against the built site (`vite build`,
+  then `vite preview`), not the dev server, whose first visit to each page is slow. On your
+  computer they use the dev server. Actions are pinned to a commit, the token can only read, and a newer push cancels an older run of the same pull
   request (not on `main`, where each commit keeps its run). CI does not skip any path, because a
   pull request needs both checks.
 - Pull requests, not fast-forward pushes (owner's choice, November 23). With several sessions
