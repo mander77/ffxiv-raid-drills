@@ -370,7 +370,7 @@ export function StylesPage() {
 
         <section className="space-y-4">
           <h2 className="font-display text-2xl font-bold">Standard Attacks</h2>
-          <p className="text-muted-foreground">Every attack is one of these. Only its size changes.</p>
+          <p className="text-muted-foreground">Every attack is one of these. Its size and place change, and for some, its direction.</p>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {ATTACKS.map((a) => (
               <IconItem

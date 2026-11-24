@@ -1,6 +1,6 @@
-// The standard attacks: every attack in the game is one of a few kinds, and only its size
-// changes. Each function takes where the attack is (a point in arena units) and its size in
-// yalms, and returns the overlays the arena draws. A fight gets its set from its arena's size
+// The standard attacks: every attack in the game is one of a few kinds. Its size, its place and,
+// for some, its direction change. Each function takes where the attack is (a point in arena
+// units), its direction where it has one, and its size in yalms, and returns the overlays the arena draws. A fight gets its set from its arena's size
 // (`standardAttacks(BOSSMOD_ARENA_HALF)`), so the same yalms draw to scale in every fight.
 //
 // Directions are degrees clockwise from north, as in geometry.ts. The arena is 100 units across.
