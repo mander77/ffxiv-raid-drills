@@ -2,12 +2,10 @@
 // run skips ahead, when a result shows, the 3-2-1 before a mechanic, and the look-ahead answer
 // to look ahead to. The fight screen calls them on every frame; the tests call them too.
 
-import { type Category, categoriesAt } from "../data/fights/m11s/abilities";
-import { facingNext, jumpsNext } from "../data/fights/m11s/drills";
-import { buildHits, type Fight, type FightSeg, type Hit } from "../data/fights/m11s/fight";
 import { clickRoute, correctRoute, type Stop, showOf } from "../data/route";
 import { inZone, rotOverlay, rotZone, stepZone, zoneCenter } from "../geometry";
-import type { Boss, Point, Scene, StepResult, Zone } from "../types";
+import type { Boss, Category, Fight, FightSeg, Hit, Point, Scene, StepResult, Zone } from "../types";
+import { facingNext, jumpsNext } from "./scene";
 
 /* ---------- times, in seconds ---------- */
 // Each of these is the app's choice, not a fight time, unless its comment names a source.
@@ -97,7 +95,7 @@ export interface FightState {
     skip, so it opens with the 3-2-1 of the first mechanic. */
 export function newFightState(mode: FightMode, fight: Fight, opts: { paused?: boolean; stops?: boolean } = {}): FightState {
   const t = mode === "run" ? Math.max(0, fight.segs[0].from - LEAD) : 0;
-  const hits = buildHits(fight);
+  const hits = fight.hits;
   return {
     mode,
     fight,
@@ -504,7 +502,7 @@ export function castsAhead(s: FightState, past = CASTS_PAST): CastMark[] {
   return s.lines.flatMap((e, i) => {
     const left = e.t - s.t;
     return left >= -past && left <= CASTS_AHEAD
-      ? [{ i, name: e.name, t: e.t, cats: categoriesAt(e.t), raidwide: Boolean(e.raidwide), cast: Boolean(e.cast), left }]
+      ? [{ i, name: e.name, t: e.t, cats: e.cats, raidwide: Boolean(e.raidwide), cast: Boolean(e.cast), left }]
       : [];
   });
 }

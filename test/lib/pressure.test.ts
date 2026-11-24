@@ -1,4 +1,5 @@
 import { assert, test } from "vitest";
+import { M11S } from "../../src/data/fights/m11s";
 import { QUICK_SIZE, quickRound, timerAt, weight, weighted } from "../../src/lib/pressure";
 
 test("a card you never saw or often got incorrect comes up more, and none drops out", () => {
@@ -23,7 +24,7 @@ test("the weighted order keeps every card once, heavy ones first more often", ()
 });
 
 test("a quick round has 12 different cards", () => {
-  const cards = quickRound({});
+  const cards = quickRound(M11S, {});
   assert.equal(cards.length, QUICK_SIZE);
   assert.equal(new Set(cards.map((c) => c.id)).size, QUICK_SIZE);
 });

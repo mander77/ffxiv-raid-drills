@@ -1,4 +1,5 @@
-import { CATEGORIES, type Category } from "../data/fights/m11s/abilities";
+import { CATEGORIES } from "../data/categories";
+import type { Category } from "../types";
 import { CategoryIcons } from "./CategoryIcons";
 
 /** The key to the category icons: every ability category with its icon. */

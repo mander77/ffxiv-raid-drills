@@ -2,7 +2,7 @@
 // on one page.
 // TS note: a .tsx file is TypeScript that may hold JSX, the HTML-like tags below. Each tag compiles
 // to a call to React, so the compiler checks every tag and attribute.
-import { type ComponentProps, type MouseEvent, type ReactNode, useState } from "react";
+import { type ComponentProps, type MouseEvent, type ReactNode, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,20 +12,23 @@ import { CategoryIcons, categoryNames } from "../components/CategoryIcons";
 import { CategoryKey } from "../components/CategoryKey";
 import { LineList } from "../components/LineList";
 import { PageContainer } from "../components/PageContainer";
-import { timelineCategories } from "../data/fights/m11s/abilities";
-import { LEARN_PICTURES } from "../data/fights/m11s/pictures";
-import { learnCard, practiceDrill, type ReferenceEntry, referenceByPhase, slotAnswer } from "../data/fights/m11s/reference";
-import { SOURCES } from "../data/fights/m11s/sources";
-import { TIMELINE } from "../data/fights/m11s/timeline";
+import type { FightData } from "../data/fights/types";
+import { useFight, useFightLink } from "../hooks/useFight";
 import { useSectionInView } from "../hooks/useSectionInView";
 import { prefersLessMotion } from "../lib/dom";
+import { learnCard, practiceDrill, referenceByPhase, slotAnswer } from "../lib/reference";
 import { scoresOf, useProgressStore } from "../stores/progress";
 import { useSlotStore } from "../stores/slot";
 import { tabOf } from "../tabs";
-import type { Slot } from "../types";
+import type { ReferenceEntry, Slot } from "../types";
 
 /** The phases of the fight in order, each with its mechanics. */
-const PHASES = referenceByPhase();
+type SheetPhases = ReturnType<typeof referenceByPhase>;
+/** One section of the page: the address of its heading, and its button's label. */
+interface SheetSection {
+  id: string;
+  label: string;
+}
 
 /** The short name of a phase, "Phase 1" from "Phase 1: Trophy Weapons", for its chip. */
 function shortPhase(phase: string): string {
@@ -39,8 +42,8 @@ function phaseId(phase: string): string {
 
 /** The name of a drill on its button: "Practice" when the mechanic has one drill, or "Practice:
     axe" from "Raw Steel Trophy: axe" when it has more. */
-function practiceLabel(drill: string, many: boolean): string {
-  const title = practiceDrill(drill).title;
+function practiceLabel(fight: FightData, drill: string, many: boolean): string {
+  const title = practiceDrill(fight, drill).title;
   return many ? `Practice: ${title.split(": ").at(-1)}` : "Practice";
 }
 
@@ -52,11 +55,13 @@ interface MechanicCardProps {
 /** One mechanic: its time and name, its Learn answer picture for your slot, its rules, the answers
     that are yours alone, and links to the tabs that train it. */
 function MechanicCard({ entry, slot }: MechanicCardProps) {
-  const card = learnCard(entry.picture);
-  const fig = LEARN_PICTURES[entry.picture]?.(slot);
-  const yours = entry.cards.map((id) => slotAnswer(id, slot)).filter((a) => a !== undefined);
+  const fight = useFight();
+  const link = useFightLink();
+  const card = learnCard(fight, entry.picture);
+  const fig = fight.pictures[entry.picture]?.(slot);
+  const yours = entry.cards.map((id) => slotAnswer(fight, id, slot)).filter((a) => a !== undefined);
   // Every rule line of its cards, each once: two cards can share a line.
-  const rules = [...new Set(entry.cards.flatMap((id) => learnCard(id).build(slot).rule))];
+  const rules = [...new Set(entry.cards.flatMap((id) => learnCard(fight, id).build(slot).rule))];
   return (
     <Card className="gap-3 py-4">
       <CardHeader className="px-4">
@@ -84,16 +89,16 @@ function MechanicCard({ entry, slot }: MechanicCardProps) {
           ))}
           <nav aria-label={`Train ${entry.name}`} className="flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm">
-              <Link to={`/learn/${entry.cards[0]}`}>Learn</Link>
+              <Link to={link(`/learn/${entry.cards[0]}`)}>Learn</Link>
             </Button>
             {entry.drills.map((d) => (
               <Button key={d} asChild variant="outline" size="sm">
-                <Link to={`/practice/${d}`}>{practiceLabel(d, entry.drills.length > 1)}</Link>
+                <Link to={link(`/practice/${d}`)}>{practiceLabel(fight, d, entry.drills.length > 1)}</Link>
               </Button>
             ))}
             {entry.timeline && (
               <Button asChild variant="outline" size="sm">
-                <Link to={`/timeline/${entry.timeline}`}>Timeline</Link>
+                <Link to={link(`/timeline/${entry.timeline}`)}>Timeline</Link>
               </Button>
             )}
           </nav>
@@ -104,17 +109,18 @@ function MechanicCard({ entry, slot }: MechanicCardProps) {
 }
 
 interface MechanicsProps {
+  phases: SheetPhases;
   slot: Slot;
 }
 
 /** Every mechanic in fight order, by phase. */
-function Mechanics({ slot }: MechanicsProps) {
+function Mechanics({ phases, slot }: MechanicsProps) {
   return (
     <section aria-labelledby="mechanics" className="space-y-4">
       <h2 id="mechanics" className="font-display text-2xl tracking-wide">
         Every Mechanic as {slot}
       </h2>
-      {PHASES.map((p) => (
+      {phases.map((p) => (
         // The wide-screen header stays at the top, so a phase heading stops below it.
         <section key={p.phase} aria-labelledby={phaseId(p.phase)} className="space-y-3">
           <h3 id={phaseId(p.phase)} className="scroll-mt-32 font-display text-xl tracking-wide">
@@ -135,8 +141,8 @@ function Mechanics({ slot }: MechanicsProps) {
     and the timeline. Each id is the address of the section's heading. Sources and Your progress
     are left out: they are short and end the page, so their headings never scroll up to the top,
     and a jump to them would seem to do nothing. They come right after the timeline. */
-const SECTIONS: readonly { id: string; label: string }[] = [
-  ...PHASES.map((p) => ({ id: phaseId(p.phase), label: shortPhase(p.phase) })),
+const sectionsOf = (phases: SheetPhases): SheetSection[] => [
+  ...phases.map((p) => ({ id: phaseId(p.phase), label: shortPhase(p.phase) })),
   { id: "panic-reset", label: "Panic Reset" },
   { id: "timeline", label: "Timeline" },
 ];
@@ -161,19 +167,23 @@ function JumpLink({ to, smooth = false, ...props }: JumpLinkProps) {
   return <a {...props} href={`#${to}`} onClick={handleClick} />;
 }
 
-/** Every section of the page, for the buttons at its top: the stops of Back and Next, then the
-    two short cards that end the page. */
-const ALL_SECTIONS: readonly { id: string; label: string }[] = [
-  ...SECTIONS,
+/** The two short cards that end the page: the buttons at its top list them after the stops of
+    Back and Next. */
+const LAST_SECTIONS: readonly SheetSection[] = [
   { id: "sources", label: "Sources" },
   { id: "progress", label: "Your Progress" },
 ];
 
+interface SectionsProps {
+  /** The stops of Back and Next, in page order. */
+  sections: readonly SheetSection[];
+}
+
 /** A row of buttons at the top of the page, one per section, to jump to it. */
-function SectionChips() {
+function SectionChips({ sections }: SectionsProps) {
   return (
     <nav aria-label="Sections on this page" className="flex flex-wrap gap-2">
-      {ALL_SECTIONS.map((x) => (
+      {[...sections, ...LAST_SECTIONS].map((x) => (
         <Button key={x.id} asChild variant="outline" size="sm">
           <JumpLink to={x.id}>{x.label}</JumpLink>
         </Button>
@@ -188,15 +198,13 @@ const SECTION_REACHED = 150;
 
 /** Buttons in the bottom corner, once you scroll to the first phase: back to the section before
     the one you are in, on to the next section, and back to the top of the page. */
-function SectionButtons() {
-  const inView = useSectionInView(
-    SECTIONS.map((x) => x.id),
-    SECTION_REACHED,
-  );
+function SectionButtons({ sections }: SectionsProps) {
+  const ids = useMemo(() => sections.map((x) => x.id), [sections]);
+  const inView = useSectionInView(ids, SECTION_REACHED);
   if (inView === null) return null;
-  const i = SECTIONS.findIndex((x) => x.id === inView);
-  const back = SECTIONS[i - 1];
-  const next = SECTIONS[i + 1];
+  const i = sections.findIndex((x) => x.id === inView);
+  const back = sections[i - 1];
+  const next = sections[i + 1];
   return (
     <nav aria-label="Go to a section" className="fixed right-4 bottom-4 z-10 flex gap-2">
       {back && (
@@ -247,9 +255,10 @@ interface YourProgressProps {
 }
 
 /** How many questions and drills you answered in your slot, and Reset, which asks once before it
-    erases the progress of every slot. */
+    erases the progress of every slot in this fight. */
 function YourProgress({ slot }: YourProgressProps) {
-  const seen = useProgressStore((st) => Object.keys(scoresOf(st, slot)).length);
+  const fight = useFight().id;
+  const seen = useProgressStore((st) => Object.keys(scoresOf(st, fight, slot)).length);
   const reset = useProgressStore((st) => st.reset);
   const [confirm, setConfirm] = useState(false);
   function handleReset(): void {
@@ -257,7 +266,7 @@ function YourProgress({ slot }: YourProgressProps) {
       setConfirm(true);
       return;
     }
-    reset();
+    reset(fight);
     setConfirm(false);
   }
   return (
@@ -275,13 +284,16 @@ function YourProgress({ slot }: YourProgressProps) {
 /** The whole cheat sheet, for the slot picked in the header. */
 export function CheatSheetPage() {
   const slot = useSlotStore((st) => st.slot);
+  const fight = useFight();
+  const phases = useMemo(() => referenceByPhase(fight), [fight]);
+  const sections = useMemo(() => sectionsOf(phases), [phases]);
   return (
     <main>
       <PageContainer className="space-y-6 py-6">
         <p className="text-muted-foreground">{tabOf("/sheet")?.lede}</p>
-        <SectionChips />
+        <SectionChips sections={sections} />
 
-        <Mechanics slot={slot} />
+        <Mechanics phases={phases} slot={slot} />
 
         <Section id="panic-reset" title="Panic Reset">
           <ol className="list-decimal space-y-2 pl-6">
@@ -304,8 +316,8 @@ export function CheatSheetPage() {
             </TableHeader>
             <TableBody>
               {/* Each row shows the ability list's category icons for what it covers, with the same key. */}
-              {TIMELINE.map((e, i) => {
-                const cats = timelineCategories(i);
+              {fight.timeline.map((e, i) => {
+                const cats = fight.timelineCategories(i);
                 return (
                   <TableRow key={e.t + e.n}>
                     <TableCell className="align-top font-mono tabular-nums">{e.t}</TableCell>
@@ -324,14 +336,12 @@ export function CheatSheetPage() {
               })}
             </TableBody>
           </Table>
-          <p className="text-sm text-muted-foreground">
-            Times are from the cactbot fight timeline. Some phase 1 times move by a second or two with the axe or scythe opener.
-          </p>
+          <p className="text-sm text-muted-foreground">{fight.timelineNote}</p>
         </Section>
 
         <Section id="sources" title="Sources">
           <ul className="space-y-1.5">
-            {SOURCES.map((src) => (
+            {fight.sources.map((src) => (
               <li key={src.href}>
                 <a className="text-primary underline underline-offset-4" href={src.href} target="_blank" rel="noopener">
                   {src.label}
@@ -345,7 +355,7 @@ export function CheatSheetPage() {
         <Section id="progress" title="Your Progress">
           <YourProgress slot={slot} />
         </Section>
-        <SectionButtons />
+        <SectionButtons sections={sections} />
       </PageContainer>
     </main>
   );

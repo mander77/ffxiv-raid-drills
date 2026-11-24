@@ -3,14 +3,14 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 import { defineConfig } from "vitest/config";
-import { FIGHT_INFO } from "./src/data/fights/m11s/fightInfo.ts";
+import { FIGHTS } from "./src/data/fights/index.ts";
 
-/** Writes the fight's short name into the page title in index.html, before Vite reads the page.
+/** Writes the fights' short names into the page title in index.html, before Vite reads the page.
     The title stays in the HTML file, so link previews show it without running the app. */
 function fightTitle(): Plugin {
   return {
     name: "fight-title",
-    transformIndexHtml: { order: "pre", handler: (html) => html.replaceAll("%FIGHT_SHORT%", FIGHT_INFO.short) },
+    transformIndexHtml: { order: "pre", handler: (html) => html.replaceAll("%FIGHT_SHORT%", FIGHTS.map((f) => f.info.short).join(", ")) },
   };
 }
 

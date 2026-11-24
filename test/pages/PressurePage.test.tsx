@@ -5,11 +5,12 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, assert, beforeAll, beforeEach, test } from "vitest";
 import { TooltipProvider } from "../../src/components/ui/tooltip";
+import { M11S } from "../../src/data/fights/m11s";
 import { RANDOM } from "../../src/data/fights/m11s/fight";
 import { playerLink } from "../../src/lib/pressure";
 import { PressurePage } from "../../src/pages/PressurePage";
-import { usePressureStore } from "../../src/stores/pressure";
-import { useProgressStore } from "../../src/stores/progress";
+import { choicesOf, usePressureStore } from "../../src/stores/pressure";
+import { roundOf, scoresOf, useProgressStore } from "../../src/stores/progress";
 import { useSlotStore } from "../../src/stores/slot";
 
 beforeAll(() => {
@@ -17,8 +18,8 @@ beforeAll(() => {
 });
 beforeEach(() => {
   useSlotStore.setState({ slot: "H1" });
-  useProgressStore.getState().reset();
-  usePressureStore.setState({ secs: 6, stops: false, choices: RANDOM, speed: 1 });
+  useProgressStore.getState().reset("m11s");
+  usePressureStore.setState({ secs: 6, stops: false, choices: {}, speed: 1 });
 });
 afterEach(cleanup);
 
@@ -62,12 +63,12 @@ test("a quick round asks 12 timed cards, and an answer counts in its score only"
   assert.ok(screen.getByText("Read"), "the timer starts with the time to read");
   const answers = within(screen.getByRole("group", { name: "Answers" })).getAllByRole("button");
   await user.click(answers[0]);
-  const scores = Object.values(useProgressStore.getState().scores.H1 ?? {});
+  const scores = Object.values(scoresOf(useProgressStore.getState(), "m11s", "H1"));
   assert.deepEqual(
     scores.map((s) => s.seen),
     [1],
   );
-  assert.equal(useProgressStore.getState().rounds.learn.done, 0, "no Learn round");
+  assert.equal(roundOf(useProgressStore.getState(), "m11s", "learn").done, 0, "no Learn round");
   await user.click(screen.getByRole("button", { name: "Next" }));
   assert.ok(screen.getByText(/Card 2 of 12/));
 });
@@ -137,7 +138,7 @@ test("a pick in Settings goes in the address, and the moment stays", async () =>
   const row = screen.getByRole("radiogroup", { name: "First Raw Steel Trophy" });
   await user.click(within(row).getByRole("radio", { name: "Axe" }));
   assert.equal(where(), "/pressure/K7Q2/raw=axe?t=46");
-  assert.equal(usePressureStore.getState().choices.raw, "axe", "the pick is saved");
+  assert.equal(choicesOf(usePressureStore.getState(), M11S).raw, "axe", "the pick is saved");
 });
 
 test("a link with a broken code opens the start screen", () => {
@@ -146,8 +147,8 @@ test("a link with a broken code opens the start screen", () => {
 });
 
 test("the player's address holds the code, the picks and the moment", () => {
-  assert.equal(playerLink("K7Q2", RANDOM), "/pressure/K7Q2");
-  assert.equal(playerLink("K7Q2", { ...RANDOM, raw: "axe", ult: "cw" }, 48.24), "/pressure/K7Q2/raw=axe,ult=cw?t=48.2");
+  assert.equal(playerLink(M11S, "K7Q2", RANDOM), "/pressure/K7Q2");
+  assert.equal(playerLink(M11S, "K7Q2", { ...RANDOM, raw: "axe", ult: "cw" }, 48.24), "/pressure/K7Q2/raw=axe,ult=cw?t=48.2");
 });
 
 test("between mechanics, Jump to next mechanic goes to the mechanic named above it", async () => {

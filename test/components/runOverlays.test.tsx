@@ -4,9 +4,9 @@ import { act, cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, assert, test } from "vitest";
 import { Countdown, HitLabel, RunProgress, RunResult } from "../../src/components/pressure/RunOverlays";
-import { buildFight } from "../../src/data/fights/m11s/fight";
 import { FightFrameContext, type FrameFn } from "../../src/hooks/useFightFrame";
 import { type FightState, LEAD, newFightState } from "../../src/lib/fight";
+import { buildFight } from "../m11s";
 
 afterEach(cleanup);
 

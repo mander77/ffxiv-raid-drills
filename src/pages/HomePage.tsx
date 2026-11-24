@@ -4,19 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { LearnPicture } from "../components/arena/LearnPicture";
 import { PageContainer } from "../components/PageContainer";
-import { DRILLS } from "../data/fights/m11s/drills";
-import { FIGHT_INFO } from "../data/fights/m11s/fightInfo";
-import { LEARN_PICTURES } from "../data/fights/m11s/pictures";
-import { LEARN_CARDS, TIMELINE_CARDS } from "../data/fights/m11s/questions";
-import { BOSSMOD, CACTBOT, WTFDIG } from "../data/fights/m11s/sources";
+import type { FightData } from "../data/fights/types";
+import { useFight, useFightLink } from "../hooks/useFight";
 import { useSlotStore } from "../stores/slot";
 
-/** The Learn card whose answer picture is at the top of the page: the first mechanic of the
-    fight, with the party's spot in green and you in it. */
-const HERO_CARD = "k-raw-first";
-
 /** The strats in one phrase, such as "A, B and C". */
-const STRAT_LIST = `${FIGHT_INFO.strats.slice(0, -1).join(", ")} and ${FIGHT_INFO.strats.at(-1)}`;
+const stratList = (strats: readonly string[]): string =>
+  strats.length > 1 ? `${strats.slice(0, -1).join(", ")} and ${strats.at(-1)}` : (strats[0] ?? "");
 
 /** A card under "Start Here": one tab, in the order to learn the fight. */
 interface StartCard {
@@ -29,22 +23,22 @@ interface StartCard {
 }
 
 /** The tabs to start with, in order, then the cheat sheet. */
-const START: readonly StartCard[] = [
+const startCards = (fight: FightData): readonly StartCard[] => [
   {
     path: "/learn",
     name: "Learn",
     step: 1,
     about: "What each mechanic does, with a picture.",
-    count: `${LEARN_CARDS.length} questions`,
+    count: `${fight.learnCards.length} questions`,
   },
   {
     path: "/practice",
     name: "Practice",
     step: 2,
     about: "Click where you stand, one mechanic at a time.",
-    count: `${DRILLS.length} mechanics`,
+    count: `${fight.drills.length} mechanics`,
   },
-  { path: "/timeline", name: "Timeline", step: 3, about: "Which mechanic comes next.", count: `${TIMELINE_CARDS.length} questions` },
+  { path: "/timeline", name: "Timeline", step: 3, about: "Which mechanic comes next.", count: `${fight.timelineCards.length} questions` },
   {
     path: "/pressure",
     name: "Pressure",
@@ -77,7 +71,11 @@ function OutLink({ href, children }: OutLinkProps) {
 
 export function HomePage() {
   const slot = useSlotStore((s) => s.slot);
-  const fig = LEARN_PICTURES[HERO_CARD]?.(slot);
+  const fight = useFight();
+  const link = useFightLink();
+  /** The Learn card's answer picture at the top of the page: the first mechanic of the fight,
+      with the party's spot in green and you in it. */
+  const fig = fight.pictures[fight.hero.card]?.(slot);
   return (
     <main>
       <PageContainer className="space-y-10 py-6">
@@ -92,7 +90,7 @@ export function HomePage() {
                 <LearnPicture
                   fig={fig}
                   answered
-                  label="Raw Steel Trophy on the arena: your spot is the green area"
+                  label={fight.hero.label}
                   // On a phone: the picture is 108 units wide, with 4 units of room each side of the
                   // 100-unit arena. Make it 108% wide and move it 4% left, so the arena floor fills
                   // the strip from edge to edge and the white frame is the same on every side.
@@ -103,7 +101,7 @@ export function HomePage() {
           )}
           <div className="space-y-3">
             <h2 className="font-display text-3xl tracking-wide text-balance">Practice Savage Mechanics Without a Party</h2>
-            <p>Learn the mechanics, practice where you stand, then do it all fast. The answers follow {STRAT_LIST}.</p>
+            <p>Learn the mechanics, practice where you stand, then do it all fast. The answers follow {stratList(fight.info.strats)}.</p>
             <p>
               You are set as <span className="font-semibold">{slot}</span>. Change it with the Light Party switch at the top. Your progress
               stays in this browser.
@@ -115,10 +113,10 @@ export function HomePage() {
           <h2 className="font-display text-2xl tracking-wide">Start Here</h2>
           <p className="text-sm text-muted-foreground">Go in order.</p>
           <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {START.map((c) => (
+            {startCards(fight).map((c) => (
               <li key={c.path}>
                 <Link
-                  to={c.path}
+                  to={link(c.path)}
                   className="block h-full rounded-xl focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
                 >
                   <Card className="h-full transition-colors hover:bg-accent">
@@ -150,11 +148,11 @@ export function HomePage() {
               <p key={p}>{p}</p>
             ))}
             <p className="rounded-lg bg-muted px-3 py-2 text-sm">
-              Today: {FIGHT_INFO.short} healers. Coming later: ranged, melee, tanks and more fights.
+              Today: {fight.info.short} healers. Coming later: ranged, melee, tanks and more fights.
             </p>
             <p className="text-sm text-muted-foreground">
-              Positions follow the <OutLink href={WTFDIG}>wtfdig guide</OutLink>; attack sizes come from{" "}
-              <OutLink href={BOSSMOD}>BossMod</OutLink> and times from <OutLink href={CACTBOT}>cactbot</OutLink>.
+              Positions follow the <OutLink href={fight.links.guide}>wtfdig guide</OutLink>; attack sizes come from{" "}
+              <OutLink href={fight.links.bossmod}>BossMod</OutLink> and times from <OutLink href={fight.links.cactbot}>cactbot</OutLink>.
             </p>
           </div>
           {/* My character: a static file in public/, cropped wide and aimed a fifth of the way down, so

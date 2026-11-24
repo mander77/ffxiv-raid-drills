@@ -2,23 +2,7 @@
 // rule lines of its Learn cards, and the Practice drills and Timeline card that train it. The time
 // and the phase come from the picture's card.
 
-import type { Drill, QuizItem, Slot } from "../../../types";
-import { DRILLS } from "./drills";
-import { LEARN_CARDS, TIMELINE_CARDS } from "./questions";
-
-/** One mechanic of the reference. */
-export interface ReferenceEntry {
-  name: string;
-  /** The Learn card whose answer picture it shows. Its time and phase are the entry's. */
-  picture: string;
-  /** The Learn cards whose rules it lists, in order (the picture's card among them). */
-  cards: readonly string[];
-  /** The Practice drills where you click your spot for it. */
-  drills: readonly string[];
-  /** The Timeline card whose answer is this mechanic ("... just happened. What comes next?"),
-      when it has its own row in the timeline. */
-  timeline?: string;
-}
+import type { ReferenceEntry } from "../../../types";
 
 /** Every mechanic in fight order. The tests check that each Learn card is in exactly one entry,
     and each drill in at least one. */
@@ -79,47 +63,3 @@ export const REFERENCE: readonly ReferenceEntry[] = [
   { name: "Ecliptic Puddles", picture: "k-ecl-two", cards: ["k-ecl-two", "k-ecl-four"], drills: ["m-ecl-two", "m-ecl-four"] },
   { name: "Heartbreak Kick", picture: "k-hb", cards: ["k-hb"], drills: [], timeline: "n-26" },
 ];
-
-/** The Learn card with this id. It throws for an id that is not a card, which the tests catch. */
-export function learnCard(id: string): QuizItem {
-  const card = LEARN_CARDS.find((c) => c.id === id);
-  if (!card) throw new Error(`No Learn card ${id}`);
-  return card;
-}
-
-/** The Practice drill with this id. It throws for an id that is not a drill. */
-export function practiceDrill(id: string): Drill {
-  const drill = DRILLS.find((m) => m.id === id);
-  if (!drill) throw new Error(`No drill ${id}`);
-  return drill;
-}
-
-/** The Timeline card with this id. It throws for an id that is not a card. */
-export function timelineCard(id: string): QuizItem {
-  const card = TIMELINE_CARDS.find((c) => c.id === id);
-  if (!card) throw new Error(`No Timeline card ${id}`);
-  return card;
-}
-
-/** The correct answer of a Learn card for your slot, when it is not the same for the other slot.
-    Otherwise undefined: the card's rule already says it for everyone. */
-export function slotAnswer(id: string, slot: Slot): string | undefined {
-  const answerFor = (s: Slot): string | undefined =>
-    learnCard(id)
-      .build(s)
-      .options.find((o) => o.ok)?.t;
-  const mine = answerFor(slot);
-  return mine !== answerFor(slot === "H1" ? "H2" : "H1") ? mine : undefined;
-}
-
-/** The phases in fight order, each with its entries. */
-export function referenceByPhase(): Array<{ phase: QuizItem["phase"]; entries: ReferenceEntry[] }> {
-  const out: Array<{ phase: QuizItem["phase"]; entries: ReferenceEntry[] }> = [];
-  for (const e of REFERENCE) {
-    const phase = learnCard(e.picture).phase;
-    const last = out.at(-1);
-    if (last?.phase === phase) last.entries.push(e);
-    else out.push({ phase, entries: [e] });
-  }
-  return out;
-}

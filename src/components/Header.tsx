@@ -1,14 +1,13 @@
 import { Link } from "react-router";
-import { FIGHT_INFO } from "../data/fights/m11s/fightInfo";
+import { FIGHTS } from "../data/fights";
+import { useFightLink, useFightScope } from "../hooks/useFight";
+import { FightPicker } from "./FightPicker";
 import { ModeToggle } from "./ModeToggle";
 import { PageContainer } from "./PageContainer";
 import { ShareButton } from "./ShareButton";
 import { SlotSwitch } from "./SlotSwitch";
 import { TabMenu } from "./TabMenu";
 import { TabNav } from "./TabNav";
-
-/** The fight and the strats the positions follow, as tags beside the site name. */
-const STRATS = [`${FIGHT_INFO.short} ${FIGHT_INFO.full}`, ...FIGHT_INFO.strats];
 
 /** The header at the top of every page, a slate band. On a wide screen it has two rows, so the
     page below gets more room: the name and the strats, then Light/dark and Share on the right; the
@@ -18,6 +17,12 @@ const STRATS = [`${FIGHT_INFO.short} ${FIGHT_INFO.full}`, ...FIGHT_INFO.strats];
     It stays at the top of the screen only on a wide screen. On a phone it is three or four rows tall,
     so it scrolls away with the page and never covers the arena. */
 export function Header() {
+  const { fight } = useFightScope();
+  const link = useFightLink();
+  // The fight and the strats the positions follow, as tags beside the site name. With more than
+  // one fight, the fight's tag is the fight picker.
+  const many = FIGHTS.length > 1;
+  const tags = fight ? [...(many ? [] : [`${fight.info.short} ${fight.info.full}`]), ...fight.info.strats] : [];
   return (
     <header className="border-b-3 lg:sticky lg:top-0 lg:z-10 border-highlight bg-header text-header-foreground">
       <PageContainer className="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-2 pt-3">
@@ -26,7 +31,7 @@ export function Header() {
           {/* The site name is a link to Home, as on most sites. */}
           <h1 className="font-display text-2xl tracking-wide">
             <Link
-              to="/"
+              to={link("/")}
               className="inline-flex items-center gap-2 rounded-md hover:opacity-90 focus-visible:ring-3 focus-visible:ring-highlight focus-visible:outline-none"
             >
               <TitleIcon />
@@ -39,7 +44,12 @@ export function Header() {
             <ShareButton className="hover:bg-white/10 hover:text-header-foreground" />
           </div>
           <ul aria-label="Fight and strats" className="flex flex-wrap gap-1.5 max-lg:basis-full">
-            {STRATS.map((s) => (
+            {many && (
+              <li>
+                <FightPicker />
+              </li>
+            )}
+            {tags.map((s) => (
               // A darker fill on the band, so the text reads at 7:1.
               <li key={s} className="rounded-full bg-black/25 px-2.5 py-0.5 text-sm font-medium whitespace-nowrap">
                 {s}

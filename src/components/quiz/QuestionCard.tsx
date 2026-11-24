@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { LEARN_PICTURES } from "../../data/fights/m11s/pictures";
+import { useFight } from "../../hooks/useFight";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { timerOf } from "../../lib/pressure";
 import type { Option, QuizItem, Slot } from "../../types";
@@ -50,6 +50,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
   // and shuffled once per card, not on every draw.
   const [q] = useState(() => item.build(slot));
   const [opts] = useState<ShownOption[]>(() => shuffle(q.options.map((o, k) => ({ ...o, k }))));
+  const { pictures } = useFight();
   const [pick, setPick] = useState<number | null>(null);
   /** The answer picked to see on the picture, not locked in yet. */
   const [sel, setSel] = useState<number | null>(null);
@@ -63,7 +64,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
   const [slow, setSlow] = useState(false);
 
   const answered = pick !== null || slow;
-  const fig = LEARN_PICTURES[item.id]?.(slot);
+  const fig = pictures[item.id]?.(slot);
   const previews = previewAnswers && Boolean(fig?.options);
   const row = fig ? null : timelineRowOf(item);
   const correctName = q.options.find((o) => o.ok)?.t ?? "";

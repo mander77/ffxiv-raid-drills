@@ -7,15 +7,12 @@ import {
   buildAssault2,
   buildOrbital,
   buildUltimate,
-  changes,
   cometSpread,
   DANCE_LINES,
   DANCE_PAIRS,
   DRILLS,
-  facingNext,
   GUST_CONES,
   type JumpSet,
-  jumpsNext,
   nextPuddle,
   portalAt,
   type SplitEnd,
@@ -28,6 +25,8 @@ import {
   voidAgain,
 } from "../src/data/fights/m11s/drills";
 import { angOf, inZone, zoneCenter } from "../src/geometry";
+import { changes } from "../src/lib/practice";
+import { facingNext, jumpsNext } from "../src/lib/scene";
 import type { Point, ScytheOverlay, Slot, SlotName, StepResult, Zone } from "../src/types";
 import { assertLines } from "./lines";
 

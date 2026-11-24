@@ -1,9 +1,11 @@
 // Your Pressure settings, kept in this browser: the seconds to decide in the quick round, whether
-// the run stops at each new mechanic, the pattern picks of the full fight, and the speed of
+// the run stops at each new mechanic, the pattern picks of each fight, and the speed of
 // Watch the correct moves.
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { type Choices, cleanChoices, RANDOM } from "../data/fights/m11s/fight";
+import { FIGHTS } from "../data/fights";
+import type { FightData } from "../data/fights/types";
+import type { Choices } from "../types";
 
 /** The seconds to decide that the quick round offers. */
 export const DECIDE_SECONDS = [4, 6, 8, 10] as const;
@@ -16,11 +18,12 @@ export type Speed = (typeof SPEEDS)[number];
 interface PressureState {
   secs: DecideSeconds;
   stops: boolean;
-  choices: Choices;
+  /** The pattern picks of each fight, by fight id. */
+  choices: Partial<Record<string, Choices>>;
   speed: Speed;
   setSecs: (secs: DecideSeconds) => void;
   setStops: (stops: boolean) => void;
-  setChoices: (choices: Choices) => void;
+  setChoices: (fight: string, choices: Choices) => void;
   setSpeed: (speed: Speed) => void;
 }
 
@@ -31,11 +34,11 @@ export const usePressureStore = create<PressureState>()(
     (set) => ({
       secs: 6,
       stops: false,
-      choices: RANDOM,
+      choices: {},
       speed: 1,
       setSecs: (secs) => set({ secs }),
       setStops: (stops) => set({ stops }),
-      setChoices: (choices) => set({ choices }),
+      setChoices: (fight, choices) => set((st) => ({ choices: { ...st.choices, [fight]: choices } })),
       setSpeed: (speed) => set({ speed }),
     }),
     {
@@ -43,8 +46,8 @@ export const usePressureStore = create<PressureState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({ secs: s.secs, stops: s.stops, choices: s.choices, speed: s.speed }),
       // The shape of the saved data. merge checks each value, so saved data of another version
-      // goes to merge as it is.
-      version: 1,
+      // goes to merge as it is. Version 2 keeps the picks of each fight.
+      version: 2,
       migrate: (saved) => saved,
       // A saved value the app does not know (an old or edited one) falls back to the default.
       merge: (saved, current) => {
@@ -53,10 +56,13 @@ export const usePressureStore = create<PressureState>()(
           ...current,
           secs: pick(DECIDE_SECONDS, s.secs, current.secs),
           stops: s.stops === true,
-          choices: cleanChoices(s.choices),
+          choices: Object.fromEntries(FIGHTS.map((f) => [f.id, f.clock.clean(s.choices?.[f.id])])),
           speed: pick(SPEEDS, s.speed, current.speed),
         };
       },
     },
   ),
 );
+
+/** Your picks for a fight, for a selector: usePressureStore((s) => choicesOf(s, fight)). */
+export const choicesOf = (st: Pick<PressureState, "choices">, fight: FightData): Choices => st.choices[fight.id] ?? fight.clock.random;

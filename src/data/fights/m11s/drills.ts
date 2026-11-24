@@ -194,18 +194,6 @@ export function buildUltimate(s: Slot, forceCw?: boolean): JumpSet & {cw: boolea
     The picks were checked against the known orders when they were saved. */
 const orderFrom = (pick?: string): WeaponType[] | undefined => pick ? pick.split("-") as WeaponType[] : undefined;
 
-/** True when the boss jumps once `n` steps of the scene are done: his next place is elsewhere. */
-export function jumpsNext(sc: Scene, n: number): boolean {
-  const now = sc.bossAt?.(n), next = sc.bossAt?.(n + 1);
-  return Boolean(now && next && (next.x !== now.x || next.y !== now.y));
-}
-/** The boss before a jump: he turns to face the weapon he jumps to next. `n` steps of the scene
-    are done. He stays as he is when no jump comes next. */
-export function facingNext(sc: Scene, n: number, boss: Boss): Boss {
-  const next = sc.bossAt?.(n + 1);
-  return next && next.f != null && (next.x !== boss.x || next.y !== boss.y) ? {...boss, f:next.f} : boss;
-}
-
 /* The scenes around a jump set. Practice and the full fight both use them, so a
    fight can pass in a set built with the player's choices. */
 export function assaultScene(A: JumpSet, s: Slot): Scene {
@@ -481,9 +469,6 @@ export function voidAgain(s: Slot, spread: boolean, boss: Boss): Scene {
       "Each one just outside the last, clockwise around him.",
       "The second Void Stardust is always the opposite of the first."]};
 }
-
-/** True when a new try at this drill can look different: random parts, a variant or a turn. */
-export const changes = (m: Drill): boolean => Boolean(m.random || m.variants || m.rotate);
 
 /* ---------- map drills ---------- */
 export const BOSS: Boss = {x:50, y:50, f:0};

@@ -1,13 +1,13 @@
 import { useRef } from "react";
 import { cn } from "@/lib/utils";
-import { busterPieces, isStretched, SPLIT_HALF_W } from "../../data/fights/m11s/attacks";
-import type { Hit } from "../../data/fights/m11s/fight";
 import { runnerAt } from "../../data/route";
+import { dist } from "../../geometry";
+import { useArenaSizes, useFight } from "../../hooks/useFight";
 import { useFightFrame } from "../../hooks/useFightFrame";
 import type { FightView } from "../../lib/fight";
 import { promptOf } from "../../lib/fight";
 import { markRole, partyOf } from "../../party";
-import type { Point, Slot } from "../../types";
+import type { Hit, Point, Slot } from "../../types";
 import { LiveArena } from "../arena/LiveArena";
 import { Shape, Tether } from "../arena/Shape";
 
@@ -76,6 +76,8 @@ interface HitEffectProps {
 /** Damage going out: a flash over the floor in the category's colour, or for a tank buster, the
     tanks and the hit on them. Its CSS animation fades it out. */
 function HitEffect({ hit, at, split }: HitEffectProps) {
+  const { busterPieces } = useFight().clock;
+  const halfWidth = useArenaSizes().split?.halfWidth;
   if (hit.kind === "tank")
     return (
       <g className="buster">
@@ -86,7 +88,7 @@ function HitEffect({ hit, at, split }: HitEffectProps) {
       </g>
     );
   if (hit.kind === "aoe") return null;
-  const [x, width] = split ? [50 - SPLIT_HALF_W, SPLIT_HALF_W * 2] : [0, 100];
+  const [x, width] = split && halfWidth ? [50 - halfWidth, halfWidth * 2] : [0, 100];
   return <rect className={cn("hitfx", hit.kind, hit.cat)} x={x} y="0" width={width} height="100" />;
 }
 
@@ -140,12 +142,14 @@ function Runner({ slot, portal }: RunnerProps) {
   // Two tethers, one red and one stretched: each frame shows the one that fits its length.
   const short = useRef<SVGGElement>(null);
   const long = useRef<SVGGElement>(null);
+  /** How long a tether is before it counts as stretched. */
+  const reach = useArenaSizes().split?.tetherStretch ?? Number.POSITIVE_INFINITY;
   useFightFrame((s) => {
     const { at, target } = runnerAt(s.route, s.t);
     const to = target?.p;
     me.current?.setAttribute("transform", `translate(${at[0].toFixed(2)} ${at[1].toFixed(2)})`);
     if (portal) {
-      const stretched = isStretched(portal, at);
+      const stretched = dist(portal, at) >= reach;
       for (const [g, show] of [
         [short.current, !stretched],
         [long.current, stretched],

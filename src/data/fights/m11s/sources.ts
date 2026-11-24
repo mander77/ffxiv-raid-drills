@@ -3,42 +3,17 @@
 // each fight time and size from source.gen.ts (`npm run import:sources` writes it) through
 // `cactbot` and `bossmod` below, so a time or a size is never typed by hand.
 import { BOSSMOD_ABILITIES, CACTBOT_LINES } from "./source.gen";
+import { sourceLookups } from "../../sourceLookups";
+export { tenth } from "../../sourceLookups";
 
 // TS note: `(typeof CACTBOT_LINES)[number]["name"]` is the union of every line name in the
 // generated list, because the list is `as const`. A misspelt name is then a type error.
 /** The name of a line on the cactbot timeline. */
 export type LineName = (typeof CACTBOT_LINES)[number]["name"];
 
-/** When the cactbot line `name` comes for the `n`th time (1 is the first), in seconds into the
-    fight. The same line in two branches at the same time counts once. */
-export function cactbot(name: LineName, n = 1): number {
-  const times = CACTBOT_LINES.filter(l => l.name === name).map(l => l.t);
-  const t = times[n - 1];
-  if(t === undefined) throw new Error(`cactbot has ${times.length} lines "${name}", not ${n}`);
-  return t;
-}
-
-// TS note: `K extends keyof typeof X` and the return type `(typeof X)[K]` keep the exact type of
-// the one entry asked for, so `bossmod("AssaultEvolvedSwordAOE").width` is known to exist (10),
-// and asking a circle for its width is a type error.
-/** BossMod's ability `name`: its cast in seconds and its shape, in yalms. */
-export const bossmod = <K extends keyof typeof BOSSMOD_ABILITIES>(name: K): (typeof BOSSMOD_ABILITIES)[K] => BOSSMOD_ABILITIES[name];
-
-/** A time to one decimal, as cactbot writes its times, so a time worked out from two source
-    times (a line minus a cast) is exact. */
-export const tenth = (t: number): number => Math.round(t * 10) / 10;
-
-/** When BossMod's cast `ability` starts, for the `n`th cactbot line `name`, where the cast ends. */
-export const castStart = (ability: keyof typeof BOSSMOD_ABILITIES, name: LineName, n = 1): number =>
-  tenth(cactbot(name, n) - bossmod(ability).cast);
-
-/** The numbered lines after the `n`th line `name`, up to the next one, as [time, name]: after the
-    second "Heartbreak Kick", its hits "Heartbreak Kick 1" to "Heartbreak Kick 6". */
-export function numberedAfter(name: LineName, n: number): Array<[number, string]> {
-  const from = cactbot(name, n), to = CACTBOT_LINES.find(l => l.name === name && l.t > from)?.t ?? Infinity;
-  const numbered = (line: string): boolean => line.startsWith(name + " ") && /^\d+$/.test(line.slice(name.length + 1));
-  return CACTBOT_LINES.filter(l => l.t > from && l.t < to && numbered(l.name)).map((l): [number, string] => [l.t, l.name]);
-}
+/** `cactbot(name, n)`: when a line comes. `bossmod(ability)`: its cast and shape. `castStart`
+    and `numberedAfter`: see data/sourceLookups.ts. */
+export const { cactbot, bossmod, castStart, numberedAfter } = sourceLookups(CACTBOT_LINES, BOSSMOD_ABILITIES);
 
 /** The group's guide on wtfdig, opened with its strats picked: Hector (Toxic), Kindred No Buddies, Fixed (3CJ). */
 export const WTFDIG = "https://wtfdig.info/74/m11s#hector:nobuddies:fixed";

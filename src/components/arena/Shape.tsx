@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import { HITBOX, isStretched, TOWER_R } from "../../data/fights/m11s/attacks";
-import { round2, unit } from "../../geometry";
+import { dist, round2, unit } from "../../geometry";
+import { useArenaSizes } from "../../hooks/useFight";
 import type { Overlay, Point } from "../../types";
 import { Weapon } from "./Weapon";
 
@@ -17,15 +17,13 @@ function circlePath(cx: number, cy: number, r: number): string {
     it. Inside, not outside, so the ring never makes the safe ground look bigger than it is. */
 export const SAFE_INSET = 1.6;
 
-/** The boss's hitbox ring, from BossMod (see src/data/attacks.ts). */
-export const RING = HITBOX;
-
 export interface ShapeProps {
   overlay: Overlay;
 }
 
 /** One piece on the arena: an attack, a weapon, a tower, a label, a player mark and so on. */
 export function Shape({ overlay: o }: ShapeProps) {
+  const sizes = useArenaSizes();
   // TS note: `switch (o.t)` narrows the union: in each case TypeScript knows which overlay `o` is,
   // so `o.r` is allowed for "aoe" and an error for "tag".
   switch (o.t) {
@@ -49,7 +47,7 @@ export function Shape({ overlay: o }: ShapeProps) {
     case "tower":
       return (
         <g className="tower" transform={`translate(${round2(o.x)} ${round2(o.y)})`}>
-          <circle className="out" r={o.r ?? TOWER_R} />
+          <circle className="out" r={o.r ?? sizes.tower} />
           <circle className="in" r="1.1" />
         </g>
       );
@@ -117,17 +115,19 @@ export function Shape({ overlay: o }: ShapeProps) {
 interface TetherProps {
   portal: Point;
   to: Point;
-  /** Whether the tether is stretched. By default, from its length. */
+  /** Whether the tether is stretched. By default, from its length and the fight's stretch distance. */
   stretched?: boolean;
 }
 
 /** A tether from its portal to a player: a solid cord on a light outline, red until it is long
     enough, then blue. Its name says which, for a screen reader, and its title shows on hover. */
-export function Tether({ portal, to, stretched = isStretched(portal, to) }: TetherProps) {
+export function Tether({ portal, to, stretched }: TetherProps) {
+  const reach = useArenaSizes().split?.tetherStretch ?? Number.POSITIVE_INFINITY;
+  const isStretched = stretched ?? dist(portal, to) >= reach;
   const ends = { x1: round2(portal[0]), y1: round2(portal[1]), x2: round2(to[0]), y2: round2(to[1]) };
-  const name = stretched ? "Tether, stretched" : "Tether, not stretched";
+  const name = isStretched ? "Tether, stretched" : "Tether, not stretched";
   return (
-    <g className={cn("tether", stretched && "stretched")} aria-label={name}>
+    <g className={cn("tether", isStretched && "stretched")} aria-label={name}>
       <title>{name}</title>
       <line className="halo" {...ends} />
       <line className="cord" {...ends} />

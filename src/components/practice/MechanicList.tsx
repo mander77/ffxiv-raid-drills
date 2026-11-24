@@ -1,7 +1,7 @@
-import { type MouseEvent, type RefObject, useEffect, useEffectEvent, useRef } from "react";
+import { type MouseEvent, type RefObject, useEffect, useEffectEvent, useMemo, useRef } from "react";
 import { Link } from "react-router";
 import { cn } from "@/lib/utils";
-import { DRILLS } from "../../data/fights/m11s/drills";
+import { useFight, useFightLink } from "../../hooks/useFight";
 import { useLineDrag } from "../../hooks/useLineDrag";
 import { kindsOf } from "../../lib/practice";
 import type { Drill } from "../../types";
@@ -9,14 +9,15 @@ import { CastSquare } from "../CastSquare";
 
 /** The mechanics in fight order, under their phases. */
 // TS note: reduce builds the list of phases, each with its mechanics, in fight order.
-const PHASES = [...DRILLS]
-  .sort((a, b) => a.order - b.order)
-  .reduce<{ name: Drill["phase"]; drills: Drill[] }[]>((acc, d) => {
-    const last = acc[acc.length - 1];
-    if (last && last.name === d.phase) last.drills.push(d);
-    else acc.push({ name: d.phase, drills: [d] });
-    return acc;
-  }, []);
+const phasesOf = (drills: readonly Drill[]): { name: Drill["phase"]; drills: Drill[] }[] =>
+  [...drills]
+    .sort((a, b) => a.order - b.order)
+    .reduce<{ name: Drill["phase"]; drills: Drill[] }[]>((acc, d) => {
+      const last = acc[acc.length - 1];
+      if (last && last.name === d.phase) last.drills.push(d);
+      else acc.push({ name: d.phase, drills: [d] });
+      return acc;
+    }, []);
 
 /** No square has a category: a mechanic's square shows its kind. */
 const NO_CATS = [] as const;
@@ -68,6 +69,8 @@ export interface MechanicListProps {
     on screen is marked and kept in view. You scroll the list, or drag it with the mouse. */
 export function MechanicList({ axis, current, onPick, className }: MechanicListProps) {
   const look = LOOK[axis];
+  const { drills } = useFight();
+  const phases = useMemo(() => phasesOf(drills), [drills]);
   const box = useRef<HTMLElement>(null);
   const on = useRef<HTMLAnchorElement>(null);
   /** The box's scroll when a drag started. */
@@ -137,7 +140,7 @@ export function MechanicList({ axis, current, onPick, className }: MechanicListP
       {...drag}
     >
       <div className={look.track}>
-        {PHASES.map((ph) => {
+        {phases.map((ph) => {
           const [num, name = ""] = ph.name.split(": ");
           return (
             <section key={ph.name}>
@@ -176,10 +179,11 @@ interface RowProps {
 function Row({ drill: d, axis, current, onRef, onClick }: RowProps) {
   const look = LOOK[axis];
   const kinds = kindsOf(d);
+  const link = useFightLink();
   return (
     <Link
       ref={current ? onRef : undefined}
-      to={`/practice/${d.id}`}
+      to={link(`/practice/${d.id}`)}
       aria-current={current ? "step" : undefined}
       draggable={false}
       onClick={(e) => onClick(e, d.id)}

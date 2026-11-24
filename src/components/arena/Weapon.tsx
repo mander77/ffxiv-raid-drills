@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { SCYTHE_SAFE } from "../../data/fights/m11s/attacks";
 import { round2, unit } from "../../geometry";
+import { useArenaSizes } from "../../hooks/useFight";
 import type { Overlay, Point } from "../../types";
 import { SAFE_INSET } from "./Shape";
 
@@ -35,6 +35,7 @@ function floorLine(o: WeaponOverlay): Point {
     The icon's badge is filled with sand, so the dark icon stays readable on the boss's dark dot
     and the line never runs into the icon. */
 export function Weapon({ overlay: o }: WeaponProps) {
+  const { scytheSafe } = useArenaSizes();
   if (o.held) {
     return (
       <g className={`wpn ${o.t}`}>
@@ -45,7 +46,7 @@ export function Weapon({ overlay: o }: WeaponProps) {
   const u = floorLine(o);
   let line: ReactNode;
   if (o.t === "scythe") {
-    const half = SCYTHE_SAFE - SAFE_INSET;
+    const half = scytheSafe - SAFE_INSET;
     // The blade in its own frame: x from the butt (-half) to the point (+half), turned to u.
     const turn = [u[0], u[1], -u[1], u[0], o.x, o.y].map(round2).join(" ");
     line = <path className="blade" transform={`matrix(${turn})`} d={`M${-half} -1.6 Q0 -1 ${half} 0 Q0 1 ${-half} 1.6 Z`} />;

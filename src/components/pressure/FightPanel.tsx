@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
-import { ABILITIES } from "../../data/fights/m11s/abilities";
-import type { Fight, FightSeg } from "../../data/fights/m11s/fight";
+import { useFight } from "../../hooks/useFight";
 import { useFightFrame } from "../../hooks/useFightFrame";
 import { activeSeg, type FightView, nextSeg, upcoming, watchQuestion } from "../../lib/fight";
 import { clock } from "../../time";
+import type { Fight, FightSeg } from "../../types";
 import { CategoryIcons, categoryNames } from "../CategoryIcons";
 import { LastAnswer } from "../LastAnswer";
 import { LineList } from "../LineList";
@@ -135,14 +135,15 @@ interface BetweenProps {
 function Between({ paused, fight, onGoTo }: BetweenProps) {
   // Both change as the clock runs, so a frame function keeps them current.
   const [next, setNext] = useState<{ seg: number; ability: number }>({ seg: -1, ability: -1 });
+  const { abilities } = useFight();
   useFightFrame((s) => {
     const nx = upcoming(s.fight, s.t);
     const seg = nx ? s.fight.segs.indexOf(nx) : -1;
-    const ability = ABILITIES.findIndex((x) => x.t >= s.t);
+    const ability = abilities.findIndex((x) => x.t >= s.t);
     setNext((was) => (was.seg === seg && was.ability === ability ? was : { seg, ability }));
   });
   const nx = next.seg >= 0 ? fight.segs[next.seg] : null;
-  const a = next.ability >= 0 ? ABILITIES[next.ability] : null;
+  const a = next.ability >= 0 ? abilities[next.ability] : null;
   return (
     <div className="space-y-3">
       <h2 className="font-display text-xl tracking-wide">Between mechanics</h2>

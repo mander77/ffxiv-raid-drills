@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, useLocation } from "react-router";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useFightLink } from "../hooks/useFight";
 import { TABS, tabOf } from "../tabs";
 import { TabMenuIcon } from "./icons";
 
@@ -13,6 +14,7 @@ export interface TabMenuProps {
     It opens a sheet from the left with every tab; a tap on one goes there and closes the sheet. */
 export function TabMenu({ className }: TabMenuProps) {
   const { pathname } = useLocation();
+  const link = useFightLink();
   const [open, setOpen] = useState(false);
   // A page that is not a tab (the styles page) has no tab to name.
   const tab = tabOf(pathname)?.label;
@@ -39,7 +41,9 @@ export function TabMenu({ className }: TabMenuProps) {
           {TABS.map((t) => (
             <NavLink
               key={t.path}
-              to={t.path}
+              to={link(t.path)}
+              // Home's address starts every other page's, so it is current only on its own.
+              end={t.path === "/"}
               // Going to a tab closes the sheet; it stays out of the way of the page.
               onClick={() => setOpen(false)}
               className="rounded-md px-3 py-2.5 font-display text-lg tracking-wide hover:bg-accent aria-[current=page]:bg-highlight aria-[current=page]:text-highlight-foreground"

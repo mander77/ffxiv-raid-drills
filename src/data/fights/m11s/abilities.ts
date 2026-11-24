@@ -9,6 +9,8 @@
 import { P1, P2, P3, P4, type Phase, TIMELINE } from "./timeline";
 import { sec } from "../../../time";
 import { cactbot } from "./sources";
+import { CATEGORIES } from "../../categories";
+import type { Ability, Category, HitRule } from "../../../types";
 
 /** The enrage (Heartbreaker), in seconds into the fight: the last line of the cactbot timeline.
     Every screen that needs the end of the fight starts from this time. */
@@ -18,22 +20,6 @@ export const ENRAGE = cactbot("Heartbreaker (Enrage)");
 const AFTER_ENRAGE = 2.4;
 /** The end of the full fight's clock, in seconds. */
 export const FIGHT_END = Math.round((ENRAGE + AFTER_ENRAGE) * 10) / 10;
-
-/** The sheet's colour codes. "spot" is the sheet's "Positioning Required". */
-export type Category = "raid" | "tank" | "spot" | "dodge" | "target" | "mech" | "enrage";
-export const CATEGORIES: Record<Category, string> = {
-  raid:"Raid Damage", tank:"Tank Damage", spot:"Positioning", dodge:"Avoidable AoE",
-  target:"Targeted AoE", mech:"Mechanic", enrage:"Enrage"
-};
-
-/** How the full fight shows an ability's hits, where its categories alone do not say it.
-    `shared`: the party shares the hit (a stack or a tower), so it flashes softer.
-    `times`: it hits `n` times, `gap` seconds apart, named `name` 1, `name` 2 and so on.
-    `lines`: each timeline line named `lines` and a number, up to the next ability, is one hit. */
-export interface HitRule { shared?: boolean; times?: { n: number; gap: number; name: string }; lines?: string }
-
-/** One row of the ability list. `t` is when it hits, in seconds into the fight. */
-export interface Ability { t: number; name: string; cats: Category[]; note: string; hit?: HitRule }
 
 const N = {
   crown: "Raid damage on the party.",

@@ -1,8 +1,9 @@
 import "./arena.css";
 import { Fragment, type MouseEvent, type ReactNode, useId, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W } from "../../data/fights/m11s/attacks";
+import type { ArenaSizes } from "../../data/fights/types";
 import { round2 } from "../../geometry";
+import { useArenaSizes } from "../../hooks/useFight";
 import type { Overlay, Point } from "../../types";
 import { hitsFirst, isWeapon, Shape } from "./Shape";
 
@@ -54,21 +55,24 @@ function Waymarks() {
   ));
 }
 
-/** The floor of a split arena: from the west platform's outer edge to the east one's. */
-const SPLIT_LEFT = 50 - SPLIT_HALF_W;
+// TS note: NonNullable drops undefined from a type: the split sizes, when the arena has them.
+type SplitSizes = NonNullable<ArenaSizes["split"]>;
 
 interface FloorProps {
-  split: boolean;
+  /** The two platforms of a split arena, or undefined for one square. */
+  split: SplitSizes | undefined;
   /** The id of the tile pattern. */
   tiles: string;
 }
 
 /** The floor: one square, or the two platforms of the Arena Split with the void between them. */
 function Floor({ split, tiles }: FloorProps) {
-  const rects: (readonly [number, number])[] = split ? Object.values(PLATFORM_X) : [[0, 100]];
+  const rects: (readonly [number, number])[] = split ? Object.values(split.platformX) : [[0, 100]];
   return (
     <>
-      {split && <rect className="voidr" x={PLATFORM_X.west[1]} y="0" width={PLATFORM_X.east[0] - PLATFORM_X.west[1]} height="100" />}
+      {split && (
+        <rect className="voidr" x={split.platformX.west[1]} y="0" width={split.platformX.east[0] - split.platformX.west[1]} height="100" />
+      )}
       {rects.map(([x0, x1]) => (
         <Fragment key={x0}>
           <rect className="floor" x={x0} y="0" width={x1 - x0} height="100" />
@@ -83,15 +87,17 @@ function Floor({ split, tiles }: FloorProps) {
 /** The picture's viewBox, in arena units: the 100 by 100 floor, with room around it for the
     compass (6 above, 4 on the other sides). */
 export const ARENA_VIEW = { x: -4, y: -6, width: 108, height: 110 } as const;
-/** How far out from a split arena's outer walls the picture must reach: the tether portals and
-    their width (a portal is 2.2 units across each way), with a little room. */
-const SPLIT_REACH = SPLIT_HALF_W + PORTAL_OUT + 3;
+/** How far past the tether portals a split arena's picture reaches: their width (a portal is 2.2
+    units across each way), with a little room. The app's choice. */
+const PORTAL_ROOM = 3;
 /** A split arena is wider than the square one (its platforms reach past 0 and 100, and its
     portals further), so it is drawn smaller about the arena's center, to fit the square floor's
     0 to 100: what sits beside the floor (Practice's list, Pressure's casts) lines up with that
     square. Every piece on it shrinks with it, so each size stays true to the others. */
-const SPLIT_SCALE = 50 / SPLIT_REACH;
-const SPLIT_TRANSFORM = `translate(50 50) scale(${round2(SPLIT_SCALE)}) translate(-50 -50)`;
+function splitTransform({ halfWidth, portalOut }: SplitSizes): string {
+  const reach = halfWidth + portalOut + PORTAL_ROOM;
+  return `translate(50 50) scale(${round2(50 / reach)}) translate(-50 -50)`;
+}
 /** The picture's width over its height. */
 export const ARENA_ASPECT = ARENA_VIEW.width / ARENA_VIEW.height;
 
@@ -117,6 +123,9 @@ export function Arena({ label, layers, split = false, className, onPointClick }:
   const tiles = `${id}-tiles`;
   // The group that holds the floor and the pieces: a click is read in its units.
   const world = useRef<SVGGElement>(null);
+  /** The split's sizes, when the picture is split and the fight's arena can split. */
+  const sizes = useArenaSizes();
+  const platforms = split ? sizes.split : undefined;
   const all: Partial<Record<Layer, ReactNode>> = { ...layers, waymarks: <Waymarks /> };
   return (
     // Choosing a spot on the arena is a pointing task with no keyboard form; the page's buttons
@@ -131,7 +140,12 @@ export function Arena({ label, layers, split = false, className, onPointClick }:
     >
       <defs>
         <clipPath id={clip}>
-          {split ? <rect x={SPLIT_LEFT} y="0" width={SPLIT_HALF_W * 2} height="100" /> : <rect x="0" y="0" width="100" height="100" />}
+          {platforms ? (
+            // The floor of a split arena: from the west platform's outer edge to the east one's.
+            <rect x={50 - platforms.halfWidth} y="0" width={platforms.halfWidth * 2} height="100" />
+          ) : (
+            <rect x="0" y="0" width="100" height="100" />
+          )}
         </clipPath>
         <pattern id={tiles} width="12.5" height="12.5" patternUnits="userSpaceOnUse">
           <path className="tileline" d="M12.5 0H0V12.5" />
@@ -140,8 +154,8 @@ export function Arena({ label, layers, split = false, className, onPointClick }:
       <text className="compass" x="50" y="-2.2">
         N
       </text>
-      <g ref={world} transform={split ? SPLIT_TRANSFORM : undefined}>
-        <Floor split={split} tiles={tiles} />
+      <g ref={world} transform={platforms ? splitTransform(platforms) : undefined}>
+        <Floor split={platforms} tiles={tiles} />
         {LAYERS.map((l) => (
           <g key={l} data-layer={l} clipPath={CLIPPED.has(l) ? `url(#${clip})` : undefined}>
             {all[l]}

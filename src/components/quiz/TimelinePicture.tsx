@@ -1,8 +1,9 @@
-import { ABILITIES, ENRAGE, PHASES, timelineCategories } from "../../data/fights/m11s/abilities";
-import { TIMELINE } from "../../data/fights/m11s/timeline";
+import { useMemo } from "react";
+import type { FightData } from "../../data/fights/types";
+import { useFight } from "../../hooks/useFight";
 import { cn } from "../../lib/utils";
 import { clock, sec } from "../../time";
-import type { QuizItem } from "../../types";
+import type { Category, QuizItem } from "../../types";
 import { CategoryIcons } from "../CategoryIcons";
 
 /** At least this many rows show after the one that just happened, and at most MAX_ROWS. */
@@ -13,19 +14,20 @@ const MAX_ROWS = 8;
 const FILL_AT = 60;
 
 /** The phases with their start and end in seconds, for the strip. */
-const STRIP = PHASES.map((p, k) => {
-  const start = k === 0 ? 0 : Math.min(...p.rows.map((a) => a.t));
-  const next = PHASES[k + 1];
-  const end = next ? Math.min(...next.rows.map((a) => a.t)) : ENRAGE;
-  return { name: p.name.split(": ")[1] ?? p.name, start, end };
-});
+const stripOf = ({ phases, enrage }: FightData): { name: string; start: number; end: number }[] =>
+  phases.map((p, k) => {
+    const start = k === 0 ? 0 : Math.min(...p.rows.map((a) => a.t));
+    const next = phases[k + 1];
+    const end = next ? Math.min(...next.rows.map((a) => a.t)) : enrage;
+    return { name: p.name.split(": ")[1] ?? p.name, start, end };
+  });
 
-/** The phase (0 to 3) of the ability nearest to `now`. TIMELINE times are rounded to the second,
-    so a row at the start of a phase can sit a fraction before the phase's exact first time;
-    comparing it with the phase bounds would put it in the phase before. */
-function phaseAt(now: number): number {
-  const nearest = ABILITIES.reduce((best, a) => (Math.abs(a.t - now) < Math.abs(best.t - now) ? a : best));
-  return PHASES.findIndex((p) => p.name === nearest.phase);
+/** The phase (0 for the first) of the ability nearest to `now`. Timeline times are rounded to the
+    second, so a row at the start of a phase can sit a fraction before the phase's exact first
+    time; comparing it with the phase bounds would put it in the phase before. */
+function phaseAt({ abilities, phases }: FightData, now: number): number {
+  const nearest = abilities.reduce((best, a) => (Math.abs(a.t - now) < Math.abs(best.t - now) ? a : best));
+  return phases.findIndex((p) => p.name === nearest.phase);
 }
 
 /** The timeline row a Timeline card asks about (ids "n-<row>" and "r-<row>": row <row> just
@@ -47,17 +49,20 @@ export interface TimelinePictureProps {
     shows it, and a strip of the four phases with where you are in the fight. Before the answer
     the coming rows show their bars and countdowns but not their names. */
 export function TimelinePicture({ row, answered, correctName }: TimelinePictureProps) {
-  const now = sec(TIMELINE[row].t);
-  const correct = TIMELINE.findIndex((e, x) => x > row && e.n === correctName);
-  const last = Math.min(TIMELINE.length - 1, row + MAX_ROWS, Math.max(row + MIN_ROWS, correct));
-  const phase = phaseAt(now);
+  const fight = useFight();
+  const { timeline, timelineCategories, enrage } = fight;
+  const strip = useMemo(() => stripOf(fight), [fight]);
+  const now = sec(timeline[row].t);
+  const correct = timeline.findIndex((e, x) => x > row && e.n === correctName);
+  const last = Math.min(timeline.length - 1, row + MAX_ROWS, Math.max(row + MIN_ROWS, correct));
+  const phase = phaseAt(fight, now);
   const rows = Array.from({ length: last - row }, (_x, k) => row + 1 + k);
 
   return (
     <div className="space-y-3 rounded-lg border bg-card p-3">
       {/* The phase strip: each phase as wide as it lasts, and a mark where you are now. */}
       <div aria-hidden="true" className="relative flex h-6 overflow-hidden rounded-md text-xs font-medium">
-        {STRIP.map((p, x) => (
+        {strip.map((p, x) => (
           <span
             key={p.name}
             title={p.name}
@@ -65,31 +70,31 @@ export function TimelinePicture({ row, answered, correctName }: TimelinePictureP
               "flex items-center justify-center border-r border-background",
               x === phase ? "bg-primary text-primary-foreground" : "bg-muted",
             )}
-            style={{ width: `${((p.end - p.start) / ENRAGE) * 100}%` }}
+            style={{ width: `${((p.end - p.start) / enrage) * 100}%` }}
           >
             P{x + 1}
           </span>
         ))}
-        <span aria-hidden="true" className="absolute inset-y-0 w-0.5 bg-destructive" style={{ left: `${(now / ENRAGE) * 100}%` }} />
+        <span aria-hidden="true" className="absolute inset-y-0 w-0.5 bg-destructive" style={{ left: `${(now / enrage) * 100}%` }} />
       </div>
       <p className="text-sm">
         <span className="font-semibold">
-          P{phase + 1} · {STRIP[phase].name}
+          P{phase + 1} · {strip[phase].name}
         </span>{" "}
         <span className="text-muted-foreground">
-          {clock(now)} of {clock(ENRAGE)}
+          {clock(now)} of {clock(enrage)}
         </span>
       </p>
       {!answered && <p className="text-xs text-muted-foreground">Coming up: the names show after you answer.</p>}
       <ol aria-label="Fight timeline" className="space-y-1 text-sm">
-        <TimelineRow fill={1} name={TIMELINE[row].n} cats={timelineCategories(row)} when={TIMELINE[row].t} now />
+        <TimelineRow fill={1} name={timeline[row].n} cats={timelineCategories(row)} when={timeline[row].t} now />
         {rows.map((x) => {
-          const left = sec(TIMELINE[x].t) - now;
+          const left = sec(timeline[x].t) - now;
           return (
             <TimelineRow
               key={x}
               fill={Math.max(0, Math.min(1, 1 - left / FILL_AT))}
-              name={answered ? TIMELINE[x].n : null}
+              name={answered ? timeline[x].n : null}
               cats={timelineCategories(x)}
               when={`in ${left < 60 ? `${left} s` : clock(left)}`}
               correct={answered && x === correct}
@@ -106,7 +111,7 @@ interface TimelineRowProps {
   fill: number;
   /** The ability's name, or null to hide it until the answer. */
   name: string | null;
-  cats: ReturnType<typeof timelineCategories>;
+  cats: Category[];
   when: string;
   /** The row that just happened. */
   now?: boolean;

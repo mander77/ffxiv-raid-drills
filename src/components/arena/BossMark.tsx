@@ -1,6 +1,6 @@
 import { DEG, round2 } from "../../geometry";
+import { useArenaSizes } from "../../hooks/useFight";
 import type { Boss } from "../../types";
-import { RING } from "./Shape";
 
 /** Half of the opening at his rear, in degrees. */
 const REAR = 45;
@@ -19,6 +19,8 @@ export interface BossMarkProps {
     smoothly (the "turn" class in arena.css). With no facing, the ring is a plain circle, so it does
     not give away where he faces. */
 export function BossMark({ boss: b }: BossMarkProps) {
+  /** His hitbox ring, from BossMod. */
+  const RING = useArenaSizes().hitbox;
   const at = `translate(${round2(b.x)} ${round2(b.y)})`;
   if (b.f == null)
     return (

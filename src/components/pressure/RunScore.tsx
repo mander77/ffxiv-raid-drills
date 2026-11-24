@@ -3,8 +3,8 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
-import type { Fight } from "../../data/fights/m11s/fight";
-import type { StepResult } from "../../types";
+import { useFightLink } from "../../hooks/useFight";
+import type { Fight, StepResult } from "../../types";
 import { Tally } from "../Tally";
 
 export interface RunScoreProps {
@@ -21,6 +21,7 @@ export interface RunScoreProps {
 /** After the run: your score, and each mechanic with an incorrect or missed spot, with a link to
     practice it on its own. */
 export function RunScore({ fight, results, stopped, onAgain, onWatch }: RunScoreProps) {
+  const link = useFightLink();
   const all = results.flat();
   const correct = all.filter((x) => x.ok).length;
   const slow = all.filter((x) => x.missed).length;
@@ -54,7 +55,7 @@ export function RunScore({ fight, results, stopped, onAgain, onWatch }: RunScore
                     {g.drills[0] && (
                       <ItemActions>
                         <Button variant="outline" size="sm" asChild>
-                          <Link to={`/practice/${g.drills[0]}`}>Practice It</Link>
+                          <Link to={link(`/practice/${g.drills[0]}`)}>Practice It</Link>
                         </Button>
                       </ItemActions>
                     )}
