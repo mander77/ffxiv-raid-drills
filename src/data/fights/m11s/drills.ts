@@ -806,6 +806,15 @@ export const knockFor = (side: SplitSide, portal: Point | null): Knock =>
     SW tower, to cross that is about straight east, or a little north-east; further round, the
     knockback throws you off the arena or into the gap. */
 function towerHalf(side: SplitSide, end: SplitEnd, knock: Knock): Zone {
+  // It depends only on these three, and it takes a while to build, so each is built once.
+  const key = side + end + knock, known = TOWER_ZONES.get(key);
+  if (known) return known;
+  const zone = buildTowerHalf(side, end, knock);
+  TOWER_ZONES.set(key, zone);
+  return zone;
+}
+const TOWER_ZONES = new Map<string, Zone>();
+function buildTowerHalf(side: SplitSide, end: SplitEnd, knock: Knock): Zone {
   const c = SPLIT_TOWER[side][end], d = knockDir(side, end, knock);
   const fn = (p: Point): boolean => { const r = dist(p, c); return r >= TOWER_CORE && r <= TOWER_R && landsWell(side, end, knock, knockedFrom(c, p)); };
   // Each ray from the middle: the stretch of it that lands you where you need to go.
