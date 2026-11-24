@@ -52,6 +52,18 @@ const CATEGORY_MEANING: Record<Category, string> = {
   enrage: "The boss ends the fight.",
 };
 
+/** The kinds of mechanic in groups, so related icons sit side by side. Every kind is in one group
+    (a test checks the page names each kind once). */
+const KIND_GROUPS: readonly { title: string; kinds: readonly DrillKind[] }[] = [
+  { title: "Spread and stacks", kinds: ["spread", "stack", "pairStack", "lightPartyStack", "roleStack"] },
+  { title: "Lines from the boss", kinds: ["lineStack", "wildCharge"] },
+  { title: "Towers", kinds: ["tower", "towerKnockback", "tankTower"] },
+  { title: "Tethers", kinds: ["stretchTether", "pairTether"] },
+  { title: "Tank busters", kinds: ["tankBuster", "sharedTankBuster"] },
+  { title: "Your spot", kinds: ["bait", "protean", "knockback"] },
+  { title: "Order and timing", kinds: ["sequence", "puddles", "later"] },
+];
+
 /** How many abilities of the fight have a category. */
 const rowsWith = (cat: Category): number => ABILITIES.filter((a) => a.cats.includes(cat)).length;
 
@@ -219,16 +231,16 @@ export function StylesPage() {
           </ul>
         </section>
 
-        <section className="space-y-4" aria-labelledby="kinds">
-          <h2 id="kinds" className="font-display text-2xl font-bold">
-            Kinds of mechanic
-          </h2>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {(Object.keys(KINDS) as DrillKind[]).map((kind) => (
-              <KindItem key={kind} kind={kind} />
-            ))}
-          </ul>
-        </section>
+        {KIND_GROUPS.map((group) => (
+          <section key={group.title} className="space-y-4">
+            <h2 className="font-display text-2xl font-bold">{group.title}</h2>
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {group.kinds.map((kind) => (
+                <KindItem key={kind} kind={kind} />
+              ))}
+            </ul>
+          </section>
+        ))}
 
         <section className="space-y-4" aria-labelledby="categories">
           <h2 id="categories" className="font-display text-2xl font-bold">

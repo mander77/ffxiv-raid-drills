@@ -40,6 +40,14 @@ test("the styles page names every kind of mechanic and the boss's weapons", () =
   for (const name of ["Axe", "Scythe", "Sword"]) assert.ok(screen.getByRole("heading", { name }));
 });
 
+test("related kinds of mechanic sit together, under one heading", () => {
+  render(<StylesPage />);
+  const tethers = screen.getByRole("heading", { level: 2, name: "Tethers" }).closest("section");
+  assert.ok(tethers);
+  const names = [...tethers.querySelectorAll("h3")].map((h) => h.textContent);
+  assert.deepEqual(names, ["Stretch Tether", "Pair Tether"]);
+});
+
 test("a click on an icon's card opens it zoomed in, in a dialog named after it", async () => {
   render(<StylesPage />);
   await userEvent.click(screen.getByRole("button", { name: "Wild Charge" }));
