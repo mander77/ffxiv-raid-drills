@@ -8,7 +8,7 @@
 import { bySlot, withSeed } from "../util";
 import { markRole, partyOf } from "../party";
 import { angOf, polar, rotOverlay, zoneCenter } from "../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, type Weapon, type WeaponType } from "./drills";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, type Weapon, type WeaponType } from "./drills";
 import { BREATH_W, GUST_HALF, GUST_LEN, PROXIMITY_DOT, PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, lineTo, swordCross } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
@@ -363,12 +363,14 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
         // The "?" sits toward the platform middle, clear of the number marker next to each tower.
         show([TOWER_NW, TOWER_NE, TOWER_SW, TOWER_SE].map(p => tag(p[0], p[1] + (p[1] < 50 ? 4 : -4), "?")))]}; },
   "k-massive": () => {
-    // Spread down the platform, between the number markers at its two ends.
+    // Spread down the platform, between the number markers at its two ends. After the two rounds of
+    // tethers, light party 1 is on the east platform and light party 2 on the west; each stacks in close.
     const ROWS = [27, 42, 57, 72], spread = (g: Who[], x: number): Overlay[] => g.map(([l, r], i) => mark(x, ROWS[i], l, r));
-    const stacked = (g: Who[], x: number): Overlay[] => g.map(([l, r], i) => mark(x + (i % 2) * 7, 47 + Math.floor(i / 2) * 7, l, r));
-    const apart = [...spread(G1, 12), ...spread(G2, 88)], s1 = stacked(G1, 9), s2 = stacked(G2, 84);
-    const stacks = [stackHit(s1), stackHit(s2), ...s1, ...s2, target([9, 47]), target([84, 47]), tag(12.5, 39, "5 HITS"), tag(87.5, 39, "5 HITS")];
-    const zones = [circle([12.5, 50.5], 9), circle([87.5, 50.5], 9)];
+    // Stacked just north of waymark B or D, so no mark hides it.
+    const stacked = (g: Who[], x: number): Overlay[] => g.map(([l, r], i) => mark(x + (i % 2) * 7, 37 + Math.floor(i / 2) * 7, l, r));
+    const apart = [...spread(G2, 12), ...spread(G1, 88)], s1 = stacked(G1, 76), s2 = stacked(G2, 17);
+    const stacks = [stackHit(s1), stackHit(s2), ...s1, ...s2, target([76, 37]), target([17, 37]), tag(20.5, 30, "5 HITS"), tag(79.5, 30, "5 HITS")];
+    const zones = [SPLIT_INNER.west, SPLIT_INNER.east];
     return {overlays:[], split:true, boss:BOSS, before:apart, after:stacks, answer:zones, options:[
       show(stacks, zones),
       show([aoe([12, ROWS[0]], FAKE.platformBuster), aoe([88, ROWS[0]], FAKE.platformBuster), ...apart, target([12, ROWS[0]]), target([88, ROWS[0]]), say("TANK BUSTER", 8)]),

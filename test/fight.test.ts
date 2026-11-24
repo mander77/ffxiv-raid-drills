@@ -118,3 +118,17 @@ test("Watch the correct moves: the spot it clicks is correct for every step", ()
       }
     }
 });
+
+test("Arena Split: one round with a tether, and you stack for Massive Meteor on the other platform", () => {
+  for (const s of SLOTS)
+    for (let i = 0; i < REPEATS; i++) {
+      const f = buildFight(s),
+        rounds = f.segs.filter((g) => g.drills[0] === "m-split-fire");
+      assert.equal(rounds.length, 2);
+      assert.deepEqual(rounds.map((g) => /tether/.test(g.scene.steps[1].q)).sort(), [false, true], "a tether in one round only");
+      const massive = f.segs.find((g) => g.title === "Massive Meteor");
+      const p = zoneCenter(massive?.scene.steps[0].z ?? { c: [50, 50], r: 0 });
+      // H1 starts west and H2 east; the two rounds put each on the other platform.
+      assert.ok(s === "H1" ? p[0] > 74.5 : p[0] < 25.5, `${s} stacks on the ${s === "H1" ? "east" : "west"} platform`);
+    }
+});

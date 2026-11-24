@@ -674,6 +674,24 @@ static wins.
   first SW rock, farther out. Icy Veins swaps H1 and H2 here. The site follows wtfdig.
 - The tank tethers in Meteorain are tank busters at 5:09, 5:19 and 5:29.
 - Crown of Arcadia, a raidwide, comes five times.
+- Arena Split after the first towers (owner's answers, checked against wtfdig's Kindred No Buddies
+  pictures, November 2026):
+  - You have a tether in one of the two rounds, not both: the tethers swap in the second round.
+    Pressure's Settings pick says which round ("Your Arena Split tether").
+  - Each tower knocks you back: with a tether to the other platform, without one to the same
+    platform. So after the second round H1 is always on the east platform and H2 on the west.
+  - Each round: everyone goes in close, to the middle of the platform's inner edge, to bait the
+    puddles; without a tether you bait Fire Breath there first. Then the portal lines leave one end
+    of the platform safe (north or south, random each round): a tether goes to the outer edge at
+    that end, a Fire Breath marker to the number waymark there. Inner and outer corners both count.
+  - The second and third towers: the tower in the quadrant where your last tether or marker was.
+  - Massive Meteor: the four on a platform stack at the middle of its inner edge, next to the boss,
+    so the melee can hit him. Learn's Massive Meteor picture shows it there too.
+  - Arcadion Avalanche: he faces one platform and grabs it. The towers knock you to the other one.
+    Then go to its far end, by the number waymark, away from the side he turns from. The drill
+    shows his turn as a dashed arrow around him (the app's choice).
+  - The drills draw no Fire Breath cone, portal line or slam size: none of them is in
+    `attacks.ts` yet. The portal lines show as a soft area over the unsafe end (the app's choice).
 
 ### The moving marker (data/route.ts)
 

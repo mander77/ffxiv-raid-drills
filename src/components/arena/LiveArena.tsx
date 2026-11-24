@@ -141,9 +141,12 @@ export function LiveArena({
         <Shape key={`leave-${i}`} overlay={leave} />,
       );
   });
-  // Cues show with their step's question and stay. Player marks in a cue go in the marks layer.
+  // Cues show with their step's question and stay. After a correct answer the next question is
+  // already asked, so its cue shows too; after an incorrect one it waits for Next step. Player
+  // marks in a cue go in the marks layer.
+  const cuesTo = showLast && !results[n - 1]?.ok ? n - 1 : n;
   const cues = sc.steps
-    .slice(0, asking + 1)
+    .slice(0, cuesTo + 1)
     .flatMap((st) => st.cue ?? [])
     .map((o) => rotOverlay(o, k));
 

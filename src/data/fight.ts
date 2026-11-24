@@ -2,10 +2,11 @@
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6, `ENRAGE`).
-import { DRILLS, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
+import { DRILLS, SPLIT_INNER, avalancheScene, homeSide, massiveScene, otherSide, splitRound, splitTowers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
 import { ABILITIES, ENRAGE, FIGHT_END, type Category } from "./abilities";
 import { newCode, random, withSeed } from "../util";
 import { nearClock } from "../time";
+import { zoneCenter } from "../geometry";
 import { bossmod, cactbot, castStart, numberedAfter, tenth, type LineName } from "./sources";
 import type { Point, Scene, Slot } from "../types";
 
@@ -50,12 +51,12 @@ type WeaponOrder = `${WeaponType}-${WeaponType}-${WeaponType}`;
 
 /** How each random part of a fight comes out. `set1` and `set2` are the weapon orders of the
     Assault Evolved sets at 0:48 and 1:33. */
-export interface Picks { raw: "axe" | "scythe"; void: "stack" | "spread"; set1: WeaponOrder; set2: WeaponOrder; ult: "cw" | "ccw"; fireball: "two" | "four"; wall: "north" | "south" }
+export interface Picks { raw: "axe" | "scythe"; void: "stack" | "spread"; set1: WeaponOrder; set2: WeaponOrder; ult: "cw" | "ccw"; tether: "first" | "second"; fireball: "two" | "four"; wall: "north" | "south" }
 // TS note: Choices is a mapped type. `[K in keyof Picks]` walks every field of Picks, so Choices
 // has the same fields, and each one takes the same values or "random". Add a field to Picks and
 // Choices gets it too. C# has no direct match; you would write the second class by hand.
 export type Choices = { [K in keyof Picks]: Picks[K] | "random" };
-export const RANDOM: Choices = {raw:"random", void:"random", set1:"random", set2:"random", ult:"random", fireball:"random", wall:"random"};
+export const RANDOM: Choices = {raw:"random", void:"random", set1:"random", set2:"random", ult:"random", tether:"random", fireball:"random", wall:"random"};
 
 /** The six weapon orders, as [value, text]: "sword-axe-scythe" shows as "Sword, axe, scythe". */
 const orderText = (o: string): string => { const s = o.split("-").join(", "); return s.charAt(0).toUpperCase() + s.slice(1); };
@@ -78,6 +79,7 @@ export const CHOICE_ROWS = [
   {key:"void", label:"First Void Stardust ends in", options:[["stack", "Stack"], ["spread", "Spread"]]},
   {key:"set2", label:`Weapon order at ${nearClock(cactbot("Assault Evolved", 2))}`, options:ORDERS},
   {key:"ult", label:"Ultimate Trophy Weapons", options:[["cw", "Clockwise"], ["ccw", "Counterclockwise"]]},
+  {key:"tether", label:"Your Arena Split tether", options:[["first", "First round"], ["second", "Second round"]]},
   {key:"fireball", label:"Ecliptic Fireball", options:[["two", "Two-way"], ["four", "Four-way"]]},
   {key:"wall", label:"Your Ecliptic puddles", options:[["north", "North wall"], ["south", "South wall"]]}
 ] as const satisfies readonly ChoiceRow[];
@@ -181,6 +183,29 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Ecliptic Stampede: Start", drills:["m-ecl-start"], scene:drill("m-ecl-start", s), k:0, from:cactbot("--middle--", 7), due:[cactbot("Atomic Impact 1")]},
     {title:"Ecliptic Stampede: " + fireball, drills:[ecl], scene:drill(ecl, s, wall), k:0, from:cactbot("Weighty Impact"), due:[cactbot("Two-way Fireball / Four-way Fireball")]}
   );
+  /* The rest of Arena Split, built last so the random parts above keep their codes. You have a
+     tether in one round of the two and not in the other. A tether knocks you to the other
+     platform; no tether leaves you on the same one. Everyone is in close when the first puddle's
+     cast starts (cactbot's "--meteor 1--"), after the Fire Breath markers. The portal lines
+     leave a random end of your platform safe each round. Then the boss faces a random platform
+     and turns to the other over a random side. */
+  const t1 = choose(c.tether, random() < 0.5 ? "first" : "second") === "first";
+  const end = (): SplitEnd => random() < 0.5 ? "north" : "south";
+  const end1 = end(), end2 = end(), face: SplitSide = random() < 0.5 ? "west" : "east", swing = end();
+  const side1 = t1 ? otherSide(homeSide(s)) : homeSide(s), side2 = otherSide(homeSide(s));
+  const WRATH = "Majestic Meteowrath/Majestic Meteorain/Fire Breath";
+  const round = (n: number): number[] => [cactbot("--meteor 1--", n), cactbot(WRATH, n)];
+  segs.push(
+    {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, t1, side1, end1), k:0, from:cactbot("Explosion", 6), due:round(1)},
+    {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, !t1, side1, end1), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
+    {title:"Arena Split: Fire Breath (Second Time)", drills:["m-split-fire"], scene:splitRound(s, !t1, side2, end2), k:0, from:cactbot("Explosion", 7), due:round(2)},
+    {title:"Massive Meteor", drills:["m-massive"], scene:massiveScene(side2), k:0, from:cactbot("Massive Meteor (castbar)"), due:[cactbot("Massive Meteor x5")],
+      // The cast gives about a second, so the party waits in close, where the stack goes.
+      pre:zoneCenter(SPLIT_INNER[side2])},
+    {title:"Arcadion Avalanche", drills:["m-avalanche"], scene:avalancheScene(s, side2, end2, face, swing), k:0, from:cactbot("Massive Meteor x5"), due:[cactbot("Explosion", 8), cactbot("Arcadion Avalanche")]}
+  );
+  // TS note: sort with a compare function, like List.Sort(Comparison) in C#. It keeps equal items in order.
+  segs.sort((a, b) => a.from - b.from);
   /* The timeline lines, with cactbot's names. Where the arena is the test, the names stay as
      general as cactbot's before it syncs: "Comet/Crushing Comet", "Assault Evolved 1". */
   // The nth Raw Steel Trophy with weapon w: its cast and its hits.
@@ -231,9 +256,10 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     L("Foregone Fatality", 3), L("Fearsome Fireball", 4), L("Explosion", 5),
     L("Triple Tyrannhilation"),
     L("Flatliner (split)", 1, "Flatliner"), L("Majestic Meteor"), L("Explosion", 6),
-    L("Majestic Meteor 1"), L("Majestic Meteor 2"), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath"), L("Majestic Meteor 3"),
+    // A Majestic Meteor puddle "drops" when its cast starts (cactbot's "--meteor 1--"), as a Cometite puddle does.
+    L("--meteor 1--", 1, "Majestic Meteor 1 drops"), L("Majestic Meteor 1"), L("Majestic Meteor 2"), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath"), L("Majestic Meteor 3"),
     L("Explosion", 7),
-    L("Majestic Meteor 1", 2), L("Majestic Meteor 2", 2), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath", 2), L("Majestic Meteor 3", 2),
+    L("--meteor 1--", 2, "Majestic Meteor 1 drops"), L("Majestic Meteor 1", 2), L("Majestic Meteor 2", 2), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath", 2), L("Majestic Meteor 3", 2),
     L("Massive Meteor (castbar)", 1, "Massive Meteor"), L("Massive Meteor x5"), L("Explosion", 8), L("Arcadion Avalanche"),
     L("Crown of Arcadia", 3),
     L("Great Wall of Fire 1", 2), L("Great Wall of Fire 2", 2), L("Explosion 1", 2), L("Explosion 2", 2),
@@ -248,10 +274,11 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   ];
   const events = lines.map(([t, name]): TLEvent => ({t, name, raidwide:RAIDWIDE.has(name), cast:BOSS_CAST.has(name) || name.endsWith(" drops")}));
   const picks: Picks = {raw:w1, void:stackFirst ? "stack" : "spread", set1:orderIn(A1), set2:orderIn(A2),
-    ult:U.cw ? "cw" : "ccw", fireball:four ? "four" : "two", wall};
+    ult:U.cw ? "cw" : "ccw", tether:t1 ? "first" : "second", fireball:four ? "four" : "two", wall};
   const summary = "Raw Steel Trophy: " + w1 + " first, then " + w2 + ". Assault Evolved at " + nearClock(cactbot("Assault Evolved")) + ": " + orderText(picks.set1).toLowerCase() +
     ". At " + nearClock(cactbot("Assault Evolved", 2)) + ": " + orderText(picks.set2).toLowerCase() + ". Void Stardust: " + (stackFirst ? "stack first, then spread." : "spread first, then stack.") +
     " Ultimate Trophy Weapons: " + (U.cw ? "clockwise." : "counterclockwise.") +
+    " Arena Split: your tether in the " + (t1 ? "first" : "second") + " round." +
     " Ecliptic Stampede: " + fireball + ", with your puddles along the " + wall + " wall.";
   return {segs, events, end:FIGHT_END, split:[cactbot("Flatliner (split)"), cactbot("Crown of Arcadia", 3)], summary, code, picks, choices:c};
 }

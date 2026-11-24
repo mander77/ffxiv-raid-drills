@@ -148,7 +148,7 @@ export const LEARN_CARDS: QuizItem[] = [
     rule:["Towers 2 and 3: the quadrant you ended in."]})),
   mq("k-massive", 20, P3, "7:25", s=>({prompt:"Massive Meteor: what is it?",
     options:[{t:"A five-hit stack on one player per platform. All four on the platform stack. Mitigate and heal.", ok:true},{t:"A Tank Buster."},{t:"Spread markers."},{t:"A knockback only."}],
-    why:["A stack with fewer than four players kills.", "Heal between the hits."],
+    why:["A stack with fewer than four players kills.", "Stack in close, at the middle of the platform's inner edge.", "Heal between the hits."],
     rule:["Massive Meteor: all four stack.", "Mitigate and heal."]})),
   mq("k-slab", 21, P3, "7:39", s=>({prompt:"Arcadion Avalanche: the boss faces one platform. What do you do?",
     options:[{t:"Get knocked to the platform he is NOT facing. Then run to the side away from where he swings.", ok:true},{t:"Stay on the platform he faces."},{t:"Stand in the middle."},{t:"Get knocked to the platform he faces."}],
