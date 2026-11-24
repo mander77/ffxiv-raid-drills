@@ -1,8 +1,8 @@
 import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { Fight, FightSeg } from "../../data/fights/m11s/fight";
 import type { CastControls } from "../../hooks/useCastTimeline";
+import { useFight } from "../../hooks/useFight";
 import { FightFrameContext, type FrameFn } from "../../hooks/useFightFrame";
 import { useFightKeys } from "../../hooks/useFightKeys";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
@@ -25,7 +25,7 @@ import {
 } from "../../lib/fight";
 import type { Speed } from "../../stores/pressure";
 import { useProgressStore } from "../../stores/progress";
-import type { Point, Slot } from "../../types";
+import type { Fight, FightSeg, Point, Slot } from "../../types";
 import { ArenaFrame, type ArenaFrameProps } from "../arena/ArenaFrame";
 import { CastBar } from "./CastBar";
 import { CastList } from "./CastList";
@@ -99,6 +99,7 @@ export function FightScreen({
   /** Counts "Watch the Spawns Again": the arena draws anew, so its spawns play again. */
   const [replays, setReplays] = useState(0);
   const score = useProgressStore((s) => s.score);
+  const fightId = useFight().id;
   /** A wide screen (lg, 1024 px and up): the run's cast bar, prompt and bar sit beside the arena,
       and the player has three columns. */
   const wide = useMediaQuery("(min-width: 1024px)");
@@ -114,7 +115,7 @@ export function FightScreen({
   function showAnswer(a: Answered | null): void {
     if (!a || mode !== "run") return;
     setResult((was) => ({ n: (was?.n ?? 0) + 1, kind: a.kind }));
-    if (a.scored) score(a.scored.drill, a.scored.allCorrect, slot);
+    if (a.scored) score(fightId, a.scored.drill, a.scored.allCorrect, slot);
   }
 
   // One step of the clock per animation frame.

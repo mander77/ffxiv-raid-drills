@@ -37,10 +37,10 @@ import { AnswerButton } from "../components/quiz/AnswerButton";
 import { RuleBox } from "../components/RuleBox";
 import { StepChips } from "../components/StepChips";
 import { Tally } from "../components/Tally";
-import { ABILITIES, CATEGORIES, type Category } from "../data/fights/m11s/abilities";
-import { DRILLS } from "../data/fights/m11s/drills";
+import { CATEGORIES } from "../data/categories";
+import { FIGHTS } from "../data/fights";
 import { kindsOf } from "../lib/practice";
-import type { DrillKind } from "../types";
+import type { Category, DrillKind } from "../types";
 
 /** What each ability category means, for its card. */
 const CATEGORY_MEANING: Record<Category, string> = {
@@ -65,8 +65,8 @@ const KIND_GROUPS: readonly { title: string; kinds: readonly DrillKind[] }[] = [
   { title: "Order and Timing", kinds: ["sequence", "puddles", "later"] },
 ];
 
-/** How many abilities of the fight have a category. */
-const rowsWith = (cat: Category): number => ABILITIES.filter((a) => a.cats.includes(cat)).length;
+/** How many abilities of the fights have a category. */
+const rowsWith = (cat: Category): number => FIGHTS.flatMap((f) => f.abilities).filter((a) => a.cats.includes(cat)).length;
 
 /** An icon of the site's buttons and signs, with its name and what it means. */
 interface InterfaceIcon {
@@ -227,9 +227,12 @@ const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode
   },
 ];
 
-/** The titles of the Practice mechanics of a kind, in fight order. */
+/** The titles of the Practice mechanics of a kind, in fight order, after the fight's name when
+    the site has more than one fight. */
 function drillsOf(kind: DrillKind): string[] {
-  return DRILLS.filter((d) => kindsOf(d).includes(kind)).map((d) => d.title);
+  return FIGHTS.flatMap((f) =>
+    f.drills.filter((d) => kindsOf(d).includes(kind)).map((d) => (FIGHTS.length > 1 ? `${f.info.short}: ${d.title}` : d.title)),
+  );
 }
 
 export function StylesPage() {

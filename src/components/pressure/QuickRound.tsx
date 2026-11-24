@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFight } from "../../hooks/useFight";
 import { quickRound } from "../../lib/pressure";
 import { usePressureStore } from "../../stores/pressure";
 import { scoresOf, useProgressStore } from "../../stores/progress";
@@ -26,24 +27,25 @@ const NO_COUNTS: Counts = { correct: 0, incorrect: 0, froze: 0 };
     froze. At the end: your counts, and Go again. */
 export function QuickRound({ onBack }: QuickRoundProps) {
   const slot = useSlotStore((s) => s.slot);
+  const fight = useFight();
   const secs = usePressureStore((s) => s.secs);
   const score = useProgressStore((s) => s.score);
   // The cards are picked once per round, when it starts.
-  const [cards, setCards] = useState(() => quickRound(scoresOf(useProgressStore.getState(), slot)));
+  const [cards, setCards] = useState(() => quickRound(fight, scoresOf(useProgressStore.getState(), fight.id, slot)));
   const [i, setI] = useState(0);
   const [counts, setCounts] = useState<Counts>(NO_COUNTS);
 
   function again(): void {
-    setCards(quickRound(scoresOf(useProgressStore.getState(), slot)));
+    setCards(quickRound(fight, scoresOf(useProgressStore.getState(), fight.id, slot)));
     setI(0);
     setCounts(NO_COUNTS);
   }
   function handleAnswer(id: string, ok: boolean): void {
-    score(id, ok, slot);
+    score(fight.id, id, ok, slot);
     setCounts((c) => (ok ? { ...c, correct: c.correct + 1 } : { ...c, incorrect: c.incorrect + 1 }));
   }
   function handleTimeout(id: string): void {
-    score(id, false, slot);
+    score(fight.id, id, false, slot);
     setCounts((c) => ({ ...c, froze: c.froze + 1 }));
   }
 

@@ -16,7 +16,7 @@ const TIMELINE = [...TIMELINE_CARDS].sort((a, b) => a.order - b.order);
 
 beforeEach(() => {
   useSlotStore.setState({ slot: "H1" });
-  useProgressStore.getState().reset();
+  useProgressStore.getState().reset("m11s");
 });
 afterEach(cleanup);
 
@@ -64,7 +64,7 @@ test("a Learn answer shows on the picture first, then Lock in answers it", async
   assert.ok(screen.getByRole("img", { name: /Arena picture of answer/ }), "the picture shows the picked answer");
   await user.click(lock);
   assert.ok(screen.getByText("Correct answer.", { exact: false }));
-  assert.deepEqual(useProgressStore.getState().scores.H1?.[LEARN[0].id], { seen: 1, correct: 1 });
+  assert.deepEqual(useProgressStore.getState().scores.m11s?.H1?.[LEARN[0].id], { seen: 1, correct: 1 });
   assert.ok(screen.getByRole("img", { name: /green area shows the answer/ }));
 });
 
@@ -73,7 +73,7 @@ test("number keys pick, Enter locks in, and Enter again goes to the next card", 
   fireEvent.keyDown(window, { key: "1" });
   assert.equal(answers()[0].getAttribute("aria-pressed"), "true");
   fireEvent.keyDown(window, { key: "Enter" });
-  assert.equal(useProgressStore.getState().rounds.learn.done, 1);
+  assert.equal(useProgressStore.getState().rounds.m11s?.learn.done, 1);
   // Next has the focus now, so Enter on it is a click.
   fireEvent.click(screen.getByRole("button", { name: "Next" }));
   assert.equal(where(), `/learn/${LEARN[1].id}`);
@@ -97,7 +97,7 @@ test("a Timeline card answers with one click and shows the coming rows", async (
   if (!correct) throw new Error("no correct answer");
   await user.click(correct);
   assert.equal(screen.queryAllByText("? ? ?").length, 0, "the names show after the answer");
-  assert.equal(useProgressStore.getState().rounds.timeline.correct, 1);
+  assert.equal(useProgressStore.getState().rounds.m11s?.timeline.correct, 1);
 });
 
 test("after the last card the round ends with the score, and Go again starts over", async () => {

@@ -3,39 +3,12 @@
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6, `ENRAGE`).
 import { DRILLS, SPLIT_INNER, avalancheScene, firstTowerEnd, homeSide, massiveScene, otherEnd, otherSide, portalAt, randomEndsSide, randomHalf, randomOthers, splitRound, splitTowers, swappedOthers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
-import { ABILITIES, ENRAGE, FIGHT_END, type Category } from "./abilities";
+import { ABILITIES, ENRAGE, FIGHT_END } from "./abilities";
 import { newCode, random, withSeed } from "../../../util";
 import { nearClock } from "../../../time";
 import { zoneCenter } from "../../../geometry";
 import { bossmod, cactbot, castStart, numberedAfter, tenth, type LineName } from "./sources";
-import type { Point, Scene, Slot } from "../../../types";
-
-/** One line on the fight timeline: `name` happens at `t`, in seconds into the fight. */
-interface TLEvent { t: number; name: string; raidwide?: boolean; cast?: boolean }
-
-/** One stretch of the fight with a scene on the arena. `due[i]` is when step i resolves. */
-export interface FightSeg {
-  title: string;
-  /** The Practice drills this stretch tests. Its result counts toward the first one's score,
-      and the end screen links to it with "Practice It". */
-  drills: string[];
-  scene: Scene;
-  /** Quarter turns of the arena, for mechanics that turn (Dance of Domination). */
-  k: number;
-  /** When the scene appears on the arena. */
-  from: number;
-  due: number[];
-  /** While the boss stands in the middle: no facing arrow until `at`, when his cast starts
-      and he turns to the first weapon (facing `f`, degrees clockwise from north). The last
-      `weapons` steps are the weapons: before he turns, the player cannot know where to go for
-      them, so the watched run shows no spot for them until then. */
-  turn?: { at: number; f: number; weapons: number };
-  /** Where to pre-position before this stretch, when the first move is known in advance (the
-      first Void Stardust puddle is always north, the second one is at the boss's butt). The
-      player goes there just after the last hit before it. Without it, the player waits up close
-      to the boss in a quiet stretch (see data/route.ts). */
-  pre?: Point;
-}
+import type { FightSeg, Hit, Scene, Slot, TLEvent } from "../../../types";
 
 /** `code` rebuilds the same fight: the same weapons, the same stack or spread, and so on.
     `split` is when the arena is two platforms, from Flatliner to the Crown of Arcadia that
@@ -297,12 +270,6 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
 }
 
 /* ---------- damage going out ---------- */
-/** How the full fight shows a hit: a raidwide flashes the arena floor, a tank buster draws the
-    tanks and the hit on them, a shared hit (a stack or a tower the party shares) flashes softer,
-    the enrage flashes long and dark, and any other AoE only shows its name. */
-export type HitKind = "raid" | "tank" | "shared" | "enrage" | "aoe";
-export interface Hit { t: number; name: string; kind: HitKind; cat: Category }
-
 /** Every hit of the fight, in time order, from the ability list and its hit rules. */
 export function buildHits(f: Fight): Hit[] {
   const hits: Hit[] = [];

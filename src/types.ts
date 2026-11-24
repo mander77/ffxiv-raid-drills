@@ -5,7 +5,8 @@
 // so nothing here exists at run time. Other files bring these names in with
 // `import type { ... }`, which tells the compiler that the import is for type checking only.
 
-import type { Phase } from "./data/fights/m11s/timeline";
+/** A phase of a fight, by its full name: "Phase 1: Trophy Weapons". Each fight lists its own. */
+export type Phase = string;
 
 /* ---------- party slots ---------- */
 // A party slot has two parts: the light party (1 or 2) and the role in it. Its short name comes
@@ -251,7 +252,7 @@ export interface Drill {
   variants?: string[];
   /** The build itself picks random parts, such as weapon spots or line patterns. */
   random?: boolean;
-  /** The fight pattern picks this drill follows (keys of Picks in data/fight.ts): `variant`
+  /** The fight pattern picks this drill follows (keys of the fight's pick rows): `variant`
       chooses its variant, and `pick` goes to build as its third argument. */
   follows?: { variant?: string; pick?: string };
   // TS note: a drill's build function may take fewer parameters than this type lists.
@@ -311,4 +312,110 @@ export interface TimelineEvent {
   n: string;
   /** What you do, one short line each. */
   job: (s: Slot) => Lines;
+}
+
+/* ---------- abilities ---------- */
+
+/** The colour categories of the ability list (the keys of CATEGORIES in data/categories.ts).
+    "spot" is "Positioning Required". */
+export type Category = "raid" | "tank" | "spot" | "dodge" | "target" | "mech" | "enrage";
+
+/** How the full fight shows an ability's hits, where its categories alone do not say it.
+    `shared`: the party shares the hit (a stack or a tower), so it flashes softer.
+    `times`: it hits `n` times, `gap` seconds apart, named `name` 1, `name` 2 and so on.
+    `lines`: each timeline line named `lines` and a number, up to the next ability, is one hit. */
+export interface HitRule {
+  shared?: boolean;
+  times?: { n: number; gap: number; name: string };
+  lines?: string;
+}
+
+/** One row of the ability list. `t` is when it hits, in seconds into the fight. */
+export interface Ability {
+  t: number;
+  name: string;
+  cats: Category[];
+  note: string;
+  hit?: HitRule;
+}
+
+/* ---------- the full fight ---------- */
+
+/** One line on the fight timeline: `name` happens at `t`, in seconds into the fight. */
+export interface TLEvent {
+  t: number;
+  name: string;
+  raidwide?: boolean;
+  cast?: boolean;
+}
+
+/** One stretch of the fight with a scene on the arena. `due[i]` is when step i resolves. */
+export interface FightSeg {
+  title: string;
+  /** The Practice drills this stretch tests. Its result counts toward the first one's score,
+      and the end screen links to it with "Practice It". */
+  drills: string[];
+  scene: Scene;
+  /** Quarter turns of the arena, for mechanics that turn (Dance of Domination). */
+  k: number;
+  /** When the scene appears on the arena. */
+  from: number;
+  due: number[];
+  /** While the boss stands in the middle: no facing arrow until `at`, when his cast starts
+      and he turns to the first weapon (facing `f`, degrees clockwise from north). The last
+      `weapons` steps are the weapons: before he turns, the player cannot know where to go for
+      them, so the watched run shows no spot for them until then. */
+  turn?: { at: number; f: number; weapons: number };
+  /** Where to pre-position before this stretch, when the first move is known in advance (the
+      first Void Stardust puddle is always north, the second one is at the boss's butt). The
+      player goes there just after the last hit before it. Without it, the player waits up close
+      to the boss in a quiet stretch (see data/route.ts). */
+  pre?: Point;
+}
+
+/** How the full fight shows a hit: a raidwide flashes the arena floor, a tank buster draws the
+    tanks and the hit on them, a shared hit (a stack or a tower the party shares) flashes softer,
+    the enrage flashes long and dark, and any other AoE only shows its name. */
+export type HitKind = "raid" | "tank" | "shared" | "enrage" | "aoe";
+export interface Hit {
+  t: number;
+  name: string;
+  kind: HitKind;
+  cat: Category;
+}
+
+/** Your pattern picks for the full fight: each pick's key and its value, or "random". The
+    fight's pick rows say which keys and values it knows. */
+export type Choices = Readonly<Record<string, string>>;
+
+/** One full fight on the clock, as the engine (lib/fight.ts) and the screens use it. `code`
+    rebuilds the same fight. `split` is when the arena is two platforms, in seconds ([0, 0] when
+    it never splits). `hits` is every hit in time order. Each line of `events` carries the
+    categories of the abilities at its time. `choices` is what the player asked for, so a link
+    can carry it. */
+export interface Fight {
+  segs: FightSeg[];
+  events: Array<TLEvent & { cats: Category[] }>;
+  hits: Hit[];
+  end: number;
+  split: [number, number];
+  summary: string;
+  code: string;
+  choices: Choices;
+}
+
+/* ---------- the Cheat Sheet ---------- */
+
+/** One mechanic of the reference. */
+export interface ReferenceEntry {
+  name: string;
+  /** The Learn card whose answer picture it shows. Its time and phase are the entry's. */
+  picture: string;
+  /** The Learn cards whose rules it lists, in order (the picture's card among them). */
+  cards: readonly string[];
+  /** The Practice drills where you click your spot for it. */
+  drills: readonly string[];
+  /** The Timeline card whose answer is this mechanic ("... just happened. What comes next?"),
+      when it has its own row in the timeline. */
+  timeline?: string;
 }

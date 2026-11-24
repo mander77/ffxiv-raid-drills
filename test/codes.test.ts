@@ -1,6 +1,7 @@
 import { assert, test } from "vitest";
-import { changes, DRILLS } from "../src/data/fights/m11s/drills";
+import { DRILLS } from "../src/data/fights/m11s/drills";
 import { buildFight } from "../src/data/fights/m11s/fight";
+import { changes } from "../src/lib/practice";
 import { isCode, newCode, withSeed } from "../src/util";
 
 const CODES = Array.from({ length: 30 }, () => newCode());

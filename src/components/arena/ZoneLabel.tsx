@@ -1,5 +1,5 @@
-import { HITBOX } from "../../data/fights/m11s/attacks";
 import { unit, zoneCenter } from "../../geometry";
+import { useArenaSizes } from "../../hooks/useFight";
 import type { Point, Zone } from "../../types";
 import { ArenaLabel, type LabelLook } from "./ArenaLabel";
 
@@ -15,8 +15,8 @@ export const ZONE_LABELS = {
 /** The height of a zone's label, in arena units. */
 const LABEL_H = 4.2;
 
-/** How far from the boss's middle a label keeps clear: his hitbox ring and its flank ticks. */
-const BOSS_CLEAR = HITBOX + 2;
+/** How far past the boss's hitbox ring a label keeps clear: the ring's flank ticks. */
+const RING_CLEAR = 2;
 
 export interface ZoneLabelProps {
   zone: Zone;
@@ -43,15 +43,17 @@ function touches(p: Point, w: number, c: Point, r: number): boolean {
     It does not name your slot: your own marker is you, so a slot name would look like a second you. */
 export function ZoneLabel({ zone: z, kind, boss }: ZoneLabelProps) {
   const label = ZONE_LABELS[kind];
+  /** How far from the boss's middle the label keeps clear. */
+  const clear = useArenaSizes().hitbox + RING_CLEAR;
   const ctr = zoneCenter(z);
   const top = "c" in z ? z.c[1] - z.r : "rect" in z ? z.rect[1] : ctr[1] + 1;
   const bottom = "c" in z ? z.c[1] + z.r : "rect" in z ? z.rect[3] : ctr[1] - 1;
   const y = "fn" in z ? ctr[1] : top - 3 >= -3 ? top - 3 : bottom + 3;
   let at = clampInside([ctr[0], y], label.w);
-  if (boss && touches(at, label.w, boss, BOSS_CLEAR)) {
+  if (boss && touches(at, label.w, boss, clear)) {
     // Out from the boss through the zone's middle; straight up when the zone is on him.
     const away = Math.hypot(ctr[0] - boss[0], ctr[1] - boss[1]) > 1 ? unit([ctr[0] - boss[0], ctr[1] - boss[1]]) : ([0, -1] as Point);
-    for (let d = 0; d <= 60 && touches(at, label.w, boss, BOSS_CLEAR); d += 0.5)
+    for (let d = 0; d <= 60 && touches(at, label.w, boss, clear); d += 0.5)
       at = clampInside([boss[0] + away[0] * d, boss[1] + away[1] * d], label.w);
   }
   return <ArenaLabel at={at} text={label.text} w={label.w} h={LABEL_H} look={label.look} />;

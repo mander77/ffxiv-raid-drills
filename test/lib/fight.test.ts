@@ -1,5 +1,4 @@
 import { describe, expect, test } from "vitest";
-import { buildFight } from "../../src/data/fights/m11s/fight";
 import {
   activeSeg,
   answerFightStep,
@@ -25,6 +24,7 @@ import {
   watchAt,
   watchQuestion,
 } from "../../src/lib/fight";
+import { buildFight } from "../m11s";
 
 const fight = () => buildFight("H1", "K7Q2");
 

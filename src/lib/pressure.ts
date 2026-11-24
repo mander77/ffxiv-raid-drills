@@ -1,9 +1,8 @@
 // The rules of Pressure, as plain functions: which cards the quick round asks, its timer (time to
 // read, then time to decide), and the address of the player.
-import { type Choices, choicesText } from "../data/fights/m11s/fight";
-import { LEARN_CARDS, TIMELINE_CARDS } from "../data/fights/m11s/questions";
+import type { ChoiceRow, FightData } from "../data/fights/types";
 import type { Score } from "../stores/progress";
-import type { QuizItem } from "../types";
+import type { Choices, QuizItem } from "../types";
 import { readingMs } from "../util";
 
 /** How many cards a quick round asks. */
@@ -39,8 +38,8 @@ export function weighted<T extends { id: string }>(
 }
 
 /** The cards of a new quick round: QUICK_SIZE cards from Learn and Timeline. */
-export const quickRound = (scores: Record<string, Score>, random: () => number = Math.random): QuizItem[] =>
-  weighted([...LEARN_CARDS, ...TIMELINE_CARDS], scores, random).slice(0, QUICK_SIZE);
+export const quickRound = (fight: FightData, scores: Record<string, Score>, random: () => number = Math.random): QuizItem[] =>
+  weighted([...fight.learnCards, ...fight.timelineCards], scores, random).slice(0, QUICK_SIZE);
 
 /** The timer of one card: the time to read it (from the length of the question and its answers),
     then the seconds you chose to decide. */
@@ -58,8 +57,20 @@ export function timerAt(t: Timer, ms: number): { reading: boolean; fill: number;
   return { reading: false, fill, low: fill < 0.34 };
 }
 
-/** The address of the player for a fight: its code, its picks (when any is set) and the moment. */
-export function playerLink(code: string, choices: Choices, t?: number): string {
-  const picks = choicesText(choices);
+/** For a link: "raw=axe,ult=cw", in the order of the rows. Choices left on "random" are left out. */
+export const choicesText = (rows: readonly ChoiceRow[], c: Choices): string =>
+  rows
+    .filter((r) => c[r.key] !== undefined && c[r.key] !== "random")
+    .map((r) => `${r.key}=${c[r.key]}`)
+    .join(",");
+
+/** The choices in a link's text, checked by the fight's `clean`. */
+export const parseChoices = (fight: FightData, text: string): Choices =>
+  fight.clock.clean(Object.fromEntries(text.split(",").map((p) => p.split("="))));
+
+/** The address of the player for a fight, after the fight's base: its code, its picks (when any
+    is set) and the moment. */
+export function playerLink(fight: FightData, code: string, choices: Choices, t?: number): string {
+  const picks = choicesText(fight.clock.rows, choices);
   return `/pressure/${code}${picks ? `/${picks}` : ""}${t ? `?t=${Math.round(t * 10) / 10}` : ""}`;
 }

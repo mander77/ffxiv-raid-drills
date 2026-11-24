@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { Navigate, useNavigate, useParams } from "react-router";
 import { Button } from "@/components/ui/button";
-import { type RoundTab, useProgressStore } from "../../stores/progress";
+import { useFight, useFightLink } from "../../hooks/useFight";
+import { type RoundTab, roundOf, useProgressStore } from "../../stores/progress";
 import { useSlotStore } from "../../stores/slot";
 import type { QuizItem } from "../../types";
 import { ChipRow } from "../ChipRow";
@@ -35,7 +36,9 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
   const { card } = useParams();
   const navigate = useNavigate();
   const slot = useSlotStore((s) => s.slot);
-  const round = useProgressStore((s) => s.rounds[tab]);
+  const fight = useFight().id;
+  const inFight = useFightLink();
+  const round = useProgressStore((s) => roundOf(s, fight, tab));
   const record = useProgressStore((s) => s.record);
   const visit = useProgressStore((s) => s.visit);
   const newRound = useProgressStore((s) => s.newRound);
@@ -46,10 +49,10 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
 
   // Remember the card, so the tab opens on it again.
   useEffect(() => {
-    if (item) visit(tab, item.id);
-  }, [item, tab, visit]);
+    if (item) visit(fight, tab, item.id);
+  }, [item, fight, tab, visit]);
 
-  const link = (id: string): string => `/${tab}/${id}`;
+  const link = (id: string): string => inFight(`/${tab}/${id}`);
 
   // /learn with no card: the round is done, or it opens on the card you were on, or the first one.
   if (card === undefined) {
@@ -60,7 +63,7 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
           correct={mine ? round.correct : 0}
           done={mine ? round.done : 0}
           onAgain={() => {
-            newRound(tab);
+            newRound(fight, tab);
             navigate(link(items[0].id));
           }}
         />
@@ -74,8 +77,8 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
   function goNext(): void {
     if (i < items.length - 1) navigate(link(items[i + 1].id));
     else {
-      finish(tab);
-      navigate(`/${tab}`);
+      finish(fight, tab);
+      navigate(inFight(`/${tab}`));
     }
   }
 
@@ -126,7 +129,7 @@ export function QuizDeck({ tab, items, chips, chipLabel, previewAnswers = false 
       slot={slot}
       previewAnswers={previewAnswers}
       top={top}
-      onAnswer={(ok) => record(item.id, ok, tab, slot)}
+      onAnswer={(ok) => record(fight, item.id, ok, tab, slot)}
       onNext={goNext}
     />
   );

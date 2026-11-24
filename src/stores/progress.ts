@@ -30,6 +30,10 @@ export type SlotScores = Record<string, Score>;
     Dictionary<Slot, X> that starts empty. */
 export type Scores = Partial<Record<Slot, SlotScores>>;
 
+/** The scores and the rounds of every fight, by fight id. */
+export type FightScores = Partial<Record<string, Scores>>;
+type FightRounds = Partial<Record<string, Record<RoundTab, Round>>>;
+
 /** The scores of a slot with no answers yet. One shared object, so a selector that reads it
     gives the same value each time. */
 const NO_SCORES: SlotScores = {};
@@ -41,66 +45,85 @@ function withAnswer(scores: Scores, slot: Slot, id: string, ok: boolean): Scores
   return { ...scores, [slot]: { ...mine, [id]: { seen: was.seen + 1, correct: was.correct + (ok ? 1 : 0) } } };
 }
 
+/** Every fight's scores, with one more answer in one fight. */
+const withFightAnswer = (all: FightScores, fight: string, slot: Slot, id: string, ok: boolean): FightScores => ({
+  ...all,
+  [fight]: withAnswer(all[fight] ?? {}, slot, id, ok),
+});
+
 const NEW_ROUND: Round = { slot: null, done: 0, correct: 0, current: null, finished: false };
 const NO_ROUNDS: Record<RoundTab, Round> = { learn: NEW_ROUND, timeline: NEW_ROUND, practice: NEW_ROUND };
 
+/** Every fight's rounds, with one tab's round in one fight changed by `change`. */
+function withRound(all: FightRounds, fight: string, tab: RoundTab, change: (r: Round) => Round): FightRounds {
+  const rounds = all[fight] ?? NO_ROUNDS;
+  return { ...all, [fight]: { ...rounds, [tab]: change(rounds[tab]) } };
+}
+
 interface ProgressState {
-  scores: Scores;
-  rounds: Record<RoundTab, Round>;
-  /** Count an answer to a question or drill, in its score and in the round of its tab. A round
-      belongs to one slot: an answer for another slot starts a new round. */
-  record: (id: string, ok: boolean, tab: RoundTab, slot: Slot) => void;
+  scores: FightScores;
+  rounds: FightRounds;
+  /** Count an answer to a question or drill of a fight, in its score and in the round of its
+      tab. A round belongs to one slot: an answer for another slot starts a new round. */
+  record: (fight: string, id: string, ok: boolean, tab: RoundTab, slot: Slot) => void;
   /** Count an answer in its score only, for the quick round and the run on Pressure, which keep
       their own count. */
-  score: (id: string, ok: boolean, slot: Slot) => void;
+  score: (fight: string, id: string, ok: boolean, slot: Slot) => void;
   /** Remember the card you are on in a tab. */
-  visit: (tab: RoundTab, current: string) => void;
+  visit: (fight: string, tab: RoundTab, current: string) => void;
   /** End the round of a tab, after its last card. */
-  finish: (tab: RoundTab) => void;
+  finish: (fight: string, tab: RoundTab) => void;
   /** Start the round of a tab again, from its first card. */
-  newRound: (tab: RoundTab) => void;
-  /** Erase every score and round, of every slot. */
-  reset: () => void;
+  newRound: (fight: string, tab: RoundTab) => void;
+  /** Erase every score and round of a fight, of every slot. */
+  reset: (fight: string) => void;
 }
 
 export const useProgressStore = create<ProgressState>()(
   persist(
     (set) => ({
       scores: {},
-      rounds: NO_ROUNDS,
-      record: (id, ok, tab, slot) =>
+      rounds: {},
+      record: (fight, id, ok, tab, slot) =>
+        set((st) => ({
+          scores: withFightAnswer(st.scores, fight, slot, id, ok),
+          rounds: withRound(st.rounds, fight, tab, (r) => {
+            const round = r.slot === slot ? r : { ...r, slot, done: 0, correct: 0 };
+            return { ...round, done: round.done + 1, correct: round.correct + (ok ? 1 : 0) };
+          }),
+        })),
+      score: (fight, id, ok, slot) => set((st) => ({ scores: withFightAnswer(st.scores, fight, slot, id, ok) })),
+      visit: (fight, tab, current) =>
         set((st) => {
-          const round = st.rounds[tab].slot === slot ? st.rounds[tab] : { ...st.rounds[tab], slot, done: 0, correct: 0 };
-          return {
-            scores: withAnswer(st.scores, slot, id, ok),
-            rounds: { ...st.rounds, [tab]: { ...round, done: round.done + 1, correct: round.correct + (ok ? 1 : 0) } },
-          };
-        }),
-      score: (id, ok, slot) => set((st) => ({ scores: withAnswer(st.scores, slot, id, ok) })),
-      visit: (tab, current) =>
-        set((st) =>
-          st.rounds[tab].current === current && !st.rounds[tab].finished
+          const r = roundOf(st, fight, tab);
+          return r.current === current && !r.finished
             ? st
-            : { rounds: { ...st.rounds, [tab]: { ...st.rounds[tab], current, finished: false } } },
-        ),
-      finish: (tab) => set((st) => ({ rounds: { ...st.rounds, [tab]: { ...st.rounds[tab], finished: true } } })),
-      newRound: (tab) => set((st) => ({ rounds: { ...st.rounds, [tab]: NEW_ROUND } })),
-      reset: () => set({ scores: {}, rounds: NO_ROUNDS }),
+            : { rounds: withRound(st.rounds, fight, tab, (was) => ({ ...was, current, finished: false })) };
+        }),
+      finish: (fight, tab) => set((st) => ({ rounds: withRound(st.rounds, fight, tab, (r) => ({ ...r, finished: true })) })),
+      newRound: (fight, tab) => set((st) => ({ rounds: withRound(st.rounds, fight, tab, () => NEW_ROUND) })),
+      reset: (fight) => set((st) => ({ scores: { ...st.scores, [fight]: {} }, rounds: { ...st.rounds, [fight]: NO_ROUNDS } })),
     }),
     {
       name: "raid-drills-progress",
       storage: createJSONStorage(() => localStorage),
       // Keep the scores; a round starts again with each visit.
       partialize: (st) => ({ scores: st.scores }),
-      // The shape of the saved data. Saved data of another version is dropped: before version 1,
-      // the scores of all slots were mixed.
-      version: 1,
+      // The shape of the saved data. Saved data of another version is dropped: version 2 keeps
+      // the scores of each fight.
+      version: 2,
       migrate: () => ({ scores: {} }),
     },
   ),
 );
 
-/** The scores of one slot, for a selector: useProgressStore((st) => scoresOf(st, slot)). */
-export function scoresOf(st: Pick<ProgressState, "scores">, slot: Slot): SlotScores {
-  return st.scores[slot] ?? NO_SCORES;
+/** The scores of one slot in one fight, for a selector:
+    useProgressStore((st) => scoresOf(st, fight, slot)). */
+export function scoresOf(st: Pick<ProgressState, "scores">, fight: string, slot: Slot): SlotScores {
+  return st.scores[fight]?.[slot] ?? NO_SCORES;
+}
+
+/** The round of one tab in one fight, for a selector. */
+export function roundOf(st: Pick<ProgressState, "rounds">, fight: string, tab: RoundTab): Round {
+  return st.rounds[fight]?.[tab] ?? NEW_ROUND;
 }

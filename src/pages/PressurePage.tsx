@@ -1,6 +1,7 @@
 // The Pressure page (/pressure): the same questions, fast. A quick round of timed questions, or
 // the full fight on the clock: the run, where you click your spots, and Watch the correct moves,
-// the player. A link to the player holds its fight: /pressure/<code>[/<picks>][?t=<seconds>].
+// the player. A link to the player holds its fight: /pressure/<code>[/<picks>][?t=<seconds>],
+// after the fight's id when the address has one.
 import { type ReactNode, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams, useSearchParams } from "react-router";
 import { PageContainer } from "../components/PageContainer";
@@ -10,12 +11,12 @@ import { PressureStart } from "../components/pressure/PressureStart";
 import { QuickRound } from "../components/pressure/QuickRound";
 import { RunScore } from "../components/pressure/RunScore";
 import { WatchDone } from "../components/pressure/WatchDone";
-import { buildFight, type Choices, type Fight, parseChoices, RANDOM } from "../data/fights/m11s/fight";
-import { playerLink } from "../lib/pressure";
-import { usePressureStore } from "../stores/pressure";
+import { useFight, useFightLink } from "../hooks/useFight";
+import { parseChoices, playerLink } from "../lib/pressure";
+import { choicesOf, usePressureStore } from "../stores/pressure";
 import { useSlotStore } from "../stores/slot";
 import { tabOf } from "../tabs";
-import type { StepResult } from "../types";
+import type { Choices, Fight, StepResult } from "../types";
 import { isCode, newCode } from "../util";
 
 /** What the page shows at /pressure. The player has its own address, so it is not one of these. */
@@ -31,22 +32,24 @@ export function PressurePage() {
   const { code, picks } = useParams();
   const navigate = useNavigate();
   const slot = useSlotStore((s) => s.slot);
-  const choices = usePressureStore((s) => s.choices);
+  const fight = useFight();
+  const link = useFightLink();
+  const choices = usePressureStore((s) => choicesOf(s, fight));
   const stops = usePressureStore((s) => s.stops);
   const [screen, setScreen] = useState<Screen>({ kind: "start" });
 
   function startRun(c: string, ch: Choices): void {
     setScreen((was) => ({ kind: "run", code: c, choices: ch, n: was.kind === "run" ? was.n + 1 : 0 }));
-    navigate("/pressure");
+    navigate(link("/pressure"));
   }
   function watch(c: string, ch: Choices): void {
-    navigate(playerLink(c, ch));
+    navigate(link(playerLink(fight, c, ch)));
   }
 
   let body: ReactNode;
   if (code !== undefined) {
     // A link to a fight that is not a code opens the start screen.
-    if (!isCode(code)) return <Navigate to="/pressure" replace />;
+    if (!isCode(code)) return <Navigate to={link("/pressure")} replace />;
     body = <Player key={code.toUpperCase()} code={code.toUpperCase()} picks={picks} onRun={startRun} />;
   } else if (screen.kind === "quick") body = <QuickRound onBack={() => setScreen({ kind: "start" })} />;
   else if (screen.kind === "run") body = <Run key={`${screen.n}-${slot}`} screen={screen} stops={stops} onEnd={setScreen} />;
@@ -90,7 +93,8 @@ interface RunProps {
 /** The run: every mechanic in fight order at real speed. Click your spot before each hit lands. */
 function Run({ screen, stops, onEnd }: RunProps) {
   const slot = useSlotStore((s) => s.slot);
-  const fight = useMemo(() => buildFight(slot, screen.code, screen.choices), [slot, screen.code, screen.choices]);
+  const { build } = useFight().clock;
+  const fight = useMemo(() => build(slot, screen.code, screen.choices), [build, slot, screen.code, screen.choices]);
   return (
     <FightScreen
       mode="run"
@@ -125,20 +129,24 @@ function Player({ code, picks, onRun }: PlayerProps) {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const slot = useSlotStore((s) => s.slot);
+  const data = useFight();
+  const link = useFightLink();
+  /** The player's address for a fight code and picks, and the moment. */
+  const player = (c: string, ch: Choices, at?: number): string => link(playerLink(data, c, ch, at));
   const speed = usePressureStore((s) => s.speed);
   const setSpeed = usePressureStore((s) => s.setSpeed);
   const setChoices = usePressureStore((s) => s.setChoices);
   const [done, setDone] = useState(false);
-  const linkChoices = useMemo(() => (picks ? parseChoices(picks) : RANDOM), [picks]);
-  const fight = useMemo(() => buildFight(slot, code, linkChoices), [slot, code, linkChoices]);
+  const linkChoices = useMemo(() => (picks ? parseChoices(data, picks) : data.clock.random), [data, picks]);
+  const fight = useMemo(() => data.clock.build(slot, code, linkChoices), [data, slot, code, linkChoices]);
   const t = Number(params.get("t"));
   const startAt = Number.isFinite(t) && t > 0 ? Math.min(t, fight.end) : undefined;
 
   /** The same fight with new picks: the player builds it again at the same moment. They become
       your saved picks too. */
   function changePicks(next: Choices): void {
-    setChoices(next);
-    navigate({ pathname: playerLink(code, next), search: params.toString() }, { replace: true });
+    setChoices(data.id, next);
+    navigate({ pathname: player(code, next), search: params.toString() }, { replace: true });
   }
 
   if (done)
@@ -148,7 +156,7 @@ function Player({ code, picks, onRun }: PlayerProps) {
         onRun={() => onRun(code, linkChoices)}
         onWatch={() => {
           setDone(false);
-          navigate(playerLink(code, linkChoices), { replace: true });
+          navigate(player(code, linkChoices), { replace: true });
         }}
       />
     );
@@ -163,7 +171,7 @@ function Player({ code, picks, onRun }: PlayerProps) {
       settings={<FightSettings code={code} choices={linkChoices} onChange={changePicks} />}
       onDone={() => setDone(true)}
       onPause={(at) => setParams(at === null ? {} : { t: String(Math.round(at * 10) / 10) }, { replace: true })}
-      onNewFight={(at) => navigate(playerLink(newCode(), linkChoices, at))}
+      onNewFight={(at) => navigate(player(newCode(), linkChoices, at))}
     />
   );
 }

@@ -1,9 +1,17 @@
 import { assert, test } from "vitest";
+import { M11S } from "../src/data/fights/m11s";
 import { DRILLS } from "../src/data/fights/m11s/drills";
 import { LEARN_PICTURES } from "../src/data/fights/m11s/pictures";
 import { LEARN_CARDS } from "../src/data/fights/m11s/questions";
-import { learnCard, practiceDrill, REFERENCE, referenceByPhase, slotAnswer, timelineCard } from "../src/data/fights/m11s/reference";
+import { REFERENCE } from "../src/data/fights/m11s/reference";
 import { TIMELINE } from "../src/data/fights/m11s/timeline";
+import * as ref from "../src/lib/reference";
+
+const learnCard = (id: string) => ref.learnCard(M11S, id);
+const practiceDrill = (id: string) => ref.practiceDrill(M11S, id);
+const timelineCard = (id: string) => ref.timelineCard(M11S, id);
+const slotAnswer = (id: string, slot: "H1" | "H2") => ref.slotAnswer(M11S, id, slot);
+const referenceByPhase = () => ref.referenceByPhase(M11S);
 
 /** Seconds from a time such as "4:52" (the first time in "0:50 to 1:45"). */
 function secs(t: string): number {

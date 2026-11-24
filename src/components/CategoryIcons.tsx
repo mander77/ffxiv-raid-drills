@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
-import { CATEGORIES, type Category } from "../data/fights/m11s/abilities";
+import { CATEGORIES } from "../data/categories";
+import type { Category } from "../types";
 import {
   AvoidableAoeIcon,
   EnrageIcon,

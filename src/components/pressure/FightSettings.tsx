@@ -13,9 +13,11 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { WeaponType } from "../../data/fights/m11s/drills";
-import { CHOICE_ROWS, type Choices, choicesText, cleanChoices, RANDOM } from "../../data/fights/m11s/fight";
+import type { ChoiceRow } from "../../data/fights/types";
+import { useFight } from "../../hooks/useFight";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
+import { choicesText } from "../../lib/pressure";
+import type { Choices } from "../../types";
 import { DragHandleIcon, SettingsIcon } from "../icons";
 
 export interface FightSettingsProps {
@@ -31,8 +33,9 @@ export interface FightSettingsProps {
     the bottom on a phone. */
 export function FightSettings({ code, choices, onChange }: FightSettingsProps) {
   const wide = useMediaQuery("(min-width: 768px)");
-  /** Save one pick. cleanChoices checks it, so only a known value is kept. */
-  const set = (key: string, value: string): void => onChange(cleanChoices({ ...choices, [key]: value }));
+  const { clock } = useFight();
+  /** Save one pick. The fight's clean checks it, so only a known value is kept. */
+  const set = (key: string, value: string): void => onChange(clock.clean({ ...choices, [key]: value }));
   return (
     <Sheet>
       <Tooltip>
@@ -49,19 +52,18 @@ export function FightSettings({ code, choices, onChange }: FightSettingsProps) {
         <SheetHeader>
           <SheetTitle>Fight pattern</SheetTitle>
           <SheetDescription>
-            Fight {code}. Pick a part to practice it on purpose. For a weapon order, press Set order, then drag the cards into the order the
-            boss takes them.
+            Fight {code}. {clock.help}
           </SheetDescription>
         </SheetHeader>
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4">
-          <PickRows choices={choices} onPick={set} />
+          <PickRows rows={clock.rows} choices={choices} onPick={set} />
         </div>
         <SheetFooter className="flex-row flex-wrap">
           <SheetClose asChild>
             <Button>Done</Button>
           </SheetClose>
-          {choicesText(choices) && (
-            <Button variant="link" onClick={() => onChange(RANDOM)}>
+          {choicesText(clock.rows, choices) && (
+            <Button variant="link" onClick={() => onChange(clock.random)}>
               Set All to Random
             </Button>
           )}
@@ -72,20 +74,21 @@ export function FightSettings({ code, choices, onChange }: FightSettingsProps) {
 }
 
 interface PickRowsProps {
+  rows: readonly ChoiceRow[];
   choices: Choices;
   onPick: (key: string, value: string) => void;
 }
 
 /** One row per pick, in fight order. */
-function PickRows({ choices, onPick: set }: PickRowsProps) {
-  return CHOICE_ROWS.map((row) =>
-    row.key === "set1" || row.key === "set2" ? (
-      <WeaponOrderRow key={row.key} label={row.label} value={choices[row.key]} onChange={(v) => set(row.key, v)} />
+function PickRows({ rows, choices, onPick: set }: PickRowsProps) {
+  return rows.map((row) =>
+    row.order ? (
+      <OrderRow key={row.key} label={row.label} items={row.order} value={choices[row.key] ?? "random"} onChange={(v) => set(row.key, v)} />
     ) : (
       <PickRow
         key={row.key}
         label={row.label}
-        value={choices[row.key]}
+        value={choices[row.key] ?? "random"}
         options={[["random", "Random"], ...row.options]}
         onChange={(v) => set(row.key, v)}
       />
@@ -127,25 +130,25 @@ function PickRow({ label, value, options, onChange }: PickRowProps) {
   );
 }
 
-const WEAPON_NAMES: Record<WeaponType, string> = { sword: "Sword", axe: "Axe", scythe: "Scythe" };
-const DEFAULT_ORDER: WeaponType[] = ["sword", "axe", "scythe"];
-
-interface WeaponOrderRowProps {
+interface OrderRowProps {
   label: string;
-  /** "random", or the weapons in order: "sword-axe-scythe". */
+  /** The items to put in order, each as [value, name], in the order Random shows them. */
+  items: readonly (readonly [string, string])[];
+  /** "random", or the items in order: "sword-axe-scythe". */
   value: string;
   onChange: (value: string) => void;
 }
 
-/** A weapon order: Random or Set order, then three cards in the order the boss takes them. On
-    Random the cards show "?" and stay put. With Set order, drag a card to a new place, or focus it
-    and use the arrow keys. */
-function WeaponOrderRow({ label, value, onChange }: WeaponOrderRowProps) {
+/** An order pick, such as the order of the weapons: Random or Set order, then one card per item, in
+    order. On Random the cards show "?" and stay put. With Set order, drag a card to a new place, or
+    focus it and use the arrow keys. */
+function OrderRow({ label, items, value, onChange }: OrderRowProps) {
   const id = useId();
   const random = value === "random";
-  const saved = random ? DEFAULT_ORDER : (value.split("-") as WeaponType[]);
+  const saved = random ? items.map(([v]) => v) : value.split("-");
+  const nameOf = (v: string): string => items.find(([x]) => x === v)?.[1] ?? v;
   /** The order while you drag a card; it is saved when you let go. */
-  const [dragged, setDragged] = useState<WeaponType[] | null>(null);
+  const [dragged, setDragged] = useState<string[] | null>(null);
   const order = dragged ?? saved;
   const cards = useRef<HTMLOListElement>(null);
 
@@ -169,15 +172,15 @@ function WeaponOrderRow({ label, value, onChange }: WeaponOrderRowProps) {
     e.currentTarget.setPointerCapture(e.pointerId);
     setDragged(order);
   }
-  function handlePointerMove(e: PointerEvent<HTMLLIElement>, w: WeaponType): void {
+  function handlePointerMove(e: PointerEvent<HTMLLIElement>, w: string): void {
     if (!dragged || !cards.current) return;
-    const items = [...cards.current.children] as HTMLElement[];
+    const nodes = [...cards.current.children] as HTMLElement[];
     const i = dragged.indexOf(w);
     const mid = (n: number): number => {
-      const r = items[n].getBoundingClientRect();
+      const r = nodes[n].getBoundingClientRect();
       return r.left + r.width / 2;
     };
-    const j = i + 1 < items.length && e.clientX > mid(i + 1) ? i + 1 : i > 0 && e.clientX < mid(i - 1) ? i - 1 : i;
+    const j = i + 1 < nodes.length && e.clientX > mid(i + 1) ? i + 1 : i > 0 && e.clientX < mid(i - 1) ? i - 1 : i;
     if (j === i) return;
     const next = [...dragged];
     [next[i], next[j]] = [next[j], next[i]];
@@ -211,7 +214,7 @@ function WeaponOrderRow({ label, value, onChange }: WeaponOrderRowProps) {
             key={w}
             // A card takes the focus, so the arrow keys can move it.
             tabIndex={random ? undefined : 0}
-            aria-label={`${WEAPON_NAMES[w]}${random ? ", order random" : `, number ${i + 1}`}`}
+            aria-label={`${nameOf(w)}${random ? ", order random" : `, number ${i + 1}`}`}
             className={cn(
               "flex flex-1 touch-none items-center gap-1.5 rounded-md border bg-card px-2 py-1.5 text-sm select-none",
               random ? "text-muted-foreground" : "cursor-grab focus-visible:ring-2 focus-visible:ring-ring",
@@ -225,7 +228,7 @@ function WeaponOrderRow({ label, value, onChange }: WeaponOrderRowProps) {
           >
             {!random && <DragHandleIcon aria-hidden="true" className="size-4 text-muted-foreground" />}
             <b className="tabular-nums">{random ? "?" : i + 1}</b>
-            {WEAPON_NAMES[w]}
+            {nameOf(w)}
           </li>
         ))}
       </ol>

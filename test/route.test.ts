@@ -1,9 +1,10 @@
 import { assert, test } from "vitest";
-import { buildFight, RANDOM } from "../src/data/fights/m11s/fight";
+import { RANDOM } from "../src/data/fights/m11s/fight";
 import { clickRoute, correctRoute, LOOK, MOVEMENT_SPEED, REACT, REST_GAP, runnerAt, HOME as START, type Stop } from "../src/data/route";
 import { inZone, rotZone } from "../src/geometry";
 import type { Point, Slot, StepResult } from "../src/types";
 import { newCode } from "../src/util";
+import { buildFight } from "./m11s";
 
 const SLOTS: Slot[] = ["H1", "H2"];
 const dist = (a: Point, b: Point): number => Math.hypot(a[0] - b[0], a[1] - b[1]);

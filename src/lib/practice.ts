@@ -1,9 +1,12 @@
 // The rules of a Practice mechanic, as plain functions: build its pattern from a code, and answer
 // a step with a click. The Practice page and its tests both use them.
-import { facingNext } from "../data/fights/m11s/drills";
 import { inZone, rotOverlay, rotZone, stepZone, zoneCenter } from "../geometry";
 import type { Boss, Drill, DrillKind, Point, Scene, Slot, StepResult } from "../types";
 import { random, withSeed } from "../util";
+import { facingNext } from "./scene";
+
+/** True when a new try at this drill can look different: random parts, a variant or a turn. */
+export const changes = (m: Drill): boolean => Boolean(m.random || m.variants || m.rotate);
 
 /** A mechanic's pattern: its scene, and `k`, how many quarter turns the arena is turned. */
 export interface Pattern {

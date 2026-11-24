@@ -24,7 +24,7 @@ beforeAll(() => {
 });
 beforeEach(() => {
   useSlotStore.setState({ slot: "H1" });
-  useProgressStore.getState().reset();
+  useProgressStore.getState().reset("m11s");
 });
 afterEach(cleanup);
 
@@ -74,7 +74,7 @@ test("a correct click answers the step and counts in your score", () => {
   open(`/practice/${FIRST.id}/${CODE}`);
   clickAt(firstRightSpot());
   assert.ok(screen.getByText("Correct", { selector: "[role=status]" }));
-  assert.deepEqual(useProgressStore.getState().scores.H1?.[FIRST.id], { seen: 1, correct: 1 });
+  assert.deepEqual(useProgressStore.getState().scores.m11s?.H1?.[FIRST.id], { seen: 1, correct: 1 });
   assert.ok(arena().querySelector(".zlabel"), "the correct spot is tagged");
 });
 
@@ -86,7 +86,7 @@ test("Show me draws the spot, and a try with it does not count", async () => {
   assert.equal(screen.getByRole("button", { name: "Hide" }).getAttribute("aria-pressed"), "true");
   clickAt(firstRightSpot());
   assert.ok(screen.getByText("Correct", { selector: "[role=status]" }));
-  assert.isUndefined(useProgressStore.getState().scores.H1?.[FIRST.id]);
+  assert.isUndefined(useProgressStore.getState().scores.m11s?.H1?.[FIRST.id]);
 });
 
 test("an incorrect spot says so and counts, and Reset starts over", async () => {
@@ -95,7 +95,7 @@ test("an incorrect spot says so and counts, and Reset starts over", async () => 
   clickAt([-40, -40]);
   assert.ok(screen.getAllByText("Not there").length > 0);
   assert.ok(arena().querySelector(".pick.bad"), "your click shows in red");
-  assert.deepEqual(useProgressStore.getState().scores.H1?.[FIRST.id], { seen: 1, correct: 0 });
+  assert.deepEqual(useProgressStore.getState().scores.m11s?.H1?.[FIRST.id], { seen: 1, correct: 0 });
   await user.click(screen.getByRole("button", { name: "Reset" }));
   assert.isNull(arena().querySelector(".pick"), "a fresh try");
   assert.equal(where(), `/practice/${FIRST.id}/${CODE}`, "the same pattern");
@@ -185,7 +185,7 @@ test("Try from here keeps the answers before the step and asks it again, without
   const steps = buildPattern(VOID, "H1", CODE).scene.steps;
   open(`/practice/${VOID.id}/${CODE}`);
   await answerOff(steps.length);
-  const scored = useProgressStore.getState().scores.H1?.[VOID.id];
+  const scored = useProgressStore.getState().scores.m11s?.H1?.[VOID.id];
   const user = userEvent.setup();
   await user.click(stepButtons()[2]);
   await user.click(screen.getByRole("button", { name: "Try From Here" }));
@@ -195,7 +195,7 @@ test("Try from here keeps the answers before the step and asks it again, without
   assert.lengthOf(stepButtons(), 0, "the chips are badges again");
   await answerOff(steps.length - 2);
   assert.lengthOf(stepButtons(), steps.length, "the try is done again");
-  assert.deepEqual(useProgressStore.getState().scores.H1?.[VOID.id], scored, "the part try did not count");
+  assert.deepEqual(useProgressStore.getState().scores.m11s?.H1?.[VOID.id], scored, "the part try did not count");
 });
 
 test("Reset after a review starts the whole mechanic again", async () => {

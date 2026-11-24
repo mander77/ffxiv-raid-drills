@@ -87,19 +87,21 @@ test("the sources name where the times and the attack sizes come from", () => {
 test("Your progress counts your slot's answers; Reset asks once, then erases every slot", async () => {
   useProgressStore.setState({
     scores: {
-      H1: {
-        "k-sword": { seen: 2, correct: 1 },
-        "k-axe": { seen: 1, correct: 1 },
+      m11s: {
+        H1: {
+          "k-sword": { seen: 2, correct: 1 },
+          "k-axe": { seen: 1, correct: 1 },
+        },
+        H2: { "k-sword": { seen: 1, correct: 0 } },
       },
-      H2: { "k-sword": { seen: 1, correct: 0 } },
     },
   });
   draw("H1");
   const user = userEvent.setup();
   assert.ok(screen.getByText(/You answered 2 different items as H1/));
   await user.click(screen.getByRole("button", { name: "Reset My Progress" }));
-  assert.equal(Object.keys(useProgressStore.getState().scores).length, 2, "the first click only asks");
+  assert.equal(Object.keys(useProgressStore.getState().scores.m11s ?? {}).length, 2, "the first click only asks");
   await user.click(screen.getByRole("button", { name: "Click Again to Erase Progress" }));
-  assert.deepEqual(useProgressStore.getState().scores, {});
+  assert.deepEqual(useProgressStore.getState().scores.m11s, {});
   assert.ok(screen.getByText(/You answered 0 different items/));
 });

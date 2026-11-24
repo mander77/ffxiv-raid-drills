@@ -7,25 +7,25 @@ import { Navigate, useNavigate, useParams } from "react-router";
 import { PageContainer } from "../components/PageContainer";
 import { DrillScreen } from "../components/practice/DrillScreen";
 import { RoundDone } from "../components/RoundDone";
-import { changes, DRILLS } from "../data/fights/m11s/drills";
-import { buildPattern } from "../lib/practice";
-import { useProgressStore } from "../stores/progress";
+import { useFight, useFightLink } from "../hooks/useFight";
+import { buildPattern, changes } from "../lib/practice";
+import { roundOf, useProgressStore } from "../stores/progress";
 import { useSlotStore } from "../stores/slot";
 import { tabOf } from "../tabs";
 import { isCode, newCode } from "../util";
-
-/** The mechanics, in fight order. */
-const IN_ORDER = [...DRILLS].sort((a, b) => a.order - b.order);
-
-/** The address of a mechanic with a new pattern. For clicks only: drawing must not make random
-    codes, so a redirect uses the code the page made once (see `fresh`). */
-const withNewCode = (id: string): string => `/practice/${id}/${newCode()}`;
 
 export function PracticePage() {
   const { drill, code } = useParams();
   const navigate = useNavigate();
   const slot = useSlotStore((s) => s.slot);
-  const round = useProgressStore((s) => s.rounds.practice);
+  const { id: fight, drills } = useFight();
+  const link = useFightLink();
+  /** The mechanics, in fight order. */
+  const inOrder = useMemo(() => [...drills].sort((a, b) => a.order - b.order), [drills]);
+  /** The address of a mechanic with a new pattern. For clicks only: drawing must not make random
+      codes, so a redirect uses the code the page made once (see `fresh`). */
+  const withNewCode = (id: string): string => link(`/practice/${id}/${newCode()}`);
+  const round = useProgressStore((s) => roundOf(s, fight, "practice"));
   const record = useProgressStore((s) => s.record);
   const visit = useProgressStore((s) => s.visit);
   const finish = useProgressStore((s) => s.finish);
@@ -36,8 +36,8 @@ export function PracticePage() {
   // TS note: useState(newCode) passes the function itself, so React calls it once, on the first draw.
   const [fresh] = useState(newCode);
 
-  const i = IN_ORDER.findIndex((m) => m.id === drill);
-  const item = i >= 0 ? IN_ORDER[i] : undefined;
+  const i = inOrder.findIndex((m) => m.id === drill);
+  const item = i >= 0 ? inOrder[i] : undefined;
   const okCode = code !== undefined && isCode(code) ? code.toUpperCase() : undefined;
   // Building a pattern runs the mechanic's own code, so it is kept until the mechanic, the code or
   // the slot changes.
@@ -45,8 +45,8 @@ export function PracticePage() {
 
   // Remember the mechanic, so the tab opens on it again.
   useEffect(() => {
-    if (item) visit("practice", item.id);
-  }, [item, visit]);
+    if (item) visit(fight, "practice", item.id);
+  }, [item, fight, visit]);
 
   const lede = <p className="text-muted-foreground">{tabOf("/practice")?.lede}</p>;
 
@@ -62,27 +62,27 @@ export function PracticePage() {
               correct={mine ? round.correct : 0}
               done={mine ? round.done : 0}
               onAgain={() => {
-                newRound("practice");
-                navigate(withNewCode(IN_ORDER[0].id));
+                newRound(fight, "practice");
+                navigate(withNewCode(inOrder[0].id));
               }}
             />
           </PageContainer>
         </main>
       );
     }
-    return <Navigate to={`/practice/${round.current ?? IN_ORDER[0].id}/${fresh}`} replace />;
+    return <Navigate to={link(`/practice/${round.current ?? inOrder[0].id}/${fresh}`)} replace />;
   }
   // A mechanic that does not exist: start from the first. A mechanic with no code (or a broken
   // one): give it a new pattern, so the address always names the pattern on screen.
-  if (!item) return <Navigate to={`/practice/${IN_ORDER[0].id}/${fresh}`} replace />;
-  if (!okCode || !pattern) return <Navigate to={`/practice/${item.id}/${fresh}`} replace />;
-  if (okCode !== code) return <Navigate to={`/practice/${item.id}/${okCode}`} replace />;
+  if (!item) return <Navigate to={link(`/practice/${inOrder[0].id}/${fresh}`)} replace />;
+  if (!okCode || !pattern) return <Navigate to={link(`/practice/${item.id}/${fresh}`)} replace />;
+  if (okCode !== code) return <Navigate to={link(`/practice/${item.id}/${okCode}`)} replace />;
 
   function goNext(): void {
-    if (i < IN_ORDER.length - 1) navigate(withNewCode(IN_ORDER[i + 1].id));
+    if (i < inOrder.length - 1) navigate(withNewCode(inOrder[i + 1].id));
     else {
-      finish("practice");
-      navigate("/practice");
+      finish(fight, "practice");
+      navigate(link("/practice"));
     }
   }
 
@@ -95,9 +95,9 @@ export function PracticePage() {
           item={item}
           pattern={pattern}
           i={i}
-          count={IN_ORDER.length}
+          count={inOrder.length}
           canChange={changes(item)}
-          onScore={(ok) => record(item.id, ok, "practice", slot)}
+          onScore={(ok) => record(fight, item.id, ok, "practice", slot)}
           onNextMechanic={goNext}
           onReset={() => setTries((t) => t + 1)}
           onNewPattern={() => navigate(withNewCode(item.id))}
