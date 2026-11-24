@@ -98,6 +98,15 @@ export const spreadHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("CometS
 export const towerHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("ExplosionTower").range);
 /** A tower to soak ("range 4 circle"), with how many players soak it. */
 export const soakTower = (p: Point, soak: number): Overlay => ATTACK.tower(p, bossmod("ExplosionTower").range, soak);
+/** An Ecliptic Stampede solo tower (Cosmic Kiss, "range 4 circle"): one tank soaks it (BossMod's
+    ImpactKiss: 1 soaker; Hector's Fixed Stampede: MT clockwise, OT counterclockwise). */
+export const soloTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("CosmicKissEcliptic").range, 1, true);
+/** An Ecliptic Stampede pair tower (Weighty Impact, "range 4 circle"): two players soak it, a melee
+    and a healer or ranged (BossMod's ImpactKiss: 2 soakers). */
+export const pairTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("WeightyImpact").range, 2);
+/** The Heartbreak Kick tower ("range 4 circle"). BossMod lets up to 8 soak it; the app shows all 8
+    (the owner's choice): either the whole party soaks it, or the tanks do with invulns. */
+export const kickTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("HeartbreakKickTower").range, 8);
 /** A baited Meteorain meteor (Cosmic Kiss, "range 4 circle"). */
 export const meteorHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("CosmicKiss").range);
 /** Where the Mammoth Meteor proximity AoE lands (PROXIMITY_DOT). */

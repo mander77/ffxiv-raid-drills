@@ -44,6 +44,6 @@ export const TIMELINE: readonly TimelineEvent[] = [
   {t:at("Crown of Arcadia", 4), n:"Crown of Arcadia", job:s=>["Raidwide.", "Heal the party before Ecliptic Stampede."]},
   {t:at("Ecliptic Stampede"), n:"Ecliptic Stampede", job:s=>["Start " + bySlot(s, {H1:"SW", H2:"SE"}) + ", outside.", `Puddles ${at("Atomic Impact 1")} to ${at("Atomic Impact 6")}.`, `Towers ${at("Cosmic Kiss", 4)}.`, `Tethers ${at("--tethers--", 5)}.`, `Two-way or Four-way Fireball ${at("Two-way Fireball / Four-way Fireball")}.`]},
   {t:at("Crown of Arcadia", 5), n:"Crown of Arcadia", job:s=>["Raidwide.", "Then the enrage sequence starts."]},
-  {t:at("Heartbreak Kick"), n:"Heartbreak Kick (Three Towers)", job:s=>[`The tower hits 5, then 6, then 7 times (${at("Heartbreak Kick")}, ${at("Heartbreak Kick", 2)}, ${at("Heartbreak Kick", 3)}).`, "Heal the tanks between hits."]},
+  {t:at("Heartbreak Kick"), n:"Heartbreak Kick (Three Towers)", job:s=>[`The tower hits 5, then 6, then 7 times (${at("Heartbreak Kick")}, ${at("Heartbreak Kick", 2)}, ${at("Heartbreak Kick", 3)}).`, "The tanks soak it with invulns, or the party soaks it.", "Heal between the hits."]},
   {t:at("Heartbreaker (Enrage)"), n:"Heartbreaker (Enrage)", job:s=>["The boss must be dead before this."]}
 ];

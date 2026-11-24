@@ -113,3 +113,28 @@ test("the pictures are the same every time, so the answer cannot move after you 
       if (make) assert.equal(figSVG(make(s), true, ""), figSVG(make(s), true, ""), item.id);
     }
 });
+
+test("Ecliptic towers show their soakers: a T on a tank tower, 2 dots on a two-player tower", () => {
+  for (const s of SLOTS) {
+    const towers = LEARN_PICTURES["k-ecl-prio"]?.(s).overlays.filter((o) => o.t === "tower") ?? [];
+    assert.deepEqual(
+      towers.map((t) => [t.soak, t.tank ?? false]),
+      [
+        [1, true],
+        [1, true],
+        [2, false],
+        [2, false],
+      ],
+      s,
+    );
+    for (const id of ["k-ecl-center", "k-ecl-tether"]) {
+      const tower = LEARN_PICTURES[id]?.(s).overlays.find((o) => o.t === "tower");
+      assert.equal(tower?.t === "tower" ? tower.soak : undefined, 2, `${id} ${s}`);
+    }
+  }
+});
+
+test("the Heartbreak Kick tower shows 8 dots: the party can soak it", () => {
+  const tower = LEARN_PICTURES["k-hb"]?.("H1").overlays.find((o) => o.t === "tower");
+  assert.equal(tower?.t === "tower" ? tower.soak : undefined, 8);
+});

@@ -209,6 +209,7 @@ The header switch is "Light Party", with the buttons 1 and 2.
 | fire trail | What Great Wall of Fire leaves on the floor. | fire line, line AoE, the line it leaves |
 | puddle | A ground AoE that a player drops. | void zone, baited circle |
 | tower | A circle that players soak. | |
+| two-player tower | An Ecliptic Stampede tower for two: a melee on its edge, a healer or ranged dead center. | pair tower, two-person tower |
 | tether | A line between a player and something else. | |
 | stretched | A tether that is long enough. Arena Split: 48 yalms from its portal. | long enough, pulled |
 | cone | A hit shaped like a slice. Use as a noun. | (do not use "cones" as a verb in new text) |

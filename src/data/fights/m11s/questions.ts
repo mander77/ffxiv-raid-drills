@@ -164,11 +164,15 @@ export const LEARN_CARDS: QuizItem[] = [
     options:[{t:"The one closer to the proximity AoE moves to the other side.", ok:true},{t:"H1 always moves."},{t:"Nobody moves."},{t:"Both move north."}],
     why:["Each wall needs one puddle dropper.", "The fixed adjust rule stops two people from moving immediately."],
     rule:["Same side? The one closer to the proximity AoE adjusts."]})),
-  mq("k-ecl-prio", 26.2, P4, "9:17", s=>({prompt:"Ecliptic towers: what is the priority for the two-player towers?",
-    options:[{t:"H1 > H2 > R1 > R2, clockwise from A.", ok:true},{t:"R1 > R2 > H1 > H2, counterclockwise from A."},{t:"Melee first."},{t:"Tanks soak every tower."}],
-    why:bySlot(s, {H1:["Not marked? Soak the first two-player tower clockwise from A."],
-      H2:["Not marked? Soak a tower in H1 > H2 > R1 > R2 order.", "Count clockwise from A."]}),
-    rule:["H1 > H2 > R1 > R2, clockwise from A."]})),
+  mq("k-ecl-prio", 26.2, P4, "9:17", s=>({prompt:"Ecliptic towers: R1 and R2 have puddles. Which tower do you soak?",
+    options:[{t:"The first two-player tower clockwise from A, with M1.", ok:s === "H1"},
+      {t:"The first two-player tower counterclockwise from A, with M2.", ok:s === "H2"},
+      {t:"The first tower clockwise from A."},{t:"None. Healers stay out of the towers."}],
+    why:["The tanks soak the tank towers: MT clockwise, OT counterclockwise.", "M1 goes clockwise, M2 counterclockwise.",
+      ...bySlot(s, {H1:["H1 is first in H1 > H2 > R1 > R2, so H1 goes clockwise."],
+        H2:["H1 goes clockwise, so H2 goes counterclockwise."]})],
+    rule:["Tank towers: MT clockwise, OT counterclockwise from A.", "Two-player towers: M1 clockwise, M2 counterclockwise.",
+      "No puddles? First in H1 > H2 > R1 > R2 goes clockwise."]})),
   mq("k-ecl-center", 26.3, P4, "9:17", s=>({prompt:"Ecliptic towers: where in the tower do you stand?",
     options:[{t:"Dead center. The melee stand on the edge.", ok:true},{t:"On the edge."},{t:"Just outside it."},{t:"Half in, half out."}],
     why:["Standing dead center makes the tether go to you, not to the melee."],
@@ -186,9 +190,10 @@ export const LEARN_CARDS: QuizItem[] = [
     why:["M1 is always SW, and M2 always SE.", "The two puddle droppers take NW and NE."],
     rule:FOUR_WAY_RULE})),
   mq("k-hb", 28, P4, "9:53", s=>({prompt:"Heartbreak Kick: what is your job?",
-    options:[{t:"Heal the tanks between hits. The tower hits 5, then 6, then 7 times.", ok:true},{t:"Soak the tower alone."},{t:"Raise the party."},{t:"Nothing. It is the enrage."}],
-    why:["Tanks use invulns and mitigation in an agreed order.", "Ask your lead for that order.", "The real enrage is at 11:00."],
-    rule:["Keep the tanks alive between hits."]}))
+    options:[{t:"Soak it with the party, or heal the tanks if they invuln it.", ok:true},{t:"Soak the tower alone."},{t:"Raise the party."},{t:"Nothing. It is the enrage."}],
+    why:["Two ways: the tanks soak it with invulns, or the party soaks it.", "Ask your lead which one you use.",
+      "The tower hits 5, then 6, then 7 times.", "The real enrage is at 11:00."],
+    rule:["The tanks soak it with invulns, or the party soaks it.", "Heal between the hits."]}))
 ];
 
 /* ---------- generated timeline questions ---------- */

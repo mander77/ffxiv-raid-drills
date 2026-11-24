@@ -97,8 +97,9 @@ type OverlayShape =
   | ({ t: "knockback" } & Line)
   | ({ t: "tornado" } & At)
   | ({ t: "rock" } & At)
-  /** `soak` is how many players the tower needs; the tower shows it in the middle. */
-  | ({ t: "tower"; r?: number; soak?: number } & At)
+  /** `soak` is how many players the tower needs: one dot on its ring for each. `tank` is a tower
+      only tanks soak: a "T" in place of each dot. */
+  | ({ t: "tower"; r?: number; soak?: number; tank?: boolean } & At)
   | ({ t: "target" } & At)
   /** ux, uy turn the weapon: its long side on the floor, from the handle end to the tip. `held`
       is a weapon in the boss's hand, drawn without the cut in the floor. */

@@ -137,8 +137,15 @@ export function standardAttacks(arenaHalf: number) {
     ...(life === undefined ? {} : { life }),
   });
 
-  /** A tower to soak, `radius` yalms, for `soak` players. */
-  const tower = (at: Point, radius: number, soak: number): Overlay => ({ t: "tower", x: at[0], y: at[1], r: yalms(radius), soak });
+  /** A tower to soak, `radius` yalms, for `soak` players; with `tank`, only tanks soak it. */
+  const tower = (at: Point, radius: number, soak: number, tank = false): Overlay => ({
+    t: "tower",
+    x: at[0],
+    y: at[1],
+    r: yalms(radius),
+    soak,
+    ...(tank ? { tank } : {}),
+  });
 
   /** An attack whose size no source gives yet: a dashed grey ring with a "?". */
   const unknown = (at: Point): Overlay => ({ t: "unknown", x: at[0], y: at[1] });
