@@ -113,6 +113,8 @@ npm run import:sources -- m10s   # one fight
 npm run check:sources    # fails if a generated file is out of date, then runs the source tests
 npm run find:sources -- m12s     # finds a new fight's files and writes its sources.json, unchecked
 npm run import:strat -- "https://wtfdig.info/74/m11s#hector::fixed"   # wtfdig's strat notes, into notes/m11s/
+npm run import:video -- m11s "https://youtu.be/w1uuwzhyf5A"   # a guide video's chapters, captions and frames
+npm run import:video -- m11s                                  # again, for every video the fight has notes for
 ```
 
 ## Code map
@@ -188,11 +190,17 @@ src/lib/             cn() for class names; dom.ts: isPageKey (a key belongs to t
 scripts/             setup.mjs (npm run setup), publish.mjs (npm run publish), wait-deploy.mjs
                      (npm run wait-deploy), import-sources.mjs (npm run import:sources and
                      check:sources), find-sources.mjs (npm run find:sources), import-strat.mjs
-                     (npm run import:strat): plain Node.js, so they run the same on every OS
+                     (npm run import:strat), import-video.mjs (npm run import:video; it needs
+                     yt-dlp and ffmpeg): plain Node.js, so they run the same on every OS
 notes/<fight>/strat.json  wtfdig's strat notes for the static's strats, written by
                      npm run import:strat: each mechanic's text for each role and light party, its
                      image and its source. Input for the draft of a new fight; the site does not
                      read it. Never edit it by hand.
+notes/<fight>/videos/<video id>.json  a guide video's chapters, written by npm run import:video:
+                     each chapter's span, its caption lines with their times, and its still frames
+                     (one every 3 seconds, in .cache/video/). Only for understanding: never a fight
+                     time or an attack size from it, and every position read from it is "owner to
+                     check". Never edit it by hand.
 src/types.ts         drills, steps, zones, overlays, questions, abilities, the full fight (Fight,
                      FightSeg, Hit, Choices) and the Cheat Sheet's ReferenceEntry
 src/party.ts         party slots: roles, light parties, slot names

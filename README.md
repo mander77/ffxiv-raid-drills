@@ -66,8 +66,8 @@ src/util.ts              small shared helpers
 src/geometry.ts          arena geometry
 src/data/                the fight: drills, pictures, questions, timeline, attacks
 test/                    Vitest tests
-scripts/                 setup, publish, wait-deploy, import-sources, find-sources and import-strat (plain Node.js)
-notes/                   wtfdig's strat notes for each fight (npm run import:strat), for the draft of a new fight
+scripts/                 setup, publish, wait-deploy, import-sources, find-sources, import-strat and import-video (plain Node.js)
+notes/                   wtfdig's strat notes and the guide videos' chapters for each fight (npm run import:strat and import:video), for the draft of a new fight
 e2e/                     Playwright browser tests
 ```
 
