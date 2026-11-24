@@ -86,6 +86,9 @@ export const SPLIT_HALF_W = yalms(SPLIT.platformCenter + SPLIT.platformHalfWidth
 /** A tether counts as stretched this far from its portal (BossMod's StretchDistance, which it
     calls an estimate; the owner chose to use it). Shorter, it shows red; this long, blue. */
 export const TETHER_STRETCH = yalms(SPLIT.stretch);
+/** How far an Arena Split tower knocks the players in it, straight away from its middle (BossMod's
+    ExplosionKnockback). */
+export const TOWER_KNOCKBACK = yalms(SPLIT.towerKnockback);
 /** True when a tether from its portal to p is stretched. */
 export const isStretched = (portal: Point, p: Point): boolean => dist(portal, p) >= TETHER_STRETCH;
 /** How far outside a platform's outer wall the tether portals stand: 3 yalms. BossMod has no

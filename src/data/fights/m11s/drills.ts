@@ -563,8 +563,8 @@ const quadrant = (side: SplitSide, end: SplitEnd): string => (end === "north" ? 
     corner at that end of the platform, clear of its tower and of the tower's label. */
 const lastSpot = (s: Slot, side: SplitSide, end: SplitEnd): Overlay =>
   ({t:"mark", x:side === "west" ? PLATFORM_X.west[0] + 5 : PLATFORM_X.east[1] - 5, y:end === "north" ? 5 : 95, l:s, r:"H"});
-/** The end of the tower you soaked first: where your tower sends you. Hector No Buddies puts
-    tanks and ranged north, healers and melee south, so both healers start south (H1 SW, H2 SE). */
+/** The end of your first tower. Hector No Buddies puts tanks and ranged north, healers and melee
+    south, so both healers start south (H1 SW, H2 SE). */
 export const firstTowerEnd = (_s: Slot): SplitEnd => "south";
 const randomEnd = (): SplitEnd => random() < 0.5 ? "north" : "south";
 const randomSide = (): SplitSide => random() < 0.5 ? "west" : "east";
@@ -788,33 +788,65 @@ export function splitRound(s: Slot, r: SplitRound): Scene {
     rule:SPLIT_ROUND_RULE};
 }
 
-/** The first towers. In the full fight the tethers come with them (cactbot's "--tethers--"), so
-    `tether` says whether you have one this round: with a portal, your tether runs from it to you
-    from the start, so you see it before the knockback. Practice leaves it out. */
-export function firstTowersScene(s: Slot, tether?: {portal: Point} | null): Scene {
-  const home = homeSide(s), at = SPLIT_TOWER[home][firstTowerEnd(s)];
+/* The Arena Split towers. Each one knocks the players in it 23 yalms straight away from its
+   middle (TOWER_KNOCKBACK, BossMod), so where you stand in it decides where you land (Hector's
+   video, 13:08). To cross, stand on the side facing the other platform. To stay, stand on the
+   side facing the platform's middle: you land at its other end. */
+/** Where a tower must send you: across to the other platform, or along yours to its other end. */
+export type Knock = "across" | "along";
+/** The way a tower at (side, end) knocks you, as a unit vector. */
+export const knockDir = (side: SplitSide, end: SplitEnd, knock: Knock): Point =>
+  knock === "across" ? [side === "west" ? 1 : -1, 0] : [0, end === "north" ? 1 : -1];
+/** A tether ends on the platform across from its portal. So it needs the knockback across only
+    when its portal is on your own side; when the portal is already across, you stay. */
+export const knockFor = (side: SplitSide, portal: Point | null): Knock =>
+  portal && (portal[0] < 50 ? "west" : "east") === side ? "across" : "along";
+/** The half of the tower at (side, end) that sends you `knock`: the half facing that way. */
+function towerHalf(side: SplitSide, end: SplitEnd, knock: Knock): Zone {
+  const c = SPLIT_TOWER[side][end], d = knockDir(side, end, knock), a = angOf(d);
+  const fn = (p: Point): boolean => dist(p, c) <= TOWER_R && (p[0] - c[0]) * d[0] + (p[1] - c[1]) * d[1] >= 0;
+  const arc = Array.from({length:19}, (_x, i) => polar(a - 90 + i * 10, TOWER_R, c));
+  return {fn, label:addVec(c, d, TOWER_R / 2), show:[{poly:arc}]};
+}
+/** "east", "south"...: the way a unit vector points. */
+const way = (d: Point): string => d[0] > 0.5 ? "east" : d[0] < -0.5 ? "west" : d[1] > 0 ? "south" : "north";
+/** The answer for a tower: which side of it, and why. */
+function towerAnswer(side: SplitSide, end: SplitEnd, knock: Knock, tether: boolean): Lines {
+  const at = "The " + way(knockDir(side, end, knock)) + " side of the " + quadrant(side, end) + " tower";
+  if (knock === "across") return [at + ", facing the other platform.", "Your tether's portal is on your side: get knocked across."];
+  return [at + ", facing the platform's middle.",
+    tether ? "Your tether's portal is already across: stay on this platform." : "No tether: stay, and land at the other end."];
+}
+const TOWER_RULE: Lines = ["A tower knocks you straight away from its middle.", "Tether, portal on your side: stand facing the other platform.",
+  "Tether, portal already across: stand facing the platform's middle.", "No tether: stand facing the platform's middle."];
+
+/** The first towers: your light party's tower, at its south end (Hector No Buddies). With a
+    tether, it runs from its portal to you from the start, so you see before the knockback which
+    way to go. In the full fight the tethers come with the towers (cactbot's "--tethers--"). */
+export function firstTowersScene(s: Slot, tether: {portal: Point} | null): Scene {
+  const home = homeSide(s), end = firstTowerEnd(s), at = SPLIT_TOWER[home][end], knock = knockFor(home, tether?.portal ?? null);
   const mark: Extract<Overlay, {t: "mark"}> = {t:"mark", x:at[0], y:at[1], l:s, r:"H"};
-  return {setup:["Four towers appear: two on each platform.", "Every player soaks a tower.",
-      ...(tether === undefined ? [] : [tether ? "You have a tether this time." : "No tether this time."])],
+  return {setup:["Four towers appear: two on each platform.", "Every player soaks a tower.", tether ? "You have a tether this time." : "No tether this time."],
     split:true, boss:BOSS, overlays:[...SPLIT_TOWERS, ...(tether ? [{t:"portal", x:tether.portal[0], y:tether.portal[1], vert:false} as const] : [])],
     ...(tether ? {tether:{portal:tether.portal, you:mark}} : {}),
-    steps:[{q:"Which tower do you soak?", z:{c:at, r:TOWER_R}, a:bySlot(s, {H1:["The SW tower, with M1."], H2:["The SE tower, with M2."]})}],
-    rule:["Tethered: get knocked to the other platform.", "Not tethered: get knocked to the same platform."]};
+    steps:[{q:"Where in your tower do you stand?", zf:() => towerHalf(home, end, knock),
+      a:[...towerAnswer(home, end, knock, tether !== null), bySlot(s, {H1:"Your tower is the SW one, with M1.", H2:"Your tower is the SE one, with M2."})]}],
+    rule:TOWER_RULE};
 }
 
 /** The second towers: soak the tower in the quadrant where you ended the first round. With a
-    tether, it runs from `portal`, on your own platform's side, to your mark. */
-export function splitTowers(s: Slot, tether: boolean, side: SplitSide, end: SplitEnd, portal?: Point): Scene {
-  const to = tether ? otherSide(side) : side, mark = lastSpot(s, side, end);
-  const mine = tether && portal && mark.t === "mark" ? {portal, you:mark} : undefined;
+    tether, it runs from its portal to your mark. */
+export function splitTowers(s: Slot, side: SplitSide, end: SplitEnd, tether: {portal: Point} | null): Scene {
+  const mark = lastSpot(s, side, end), knock = knockFor(side, tether?.portal ?? null);
+  const mine = tether && mark.t === "mark" ? {portal:tether.portal, you:mark} : undefined;
   return {setup:["Four towers again, one in each quadrant.", tether ? "You have a tether this time." : "No tether this time."],
     split:true, boss:BOSS,
     // With a tether, your mark is the tether's end, drawn with it.
     overlays:mine ? [...SPLIT_TOWERS, {t:"portal", x:mine.portal[0], y:mine.portal[1], vert:false}] : [...SPLIT_TOWERS, mark],
     ...(mine ? {tether:mine} : {}),
-    steps:[{q:"Which tower do you soak?", z:{c:SPLIT_TOWER[side][end], r:TOWER_R},
-      a:["The " + quadrant(side, end) + " tower: the quadrant you ended in.", (tether ? "Tether: get knocked to the " : "No tether: get knocked to the same platform, the ") + to + " one."]}],
-    rule:["Towers: the quadrant you ended the last tethers and markers in.", "Tethered: get knocked to the other platform.", "Not tethered: get knocked to the same platform."]};
+    steps:[{q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, knock),
+      a:[...towerAnswer(side, end, knock, tether !== null), "Your tower is in the quadrant you ended in."]}],
+    rule:["Towers: the quadrant you ended the last tethers and markers in.", ...TOWER_RULE]};
 }
 
 /** Massive Meteor: the four players on a platform stack in close, at the middle of its inner edge. */
@@ -839,8 +871,11 @@ export function avalancheScene(s: Slot, side: SplitSide, end: SplitEnd, face: Sp
   return {setup:["The boss faces the " + face + " platform: he grabs it.", "Towers appear, one in each quadrant.", "Then he turns and slams the platform down."], ordered:true,
     split:true, boss:{x:50, y:50, f}, overlays:[...SPLIT_TOWERS, lastSpot(s, side, end)],
     steps:[
-      {q:"Which tower do you soak?", z:{c:SPLIT_TOWER[side][end], r:TOWER_R},
-        a:["The " + quadrant(side, end) + " tower: the quadrant you ended in.", "Get knocked to the " + back + " platform, behind him."]},
+      {q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, side === back ? "along" : "across"),
+        a:[side === back
+          ? "The " + way(knockDir(side, end, "along")) + " side of the " + quadrant(side, end) + " tower: stay on this platform."
+          : "The " + way(knockDir(side, end, "across")) + " side of the " + quadrant(side, end) + " tower: get knocked across.",
+        "Your tower is in the quadrant you ended in.", "End on the " + back + " platform, behind him."]},
       {q:"He turns over the " + swing + " side. Where do you go?", z:{rect:[x0, y0, x1, y1]}, cue:turn,
         a:["The " + safe + " end of the " + back + " platform, by waymark " + wm.n + ".", "He turns from the " + swing + ", so go to the other end."],
         reveal:[{t:"lane", rect:platformZone(face).rect}, {t:"tag", x:platformMid(face), y:50, s:"GRABBED"}]}],
@@ -924,16 +959,17 @@ export const DRILLS: readonly Drill[] = [
       steps:[{q:"Click your lineup spot.", z:bySlot(s, {H1:{rect:[PLATFORM_X.west[0],52,PLATFORM_X.west[1],92]}, H2:{rect:[PLATFORM_X.east[0],52,PLATFORM_X.east[1],92]}}), a:bySlot(s, {H1:["West platform (light party 1), south end.", "Healers and melee go south."], H2:["East platform (light party 2), south end.", "Healers and melee go south."]})}],
       rule:["Light party 1 west, light party 2 east.", "Tanks and ranged north, healers and melee south."]})},
   {id:"m-split-tower", order:19, phase:P3, time:"6:29", title:"Arena Split: First Towers", kind:"towerKnockback", soak:2,
-    build:s=>firstTowersScene(s)},
-  // The first round: a tether knocked you to the other platform, no tether left you on your own.
+    variants:["tether", "marker"], random:true,
+    // A tether's portal is on either side, so the tether may need the knockback across or not.
+    build:(s, v)=>firstTowersScene(s, v === "tether" ? {portal:portalAt(randomSide(), randomEnd(), randomEndsSide())} : null)},
+  // A round of tethers and markers: a tether ends on either platform, across from its portal.
   {id:"m-split-fire", order:19.1, variants:["tether", "marker"], random:true, phase:P3, time:"6:35", title:"Arena Split: Fire Breath", kind:["bait", "chains"],
     build:(s, v)=>{ const tether = v === "tether", home = homeSide(s);
-      return splitRound(s, {tether, side:tether ? otherSide(home) : home, end:randomEnd(), covered:randomHalf(), endsSide:randomEndsSide(), others:randomOthers(s, tether ? 3 : 4)}); }},
-  // The second towers: no tether in the first round left you on your own platform, and the other way round.
+      return splitRound(s, {tether, side:tether ? randomSide() : home, end:randomEnd(), covered:randomHalf(), endsSide:randomEndsSide(), others:randomOthers(s, tether ? 3 : 4)}); }},
+  // The second towers: you start in the quadrant where the first round ended, on either platform.
   {id:"m-split-towers2", order:19.2, variants:["tether", "marker"], random:true, phase:P3, time:"7:01", title:"Arena Split: Second Towers", kind:"towerKnockback", soak:2,
-    build:(s, v)=>{ const tether = v === "tether", home = homeSide(s), side = tether ? home : otherSide(home), end = randomEnd();
-      // A tether's portal is on your own side, so the knockback to the other platform stretches it.
-      return splitTowers(s, tether, side, end, portalAt(side, randomEnd(), randomEndsSide())); }},
+    build:(s, v)=>{ const side = randomSide(), end = randomEnd();
+      return splitTowers(s, side, end, v === "tether" ? {portal:portalAt(randomSide(), randomEnd(), randomEndsSide())} : null); }},
   {id:"m-massive", order:20, phase:P3, time:"7:25", title:"Massive Meteor", kind:"lightPartyStack",
     build:s=>massiveScene(otherSide(homeSide(s)))},
   {id:"m-avalanche", order:21, random:true, phase:P3, time:"7:39", title:"Arcadion Avalanche", kind:"towerKnockback", soak:2,

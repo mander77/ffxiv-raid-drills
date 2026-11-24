@@ -740,8 +740,19 @@ static wins.
   November 2026):
   - You have a tether in one of the two rounds, not both: the tethers swap in the second round.
     Pressure's Settings pick says which round ("Your Arena Split tether").
-  - Each tower knocks you back: with a tether to the other platform, without one to the same
-    platform. So after the second round H1 is always on the east platform and H2 on the west.
+  - Each tower knocks the players in it 23 yalms straight away from its middle (BossMod's
+    `ExplosionKnockback`, `TOWER_KNOCKBACK`), so where you stand in it decides where you land
+    (owner's answers, November 2026, from Hector's video at 13:08). The correct area is the half
+    of your tower facing that way (`towerHalf`):
+    - A tether ends on the platform across from its portal. With its portal on your side, stand
+      on the side facing the other platform: you land across. With its portal already across,
+      you stay (Hector 13:16, wtfdig "KB to other side if you need to stretch tether").
+    - Without a tether you stay: stand on the side facing the platform's middle, and you land at
+      its other end. Healers start in the south towers, so round 1 without a tether ends north.
+    - So the platform you end on depends on your portals: it is no longer fixed after round 2.
+      Your portal's side is random each round in the drills and the full fight.
+    - Before November 2026 the app counted the whole tower as correct, always put your portal on
+      your side, and kept a no-tether player at the tower's end.
   - The split arena is drawn to scale from BossMod's Flatliner file (`BOSSMOD_SPLIT`, issue #89):
     each platform is 20 yalms wide and 40 long, 16 yalms from the boss to its middle, with a
     12-yalm gap. Together the platforms are wider than the square arena, so the arena draws the
@@ -759,8 +770,8 @@ static wins.
       outside the outer walls, two on each side, at the ends or near the middle (Hector's video,
       12:34). Your portal is on the other platform's side. The tether goes to the north or south
       wall at your end, just outside the portal lines.
-    - Without a tether, your end is the one you were knocked to: in round 1 your first tower's end
-      (south for both healers), in round 2 the end where round 1 ended. A Fire Breath marker goes to
+    - Without a tether, your end is the one you were knocked to: the other end from your tower
+      (round 1: north for both healers; round 2: the other end from where round 1 ended). A Fire Breath marker goes to
       the number waymark at that end, on its corner nearest the wall, on the side of the waymark
       the portal lines leave safe (the owner's choice, from Hector's video). The number waymarks
       sit on the line between the two halves, as in Hector's video.
@@ -780,11 +791,10 @@ static wins.
     - Every tether shows: yours follows you from the first step (your last click in Practice, the
       moving marker in Pressure). The other three or four show, stretched, when the lineup step
       is answered, on random players at the wall (the owner chose the lineup over the start).
-    - Second Towers with a tether: your tether runs from a portal on your own side to your mark, so
-      the knockback to the other platform stretches it. In the full fight, a round 1 tether shows
-      the same way from the First Towers on (cactbot's "--tethers--"), so you see it before the
-      knockback and can choose where to get knocked (the owner, November 2026). Practice's First
-      Towers has no tether pattern.
+    - At the towers your tether runs from its portal to you, from the start of the towers
+      (cactbot's "--tethers--" in the full fight), so you see before the knockback which way to
+      go (the owner, November 2026). First Towers and Second Towers both have a tether and a no
+      tether pattern in Practice.
     - A tether is a solid cord on a light outline; a guide stays thin white dashes. `/styles` shows
       both. To fit the portals, the split arena is drawn smaller (`SPLIT_SCALE`).
   - Majestic Meteor (owner's answers, November 2026): three puddles, one click each. The first

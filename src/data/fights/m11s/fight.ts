@@ -158,35 +158,41 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Ecliptic Stampede: " + fireball, drills:[ecl], scene:drill(ecl, s, wall), k:0, from:cactbot("Weighty Impact"), due:[cactbot("Two-way Fireball / Four-way Fireball")]}
   );
   /* The rest of Arena Split, built last so the random parts above keep their codes. You have a
-     tether in one round of the two and not in the other. A tether knocks you to the other
-     platform; no tether leaves you on the same one. Everyone is in close when the first puddle's
-     cast starts (cactbot's "--meteor 1--"), after the Fire Breath markers. Each puddle drops
-     when its cast starts ("--meteor 1--" to "--meteor 3--") and goes off 3 seconds later
-     (MajesticMeteorAOE). The tethers and markers resolve with Fire Breath. Your end of the
-     platform: with a tether, the end away from your portal (random); without one, the end you
-     were knocked to, which is your tower's end. The side portal lines cover a random half of
-     each platform each round. The side whose tether portals are near the ends is random each
-     round, and so are the other tethered players; in the second round the tethers swap. Then
-     the boss faces a random platform and turns to the other over a random side. */
+     tether in one round of the two and not in the other. Each tower knocks you away from its
+     middle. A tether ends on the platform across from its portal: when its portal is on your
+     side, the tower knocks you across; when it is already across, you stay. Without a tether
+     you stay, and the knockback sends you to the other end of your platform. Everyone is in
+     close when the first puddle's cast starts (cactbot's "--meteor 1--"), after the Fire Breath
+     markers. Each puddle drops when its cast starts ("--meteor 1--" to "--meteor 3--") and goes
+     off 3 seconds later (MajesticMeteorAOE). The tethers and markers resolve with Fire Breath.
+     Your end of the platform: with a tether, the end away from your portal (random); without
+     one, the end you were knocked to. The side portal lines cover a random half of each
+     platform each round. The side whose tether portals are near the ends is random each round,
+     and so are the other tethered players and the side of your portal; in the second round the
+     tethers swap. Then the boss faces a random platform and turns to the other over a random
+     side. */
   const t1 = choose(c.tether, random() < 0.5 ? "first" : "second") === "first";
   const end = (): SplitEnd => random() < 0.5 ? "north" : "south";
   const portal1 = end(), portal2 = end(), face: SplitSide = random() < 0.5 ? "west" : "east", swing = end();
   const cover1 = randomHalf(), cover2 = randomHalf(), ends1 = randomEndsSide(), ends2 = randomEndsSide();
   const others1 = randomOthers(s, t1 ? 3 : 4), others2 = swappedOthers(s, others1);
-  // Round 1 without a tether: the end of your first tower. Round 2 without one: you soaked the
-  // tower where round 1 ended, and it knocked you along the same platform.
-  const end1 = t1 ? portal1 : firstTowerEnd(s), end2 = t1 ? end1 : portal2;
-  const side1 = t1 ? otherSide(homeSide(s)) : homeSide(s), side2 = otherSide(homeSide(s));
+  // The side of your tether's portal in each round: you end on the platform across from it.
+  const portalSide1 = randomEndsSide(), portalSide2 = randomEndsSide();
+  // Without a tether the tower knocks you along your platform, to its other end: in round 1 from
+  // your first tower, in round 2 from the tower where round 1 ended.
+  const home = homeSide(s);
+  const end1 = t1 ? portal1 : otherEnd(firstTowerEnd(s)), side1 = t1 ? otherSide(portalSide1) : home;
+  const end2 = t1 ? otherEnd(end1) : portal2, side2 = t1 ? side1 : otherSide(portalSide2);
   const WRATH = "Majestic Meteowrath/Majestic Meteorain/Fire Breath";
   const round = (n: number): number[] => [cactbot("--meteor 1--", n), cactbot("--meteor 2--", n), cactbot("--meteor 3--", n), cactbot(WRATH, n)];
   // The first towers come with the round 1 tethers: yours, if you have one, shows from the start,
-  // so you can see before the knockback that it sends you to the other platform. Its portal is
-  // on your own platform's side, in the half away from where round 1 ends.
+  // so you can see before the knockback which way it needs you to go. Its portal is in the half
+  // away from where round 1 ends.
   const first = segs.find(g => g.drills[0] === "m-split-tower");
-  if (first) first.scene = firstTowersScene(s, t1 ? {portal:portalAt(homeSide(s), otherEnd(end1), ends1)} : null);
+  if (first) first.scene = firstTowersScene(s, t1 ? {portal:portalAt(portalSide1, otherEnd(end1), ends1)} : null);
   segs.push(
     {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, {tether:t1, side:side1, end:end1, covered:cover1, endsSide:ends1, others:others1}), k:0, from:cactbot("Explosion", 6), due:round(1)},
-    {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, !t1, side1, end1, portalAt(side1, otherEnd(end2), ends2)), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
+    {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, side1, end1, t1 ? null : {portal:portalAt(portalSide2, otherEnd(end2), ends2)}), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
     {title:"Arena Split: Fire Breath (Second Time)", drills:["m-split-fire"], scene:splitRound(s, {tether:!t1, side:side2, end:end2, covered:cover2, endsSide:ends2, others:others2}), k:0, from:cactbot("Explosion", 7), due:round(2)},
     {title:"Massive Meteor", drills:["m-massive"], scene:massiveScene(side2), k:0, from:cactbot("Massive Meteor (castbar)"), due:[cactbot("Massive Meteor x5")],
       // The cast gives about a second, so the party waits in close, where the stack goes.
