@@ -188,7 +188,12 @@ make sure that each one still matches the code before you start it.
     looks like "wrong"), and brighter accents (teal, magenta, yellow, coral) as too bright. The
     selected Role and Group are celery, like the tab you are on; the Role does not take its game
     colour, so the header never changes colour. The chrome has no other colour. Fonts: Saira Condensed
-    for names, tabs, headings and big numbers, Source Sans 3 for text, both bundled.
+    for names, tabs, headings and big numbers, Source Sans 3 for text, both bundled. The page does
+    not jump when they load: the build preloads their Latin files (`preloadFonts` in
+    `vite.config.ts`), and each has a fallback face in `src/app.css`, Arial resized to the web
+    font's metrics (values from fontaine, checked by `test/fonts.test.ts`). Fontaine's Vite plugin
+    was tried and dropped: it wrote a fallback for every subset file, with the wrong sizes for the
+    non-Latin ones.
   - Light and dark mode with a Light / Dark / System menu, as in shadcn/ui's dark mode guide for
     Vite: our own ThemeProvider sets the class on <html> (next-themes renders a script tag that
     React 19 warns about), and a script in index.html sets it before the page draws. The arena
