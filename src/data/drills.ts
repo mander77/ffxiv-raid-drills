@@ -324,10 +324,9 @@ function firstPuddle(start: Point, c: Point): Zone {
 
 /* Comet, the spread that can end Void Stardust. Only the tanks and melee have fixed spots,
    at the intercardinals just outside the hitbox. Healers and ranged take any open spot.
-   Nobody stands on a puddle that is still there (Amanda). Each one goes off VOID_PUDDLE.life (3)
-   seconds after it drops (BossMod: Cometite, 3.0 s cast) and then it is gone, and they drop 2
-   seconds apart. So by the spread only the last one is still on the floor: you leave it as it
-   goes off, on the way to your spot. The first two have faded from the map. */
+   Each puddle goes off VOID_PUDDLE.life (3) seconds after it drops (BossMod: Cometite, 3.0 s
+   cast) and then it is gone. The last one goes off 2 seconds before Comet, so by the spread
+   every puddle is gone and the spread does not check them. */
 const FIXED_SPREAD: {l: string; r: "T" | "D"; off: Point}[] = [
   {l:"MT", r:"T", off:[-15, -15]}, {l:"OT", r:"T", off:[15, -15]}, {l:"M1", r:"D", off:[-15, 15]}, {l:"M2", r:"D", off:[15, 15]}];
 /** The tank and melee spread spots around a boss at c. */
@@ -340,25 +339,22 @@ const far = (p: Point, q: Point, d: number): boolean => dist(p, q) >= d;
 /** The spot `deg` degrees clockwise from north and r units out from the arena center. */
 const POINT_AT = (deg: number, r: number): Point => polar(deg, r);
 
-/* The healers and ranged spread anywhere open: out of the hitbox, out of the last puddle, and not
-   on a tank or melee spot. A spread is 6 yalms (15 units), so a spot closer than that to a tank or
+/* The healers and ranged spread anywhere open: out of the hitbox and not on a tank or melee
+   spot. A spread is 6 yalms (15 units), so a spot closer than that to a tank or
    melee spot hits them. The map draws the open ground as four slices, one for each side of the
    boss (north, east, south and west, between the fixed spots), out to the arena edge. The shown
    spot, where the moving marker runs, is H1's west gap or H2's east gap. */
 export function cometSpread(s: Slot, c: Point = CENTER): (results: StepResult[]) => Zone {
   const fixed = fixedAround(c), gaps = gapsAround(c);
-  return results => {
-    const drops = results.flatMap(r => r.drop ? [r.drop] : []), last = drops[drops.length - 1];
-    const fn = (p: Point): boolean => inArena(p) && far(p, c, HITBOX + 2.5) &&
-      fixed.every(m => far(p, m.p, SPREAD_R)) && (!last || far(p, last, PUDDLE_R + 1));
-    const holes = [...fixed.map(m => ({q:m.p, r:SPREAD_R})), ...(last ? [{q:last, r:PUDDLE_R + 1}] : [])];
-    const part = (deg: number): Stretch | null => cutOut([[HITBOX + 2.5, toEdge(c, deg)]], c, deg, holes)[0] ?? null;
-    const slices = [0, 90, 180, 270].flatMap(a => rayArea(c, Array.from({length:91}, (_x, i) => a - 45 + i), part));
-    // Next to a wall a gap can be off the arena, and the last puddle can cover one.
-    const pref = bySlot(s, {H1:[3, 1, 0, 2], H2:[1, 3, 0, 2]}).map(i => gaps[i]);
-    const label = pref.find(fn) ?? nearestTo(pref[0], fn) ?? pref[0];
-    return {fn, label, show:slices.map(poly => ({poly}))};
-  };
+  const fn = (p: Point): boolean => inArena(p) && far(p, c, HITBOX + 2.5) && fixed.every(m => far(p, m.p, SPREAD_R));
+  const holes = fixed.map(m => ({q:m.p, r:SPREAD_R}));
+  const part = (deg: number): Stretch | null => cutOut([[HITBOX + 2.5, toEdge(c, deg)]], c, deg, holes)[0] ?? null;
+  const slices = [0, 90, 180, 270].flatMap(a => rayArea(c, Array.from({length:91}, (_x, i) => a - 45 + i), part));
+  // Next to a wall a gap can be off the arena.
+  const pref = bySlot(s, {H1:[3, 1, 0, 2], H2:[1, 3, 0, 2]}).map(i => gaps[i]);
+  const label = pref.find(fn) ?? nearestTo(pref[0], fn) ?? pref[0];
+  const zone: Zone = {fn, label, show:slices.map(poly => ({poly}))};
+  return () => zone;
 }
 
 /** Fire and Fury: the boss, facing north, cleaves his front and back. */
@@ -420,7 +416,7 @@ function voidSteps(s: Slot, spread: boolean, c: Point = CENTER, start = NORTH_ST
     spread
       ? {q:"Puddles done. Comet: every player spreads. Tanks and melee go to fixed spots. Where do you go?",
           zf:cometSpread(s, c), cue:spreadMarks(c),
-          a:["Any open spot. Healers and ranged have no fixed spread spot.", "Keep away from the tank and melee spots.", "Stay out of the last puddle."]}
+          a:["Any open spot. Healers and ranged have no fixed spread spot.", "Keep away from the tank and melee spots."]}
       : {q:"Puddles done. Where does the party stack?", zf:next,
           a:["Stack one more step clockwise, just past the third puddle.", "Stay in max melee."]}];
 }

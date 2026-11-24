@@ -648,8 +648,10 @@ static wins.
 - Puddles: start north of the boss. Drop each one just outside the last, a small step clockwise,
   in max melee.
 - A puddle (Cometite in BossMod) has a 3.0-second cast and goes off once. The drops are 2 seconds
-  apart, so at the stack or spread only the third puddle is still on the floor. The map fades each
-  puddle 3 seconds after it drops.
+  apart. The map fades each puddle 3 seconds after it drops.
+- The third puddle goes off 2 seconds before the stack or spread (1:27.9 and 1:29.9 in the first
+  Void Stardust, 1:54.2 and 1:56.2 in the second), so no puddle is on the floor then. The Comet
+  spread does not keep you out of a puddle (owner, 2026-11-24, issue #102).
 - Crushing Comet stack: one more step clockwise, just past the third puddle, where a fourth
   puddle would go. The same for both Void Stardusts. It is clear of the third puddle by its place.
 - Every puddle and the stack stay in the boss's max melee range (owner, 2026-11-23).

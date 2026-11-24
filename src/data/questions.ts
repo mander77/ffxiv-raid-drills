@@ -47,7 +47,7 @@ export const LEARN_CARDS: QuizItem[] = [
     why:["Comet puts a spread marker on every player.", "Crushing Comet puts one Party Stack on a healer.", "If it is on you, do not run away from the party."],
     rule:["Comet = spread.", "Crushing Comet = Party Stack on a healer."]})),
   mq("k-void-spread", 4.2, P1, "1:30", s=>({prompt:"Void Stardust ends with Comet, the spread. Where do you go?",
-    options:[{t:"Any open spot, away from the tanks and melee and out of the last puddle.", ok:true},{t:"The SW intercardinal, next to the boss."},{t:"Stay stacked with the party."},{t:"Under the boss."}],
+    options:[{t:"Any open spot, away from the tanks and melee.", ok:true},{t:"The SW intercardinal, next to the boss."},{t:"Stay stacked with the party."},{t:"Under the boss."}],
     why:["The spread is free for all, except for the tanks and melee.", "Fixed spots for tanks and melee: MT NW, OT NE, M1 SW, M2 SE.", "Healers and ranged find open ground, for example at a cardinal between those spots."],
     rule:["Comet spread: healers and ranged take any open spot.", "MT NW, OT NE, M1 SW, M2 SE."]})),
   mq("k-void-sprint", 4.3, P1, "1:30", s=>({prompt:"Void Stardust ends with a spread, and the first weapon of the second set is a scythe on the far side of the arena. How does the party get there in time?",
