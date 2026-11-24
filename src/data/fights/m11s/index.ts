@@ -1,6 +1,6 @@
 // M11S, The Tyrant (Savage), as the site reads it: one FightData built from the files in this
 // folder. The files keep their own names and shapes; this file only joins them up.
-import type { Choices, Fight } from "../../../types";
+import type { Choices, Fight, Slot } from "../../../types";
 import type { FightData } from "../types";
 import { ABILITIES, categoriesAt, ENRAGE, PHASES, timelineCategories } from "./abilities";
 import { busterPieces, HITBOX, PLATFORM_X, PORTAL_OUT, SCYTHE_SAFE, SPLIT_HALF_W, TETHER_STRETCH, TOWER_R } from "./attacks";
@@ -22,7 +22,7 @@ const WEAPONS = [
 
 /** The full fight as the engine uses it: every hit, and each timeline line with the categories
     of its abilities. */
-function build(s: Parameters<typeof buildFight>[0], code: string, choices: Choices): Fight {
+function build(s: Slot, code: string, choices: Choices): Fight {
   const f = buildFight(s, code, cleanChoices(choices));
   return {
     segs: f.segs,

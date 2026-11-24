@@ -1,5 +1,5 @@
 // The fight's times and sizes against its sources: the cactbot timeline and the BossMod module,
-// as `npm run import:sources` wrote them into src/data/source.gen.ts. Every time the app uses
+// as `npm run import:sources` wrote them into src/data/fights/m11s/source.gen.ts. Every time the app uses
 // must be a cactbot line, or the start of a cast that ends on one. Every size must be BossMod's.
 // A value that matches no source is listed below with the question for the owner, and the test
 // checks that it still matches none, so the list stays true.

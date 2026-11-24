@@ -1,7 +1,7 @@
 // Every correct answer against the attacks around it. For each drill, each variant, both slots
 // and a fixed list of pattern codes, the test answers each step with its correct spot and checks
 // that the spot is outside every attack that goes off at that step, and outside every dropped
-// puddle still on the floor. The attack sizes come from BossMod (src/data/attacks.ts), so this
+// puddle still on the floor. The attack sizes come from BossMod (src/data/fights/m11s/attacks.ts), so this
 // test does for positions what test/sources.test.ts does for times.
 //
 // Which attacks go off at a step: `Step.hits` when it is set, else the attacks in `reveal` (drawn
