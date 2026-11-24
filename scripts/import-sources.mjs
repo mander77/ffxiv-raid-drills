@@ -10,6 +10,8 @@
 //   removes the offsets, so each time is seconds into the fight.
 // - BossMod's module for the fight: every attack's size and shape, and the boss's hitbox.
 //   The enums file lists each ability with its shape in a comment, such as "range 8 circle".
+//   Its Flatliner file gives the two platforms of the Arena Split and where the side portal
+//   lines (Majestic Meteorain) can fire.
 //
 // Downloads come only from the two official GitHub repositories, at the commits below, into
 // .cache/sources/ (git ignores it). To move a pin, change the commit here, run the import, and
@@ -33,6 +35,7 @@ const BOSSMOD = {
   commit: "3004b0a7b5edd9ea8afaea69e71263c76668fff6",
   enums: "BossMod.Modules/Dawntrail/Savage/RM11STheTyrant/RM11STheTyrantEnums.cs",
   module: "BossMod.Modules/Dawntrail/Savage/RM11STheTyrant/RM11STheTyrant.cs",
+  flatliner: "BossMod.Modules/Dawntrail/Savage/RM11STheTyrant/Flatliner.cs",
 };
 
 /** One file of a repository at a commit, from the cache or from GitHub. */
@@ -142,6 +145,19 @@ export function parseBossmod(enums, module) {
   return { actors, abilities, arenaHalf: Number(square[1]) };
 }
 
+/** The Arena Split in BossMod's Flatliner file, in yalms from the arena's center: each platform's
+    center ("p + new WDir(16, 0)"), its half width and half length ("CurveApprox.Rect(new WDir(0,
+    20), new WDir(10, 0))"), and the x of each side portal line ("0x16 => -21"). */
+export function parseSplit(flatliner) {
+  const rect = /var plat = CurveApprox\.Rect\(new WDir\(0, (\d+(?:\.\d+)?)\), new WDir\((\d+(?:\.\d+)?), 0\)\)/.exec(flatliner);
+  const offset = /plat\.Select\(p => p \+ new WDir\((\d+(?:\.\d+)?), 0\)\)/.exec(flatliner);
+  const lines = /class MajesticMeteorain[\s\S]*?var xpos = index switch\s*\{([\s\S]*?)\};/.exec(flatliner);
+  if (!rect || !offset || !lines) throw new Error("bossmod: no Arena Split in the Flatliner file");
+  const xs = [...lines[1].matchAll(/0x[0-9A-F]+ => (-?\d+(?:\.\d+)?)/g)].map((m) => Number(m[1]));
+  if (xs.length === 0) throw new Error("bossmod: no Majestic Meteorain lines in the Flatliner file");
+  return { platformCenter: Number(offset[1]), platformHalfWidth: Number(rect[2]), platformHalfLength: Number(rect[1]), lines: xs };
+}
+
 /** A value as TypeScript text, on one line. */
 const ts = (v) =>
   typeof v === "string"
@@ -187,6 +203,11 @@ export function generate(lines, bossmod) {
     "/** Half the width of BossMod's square arena, in yalms. */",
     `export const BOSSMOD_ARENA_HALF = ${bossmod.arenaHalf};`,
     "",
+    "/** BossMod's Arena Split, in yalms from the arena's center: the center of each platform (west",
+    "    and east), its half width and half length, and the x of each side portal line",
+    "    (Majestic Meteorain). */",
+    `export const BOSSMOD_SPLIT = ${ts(bossmod.split)} as const;`,
+    "",
   ];
   return out.join("\n");
 }
@@ -196,7 +217,8 @@ async function main() {
   const timeline = await download(CACTBOT.repo, CACTBOT.commit, CACTBOT.path);
   const enums = await download(BOSSMOD.repo, BOSSMOD.commit, BOSSMOD.enums);
   const module = await download(BOSSMOD.repo, BOSSMOD.commit, BOSSMOD.module);
-  const text = generate(parseCactbot(timeline), parseBossmod(enums, module));
+  const flatliner = await download(BOSSMOD.repo, BOSSMOD.commit, BOSSMOD.flatliner);
+  const text = generate(parseCactbot(timeline), { ...parseBossmod(enums, module), split: parseSplit(flatliner) });
   if (check) {
     const now = existsSync(OUT) ? readFileSync(OUT, "utf8").replace(/\r\n/g, "\n") : "";
     if (now !== text) {
