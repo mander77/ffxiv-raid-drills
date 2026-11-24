@@ -2,7 +2,7 @@
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6, `ENRAGE`).
-import { DRILLS, SPLIT_INNER, avalancheScene, firstTowerEnd, homeSide, massiveScene, otherSide, randomHalf, splitRound, splitTowers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
+import { DRILLS, SPLIT_INNER, avalancheScene, firstTowerEnd, homeSide, massiveScene, otherEnd, otherSide, portalAt, randomEndsSide, randomHalf, randomOthers, splitRound, splitTowers, swappedOthers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
 import { ABILITIES, ENRAGE, FIGHT_END, type Category } from "./abilities";
 import { newCode, random, withSeed } from "../util";
 import { nearClock } from "../time";
@@ -191,12 +191,14 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
      (MajesticMeteorAOE). The tethers and markers resolve with Fire Breath. Your end of the
      platform: with a tether, the end away from your portal (random); without one, the end you
      were knocked to, which is your tower's end. The side portal lines cover a random half of
-     each platform each round. Then the boss faces a random platform and turns to the other over
-     a random side. */
+     each platform each round. The side whose tether portals are near the ends is random each
+     round, and so are the other tethered players; in the second round the tethers swap. Then
+     the boss faces a random platform and turns to the other over a random side. */
   const t1 = choose(c.tether, random() < 0.5 ? "first" : "second") === "first";
   const end = (): SplitEnd => random() < 0.5 ? "north" : "south";
   const portal1 = end(), portal2 = end(), face: SplitSide = random() < 0.5 ? "west" : "east", swing = end();
-  const cover1 = randomHalf(), cover2 = randomHalf();
+  const cover1 = randomHalf(), cover2 = randomHalf(), ends1 = randomEndsSide(), ends2 = randomEndsSide();
+  const others1 = randomOthers(s, t1 ? 3 : 4), others2 = swappedOthers(s, others1);
   // Round 1 without a tether: the end of your first tower. Round 2 without one: you soaked the
   // tower where round 1 ended, and it knocked you along the same platform.
   const end1 = t1 ? portal1 : firstTowerEnd(s), end2 = t1 ? end1 : portal2;
@@ -204,9 +206,9 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   const WRATH = "Majestic Meteowrath/Majestic Meteorain/Fire Breath";
   const round = (n: number): number[] => [cactbot("--meteor 1--", n), cactbot("--meteor 2--", n), cactbot("--meteor 3--", n), cactbot(WRATH, n)];
   segs.push(
-    {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, t1, side1, end1, cover1), k:0, from:cactbot("Explosion", 6), due:round(1)},
-    {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, !t1, side1, end1), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
-    {title:"Arena Split: Fire Breath (Second Time)", drills:["m-split-fire"], scene:splitRound(s, !t1, side2, end2, cover2), k:0, from:cactbot("Explosion", 7), due:round(2)},
+    {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, {tether:t1, side:side1, end:end1, covered:cover1, endsSide:ends1, others:others1}), k:0, from:cactbot("Explosion", 6), due:round(1)},
+    {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, !t1, side1, end1, portalAt(side1, otherEnd(end2), ends2)), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
+    {title:"Arena Split: Fire Breath (Second Time)", drills:["m-split-fire"], scene:splitRound(s, {tether:!t1, side:side2, end:end2, covered:cover2, endsSide:ends2, others:others2}), k:0, from:cactbot("Explosion", 7), due:round(2)},
     {title:"Massive Meteor", drills:["m-massive"], scene:massiveScene(side2), k:0, from:cactbot("Massive Meteor (castbar)"), due:[cactbot("Massive Meteor x5")],
       // The cast gives about a second, so the party waits in close, where the stack goes.
       pre:zoneCenter(SPLIT_INNER[side2])},

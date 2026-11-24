@@ -88,6 +88,8 @@ type OverlayShape =
   | ({ t: "lineaoe"; w?: number } & Line)
   | ({ t: "band"; w: number } & Line)
   | ({ t: "guide" } & Line)
+  // A tether: from its portal (x, y) to the player (x2, y2). It shows stretched when it is long enough.
+  | ({ t: "tether" } & Line)
   // Where a cone points: an arrow from its source (x, y) out to (x2, y2).
   | ({ t: "aim" } & Line)
   | ({ t: "tornado" } & At)
@@ -101,7 +103,8 @@ type OverlayShape =
   | ({ t: "puddle"; r: number } & At)
   | ({ t: "tag"; s: string } & At)
   | ({ t: "mark"; l: string; r: MarkRole } & At)
-  | ({ t: "portal"; vert: boolean; n: number } & At)
+  /** `n` numbers Orbital Omen's portals; the Arena Split's tether portals have none. */
+  | ({ t: "portal"; vert: boolean; n?: number } & At)
   | ({ t: "scythe"; ux: number; uy: number; dx: number; dy: number; held?: boolean } & At)
   | { t: "lane"; rect: RectBox; soft?: boolean }
   | { t: "poly"; pts: Point[] }
@@ -195,6 +198,9 @@ export interface Scene {
   spawnPlay?: boolean;
   /** How many weapons show before the first hit. Each answered step shows one more. */
   spawnAhead?: number;
+  /** Your tether: it runs from its portal to where you stand, from the first step. Before your
+      first answer you stand at your mark `you`. */
+  tether?: { portal: Point; you: Extract<Overlay, { t: "mark" }> };
 }
 
 /** What you do in a Practice mechanic: spread out, stack (the whole party, in pairs, in light

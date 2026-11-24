@@ -713,7 +713,25 @@ static wins.
       the portal lines leave safe (the owner's choice, from Hector's video). The number waymarks
       sit on the line between the two halves, as in Hector's video.
   - Tethers go to random roles: two tethered players on each platform, in any mix of roles (the
-    owner, November 2026). The drills only follow your own tether.
+    owner, November 2026). In the second round the tethers swap: the four untethered players of
+    round 1 get them.
+  - The tethers on the arena (issue #85, owner's answers, November 2026):
+    - The other end of each tether is a portal. The four portals stand 3 yalms outside the outer
+      walls (`PORTAL_OUT`), two on each side: one side's pair near the ends (5 and 35 yalms from
+      the north wall), the other's near the middle (15 and 25), random each round. BossMod has no
+      portal spots, so they come from Hector's video (13:36), drawn to scale. The owner first
+      asked for the wall line, then chose these spots, because on the wall line a correct tether
+      spot measured under 48 yalms and stayed red.
+    - Red when short, blue when stretched. Stretched means at least 48 yalms from the portal
+      (BossMod's `StretchDistance`, `TETHER_STRETCH`), which BossMod calls an estimate. The correct
+      tether spot must be stretched too, so the part of the wall next to the gap can be incorrect.
+    - Every tether shows: yours follows you from the first step (your last click in Practice, the
+      moving marker in Pressure). The other three or four show, stretched, when the lineup step
+      is answered, on random players at the wall (the owner chose the lineup over the start).
+    - Second Towers with a tether: your tether runs from a portal on your own side to your mark, so
+      the knockback to the other platform stretches it. First Towers has no tether pattern.
+    - A tether is a solid cord on a light outline; a guide stays thin white dashes. `/styles` shows
+      both. To fit the portals, the split arena is drawn smaller (`SPLIT_SCALE`).
   - Majestic Meteor (owner's answers, November 2026): three puddles, one click each. The first
     goes in close at the middle of the inner edge. Each next one goes just outside the last, tight
     against the inner edge (`INNER_STRIP`, the app's choice), toward your end. A puddle drops when

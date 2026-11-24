@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { cn } from "@/lib/utils";
-import { busterPieces } from "../../data/attacks";
+import { busterPieces, isStretched, SPLIT_HALF_W } from "../../data/attacks";
 import type { Hit } from "../../data/fight";
 import { runnerAt } from "../../data/route";
 import { useFightFrame } from "../../hooks/useFightFrame";
@@ -9,7 +9,7 @@ import { promptOf } from "../../lib/fight";
 import { markRole, partyOf } from "../../party";
 import type { Point, Slot } from "../../types";
 import { LiveArena } from "../arena/LiveArena";
-import { Shape } from "../arena/Shape";
+import { Shape, Tether } from "../arena/Shape";
 
 /** A hit to show over the arena: `n` counts the hits, so each one draws (and animates) anew. */
 export interface ShownHit {
@@ -57,11 +57,11 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
       className={cn("cursor-pointer", className)}
       effects={
         <>
-          {hit && <HitEffect key={hit.n} hit={hit.hit} at={hit.at} />}
+          {hit && <HitEffect key={hit.n} hit={hit.hit} at={hit.at} split={v.scene.split ?? false} />}
           <CountdownRing at={bossAt} />
         </>
       }
-      runner={<Runner slot={slot} />}
+      runner={<Runner slot={slot} portal={v.scene.tether?.portal} />}
     />
   );
 }
@@ -69,11 +69,13 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
 interface HitEffectProps {
   hit: Hit;
   at: Point;
+  /** The Arena Split: the flash covers both platforms, which reach past 0 and 100. */
+  split: boolean;
 }
 
 /** Damage going out: a flash over the floor in the category's colour, or for a tank buster, the
     tanks and the hit on them. Its CSS animation fades it out. */
-function HitEffect({ hit, at }: HitEffectProps) {
+function HitEffect({ hit, at, split }: HitEffectProps) {
   if (hit.kind === "tank")
     return (
       <g className="buster">
@@ -84,7 +86,8 @@ function HitEffect({ hit, at }: HitEffectProps) {
       </g>
     );
   if (hit.kind === "aoe") return null;
-  return <rect className={cn("hitfx", hit.kind, hit.cat)} x="0" y="0" width="100" height="100" />;
+  const [x, width] = split ? [50 - SPLIT_HALF_W, SPLIT_HALF_W * 2] : [0, 100];
+  return <rect className={cn("hitfx", hit.kind, hit.cat)} x={x} y="0" width={width} height="100" />;
 }
 
 interface CountdownRingProps {
@@ -123,19 +126,38 @@ function CountdownRing({ at }: CountdownRingProps) {
 
 interface RunnerProps {
   slot: Slot;
+  /** Your tether's portal, when you have a tether: the tether runs from it to your marker. */
+  portal?: Point;
 }
 
 /** Your marker: it runs the correct spots on the player, and to your clicks in the run. It waits on
     each spot until the hit lands, then runs to the next one. While it has to get there, a dotted
-    line goes to the spot, and a ring marks it. */
-function Runner({ slot }: RunnerProps) {
+    line goes to the spot, and a ring marks it. With a tether, the tether follows it. */
+function Runner({ slot, portal }: RunnerProps) {
   const me = useRef<SVGGElement>(null);
   const path = useRef<SVGLineElement>(null);
   const next = useRef<SVGCircleElement>(null);
+  // Two tethers, one red and one stretched: each frame shows the one that fits its length.
+  const short = useRef<SVGGElement>(null);
+  const long = useRef<SVGGElement>(null);
   useFightFrame((s) => {
     const { at, target } = runnerAt(s.route, s.t);
     const to = target?.p;
     me.current?.setAttribute("transform", `translate(${at[0].toFixed(2)} ${at[1].toFixed(2)})`);
+    if (portal) {
+      const stretched = isStretched(portal, at);
+      for (const [g, show] of [
+        [short.current, !stretched],
+        [long.current, stretched],
+      ] as const) {
+        if (!g) continue;
+        g.style.display = show ? "" : "none";
+        for (const line of g.querySelectorAll("line")) {
+          line.setAttribute("x2", at[0].toFixed(2));
+          line.setAttribute("y2", at[1].toFixed(2));
+        }
+      }
+    }
     const away = to != null && Math.hypot(to[0] - at[0], to[1] - at[1]) > 0.5;
     if (path.current) {
       path.current.style.display = away ? "" : "none";
@@ -156,6 +178,16 @@ function Runner({ slot }: RunnerProps) {
   });
   return (
     <g className="runner">
+      {portal && (
+        <>
+          <g ref={short}>
+            <Tether portal={portal} to={portal} stretched={false} />
+          </g>
+          <g ref={long} style={{ display: "none" }}>
+            <Tether portal={portal} to={portal} stretched />
+          </g>
+        </>
+      )}
       <line ref={path} className="runpath" style={{ display: "none" }} />
       <circle ref={next} className="runnext" r="2.6" style={{ display: "none" }} />
       <g ref={me}>

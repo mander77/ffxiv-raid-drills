@@ -58,7 +58,14 @@ test("the arena's name says that a click picks where you stand, only when it doe
 
 test("the next step's cue shows after a correct answer, and waits after an incorrect one", () => {
   // Arena Split: the portal lines are the cue of the lineup, after the three puddles.
-  const scene = splitRound("H1", false, "west", "north", "inner"),
+  const scene = splitRound("H1", {
+      tether: false,
+      side: "west",
+      end: "north",
+      covered: "inner",
+      endsSide: "west",
+      others: ["MT", "OT", "M1", "R2"],
+    }),
     puddles: StepResult[] = [];
   for (const st of scene.steps.slice(0, 3)) {
     const z = stepZone(st, puddles);
@@ -108,4 +115,30 @@ test("Void Stardust: every puddle fades when Comet is asked, but stays for the s
     assert.equal(drops[2].classList.contains("fading"), lastFades, `${name}: the last puddle`);
     unmount();
   }
+});
+
+test("Arena Split: your tether follows you, red until it is stretched, and the others show at the lineup", () => {
+  const scene = splitRound("H1", {
+      tether: true,
+      side: "east",
+      end: "south",
+      covered: "inner",
+      endsSide: "west",
+      others: ["MT", "M2", "R1"],
+    }),
+    results: StepResult[] = [];
+  const { rerender } = render(<LiveArena scene={scene} k={0} results={results} showLast={false} hint={false} />);
+  // From the first step: your tether to your mark, not stretched yet.
+  assert.ok(screen.getByLabelText("Tether, not stretched"));
+  assert.isNull(screen.queryByLabelText("Tether, stretched"));
+  for (const st of scene.steps) {
+    const z = stepZone(st, results);
+    if (!z) throw new Error("no zone");
+    results.push({ p: zoneCenter(z), ok: true, z, drop: st.drop ? zoneCenter(z) : null });
+  }
+  rerender(<LiveArena scene={scene} k={0} results={results} showLast hint={false} />);
+  // At the lineup: yours and the three others, all stretched.
+  assert.equal(screen.getAllByLabelText("Tether, stretched").length, 4);
+  assert.isNull(screen.queryByLabelText("Tether, not stretched"));
+  assert.ok(screen.getByText("M2"), "on the other tethered players");
 });

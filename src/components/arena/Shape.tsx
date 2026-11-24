@@ -1,4 +1,5 @@
-import { HITBOX, TOWER_R } from "../../data/attacks";
+import { cn } from "@/lib/utils";
+import { HITBOX, isStretched, TOWER_R } from "../../data/attacks";
 import { round2, unit } from "../../geometry";
 import type { Overlay, Point } from "../../types";
 import { Weapon } from "./Weapon";
@@ -101,14 +102,37 @@ export function Shape({ overlay: o }: ShapeProps) {
       return <Aim from={[o.x, o.y]} to={[o.x2, o.y2]} />;
     case "guide":
       return <line className="guide" x1={round2(o.x)} y1={round2(o.y)} x2={round2(o.x2)} y2={round2(o.y2)} />;
+    case "tether":
+      return <Tether portal={[o.x, o.y]} to={[o.x2, o.y2]} />;
     case "portal":
       return (
         <g className="portal" transform={`translate(${round2(o.x)} ${round2(o.y)})`}>
           <ellipse rx={o.vert ? 6 : 2.2} ry={o.vert ? 2.2 : 6} />
-          <text>{o.n}</text>
+          {o.n != null && <text>{o.n}</text>}
         </g>
       );
   }
+}
+
+interface TetherProps {
+  portal: Point;
+  to: Point;
+  /** Whether the tether is stretched. By default, from its length. */
+  stretched?: boolean;
+}
+
+/** A tether from its portal to a player: a solid cord on a light outline, red until it is long
+    enough, then blue. Its name says which, for a screen reader, and its title shows on hover. */
+export function Tether({ portal, to, stretched = isStretched(portal, to) }: TetherProps) {
+  const ends = { x1: round2(portal[0]), y1: round2(portal[1]), x2: round2(to[0]), y2: round2(to[1]) };
+  const name = stretched ? "Tether, stretched" : "Tether, not stretched";
+  return (
+    <g className={cn("tether", stretched && "stretched")} aria-label={name}>
+      <title>{name}</title>
+      <line className="halo" {...ends} />
+      <line className="cord" {...ends} />
+    </g>
+  );
 }
 
 interface AimProps {
