@@ -280,8 +280,8 @@ test("Void Stardust spread: any open spot, drawn as four slices around the boss"
   // A spread is 6 yalms (15 units): closer than that to a melee spot hits them.
   assert.notOk(inZone([37, 63], z), "next to the M1 spot");
   assert.notOk(inZone([30, 75], z), "4.5 yalms from M1");
-  assert.notOk(inZone(PUDDLES[2], z), "inside the last puddle");
-  assert.ok(inZone([50, 17], z), "on the first puddle, which went off before the spread");
+  // Every puddle goes off before the spread, so none of them closes a spot.
+  assert.ok(inZone([50, 17], z), "on the first puddle");
   assert.notOk(inZone([50, 58], z), "inside the hitbox");
   drawnMatchesRule(z);
   assert.isAbove(zoneCenter(cometSpread("H2")(VOID_RESULTS))[0], 50, "H2's shown spot is east");
