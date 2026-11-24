@@ -80,9 +80,10 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
 - A knockback has its own overlay (`{t:"knockback"}`): wide, hollow arrows out from its source,
   like the push in the knockback icons (icons.tsx, rule 5; owner's request). Thin white guides
   were too faint to see.
-- A tower can show its soak count (`soak`): a badge on its ring with the tower icon and the
-  number in its column, in the highlight colour, as the mechanic icon shows it (owner's request;
-  first in its middle, moved to the ring so a waymark cannot cover it). A puddle can
+- A tower can show its soak count (`soak`): a pill-shaped badge on its ring, with the tower icon
+  and, beside it, the number, large, in the highlight colour (owner's request; first in the
+  tower's middle, then inside the icon on the ring: a waymark covered the first and the number was
+  too small to read in the second). A puddle can
   carry its life in seconds (`life`).
 - On the styles page, "Knockback Arrows" and "Tower to Soak" have these names because the
   mechanic kinds "Knockback" and "Tower" already have cards there.
