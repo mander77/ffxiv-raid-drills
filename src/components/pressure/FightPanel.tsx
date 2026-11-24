@@ -92,7 +92,7 @@ function Mechanic({ view: v, fight, g, onGoTo, onGoToStep, onSpawns }: MechanicP
               </Button>
             )}
             <Button variant="outline" onClick={() => onGoTo(g)}>
-              Watch it again
+              Watch It Again
             </Button>
             {nx && v.paused && (
               <span className="text-sm text-muted-foreground pointer-coarse:hidden">
@@ -104,7 +104,7 @@ function Mechanic({ view: v, fight, g, onGoTo, onGoToStep, onSpawns }: MechanicP
       ) : (
         g.scene.spawnPlay && (
           <Button variant="outline" onClick={onSpawns}>
-            Watch the spawns again
+            Watch the Spawns Again
           </Button>
         )
       )}
@@ -152,7 +152,7 @@ function Between({ paused, fight, onGoTo }: BetweenProps) {
             Next mechanic: {nx.title} at {clock(nx.from)}.
           </p>
           {/* The line above names the mechanic, so the button stays short. */}
-          <Button onClick={() => onGoTo(nx)}>Jump to next mechanic</Button>
+          <Button onClick={() => onGoTo(nx)}>Jump to Next Mechanic</Button>
         </>
       )}
       {a && (

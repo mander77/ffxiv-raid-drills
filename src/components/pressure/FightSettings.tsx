@@ -62,7 +62,7 @@ export function FightSettings({ code, choices, onChange }: FightSettingsProps) {
           </SheetClose>
           {choicesText(choices) && (
             <Button variant="link" onClick={() => onChange(RANDOM)}>
-              Set all to Random
+              Set All to Random
             </Button>
           )}
         </SheetFooter>
@@ -203,7 +203,7 @@ function WeaponOrderRow({ label, value, onChange }: WeaponOrderRowProps) {
         onValueChange={(v) => v && onChange(v === "random" ? "random" : order.join("-"))}
       >
         <ToggleGroupItem value="random">Random</ToggleGroupItem>
-        <ToggleGroupItem value="set">Set order</ToggleGroupItem>
+        <ToggleGroupItem value="set">Set Order</ToggleGroupItem>
       </ToggleGroup>
       <ol ref={cards} aria-label={`${label}${random ? ": random" : ": drag the cards, or use the arrow keys"}`} className="flex gap-2">
         {order.map((w, i) => (

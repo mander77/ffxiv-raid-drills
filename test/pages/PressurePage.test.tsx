@@ -44,8 +44,8 @@ test("the start screen offers the quick round and the full fight", () => {
   open("/pressure");
   assert.ok(screen.getByText("Timed questions"));
   assert.ok(screen.getByText("The whole fight on the clock"));
-  assert.ok(screen.getByRole("button", { name: "Start the run" }));
-  assert.ok(screen.getByRole("button", { name: "Watch the correct moves" }));
+  assert.ok(screen.getByRole("button", { name: "Start the Run" }));
+  assert.ok(screen.getByRole("button", { name: "Watch the Correct Moves" }));
 });
 
 test("the seconds to decide are saved", async () => {
@@ -84,7 +84,7 @@ test("Quit ends a quick round and goes back to the start", async () => {
 test("Start the run opens the run on /pressure, and Quit with no answer goes back", async () => {
   open("/pressure");
   const user = userEvent.setup();
-  await user.click(screen.getByRole("button", { name: "Start the run" }));
+  await user.click(screen.getByRole("button", { name: "Start the Run" }));
   assert.equal(where(), "/pressure");
   assert.ok(await screen.findByText(/Mechanic 1 of \d+/), "the first frame shows your progress");
   assert.ok(screen.getByRole("region", { name: "Casts coming up" }), "the casts coming up, as in the player");
@@ -94,7 +94,7 @@ test("Start the run opens the run on /pressure, and Quit with no answer goes bac
 
 test("Watch the correct moves opens the player at a new fight's address", async () => {
   open("/pressure");
-  await userEvent.setup().click(screen.getByRole("button", { name: "Watch the correct moves" }));
+  await userEvent.setup().click(screen.getByRole("button", { name: "Watch the Correct Moves" }));
   assert.match(where() ?? "", /^\/pressure\/[2-9A-HJ-NP-Z]{4}$/);
   assert.ok(screen.getByRole("slider", { name: "Fight time" }));
 });
@@ -154,7 +154,7 @@ test("between mechanics, Jump to next mechanic goes to the mechanic named above 
   open("/pressure/K7Q2?t=66");
   // The panel fills in the next mechanic on the first frame of the fight clock.
   assert.ok(await screen.findByText(/Next mechanic: Void Stardust into the Second Weapons/));
-  await userEvent.setup().click(screen.getByRole("button", { name: "Jump to next mechanic" }));
+  await userEvent.setup().click(screen.getByRole("button", { name: "Jump to Next Mechanic" }));
   assert.ok(screen.getByRole("heading", { name: "Void Stardust into the Second Weapons" }));
 });
 

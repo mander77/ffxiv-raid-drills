@@ -8,14 +8,14 @@ this file in the same commit.
 
 - November 20: the aim is narrow. Learn the fight mechanics, learn the role positions, and answer
   the same questions under time pressure. A screen must work with very little reading.
-- The tabs are Home, Learn, Practice, Timeline, Pressure and Cheat sheet. The tabs "My job" and
+- The tabs are Home, Learn, Practice, Timeline, Pressure and Cheat Sheet. The tabs "My job" and
   "Someone died" were deleted. Git history keeps their code.
 - The site has one fight and one role today. The long-term plan is many raid fights and every
   role (tanks, healers, melee, ranged and casters), each with its own slots (MT/OT, H1/H2, M1/M2,
   R1/R2). A new fight comes from data files, with little or no change to the engine code.
 - The site does not replace wtfdig. The owner likes the site's own diagrams, so the plan has a
   reference view of every mechanic in fight order, for a second screen (issue #2), at the top of
-  the Cheat sheet.
+  the Cheat Sheet.
 
 ## Planned work
 
@@ -23,7 +23,7 @@ The plans are GitHub issues in `mander77/ffxiv-raid-drills`. Read them with `gh 
 `gh issue view <number>`. The issues were written on November 20, before some later changes, so
 make sure that each one still matches the code before you start it.
 
-- Issue #2, the reference view (November 22): it lives at the top of the Cheat sheet, in place of
+- Issue #2, the reference view (November 22): it lives at the top of the Cheat Sheet, in place of
   "Positions to remember", not in a new tab, so the phone keeps its short list of tabs. It is one
   scrolling page, not one mechanic at a time. Each mechanic gets
   one key picture, not one per Learn card: 26 mechanics in fight order (`REFERENCE` in
@@ -58,8 +58,8 @@ make sure that each one still matches the code before you start it.
     BossMod.
   - The arena stays SVG, drawn by React components, not a canvas or a game library. The full
     fight's per-frame parts run in a requestAnimationFrame loop that updates elements through refs.
-  - Rebuild 1 (#18): the header and the Cheat sheet, in the default look. Any other address opens
-    the Cheat sheet until its tab is back. The Cheat sheet lost its "Learn →" links and "Your
+  - Rebuild 1 (#18): the header and the Cheat Sheet, in the default look. Any other address opens
+    the Cheat Sheet until its tab is back. The Cheat Sheet lost its "Learn →" links and "Your
     progress" box for now: Learn and the scores come back in later steps.
   - The slot is in a Zustand store (`src/stores/slot.ts`), saved under "raid-drills-slot".
   - The React code follows the usual React layout, so a React developer finds things at once:
@@ -85,14 +85,14 @@ make sure that each one still matches the code before you start it.
     scores are in a Zustand store (`src/stores/progress.ts`) under "raid-drills-progress"; each
     tab's round count (correct of done) is kept until you reload, and an answer for another slot
     starts a new round. Home's "Start here" cards link only to tabs that exist. On a phone the
-    Lock in bar is fixed to the bottom of the screen once you pick an answer: a sticky bar would
+    Lock In bar is fixed to the bottom of the screen once you pick an answer: a sticky bar would
     stay inside the answers' column, under the picture, off screen.
   - Rebuild 4 (#21): Practice is back. The address always names the pattern
     (`/practice/<mechanic>/<code>`): a mechanic with no code, or a broken one, gets a new code, and
-    Next mechanic and New pattern make a new one. The rules (build a pattern from its code, answer
+    Next mechanic and New Pattern make a new one. The rules (build a pattern from its code, answer
     a step, the phase after it, where the boss stands) are plain functions in
     `src/lib/practice.ts`, with tests. The pictures and the boss's turns match the live site for
-    the same code. A try with Show me does not count in your score, as before. Choosing a spot on
+    the same code. A try with Show Me does not count in your score, as before. Choosing a spot on
     the arena takes a pointer; the buttons around it all work from the keyboard.
   - November 21: a naming clean-up, so one idea has one name (CLAUDE.md, "Words in the code").
     The addresses and round names are the tabs' names (`/learn`, `/practice`, `/timeline`); a
@@ -101,7 +101,7 @@ make sure that each one still matches the code before you start it.
     status; `look` is a colour, so a look-ahead step is `Step.lookAhead`; the ability categories
     are spelled out (`Category`, `CategoryIcons`); `f1` (which rounds to 2 decimals) is `round2`.
     Only names changed, never a value, in `src/data/` too, with the owner's OK.
-  - Rebuild 5 (#22): Pressure is back: the quick round, the run and Watch the correct moves, with
+  - Rebuild 5 (#22): Pressure is back: the quick round, the run and Watch the Correct Moves, with
     shared player links (`/pressure/<code>[/<picks>][?t=<s>]`). The fight clock's rules (the skip
     to 3 seconds before a mechanic, when a step can be answered, the result hold, the 3-2-1, the
     look-ahead answer) moved from the old screen code into plain functions in `src/lib/fight.ts`,
@@ -289,8 +289,8 @@ make sure that each one still matches the code before you start it.
 - The Home "Start here" cards, in learning order.
 - The Learn picture with the answer drawn on it. A player who skips the text still gets the
   answer from the picture.
-- Practice's Show me with the blue "Go here" area. It teaches before it tests.
-- "Watch the correct moves". The new-player tests liked it best.
+- Practice's Show Me with the blue "Go here" area. It teaches before it tests.
+- "Watch the Correct Moves". The new-player tests liked it best.
 
 ## Ideas the owner rejected or declined
 
@@ -339,7 +339,7 @@ Do not propose these again unless the owner brings them up.
   question and the answers in a 20rem column against the arena's floor, lined up with its top, so
   the arena takes the height the question took above it. The column scrolls when a long rule does
   not fit. A phone, and a Timeline card, keep the question above and the picture beside or above.
-- Pick an answer (click or a number key) to preview it in blue on the picture, then Lock in (or
+- Pick an answer (click or a number key) to preview it in blue on the picture, then Lock In (or
   Enter). The preview also draws the attack that the answer assumes, because the quiz tests what
   the boss does, not only where you stand.
 - After an answer, the correct answer holds its explanation, and an incorrect pick gets a "Your pick" tag.
@@ -348,7 +348,7 @@ Do not propose these again unless the owner brings them up.
   that each card is in exactly one chip.
 - One prompt bar on every tab that asks something (owner's choice, November 23, "Option A"): Learn,
   Timeline, Pressure's quick round and Practice share `PromptBar`. It holds the question (with
-  Practice's step count), Lock in, and after the answer Next. The owner wanted navigation the same
+  Practice's step count), Lock In, and after the answer Next. The owner wanted navigation the same
   on every tab, and the eye drawn to what changed, at every width.
   - On a wide screen it sits at the top of the column beside the arena, where Practice had its bar.
     On a narrow screen it sits over the picture and sticks to the top of the screen while you
@@ -361,8 +361,8 @@ Do not propose these again unless the owner brings them up.
     one, and scrolls into view; on a wide screen the correct answer, with its explanation, scrolls
     into view in the column. Before, the rule came after the answers and was often off the
     screen, so players did not know it was there (owner's report).
-  - This replaced the bar fixed to the bottom of a phone screen (Lock in and Next), which moved
-    the button from the top on a wide screen to the bottom on a phone. Lock in is now "Lock in".
+  - This replaced the bar fixed to the bottom of a phone screen (Lock In and Next), which moved
+    the button from the top on a wide screen to the bottom on a phone. Lock In is now "Lock In".
 
 ### Timeline
 
@@ -445,13 +445,13 @@ Do not propose these again unless the owner brings them up.
     mechanic in other fights.
 - Practice has the layout of Pressure's player (owner's choice), so the two tabs look and feel the
   same. A wide screen: the prompt over the mechanic on the left of the arena, and a bar (which
-  mechanic, New pattern) over the list of mechanics on its right. Both sides are 20rem wide, so
+  mechanic, New Pattern) over the list of mechanics on its right. Both sides are 20rem wide, so
   the prompt and its buttons fit, on Practice and Pressure alike (owner's choice). A narrow screen: the same in one
   column, the prompt and the mechanic over the arena, the bar and the list, sideways, under it. It
   has no timer (owner's choice, after a timer for each mechanic was discussed): Practice is where
   you learn a mechanic with no time pressure, and Pressure is the timed tab.
-- Show me draws the correct spot in blue with the tag "Go here", shows the answer text in the bar and
-  the rule in the panel. A try with Show me does not count in the score.
+- Show Me draws the correct spot in blue with the tag "Go here", shows the answer text in the bar and
+  the rule in the panel. A try with Show Me does not count in the score.
 - Reset (start the same pattern again) is always in the prompt bar on the left, as an icon button
   with a tooltip (owner's choice); after a mechanic, Next mechanic sits beside it, as an icon too.
   The bar over the list of mechanics has no Again: one restart button, in one place.
@@ -459,13 +459,13 @@ Do not propose these again unless the owner brings them up.
   in review, a chip takes you to a step. A chip that is a button looks like Learn's chips (round);
   a chip that only shows progress is a badge.
   - During a try the chips are badges: a check, a cross, the step you are on. Nothing jumps. Show
-    me covers the step you are on, and Watch the correct moves covers the whole mechanic.
+    me covers the step you are on, and Watch the Correct Moves covers the whole mechanic.
   - After the try they are buttons. A click, or the arrow keys, shows that step: the arena as it
     was (the boss, the puddles down, your click, the green area), its answer under the chips, and
     "Step 2/4, Not there" in the bar. The step shown has a ring, apart from its check or cross.
-  - Try from here, in the bar, answers the step shown and the ones after it again; the answers
-    before it stay. It does not count in the score, as with Show me (the app's choice: the first
-    try already counted). A mechanic with one step has no chips, so no Try from here.
+  - Try From Here, in the bar, answers the step shown and the ones after it again; the answers
+    before it stay. It does not count in the score, as with Show Me (the app's choice: the first
+    try already counted). A mechanic with one step has no chips, so no Try From Here.
   - Reset keeps one meaning: start the whole mechanic again.
   - The answer card sits under the chips, over the rule, so the step you review and its answer
     are together.
@@ -496,7 +496,7 @@ Do not propose these again unless the owner brings them up.
 - The option "Stop at each new mechanic, so I can look first" waits at each new mechanic until you
   press Go.
 
-### Pressure: Watch the correct moves (the player)
+### Pressure: Watch the Correct Moves (the player)
 
 - A replay. A marker with your role runs the correct spots. You do not click answers.
 - The HUD gives the correct move (the step's answer text), and nothing turns red.
@@ -527,12 +527,12 @@ Do not propose these again unless the owner brings them up.
 - The first weapon of Void Stardust is answered 4 seconds early and shows as "Look ahead"
   until its due time, so you have time to see it.
 
-### Home and Cheat sheet
+### Home and Cheat Sheet
 
 - Home: "Start here" cards in learning order. The top picture is the answer picture of the Learn
   card `k-raw-first` (on a phone, a 110 px strip from the boss to the party stack). The owner's
   character picture is in About me with a wide crop of the face, the card and both arms.
-- Cheat sheet: first every mechanic in fight order, by phase, as cards: its time, a Learn answer
+- Cheat Sheet: first every mechanic in fight order, by phase, as cards: its time, a Learn answer
   picture for your slot, its Learn cards' rules and a link to Learn. One card per row (owner's
   choice, after four, three and two per row): from tablet width the text sits beside a big
   picture (576 px at 1280 px), on a phone under it. Under the rules, "As H1:" gives each Learn
@@ -541,9 +541,9 @@ Do not propose these again unless the owner brings them up.
   mechanic. No Pressure link: the player needs a fight code, and its times move with the pattern.
   The page is long, so once you scroll to Phase 1, buttons sit in the bottom right corner: "↑"
   the section before the one you are in, "↓" the next one, and "↑ Top" (owner's ask). The
-  sections are Phase 1 to 4, Panic reset and Timeline. Sources and Your progress are not stops:
+  sections are Phase 1 to 4, Panic Reset and Timeline. Sources and Your progress are not stops:
   they are short and end the page, so their headings never scroll up to the top. At the top of
-  the page, one button per section jumps to it: the phases, Panic reset, Timeline, Sources and
+  the page, one button per section jumps to it: the phases, Panic Reset, Timeline, Sources and
   Your progress (owner's ask). The buttons at the top jump at once; the corner buttons scroll
   smoothly (owner's ask), or jump when the system asks for reduced motion. Then the panic reset,
   your timeline, the sources and
@@ -595,7 +595,7 @@ Do not propose these again unless the owner brings them up.
 - Below lg (1024 px) the tabs are one button with the tab you are on, in celery like a tab
   ("☰ Learn"). It opens a sheet from the left with the six tabs (`TabMenu`, shadcn's Sheet). The
   owner chose it over two rows of three, which took a quarter of a phone's screen, and over a tab
-  bar at the bottom (six tabs are too many, and it would cover Learn's Lock in bar). The Role and
+  bar at the bottom (six tabs are too many, and it would cover Learn's Lock In bar). The Role and
   Group switch sits on the button's row when it fits (a 375 px phone and up) and moves above it
   when not.
 - Keyboard hints do not show on touch screens.
@@ -608,7 +608,7 @@ Do not propose these again unless the owner brings them up.
   shadcn/ui's customization guide shows. The outline variant's own dark-mode colours hid them.
 - Scores are kept per slot (owner's choice): the correct answers differ by slot, so H1 and H2
   answers never mix. The quick round picks its weak cards from your slot's scores, and the
-  Cheat sheet counts your slot's answers. Reset erases every slot.
+  Cheat Sheet counts your slot's answers. Reset erases every slot.
 - Every saved store (slot, progress, Pressure settings) has a `version` in its persist options.
   When the saved shape changes, raise the version and say in `migrate` what happens to old data.
   While the site is in development, old data may simply be dropped.

@@ -21,7 +21,7 @@ CONTEXT
 - The site is a free practice tool for one FFXIV raid fight: M11S (The Tyrant, Savage), for
   healers. It has these tabs: Home, Learn (quiz cards with arena pictures), Practice (click
   where you stand, one mechanic at a time), Timeline (which mechanic comes next), Pressure (a
-  quick round of timed questions, or the full fight on the clock), Cheat sheet (every
+  quick round of timed questions, or the full fight on the clock), Cheat Sheet (every
   mechanic on one page).
 - The header has a role switch (only Healer works today; the other roles say they are not
   yet available), a Group switch for your slot (H1 or H2), a light and dark mode switch, and
@@ -32,7 +32,7 @@ CONTEXT
 - Goals a user must reach: learn what each mechanic does and where to stand; practice one
   mechanic; answer under time pressure (the quick round and the full-fight run); watch the
   correct moves for the whole fight and jump to one mechanic in it; set your own slot; keep
-  the Cheat sheet open on a second screen during the raid; share a link with the static.
+  the Cheat Sheet open on a second screen during the raid; share a link with the static.
 
 SCOPE AND RULES
 - Use only the live site in the browser. Do not read source code, docs or the repository.

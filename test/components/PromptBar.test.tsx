@@ -8,13 +8,13 @@ afterEach(cleanup);
 
 test("while the question is open, the bar shows the count, the question and the buttons", () => {
   const { container } = render(
-    <PromptBar count="2/4" actions={<button type="button">Show me</button>}>
+    <PromptBar count="2/4" actions={<button type="button">Show Me</button>}>
       Where do you stand?
     </PromptBar>,
   );
   assert.ok(screen.getByText("2/4"));
   assert.ok(screen.getByText("Where do you stand?"));
-  assert.ok(screen.getByRole("button", { name: "Show me" }));
+  assert.ok(screen.getByRole("button", { name: "Show Me" }));
   assert.equal(container.querySelector("svg"), null, "no check mark or cross yet");
 });
 

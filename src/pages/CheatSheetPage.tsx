@@ -1,4 +1,4 @@
-// The Cheat sheet page (/sheet): every mechanic with its picture, the panic reset and your timeline
+// The Cheat Sheet page (/sheet): every mechanic with its picture, the panic reset and your timeline
 // on one page.
 // TS note: a .tsx file is TypeScript that may hold JSX, the HTML-like tags below. Each tag compiles
 // to a call to React, so the compiler checks every tag and attribute.
@@ -137,7 +137,7 @@ function Mechanics({ slot }: MechanicsProps) {
     and a jump to them would seem to do nothing. They come right after the timeline. */
 const SECTIONS: readonly { id: string; label: string }[] = [
   ...PHASES.map((p) => ({ id: phaseId(p.phase), label: shortPhase(p.phase) })),
-  { id: "panic-reset", label: "Panic reset" },
+  { id: "panic-reset", label: "Panic Reset" },
   { id: "timeline", label: "Timeline" },
 ];
 
@@ -166,7 +166,7 @@ function JumpLink({ to, smooth = false, ...props }: JumpLinkProps) {
 const ALL_SECTIONS: readonly { id: string; label: string }[] = [
   ...SECTIONS,
   { id: "sources", label: "Sources" },
-  { id: "progress", label: "Your progress" },
+  { id: "progress", label: "Your Progress" },
 ];
 
 /** A row of buttons at the top of the page, one per section, to jump to it. */
@@ -266,7 +266,7 @@ function YourProgress({ slot }: YourProgressProps) {
         You answered {seen} different items as {slot} so far. Progress stays in this browser only.
       </p>
       <Button variant={confirm ? "destructive" : "outline"} onClick={handleReset}>
-        {confirm ? "Click again to erase progress" : "Reset my progress"}
+        {confirm ? "Click Again to Erase Progress" : "Reset My Progress"}
       </Button>
     </>
   );
@@ -283,7 +283,7 @@ export function CheatSheetPage() {
 
         <Mechanics slot={slot} />
 
-        <Section id="panic-reset" title="Panic reset">
+        <Section id="panic-reset" title="Panic Reset">
           <ol className="list-decimal space-y-2 pl-6">
             <li>Feet: go to your spot for the next mechanic.</li>
             <li>Self: if you are low, heal or shield yourself.</li>
@@ -342,7 +342,7 @@ export function CheatSheetPage() {
             ))}
           </ul>
         </Section>
-        <Section id="progress" title="Your progress">
+        <Section id="progress" title="Your Progress">
           <YourProgress slot={slot} />
         </Section>
         <SectionButtons />

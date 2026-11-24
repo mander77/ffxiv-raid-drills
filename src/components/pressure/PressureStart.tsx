@@ -71,9 +71,9 @@ export function PressureStart({ onQuick, onRun, onWatch }: PressureStartProps) {
             <Label htmlFor={stopsId}>Stop at each new mechanic, so I can look first</Label>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button onClick={onRun}>Start the run</Button>
+            <Button onClick={onRun}>Start the Run</Button>
             <Button variant="outline" onClick={onWatch}>
-              Watch the correct moves
+              Watch the Correct Moves
             </Button>
           </div>
         </CardContent>

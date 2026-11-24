@@ -147,7 +147,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
         ) : (
           previews && (
             <Button size="sm" disabled={sel === null} onClick={() => sel !== null && lockIn(sel)}>
-              Lock in
+              Lock In
             </Button>
           )
         )

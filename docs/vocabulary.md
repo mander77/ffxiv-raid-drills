@@ -90,6 +90,7 @@ Each kind of text has a place in the code and a job.
 |------|---------|-----------|
 | Every mechanic name is in Title Case: on the icons, in titles and inside a sentence. | "a Party Stack on a healer" | "a party stack on a healer" |
 | Mechanic titles are in Title Case, also the part after the colon and in parentheses. | "Raw Steel Trophy: Axe", "Void Stardust (Second Time)" | "Raw Steel Trophy: axe" |
+| Button labels, tab names and headings are in Title Case. A sentence on a button or a label stays a sentence. | "Show Me", "Lock In", "Cheat Sheet" | "Show me", "Lock in" |
 | Small words stay in lower case inside a title: a, an, and, as, at, by, for, in, into, of, on, or, the, to. | "Void Stardust into the Second Weapons" | "Void Stardust Into The Second Weapons" |
 | A verb stays in lower case, also when it looks like a kind name. | "the party stacks", "Your light party stacks on you." | "the Party Stacks" |
 | A name from the game stays as the game writes it. | "Two-way Fireball" | "Two-Way Fireball" |
@@ -267,8 +268,8 @@ The header switch is "Light party", with the buttons 1 and 2.
 | Froze: the time ran out. | A quick-round card with no answer in time. | |
 | Too slow | A step in the run with no click in time. | |
 | Correct spot | The label on the green area. | |
-| Go here | The label on Show me's blue area. | |
-| Correct move: | The player's answer line in Watch the correct moves. | |
+| Go here | The label on Show Me's blue area. | |
+| Correct move: | The player's answer line in Watch the Correct Moves. | |
 | Correct answer. | The start of a card's explanation. | |
 
 "Froze" and "Too slow" mean the same thing on purpose: one is for cards, one is for the run
@@ -284,12 +285,12 @@ These words name parts of the site. `CLAUDE.md`, "Words in the code", has the na
 | pattern | The random parts of a mechanic. | layout |
 | card | One Learn or Timeline question. | |
 | the run | The scored full fight. Only this. | |
-| Watch the correct moves | The replay of the full fight. | |
-| Show me | The button that shows the correct spot. | |
+| Watch the Correct Moves | The replay of the full fight. | |
+| Show Me | The button that shows the correct spot. | |
 | step chips | One chip per step of a mechanic: badges during a try, buttons in review. | |
-| Try from here | After a try: answer the step shown and the ones after it again. | Retry, Redo |
+| Try From Here | After a try: answer the step shown and the ones after it again. | Retry, Redo |
 | phase | Phase 1 to 4 of the fight. Nothing else. | |
-| tab | Home, Learn, Practice, Timeline, Pressure, Cheat sheet. | |
+| tab | Home, Learn, Practice, Timeline, Pressure, Cheat Sheet. | |
 
 ## Names from the game
 

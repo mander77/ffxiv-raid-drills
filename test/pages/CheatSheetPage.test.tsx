@@ -45,7 +45,7 @@ test("the buttons at the top jump to each section of the page", () => {
   const chips = within(screen.getByRole("navigation", { name: "Sections on this page" })).getAllByRole("link");
   assert.deepEqual(
     chips.map((c) => c.textContent),
-    ["Phase 1", "Phase 2", "Phase 3", "Phase 4", "Panic reset", "Timeline", "Sources", "Your progress"],
+    ["Phase 1", "Phase 2", "Phase 3", "Phase 4", "Panic Reset", "Timeline", "Sources", "Your Progress"],
   );
   // Each one goes to a section that is on the page.
   for (const c of chips) assert.ok(document.getElementById(c.getAttribute("href")?.slice(1) ?? ""), c.textContent ?? "");
@@ -97,9 +97,9 @@ test("Your progress counts your slot's answers; Reset asks once, then erases eve
   draw("H1");
   const user = userEvent.setup();
   assert.ok(screen.getByText(/You answered 2 different items as H1/));
-  await user.click(screen.getByRole("button", { name: "Reset my progress" }));
+  await user.click(screen.getByRole("button", { name: "Reset My Progress" }));
   assert.equal(Object.keys(useProgressStore.getState().scores).length, 2, "the first click only asks");
-  await user.click(screen.getByRole("button", { name: "Click again to erase progress" }));
+  await user.click(screen.getByRole("button", { name: "Click Again to Erase Progress" }));
   assert.deepEqual(useProgressStore.getState().scores, {});
   assert.ok(screen.getByText(/You answered 0 different items/));
 });

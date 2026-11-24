@@ -17,7 +17,7 @@ export const TABS: readonly TabInfo[] = [
   { path: "/practice", label: "Practice", lede: "Click where you stand. One mechanic at a time, no timer." },
   { path: "/timeline", label: "Timeline", lede: "Which mechanic comes next in the fight." },
   { path: "/pressure", label: "Pressure", lede: "The same questions, fast: timed questions, or the whole fight on the clock." },
-  { path: "/sheet", label: "Cheat sheet", lede: "Every mechanic with its picture, and your timeline, on one page." },
+  { path: "/sheet", label: "Cheat Sheet", lede: "Every mechanic with its picture, and your timeline, on one page." },
 ];
 
 /** The tab of an address: "/learn/k-sword" is on the Learn tab, and only "/" is on Home. */

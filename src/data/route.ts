@@ -1,5 +1,5 @@
 // The route your marker runs in the full fight: from spot to spot, leaving each spot just after
-// its hit. "Watch the correct moves" runs the correct spots, and the run goes to your own clicks.
+// its hit. "Watch the Correct Moves" runs the correct spots, and the run goes to your own clicks.
 // The position comes from the fight time, so pausing, the slider and the speed setting stay in
 // step with it.
 //
@@ -52,7 +52,7 @@ function middleOf(z: Zone, from: Point): Point {
   return choices.reduce((a, b) => dist(a, from) <= dist(b, from) ? a : b);
 }
 
-/** The correct spots of the whole fight, in time order. "Watch the correct moves" answers with these
+/** The correct spots of the whole fight, in time order. "Watch the Correct Moves" answers with these
     same points. Each one is the middle of its spot (see middleOf). A step with a best spot goes
     there instead: a few steps in from the sword pocket's inner corner. A spot that depends on the
     steps before it (a puddle, for example) is worked out from these answers. */

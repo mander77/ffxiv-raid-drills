@@ -41,7 +41,7 @@ test("picking Light or Dark sets the page's mode and keeps it in the browser", a
     </ThemeProvider>,
   );
   const user = userEvent.setup();
-  await user.click(screen.getByRole("button", { name: "Light or dark mode" }));
+  await user.click(screen.getByRole("button", { name: "Light or Dark Mode" }));
   await user.click(screen.getByRole("menuitem", { name: "Light" }));
   assert.isTrue(document.documentElement.classList.contains("light"));
   assert.isFalse(document.documentElement.classList.contains("dark"));

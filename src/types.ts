@@ -142,7 +142,7 @@ export interface Step {
   zf?: (results: StepResult[]) => Zone;
   drop?: boolean;
   /** A look-ahead step: you click to show what you have spotted (a weapon, for example), but you
-      do not move there. The moving marker in "Watch the correct moves" skips it. */
+      do not move there. The moving marker in "Watch the Correct Moves" skips it. */
   lookAhead?: boolean;
   /** The best spot to stand when the zone has one, for example a few steps in from the
       sword pocket's inner corner. The moving marker goes there instead of

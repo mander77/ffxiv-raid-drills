@@ -49,7 +49,7 @@ export const CACTBOT_TIMELINE = "https://github.com/OverlayPlugin/cactbot/blob/m
 export const BOSSMOD = "https://github.com/awgil/ffxiv_bossmod";
 export const BOSSMOD_MODULE = "https://github.com/awgil/ffxiv_bossmod/tree/master/BossMod.Modules/Dawntrail/Savage/RM11STheTyrant";
 
-/** The guides and sources the Cheat sheet lists, each with an optional note after it. */
+/** The guides and sources the Cheat Sheet lists, each with an optional note after it. */
 export const SOURCES: readonly { href: string; label: string; note?: string }[] = [
   { href: WTFDIG, label: "wtfdig M11S", note: "Your strats: Hector (Toxic), Kindred No Buddies, Fixed (3CJ)" },
   { href: "https://www.youtube.com/watch?v=w1uuwzhyf5A", label: "Hector's video guide" },

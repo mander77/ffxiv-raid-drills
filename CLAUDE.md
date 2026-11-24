@@ -48,11 +48,11 @@ claim on the live site before you act on it.
 | Tab | Route | What it does |
 |-----|-------|--------------|
 | Home | `/` | An arena picture from a Learn card, "Start here" cards, and About me. |
-| Learn | `/learn/<card>` | Quiz cards with arena pictures. Pick an answer to see it, then Lock in. Back, Next and one chip per mechanic. |
-| Practice | `/practice/<mechanic>/<code>` | Click where you stand, one mechanic at a time. Show me, Reset, New pattern. The code names the pattern. |
+| Learn | `/learn/<card>` | Quiz cards with arena pictures. Pick an answer to see it, then Lock In. Back, Next and one chip per mechanic. |
+| Practice | `/practice/<mechanic>/<code>` | Click where you stand, one mechanic at a time. Show Me, Reset, New Pattern. The code names the pattern. |
 | Timeline | `/timeline/<card>` | Which mechanic comes next, with a cactbot-style list. |
-| Pressure | `/pressure`, `/pressure/<code>[/<picks>][?t=<s>]` | A quick round of 12 timed cards, or the full fight: the run (you click) and Watch the correct moves (the player). The player's address names its fight, its picks and, paused, its moment. |
-| Cheat sheet | `/sheet` | Every mechanic in fight order with its picture, rules, your own answer and links to train it, the timeline for your role, sources and your progress. |
+| Pressure | `/pressure`, `/pressure/<code>[/<picks>][?t=<s>]` | A quick round of 12 timed cards, or the full fight: the run (you click) and Watch the Correct Moves (the player). The player's address names its fight, its picks and, paused, its moment. |
+| Cheat Sheet | `/sheet` | Every mechanic in fight order with its picture, rules, your own answer and links to train it, the timeline for your role, sources and your progress. |
 
 The footer, at the bottom of every page, links to the pages that are not tabs. The styles page,
 `/styles`, has no tab; the footer links to it. It shows how the site shows an answer (the real
@@ -142,7 +142,7 @@ src/pages/           React pages, one per route: HomePage (/), LearnPage (/learn
                      (/practice), TimelinePage (/timeline), PressurePage (/pressure),
                      CheatSheetPage (/sheet), StylesPage (/styles, linked from the footer)
 src/components/practice/  Practice: DrillScreen (one drill's screen, in the layout of Pressure's
-                     player: clicks, Show me, the prompt, the panel, the bar and the list),
+                     player: clicks, Show Me, the prompt, the panel, the bar and the list),
                      MechanicList (the mechanics under their phases: a click opens one)
 src/lib/practice.ts  Practice rules as plain functions: buildPattern, answerStep, statusAfter, bossFor
 src/components/pressure/  Pressure: PressureStart, QuickRound, FightScreen (the run and the player:
@@ -157,7 +157,7 @@ src/lib/fight.ts     the fight clock's rules as plain functions: newFightState, 
                      answerFightStep, viewOf, promptOf, castOf, castsAhead, castPositions
 src/lib/pressure.ts  the quick round's rules (weighted cards, the timer) and playerLink
 src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round), QuestionCard
-                     (answers, previews, Lock in, keys, the timer of a timed card), AnswerButton
+                     (answers, previews, Lock In, keys, the timer of a timed card), AnswerButton
                      (one answer, before and after you answer), TimerBar,
                      TimelinePicture
 src/hooks/           custom hooks: useTimeout, useScrollToTopOnNewTab, useCastTimeline (the casts coming up, moving with the fight clock), useLineDrag (drag the
@@ -181,7 +181,7 @@ src/data/questions.ts  Learn cards (LEARN_CARDS, LEARN_GROUPS) and Timeline card
 src/data/fight.ts    the full fight: segments, due times, pattern picks and codes
 src/data/route.ts    the moving marker's route (correctRoute, clickRoute, runnerAt, showOf)
 src/data/timeline.ts the fight timeline and "what you do" per row
-src/data/reference.ts  the Cheat sheet's mechanics in fight order (REFERENCE): a Learn picture
+src/data/reference.ts  the Cheat Sheet's mechanics in fight order (REFERENCE): a Learn picture
                      and the Learn cards whose rules each one lists, its drills and Timeline card
 src/data/abilities.ts  the ability list, phases and colour categories
 src/data/attacks.ts  attack sizes and shapes (from BossMod). Put new sizes here.
@@ -326,7 +326,7 @@ rebase, run CI or approve a preview again when `main` moves.
 
 One idea has one name. Use these, and add to the list when a new idea comes in.
 
-- **Tab**: Home, Learn, Practice, Timeline, Pressure, Cheat sheet. The address and the round name
+- **Tab**: Home, Learn, Practice, Timeline, Pressure, Cheat Sheet. The address and the round name
   are the tab's name in lower case: `/learn`, `/practice`, `/timeline`.
 - **Card**: one Learn or Timeline question (`QuizItem`; `LEARN_CARDS`, `TIMELINE_CARDS`).
 - **Drill**: one Practice mechanic (`Drill`, `DRILLS`). The screen says "mechanic"; the code says
@@ -356,7 +356,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Round**: the answers so far on one tab, for one slot. The **quick round** is Pressure's 12
   timed cards (`QuickRound`).
 - **Fight**: the full fight on the clock (`Fight`, `FightScreen`), in two modes (`FightMode`):
-  **the run** (`"run"`), where you click your spots and get a score ("run" means only this), and **Watch the correct moves**
+  **the run** (`"run"`), where you click your spots and get a score ("run" means only this), and **Watch the Correct Moves**
   (`"watch"`), the player. A **frame** is one step of the fight clock (`tickFight`,
   `useFightFrame`).
 - **Jump set**: the weapons the boss jumps to in order, in Assault Evolved and Ultimate Trophy
@@ -370,8 +370,8 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Prompt bar**: the bar with the question and its buttons (`PromptBar`), the same on Learn,
   Timeline, the quick round and Practice. After the answer it turns green or red and says how
   it went. On a narrow screen a `StickyBar` keeps it at the top of the screen.
-- **Review**: after a try (and always in Watch the correct moves), the step chips (`StepChips`
-  with `onPick`) go to a step. During a test they only show progress. **Try from here** answers
+- **Review**: after a try (and always in Watch the Correct Moves), the step chips (`StepChips`
+  with `onPick`) go to a step. During a test they only show progress. **Try From Here** answers
   the step shown and the ones after it again.
 
 ## Rules for the content

@@ -64,9 +64,9 @@ export function QuickRound({ onBack }: QuickRoundProps) {
           <Tally correct={counts.correct} incorrect={counts.incorrect} missed={counts.froze} missedLabel="Froze" />
           <p className="text-sm">{msg}</p>
           <div className="flex flex-wrap gap-3">
-            <Button onClick={again}>Go again</Button>
+            <Button onClick={again}>Go Again</Button>
             <Button variant="outline" onClick={onBack}>
-              Change speed
+              Change Speed
             </Button>
           </div>
         </CardContent>
