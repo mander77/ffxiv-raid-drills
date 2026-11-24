@@ -28,6 +28,7 @@ export const BOSSMOD_MODULE = "https://github.com/awgil/ffxiv_bossmod/tree/maste
 export const SOURCES: readonly { href: string; label: string; note?: string }[] = [
   { href: WTFDIG, label: "wtfdig M11S", note: "Your strats: Hector (Toxic), Hector No Buddies, Fixed (3CJ)" },
   { href: "https://www.youtube.com/watch?v=w1uuwzhyf5A", label: "Hector's video guide" },
+  { href: "https://www.youtube.com/watch?v=p8cL88OKEWE", label: "Hector's Fixed Stampede mini-guide", note: "Ecliptic Stampede" },
   { href: "https://raidplan.io/plan/HJAbE7fuWodELUSB", label: "Toxic Friends raidplan", note: "Phases 1 and 2" },
   { href: "https://naurffxiv.com/savage/m11s", label: "naurffxiv M11S", note: "Waymark presets: Kindred Outside" },
   { href: "https://raidplan.io/plan/KXVlSGwV3zqON3CJ", label: "Fixed Stampede raidplan", note: "Ecliptic Stampede" },
