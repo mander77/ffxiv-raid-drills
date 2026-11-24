@@ -143,11 +143,25 @@ export function faceApproach(W: Weapon[]): Weapon[] {
   });
 }
 
+/** No jump straight across the middle. A weapon he reaches that way would face the middle too,
+    as square as the first one. cactbot's "R11S Trophy Weapons" trigger (r11s.ts) finds the first
+    weapon as the one facing the middle, so the game never has two. Where the spots would give a
+    180-degree jump, that jump's weapon moves 45 degrees back toward the weapon before it (the
+    owner's choice): 180/90 becomes 135/135, and 90/180 becomes 90/135. No random call is added,
+    so a fight code still builds every other part the same way. */
+function noJumpAcross(W: Weapon[]): Weapon[] {
+  return W.map((w, i): Weapon => {
+    if(i === 0 || (w.a - W[i - 1].a + 360) % 360 !== 180) return w;
+    const a = (w.a - 45 + 360) % 360;
+    return {...w, a, p:atAngle(a)};
+  });
+}
+
 /* Assault Evolved, second set (1:33, after Void Stardust). The boss does not face a weapon until
    his cast starts, but the weapons show the order (cactbot reads it from their facing): the one
    that faces the middle, square to the boss, goes first. Then clockwise. */
 export function buildAssault2(s: Slot, order?: WeaponType[]): JumpSet {
-  const W = faceApproach(assaultWeapons(order));
+  const W = faceApproach(noJumpAcross(assaultWeapons(order)));
   // The weapons used to get a random turn and flip. Those random numbers are still drawn, so a
   // fight code made before this change builds the rest of the fight the same way.
   for(let i = 0; i < W.length; i++){ if(i){ random(); random(); } random(); }

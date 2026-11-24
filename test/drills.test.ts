@@ -90,6 +90,24 @@ test("Assault Evolved, second set: each weapon faces where he jumps from, the fi
   }
 });
 
+test("Assault Evolved, second set: only the first weapon lies square to the middle", () => {
+  for (let i = 0; i < REPEATS; i++) {
+    const A = buildAssault2("H1");
+    // How far each weapon's long side is from square to the line to the middle, in degrees.
+    const off = A.W.map((w) => {
+      if (!w.axis) throw new Error("every second-set weapon is turned");
+      const out = Math.atan2(w.p[1] - 50, w.p[0] - 50),
+        along = Math.atan2(w.axis[1], w.axis[0]);
+      const d = Math.abs((((along - out) * 180) / Math.PI) % 180);
+      return Math.abs(90 - Math.min(d, 180 - d));
+    });
+    assert.closeTo(off[0], 0, 1e-6, "the first weapon is square to the middle");
+    const gaps = A.W.map((w) => w.a).join(", ");
+    assert.isAtLeast(off[1], 20, `weapons at ${gaps}: the second is clearly off square`);
+    assert.isAtLeast(off[2], 20, `weapons at ${gaps}: the third is clearly off square`);
+  }
+});
+
 const SET_BUILDERS: Record<string, (s: Slot) => JumpSet> = { buildAssault, buildAssault2, buildUltimate };
 
 test("jump sets: H1 stands at the scythe butt, H2 at the blade end", () => {
