@@ -159,29 +159,64 @@ const EXAMPLE = standardAttacks(20);
 const MID: Point = [50, 50];
 /** The middle of the arena, closer up, for an attack much smaller than the arena. */
 const CLOSE = "25 25 50 50";
-const ATTACKS: readonly { name: string; meaning: string; overlays: readonly Overlay[]; view?: string }[] = [
-  { name: "Raidwide", meaning: "Hits the whole arena: the party takes it.", overlays: [EXAMPLE.raidwide()] },
-  { name: "Circle", meaning: "Hits everything inside the circle.", overlays: [EXAMPLE.circle(MID, 8)] },
-  { name: "Donut", meaning: "Hits everything outside its inner ring: stand inside it.", overlays: [EXAMPLE.donut(MID, 5, 60)] },
-  { name: "Cone", meaning: "Hits a wedge out from its source.", overlays: [EXAMPLE.cone([50, 90], 0, 90, 60)] },
-  { name: "Line", meaning: "Hits a straight line out from its source.", overlays: [EXAMPLE.line([50, 100], 0, 60, 6)] },
-  { name: "Cross", meaning: "Hits two lines across each other.", overlays: EXAMPLE.cross(MID, 0, 40, 10) },
-  { name: "Half Arena", meaning: "Hits one half of the arena: go to the other half.", overlays: EXAMPLE.halfArena("west") },
-  {
+/** Closer still, for a tower or the "size unknown" mark. */
+const CLOSER = "35 35 30 30";
+/** One standard attack on this page: its name, what it means, and its picture. */
+interface AttackSample {
+  name: string;
+  meaning: string;
+  overlays: readonly Overlay[];
+  /** The part of the arena to show (an SVG viewBox), when not all of it. */
+  view?: string;
+}
+
+const ATTACKS = {
+  raidwide: { name: "Raidwide", meaning: "Hits the whole arena: the party takes it.", overlays: [EXAMPLE.raidwide()] },
+  circle: { name: "Circle", meaning: "Hits everything inside the circle.", overlays: [EXAMPLE.circle(MID, 8)] },
+  donut: { name: "Donut", meaning: "Hits everything outside its inner ring: stand inside it.", overlays: [EXAMPLE.donut(MID, 5, 60)] },
+  cone: { name: "Cone", meaning: "Hits a wedge out from its source.", overlays: [EXAMPLE.cone([50, 90], 0, 90, 60)] },
+  line: { name: "Line", meaning: "Hits a straight line out from its source.", overlays: [EXAMPLE.line([50, 100], 0, 60, 6)] },
+  cross: { name: "Cross", meaning: "Hits two lines across each other.", overlays: EXAMPLE.cross(MID, 0, 40, 10) },
+  halfArena: { name: "Half Arena", meaning: "Hits one half of the arena: go to the other half.", overlays: EXAMPLE.halfArena("west") },
+  knockback: {
     name: "Knockback Arrows",
     meaning: "Pushes you away from its source, as far as the arrows.",
     overlays: EXAMPLE.knockback(MID, 6),
     view: CLOSE,
   },
-  { name: "Puddle", meaning: "Stays on the floor for a few seconds, then goes off.", overlays: [EXAMPLE.puddle(MID, 6, 3)], view: CLOSE },
-  { name: "Tower to Soak", meaning: "Soaked by as many players as its number.", overlays: [EXAMPLE.tower(MID, 4, 2)], view: CLOSE },
-  {
+  puddle: {
+    name: "Puddle",
+    meaning: "Stays on the floor for a few seconds, then goes off.",
+    overlays: [EXAMPLE.puddle(MID, 6, 3)],
+    view: CLOSE,
+  },
+  tower: { name: "Tower to Soak", meaning: "Soaked by as many players as its number.", overlays: [EXAMPLE.tower(MID, 4, 2)], view: CLOSER },
+  unknown: {
     name: "Size Unknown",
     meaning: "An attack whose size no source gives yet. It is not drawn to size.",
     overlays: [EXAMPLE.unknown(MID)],
-    view: CLOSE,
+    view: CLOSER,
   },
-];
+} as const satisfies Record<string, AttackSample>;
+
+/** The standard attack each kind of mechanic resolves with, where one attack fits it. Its card
+    shows the attack beside the kind's icon. The kinds left out (chains, tethers, tank busters,
+    baits, dodge sequences, look ahead) end in more than one attack, or in none. */
+const KIND_ATTACK: Partial<Record<DrillKind, keyof typeof ATTACKS>> = {
+  spread: "circle",
+  stack: "circle",
+  pairStack: "circle",
+  lightPartyStack: "circle",
+  roleStack: "circle",
+  lineStack: "line",
+  wildCharge: "line",
+  tower: "tower",
+  towerKnockback: "tower",
+  tankTower: "tower",
+  protean: "cone",
+  knockback: "knockback",
+  puddles: "puddle",
+};
 
 /** The number a tower's icon shows on this page, as an example. */
 const EXAMPLE_SOAK = 2;
@@ -351,7 +386,7 @@ export function StylesPage() {
           <h2 className="font-display text-2xl font-bold">Standard Attacks</h2>
           <p className="text-muted-foreground">Every attack is one of these. Only its size changes.</p>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {ATTACKS.map((a) => (
+            {Object.values(ATTACKS).map((a: AttackSample) => (
               <IconItem
                 key={a.name}
                 picture={<ArenaSquare className="size-16" overlays={a.overlays} view={a.view} />}
@@ -454,7 +489,7 @@ function IconItem({ picture, zoomed, name, meaning, children }: IconItemProps) {
               <DialogTitle>{name}</DialogTitle>
               <DialogDescription>{meaning}</DialogDescription>
             </DialogHeader>
-            <div className="flex items-end justify-center gap-4 py-4">{zoomed}</div>
+            <div className="flex flex-wrap items-end justify-center gap-4 py-4">{zoomed}</div>
           </DialogContent>
         </Dialog>
         <p className="text-sm text-muted-foreground">{meaning}</p>
@@ -468,12 +503,15 @@ interface KindItemProps {
   kind: DrillKind;
 }
 
-/** A kind of mechanic: its icon large and in its square on the list, and the mechanics that use it. */
+/** A kind of mechanic: its icon large and in its square on the list, the standard attack it
+    resolves with (when one fits), and the mechanics that use it. */
 function KindItem({ kind }: KindItemProps) {
   const { name, meaning, soaked } = KINDS[kind];
   const drills = drillsOf(kind);
   // A tower's number comes from each mechanic; 2 shows where it goes.
   const soak = soaked ? EXAMPLE_SOAK : undefined;
+  const key = KIND_ATTACK[kind];
+  const attack: AttackSample | undefined = key && ATTACKS[key];
   return (
     <IconItem
       picture={
@@ -482,6 +520,7 @@ function KindItem({ kind }: KindItemProps) {
             <MechanicIcon kind={kind} soak={soak} className="size-10" />
           </span>
           <CastSquare mark={{ cats: [], kind, soak }} />
+          {attack && <ArenaSquare className="size-12" overlays={attack.overlays} view={attack.view} />}
         </>
       }
       zoomed={
@@ -490,11 +529,13 @@ function KindItem({ kind }: KindItemProps) {
             <MechanicIcon kind={kind} soak={soak} className="size-48" />
           </span>
           <CastSquare mark={{ cats: [], kind, soak }} />
+          {attack && <ArenaSquare className="size-40" overlays={attack.overlays} view={attack.view} />}
         </>
       }
       name={name}
       meaning={meaning}
     >
+      {attack && <p className="text-xs text-muted-foreground">Attack: {attack.name}</p>}
       <p className="text-xs text-muted-foreground">{drills.length ? drills.join(" · ") : "No mechanic uses it yet."}</p>
     </IconItem>
   );

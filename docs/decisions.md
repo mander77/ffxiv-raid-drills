@@ -79,6 +79,11 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
   carry its life in seconds (`life`).
 - On the styles page, "Knockback Arrows" and "Tower to Soak" have these names because the
   mechanic kinds "Knockback" and "Tower" already have cards there.
+- On the styles page, each kind of mechanic that resolves with one standard attack shows that
+  attack beside its icon, with "Attack: <name>" (owner's request). Stacks and spreads show a
+  circle, line stacks and wild charges a line, proteans a cone, towers a tower, puddle drops a
+  puddle, and a knockback its arrows. Chains, tethers, tank busters, baits, dodge sequences and
+  look ahead show none: they end in more than one attack, or in none.
 
 ## Planned work
 

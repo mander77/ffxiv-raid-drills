@@ -79,3 +79,11 @@ test("the styles page draws each standard attack, and the mark of an unknown siz
   assert.ok(attacks.querySelector(".unknown"), "the size unknown mark");
   assert.equal(attacks.querySelector(".tower text")?.textContent, "2", "a tower shows its soak count");
 });
+
+test("a kind of mechanic shows the standard attack it resolves with, where one fits", () => {
+  render(<StylesPage />);
+  const card = (name: string) => screen.getByRole("heading", { level: 3, name }).closest("li");
+  assert.ok(card("Line Stack")?.textContent?.includes("Attack: Line"));
+  assert.ok(card("Puddle Drop Sequence")?.querySelector(".puddle"), "the puddle beside the icon");
+  assert.notInclude(card("Pair Tether")?.textContent ?? "", "Attack:", "a tether has no one attack");
+});
