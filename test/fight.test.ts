@@ -36,6 +36,25 @@ test("every mechanic has one hit time per step, in order, inside the fight", () 
     }
 });
 
+test("no full-fight scene marks your own slot: the moving marker is you", () => {
+  for (let i = 0; i < 50; i++)
+    for (const s of SLOTS)
+      for (const g of buildFight(s).segs) {
+        const drawn = [...g.scene.overlays, ...g.scene.steps.flatMap((st) => [...(st.cue ?? []), ...(st.reveal ?? [])])];
+        assert.isFalse(
+          drawn.some((o) => o.t === "mark" && o.l === s),
+          `${g.title}: a mark for ${s}`,
+        );
+      }
+});
+
+test("Practice's second towers still mark where you ended the last round", () => {
+  for (const s of SLOTS) {
+    const scene = DRILLS.find((d) => d.id === "m-split-towers2")?.build(s, null);
+    assert.isTrue(scene?.overlays.some((o) => o.t === "mark" && o.l === s));
+  }
+});
+
 test("every click is due on a timeline line, and the lines run in time order", () => {
   for (let i = 0; i < 20; i++) {
     const f = buildFight("H1");

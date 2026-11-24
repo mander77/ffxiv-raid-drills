@@ -208,6 +208,9 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   );
   // TS note: sort with a compare function, like List.Sort(Comparison) in C#. It keeps equal items in order.
   segs.sort((a, b) => a.from - b.from);
+  /* A Practice scene can mark where you stand (Arena Split's towers mark where you ended the
+     last round). The fight draws you as the moving marker, so it drops your own mark. */
+  for(const g of segs) g.scene = {...g.scene, overlays:g.scene.overlays.filter(o => !(o.t === "mark" && o.l === s))};
   /* The timeline lines, with cactbot's names. Where the arena is the test, the names stay as
      general as cactbot's before it syncs: "Comet/Crushing Comet", "Assault Evolved 1". */
   // The nth Raw Steel Trophy with weapon w: its cast and its hits.
