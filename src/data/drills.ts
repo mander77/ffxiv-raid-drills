@@ -624,7 +624,7 @@ export function splitRound(s: Slot, tether: boolean, side: SplitSide, end: Split
   const edge: RectZone = {rect:[o0, y0, o1, y1]}, edgeMid = zoneCenter(edge);
   // The waymark's outer corner: toward the arena's corner at that end. A marker stands at the
   // waymark, out to the wall beside it (the app's choice), out of the third puddle.
-  const outer: Point = [wm.p[0] + (side === "west" ? -4 : 4), wm.p[1] + (end === "north" ? -4 : 4)];
+  const outer: Point = [wm.p[0] + (side === "west" ? -5.5 : 5.5), wm.p[1] + (end === "north" ? -5.5 : 5.5)];
   const marker: RectZone = {rect:side === "west" ? [0, wm.p[1] - 6.5, wm.p[0] + 6.5, wm.p[1] + 6.5] : [wm.p[0] - 6.5, wm.p[1] - 6.5, 100, wm.p[1] + 6.5]};
   return {setup:[tether ? "You have a tether. You are on the " + side + " platform." : "No tether. You are on the " + side + " platform.",
       "Three puddles drop on the party, one after another.", "The portal lines leave one end of the platform safe."], ordered:true,
