@@ -112,6 +112,7 @@ npm run import:sources   # every fight with a sources.json: downloads its pinned
 npm run import:sources -- m10s   # one fight
 npm run check:sources    # fails if a generated file is out of date, then runs the source tests
 npm run find:sources -- m12s     # finds a new fight's files and writes its sources.json, unchecked
+npm run import:strat -- "https://wtfdig.info/74/m11s#hector::fixed"   # wtfdig's strat notes, into notes/m11s/
 ```
 
 ## Code map
@@ -186,8 +187,12 @@ src/lib/             cn() for class names; dom.ts: isPageKey (a key belongs to t
                      button, an input or a dialog) and prefersLessMotion
 scripts/             setup.mjs (npm run setup), publish.mjs (npm run publish), wait-deploy.mjs
                      (npm run wait-deploy), import-sources.mjs (npm run import:sources and
-                     check:sources), find-sources.mjs (npm run find:sources): plain Node.js, so
-                     they run the same on every OS
+                     check:sources), find-sources.mjs (npm run find:sources), import-strat.mjs
+                     (npm run import:strat): plain Node.js, so they run the same on every OS
+notes/<fight>/strat.json  wtfdig's strat notes for the static's strats, written by
+                     npm run import:strat: each mechanic's text for each role and light party, its
+                     image and its source. Input for the draft of a new fight; the site does not
+                     read it. Never edit it by hand.
 src/types.ts         drills, steps, zones, overlays, questions, abilities, the full fight (Fight,
                      FightSeg, Hit, Choices) and the Cheat Sheet's ReferenceEntry
 src/party.ts         party slots: roles, light parties, slot names
