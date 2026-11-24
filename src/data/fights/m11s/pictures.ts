@@ -9,7 +9,7 @@ import { bySlot, withSeed } from "../../../util";
 import { markRole, partyOf } from "../../../party";
 import { angOf, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
 import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, avalancheScene, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
-import { PLATFORM_X, BREATH_W, PROXIMITY_DOT, PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, TOWER_KNOCKBACK, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, gust, lineTo, swordCross } from "./attacks";
+import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, axeHit, fireBreath, gust, inYalms, lineStack, meteorHit, proteanCone, proximityDot, raidwide, sharedCone, spreadHit, swordCross, tankCone, towerHit, voidPuddle, wallOfFire } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../../../types";
 
 type Who = [string, MarkRole];
@@ -19,7 +19,7 @@ const target = (p: Point): Overlay => ({t:"target", x:p[0], y:p[1]});
 const guide = (a: Point, b: Point): Overlay => ({t:"guide", x:a[0], y:a[1], x2:b[0], y2:b[1]});
 /** A tether from its portal to a player. */
 const tether = (portal: Point, p: Point): Overlay => ({t:"tether", x:portal[0], y:portal[1], x2:p[0], y2:p[1]});
-const puddle = (p: Point, r = PUDDLE_R): Overlay => ({t:"puddle", x:p[0], y:p[1], r});
+const puddle = voidPuddle;
 const circle = (c: Point, r: number): ZoneShape => ({c, r});
 // TS note: the return type is RectZone, not the wider ZoneShape, so a rectangle can also go
 // where only a Zone fits (youIn takes a Zone, and a polygon is not one).
@@ -59,24 +59,31 @@ const clockRing = (r: number, c: Point = CENTER, f = 0): Overlay[] => ALL.map(([
 const pairsAt = (spots: Point[]): Overlay[][] => spots.map((p, i) => cluster(p, PAIRED.slice(i * 2, i * 2 + 2), 2));
 
 /* ---------- the boss attacks an answer assumes ---------- */
-const RAIDWIDE = aoe(CENTER, RAIDWIDE_R);
+const RAIDWIDE = raidwide();
 /* Made-up attacks, drawn only in incorrect answers. They are not in the fight, so BossMod has no
-   size for them. The real sizes are in data/attacks.ts. */
-const FAKE = {buster:7, platformBuster:6, circle:35, bigCircle:40, smallCircle:9, axeDonut:18, voidDonut:11, tripleDonut:12, line:10};
+   size for them: these sizes, in yalms, are the app's choice. The real sizes are in attacks.ts.
+   `reach` is how far a made-up line or donut runs: past the arena's edge. */
+const FAKE = {buster:2.8, platformBuster:2.4, circle:14, bigCircle:16, smallCircle:3.6, axeDonut:7.2, voidDonut:4.4, tripleDonut:4.8, line:4, reach:60};
+/** A made-up circle, r yalms. */
+const fakeCircle = (c: Point, r: number): Overlay => ATTACK.circle(c, r);
+/** A made-up donut, safe within `inner` yalms of c. */
+const fakeDonut = (c: Point, inner: number): Overlay => ATTACK.donut(c, inner, FAKE.reach);
+/** A made-up line from the boss in the middle through `to`. */
+const fakeLine = (to: Point): Overlay => ATTACK.line(CENTER, angOf([to[0] - CENTER[0], to[1] - CENTER[1]]), FAKE.reach, FAKE.line);
 /** Where the role marks in a list stand. */
 const spotsOf = (os: Overlay[]): Point[] => os.flatMap((o): Point[] => o.t === "mark" ? [[o.x, o.y]] : []);
-/** A spread: one AoE on every player. */
-const spreadHits = (os: Overlay[], r = SPREAD_R): Overlay[] => spotsOf(os).map(p => aoe(p, r));
+/** A spread: one AoE on every player, a spread's size unless `hit` draws another. */
+const spreadHits = (os: Overlay[], hit = spreadHit): Overlay[] => spotsOf(os).map(p => hit(p));
 /** A stack: one AoE that the whole group shares, centered on the group, never smaller than the
-    6-yalm stack. */
+    6-yalm stack. It grows to cover the group, `pad` units past the farthest player. */
 function stackHit(os: Overlay[], pad = 4.5): Overlay {
   const ps = spotsOf(os), c: Point = [ps.reduce((n, p) => n + p[0], 0) / ps.length, ps.reduce((n, p) => n + p[1], 0) / ps.length];
-  return aoe(c, Math.max(SPREAD_R, Math.max(0, ...ps.map(p => Math.hypot(p[0] - c[0], p[1] - c[1]))) + pad));
+  return ATTACK.circle(c, inYalms(Math.max(SPREAD_R, Math.max(0, ...ps.map(p => Math.hypot(p[0] - c[0], p[1] - c[1]))) + pad)));
 }
 /** Proteans: a cone from `from` toward every player. */
-const proteans = (from: Point, os: Overlay[]): Overlay[] => spotsOf(os).map(p => cleave(from, angOf([p[0] - from[0], p[1] - from[1]]), PROTEAN_HALF, PROTEAN_LEN));
+const proteans = (from: Point, os: Overlay[]): Overlay[] => spotsOf(os).map(p => proteanCone(from, angOf([p[0] - from[0], p[1] - from[1]])));
 /** One half of the arena, as a cleave: front is "north" for a boss facing north. */
-const half = (side: "north" | "south"): Overlay => ({t:"lane", rect:side === "north" ? [0, 0, 100, 50] : [0, 50, 100, 100]});
+const half = (side: "north" | "south"): Overlay => ATTACK.halfArena(side)[0];
 
 /** Powerful Gust from one tornado: its cones on its two baits. */
 function gustsFrom(t: Point): Overlay[] {
@@ -195,7 +202,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...SCYTHE_CLEAVES, ...TANKS_APART, ...cluster([50, 66], NONTANK, 3)]),
       show([...AXE_HITS, ...TANKS_TOGETHER, ...AXE_SPREAD]),
       show([...proteans(CENTER, all), ...all]),
-      show([cleave(CENTER, 317, RAW_TANK_HALF), cleave(CENTER, 43, RAW_TANK_HALF), cleave(CENTER, 0, RAW_STACK_HALF), ...TANKS_APART, ...north])]}; },
+      show([tankCone(CENTER, 317), tankCone(CENTER, 43), sharedCone(CENTER, 0), ...TANKS_APART, ...north])]}; },
   "k-raw-second": s => { const d = fromDrill("m-raw-scythe", s);
     return {overlays:[tag(50, 8, "0:18 WAS AXE")], boss:d.boss, before:[tag(...HELD_TAG, "?")], after:[...d.overlays, ...d.hits, ...cluster([50, 66], NONTANK, 3)], answer:d.answer, options:[
       show([...SCYTHE_CLEAVES, ...heldWeapon("scythe"), ...TANKS_APART]),
@@ -215,17 +222,17 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const lp = [cluster([62, 30], G1, 2), cluster([62, 70], G2, 2)], close = cluster([66, 50], ALL, 2);
     return {...j.fig, options:[
       show([...j.hits, stackHit(mid), ...mid], [j.zone]), show([...spreadHits(spread), ...spread]),
-      show([...lp.map(g => stackHit(g)), ...lp.flat()]), show([donut(j.at, FAKE.axeDonut), stackHit(close), ...close])]}; },
+      show([...lp.map(g => stackHit(g)), ...lp.flat()]), show([fakeDonut(j.at, FAKE.axeDonut), stackHit(close), ...close])]}; },
   "k-scythe": s => { const j = jump(s, "scythe", 180), lp = cluster([30, 66], bySlot(s, {H1:G1, H2:G2}), 2);
     return {...j.fig, options:[hit(youIn(s, j.zone), j.hits), hit(youIn(s, j.zoneOther), j.hits),
-      hit(youAt(s, [50, 8]), [aoe(j.at, FAKE.circle)]), show([stackHit(lp), ...lp])]}; },
+      hit(youAt(s, [50, 8]), [fakeCircle(j.at, FAKE.circle)]), show([stackHit(lp), ...lp])]}; },
   "k-void": s => { const mine = ALL.findIndex(w => w[0] === s), edge = at(22.5 + mine * 45, 40), spread = ring(ALL, 40, 22.5, 45), stack = cluster([50, 36]);
     return {overlays:[], boss:BOSS, after:PUDDLES.map((p, i) => tag(p[0], p[1], String(i + 1))), answer:PUDDLES.map(p => circle(p, PUDDLE_R)), options:[
       show([...PUDDLE_PIECES, ...PUDDLES.map((p, i) => tag(p[0], p[1], String(i + 1)))]),
       show([...spreadHits(spread), puddle(edge), ...spread, say("3 PUDDLES ON ONE SPOT", 8)]),
       show([puddle([50, 36]), stackHit(stack), ...stack, say("3 PUDDLES UNDER THE STACK", 94)]),
       show([...([[50, 30], [68, 50], [50, 70]] as Point[]).flatMap((p, i) => [puddle(p), tag(p[0], p[1], String(i + 1))])])]}; },
-  "k-void-target": s => { const me = inStack(s), stackOn = (l: string): Overlay[] => [aoe(inStack(l), SPREAD_R), target(inStack(l))];
+  "k-void-target": s => { const me = inStack(s), stackOn = (l: string): Overlay[] => [spreadHit(inStack(l)), target(inStack(l))];
     return {overlays:[...PUDDLE_PIECES, ...stackedMarks], boss:BOSS, after:[...stackOn(s), tag(68, 83, "STACK ON A HEALER")], answer:[circle(me, 5)], options:[
       show([...stackOn(s), tag(68, 83, "STACK")]),
       show([...stackOn("MT"), tag(68, 83, "STACK")]),
@@ -235,13 +242,13 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     // Every puddle went off before Comet, so none is drawn.
     return {overlays:FIXED_SPREAD_MARKS, boss:BOSS, after:[...spreadWith(zoneCenter(gaps)), you(s, zoneCenter(gaps))], answer:[gaps], options:[
       hit(youIn(s, gaps), spreadWith(zoneCenter(gaps))), hit(youAt(s, [37, 71]), spreadWith([37, 71])),
-      show([stackHit(stackedMarks), ...stackedMarks]), hit(youAt(s, [50, 58], 9), [donut(CENTER, FAKE.voidDonut)])]}; },
+      show([stackHit(stackedMarks), ...stackedMarks]), hit(youAt(s, [50, 58], 9), [fakeDonut(CENTER, FAKE.voidDonut)])]}; },
   "k-void-sprint": s => { const R = buildJumpSet(s, faceApproach(weapons([[180, "scythe"]]))), open = cometSpread(s)(VOID_RESULTS), lb = zoneCenter(open);
     const waitAt = bySlot<Point>(s, {H1:[83, 50], H2:[50, 17]});
-    return {overlays:[...R.overlays, ...FIXED_SPREAD_MARKS], boss:STILL, after:[aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], answer:[open],
+    return {overlays:[...R.overlays, ...FIXED_SPREAD_MARKS], boss:STILL, after:[spreadHit(lb), you(s, lb), guide(lb, R.W[0].p)], answer:[open],
       note:"Example: the first weapon of the second set is a scythe in the south.", options:[
-        show([aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], [open]),
-        show([aoe(waitAt, SPREAD_R), you(s, waitAt), say("WAIT FOR HIS FACING", 8)], [open]),
+        show([spreadHit(lb), you(s, lb), guide(lb, R.W[0].p)], [open]),
+        show([spreadHit(waitAt), you(s, waitAt), say("WAIT FOR HIS FACING", 8)], [open]),
         youAt(s, [70, 44]),
         show([RAIDWIDE, ...stackedMarks, say("MITIGATE, STAY PUT", 8)])]}; },
   "k-assault-2": s => { const R = buildJumpSet(s, faceApproach(weapons([[135, "scythe"], [270, "axe"], [0, "sword"]]))), W = R.W;
@@ -255,14 +262,14 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...spreadHits([...FIXED_SPREAD_MARKS, me]), ...FIXED_SPREAD_MARKS, me], [gaps]),
       show([stackHit(stackedMarks), ...stackedMarks]),
       show([...pairs.map(p => stackHit(p)), ...pairs.flat()]),
-      show([aoe([50, 36], FAKE.buster), mark(50, 36, "MT", "T"), target([50, 36]), say("TANK BUSTER", 94)])]}; },
+      show([fakeCircle([50, 36], FAKE.buster), mark(50, 36, "MT", "T"), target([50, 36]), say("TANK BUSTER", 94)])]}; },
   // The pairs at their wtfdig spots. The tank and melee pairs stand on waymarks D and B, so they
   // show as their stack only, and the waymarks stay readable.
   "k-dance": s => { const d = fromDrill("m-dance", s), pairs = [cluster(DANCE_PAIRS.H1, PAIRED.slice(4, 6), 2), cluster(DANCE_PAIRS.H2, PAIRED.slice(6, 8), 2)];
-    const tankPairs = [aoe(DANCE_PAIRS.MT, SPREAD_R), aoe(DANCE_PAIRS.OT, SPREAD_R)];
+    const tankPairs = [spreadHit(DANCE_PAIRS.MT), spreadHit(DANCE_PAIRS.OT)];
     return {overlays:[tag(50, 8, "DANCE OF DOMINATION")], boss:d.boss, after:[RAIDWIDE, ...d.overlays, ...bySlot(s, {H1:pairs[0], H2:pairs[1]}), tag(50, 16, "7 HITS, THEN PAIRS")], answer:d.answer, options:[
       show([RAIDWIDE, ...d.hits, ...tankPairs, ...pairs.map(p => stackHit(p)), ...pairs.flat(), tag(50, 16, "7 RAIDWIDES, THEN PAIRS")]),
-      show([aoe([50, 36], FAKE.buster), mark(50, 36, "MT", "T"), target([50, 36]), tag(50, 16, "ONE TANK BUSTER")]),
+      show([fakeCircle([50, 36], FAKE.buster), mark(50, 36, "MT", "T"), target([50, 36]), tag(50, 16, "ONE TANK BUSTER")]),
       show([RAIDWIDE, tag(50, 16, "PARTY TO 1 HP")]),
       show([...d.overlays, tag(50, 16, "NO DAMAGE")])]}; },
   // The lines are turned so the open side is east. Then "new north" lands on a different side for each answer.
@@ -280,8 +287,8 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     return {...d, options:[pair(own, d.zone), pair(oth, d2.zone), pair([62, 50], circle([62, 50], 6), ["MT", "T"]), show([stackHit(all), ...all], [circle(CENTER, 13)])]}; },
   "k-charyb": () => { const mt = at(22.5, 20);
     return {overlays:ring(ALL, 20, 22.5, 45), boss:BOSS, after:[RAIDWIDE, say("EVERYONE AT 1 HP", 8)], options:[
-      show([RAIDWIDE, say("EVERYONE AT 1 HP", 8)]), show([aoe(mt, FAKE.buster), target(mt), say("THE TANK DIES", 8)]),
-      show([aoe(mt, FAKE.buster), target(mt), say("TANK BUSTER", 8)]), show([say("NOTHING HAPPENS", 8)])]}; },
+      show([RAIDWIDE, say("EVERYONE AT 1 HP", 8)]), show([fakeCircle(mt, FAKE.buster), target(mt), say("THE TANK DIES", 8)]),
+      show([fakeCircle(mt, FAKE.buster), target(mt), say("TANK BUSTER", 8)]), show([say("NOTHING HAPPENS", 8)])]}; },
   "k-ult-spawn": s => { const R = ultSet(s), cw: Array<[number, string]> = [[315, "2"], [90, "3"], [180, "4"], [270, "5"], [0, "6"]];
     return {overlays:ultPart(s, i => i === 0), boss:STILL, after:ultPart(s, i => i > 0), answer:[circle(R.W[1].p, 9)], options:[
       show(spotTags(cw), [circle(at(315, 29), 7)]),
@@ -303,7 +310,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     return {overlays:[...d.overlays, you(s, me), guide(me, into)], boss:d.boss, after:[...gustsFrom(into), ...near("KNOCKBACK", "DAMAGE DOWN")], answer:d.answer,
       note:"The green spot is where you bait: at the edge of your tornado, not in it.", options:[
         show(near("KNOCKBACK", "DAMAGE DOWN")), show(near("NOTHING HAPPENS")), show(near("YOU DIE")), show(near("YOU GET HEALED"))]}; },
-  "k-gwof": () => { const line: Overlay = {t:"band", x:50, y:50, x2:50, y2:-20, w:WALL_W}, tanks: Point = [50, 33], stack = cluster([30, 66], NONTANK, 3);
+  "k-gwof": () => { const line: Overlay = wallOfFire(CENTER, 0), tanks: Point = [50, 33], stack = cluster([30, 66], NONTANK, 3);
     const spread = ring(NONTANK, 26, 60, 48), tankMarks = [mark(47, 33, "MT", "T"), mark(53, 33, "OT", "T")];
     return {overlays:tankMarks, boss:BOSS, after:[line, say("2 TANK BUSTERS", 8)], answer:[circle(tanks, 7)],
       note:"Heal the tanks (green). The fire trail stays on the floor, so keep out of it.", options:[
@@ -314,7 +321,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-orbital": s => { const sides = [{poly:[[50, 50], [0, 0], [0, 100]] as Point[]}, {poly:[[50, 50], [100, 0], [100, 100]] as Point[]}];
     return {overlays:[], boss:BOSS, after:[...FIRE_AND_FURY, you(s, bySlot<Point>(s, {H1:[36, 52], H2:[64, 52]}))], answer:sides, options:[
       show([...FIRE_AND_FURY, you(s, bySlot<Point>(s, {H1:[36, 52], H2:[64, 52]}))], sides),
-      hit(youAt(s, [50, 64]), [half("north")]), hit(youAt(s, [50, 36]), [half("south")]), hit(youAt(s, [50, 94]), [aoe(CENTER, FAKE.circle)])]}; },
+      hit(youAt(s, [50, 64]), [half("north")]), hit(youAt(s, [50, 36]), [half("south")]), hit(youAt(s, [50, 94]), [fakeCircle(CENTER, FAKE.circle)])]}; },
   "k-orbital-move": s => {
     const O = withSeed("HECT", buildOrbital), [a, b] = O.steps.map(st => st.z);
     if(!a || !b || !("fn" in a) || !("fn" in b)) throw new Error("the Orbital Omen zones are rule zones");
@@ -322,7 +329,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const first = O.steps[0].reveal ?? [];
     return {overlays:O.overlays, boss:BOSS, after:route, answer:[a, b],
       note:"One pattern. Start where the #2 lines cross. After #1, cross under the boss. After #2, cross back.", options:[
-        show([...first, ...route], [a, b]), hit(youAt(s, [50, 96]), [aoe(CENTER, FAKE.circle)]), youAt(s, [50, 36]), youAt(s, [50, 64])]}; },
+        show([...first, ...route], [a, b]), hit(youAt(s, [50, 96]), [fakeCircle(CENTER, FAKE.circle)]), youAt(s, [50, 36]), youAt(s, [50, 64])]}; },
   "k-meteor-order": s => {
     // The melee's set and the healers' set, from their drills. No drill asks the ranged set, so
     // their spots are the app's: R1 drops the far SW rock, and R2's NE spot sits clear of M1's mark.
@@ -332,24 +339,24 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const order = (groups: Who[][], text?: string): Preview => {
       const pieces = groups.flatMap((g, i) => g.map(([l, r], j) => mark(...SETS[i][j], l, r)));
       const mine = groups.flatMap((g, i) => g.map(([l], j) => l === s ? SETS[i][j] : null)).find(p => p != null);
-      return show([...spreadHits(pieces, METEOR_R), ...pieces, ...(text ? [say(text, 8)] : [])], mine ? [circle(mine, 6)] : []);
+      return show([...spreadHits(pieces, meteorHit), ...pieces, ...(text ? [say(text, 8)] : [])], mine ? [circle(mine, 6)] : []);
     };
     return {overlays:SETS.flat().map(target), boss:BOSS, after:[...order([M, H, R]).pieces, say("MELEE > HEALERS > RANGED", 8)],
       answer:[circle(bySlot(s, {H1:HEALER_METEORS[0], H2:HEALER_METEORS[1]}), 6)], options:[order([M, H, R]), order([H, R, M]), order([TANKS, TANKS, TANKS], "TANKS ONLY"), order([R, M, H])]}; },
   "k-meteor-drop": s => { const d = fromDrill("m-meteor-2", s), d2 = fromDrill("m-meteor-2", other(s)), stack = cluster([65, 35], NO_HEALERS.concat([[s, "H"]]));
-    const meteor = (z: Zone): Overlay => aoe(zoneCenter(z), METEOR_R);
+    const meteor = (z: Zone): Overlay => meteorHit(zoneCenter(z));
     return {...d, options:[hit(youIn(s, d.zone), [meteor(d.zone)]), hit(youIn(s, d2.zone), [meteor(d2.zone)]),
-      hit(youAt(s, [64, 36]), [aoe([64, 36], METEOR_R)]), show([stackHit(stack), aoe([65, 35], METEOR_R), ...stack], [circle([65, 35], 10)])]}; },
+      hit(youAt(s, [64, 36]), [meteorHit([64, 36])]), show([stackHit(stack), meteorHit([65, 35]), ...stack], [circle([65, 35], 10)])]}; },
   "k-meteor-stack": () => { const ne = cluster([67, 33], NO_HEALERS, 3), sw = cluster([33, 67], NO_HEALERS, 3), under = ring(NO_HEALERS, 9, 0, 60), spread = ring(NO_HEALERS, 36, 30, 60);
     return {overlays:[...fromDrill("m-meteor-2", "H1").overlays, ...HEALER_METEORS.map(target)], boss:BOSS,
-      after:[lineTo(CENTER, [65, 35])], answer:[circle([65, 35], 7)], options:[
-        show([lineTo(CENTER, [67, 33]), ...ne], [circle([67, 33], 9)]),
-        show([lineTo(CENTER, [33, 67]), ...sw], [circle([33, 67], 9)]),
+      after:[lineStack(CENTER, [65, 35])], answer:[circle([65, 35], 7)], options:[
+        show([lineStack(CENTER, [67, 33]), ...ne], [circle([67, 33], 9)]),
+        show([lineStack(CENTER, [33, 67]), ...sw], [circle([33, 67], 9)]),
         show([stackHit(under), ...under], [circle(CENTER, 9)]),
         show([...spreadHits(spread), ...spread])]}; },
   "k-triple": s => { const d = fromDrill("m-meteor-4", s, null, 1), spread = ring(ALL, 44, 22.5, 45);
-    return {...d, options:[hit(youAt(s, [6, 94], 6), [lineTo(CENTER, [6, 94], FAKE.line)]), hit(youAt(s, [50, 58], 9), [donut(CENTER, FAKE.tripleDonut)]),
-      hit(youAt(s, [67, 33], 6), [lineTo(CENTER, [67, 33], FAKE.line)]), show([aoe(CENTER, FAKE.bigCircle), ...spread])]}; },
+    return {...d, options:[hit(youAt(s, [6, 94], 6), [fakeLine([6, 94])]), hit(youAt(s, [50, 58], 9), [fakeDonut(CENTER, FAKE.tripleDonut)]),
+      hit(youAt(s, [67, 33], 6), [fakeLine([67, 33])]), show([fakeCircle(CENTER, FAKE.bigCircle), ...spread])]}; },
   // Flatliner knocks everyone back from the boss before the split, so each spot gets a knockback arrow.
   "k-split-side": s => { const d = fromDrill("m-split-line", s);
     const WN = platformPart(PLATFORM_X.west, 8, 48), WS = platformPart(PLATFORM_X.west, 52, 92), EN = platformPart(PLATFORM_X.east, 8, 48), ES = platformPart(PLATFORM_X.east, 52, 92);
@@ -375,7 +382,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     if(!z) throw new Error("the first Fire Breath step has no fixed zone");
     // Your mark stands in that area, a little north (H1) or south (H2), so it clears waymark D or B.
     const inner = bySlot<Point>(s, {H1:[29, 42], H2:[71, 58]});
-    const tethered = bySlot<Point>(s, {H1:[10, 57], H2:[90, 43]}), tank = mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T"), breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W);
+    const tethered = bySlot<Point>(s, {H1:[10, 57], H2:[90, 43]}), tank = mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T"), breath = (p: Point): Overlay => fireBreath(CENTER, p);
     // The tank's tether, before it is stretched: from a portal on the other side.
     const tankTether = tether(portalAt(otherSide(side), bySlot(s, {H1:"north", H2:"south"}), "west"), tethered);
     return {overlays:sc.overlays, split:sc.split, boss:sc.boss, before:[you(s, start)], after:[breath(inner), you(s, inner)],
@@ -390,7 +397,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const side = homeSide(s), covered = bySlot<"inner" | "outer">(s, {H1:"inner", H2:"outer"}), lines = portalLines(side, covered);
     // The drill's marker spot at each end of your platform.
     const markers = (["north", "south"] as const).map(e => markerCorner(side, e, covered)), corner = markers[0];
-    const breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W), edge = bySlot<Point>(s, {H1:[-12, 40], H2:[112, 60]});
+    const breath = (p: Point): Overlay => fireBreath(CENTER, p), edge = bySlot<Point>(s, {H1:[-12, 40], H2:[112, 60]});
     const tethered = bySlot<Point>(s, {H1:[4, 3], H2:[85, 97]}), nextTo = bySlot<Point>(s, {H1:[3, 9], H2:[80, 92]}), middle = bySlot<Point>(s, {H1:[10, 50], H2:[90, 50]});
     // The tank's tether at the wall, stretched from a portal on the other side, at the other end.
     const tankTether = tether(portalAt(otherSide(side), bySlot(s, {H1:"south", H2:"north"}), "west"), tethered);
@@ -423,7 +430,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const zones = [SPLIT_INNER.west, SPLIT_INNER.east];
     return {overlays:[], split:true, boss:BOSS, before:apart, after:stacks, answer:zones, options:[
       show(stacks, zones),
-      show([aoe([12, ROWS[0]], FAKE.platformBuster), aoe([88, ROWS[0]], FAKE.platformBuster), ...apart, target([12, ROWS[0]]), target([88, ROWS[0]]), say("TANK BUSTER", 8)]),
+      show([fakeCircle([12, ROWS[0]], FAKE.platformBuster), fakeCircle([88, ROWS[0]], FAKE.platformBuster), ...apart, target([12, ROWS[0]]), target([88, ROWS[0]]), say("TANK BUSTER", 8)]),
       show([...spreadHits(apart), ...apart]),
       show([...apart, ...ROWS.flatMap(y => [guide([12, y], [-12, y]), guide([88, y], [112, y])]), say("KNOCKBACK", 8)])]}; },
   // He grabs the platform he faces. Each answer draws the grab where that answer expects it.
@@ -444,7 +451,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       hit(youAt(s, [38, 22]), [target([38, 22]), target([25, 25]), target([75, 25])])]}; },
   "k-ecl-adjust": () => { const up = (x: number): Overlay => guide([x, 74], [x, 36]);
     return {overlays:[mark(25, 25, "R1", "D"), mark(75, 25, "R2", "D"), target([25, 74]), target([75, 74]), mark(25, 74, "H1", "H"), mark(75, 74, "H2", "H"),
-      aoe([66, 93], PROXIMITY_DOT), tag(66, 85, "PROXIMITY")], boss:BOSS, after:[up(75)], answer:[circle([75, 74], 7)],
+      proximityDot([66, 93]), tag(66, 85, "PROXIMITY")], boss:BOSS, after:[up(75)], answer:[circle([75, 74], 7)],
       note:"Example: the proximity AoE is closer to H2, so H2 moves north.", options:[
         show([up(75)], [circle([75, 74], 7)]), show([up(25)], [circle([25, 74], 7)]), show([say("NOBODY MOVES", 8)]), show([up(25), up(75)], [circle([25, 74], 7), circle([75, 74], 7)])]}; },
   "k-ecl-prio": s => { const T: Point[] = [[50, 13], [87, 50], [50, 87], [13, 50]];
@@ -473,17 +480,17 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   // of two players each, NW, NE, SW and SE. Both are 6 yalms wide (BossMod).
   "k-ecl-two": s => { const d = fromDrill("m-ecl-two", s, "north");
     return {...d, after:[...d.hits, you(s, [32, 50])], options:[
-      show([lineTo(CENTER, [0, 50]), you(s, [32, 50])], [d.zone]), show([lineTo(CENTER, [100, 50]), you(s, [68, 50])], [rect(60, 43, 84, 57)]),
-      hit(youAt(s, [43, 43], 5.5), [lineTo(CENTER, [43, 43])]), show([aoe(CENTER, FAKE.smallCircle), you(s, [50, 58])], [circle(CENTER, 9)])]}; },
+      show([lineStack(CENTER, [0, 50]), you(s, [32, 50])], [d.zone]), show([lineStack(CENTER, [100, 50]), you(s, [68, 50])], [rect(60, 43, 84, 57)]),
+      hit(youAt(s, [43, 43], 5.5), [lineStack(CENTER, [43, 43])]), show([fakeCircle(CENTER, FAKE.smallCircle), you(s, [50, 58])], [circle(CENTER, 9)])]}; },
   "k-ecl-four": s => { const d = fromDrill("m-ecl-four", s, "south");
     return {...d, options:[
-      hit(youIn(s, d.zone), [lineTo(CENTER, zoneCenter(d.zone))]), hit(youAt(s, [43, 43], 5.5), [lineTo(CENTER, [43, 43])]),
-      show([lineTo(CENTER, [100, 50]), you(s, [68, 50])], [rect(60, 43, 84, 57)]), hit(youAt(s, [6, 94], 6), [lineTo(CENTER, [6, 94])])]}; },
+      hit(youIn(s, d.zone), [lineStack(CENTER, zoneCenter(d.zone))]), hit(youAt(s, [43, 43], 5.5), [lineStack(CENTER, [43, 43])]),
+      show([lineStack(CENTER, [100, 50]), you(s, [68, 50])], [rect(60, 43, 84, 57)]), hit(youAt(s, [6, 94], 6), [lineStack(CENTER, [6, 94])])]}; },
   "k-hb": s => { const tanks = [mark(47, 31, "MT", "T"), mark(53, 31, "OT", "T")], tower: Point = [50, 31];
-    return {overlays:[{t:"tower", x:tower[0], y:tower[1]}], boss:BOSS, before:tanks, after:[aoe(tower, TOWER_R), ...tanks, say("5, THEN 6, THEN 7 HITS", 8)], answer:[circle(tower, TOWER_R)],
+    return {overlays:[{t:"tower", x:tower[0], y:tower[1]}], boss:BOSS, before:tanks, after:[towerHit(tower), ...tanks, say("5, THEN 6, THEN 7 HITS", 8)], answer:[circle(tower, TOWER_R)],
       note:"Example spot. The tanks soak the tower, and you heal them between the hits.", options:[
-        show([aoe(tower, TOWER_R), ...tanks, say("5, THEN 6, THEN 7 HITS", 8)], [circle(tower, TOWER_R)]),
-        show([aoe(tower, TOWER_R), you(s, tower), say("YOU SOAK IT ALONE", 8)], [circle(tower, TOWER_R)]),
+        show([towerHit(tower), ...tanks, say("5, THEN 6, THEN 7 HITS", 8)], [circle(tower, TOWER_R)]),
+        show([towerHit(tower), you(s, tower), say("YOU SOAK IT ALONE", 8)], [circle(tower, TOWER_R)]),
         show([...tanks, say("RAISE THE PARTY", 8)]),
         show([RAIDWIDE, ...tanks, say("IT IS THE ENRAGE", 8)])]}; }
 };

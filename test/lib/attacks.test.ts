@@ -2,7 +2,6 @@
 // fight turns into one.
 import { assert, test } from "vitest";
 import * as M10S from "../../src/data/fights/m10s/source.gen";
-import * as M11 from "../../src/data/fights/m11s/attacks";
 import * as M11S from "../../src/data/fights/m11s/source.gen";
 import { dist, polar } from "../../src/geometry";
 import { RAIDWIDE_R, standardAttacks } from "../../src/lib/attacks";
@@ -94,19 +93,6 @@ test("every ability of every fight draws, with no new code", () => {
       if (ability.shape !== "single-target") assert.isAbove(os.length, 0, `${fight} ${name}`);
     }
   }
-});
-
-test("the standard attacks draw M11S's attacks the same as its own helpers", () => {
-  const boss: Point = [50, 30];
-  assert.deepEqual(A.circle(boss, M11S.BOSSMOD_ABILITIES.AssaultEvolvedAxeAOE.range), M11.axeHit(boss));
-  assert.deepEqual(A.donut(boss, 5, 60), M11.donut(boss, M11.SCYTHE_SAFE));
-  assert.deepEqual(
-    A.cone(boss, 120, M11S.BOSSMOD_ABILITIES.SweepingVictory.angle, 60),
-    M11.cleave(boss, 120, M11.PROTEAN_HALF, M11.PROTEAN_LEN),
-  );
-  const l = kindOf(A.line(boss, 180, 60, 6), "band"),
-    old = kindOf(M11.lineTo(boss, [50, 60]), "band");
-  for (const k of ["x", "y", "x2", "y2", "w"] as const) assert.closeTo(l[k], old[k], 1e-9, k);
 });
 
 test("proteans are eight cones out from the boss, evenly around him", () => {
