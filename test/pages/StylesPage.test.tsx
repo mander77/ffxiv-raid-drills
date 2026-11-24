@@ -93,13 +93,13 @@ test("the styles page draws each standard attack, and the mark of an unknown siz
   assert.equal(attacks.querySelector(".tower text")?.textContent, "2", "a tower shows its soak count");
 });
 
-test("proteans come out from the boss, and a knockback shows bold arrows", () => {
+test("proteans are eight cones, a knockback shows hollow arrows, and a tower its icon", () => {
   render(<StylesPage />);
   const card = (name: string) => screen.getByRole("heading", { level: 3, name }).closest("li");
   const proteans = card("Proteans");
   assert.equal(proteans?.querySelectorAll("polygon.aoe").length, 8, "eight cones");
-  assert.ok(proteans?.querySelector(".bosscore"), "out from the boss");
-  assert.equal(card("Knockback Arrows")?.querySelectorAll(".aim.push").length, 8, "eight bold arrows");
+  assert.equal(card("Knockback Arrows")?.querySelectorAll("polygon.push").length, 8, "eight hollow arrows");
+  assert.ok(card("Tower to Soak")?.querySelector(".tower svg.lucide-tower"), "the tower icon in the middle");
 });
 
 test("the mechanic cards show their icons only, with no attack on the arena", () => {

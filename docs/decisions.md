@@ -63,7 +63,9 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
 - Two pull requests (owner's choice). The first adds the library, `fromBossmod`, the "size
   unknown" mark and the attacks on the styles page. M11S does not change. The second moves
   M11S's drills and pictures onto the library, and checks that each one builds the same as before.
-- `proteans(from, angle, range, count = 8)` was added after the first ten (owner's request): the clock spots, eight cones evenly around the boss. The styles page lists it with the other attacks.
+- `proteans(from, angle, range, count = 8)` was added after the first ten (owner's request):
+  the clock spots, eight cones evenly around one source. The source is not always the boss, so
+  the styles page draws no boss (owner's correction). It lists proteans with the other attacks.
 - All ten attacks of the issue are built now, also those M11S does not use (owner's choice):
   raidwide, circle, donut, cone, line, cross, half arena, knockback, puddle and tower. A new
   fight, such as M10S, then draws with no new code.
@@ -75,18 +77,20 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
   choice. The import keeps such an ability, with its text; it does not stop.
 - A cone keeps three points on its round edge up to 90 degrees, as M11S's `cleave` draws it. A
   wider cone gets one more point for each 45 degrees.
-- A knockback has its own overlay (`{t:"knockback"}`): bold dark arrows with arrowheads on a
-  light outline, out from its source (owner's request). Thin white guides were too faint to see.
+- A knockback has its own overlay (`{t:"knockback"}`): wide, hollow arrows out from its source,
+  like the push in the knockback icons (icons.tsx, rule 5; owner's request). Thin white guides
+  were too faint to see.
   M11S still draws its knockbacks as guides until the second pull request moves it.
-- A tower can show its soak count in its middle (`soak`), and a puddle can carry its life in
-  seconds (`life`).
+- A tower can show its soak count (`soak`): the tower icon in its middle, with the number in its
+  column, in the highlight colour, as the mechanic icon shows it (owner's request). A puddle can
+  carry its life in seconds (`life`).
 - On the styles page, "Knockback Arrows" and "Tower to Soak" have these names because the
   mechanic kinds "Knockback" and "Tower" already have cards there.
 - Rejected: an attack's picture beside each mechanic kind's icon on the styles page. A kind does
   not always map to one attack. Every attack is in the Standard Attacks section instead (owner's
   choice).
-- The Cone sample covers a small wedge (60 degrees, 16 yalms), so it reads as a cone and not
-  as half the arena (owner's request).
+- The Cone sample is a wedge from near the middle of the arena out to its edge (60 degrees, 20
+  yalms), so it reads as a cone and not as half the arena (owner's request).
 
 ## Planned work
 

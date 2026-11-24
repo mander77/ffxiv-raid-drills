@@ -8,7 +8,6 @@ import "../components/arena/arena.css";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { BossMark } from "../components/arena/BossMark";
 import { hitsFirst, Shape, Tether } from "../components/arena/Shape";
 import { Weapon } from "../components/arena/Weapon";
 import { CastSquare } from "../components/CastSquare";
@@ -43,7 +42,7 @@ import { CATEGORIES } from "../data/categories";
 import { FIGHTS } from "../data/fights";
 import { standardAttacks } from "../lib/attacks";
 import { kindsOf } from "../lib/practice";
-import type { Boss, Category, DrillKind, Overlay, Point } from "../types";
+import type { Category, DrillKind, Overlay, Point } from "../types";
 
 /** What each ability category means, for its card. */
 const CATEGORY_MEANING: Record<Category, string> = {
@@ -169,23 +168,17 @@ interface AttackSample {
   overlays: readonly Overlay[];
   /** The part of the arena to show (an SVG viewBox), when not all of it. */
   view?: string;
-  /** The boss, when the attack comes out from him. */
-  boss?: Boss;
 }
-
-/** The boss in the middle, with no facing, for an attack that comes out from him. */
-const MID_BOSS: Boss = { x: 50, y: 50, f: null };
 
 const ATTACKS: readonly AttackSample[] = [
   { name: "Raidwide", meaning: "Hits the whole arena: the party takes it.", overlays: [EXAMPLE.raidwide()] },
   { name: "Circle", meaning: "Hits everything inside the circle.", overlays: [EXAMPLE.circle(MID, 8)] },
   { name: "Donut", meaning: "Hits everything outside its inner ring: stand inside it.", overlays: [EXAMPLE.donut(MID, 5, 60)] },
-  { name: "Cone", meaning: "Hits a wedge out from its source.", overlays: [EXAMPLE.cone([50, 95], 0, 60, 16)] },
+  { name: "Cone", meaning: "Hits a wedge out from its source.", overlays: [EXAMPLE.cone([50, 55], 0, 60, 20)] },
   {
     name: "Proteans",
-    meaning: "Eight cones out from the boss, one on each player: take your clock spot.",
+    meaning: "Eight cones out from one source, one on each player: take your clock spot.",
     overlays: EXAMPLE.proteans(MID, 30, 60),
-    boss: MID_BOSS,
   },
   { name: "Line", meaning: "Hits a straight line out from its source.", overlays: [EXAMPLE.line([50, 100], 0, 60, 6)] },
   { name: "Cross", meaning: "Hits two lines across each other.", overlays: EXAMPLE.cross(MID, 0, 40, 10) },
@@ -439,7 +432,7 @@ interface ArenaSquareProps {
 }
 
 /** The arena floor, 100 units across (or the part of it the sample asks for), with the attack on
-    it, the boss when the attack comes out from him, and the arena's edge on top. */
+    it and the arena's edge on top. */
 function ArenaSquare({ sample, className }: ArenaSquareProps) {
   return (
     <svg className={cn("arena", className)} viewBox={sample.view ?? "0 0 100 100"} aria-hidden="true">
@@ -448,7 +441,6 @@ function ArenaSquare({ sample, className }: ArenaSquareProps) {
         // biome-ignore lint/suspicious/noArrayIndexKey: the pieces of a sample never change order.
         <Shape key={i} overlay={o} />
       ))}
-      {sample.boss && <BossMark boss={sample.boss} />}
       <rect className="edge" x="0" y="0" width="100" height="100" />
     </svg>
   );

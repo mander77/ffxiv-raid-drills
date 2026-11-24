@@ -1,8 +1,9 @@
 import { cn } from "@/lib/utils";
-import { dist, round2, unit } from "../../geometry";
+import { addVec, dist, round2, unit } from "../../geometry";
 import { useArenaSizes } from "../../hooks/useFight";
 import { UNKNOWN_R } from "../../lib/attacks";
 import type { Overlay, Point } from "../../types";
+import { TowerIcon } from "../icons";
 import { Weapon } from "./Weapon";
 
 /** "x,y" for an SVG points or path list, to 2 decimals. */
@@ -49,7 +50,7 @@ export function Shape({ overlay: o }: ShapeProps) {
       return (
         <g className="tower" transform={`translate(${round2(o.x)} ${round2(o.y)})`}>
           <circle className="out" r={o.r ?? sizes.tower} />
-          {o.soak == null ? <circle className="in" r="1.1" /> : <text>{o.soak}</text>}
+          {o.soak == null ? <circle className="in" r="1.1" /> : <SoakMark r={o.r ?? sizes.tower} soak={o.soak} />}
         </g>
       );
     case "unknown":
@@ -108,7 +109,7 @@ export function Shape({ overlay: o }: ShapeProps) {
     case "aim":
       return <Aim from={[o.x, o.y]} to={[o.x2, o.y2]} />;
     case "knockback":
-      return <Aim className="push" from={[o.x, o.y]} to={[o.x2, o.y2]} />;
+      return <Push from={[o.x, o.y]} to={[o.x2, o.y2]} />;
     case "guide":
       return <line className="guide" x1={round2(o.x)} y1={round2(o.y)} x2={round2(o.x2)} y2={round2(o.y2)} />;
     case "tether":
@@ -149,8 +150,6 @@ export function Tether({ portal, to, stretched }: TetherProps) {
 interface AimProps {
   from: Point;
   to: Point;
-  /** "push" draws a knockback's arrow, in the arena's dark text colour. */
-  className?: string;
 }
 
 /** How long the arrowhead of an aim is, and how wide each side of it is, in arena units. The
@@ -158,22 +157,75 @@ interface AimProps {
 const HEAD_LEN = 4.2;
 const HEAD_HALF = 2.8;
 
-/** An arrow from a cone's source along its middle, so a wide cone shows where it comes from, or
-    (with "push") where a knockback sends you. It is drawn twice: a light outline first, so it
-    stands out on the floor or an attack, then the arrow. */
-function Aim({ from, to, className }: AimProps) {
+/** An arrow from a cone's source along its middle, so a wide cone shows where it comes from. It
+    is drawn twice: a light outline first, so it stands out on the cone, then the arrow. */
+function Aim({ from, to }: AimProps) {
   const d = unit([to[0] - from[0], to[1] - from[1]]);
   const back: Point = [to[0] - d[0] * HEAD_LEN, to[1] - d[1] * HEAD_LEN];
   const side = (s: number): Point => [back[0] - d[1] * HEAD_HALF * s, back[1] + d[0] * HEAD_HALF * s];
   const shaft = `M${pt(from)} L${pt(back)}`;
   const head = `M${pt(to)} L${pt(side(1))} L${pt(side(-1))} Z`;
   return (
-    <g className={cn("aim", className)}>
+    <g className="aim">
       <path className="halo" d={`${shaft} ${head}`} />
       <path className="shaft" d={shaft} />
       <path className="head" d={head} />
     </g>
   );
+}
+
+interface SoakMarkProps {
+  /** The tower's radius, in arena units. */
+  r: number;
+  soak: number;
+}
+
+/** How wide the tower icon is, as a part of the tower's width. The app's choice, for the picture. */
+const SOAK_ICON = 0.6;
+
+/** The tower icon in the middle of a tower, with how many players soak it in its column, as the
+    mechanic icon shows it (MechanicIcon). Drawn around the tower's middle. */
+function SoakMark({ r, soak }: SoakMarkProps) {
+  const size = 2 * r * SOAK_ICON;
+  return (
+    <>
+      <TowerIcon className="icon" x={-size / 2} y={-size / 2} width={size} height={size} />
+      {/* Up a little, in the column, clear of the ring, as MechanicIcon places it. */}
+      <text y={-size * 0.06} fontSize={size * 0.5}>
+        {soak}
+      </text>
+    </>
+  );
+}
+
+interface PushProps {
+  from: Point;
+  to: Point;
+}
+
+/** The half widths of a knockback's arrow, its shaft and its head, and the length of its head, in
+    arena units. The app's choice, for the picture. */
+const PUSH_SHAFT_HALF = 1.3;
+const PUSH_HEAD_HALF = 3;
+const PUSH_HEAD_LEN = 3.6;
+
+/** Where a knockback pushes you: a wide, hollow arrow from `from` to `to`, like the push in the
+    knockback icons (icons.tsx, rule 5). A thin arrow is a move you make; this one throws you. */
+function Push({ from, to }: PushProps) {
+  const d = unit([to[0] - from[0], to[1] - from[1]]);
+  const across: Point = [-d[1], d[0]];
+  const back = addVec(to, d, -PUSH_HEAD_LEN);
+  const at = (p: Point, w: number): Point => addVec(p, across, w);
+  const pts = [
+    at(from, PUSH_SHAFT_HALF),
+    at(back, PUSH_SHAFT_HALF),
+    at(back, PUSH_HEAD_HALF),
+    to,
+    at(back, -PUSH_HEAD_HALF),
+    at(back, -PUSH_SHAFT_HALF),
+    at(from, -PUSH_SHAFT_HALF),
+  ];
+  return <polygon className="push" points={pts.map(pt).join(" ")} />;
 }
 
 /** True for one of the boss's weapons. */

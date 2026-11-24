@@ -31,6 +31,8 @@
     --arena-wm-yellow: oklch(0.783 0.154 89.014);
     --arena-wm-blue: oklch(0.553 0.125 249.557);
     --arena-wm-purple: oklch(0.541 0.168 302.527);
+    /* The number of players, as in the mechanic icons (--count in app.css, light mode). */
+    --arena-count: oklch(0.6 0.19 45);
     --arena-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
     /* A tether: red until it is stretched, then blue (the owner's choice, as in the game). */
     --arena-tether: oklch(0.577 0.215 27.325);
@@ -144,13 +146,12 @@
   .arena .aim .head {
     fill: var(--arena-aim);
   }
-  /* Where a knockback pushes you: the same arrow in the arena's dark text colour, so it stands
-     out on the light floor and is never mistaken for a cone's aim. */
-  .arena .aim.push .shaft {
+  /* Where a knockback pushes you: a wide, hollow arrow, as in the knockback icons. */
+  .arena .push {
+    fill: oklch(1 0 0 / 0.85);
     stroke: var(--arena-text);
-  }
-  .arena .aim.push .head {
-    fill: var(--arena-text);
+    stroke-width: 0.6;
+    stroke-linejoin: round;
   }
   .arena .aoeband {
     stroke: var(--arena-aoe);
@@ -228,12 +229,14 @@
     fill: var(--arena-text);
     opacity: 0.55;
   }
-  /* A tower's soak count, in its middle. */
+  /* A tower's soak count: the tower icon in its middle, with the number of players in its
+     column, in the highlight colour, as the mechanic icon shows it. */
+  .arena .tower .icon {
+    color: var(--arena-text);
+  }
   .arena .tower text {
-    fill: var(--arena-text);
-    font-family: var(--arena-mono);
+    fill: var(--arena-count);
     font-weight: 700;
-    font-size: 3.6px;
     text-anchor: middle;
     dominant-baseline: central;
   }
