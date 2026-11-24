@@ -368,7 +368,7 @@ Do not propose these again unless the owner brings them up.
   Less (owner's choice: the player must see every step at a glance, with no click). This replaces
   the Collapsible from issue #29.
 - A rule that a drill and a Learn card both show is written once, in `src/data/fights/m11s/rules.ts`.
-- Mechanic names are in Title Case everywhere, on the icons and in the text (owner's choice, issue
+- Mechanic names are in Title Case everywhere, on the icons and in the text (owner's choice, issue #110
   #58). The rule is in `docs/vocabulary.md`.
 - One idea has one phrase on screen (owner's choices, issue #58). The list is in `docs/vocabulary.md`. The owner chose "under the boss" and "max melee" as the only hitbox words, "light party
   1/2" over G1/G2 and "static", "soaked" for towers, "Supports (tanks and healers)" explained on
@@ -842,9 +842,16 @@ static wins.
     callouts and comments, and each mechanic class's abilities, shapes and positions. Owner's
     choice over raw copies (other projects' code, which needs their licence notices) and over
     the cache only (a fresh clone would lack them). The site does not read it; the draft does.
-  - A BossMod ability with no shape the import knows ("???", "range 60 ?-degree cone") is kept
-    as `shape: "unknown"` with its text, so a new fight imports without a code change. M11S has
-    none.
+  - A BossMod ability whose enums comment gives no full shape ("???", "range 60 ?-degree cone")
+    takes its shape from the mechanic files when the classes that name it make exactly one shape
+    that fits the comment (`sizeFrom` names the file and class). BossMod's code gives a cone's
+    angle and a rectangle's or a cross's width as half values; the import doubles them, to the
+    full values the enums comments use. Any other one stays `shape: "unknown"` with its text, and
+    the site will draw it with a "size unknown" mark (owner's choice). M11S has none. M10S has 3
+    left: `ReverseAlleyOopFirst` and `ReverseAlleyOopRepeat` (their classes make two cone sizes)
+    and `DeepVarialBoss` (no class names it).
+  - The owner asked for one set of standard attacks that every fight draws with: issue #110,
+    after #94. M11S moves onto it too.
   - M11S's Arena Split is an "extra" in its list (`"arenaSplit": "Flatliner.cs"`), read by the
     import's own parser. M11S's generated data stayed the same; only its header comment changed.
   - M10S is imported (owner's choice, November 24) at the newest commits, for the draft. It has
