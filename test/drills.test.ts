@@ -1,6 +1,7 @@
 import { assert, test } from "vitest";
 import {
   assaultScene,
+  avalancheScene,
   buildAssault,
   buildAssault2,
   buildOrbital,
@@ -14,6 +15,10 @@ import {
   type JumpSet,
   jumpsNext,
   nextPuddle,
+  type SplitEnd,
+  type SplitSide,
+  splitRound,
+  splitTowers,
   ultimateScene,
   voidAgain,
 } from "../src/data/drills";
@@ -53,7 +58,7 @@ test("drills with no random parts build the same pattern every time", () => {
       for (let i = 0; i < 20; i++)
         assert.equal(JSON.stringify(m.build(s, null)), first, `${m.id} changed between builds, so mark it random`);
     }
-  assert.equal(DRILLS.filter((x) => !changes(x)).length, 10, "10 fixed drills");
+  assert.equal(DRILLS.filter((x) => !changes(x)).length, 11, "11 fixed drills");
 });
 
 test("Assault Evolved: the faced weapon goes first, then clockwise", () => {
@@ -466,4 +471,44 @@ test("Dance of Domination: every pair spot is clear of the 10-yalm Hurricane Exp
   const drill = DRILLS.find((m) => m.id === "m-dance");
   if (!drill) throw new Error("missing drill m-dance");
   for (const s of SLOTS) assert.deepEqual(zoneOf(drill.build(s, null).steps[0].z), { c: DANCE_PAIRS[s], r: 5 });
+});
+
+/** True when p is on the west (or east) platform, or at its north (or south) end. */
+const onSide = (p: Point, side: SplitSide): boolean => (side === "west" ? p[0] <= 25.5 : p[0] >= 74.5);
+const atEnd = (p: Point, end: SplitEnd): boolean => (end === "north" ? p[1] < 50 : p[1] > 50);
+const SIDES: SplitSide[] = ["west", "east"],
+  ENDS: SplitEnd[] = ["north", "south"];
+
+test("Arena Split: a round puts you in close, then at the safe end of your platform", () => {
+  for (const s of SLOTS)
+    for (const side of SIDES)
+      for (const end of ENDS)
+        for (const tether of [true, false]) {
+          const sc = splitRound(s, tether, side, end),
+            [bait, lineup] = sc.steps.map((st) => zoneCenter(zoneOf(st.z)));
+          assert.ok(onSide(bait, side) && Math.abs(bait[1] - 50) < 1, "in close, at the middle of the inner edge");
+          assert.ok(onSide(lineup, side) && atEnd(lineup, end), `${tether ? "tether" : "marker"}: the ${end} end`);
+          // A tether stretches at the outer edge; a marker goes to the number waymark.
+          if (tether) assert.ok(side === "west" ? lineup[0] < 5 : lineup[0] > 95, "the outer edge");
+          else assert.deepEqual(lineup, side === "west" ? [9, end === "north" ? 19 : 81] : [91, end === "north" ? 19 : 81]);
+          for (const st of sc.steps) assertLines(st.a, sc.setup.join(" "));
+        }
+});
+
+test("Arena Split: the towers are in the quadrant you ended in", () => {
+  for (const side of SIDES)
+    for (const end of ENDS) {
+      const towers = zoneCenter(zoneOf(splitTowers("H1", true, side, end).steps[0].z)),
+        avalanche = zoneCenter(zoneOf(avalancheScene("H1", side, end, "west", "north").steps[0].z));
+      for (const p of [towers, avalanche]) assert.ok(onSide(p, side) && atEnd(p, end));
+    }
+});
+
+test("Arcadion Avalanche: the far end of the platform he does not face, away from his turn", () => {
+  for (const face of SIDES)
+    for (const swing of ENDS) {
+      const p = zoneCenter(zoneOf(avalancheScene("H2", "west", "north", face, swing).steps[1].z));
+      assert.ok(onSide(p, face === "west" ? "east" : "west"), "behind him");
+      assert.ok(atEnd(p, swing === "north" ? "south" : "north") && Math.abs(p[1] - 50) > 30, "the far end");
+    }
 });

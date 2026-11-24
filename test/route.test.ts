@@ -143,12 +143,12 @@ test("in a quiet stretch the runner pre-positions for the next mechanic", () => 
       });
       assert.isAbove(quiet, 2, "the fight has quiet stretches");
       // The first Void Stardust starts with the first puddle north of the boss, and the second at
-      // his butt, so the player pre-positions on that first puddle. Other mechanics have no
-      // pre-position of their own.
+      // his butt; Massive Meteor stacks where the party waits, in close. So the player
+      // pre-positions on the first spot. Other mechanics have no pre-position of their own.
       for (const st of moves) {
         const title = f.segs[st.si].title,
           first = moves.find((m) => m.si === st.si);
-        if (title.startsWith("Void Stardust")) assert.deepEqual(st.pre, first?.p, title);
+        if (title.startsWith("Void Stardust") || title === "Massive Meteor") assert.deepEqual(st.pre, first?.p, title);
         else assert.isUndefined(st.pre, title);
       }
     }

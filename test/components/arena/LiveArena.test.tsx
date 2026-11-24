@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, assert, test } from "vitest";
 import { LiveArena } from "../../../src/components/arena/LiveArena";
-import { DRILLS } from "../../../src/data/drills";
+import { DRILLS, splitRound } from "../../../src/data/drills";
 import { stepZone, zoneCenter } from "../../../src/geometry";
 import { buildPattern } from "../../../src/lib/practice";
 import type { StepResult } from "../../../src/types";
@@ -54,4 +54,18 @@ test("the arena's name says that a click picks where you stand, only when it doe
   assert.ok(screen.getByRole("img", { name: "Arena map." }));
   rerender(<LiveArena scene={scene} k={k} results={[]} showLast={false} hint={false} />);
   assert.ok(screen.getByRole("img", { name: "Arena map." }));
+});
+
+test("the next step's cue shows after a correct answer, and waits after an incorrect one", () => {
+  // Arena Split: the portal lines are the cue of the second step.
+  const scene = splitRound("H1", false, "west", "north"),
+    z = stepZone(scene.steps[0], []);
+  if (!z) throw new Error("no zone");
+  const answer = (ok: boolean): StepResult[] => [{ p: ok ? zoneCenter(z) : [50, 90], ok, z, drop: null }];
+  const { rerender } = render(<LiveArena scene={scene} k={0} results={answer(true)} showLast hint={false} />);
+  assert.ok(screen.queryByText("PORTAL LINES"), "shown with the next question");
+  rerender(<LiveArena scene={scene} k={0} results={answer(false)} showLast hint={false} />);
+  assert.isNull(screen.queryByText("PORTAL LINES"), "not before Next step");
+  rerender(<LiveArena scene={scene} k={0} results={answer(false)} showLast={false} hint={false} />);
+  assert.ok(screen.queryByText("PORTAL LINES"), "shown once the next step is asked");
 });

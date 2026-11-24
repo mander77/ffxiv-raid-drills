@@ -522,6 +522,104 @@ const SCYTHE_STACK: Zone = {
 // TypeScript would type t as plain string, and "puddle" would not fit the Overlay union.
 const NPUD = [22, 34, 46, 58, 70, 82].map((x): Overlay => ({t:"puddle", x, y:5, r:ATOMIC_R}));
 const SPUD = [18, 30, 42, 54, 66, 78].map((x): Overlay => ({t:"puddle", x, y:95, r:ATOMIC_R}));
+
+/* ---------- Arena Split ----------
+   Two platforms, west and east, from Flatliner to the Crown of Arcadia. Light party 1 (H1)
+   starts west, light party 2 (H2) east (Kindred No Buddies). Each tower knocks you back: with a
+   tether to the other platform, without one to the same platform. You have a tether in one of
+   the two rounds and not in the other. So H1 is on the east platform after the second round,
+   and H2 on the west, whichever round had the tether (the owner's rule, from wtfdig). */
+export type SplitSide = "west" | "east";
+/** An end of a platform: north or south. */
+export type SplitEnd = "north" | "south";
+export const homeSide = (s: Slot): SplitSide => bySlot<SplitSide>(s, {H1:"west", H2:"east"});
+export const otherSide = (p: SplitSide): SplitSide => p === "west" ? "east" : "west";
+export const otherEnd = (e: SplitEnd): SplitEnd => e === "north" ? "south" : "north";
+/** The middle of a platform's inner edge, next to the boss: the Fire Breath bait, the puddles and
+    Massive Meteor. The same zone as Learn's Fire Breath card. */
+export const SPLIT_INNER: Record<SplitSide, RectZone> = {west:{rect:[15, 38, 25.5, 62]}, east:{rect:[74.5, 38, 85, 62]}};
+/** Half of a platform, north or south of its middle: the app's choice, as in the lineup zones. */
+const HALF: Record<SplitEnd, [number, number]> = {north:[8, 48], south:[52, 92]};
+/** The outer edge of a platform, where a tether stretches (Learn's lineup card). */
+const OUTER_X: Record<SplitSide, [number, number]> = {west:[0, 5], east:[95, 100]};
+/** The four towers, one in each quadrant (as in the first towers). */
+const SPLIT_TOWER: Record<SplitSide, Record<SplitEnd, Point>> = {west:{north:[11, 23], south:[11, 77]}, east:{north:[89, 23], south:[89, 77]}};
+const SPLIT_TOWERS: Overlay[] = [SPLIT_TOWER.west.north, SPLIT_TOWER.east.north, SPLIT_TOWER.west.south, SPLIT_TOWER.east.south].map(([x, y]): Overlay => ({t:"tower", x, y}));
+/** The number waymark at each end of each platform, where a Fire Breath marker goes. */
+const WAYMARK: Record<SplitSide, Record<SplitEnd, {n: number; p: Point}>> = {
+  west:{north:{n:1, p:[9, 19]}, south:{n:4, p:[9, 81]}}, east:{north:{n:2, p:[91, 19]}, south:{n:3, p:[91, 81]}}};
+const quadrant = (side: SplitSide, end: SplitEnd): string => (end === "north" ? "N" : "S") + (side === "west" ? "W" : "E");
+/** Your mark on the arena, where you stood at the end of the last tethers and markers. */
+const lastSpot = (s: Slot, side: SplitSide, end: SplitEnd): Overlay => {
+  const [x, y] = WAYMARK[side][end].p;
+  return {t:"mark", x:side === "west" ? x + 8 : x - 8, y, l:s, r:"H"};
+};
+const randomEnd = (): SplitEnd => random() < 0.5 ? "north" : "south";
+const randomSide = (): SplitSide => random() < 0.5 ? "west" : "east";
+
+const SPLIT_ROUND_RULE: Lines = ["No tether: go in close to bait Fire Breath.", "Everyone baits the puddles in close.",
+  "Then the safe end: a tether to the edge, a marker to the waymark."];
+
+/** One round of tethers and Fire Breath markers, on the platform `side`. The portal lines leave
+    one end of the platform safe (`end`). Without a tether you bait Fire Breath and get a marker. */
+export function splitRound(s: Slot, tether: boolean, side: SplitSide, end: SplitEnd): Scene {
+  const wm = WAYMARK[side][end], [y0, y1] = HALF[end], [o0, o1] = OUTER_X[side];
+  const x0 = side === "west" ? 0 : 74.5, x1 = side === "west" ? 25.5 : 100, [u0, u1] = HALF[otherEnd(end)];
+  // The portal lines cover the other end of your platform: drawn as a soft lane, the app's way to show it.
+  const lines: Overlay[] = [{t:"lane", rect:[x0, u0, x1, u1], soft:true}, {t:"tag", x:(x0 + x1) / 2, y:(u0 + u1) / 2, s:"PORTAL LINES"}];
+  return {setup:[tether ? "You have a tether. You are on the " + side + " platform." : "No tether. You are on the " + side + " platform.",
+      "Three puddles drop on the party, in close.", "Then the portal lines leave one end of the platform safe."], ordered:true,
+    split:true, boss:BOSS, overlays:[],
+    steps:[
+      tether
+        ? {q:"Where do you bait the puddles?", z:SPLIT_INNER[side], a:["In close, at the middle of the platform's inner edge.", "Bait the puddles with the party."]}
+        : {q:"No tether. Where do you go?", z:SPLIT_INNER[side], a:["In close, at the middle of the platform's inner edge.", "Bait Fire Breath, then the puddles, there."]},
+      tether
+        ? {q:"Where do you stretch your tether?", z:{rect:[o0, y0, o1, y1]}, cue:lines, a:["The outer edge, at the " + end + " end."]}
+        : {q:"You have a Fire Breath marker. Where do you stand?", z:{c:wm.p, r:6.5}, cue:lines,
+          a:["A corner of waymark " + wm.n + ", at the " + end + " end.", "Inner or outer corner: ask your lead."]}],
+    rule:SPLIT_ROUND_RULE};
+}
+
+/** The second towers: soak the tower in the quadrant where you ended the first round. */
+export function splitTowers(s: Slot, tether: boolean, side: SplitSide, end: SplitEnd): Scene {
+  const to = tether ? otherSide(side) : side;
+  return {setup:["Four towers again, one in each quadrant.", tether ? "You have a tether this time." : "No tether this time."],
+    split:true, boss:BOSS, overlays:[...SPLIT_TOWERS, lastSpot(s, side, end)],
+    steps:[{q:"Which tower do you soak?", z:{c:SPLIT_TOWER[side][end], r:TOWER_R},
+      a:["The " + quadrant(side, end) + " tower: the quadrant you ended in.", (tether ? "Tether: get knocked to the " : "No tether: get knocked to the same platform, the ") + to + " one."]}],
+    rule:["Towers: the quadrant you ended the last tethers and markers in.", "Tethered: get knocked to the other platform.", "Not tethered: get knocked to the same platform."]};
+}
+
+/** Massive Meteor: the four players on a platform stack in close, at the middle of its inner edge. */
+export function massiveScene(side: SplitSide): Scene {
+  return {setup:["Massive Meteor: a five-hit stack on each platform.", "You are on the " + side + " platform."],
+    split:true, boss:BOSS, overlays:[],
+    steps:[{q:"Where do you stack?", z:SPLIT_INNER[side], a:["In close, at the middle of the platform's inner edge.", "All four on the platform stack, so the melee can hit the boss."]}],
+    rule:["All four on a platform stack.", "Mitigate and heal between the hits."]};
+}
+
+/** Arcadion Avalanche: the boss faces one platform and grabs it. The towers knock you to the
+    other platform, behind him. He turns to it over the north or the south side and slams the
+    platform down on most of it; the far end, away from his turn, is safe (wtfdig). */
+export function avalancheScene(s: Slot, side: SplitSide, end: SplitEnd, face: SplitSide, swing: SplitEnd): Scene {
+  const back = otherSide(face), safe = otherEnd(swing), wm = WAYMARK[back][safe];
+  const f = face === "west" ? 270 : 90, dir = (f === 270) === (swing === "north") ? 1 : -1;
+  // His turn, drawn as a dashed arc around him with an arrowhead at its end. The app's choice.
+  const R = 17, arc = Array.from({length:7}, (_x, i) => POINT_AT(f + dir * 30 * i, R));
+  const turn: Overlay[] = [...arc.slice(1).map(([x2, y2], i): Overlay => ({t:"guide", x:arc[i][0], y:arc[i][1], x2, y2})),
+    ...[R - 3, R + 3].map((r): Overlay => { const [x, y] = POINT_AT(f + dir * 168, r); return {t:"guide", x, y, x2:arc[6][0], y2:arc[6][1]}; })];
+  const [y0, y1] = safe === "north" ? [0, 32] : [68, 100], [x0, x1] = back === "west" ? [0, 25.5] : [74.5, 100];
+  return {setup:["The boss faces the " + face + " platform: he grabs it.", "Towers appear, one in each quadrant.", "Then he turns and slams the platform down."], ordered:true,
+    split:true, boss:{x:50, y:50, f}, overlays:[...SPLIT_TOWERS, lastSpot(s, side, end)],
+    steps:[
+      {q:"Which tower do you soak?", z:{c:SPLIT_TOWER[side][end], r:TOWER_R},
+        a:["The " + quadrant(side, end) + " tower: the quadrant you ended in.", "Get knocked to the " + back + " platform, behind him."]},
+      {q:"He turns over the " + swing + " side. Where do you go?", z:{rect:[x0, y0, x1, y1]}, cue:turn,
+        a:["The " + safe + " end of the " + back + " platform, by waymark " + wm.n + ".", "He turns from the " + swing + ", so go to the other end."],
+        reveal:[{t:"lane", rect:face === "west" ? [0, 0, 25.5, 100] : [74.5, 0, 100, 100]}, {t:"tag", x:face === "west" ? 13 : 87, y:50, s:"GRABBED"}]}],
+    rule:["He grabs the platform he faces.", "Get knocked to the other platform.", "Go to its far end, away from his turn."]};
+}
 // TS note: the `Drill[]` annotation is what checks every drill below. Each build function
 // must return a Scene, so a missing field or a misspelled one is a compile error.
 export const DRILLS: readonly Drill[] = [
@@ -602,6 +700,16 @@ export const DRILLS: readonly Drill[] = [
       split:true, boss:BOSS, overlays:[{t:"tower",x:11,y:23},{t:"tower",x:89,y:23},{t:"tower",x:11,y:77},{t:"tower",x:89,y:77}],
       steps:[{q:"Which tower do you soak?", z:bySlot(s, {H1:{c:[11,23],r:TOWER_R}, H2:{c:[89,77],r:TOWER_R}}), a:bySlot(s, {H1:["The NW tower, with the MT."], H2:["The SE tower, with the OT."]})}],
       rule:["Tethered: get knocked to the other platform.", "Not tethered: get knocked to the same platform."]})},
+  // The first round: a tether knocked you to the other platform, no tether left you on your own.
+  {id:"m-split-fire", order:19.1, variants:["tether", "marker"], random:true, phase:P3, time:"6:35", title:"Arena Split: Fire Breath", kind:["bait", "chains"],
+    build:(s, v)=>{ const tether = v === "tether", home = homeSide(s); return splitRound(s, tether, tether ? otherSide(home) : home, randomEnd()); }},
+  // The second towers: no tether in the first round left you on your own platform, and the other way round.
+  {id:"m-split-towers2", order:19.2, variants:["tether", "marker"], random:true, phase:P3, time:"7:01", title:"Arena Split: Second Towers", kind:"towerKnockback", soak:2,
+    build:(s, v)=>{ const tether = v === "tether", home = homeSide(s); return splitTowers(s, tether, tether ? home : otherSide(home), randomEnd()); }},
+  {id:"m-massive", order:20, phase:P3, time:"7:25", title:"Massive Meteor", kind:"lightPartyStack",
+    build:s=>massiveScene(otherSide(homeSide(s)))},
+  {id:"m-avalanche", order:21, random:true, phase:P3, time:"7:39", title:"Arcadion Avalanche", kind:"towerKnockback", soak:2,
+    build:s=>avalancheScene(s, otherSide(homeSide(s)), randomEnd(), randomSide(), randomEnd())},
   {id:"m-ecl-start", order:26, phase:P4, time:"8:54", title:"Ecliptic Stampede: Start", kind:"puddles",
     build:s=>({setup:["Tanks and melee stack under the boss.", "Healers and ranged stay out to bait the markers."],
       boss:BOSS, overlays:[{t:"mark",x:25,y:25,l:"R1",r:"D"},{t:"mark",x:75,y:25,l:"R2",r:"D"}],

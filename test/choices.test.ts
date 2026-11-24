@@ -27,6 +27,12 @@ const SHOWS: { [K in keyof Picks]: (f: Fight, v: string) => boolean } = {
     const o = seg(f, "Ultimate Trophy Weapons").scene.overlays.find((x) => x.spawn === 0 && WEAPON.has(x.t));
     return Boolean(o && "x" in o && o.x < 50 === (v === "cw"));
   },
+  // The first Fire Breath round asks a tether player to stretch it, and the second round does not.
+  tether: (f, v) =>
+    f.segs
+      .filter((g) => g.drills[0] === "m-split-fire")
+      .map((g) => /tether/.test(g.scene.steps[1].q))
+      .join() === (v === "first" ? "true,false" : "false,true"),
   fireball: (f, v) => {
     const g = f.segs.find((x) => x.drills[0] === "m-ecl-two" || x.drills[0] === "m-ecl-four");
     return Boolean(g && g.drills[0] === `m-ecl-${v}` && g.title.endsWith(v === "four" ? "Four-way Fireball" : "Two-way Fireball"));
