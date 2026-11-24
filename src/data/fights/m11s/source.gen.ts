@@ -348,5 +348,6 @@ export const BOSSMOD_ARENA_HALF = 20;
 
 /** BossMod's Arena Split, in yalms from the arena's center: the center of each platform (west
     and east), its half width and half length, the x of each side portal line (Majestic
-    Meteorain), and how far from its portal a tether counts as stretched (BossMod's estimate). */
-export const BOSSMOD_SPLIT = {platformCenter:16, platformHalfWidth:10, platformHalfLength:20, lines:[-21, -11, 11, 21], stretch:48} as const;
+    Meteorain), how far from its portal a tether counts as stretched (BossMod's estimate), and
+    how far a tower knocks the players in it. */
+export const BOSSMOD_SPLIT = {platformCenter:16, platformHalfWidth:10, platformHalfLength:20, lines:[-21, -11, 11, 21], stretch:48, towerKnockback:23} as const;
