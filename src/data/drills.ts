@@ -326,7 +326,7 @@ function firstPuddle(start: Point, c: Point): Zone {
    at the intercardinals just outside the hitbox. Healers and ranged take any open spot.
    Each puddle goes off VOID_PUDDLE.life (3) seconds after it drops (BossMod: Cometite, 3.0 s
    cast) and then it is gone. The last one goes off 2 seconds before Comet, so by the spread
-   every puddle is gone and the spread does not check them. */
+   every puddle is gone: the spread does not check them, and the map fades them (puddlesOff). */
 const FIXED_SPREAD: {l: string; r: "T" | "D"; off: Point}[] = [
   {l:"MT", r:"T", off:[-15, -15]}, {l:"OT", r:"T", off:[15, -15]}, {l:"M1", r:"D", off:[-15, 15]}, {l:"M2", r:"D", off:[15, 15]}];
 /** The tank and melee spread spots around a boss at c. */
@@ -415,7 +415,7 @@ function voidSteps(s: Slot, spread: boolean, c: Point = CENTER, start = NORTH_ST
     {q:"Third puddle?", zf:next, a:["Just outside the second puddle, clockwise again.", "Stay in max melee."], drop:VOID_PUDDLE},
     spread
       ? {q:"Puddles done. Comet: every player spreads. Tanks and melee go to fixed spots. Where do you go?",
-          zf:cometSpread(s, c), cue:spreadMarks(c),
+          zf:cometSpread(s, c), cue:spreadMarks(c), puddlesOff:true,
           a:["Any open spot. Healers and ranged have no fixed spread spot.", "Keep away from the tank and melee spots."]}
       : {q:"Puddles done. Where does the party stack?", zf:next,
           a:["Stack one more step clockwise, just past the third puddle.", "Stay in max melee."]}];

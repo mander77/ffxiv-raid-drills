@@ -651,7 +651,9 @@ static wins.
   apart. The map fades each puddle 3 seconds after it drops.
 - The third puddle goes off 2 seconds before the stack or spread (1:27.9 and 1:29.9 in the first
   Void Stardust, 1:54.2 and 1:56.2 in the second), so no puddle is on the floor then. The Comet
-  spread does not keep you out of a puddle (owner, 2026-11-24, issue #102).
+  spread does not keep you out of a puddle (owner, 2026-11-24, issue #102). Practice fades every
+  puddle when it asks the Comet step (`puddlesOff`), and the Learn pictures of the spread draw no
+  puddles. The stack step and its pictures still show the puddles, as a guide to the stack spot.
 - Crushing Comet stack: one more step clockwise, just past the third puddle, where a fourth
   puddle would go. The same for both Void Stardusts. It is clear of the third puddle by its place.
 - Every puddle and the stack stay in the boss's max melee range (owner, 2026-11-23).
