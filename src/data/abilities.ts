@@ -8,11 +8,11 @@
 // The notes are written for this app.
 import { P1, P2, P3, P4, type Phase, TIMELINE } from "./timeline";
 import { sec } from "../time";
+import { cactbot } from "./sources";
 
-/** The enrage (Heartbreaker), in seconds into the fight: the last line of the cactbot timeline,
-    at 1659.6 there (its fight starts at 1000). Every screen that needs the end of the fight
-    starts from this time. */
-export const ENRAGE = 659.6;
+/** The enrage (Heartbreaker), in seconds into the fight: the last line of the cactbot timeline.
+    Every screen that needs the end of the fight starts from this time. */
+export const ENRAGE = cactbot("Heartbreaker (Enrage)");
 /** The full fight's clock runs this long past the enrage, so the enrage hit shows before the
     end screen. This is the app's choice, not a fight time. */
 const AFTER_ENRAGE = 2.4;
@@ -87,99 +87,100 @@ const N = {
 type Row = [t: number, name: string, cats: Category[], note: string, hit?: HitRule];
 const rows = (list: Row[]): Ability[] => list.map(([t, name, cats, note, hit]) => ({t, name, cats, note, ...(hit ? {hit} : {})}));
 
-/** Dance of Domination: seven raidwide hits. cactbot has the first at 2:21.3 and the seventh at
-    2:25.5, so they come 0.7 seconds apart. */
-const DANCE: HitRule = {times:{n:7, gap:0.7, name:"Dance of Domination"}};
+/** Dance of Domination: seven raidwide hits, evenly apart from cactbot's first to its seventh
+    (0.7 seconds, to one decimal as cactbot writes its times). */
+const DANCE_GAP = Math.round((cactbot("Dance of Domination 7") - cactbot("Dance of Domination 1")) / 6 * 10) / 10;
+const DANCE: HitRule = {times:{n:7, gap:DANCE_GAP, name:"Dance of Domination"}};
 /** Heartbreak Kick: each hit on the shared tower is its own cactbot line. */
 const KICK: HitRule = {shared:true, lines:"Heartbreak Kick"};
 
 /** The ability list, one entry per phase. The phases use this app's names. */
 export const PHASES: readonly {name: Phase; rows: Ability[]}[] = [
   {name:P1, rows:rows([
-    [10.6, "Crown of Arcadia", ["raid"], N.crown],
-    [17.7, "Raw Steel Trophy", ["mech"], N.rawTrophy],
-    [25.1, "Raw Steel", ["spot"], N.rawSteel],
-    [38.4, "Trophy Weapons", ["mech"], N.trophy],
-    [48.2, "Assault Evolved", ["mech"], N.assaultCast],
-    [50.4, "Assault Evolved #1", ["mech"], N.assault],
-    [55.5, "Assault Evolved #2", ["mech"], N.assault],
-    [60.6, "Assault Evolved #3", ["mech"], N.assault],
-    [72.7, "Trophy Weapons", ["mech"], N.trophy],
-    [79.8, "Void Stardust", ["dodge"], N.voidCast],
-    [83.9, "Void Stardust baits x3", ["dodge"], N.voidBaits],
-    [89.9, "Void Stardust spread or stack", ["target"], N.voidEnd],
-    [92.7, "Assault Evolved", ["mech"], N.assaultCast],
-    [94.9, "Assault Evolved #1", ["mech"], N.assault],
-    [100.0, "Assault Evolved #2", ["mech"], N.assault],
-    [105.1, "Assault Evolved #3", ["mech"], N.assault],
-    [110.2, "Void Stardust baits x3", ["dodge"], N.voidBaits],
-    [116.2, "Void Stardust spread or stack", ["target"], N.voidEnd],
-    [122.2, "Crown of Arcadia", ["raid"], N.crown],
-    [134.6, "Dance of Domination Trophy", ["raid"], N.danceTrophy],
-    [141.3, "Dance of Domination hits", ["raid"], N.danceHits, DANCE],
-    [150.5, "Explosion + Eye of the Hurricane", ["dodge", "target"], N.eye],
-    [156.4, "Raw Steel Trophy", ["mech"], N.rawTrophy],
-    [163.8, "Raw Steel", ["spot"], N.rawSteel],
-    [178.9, "Charybdistopia", ["raid"], N.charyb],
-    [184.6, "Ultimate Trophy Weapons", ["mech"], N.ultimate],
-    [192.4, "Assault Apex", ["mech"], N.apex],
-    [194.6, "Assault Evolved #1", ["mech"], N.assault],
-    [199.7, "Assault Evolved #2", ["mech"], N.assault],
-    [204.8, "Assault Evolved #3", ["mech"], N.assault],
-    [209.9, "Assault Evolved #4", ["mech"], N.assault],
-    [215.0, "Assault Evolved #5", ["mech"], N.assault],
-    [220.1, "Assault Evolved #6", ["mech"], N.assault],
-    [226.3, "Powerful Gust", ["target"], N.gust],
-    [240.4, "One and Only", ["raid"], N.oneOnly],
-    [252.8, "Great Wall of Fire #1", ["tank"], N.wall1],
-    [256.0, "Great Wall of Fire #2 + line dodge", ["tank", "dodge"], N.wall2],
-    [259.8, "Line dodge", ["dodge"], N.lineDodge]
+    [cactbot("Crown of Arcadia"), "Crown of Arcadia", ["raid"], N.crown],
+    [cactbot("Raw Steel Trophy (Scythe/Axe)"), "Raw Steel Trophy", ["mech"], N.rawTrophy],
+    [cactbot("Heavy Hitter (Scythe)/Impact x6 (Axe)"), "Raw Steel", ["spot"], N.rawSteel],
+    [cactbot("Trophy Weapons"), "Trophy Weapons", ["mech"], N.trophy],
+    [cactbot("Assault Evolved"), "Assault Evolved", ["mech"], N.assaultCast],
+    [cactbot("Assault Evolved 1"), "Assault Evolved #1", ["mech"], N.assault],
+    [cactbot("Assault Evolved 2"), "Assault Evolved #2", ["mech"], N.assault],
+    [cactbot("Assault Evolved 3"), "Assault Evolved #3", ["mech"], N.assault],
+    [cactbot("Trophy Weapons", 2), "Trophy Weapons", ["mech"], N.trophy],
+    [cactbot("Void Stardust"), "Void Stardust", ["dodge"], N.voidCast],
+    [cactbot("Cometite 1"), "Void Stardust baits x3", ["dodge"], N.voidBaits],
+    [cactbot("Comet/Crushing Comet?"), "Void Stardust spread or stack", ["target"], N.voidEnd],
+    [cactbot("Assault Evolved", 2), "Assault Evolved", ["mech"], N.assaultCast],
+    [cactbot("Assault Evolved 1", 2), "Assault Evolved #1", ["mech"], N.assault],
+    [cactbot("Assault Evolved 2", 2), "Assault Evolved #2", ["mech"], N.assault],
+    [cactbot("Assault Evolved 3", 2), "Assault Evolved #3", ["mech"], N.assault],
+    [cactbot("Cometite 1", 2), "Void Stardust baits x3", ["dodge"], N.voidBaits],
+    [cactbot("Comet", 2), "Void Stardust spread or stack", ["target"], N.voidEnd],
+    [cactbot("Crown of Arcadia", 2), "Crown of Arcadia", ["raid"], N.crown],
+    [cactbot("Dance of Domination Trophy"), "Dance of Domination Trophy", ["raid"], N.danceTrophy],
+    [cactbot("Dance of Domination 1"), "Dance of Domination hits", ["raid"], N.danceHits, DANCE],
+    [cactbot("Eye of the Hurricane"), "Explosion + Eye of the Hurricane", ["dodge", "target"], N.eye],
+    [cactbot("Raw Steel Trophy Axe", 2), "Raw Steel Trophy", ["mech"], N.rawTrophy],
+    [cactbot("Heavy Hitter (Scythe)", 2), "Raw Steel", ["spot"], N.rawSteel],
+    [cactbot("Charybdistopia"), "Charybdistopia", ["raid"], N.charyb],
+    [cactbot("Ultimate Trophy Weapons"), "Ultimate Trophy Weapons", ["mech"], N.ultimate],
+    [cactbot("Assault Apex"), "Assault Apex", ["mech"], N.apex],
+    [cactbot("Assault Evolved 1", 3), "Assault Evolved #1", ["mech"], N.assault],
+    [cactbot("Assault Evolved 2", 3), "Assault Evolved #2", ["mech"], N.assault],
+    [cactbot("Assault Evolved 3", 3), "Assault Evolved #3", ["mech"], N.assault],
+    [cactbot("Assault Evolved 4"), "Assault Evolved #4", ["mech"], N.assault],
+    [cactbot("Assault Evolved 5"), "Assault Evolved #5", ["mech"], N.assault],
+    [cactbot("Assault Evolved 6"), "Assault Evolved #6", ["mech"], N.assault],
+    [cactbot("Powerful Gust"), "Powerful Gust", ["target"], N.gust],
+    [cactbot("One and Only"), "One and Only", ["raid"], N.oneOnly],
+    [cactbot("Great Wall of Fire 1"), "Great Wall of Fire #1", ["tank"], N.wall1],
+    [cactbot("Great Wall of Fire 2"), "Great Wall of Fire #2 + line dodge", ["tank", "dodge"], N.wall2],
+    [cactbot("Explosion 2"), "Line dodge", ["dodge"], N.lineDodge]
   ])},
   {name:P2, rows:rows([
-    [266.1, "Orbital Omen", ["mech"], N.orbital],
-    [275.8, "Fire and Fury", ["dodge"], N.fury],
-    [292.1, "Meteorain", ["mech"], N.meteorain],
-    [300.1, "Fearsome Fireball + Cosmic Kiss #1", ["target"], N.fireballKiss],
-    [309.3, "Foregone Fatality #1", ["tank"], N.fatality],
-    [310.2, "Fearsome Fireball + Cosmic Kiss #2", ["target"], N.fireballKiss],
-    [319.3, "Foregone Fatality #2", ["tank"], N.fatality],
-    [320.2, "Fearsome Fireball + Cosmic Kiss #3", ["target"], N.fireballKiss],
-    [329.3, "Foregone Fatality #3", ["tank"], N.fatality],
-    [330.2, "Fearsome Fireball", ["target"], N.fireball],
-    [342.9, "Triple Tyrannhilation", ["raid", "spot"], N.triple]
+    [cactbot("Orbital Omen (castbar)"), "Orbital Omen", ["mech"], N.orbital],
+    [cactbot("Fire and Fury"), "Fire and Fury", ["dodge"], N.fury],
+    [cactbot("Meteorain"), "Meteorain", ["mech"], N.meteorain],
+    [cactbot("Fearsome Fireball"), "Fearsome Fireball + Cosmic Kiss #1", ["target"], N.fireballKiss],
+    [cactbot("Foregone Fatality"), "Foregone Fatality #1", ["tank"], N.fatality],
+    [cactbot("Fearsome Fireball", 2), "Fearsome Fireball + Cosmic Kiss #2", ["target"], N.fireballKiss],
+    [cactbot("Foregone Fatality", 2), "Foregone Fatality #2", ["tank"], N.fatality],
+    [cactbot("Fearsome Fireball", 3), "Fearsome Fireball + Cosmic Kiss #3", ["target"], N.fireballKiss],
+    [cactbot("Foregone Fatality", 3), "Foregone Fatality #3", ["tank"], N.fatality],
+    [cactbot("Fearsome Fireball", 4), "Fearsome Fireball", ["target"], N.fireball],
+    [cactbot("Triple Tyrannhilation"), "Triple Tyrannhilation", ["raid", "spot"], N.triple]
   ])},
   {name:P3, rows:rows([
-    [361.8, "Flatliner", ["raid", "spot"], N.flatliner],
-    [375.9, "Majestic Meteor", ["mech"], N.majestic],
-    [389.0, "Meteor towers", ["spot"], N.towers],
-    [400.0, "Meteor baits x3", [], N.meteorBaits],
-    [403.9, "Majestic Meteowrath + Fire Breath", ["target", "spot"], N.wrath],
-    [421.1, "Meteor towers", ["spot"], N.towers],
-    [432.1, "Meteor baits x3", [], N.meteorBaits],
-    [436.0, "Majestic Meteowrath + Fire Breath", ["target", "spot"], N.wrath],
-    [445.3, "Massive Meteor", ["target"], N.massive, {shared:true}],
-    [458.8, "Meteor towers", ["spot"], N.towers],
-    [468.7, "Arcadion Avalanche", ["dodge"], N.avalanche]
+    [cactbot("Flatliner (split)"), "Flatliner", ["raid", "spot"], N.flatliner],
+    [cactbot("Majestic Meteor"), "Majestic Meteor", ["mech"], N.majestic],
+    [cactbot("Explosion", 6), "Meteor towers", ["spot"], N.towers],
+    [cactbot("Majestic Meteor 1"), "Meteor baits x3", [], N.meteorBaits],
+    [cactbot("Majestic Meteowrath/Majestic Meteorain/Fire Breath"), "Majestic Meteowrath + Fire Breath", ["target", "spot"], N.wrath],
+    [cactbot("Explosion", 7), "Meteor towers", ["spot"], N.towers],
+    [cactbot("Majestic Meteor 1", 2), "Meteor baits x3", [], N.meteorBaits],
+    [cactbot("Majestic Meteowrath/Majestic Meteorain/Fire Breath", 2), "Majestic Meteowrath + Fire Breath", ["target", "spot"], N.wrath],
+    [cactbot("Massive Meteor (castbar)"), "Massive Meteor", ["target"], N.massive, {shared:true}],
+    [cactbot("Explosion", 8), "Meteor towers", ["spot"], N.towers],
+    [cactbot("Arcadion Avalanche"), "Arcadion Avalanche", ["dodge"], N.avalanche]
   ])},
   {name:P4, rows:rows([
-    [479.4, "Crown of Arcadia", ["raid"], N.crown],
-    [490.7, "Great Wall of Fire #1", ["tank"], N.wall1],
-    [493.9, "Great Wall of Fire #2 + line dodge", ["tank", "dodge"], N.wall2],
-    [497.7, "Line dodge", ["dodge"], N.lineDodge],
-    [504.0, "Orbital Omen", ["mech"], N.orbital],
-    [513.7, "Fire and Fury", ["dodge"], N.fury],
-    [521.8, "Crown of Arcadia", ["raid"], N.crown],
-    [534.1, "Ecliptic Stampede", ["mech"], N.ecliptic],
-    [541.2, "Mammoth Meteor x2", ["raid"], N.mammoth],
-    [541.2, "Atomic Impact + meteor baits start", ["target"], N.atomicStart],
-    [556.2, "Atomic Impact + meteor baits end", ["target"], N.atomicEnd],
-    [557.2, "Ecliptic towers", ["spot"], N.eclTowers],
-    [566.8, "Majestic Meteowrath", ["target"], N.wrath4],
-    [571.1, "Two-way / Four-way Fireball", ["target"], N.wayFireball],
-    [579.4, "Crown of Arcadia", ["raid"], N.crown],
-    [593.3, "Heartbreak Kick x5", ["spot"], N.kick, KICK],
-    [612.4, "Heartbreak Kick x6", ["spot"], N.kick, KICK],
-    [633.5, "Heartbreak Kick x7", ["spot"], N.kick, KICK],
+    [cactbot("Crown of Arcadia", 3), "Crown of Arcadia", ["raid"], N.crown],
+    [cactbot("Great Wall of Fire 1", 2), "Great Wall of Fire #1", ["tank"], N.wall1],
+    [cactbot("Great Wall of Fire 2", 2), "Great Wall of Fire #2 + line dodge", ["tank", "dodge"], N.wall2],
+    [cactbot("Explosion 2", 2), "Line dodge", ["dodge"], N.lineDodge],
+    [cactbot("Orbital Omen (castbar)", 2), "Orbital Omen", ["mech"], N.orbital],
+    [cactbot("Fire and Fury", 2), "Fire and Fury", ["dodge"], N.fury],
+    [cactbot("Crown of Arcadia", 4), "Crown of Arcadia", ["raid"], N.crown],
+    [cactbot("Ecliptic Stampede"), "Ecliptic Stampede", ["mech"], N.ecliptic],
+    [cactbot("Mammoth Meteor x2"), "Mammoth Meteor x2", ["raid"], N.mammoth],
+    [cactbot("Atomic Impact 1"), "Atomic Impact + meteor baits start", ["target"], N.atomicStart],
+    [cactbot("Atomic Impact 6"), "Atomic Impact + meteor baits end", ["target"], N.atomicEnd],
+    [cactbot("Cosmic Kiss", 4), "Ecliptic towers", ["spot"], N.eclTowers],
+    [cactbot("Majestic Meteowrath x4"), "Majestic Meteowrath", ["target"], N.wrath4],
+    [cactbot("Two-way Fireball / Four-way Fireball"), "Two-way / Four-way Fireball", ["target"], N.wayFireball],
+    [cactbot("Crown of Arcadia", 5), "Crown of Arcadia", ["raid"], N.crown],
+    [cactbot("Heartbreak Kick"), "Heartbreak Kick x5", ["spot"], N.kick, KICK],
+    [cactbot("Heartbreak Kick", 2), "Heartbreak Kick x6", ["spot"], N.kick, KICK],
+    [cactbot("Heartbreak Kick", 3), "Heartbreak Kick x7", ["spot"], N.kick, KICK],
     [ENRAGE, "Heartbreaker (enrage)", ["enrage"], N.enrage]
   ])}
 ];

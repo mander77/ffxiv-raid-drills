@@ -20,6 +20,8 @@
     "e2e": "playwright test",
     "lint": "biome check",
     "format": "biome check --write",
+    "import:sources": "node scripts/import-sources.mjs",
+    "check:sources": "node scripts/import-sources.mjs --check && vitest run test/sources.test.ts",
     "publish": "node scripts/publish.mjs",
     "wait-deploy": "node scripts/wait-deploy.mjs"
   },

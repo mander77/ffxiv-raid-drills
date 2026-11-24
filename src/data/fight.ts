@@ -5,6 +5,8 @@
 import { DRILLS, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
 import { ABILITIES, ENRAGE, FIGHT_END, type Category } from "./abilities";
 import { newCode, random, withSeed } from "../util";
+import { nearClock } from "../time";
+import { bossmod, cactbot, castStart, numberedAfter, tenth, type LineName } from "./sources";
 import type { Point, Scene, Slot } from "../types";
 
 /** One line on the fight timeline: `name` happens at `t`, in seconds into the fight. */
@@ -72,9 +74,9 @@ type ChoiceRow<K extends keyof Picks = keyof Picks> = { [P in K]: {key: P; label
 // list against ChoiceRow without widening it. A value that a pick cannot take is a type error.
 export const CHOICE_ROWS = [
   {key:"raw", label:"First Raw Steel Trophy", options:[["axe", "Axe"], ["scythe", "Scythe"]]},
-  {key:"set1", label:"Weapon order at 0:48", options:ORDERS},
+  {key:"set1", label:`Weapon order at ${nearClock(cactbot("Assault Evolved"))}`, options:ORDERS},
   {key:"void", label:"First Void Stardust ends in", options:[["stack", "Stack"], ["spread", "Spread"]]},
-  {key:"set2", label:"Weapon order at 1:33", options:ORDERS},
+  {key:"set2", label:`Weapon order at ${nearClock(cactbot("Assault Evolved", 2))}`, options:ORDERS},
   {key:"ult", label:"Ultimate Trophy Weapons", options:[["cw", "Clockwise"], ["ccw", "Counterclockwise"]]},
   {key:"fireball", label:"Ecliptic Fireball", options:[["two", "Two-way"], ["four", "Four-way"]]},
   {key:"wall", label:"Your Ecliptic puddles", options:[["north", "North wall"], ["south", "South wall"]]}
@@ -124,32 +126,37 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   /* Assault Evolved (ability B417) has a 6.0-second cast, so the boss turns to the first weapon
      6.0 seconds before cactbot's line: at 0:42.2 for the first set (line 0:48.2) and 1:26.7 for
      the second (line 1:32.7). That leaves about 8 seconds before the first hit. */
-  const CAST = 6.0, face1 = assault1.bossAt?.(0).f;
+  const face1 = assault1.bossAt?.(0).f;
   /* A Void Stardust puddle drops under you when its 3.0-second cast starts (Cometite in BossMod)
      and goes off at cactbot's line, 3 seconds later. Where you drop it counts when it drops, so
      you can leave immediately. */
-  const placed = (hits: number[]): number[] => hits.map(t => Math.round((t - 3.0) * 10) / 10);
+  const placed = (hits: number[]): number[] => hits.map(t => tenth(t - bossmod("Cometite").cast));
+  // The hits of each Assault Evolved set, and the Cometite puddles of each Void Stardust.
+  const weapons = (n: number): number[] => [cactbot("Assault Evolved 1", n), cactbot("Assault Evolved 2", n), cactbot("Assault Evolved 3", n)];
+  const SET1 = weapons(1), SET2 = weapons(2), ULTIMATE = [...weapons(3), cactbot("Assault Evolved 4"), cactbot("Assault Evolved 5"), cactbot("Assault Evolved 6")];
+  const puddles = (n: number): number[] => [cactbot("Cometite 1", n), cactbot("Cometite 2", n), cactbot("Cometite 3", n)];
   // The boss after the third weapon of the second set. He stays there for the second Void Stardust.
   const lastBoss = A2.states[A2.states.length - 1];
   /* Each click is due when the hit that checks it lands, in seconds into the fight. A scene
      appears when its cast starts (cactbot's StartsUsing or the ability before it). */
   const segs: FightSeg[] = [
-    {title:"Raw Steel Trophy: " + titleCase(w1), drills:["m-raw-" + w1], scene:drill("m-raw-" + w1, s), k:0, from:15.7, due:[25.1]},
-    {title:"Assault Evolved", drills:["m-assault"], scene:assault1, k:0, from:38.4, turn:face1 != null ? {at:48.2 - CAST, f:face1, weapons:A1.steps.length} : undefined, due:[50.4, 55.5, 60.6]},
+    {title:"Raw Steel Trophy: " + titleCase(w1), drills:["m-raw-" + w1], scene:drill("m-raw-" + w1, s), k:0, from:castStart("RawSteelTrophyAxe", "Raw Steel Trophy (Scythe/Axe)"), due:[cactbot("Heavy Hitter (Scythe)/Impact x6 (Axe)")]},
+    {title:"Assault Evolved", drills:["m-assault"], scene:assault1, k:0, from:cactbot("Trophy Weapons"), turn:face1 != null ? {at:castStart("AssaultEvolvedLongCast", "Assault Evolved"), f:face1, weapons:A1.steps.length} : undefined, due:SET1},
     // The second set of weapons spawns when this Void Stardust starts, and the drill runs through all three.
-    {title:"Void Stardust into the Second Weapons", drills:["m-void"], scene:voidIntoWeapons(s, !stackFirst, A2), k:0, from:72.7,
-      turn:{at:92.7 - CAST, f:A2.W[0].a, weapons:A2.steps.length}, due:[79.8, ...placed([83.9, 85.9, 87.9]), 89.9, 94.9, 100.0, 105.1], pre:FIRST_PUDDLE},
-    {title:"Void Stardust (Second Time)", drills:[], scene:voidAgain(s, stackFirst, lastBoss), k:0, from:106, due:[...placed([110.2, 112.2, 114.2]), 116.2], pre:behind(lastBoss)},
+    {title:"Void Stardust into the Second Weapons", drills:["m-void"], scene:voidIntoWeapons(s, !stackFirst, A2), k:0, from:cactbot("Trophy Weapons", 2),
+      turn:{at:castStart("AssaultEvolvedLongCast", "Assault Evolved", 2), f:A2.W[0].a, weapons:A2.steps.length},
+      due:[cactbot("Void Stardust"), ...placed(puddles(1)), cactbot("Comet"), ...SET2], pre:FIRST_PUDDLE},
+    {title:"Void Stardust (Second Time)", drills:[], scene:voidAgain(s, stackFirst, lastBoss), k:0, from:106, due:[...placed(puddles(2)), cactbot("Comet", 2)], pre:behind(lastBoss)},
     // The lines on the floor show only just after the 7th and last hit (2:25.5), so the scene
     // with the lines appears then, not at the Trophy cast. Until then the arena stays empty.
-    {title:"Dance of Domination", drills:["m-dance"], scene:drill("m-dance", s), k:Math.floor(random() * 4), from:146.0, due:[150.5]},
-    {title:"Raw Steel Trophy: " + titleCase(w2), drills:["m-raw-" + w2], scene:drill("m-raw-" + w2, s), k:0, from:156.4, due:[163.8]}
+    {title:"Dance of Domination", drills:["m-dance"], scene:drill("m-dance", s), k:Math.floor(random() * 4), from:146.0, due:[cactbot("Eye of the Hurricane")]},
+    {title:"Raw Steel Trophy: " + titleCase(w2), drills:["m-raw-" + w2], scene:drill("m-raw-" + w2, s), k:0, from:cactbot("Raw Steel Trophy Axe", 2), due:[cactbot("Heavy Hitter (Scythe)", 2)]}
   ];
   // Ultimate Trophy Weapons is built here, after the Dance of Domination turn, as it always was.
   const U = buildUltimate(s, c.ult === "random" ? undefined : c.ult === "cw");
   segs.push(
-    {title:"Ultimate Trophy Weapons", drills:["m-ultimate"], scene:ultimateScene(U), k:0, from:184.6, due:[194.6, 199.7, 204.8, 209.9, 215.0, 220.1]},
-    {title:"Tornadoes", drills:["m-tornado"], scene:drill("m-tornado", s), k:0, from:221.2, due:[226.3]}
+    {title:"Ultimate Trophy Weapons", drills:["m-ultimate"], scene:ultimateScene(U), k:0, from:cactbot("Ultimate Trophy Weapons"), due:ULTIMATE},
+    {title:"Tornadoes", drills:["m-tornado"], scene:drill("m-tornado", s), k:0, from:cactbot("--middle--", 5), due:[cactbot("Powerful Gust")]}
   );
   /* Phases 2 to 4. They are built after Phase 1 on purpose, so a fight code made before they
      existed still replays the same Phase 1. At 9:31 the boss casts Two-way or Four-way Fireball,
@@ -159,29 +166,34 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   const four = choose(c.fireball, random() < 0.5 ? "four" : "two") === "four", wall = choose(c.wall, random() < 0.5 ? "north" : "south");
   const fireball = four ? "Four-way Fireball" : "Two-way Fireball", ecl = four ? "m-ecl-four" : "m-ecl-two";
   segs.push(
-    {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:266.1, due:[275.2, 276.8, 278.4]},
-    {title:"Meteorain: First Line Stack", drills:["m-meteor-1"], scene:drill("m-meteor-1", s), k:0, from:292.1, due:[300.1]},
-    {title:"Meteorain: Your Meteor", drills:["m-meteor-2"], scene:drill("m-meteor-2", s), k:0, from:301.3, due:[311.4]},
-    {title:"Meteorain: Third Line Stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:312.0, due:[320.2]},
-    {title:"Meteorain: Last Line Stack", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:321.5, due:[330.2, 342.9]},
-    {title:"Arena Split: Lineup", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:361.8, due:[375.9]},
-    {title:"Arena Split: First Towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:376.5, due:[389.0]},
-    {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:504.0, due:[513.1, 514.7, 516.3]},
-    {title:"Ecliptic Stampede: Start", drills:["m-ecl-start"], scene:drill("m-ecl-start", s), k:0, from:527.0, due:[541.2]},
-    {title:"Ecliptic Stampede: " + fireball, drills:[ecl], scene:drill(ecl, s, wall), k:0, from:557.5, due:[571.1]}
+    {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)"), due:[cactbot("Orbital Omen 1"), cactbot("Orbital Omen 2"), cactbot("Orbital Omen 3")]},
+    {title:"Meteorain: First Line Stack", drills:["m-meteor-1"], scene:drill("m-meteor-1", s), k:0, from:cactbot("Meteorain"), due:[cactbot("Fearsome Fireball")]},
+    {title:"Meteorain: Your Meteor", drills:["m-meteor-2"], scene:drill("m-meteor-2", s), k:0, from:cactbot("Cosmic Kiss"), due:[cactbot("Cosmic Kiss", 2)]},
+    {title:"Meteorain: Third Line Stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:312.0, due:[cactbot("Fearsome Fireball", 3)]},
+    {title:"Meteorain: Last Line Stack", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:321.5, due:[cactbot("Fearsome Fireball", 4), cactbot("Triple Tyrannhilation")]},
+    {title:"Arena Split: Lineup", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:cactbot("Flatliner (split)"), due:[cactbot("Majestic Meteor")]},
+    {title:"Arena Split: First Towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:376.5, due:[cactbot("Explosion", 6)]},
+    {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)", 2), due:[cactbot("Orbital Omen 1", 2), cactbot("Orbital Omen 2", 2), cactbot("Orbital Omen 3", 2)]},
+    {title:"Ecliptic Stampede: Start", drills:["m-ecl-start"], scene:drill("m-ecl-start", s), k:0, from:cactbot("--middle--", 7), due:[cactbot("Atomic Impact 1")]},
+    {title:"Ecliptic Stampede: " + fireball, drills:[ecl], scene:drill(ecl, s, wall), k:0, from:557.5, due:[cactbot("Two-way Fireball / Four-way Fireball")]}
   );
   /* The timeline lines, with cactbot's names. Where the arena is the test, the names stay as
      general as cactbot's before it syncs: "Comet/Crushing Comet", "Assault Evolved 1". */
-  const raw = (w: string, t: number): Array<[number, string]> => w === "axe"
-    ? [[t, "Raw Steel Trophy Axe"], [t + 6.3, "Raw Steel (Axe)"], [t + 7.4, "Impact x6 (Axe)"]]
-    : [[t, "Raw Steel Trophy Scythe"], [t + 7.4, "Heavy Hitter (Scythe)"]];
+  // The nth Raw Steel Trophy with weapon w: its cast and its hits.
+  const raw = (w: string, n: number): Array<[number, string]> => w === "axe"
+    ? [[cactbot("Raw Steel Trophy Axe", n), "Raw Steel Trophy Axe"], [cactbot("Raw Steel (Axe)", n), "Raw Steel (Axe)"], [cactbot("Impact x6 (Axe)", n), "Impact x6 (Axe)"]]
+    : [[cactbot("Raw Steel Trophy Scythe", n), "Raw Steel Trophy Scythe"], [cactbot("Heavy Hitter (Scythe)", n), "Heavy Hitter (Scythe)"]];
   const assault = (times: number[]): Array<[number, string]> => times.map((t, i) => [t, "Assault Evolved " + (i + 1)]);
-  // Each Cometite puddle drops 3 seconds before it goes off, when its cast starts (BossMod).
-  const comets = (t: number): Array<[number, string]> =>
-    [[t - 3, "Cometite 1 drops"], [t - 1, "Cometite 2 drops"], [t, "Cometite 1"], [t + 1, "Cometite 3 drops"],
-     [t + 2, "Cometite 2"], [t + 4, "Cometite 3"], [t + 6, "Comet/Crushing Comet"]];
-  const kicks = (t: number, n: number): Array<[number, string]> =>
-    [[t, "Heartbreak Kick"], ...Array.from({length:n}, (_x, i): [number, string] => [t + 1.1 + 2 * i, "Heartbreak Kick " + (i + 1)])];
+  // Each Cometite puddle drops when its cast starts (BossMod) and goes off at cactbot's line.
+  const comets = (n: number): Array<[number, string]> => {
+    const [c1, c2, c3] = puddles(n), drop = (t: number): number => tenth(t - bossmod("Cometite").cast);
+    return [[drop(c1), "Cometite 1 drops"], [drop(c2), "Cometite 2 drops"], [c1, "Cometite 1"], [drop(c3), "Cometite 3 drops"],
+      [c2, "Cometite 2"], [c3, "Cometite 3"], [cactbot("Comet", n), "Comet/Crushing Comet"]];
+  };
+  // The nth Heartbreak Kick: its cast and each hit on the tower.
+  const kicks = (n: number): Array<[number, string]> => [[cactbot("Heartbreak Kick", n), "Heartbreak Kick"], ...numberedAfter("Heartbreak Kick", n)];
+  // The same line name, each time it comes: L("Crown of Arcadia", 2) is the second Crown of Arcadia.
+  const L = (name: LineName, n = 1, shown: string = name): [number, string] => [cactbot(name, n), shown];
   const RAIDWIDE = new Set(["Crown of Arcadia", "Dance of Domination 1", "Dance of Domination 7", "One and Only",
     "Triple Tyrannhilation", "Flatliner", "Mammoth Meteor x2", "Heartbreaker (Enrage)"]);
   /* The boss's own casts: the lines whose ability BossMod lists as "Boss->self, N s cast,
@@ -194,50 +206,50 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     "Orbital Omen", "Meteorain", "Triple Tyrannhilation", "Majestic Meteor", "Massive Meteor", "Ecliptic Stampede",
     "Heartbreak Kick"]);
   const lines: Array<[number, string]> = [
-    [10.6, "Crown of Arcadia"],
-    ...raw(w1, 17.7), [33.1, "--middle--"],
-    [38.4, "Trophy Weapons"], [48.2, "Assault Evolved"], ...assault([50.4, 55.5, 60.6]), [67.7, "--middle--"],
-    [72.7, "Trophy Weapons"], [79.8, "Void Stardust"], ...comets(83.9),
-    [92.7, "Assault Evolved"], ...assault([94.9, 100.0, 105.1]), ...comets(110.2),
-    [122.2, "Crown of Arcadia"], [130.4, "--middle--"],
-    [134.6, "Dance of Domination Trophy"], [141.3, "Dance of Domination 1"], [145.5, "Dance of Domination 7"], [150.5, "Eye of the Hurricane"],
-    ...raw(w2, 156.4), [171.8, "--middle--"],
-    [178.9, "Charybdistopia"], [184.6, "Ultimate Trophy Weapons"], [192.4, "Assault Apex"],
-    ...assault([194.6, 199.7, 204.8, 209.9, 215.0, 220.1]), [221.2, "--middle--"],
-    [226.3, "Powerful Gust"], [227.3, "Immortal Reign"],
-    [240.4, "One and Only"],
-    [252.8, "Great Wall of Fire 1"], [256.0, "Great Wall of Fire 2"], [256.6, "Explosion 1"], [259.8, "Explosion 2"],
-    [266.1, "Orbital Omen"], [275.2, "Orbital Omen 1"], [275.8, "Fire and Fury"], [276.8, "Orbital Omen 2"], [278.4, "Orbital Omen 3"], [279.8, "Orbital Omen 4"],
-    [285.0, "--middle--"],
-    [292.1, "Meteorain"], [300.1, "Fearsome Fireball"], [301.3, "Cosmic Kiss"],
-    [309.3, "Foregone Fatality"], [310.2, "Fearsome Fireball"], [311.4, "Cosmic Kiss"], [314.0, "Explosion"],
-    [319.3, "Foregone Fatality"], [320.2, "Fearsome Fireball"], [321.4, "Cosmic Kiss"], [324.0, "Explosion"],
-    [329.3, "Foregone Fatality"], [330.2, "Fearsome Fireball"], [334.0, "Explosion"],
-    [342.9, "Triple Tyrannhilation"],
-    [361.8, "Flatliner"], [375.9, "Majestic Meteor"], [389.0, "Explosion"],
-    [400.0, "Majestic Meteor 1"], [402.0, "Majestic Meteor 2"], [403.9, "Majestic Meteowrath/Majestic Meteorain/Fire Breath"], [404.1, "Majestic Meteor 3"],
-    [421.1, "Explosion"],
-    [432.1, "Majestic Meteor 1"], [434.1, "Majestic Meteor 2"], [436.0, "Majestic Meteowrath/Majestic Meteorain/Fire Breath"], [436.1, "Majestic Meteor 3"],
-    [445.3, "Massive Meteor"], [446.4, "Massive Meteor x5"], [458.8, "Explosion"], [468.7, "Arcadion Avalanche"],
-    [479.4, "Crown of Arcadia"],
-    [490.7, "Great Wall of Fire 1"], [493.9, "Great Wall of Fire 2"], [494.5, "Explosion 1"], [497.7, "Explosion 2"],
-    [504.0, "Orbital Omen"], [513.1, "Orbital Omen 1"], [513.7, "Fire and Fury"], [514.7, "Orbital Omen 2"], [516.3, "Orbital Omen 3"], [517.7, "Orbital Omen 4"],
-    [521.8, "Crown of Arcadia"], [527.0, "--middle--"],
-    [534.1, "Ecliptic Stampede"], [541.2, "Mammoth Meteor x2"], [541.2, "Atomic Impact 1"], [544.2, "Atomic Impact 2"], [547.2, "Atomic Impact 3"],
-    [550.2, "Atomic Impact 4"], [553.2, "Atomic Impact 5"], [556.2, "Atomic Impact 6"], [557.2, "Cosmic Kiss"],
-    [566.8, "Majestic Meteowrath x4"], [571.1, fireball],
-    [579.4, "Crown of Arcadia"], [584.6, "--middle--"],
-    ...kicks(593.3, 5), ...kicks(612.4, 6), ...kicks(633.5, 7),
+    L("Crown of Arcadia"),
+    ...raw(w1, 1), L("--middle--"),
+    L("Trophy Weapons"), L("Assault Evolved"), ...assault(SET1), L("--middle--", 2),
+    L("Trophy Weapons", 2), L("Void Stardust"), ...comets(1),
+    L("Assault Evolved", 2), ...assault(SET2), ...comets(2),
+    L("Crown of Arcadia", 2), L("--middle--", 3),
+    L("Dance of Domination Trophy"), L("Dance of Domination 1"), L("Dance of Domination 7"), L("Eye of the Hurricane"),
+    ...raw(w2, 2), L("--middle--", 4),
+    L("Charybdistopia"), L("Ultimate Trophy Weapons"), L("Assault Apex"),
+    ...assault(ULTIMATE), L("--middle--", 5),
+    L("Powerful Gust"), L("Immortal Reign"),
+    L("One and Only"),
+    L("Great Wall of Fire 1"), L("Great Wall of Fire 2"), L("Explosion 1"), L("Explosion 2"),
+    L("Orbital Omen (castbar)", 1, "Orbital Omen"), L("Orbital Omen 1"), L("Fire and Fury"), L("Orbital Omen 2"), L("Orbital Omen 3"), L("Orbital Omen 4"),
+    L("--middle--", 6),
+    L("Meteorain"), L("Fearsome Fireball"), L("Cosmic Kiss"),
+    L("Foregone Fatality"), L("Fearsome Fireball", 2), L("Cosmic Kiss", 2), L("Explosion", 3),
+    L("Foregone Fatality", 2), L("Fearsome Fireball", 3), L("Cosmic Kiss", 3), L("Explosion", 4),
+    L("Foregone Fatality", 3), L("Fearsome Fireball", 4), L("Explosion", 5),
+    L("Triple Tyrannhilation"),
+    L("Flatliner (split)", 1, "Flatliner"), L("Majestic Meteor"), L("Explosion", 6),
+    L("Majestic Meteor 1"), L("Majestic Meteor 2"), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath"), L("Majestic Meteor 3"),
+    L("Explosion", 7),
+    L("Majestic Meteor 1", 2), L("Majestic Meteor 2", 2), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath", 2), L("Majestic Meteor 3", 2),
+    L("Massive Meteor (castbar)", 1, "Massive Meteor"), L("Massive Meteor x5"), L("Explosion", 8), L("Arcadion Avalanche"),
+    L("Crown of Arcadia", 3),
+    L("Great Wall of Fire 1", 2), L("Great Wall of Fire 2", 2), L("Explosion 1", 2), L("Explosion 2", 2),
+    L("Orbital Omen (castbar)", 2, "Orbital Omen"), L("Orbital Omen 1", 2), L("Fire and Fury", 2), L("Orbital Omen 2", 2), L("Orbital Omen 3", 2), L("Orbital Omen 4", 2),
+    L("Crown of Arcadia", 4), L("--middle--", 7),
+    L("Ecliptic Stampede"), L("Mammoth Meteor x2"), L("Atomic Impact 1"), L("Atomic Impact 2"), L("Atomic Impact 3"),
+    L("Atomic Impact 4"), L("Atomic Impact 5"), L("Atomic Impact 6"), L("Cosmic Kiss", 4),
+    L("Majestic Meteowrath x4"), L("Two-way Fireball / Four-way Fireball", 1, fireball),
+    L("Crown of Arcadia", 5), L("--middle--", 8),
+    ...kicks(1), ...kicks(2), ...kicks(3),
     [ENRAGE, "Heartbreaker (Enrage)"]
   ];
   const events = lines.map(([t, name]): TLEvent => ({t, name, raidwide:RAIDWIDE.has(name), cast:BOSS_CAST.has(name) || name.endsWith(" drops")}));
   const picks: Picks = {raw:w1, void:stackFirst ? "stack" : "spread", set1:orderIn(A1), set2:orderIn(A2),
     ult:U.cw ? "cw" : "ccw", fireball:four ? "four" : "two", wall};
-  const summary = "Raw Steel Trophy: " + w1 + " first, then " + w2 + ". Assault Evolved at 0:48: " + orderText(picks.set1).toLowerCase() +
-    ". At 1:33: " + orderText(picks.set2).toLowerCase() + ". Void Stardust: " + (stackFirst ? "stack first, then spread." : "spread first, then stack.") +
+  const summary = "Raw Steel Trophy: " + w1 + " first, then " + w2 + ". Assault Evolved at " + nearClock(cactbot("Assault Evolved")) + ": " + orderText(picks.set1).toLowerCase() +
+    ". At " + nearClock(cactbot("Assault Evolved", 2)) + ": " + orderText(picks.set2).toLowerCase() + ". Void Stardust: " + (stackFirst ? "stack first, then spread." : "spread first, then stack.") +
     " Ultimate Trophy Weapons: " + (U.cw ? "clockwise." : "counterclockwise.") +
     " Ecliptic Stampede: " + fireball + ", with your puddles along the " + wall + " wall.";
-  return {segs, events, end:FIGHT_END, split:[361.8, 479.4], summary, code, picks, choices:c};
+  return {segs, events, end:FIGHT_END, split:[cactbot("Flatliner (split)"), cactbot("Crown of Arcadia", 3)], summary, code, picks, choices:c};
 }
 
 /* ---------- damage going out ---------- */

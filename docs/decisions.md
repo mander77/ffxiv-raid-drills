@@ -694,6 +694,13 @@ static wins.
   boss hitbox is 5 yalms. The shared sizes and shapes live in `src/data/attacks.ts`.
 - Times come from cactbot (`ui/raidboss/data/07-dt/raid/r11s.txt`). Branch labels in that file add
   offsets, so subtract them.
+- Issue #14 (November 23): `npm run import:sources` imports both sources at pinned commits into
+  `src/data/source.gen.ts`, and the data files read every time and size from it. The owner chose
+  a generated file over a check alone. The downloads stay in `.cache/sources/`, never committed.
+  The import keeps game names as cactbot writes them, so it converts no text. A value that
+  matches no source stays typed by hand, on a list in `test/sources.test.ts`, as a question for
+  the owner. `npm test` runs that test; `npm run check:sources` also compares the generated file
+  with the pinned sources, which needs the network, so CI does not run that part yet.
 
 ## Hosting
 
