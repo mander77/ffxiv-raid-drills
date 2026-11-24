@@ -357,6 +357,9 @@ export function cometSpread(s: Slot, c: Point = CENTER): (results: StepResult[])
   };
 }
 
+/** Fire and Fury: the boss, facing north, cleaves his front and back. */
+export const FIRE_AND_FURY: Overlay[] = [{t:"poly", pts:[[50, 50], [0, 0], [100, 0]]}, {t:"poly", pts:[[50, 50], [0, 100], [100, 100]]}];
+
 /* Orbital Omen, simplified to 4 lanes each way. Each set fires one north lane and one east lane.
    Set 2 always crosses in one of the four middle squares. */
 export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
@@ -380,14 +383,13 @@ export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
   H.forEach((n, i) => overlays.push({t:"guide", x:0, y:n * 25 + 12.5, x2:100, y2:n * 25 + 12.5}, {t:"portal", x:97.4, y:n * 25 + 12.5, vert:false, n:i + 1}));
   const lanes = (sets: number[], soft = false): Overlay[] =>
     sets.flatMap((i): Overlay[] => [{t:"lane", rect:lane(V[i], true).rect, soft}, {t:"lane", rect:lane(H[i], false).rect, soft}]);
-  const fireAndFury: Overlay[] = [{t:"poly", pts:[[50, 50], [0, 0], [100, 0]]}, {t:"poly", pts:[[50, 50], [0, 100], [100, 100]]}];
   return {
     overlays,
     steps:[
       {q:"Before the #1 lines and Fire and Fury: where do you stand?",
         z:{fn:p => mid(p) && side(p) && misses(p, [0]), label:spot(c2, r2), show:[cellRect(1, r2), cellRect(2, r2)]},
         a:["At his side, in max melee.", "Pick a middle square the #1 lines miss.", "Best start: the square where the #2 lines cross."],
-        reveal:[...fireAndFury, ...lanes([0])]},
+        reveal:[...FIRE_AND_FURY, ...lanes([0])]},
       {q:"The #1 lines and Fire and Fury went off. The #2 lines are next. Where do you go?",
         z:{fn:p => mid(p) && misses(p, [1]), label:spot(cOpp, r1), show:[cellRect(cOpp, r1)]},
         a:["Cross under the boss to the opposite middle square.", "The #2 lines miss it."],
@@ -552,11 +554,17 @@ const HALF: Record<SplitEnd, [number, number]> = {north:[8, 48], south:[52, 92]}
 /** The outer edge of a platform, where a tether stretches (Learn's lineup card). */
 const OUTER_X: Record<SplitSide, [number, number]> = {west:[0, 5], east:[95, 100]};
 /** The four towers, one in each quadrant (as in the first towers). */
-const SPLIT_TOWER: Record<SplitSide, Record<SplitEnd, Point>> = {west:{north:[11, 23], south:[11, 77]}, east:{north:[89, 23], south:[89, 77]}};
+export const SPLIT_TOWER: Record<SplitSide, Record<SplitEnd, Point>> = {west:{north:[11, 23], south:[11, 77]}, east:{north:[89, 23], south:[89, 77]}};
 const SPLIT_TOWERS: Overlay[] = [SPLIT_TOWER.west.north, SPLIT_TOWER.east.north, SPLIT_TOWER.west.south, SPLIT_TOWER.east.south].map(([x, y]): Overlay => ({t:"tower", x, y}));
 /** The number waymark at each end of each platform, where a Fire Breath marker goes. */
 const WAYMARK: Record<SplitSide, Record<SplitEnd, {n: number; p: Point}>> = {
   west:{north:{n:1, p:[9, 19]}, south:{n:4, p:[9, 81]}}, east:{north:{n:2, p:[91, 19]}, south:{n:3, p:[91, 81]}}};
+/** The outer corner of the number waymark at one end of a platform, toward the arena's corner:
+    where a Fire Breath marker stands. */
+export const markerCorner = (side: SplitSide, end: SplitEnd): Point => {
+  const [x, y] = WAYMARK[side][end].p;
+  return [x + (side === "west" ? -5.5 : 5.5), y + (end === "north" ? -5.5 : 5.5)];
+};
 const quadrant = (side: SplitSide, end: SplitEnd): string => (end === "north" ? "N" : "S") + (side === "west" ? "W" : "E");
 /** Your mark on the arena, where you stood at the end of the last tethers and markers. */
 const lastSpot = (s: Slot, side: SplitSide, end: SplitEnd): Overlay => {
@@ -622,9 +630,8 @@ export function splitRound(s: Slot, tether: boolean, side: SplitSide, end: Split
   const lines: Overlay[] = [{t:"lane", rect:[x0, u0, x1, u1], soft:true}, {t:"tag", x:(x0 + x1) / 2, y:(u0 + u1) / 2, s:"PORTAL LINES"}];
   const next = splitPuddleAfter(side, end);
   const edge: RectZone = {rect:[o0, y0, o1, y1]}, edgeMid = zoneCenter(edge);
-  // The waymark's outer corner: toward the arena's corner at that end. A marker stands at the
-  // waymark, out to the wall beside it (the app's choice), out of the third puddle.
-  const outer: Point = [wm.p[0] + (side === "west" ? -5.5 : 5.5), wm.p[1] + (end === "north" ? -5.5 : 5.5)];
+  // A marker stands at the waymark, out to the wall beside it (the app's choice), out of the third puddle.
+  const outer = markerCorner(side, end);
   const marker: RectZone = {rect:side === "west" ? [0, wm.p[1] - 6.5, wm.p[0] + 6.5, wm.p[1] + 6.5] : [wm.p[0] - 6.5, wm.p[1] - 6.5, 100, wm.p[1] + 6.5]};
   return {setup:[tether ? "You have a tether. You are on the " + side + " platform." : "No tether. You are on the " + side + " platform.",
       "Three puddles drop on the party, one after another.", "The portal lines leave one end of the platform safe."], ordered:true,

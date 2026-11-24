@@ -8,7 +8,7 @@
 import { bySlot, withSeed } from "../util";
 import { markRole, partyOf } from "../party";
 import { angOf, polar, rotOverlay, zoneCenter } from "../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, type Weapon, type WeaponType } from "./drills";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, avalancheScene, homeSide, markerCorner, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
 import { BREATH_W, PROXIMITY_DOT, PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, gust, lineTo, swordCross } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
@@ -146,7 +146,7 @@ const spotTags = (list: Array<[number, string]>, jumps = true): Overlay[] =>
 /* Void Stardust: the three puddles at their usual spots, north of the boss and clockwise. The
    drill's own rule (nextPuddle) places the second and third, so the sizes always agree. */
 const asDrops = (ps: Point[]): StepResult[] => ps.map(p => ({p, ok:true, z:{c:p, r:5}, drop:p}));
-const PUDDLES: Point[] = [1, 2].reduce((ps: Point[]) => [...ps, zoneCenter(nextPuddle(asDrops(ps)))], [[50, 33]]);
+const PUDDLES: Point[] = [1, 2].reduce((ps: Point[]) => [...ps, zoneCenter(nextPuddle(asDrops(ps)))], [FIRST_PUDDLE]);
 const PUDDLE_PIECES = PUDDLES.map(p => puddle(p));
 const VOID_RESULTS = asDrops(PUDDLES);
 /** The party stacked one more step clockwise, just past the third puddle, in max melee: the
@@ -158,9 +158,19 @@ const inStack = (l: string): Point => { const i = ALL.findIndex(w => w[0] === l)
 /** Pair spots at the four cardinals, just outside the waymarks. */
 const GAPS: Point[] = [[50, 15], [86, 50], [50, 85], [14, 50]];
 
-/* Arena Split: the platforms (x 0 to 25.5 and 74.5 to 100) and the four first towers. */
+/* Arena Split: the platforms (x 0 to 25.5 and 74.5 to 100) and the four towers. */
 const WEST = rect(0, 0, 25.5, 100), EAST = rect(74.5, 0, 100, 100);
-const TOWER_NW: Point = [11, 23], TOWER_NE: Point = [89, 23], TOWER_SW: Point = [11, 77], TOWER_SE: Point = [89, 77];
+const TOWER_NW = SPLIT_TOWER.west.north, TOWER_NE = SPLIT_TOWER.east.north, TOWER_SW = SPLIT_TOWER.west.south, TOWER_SE = SPLIT_TOWER.east.south;
+/** Where your mark stands in a scene: the drill draws it for you. */
+function yourSpot(os: Overlay[], s: Slot): Point {
+  const m = os.find(o => o.t === "mark" && o.l === s);
+  if(!m || m.t !== "mark") throw new Error("the scene has no mark for " + s);
+  return [m.x, m.y];
+}
+/* Meteorain: where H1 and H2 drop their meteors (the second set), from the drill. */
+const HEALER_METEORS: Point[] = (["H1", "H2"] as const).map(h => zoneCenter(fromDrill("m-meteor-2", h).zone));
+/** The targets in a list of pieces. */
+const targetsIn = (os: Overlay[]): Point[] => os.flatMap((o): Point[] => o.t === "target" ? [[o.x, o.y]] : []);
 
 /* Raw Steel Trophy: where the tanks and the party stand for each weapon. */
 const TANKS_APART = [mark(37, 36, "MT", "T"), mark(63, 36, "OT", "T")];
@@ -176,13 +186,14 @@ const AXE_HITS = [stackHit(TANKS_TOGETHER, 4), ...spreadHits(AXE_SPREAD)];
 // the function or undefined, and the caller must check before it calls it.
 export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-raw-first": s => { const d = fromDrill("m-raw-scythe", s), north = cluster([50, 35], NONTANK, 3), all = clockRing(33);
-    return {overlays:heldWeapon("scythe"), boss:BOSS, after:[...TANKS_APART, ...SCYTHE_CLEAVES, ...cluster([50, 66], NONTANK, 3)], answer:d.answer, options:[
+    // The tanks' spots are part of the answer, so they show only after it.
+    return {overlays:heldWeapon("scythe"), boss:d.boss, after:[...d.overlays.filter(o => o.t === "mark"), ...d.hits, ...cluster([50, 66], NONTANK, 3)], answer:d.answer, options:[
       show([...SCYTHE_CLEAVES, ...TANKS_APART, ...cluster([50, 66], NONTANK, 3)]),
       show([...AXE_HITS, ...TANKS_TOGETHER, ...AXE_SPREAD]),
       show([...proteans(CENTER, all), ...all]),
       show([cleave(CENTER, 317, RAW_TANK_HALF), cleave(CENTER, 43, RAW_TANK_HALF), cleave(CENTER, 0, RAW_STACK_HALF), ...TANKS_APART, ...north])]}; },
   "k-raw-second": s => { const d = fromDrill("m-raw-scythe", s);
-    return {overlays:[tag(50, 8, "0:18 WAS AXE")], boss:BOSS, before:[tag(...HELD_TAG, "?")], after:[...d.overlays, ...SCYTHE_CLEAVES, ...cluster([50, 66], NONTANK, 3)], answer:d.answer, options:[
+    return {overlays:[tag(50, 8, "0:18 WAS AXE")], boss:d.boss, before:[tag(...HELD_TAG, "?")], after:[...d.overlays, ...d.hits, ...cluster([50, 66], NONTANK, 3)], answer:d.answer, options:[
       show([...SCYTHE_CLEAVES, ...heldWeapon("scythe"), ...TANKS_APART]),
       show([...AXE_HITS, ...heldWeapon("axe"), ...TANKS_TOGETHER, ...AXE_SPREAD]),
       show([tag(...HELD_TAG, "AXE OR SCYTHE")]),
@@ -277,7 +288,10 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const own = bySlot<Point>(s, {H1:[20, 50], H2:[80, 50]}), oth = bySlot<Point>(s, {H1:[80, 50], H2:[20, 50]});
     return {...d, options:[hit(youIn(s, d.zone), gustsFrom(own)), hit(youIn(s, d2.zone), gustsFrom(oth)),
       hit(youAt(s, [40, 16], 6.5), gust([50, 16], [40, 16])), youAt(s, [57, 57], 9)]}; },
-  "k-ult-touch": s => { const d = fromDrill("m-tornado", s), me = bySlot<Point>(s, {H1:[12, 42], H2:[88, 58]}), into = bySlot<Point>(s, {H1:[20, 50], H2:[80, 50]});
+  "k-ult-touch": s => { const d = fromDrill("m-tornado", s), me = zoneCenter(d.zone);
+    // Your tornado: the one you bait.
+    const into = TORNADO_BAITS.find(b => b.support[0] === me[0] && b.support[1] === me[1])?.tornado;
+    if(!into) throw new Error("no tornado has its bait at " + me.join(","));
     // The words go on the side of the tornado away from your mark: below it for H1, above it for H2.
     const dy = bySlot(s, {H1:1, H2:-1}), near = (a: string, b?: string): Overlay[] => [tag(into[0], into[1] + 9 * dy, a), ...(b ? [tag(into[0], into[1] + 14 * dy, b)] : [])];
     // After the answer, your tornado's cones on its two baits show what the green spot is for.
@@ -293,9 +307,8 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
         show([stackHit(stack), ...stack, target([30, 66]), say("STACK ON A HEALER", 94)]),
         show([...proteans(CENTER, [...tankMarks, ...spread]), ...spread])]}; },
   "k-orbital": s => { const sides = [{poly:[[50, 50], [0, 0], [0, 100]] as Point[]}, {poly:[[50, 50], [100, 0], [100, 100]] as Point[]}];
-    const frontBack: Overlay[] = [{t:"poly", pts:[[50, 50], [0, 0], [100, 0]]}, {t:"poly", pts:[[50, 50], [0, 100], [100, 100]]}];
-    return {overlays:[], boss:BOSS, after:[...frontBack, you(s, bySlot<Point>(s, {H1:[36, 52], H2:[64, 52]}))], answer:sides, options:[
-      show([...frontBack, you(s, bySlot<Point>(s, {H1:[36, 52], H2:[64, 52]}))], sides),
+    return {overlays:[], boss:BOSS, after:[...FIRE_AND_FURY, you(s, bySlot<Point>(s, {H1:[36, 52], H2:[64, 52]}))], answer:sides, options:[
+      show([...FIRE_AND_FURY, you(s, bySlot<Point>(s, {H1:[36, 52], H2:[64, 52]}))], sides),
       hit(youAt(s, [50, 64]), [half("north")]), hit(youAt(s, [50, 36]), [half("south")]), hit(youAt(s, [50, 94]), [aoe(CENTER, FAKE.circle)])]}; },
   "k-orbital-move": s => {
     const O = withSeed("HECT", buildOrbital), [a, b] = O.steps.map(st => st.z);
@@ -306,7 +319,9 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       note:"One pattern. Start where the #2 lines cross. After #1, cross under the boss. After #2, cross back.", options:[
         show([...first, ...route], [a, b]), hit(youAt(s, [50, 96]), [aoe(CENTER, FAKE.circle)]), youAt(s, [50, 36]), youAt(s, [50, 64])]}; },
   "k-meteor-order": s => {
-    const SETS: Point[][] = [[[57, 43], [43, 57]], [[43, 43], [26, 74]], [[10, 90], [62, 38]]];
+    // The melee's set and the healers' set, from their drills. No drill asks the ranged set, so
+    // their spots are the app's: R1 drops the far SW rock, and R2's NE spot sits clear of M1's mark.
+    const SETS: Point[][] = [targetsIn(fromDrill("m-meteor-1", s).overlays), HEALER_METEORS, [[10, 90], [62, 38]]];
     const M: Who[] = [["M1", "D"], ["M2", "D"]], H: Who[] = [["H1", "H"], ["H2", "H"]], R: Who[] = [["R1", "D"], ["R2", "D"]];
     /** The marks when the groups bait the three sets in this order, a meteor under each, and your spot circled. */
     const order = (groups: Who[][], text?: string): Preview => {
@@ -315,13 +330,13 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       return show([...spreadHits(pieces, METEOR_R), ...pieces, ...(text ? [say(text, 8)] : [])], mine ? [circle(mine, 6)] : []);
     };
     return {overlays:SETS.flat().map(target), boss:BOSS, after:[...order([M, H, R]).pieces, say("MELEE > HEALERS > RANGED", 8)],
-      answer:[circle(bySlot<Point>(s, {H1:[43, 43], H2:[26, 74]}), 6)], options:[order([M, H, R]), order([H, R, M]), order([TANKS, TANKS, TANKS], "TANKS ONLY"), order([R, M, H])]}; },
+      answer:[circle(bySlot(s, {H1:HEALER_METEORS[0], H2:HEALER_METEORS[1]}), 6)], options:[order([M, H, R]), order([H, R, M]), order([TANKS, TANKS, TANKS], "TANKS ONLY"), order([R, M, H])]}; },
   "k-meteor-drop": s => { const d = fromDrill("m-meteor-2", s), d2 = fromDrill("m-meteor-2", other(s)), stack = cluster([65, 35], NO_HEALERS.concat([[s, "H"]]));
     const meteor = (z: Zone): Overlay => aoe(zoneCenter(z), METEOR_R);
     return {...d, options:[hit(youIn(s, d.zone), [meteor(d.zone)]), hit(youIn(s, d2.zone), [meteor(d2.zone)]),
       hit(youAt(s, [64, 36]), [aoe([64, 36], METEOR_R)]), show([stackHit(stack), aoe([65, 35], METEOR_R), ...stack], [circle([65, 35], 10)])]}; },
   "k-meteor-stack": () => { const ne = cluster([67, 33], NO_HEALERS, 3), sw = cluster([33, 67], NO_HEALERS, 3), under = ring(NO_HEALERS, 9, 0, 60), spread = ring(NO_HEALERS, 36, 30, 60);
-    return {overlays:[{t:"rock", x:57, y:43}, {t:"rock", x:43, y:57}, target([43, 43]), target([26, 74])], boss:BOSS,
+    return {overlays:[...fromDrill("m-meteor-2", "H1").overlays, ...HEALER_METEORS.map(target)], boss:BOSS,
       after:[lineTo(CENTER, [65, 35])], answer:[circle([65, 35], 7)], options:[
         show([lineTo(CENTER, [67, 33]), ...ne], [circle([67, 33], 9)]),
         show([lineTo(CENTER, [33, 67]), ...sw], [circle([33, 67], 9)]),
@@ -335,6 +350,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const WN = rect(0, 8, 26, 48), WS = rect(0, 52, 26, 92), EN = rect(74, 8, 100, 48), ES = rect(74, 52, 100, 92);
     const knocked = (z: RectZone): Preview => hit(youIn(s, z), [guide(CENTER, zoneCenter(z))]);
     return {...d, options:[knocked(bySlot(s, {H1:WN, H2:ES})), knocked(bySlot(s, {H1:WS, H2:EN})), knocked(bySlot(s, {H1:EN, H2:WS})), youAt(s, [50, 60], 9)]}; },
+  // You stand in your tower, a little toward the platform's middle, so your mark clears the number waymark.
   "k-split-kb": s => { const d = fromDrill("m-split-tower", s), me = bySlot<Point>(s, {H1:[11, 27], H2:[89, 73]}), to = bySlot<Point>(s, {H1:[88, 27], H2:[12, 73]}), same = bySlot<Point>(s, {H1:[11, 62], H2:[89, 38]});
     return {overlays:d.overlays, boss:BOSS, split:true, before:[you(s, me)], after:[you(s, me), guide(me, to)], answer:[bySlot(s, {H1:EAST, H2:WEST})], options:[
       show([you(s, me), guide(me, to)], [bySlot(s, {H1:EAST, H2:WEST})]),
@@ -342,17 +358,22 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([you(s, bySlot<Point>(s, {H1:[19, 50], H2:[81, 50]})), say("NO TOWER", 8)]),
       show([you(s, me), guide(me, CENTER)], [circle(CENTER, 10)])]}; },
   // Fire Breath is a line from the boss through each marked player.
-  "k-split-fb": s => { const start = bySlot<Point>(s, {H1:[10, 50], H2:[90, 50]}), inner = bySlot<Point>(s, {H1:[20, 42], H2:[80, 58]}), edge = bySlot<Point>(s, {H1:[4, 50], H2:[96, 50]});
+  "k-split-fb": s => { const start = bySlot<Point>(s, {H1:[10, 50], H2:[90, 50]}), edge = bySlot<Point>(s, {H1:[4, 50], H2:[96, 50]});
+    // The drill's first step without a tether: in close, at the middle of the platform's inner edge.
+    const sc = splitRound(s, false, homeSide(s), "north"), z = sc.steps[0].z;
+    if(!z) throw new Error("the first Fire Breath step has no fixed zone");
+    // Your mark stands in that area, a little north (H1) or south (H2), so it clears waymark D or B.
+    const inner = bySlot<Point>(s, {H1:[20, 42], H2:[80, 58]});
     const tethered = bySlot<Point>(s, {H1:[10, 57], H2:[90, 43]}), tank = mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T"), breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W);
-    return {overlays:[], split:true, boss:BOSS, before:[you(s, start)], after:[breath(inner), you(s, inner)],
-      answer:[bySlot(s, {H1:rect(15, 38, 25.5, 62), H2:rect(74.5, 38, 85, 62)})], options:[
-        show([breath(inner), you(s, inner)], [bySlot(s, {H1:rect(15, 38, 25.5, 62), H2:rect(74.5, 38, 85, 62)})]),
+    return {overlays:sc.overlays, split:sc.split, boss:sc.boss, before:[you(s, start)], after:[breath(inner), you(s, inner)],
+      answer:[z], options:[
+        show([breath(inner), you(s, inner)], [z]),
         show([breath(edge), you(s, edge)], [bySlot(s, {H1:rect(0, 38, 6, 62), H2:rect(94, 38, 100, 62)})]),
         show([breath(start), you(s, start), tank, guide(tethered, CENTER), tag(tethered[0], tethered[1] + bySlot(s, {H1:6, H2:-6}), "TETHER")]),
         show([breath(start), you(s, start), say("STAND STILL", 8)])]}; },
   "k-split-corner": s => { // The outer corner of each number waymark on your platform, toward the arena's corner.
-    const markers = bySlot<Point[]>(s, {H1:[[3.5, 13.5], [3.5, 86.5]], H2:[[96.5, 13.5], [96.5, 86.5]]}), tethered = bySlot<Point>(s, {H1:[12, 38], H2:[88, 62]});
-    const breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W), corner = bySlot<Point>(s, {H1:[3.5, 13.5], H2:[96.5, 86.5]}), edge = bySlot<Point>(s, {H1:[3, 40], H2:[97, 60]});
+    const side = homeSide(s), markers = (["north", "south"] as const).map(e => markerCorner(side, e)), tethered = bySlot<Point>(s, {H1:[12, 38], H2:[88, 62]});
+    const breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W), corner = markerCorner(side, bySlot<SplitEnd>(s, {H1:"north", H2:"south"})), edge = bySlot<Point>(s, {H1:[3, 40], H2:[97, 60]});
     const nextTo = bySlot<Point>(s, {H1:[12, 45], H2:[88, 55]}), middle = bySlot<Point>(s, {H1:[13, 50], H2:[87, 50]});
     return {overlays:[], split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[12, 50], H2:[88, 50]}))], answer:markers.map(p => circle(p, 4.5)),
       note:"Markers go to the outer corner of your number waymark. Tethers go to the platform edge.", options:[
@@ -360,9 +381,12 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
         show([breath(edge), you(s, edge)], [bySlot(s, {H1:rect(0, 10, 5, 90), H2:rect(95, 10, 100, 90)})]),
         show([breath(nextTo), you(s, nextTo), mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T"), guide(tethered, CENTER)]),
         hit(youAt(s, middle, 6), [breath(middle)])]}; },
-  "k-split-towers23": s => { const d = fromDrill("m-split-tower", s), last = bySlot<Point>(s, {H1:[19, 88], H2:[81, 12]});
-    const answer = bySlot(s, {H1:TOWER_SW, H2:TOWER_NE}), first = bySlot(s, {H1:TOWER_NW, H2:TOWER_SE}), odd = bySlot(s, {H1:TOWER_NE, H2:TOWER_SW});
-    return {overlays:[...d.overlays, you(s, last)], split:true, boss:BOSS, after:[guide(last, answer)], answer:[circle(answer, TOWER_R)],
+  "k-split-towers23": s => {
+    // The drill's second towers, with your last tether or marker in the SW quadrant (H1) or the NE one (H2).
+    const side = bySlot<SplitSide>(s, {H1:"west", H2:"east"}), end = bySlot<SplitEnd>(s, {H1:"south", H2:"north"});
+    const sc = splitTowers(s, false, side, end), last = yourSpot(sc.overlays, s), answer = SPLIT_TOWER[side][end];
+    const first = bySlot(s, {H1:TOWER_NW, H2:TOWER_SE}), odd = bySlot(s, {H1:TOWER_NE, H2:TOWER_SW});
+    return {overlays:sc.overlays, split:sc.split, boss:sc.boss, after:[guide(last, answer)], answer:[circle(answer, TOWER_R)],
       note:"Example: your last tether or marker was in the " + bySlot(s, {H1:"SW", H2:"NE"}) + " quadrant.", options:[
         show([guide(last, answer)], [circle(answer, TOWER_R)]),
         show([guide(last, first)], [circle(first, TOWER_R)]),
@@ -384,8 +408,12 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...spreadHits(apart), ...apart]),
       show([...apart, ...ROWS.flatMap(y => [guide([12, y], [3, y]), guide([88, y], [97, y])]), say("KNOCKBACK", 8)])]}; },
   // He grabs the platform he faces. Each answer draws the grab where that answer expects it.
-  "k-slab": s => { const grab = (r: [number, number, number, number]): Overlay => ({t:"lane", rect:r}), west = grab([0, 0, 25.5, 100]), east = grab([74.5, 0, 100, 100]);
-    return {overlays:[], split:true, boss:{x:50, y:50, f:270}, after:[west, tag(13, 50, "GRABBED"), you(s, [87, 40])],
+  "k-slab": s => {
+    // The drill's grab, as it shows after his turn: the platform he faces, and its name tag.
+    const scene = (face: SplitSide) => avalancheScene(s, homeSide(s), "north", face, "north");
+    const grab = (face: SplitSide): Overlay => { const g = scene(face).steps[1].reveal?.find(o => o.t === "lane"); if(!g) throw new Error("no grab"); return g; };
+    const sc = scene("west"), west = grab("west"), east = grab("east"), grabbedTag = sc.steps[1].reveal?.filter(o => o.t === "tag") ?? [];
+    return {overlays:[], split:sc.split, boss:sc.boss, after:[west, ...grabbedTag, you(s, [87, 40])],
       answer:[EAST], note:"Example: he faces the west platform.", options:[
         show([west, you(s, [87, 40])], [EAST]), show([east, you(s, [13, 40])], [WEST]),
         hit(youAt(s, [50, 62], 10), [west, east]), show([east, you(s, [13, 40]), guide([87, 40], [13, 40])], [WEST])]}; },
