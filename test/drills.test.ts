@@ -760,3 +760,13 @@ test("Arena Split: when the tethers go off, a line runs from each portal through
     assert.equal(lineup.hits?.length ?? lines.length, tether ? 3 : 4);
   }
 });
+
+test("each Arena Split tower shows how many players soak it, as its drill says", () => {
+  for (const id of ["m-split-tower", "m-split-towers2", "m-avalanche"]) {
+    const d = DRILLS.find((x) => x.id === id);
+    assert.ok(d?.soak, `${id} has a soak count`);
+    const towers = d.build("H1", d.variants?.[0] ?? null).overlays.filter((o) => o.t === "tower");
+    assert.isAbove(towers.length, 0, `${id} draws its towers`);
+    for (const t of towers) assert.equal(t.soak, d.soak, id);
+  }
+});

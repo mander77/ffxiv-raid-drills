@@ -159,7 +159,7 @@ const EXAMPLE = standardAttacks(20);
 const MID: Point = [50, 50];
 /** The middle of the arena, closer up, for an attack much smaller than the arena. */
 const CLOSE = "25 25 50 50";
-/** Closer still, for a tower or the "size unknown" mark. */
+/** Closer still, for the "size unknown" mark. */
 const CLOSER = "35 35 30 30";
 /** One standard attack on this page: its name, what it means, and its picture. */
 interface AttackSample {
@@ -195,7 +195,7 @@ const ATTACKS: readonly AttackSample[] = [
     overlays: [EXAMPLE.puddle(MID, 6, 3)],
     view: CLOSE,
   },
-  { name: "Tower to Soak", meaning: "Soaked by as many players as its number.", overlays: [EXAMPLE.tower(MID, 4, 2)], view: CLOSER },
+  { name: "Tower to Soak", meaning: "Soaked by as many players as its number.", overlays: [EXAMPLE.tower(MID, 4, 2)], view: CLOSE },
   {
     name: "Size Unknown",
     meaning: "An attack whose size no source gives yet. It is not drawn to size.",
