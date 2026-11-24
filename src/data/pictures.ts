@@ -8,8 +8,8 @@
 import { bySlot, withSeed } from "../util";
 import { markRole, partyOf } from "../party";
 import { angOf, polar, rotOverlay, zoneCenter } from "../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, avalancheScene, homeSide, markerCorner, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
-import { BREATH_W, PROXIMITY_DOT, PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, gust, lineTo, swordCross } from "./attacks";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, avalancheScene, homeSide, markerCorner, platformZone, portalLines, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
+import { PLATFORM_X, BREATH_W, PROXIMITY_DOT, PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, gust, lineTo, swordCross } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
 type Who = [string, MarkRole];
@@ -158,8 +158,10 @@ const inStack = (l: string): Point => { const i = ALL.findIndex(w => w[0] === l)
 /** Pair spots at the four cardinals, just outside the waymarks. */
 const GAPS: Point[] = [[50, 15], [86, 50], [50, 85], [14, 50]];
 
-/* Arena Split: the platforms (x 0 to 25.5 and 74.5 to 100) and the four towers. */
-const WEST = rect(0, 0, 25.5, 100), EAST = rect(74.5, 0, 100, 100);
+/* Arena Split: the platforms (PLATFORM_X, from BossMod) and the four towers. */
+const WEST = platformZone("west"), EAST = platformZone("east");
+/** A platform from y0 to y1. */
+const platformPart = (x: readonly [number, number], y0: number, y1: number): RectZone => rect(x[0], y0, x[1], y1);
 const TOWER_NW = SPLIT_TOWER.west.north, TOWER_NE = SPLIT_TOWER.east.north, TOWER_SW = SPLIT_TOWER.west.south, TOWER_SE = SPLIT_TOWER.east.south;
 /** Where your mark stands in a scene: the drill draws it for you. */
 function yourSpot(os: Overlay[], s: Slot): Point {
@@ -347,7 +349,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       hit(youAt(s, [67, 33], 6), [lineTo(CENTER, [67, 33], FAKE.line)]), show([aoe(CENTER, FAKE.bigCircle), ...spread])]}; },
   // Flatliner knocks everyone back from the boss before the split, so each spot gets a knockback arrow.
   "k-split-side": s => { const d = fromDrill("m-split-line", s);
-    const WN = rect(0, 8, 26, 48), WS = rect(0, 52, 26, 92), EN = rect(74, 8, 100, 48), ES = rect(74, 52, 100, 92);
+    const WN = platformPart(PLATFORM_X.west, 8, 48), WS = platformPart(PLATFORM_X.west, 52, 92), EN = platformPart(PLATFORM_X.east, 8, 48), ES = platformPart(PLATFORM_X.east, 52, 92);
     const knocked = (z: RectZone): Preview => hit(youIn(s, z), [guide(CENTER, zoneCenter(z))]);
     return {...d, options:[knocked(bySlot(s, {H1:WN, H2:ES})), knocked(bySlot(s, {H1:WS, H2:EN})), knocked(bySlot(s, {H1:EN, H2:WS})), youAt(s, [50, 60], 9)]}; },
   // You stand in your tower, a little toward the platform's middle, so your mark clears the number waymark.
@@ -358,28 +360,32 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([you(s, bySlot<Point>(s, {H1:[19, 50], H2:[81, 50]})), say("NO TOWER", 8)]),
       show([you(s, me), guide(me, CENTER)], [circle(CENTER, 10)])]}; },
   // Fire Breath is a line from the boss through each marked player.
-  "k-split-fb": s => { const start = bySlot<Point>(s, {H1:[10, 50], H2:[90, 50]}), edge = bySlot<Point>(s, {H1:[4, 50], H2:[96, 50]});
+  "k-split-fb": s => { const start = bySlot<Point>(s, {H1:[10, 50], H2:[90, 50]}), edge = bySlot<Point>(s, {H1:[-12, 50], H2:[112, 50]});
     // The drill's first step without a tether: in close, at the middle of the platform's inner edge.
-    const sc = splitRound(s, false, homeSide(s), "north"), z = sc.steps[0].z;
+    const sc = splitRound(s, false, homeSide(s), "north", "inner"), z = sc.steps[0].z;
     if(!z) throw new Error("the first Fire Breath step has no fixed zone");
     // Your mark stands in that area, a little north (H1) or south (H2), so it clears waymark D or B.
-    const inner = bySlot<Point>(s, {H1:[20, 42], H2:[80, 58]});
+    const inner = bySlot<Point>(s, {H1:[29, 42], H2:[71, 58]});
     const tethered = bySlot<Point>(s, {H1:[10, 57], H2:[90, 43]}), tank = mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T"), breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W);
     return {overlays:sc.overlays, split:sc.split, boss:sc.boss, before:[you(s, start)], after:[breath(inner), you(s, inner)],
       answer:[z], options:[
         show([breath(inner), you(s, inner)], [z]),
-        show([breath(edge), you(s, edge)], [bySlot(s, {H1:rect(0, 38, 6, 62), H2:rect(94, 38, 100, 62)})]),
+        show([breath(edge), you(s, edge)], [bySlot(s, {H1:rect(-15, 38, -9, 62), H2:rect(109, 38, 115, 62)})]),
         show([breath(start), you(s, start), tank, guide(tethered, CENTER), tag(tethered[0], tethered[1] + bySlot(s, {H1:6, H2:-6}), "TETHER")]),
         show([breath(start), you(s, start), say("STAND STILL", 8)])]}; },
-  "k-split-corner": s => { // The outer corner of each number waymark on your platform, toward the arena's corner.
-    const side = homeSide(s), markers = (["north", "south"] as const).map(e => markerCorner(side, e)), tethered = bySlot<Point>(s, {H1:[12, 38], H2:[88, 62]});
-    const breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W), corner = markerCorner(side, bySlot<SplitEnd>(s, {H1:"north", H2:"south"})), edge = bySlot<Point>(s, {H1:[3, 40], H2:[97, 60]});
-    const nextTo = bySlot<Point>(s, {H1:[12, 45], H2:[88, 55]}), middle = bySlot<Point>(s, {H1:[13, 50], H2:[87, 50]});
-    return {overlays:[], split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[12, 50], H2:[88, 50]}))], answer:markers.map(p => circle(p, 4.5)),
-      note:"Markers go to the outer corner of your number waymark. Tethers go to the platform edge.", options:[
+  // An example round: the portal lines cover the inner half of the west platform, so the outer
+  // half of the east one. H1 shows the west platform, H2 the east one: one example of each side.
+  "k-split-corner": s => {
+    const side = homeSide(s), covered = bySlot<"inner" | "outer">(s, {H1:"inner", H2:"outer"}), lines = portalLines(side, covered);
+    // The drill's marker spot at each end of your platform.
+    const markers = (["north", "south"] as const).map(e => markerCorner(side, e, covered)), corner = markers[0];
+    const breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W), edge = bySlot<Point>(s, {H1:[-12, 40], H2:[112, 60]});
+    const tethered = bySlot<Point>(s, {H1:[4, 3], H2:[85, 97]}), nextTo = bySlot<Point>(s, {H1:[3, 9], H2:[80, 92]}), middle = bySlot<Point>(s, {H1:[10, 50], H2:[90, 50]});
+    return {overlays:lines, split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[31, 50], H2:[69, 50]}))], answer:markers.map(p => circle(p, 4.5)),
+      note:"Example: the portal lines cover the half shown. Tethers go to the north or south wall.", options:[
         show([breath(corner), you(s, corner)], markers.map(p => circle(p, 4.5))),
-        show([breath(edge), you(s, edge)], [bySlot(s, {H1:rect(0, 10, 5, 90), H2:rect(95, 10, 100, 90)})]),
-        show([breath(nextTo), you(s, nextTo), mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T"), guide(tethered, CENTER)]),
+        show([breath(edge), you(s, edge)], [bySlot(s, {H1:rect(-15, 10, -10, 90), H2:rect(110, 10, 115, 90)})]),
+        show([breath(nextTo), you(s, nextTo), mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T")]),
         hit(youAt(s, middle, 6), [breath(middle)])]}; },
   "k-split-towers23": s => {
     // The drill's second towers, with your last tether or marker in the SW quadrant (H1) or the NE one (H2).
@@ -399,24 +405,24 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const ROWS = [27, 42, 57, 72], spread = (g: Who[], x: number): Overlay[] => g.map(([l, r], i) => mark(x, ROWS[i], l, r));
     // Stacked just north of waymark B or D, so no mark hides it.
     const stacked = (g: Who[], x: number): Overlay[] => g.map(([l, r], i) => mark(x + (i % 2) * 7, 37 + Math.floor(i / 2) * 7, l, r));
-    const apart = [...spread(G2, 12), ...spread(G1, 88)], s1 = stacked(G1, 76), s2 = stacked(G2, 17);
-    const stacks = [stackHit(s1), stackHit(s2), ...s1, ...s2, target([76, 37]), target([17, 37]), tag(20.5, 30, "5 HITS"), tag(79.5, 30, "5 HITS")];
+    const apart = [...spread(G2, 12), ...spread(G1, 88)], s1 = stacked(G1, 67), s2 = stacked(G2, 26);
+    const stacks = [stackHit(s1), stackHit(s2), ...s1, ...s2, target([67, 37]), target([26, 37]), tag(29.5, 30, "5 HITS"), tag(70.5, 30, "5 HITS")];
     const zones = [SPLIT_INNER.west, SPLIT_INNER.east];
     return {overlays:[], split:true, boss:BOSS, before:apart, after:stacks, answer:zones, options:[
       show(stacks, zones),
       show([aoe([12, ROWS[0]], FAKE.platformBuster), aoe([88, ROWS[0]], FAKE.platformBuster), ...apart, target([12, ROWS[0]]), target([88, ROWS[0]]), say("TANK BUSTER", 8)]),
       show([...spreadHits(apart), ...apart]),
-      show([...apart, ...ROWS.flatMap(y => [guide([12, y], [3, y]), guide([88, y], [97, y])]), say("KNOCKBACK", 8)])]}; },
+      show([...apart, ...ROWS.flatMap(y => [guide([12, y], [-12, y]), guide([88, y], [112, y])]), say("KNOCKBACK", 8)])]}; },
   // He grabs the platform he faces. Each answer draws the grab where that answer expects it.
   "k-slab": s => {
     // The drill's grab, as it shows after his turn: the platform he faces, and its name tag.
     const scene = (face: SplitSide) => avalancheScene(s, homeSide(s), "north", face, "north");
     const grab = (face: SplitSide): Overlay => { const g = scene(face).steps[1].reveal?.find(o => o.t === "lane"); if(!g) throw new Error("no grab"); return g; };
     const sc = scene("west"), west = grab("west"), east = grab("east"), grabbedTag = sc.steps[1].reveal?.filter(o => o.t === "tag") ?? [];
-    return {overlays:[], split:sc.split, boss:sc.boss, after:[west, ...grabbedTag, you(s, [87, 40])],
+    return {overlays:[], split:sc.split, boss:sc.boss, after:[west, ...grabbedTag, you(s, [90, 40])],
       answer:[EAST], note:"Example: he faces the west platform.", options:[
-        show([west, you(s, [87, 40])], [EAST]), show([east, you(s, [13, 40])], [WEST]),
-        hit(youAt(s, [50, 62], 10), [west, east]), show([east, you(s, [13, 40]), guide([87, 40], [13, 40])], [WEST])]}; },
+        show([west, you(s, [90, 40])], [EAST]), show([east, you(s, [10, 40])], [WEST]),
+        hit(youAt(s, [50, 62], 10), [west, east]), show([east, you(s, [10, 40]), guide([90, 40], [10, 40])], [WEST])]}; },
   // The markers go on the players outside, so each answer draws a marker on you where you stand.
   "k-ecl-start": s => { const d = fromDrill("m-ecl-start", s), d2 = fromDrill("m-ecl-start", other(s)), marked = (z: Zone): Overlay => target(zoneCenter(z));
     const under = ring([["MT", "T"], ["OT", "T"], ["M1", "D"], ["M2", "D"]], 9, 45, 90);

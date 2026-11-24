@@ -57,11 +57,16 @@ test("the arena's name says that a click picks where you stand, only when it doe
 });
 
 test("the next step's cue shows after a correct answer, and waits after an incorrect one", () => {
-  // Arena Split: the portal lines are the cue of the second step.
-  const scene = splitRound("H1", false, "west", "north"),
-    z = stepZone(scene.steps[0], []);
-  if (!z) throw new Error("no zone");
-  const answer = (ok: boolean): StepResult[] => [{ p: ok ? zoneCenter(z) : [50, 90], ok, z, drop: null }];
+  // Arena Split: the portal lines are the cue of the lineup, after the three puddles.
+  const scene = splitRound("H1", false, "west", "north", "inner"),
+    puddles: StepResult[] = [];
+  for (const st of scene.steps.slice(0, 3)) {
+    const z = stepZone(st, puddles);
+    if (!z) throw new Error("no zone");
+    puddles.push({ p: zoneCenter(z), ok: true, z, drop: zoneCenter(z) });
+  }
+  const last = puddles[2];
+  const answer = (ok: boolean): StepResult[] => [...puddles.slice(0, 2), { ...last, ok, p: ok ? last.p : [50, 90] }];
   const { rerender } = render(<LiveArena scene={scene} k={0} results={answer(true)} showLast hint={false} />);
   assert.ok(screen.queryByText("PORTAL LINES"), "shown with the next question");
   rerender(<LiveArena scene={scene} k={0} results={answer(false)} showLast hint={false} />);

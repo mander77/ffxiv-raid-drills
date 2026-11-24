@@ -1,5 +1,5 @@
 import { assert, test } from "vitest";
-import { MAJESTIC_PUDDLE } from "../src/data/attacks";
+import { MAJESTIC_PUDDLE, PLATFORM_X } from "../src/data/attacks";
 import { DRILLS } from "../src/data/drills";
 import { buildFight } from "../src/data/fight";
 import { cactbot, type LineName } from "../src/data/sources";
@@ -150,7 +150,27 @@ test("Arena Split: one round with a tether, and you stack for Massive Meteor on 
       const massive = f.segs.find((g) => g.title === "Massive Meteor");
       const p = zoneCenter(massive?.scene.steps[0].z ?? { c: [50, 50], r: 0 });
       // H1 starts west and H2 east; the two rounds put each on the other platform.
-      assert.ok(s === "H1" ? p[0] > 74.5 : p[0] < 25.5, `${s} stacks on the ${s === "H1" ? "east" : "west"} platform`);
+      assert.ok(
+        s === "H1" ? p[0] >= PLATFORM_X.east[0] : p[0] <= PLATFORM_X.west[1],
+        `${s} stacks on the ${s === "H1" ? "east" : "west"} platform`,
+      );
+    }
+});
+
+test("Arena Split: without a tether, your end is the one you were knocked to", () => {
+  for (const s of SLOTS)
+    for (let i = 0; i < REPEATS; i++) {
+      const rounds = buildFight(s).segs.filter((g) => g.drills[0] === "m-split-fire"),
+        ends = rounds.map((g) => (g.scene.setup.join(" ").match(/knocked to the (north|south) end/) ?? [])[1]),
+        portals = rounds.map((g) => (g.scene.setup.join(" ").match(/toward the (north|south)\./) ?? [])[1]),
+        away = (e: string | undefined) => (e === "north" ? "south" : "north");
+      if (ends[0]) {
+        // Round 1 without a tether: the end of your first tower (H1 NW, H2 SE).
+        assert.equal(ends[0], s === "H1" ? "north" : "south", `${s}: the first tower's end`);
+      } else {
+        // Round 1 with a tether, round 2 without: the second tower is where round 1 ended.
+        assert.equal(ends[1], away(portals[0]), `${s}: the end round 1 ended at`);
+      }
     }
 });
 

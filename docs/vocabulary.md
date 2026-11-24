@@ -149,6 +149,8 @@ The boss's hitbox has only two words.
 | the middle | The middle of the arena. | the center, centre, mid |
 | dead center | Only the middle of a tower. | |
 | the platform, the other platform, the same platform | Arena Split. | the other side, the same side |
+| the inner half, the outer half | Arena Split: the half of a platform's width next to the boss, or away from him. | the inside, the outside |
+| your end | Arena Split: the north or south end of your platform, where your round ends. | the safe end |
 | pocket | A safe area that the hits leave, for example the sword's. | |
 | clock spot | Your fixed spot around the boss for Proteans. | |
 | spot | A place to stand. | position (on screen) |
@@ -210,7 +212,9 @@ The header switch is "Light Party", with the buttons 1 and 2.
 | tether | A line between a player and something else. | |
 | cone | A hit shaped like a slice. Use as a noun. | (do not use "cones" as a verb in new text) |
 | AoE | An area hit. Use with a name: "the axe AoE", "proximity AoE". | |
-| portal | Orbital Omen's line sources, numbered #1 to #4. | |
+| portal | Orbital Omen's line sources, numbered #1 to #4. In the Arena Split, where each tether starts. | |
+| portal lines | Arena Split: the side lines (Majestic Meteorain) over half of each platform's width. | |
+| wall-side corner | The corner of a number waymark nearest the north or south wall. | outer corner, inner corner |
 | weapon | The boss's sword, axe or scythe. | |
 | butt, point | Only the scythe's two ends: the butt is the handle end, the point is the blade tip. | (never "butt" for the boss) |
 | flat side | The side of a weapon square to the boss. | |

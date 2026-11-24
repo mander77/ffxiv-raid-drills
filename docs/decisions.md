@@ -686,27 +686,46 @@ static wins.
     Pressure's Settings pick says which round ("Your Arena Split tether").
   - Each tower knocks you back: with a tether to the other platform, without one to the same
     platform. So after the second round H1 is always on the east platform and H2 on the west.
+  - The split arena is drawn to scale from BossMod's Flatliner file (`BOSSMOD_SPLIT`, issue #89):
+    each platform is 20 yalms wide and 40 long, 16 yalms from the boss to its middle, with a
+    12-yalm gap. Together the platforms are wider than the square arena, so the arena draws the
+    split smaller about its center to fit the same box (`SPLIT_SCALE` in `Arena.tsx`). Before
+    #89 the platforms were drawn half as wide, and the third puddle covered every lineup spot.
+  - The side portal lines (Majestic Meteorain, BossMod lines at x -21, -11, 11 and 21, 10 yalms
+    wide) cover one half of each platform's width, its whole length: the inner half of one
+    platform and the outer half of the other, random each round. Sources: Hector's guide video
+    (https://youtu.be/w1uuwzhyf5A, 12:31 and 14:44) and wtfdig's Kindred No Buddies pictures,
+    checked by the owner in November 2026. Before #89 the app had them over a north or south end.
   - Each round: everyone goes in close, to the middle of the platform's inner edge, to bait the
-    puddles; without a tether you bait Fire Breath there first. Then the portal lines leave one end
-    of the platform safe (north or south, random each round): a tether goes to the outer edge at
-    that end, a Fire Breath marker to the number waymark there.
+    puddles; without a tether you bait Fire Breath there first. Then each player goes to their
+    end of the platform (owner's answers, November 2026):
+    - With a tether, your end is the one away from your portal. The four tether portals are just
+      outside the outer walls, two on each side, at the ends or near the middle (Hector's video,
+      12:34). Your portal is on the other platform's side. The tether goes to the north or south
+      wall at your end, just outside the portal lines.
+    - Without a tether, your end is the one you were knocked to: in round 1 your first tower's end
+      (H1 north, H2 south), in round 2 the end where round 1 ended. A Fire Breath marker goes to
+      the number waymark at that end, on its corner nearest the wall, on the side of the waymark
+      the portal lines leave safe (the owner's choice, from Hector's video). The number waymarks
+      sit on the line between the two halves, as in Hector's video.
+  - Tethers go to random roles: two tethered players on each platform, in any mix of roles (the
+    owner, November 2026). The drills only follow your own tether.
   - Majestic Meteor (owner's answers, November 2026): three puddles, one click each. The first
-    goes in close at the middle of the inner edge. Each next one goes just outside the last, along
-    the inner edge, toward the safe end. A puddle drops when its cast starts ("--meteor 1--" to
-    "--meteor 3--") and goes off 3 seconds later (BossMod `MajesticMeteorAOE`, range 6).
+    goes in close at the middle of the inner edge. Each next one goes just outside the last, tight
+    against the inner edge (`INNER_STRIP`, the app's choice), toward your end. A puddle drops when
+    its cast starts ("--meteor 1--" to "--meteor 3--") and goes off 3 seconds later (BossMod
+    `MajesticMeteorAOE`, range 6).
   - The third puddle goes off 0.2 seconds after Fire Breath, so it is still on the floor at the
-    lineup. It covers the waymark's inner corner, so a Fire Breath marker takes the outer corner
-    (the owner's choice), and a tether stays out of it too. The second and third puddles stay
-    within the inner strip of the platform (`INNER_STRIP`, the app's choice), so the outer edge
-    and the outer corner stay clear.
+    lineup. A tether and a marker both stay out of it.
   - The second and third towers: the tower in the quadrant where your last tether or marker was.
   - Massive Meteor: the four on a platform stack at the middle of its inner edge, next to the boss,
     so the melee can hit him. Learn's Massive Meteor picture shows it there too.
   - Arcadion Avalanche: he faces one platform and grabs it. The towers knock you to the other one.
     Then go to its far end, by the number waymark, away from the side he turns from. The drill
     shows his turn as a dashed arrow around him (the app's choice).
-  - The drills draw no Fire Breath cone, portal line or slam size: none of them is in
-    `attacks.ts` yet. The portal lines show as a soft area over the unsafe end (the app's choice).
+  - The drills draw no Fire Breath cone or slam size: neither is in `attacks.ts` yet. The portal
+    lines show as a soft area over the half they cover (`PORTAL_LINE_X`), with the lineup
+    question (the app's choice: in the game they show from the start of the round).
 
 ### The moving marker (data/route.ts)
 

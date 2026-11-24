@@ -3,6 +3,7 @@ import { assert, test } from "vitest";
 import { WAYMARKS } from "../src/components/arena/Arena";
 import { DOT_R } from "../src/components/arena/BossMark";
 import { LearnPicture } from "../src/components/arena/LearnPicture";
+import { SPLIT_HALF_W } from "../src/data/attacks";
 import { LEARN_PICTURES } from "../src/data/pictures";
 import { LEARN_CARDS } from "../src/data/questions";
 import type { Overlay, Picture, Preview, Slot } from "../src/types";
@@ -90,7 +91,9 @@ test("no label hides under a waymark or the boss, runs off the arena, or covers 
         boxes.forEach((b, i) => {
           if (WAYMARK_BOXES.some((w) => overlap(b, w, 0.2))) problems.push(`${where}: a label under a waymark`);
           if (f.boss && onDot(b, f.boss, 0.2)) problems.push(`${where}: a label on the boss's dot`);
-          if (b[0] < -0.5 || b[2] > 100.5 || b[1] < -0.5 || b[3] > 100.5) problems.push(`${where}: a label off the arena`);
+          // A split arena's platforms reach past 0 and 100.
+          const [left, right] = f.split ? [50 - SPLIT_HALF_W, 50 + SPLIT_HALF_W] : [0, 100];
+          if (b[0] < left - 0.5 || b[2] > right + 0.5 || b[1] < -0.5 || b[3] > 100.5) problems.push(`${where}: a label off the arena`);
           if (boxes.slice(i + 1).some((c) => overlap(b, c, 0.4))) problems.push(`${where}: two labels on top of each other`);
         });
       }
