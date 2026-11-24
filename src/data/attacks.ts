@@ -8,7 +8,7 @@
 import { addVec, angOf, leftOf, polar, unit } from "../geometry";
 import { BOSSMOD_ACTORS } from "./source.gen";
 import { bossmod } from "./sources";
-import type { Overlay, Point } from "../types";
+import type { Overlay, Point, Puddle } from "../types";
 
 /** Yalms to arena units. */
 const yalms = (n: number): number => n * 2.5;
@@ -27,9 +27,11 @@ export const AXE_R = yalms(bossmod("AssaultEvolvedAxeAOE").range);
 export const SPREAD_R = yalms(bossmod("CometSpread").range);
 /** A Void Stardust puddle (Cometite, "range 6 circle"). */
 export const PUDDLE_R = yalms(bossmod("Cometite").range);
-/** How long a puddle stays on the floor after it drops, in seconds: Cometite is a 3.0 s cast
-    that goes off once. Then it is gone. */
-export const PUDDLE_LIFE = bossmod("Cometite").cast;
+/** A Void Stardust puddle as it drops. It stays on the floor for its cast (Cometite, 3.0 s),
+    goes off once, and then it is gone. */
+export const VOID_PUDDLE: Puddle = {r:PUDDLE_R, life:bossmod("Cometite").cast};
+/** A Majestic Meteor puddle in Arena Split (MajesticMeteorAOE, "range 6 circle", 3.0 s cast). */
+export const MAJESTIC_PUDDLE: Puddle = {r:yalms(bossmod("MajesticMeteorAOE").range), life:bossmod("MajesticMeteorAOE").cast};
 /** Each scythe protean cone: 30 degrees wide (half each side, in degrees), and it reaches across
     the arena ("range 60 30-degree cone"). */
 export const PROTEAN_HALF = bossmod("SweepingVictory").angle / 2;

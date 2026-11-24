@@ -134,6 +134,13 @@ export interface StepResult {
   missed?: boolean;
 }
 
+/** A puddle that drops where a player stands: its radius in arena units, and how many seconds it
+    stays on the floor before it goes off. */
+export interface Puddle {
+  r: number;
+  life: number;
+}
+
 export interface Step {
   q: string;
   /** The correct move, one short line each. The first line is the move itself: a prompt bar or
@@ -142,7 +149,8 @@ export interface Step {
   /** A fixed zone, or zf to build the zone from earlier answers. */
   z?: Zone;
   zf?: (results: StepResult[]) => Zone;
-  drop?: boolean;
+  /** A puddle drops where you click: its size and how long it stays. */
+  drop?: Puddle;
   /** A look-ahead step: you click to show what you have spotted (a weapon, for example), but you
       do not move there. The moving marker in "Watch the Correct Moves" skips it. */
   lookAhead?: boolean;

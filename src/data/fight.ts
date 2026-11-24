@@ -186,7 +186,9 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   /* The rest of Arena Split, built last so the random parts above keep their codes. You have a
      tether in one round of the two and not in the other. A tether knocks you to the other
      platform; no tether leaves you on the same one. Everyone is in close when the first puddle's
-     cast starts (cactbot's "--meteor 1--"), after the Fire Breath markers. The portal lines
+     cast starts (cactbot's "--meteor 1--"), after the Fire Breath markers. Each puddle drops
+     when its cast starts ("--meteor 1--" to "--meteor 3--") and goes off 3 seconds later
+     (MajesticMeteorAOE). The tethers and markers resolve with Fire Breath. The portal lines
      leave a random end of your platform safe each round. Then the boss faces a random platform
      and turns to the other over a random side. */
   const t1 = choose(c.tether, random() < 0.5 ? "first" : "second") === "first";
@@ -194,7 +196,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   const end1 = end(), end2 = end(), face: SplitSide = random() < 0.5 ? "west" : "east", swing = end();
   const side1 = t1 ? otherSide(homeSide(s)) : homeSide(s), side2 = otherSide(homeSide(s));
   const WRATH = "Majestic Meteowrath/Majestic Meteorain/Fire Breath";
-  const round = (n: number): number[] => [cactbot("--meteor 1--", n), cactbot(WRATH, n)];
+  const round = (n: number): number[] => [cactbot("--meteor 1--", n), cactbot("--meteor 2--", n), cactbot("--meteor 3--", n), cactbot(WRATH, n)];
   segs.push(
     {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, t1, side1, end1), k:0, from:cactbot("Explosion", 6), due:round(1)},
     {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, !t1, side1, end1), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
@@ -256,10 +258,10 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     L("Foregone Fatality", 3), L("Fearsome Fireball", 4), L("Explosion", 5),
     L("Triple Tyrannhilation"),
     L("Flatliner (split)", 1, "Flatliner"), L("Majestic Meteor"), L("Explosion", 6),
-    // A Majestic Meteor puddle "drops" when its cast starts (cactbot's "--meteor 1--"), as a Cometite puddle does.
-    L("--meteor 1--", 1, "Majestic Meteor 1 drops"), L("Majestic Meteor 1"), L("Majestic Meteor 2"), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath"), L("Majestic Meteor 3"),
+    // A Majestic Meteor puddle "drops" when its cast starts (cactbot's "--meteor 1--"), as a Cometite puddle does. So do the second and third.
+    L("--meteor 1--", 1, "Majestic Meteor 1 drops"), L("--meteor 2--", 1, "Majestic Meteor 2 drops"), L("Majestic Meteor 1"), L("--meteor 3--", 1, "Majestic Meteor 3 drops"), L("Majestic Meteor 2"), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath"), L("Majestic Meteor 3"),
     L("Explosion", 7),
-    L("--meteor 1--", 2, "Majestic Meteor 1 drops"), L("Majestic Meteor 1", 2), L("Majestic Meteor 2", 2), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath", 2), L("Majestic Meteor 3", 2),
+    L("--meteor 1--", 2, "Majestic Meteor 1 drops"), L("--meteor 2--", 2, "Majestic Meteor 2 drops"), L("Majestic Meteor 1", 2), L("--meteor 3--", 2, "Majestic Meteor 3 drops"), L("Majestic Meteor 2", 2), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath", 2), L("Majestic Meteor 3", 2),
     L("Massive Meteor (castbar)", 1, "Massive Meteor"), L("Massive Meteor x5"), L("Explosion", 8), L("Arcadion Avalanche"),
     L("Crown of Arcadia", 3),
     L("Great Wall of Fire 1", 2), L("Great Wall of Fire 2", 2), L("Explosion 1", 2), L("Explosion 2", 2),

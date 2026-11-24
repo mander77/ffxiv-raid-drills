@@ -1,6 +1,8 @@
 import { assert, test } from "vitest";
+import { MAJESTIC_PUDDLE } from "../src/data/attacks";
 import { DRILLS } from "../src/data/drills";
 import { buildFight } from "../src/data/fight";
+import { cactbot, type LineName } from "../src/data/sources";
 import { inZone, rotZone, zoneCenter } from "../src/geometry";
 import { clock, sec } from "../src/time";
 import type { Slot, StepResult } from "../src/types";
@@ -125,10 +127,22 @@ test("Arena Split: one round with a tether, and you stack for Massive Meteor on 
       const f = buildFight(s),
         rounds = f.segs.filter((g) => g.drills[0] === "m-split-fire");
       assert.equal(rounds.length, 2);
-      assert.deepEqual(rounds.map((g) => /tether/.test(g.scene.steps[1].q)).sort(), [false, true], "a tether in one round only");
+      assert.deepEqual(rounds.map((g) => /tether/.test(g.scene.steps[3].q)).sort(), [false, true], "a tether in one round only");
       const massive = f.segs.find((g) => g.title === "Massive Meteor");
       const p = zoneCenter(massive?.scene.steps[0].z ?? { c: [50, 50], r: 0 });
       // H1 starts west and H2 east; the two rounds put each on the other platform.
       assert.ok(s === "H1" ? p[0] > 74.5 : p[0] < 25.5, `${s} stacks on the ${s === "H1" ? "east" : "west"} platform`);
     }
+});
+
+test("Arena Split: each Majestic Meteor puddle goes off at its cactbot hit", () => {
+  const rounds = buildFight("H1").segs.filter((g) => g.drills[0] === "m-split-fire");
+  rounds.forEach((g, i) => {
+    const hits = [1, 2, 3].map((n) => cactbot(`Majestic Meteor ${n}` as LineName, i + 1));
+    g.scene.steps.slice(0, 3).forEach((st, j) => {
+      assert.equal(st.drop, MAJESTIC_PUDDLE, `${g.title}: puddle ${j + 1}`);
+      assert.closeTo(g.due[j] + MAJESTIC_PUDDLE.life, hits[j], 0.05, `${g.title}: puddle ${j + 1} goes off`);
+    });
+    assert.isUndefined(g.scene.steps[3].drop);
+  });
 });

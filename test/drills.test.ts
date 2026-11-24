@@ -486,13 +486,47 @@ test("Arena Split: a round puts you in close, then at the safe end of your platf
     for (const side of SIDES)
       for (const end of ENDS)
         for (const tether of [true, false]) {
-          const sc = splitRound(s, tether, side, end),
-            [bait, lineup] = sc.steps.map((st) => zoneCenter(zoneOf(st.z)));
-          assert.ok(onSide(bait, side) && Math.abs(bait[1] - 50) < 1, "in close, at the middle of the inner edge");
+          const sc = splitRound(s, tether, side, end);
+          // Answer each step at its shown spot, as the moving marker does.
+          const results: StepResult[] = [];
+          for (const st of sc.steps) {
+            const z = zoneOf(st.zf ? st.zf(results) : st.z),
+              p = zoneCenter(z);
+            assert.ok(inZone(p, z), st.q);
+            results.push({ p, ok: true, z, drop: st.drop ? p : null });
+          }
+          const [p1, p2, p3, lineup] = results.map((r) => r.p);
+          assert.ok(onSide(p1, side) && Math.abs(p1[1] - 50) < 1, "in close, at the middle of the inner edge");
+          // Each puddle goes just outside the last, toward the safe end, still at the inner edge.
+          for (const [a, b] of [
+            [p1, p2],
+            [p2, p3],
+          ]) {
+            assert.ok(Math.hypot(b[0] - a[0], b[1] - a[1]) >= 15, "just outside the last puddle");
+            assert.ok(end === "north" ? b[1] < a[1] : b[1] > a[1], `toward the ${end} end`);
+            assert.ok(side === "west" ? b[0] >= 19 && b[0] <= 25.5 : b[0] >= 74.5 && b[0] <= 81, "at the inner edge");
+          }
+          assert.deepEqual(
+            results.map((r) => r.drop !== null),
+            [true, true, true, false],
+            "three puddles",
+          );
           assert.ok(onSide(lineup, side) && atEnd(lineup, end), `${tether ? "tether" : "marker"}: the ${end} end`);
-          // A tether stretches at the outer edge; a marker goes to the number waymark.
-          if (tether) assert.ok(side === "west" ? lineup[0] < 5 : lineup[0] > 95, "the outer edge");
-          else assert.deepEqual(lineup, side === "west" ? [9, end === "north" ? 19 : 81] : [91, end === "north" ? 19 : 81]);
+          assert.ok(Math.hypot(lineup[0] - p3[0], lineup[1] - p3[1]) >= 15, "out of the third puddle");
+          // A tether stretches at the outer edge; a marker goes to the outer corner of the number waymark.
+          if (tether) assert.ok(side === "west" ? lineup[0] <= 5 : lineup[0] >= 95, "the outer edge");
+          else {
+            const wm: Point = side === "west" ? [9, end === "north" ? 19 : 81] : [91, end === "north" ? 19 : 81];
+            assert.ok(Math.abs(lineup[0] - wm[0]) <= 6.5 && Math.abs(lineup[1] - wm[1]) <= 6.5, "at the waymark");
+            assert.ok(side === "west" ? lineup[0] < wm[0] : lineup[0] > wm[0], "its outer corner");
+          }
+          // The third puddle as far out as it may go: the tether or marker still has a clear spot.
+          const third = zoneOf(sc.steps[2].zf?.(results.slice(0, 2))),
+            out: Point = [side === "west" ? 19 : 81, p3[1]];
+          assert.ok(inZone(out, third), "the outermost third puddle is correct");
+          const worst = [...results.slice(0, 2), { ...results[2], p: out, drop: out }],
+            z4 = zoneOf(sc.steps[3].zf?.(worst));
+          assert.ok(inZone(zoneCenter(z4), z4), "a clear spot is left");
           for (const st of sc.steps) assertLines(st.a, sc.setup.join(" "));
         }
 });
