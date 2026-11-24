@@ -107,6 +107,8 @@ export function Shape({ overlay: o }: ShapeProps) {
       return <circle className="safe" cx={round2(o.x)} cy={round2(o.y)} r={round2(o.r - SAFE_INSET)} />;
     case "aim":
       return <Aim from={[o.x, o.y]} to={[o.x2, o.y2]} />;
+    case "knockback":
+      return <Aim className="push" from={[o.x, o.y]} to={[o.x2, o.y2]} />;
     case "guide":
       return <line className="guide" x1={round2(o.x)} y1={round2(o.y)} x2={round2(o.x2)} y2={round2(o.y2)} />;
     case "tether":
@@ -147,6 +149,8 @@ export function Tether({ portal, to, stretched }: TetherProps) {
 interface AimProps {
   from: Point;
   to: Point;
+  /** "push" draws a knockback's arrow, in the arena's dark text colour. */
+  className?: string;
 }
 
 /** How long the arrowhead of an aim is, and how wide each side of it is, in arena units. The
@@ -154,16 +158,17 @@ interface AimProps {
 const HEAD_LEN = 4.2;
 const HEAD_HALF = 2.8;
 
-/** An arrow from a cone's source along its middle, so a wide cone shows where it comes from. It
-    is drawn twice: a light outline first, so it stands out on the cone, then the arrow. */
-function Aim({ from, to }: AimProps) {
+/** An arrow from a cone's source along its middle, so a wide cone shows where it comes from, or
+    (with "push") where a knockback sends you. It is drawn twice: a light outline first, so it
+    stands out on the floor or an attack, then the arrow. */
+function Aim({ from, to, className }: AimProps) {
   const d = unit([to[0] - from[0], to[1] - from[1]]);
   const back: Point = [to[0] - d[0] * HEAD_LEN, to[1] - d[1] * HEAD_LEN];
   const side = (s: number): Point => [back[0] - d[1] * HEAD_HALF * s, back[1] + d[0] * HEAD_HALF * s];
   const shaft = `M${pt(from)} L${pt(back)}`;
   const head = `M${pt(to)} L${pt(side(1))} L${pt(side(-1))} Z`;
   return (
-    <g className="aim">
+    <g className={cn("aim", className)}>
       <path className="halo" d={`${shaft} ${head}`} />
       <path className="shaft" d={shaft} />
       <path className="head" d={head} />

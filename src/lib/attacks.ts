@@ -107,14 +107,14 @@ export function standardAttacks(arenaHalf: number) {
     return [arm(d), arm(leftOf(d))];
   }
 
-  /** Where a knockback from `from` sends you: arrows out from it in every direction, `distance`
-      yalms long. */
+  /** Where a knockback from `from` sends you: bold arrows out from it in every direction,
+      `distance` yalms long. */
   function knockback(from: Point, distance: number): Overlay[] {
     return Array.from({ length: KNOCKBACK_ARROWS }, (_, i) => {
       const deg = (360 * i) / KNOCKBACK_ARROWS;
       const a = polar(deg, KNOCKBACK_FROM, from),
         b = polar(deg, KNOCKBACK_FROM + yalms(distance), from);
-      return { t: "guide", x: a[0], y: a[1], x2: b[0], y2: b[1] };
+      return { t: "knockback", x: a[0], y: a[1], x2: b[0], y2: b[1] };
     });
   }
 

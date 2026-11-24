@@ -63,7 +63,7 @@ test("half the arena, with and without its knockback", () => {
   assert.deepEqual(kindOf(A.halfArena("west")[0], "lane").rect, [0, 0, 50, 100]);
   const push = A.halfArena("east", { from: MID, distance: 10 });
   assert.equal(push.length, 9, "the half, then the arrows");
-  for (const g of A.knockback(MID, 10).map((o) => kindOf(o, "guide"))) assert.closeTo(dist([g.x, g.y], [g.x2, g.y2]), 25, 1e-9);
+  for (const g of A.knockback(MID, 10).map((o) => kindOf(o, "knockback"))) assert.closeTo(dist([g.x, g.y], [g.x2, g.y2]), 25, 1e-9);
 });
 
 test("a puddle keeps its life, and a tower its soak count", () => {
