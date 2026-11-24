@@ -262,3 +262,26 @@ test("in the full fight, every Arena Split tower throws the runner onto a platfo
       }
     }
 });
+
+test("after each tower's throw, the next round's puddles go toward where you landed", () => {
+  for (const s of SLOTS)
+    for (let i = 0; i < 40; i++) {
+      const f = buildFight(s, newCode(), RANDOM),
+        route = correctRoute(f),
+        rounds = f.segs.filter((g) => g.drills[0] === "m-split-fire"),
+        throws = route.filter((st) => st.knock).slice(0, 2);
+      throws.forEach((st, r) => {
+        const at = runnerAt(route, st.hit + THROW_TIME + 0.01).at,
+          setup = rounds[r].scene.setup.join(" "),
+          side = setup.match(/on the (west|east) platform/)?.[1],
+          // The round's puddles run toward its end: the second puddle's spot shows which way.
+          first = route.find((x) => x.si === f.segs.indexOf(rounds[r]) && x.j === 0),
+          second = route.find((x) => x.si === f.segs.indexOf(rounds[r]) && x.j === 1);
+        if (!first || !second) throw new Error("no puddles");
+        assert.equal(at[0] < 50 ? "west" : "east", side, `${s} round ${r + 1}: thrown onto the round's platform`);
+        const landedNorth = at[1] < 50,
+          puddlesNorth = second.p[1] < first.p[1];
+        assert.equal(puddlesNorth, landedNorth, `${s} round ${r + 1}: the puddles go toward where you landed`);
+      });
+    }
+});
