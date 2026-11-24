@@ -215,8 +215,9 @@ e2e/                 Playwright browser tests
 5. Commit. The header is a Conventional Commit (`feat:`, `fix:`, `chore:`). The body is plain,
    simple English: short sentences, active voice, what changed for the player and why. Write the
    message to a file and run `git commit -F <file>`.
-6. Tell the owner what changed, and ask: "Publish, or more changes first?" The owner reviews in a
-   browser before a publish. Publish only after the owner says so.
+6. Tell the owner what changed, then ask "Publish, or more changes first?" with the
+   AskUserQuestion tool, so the owner can click an answer. The owner reviews in a browser before
+   a publish. Publish only after the owner says so.
 
 ## How to publish
 
