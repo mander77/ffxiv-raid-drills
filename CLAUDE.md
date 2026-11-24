@@ -221,7 +221,9 @@ src/data/fights/m11s/  M11S, one folder per fight:
   reference.ts       the Cheat Sheet's mechanics in fight order (REFERENCE): a Learn picture
                      and the Learn cards whose rules each one lists, its drills and Timeline card
   abilities.ts       the ability list and phases
-  attacks.ts         attack sizes and shapes (from BossMod). Put new sizes here.
+  attacks.ts         M11S's attacks (spreadHit, towerHit, lineStack, gust...), each a standard attack
+                     (src/lib/attacks.ts) at its BossMod size, and the sizes zones also use.
+                     Put new attacks and sizes here.
   sources.json       the fight's sources: the cactbot and BossMod commits, the timeline, the
                      triggers, the module folder and its mechanic files, and "checked" (a person
                      checked it). The import reads it.

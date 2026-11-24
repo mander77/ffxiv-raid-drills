@@ -25,6 +25,9 @@ export type BossmodShape =
 export type ArenaSide = "north" | "east" | "south" | "west";
 
 /** The arena's center, in arena units. */
+/** A line attack, as the arena draws it: a band from one end to the other. */
+export type Band = Extract<Overlay, { t: "band" }>;
+
 const CENTER: Point = [50, 50];
 
 /** A raidwide hits the whole arena. This size is the app's choice, for the picture: a circle this
@@ -88,7 +91,7 @@ export function standardAttacks(arenaHalf: number) {
 
   /** A line from `from` toward `facing`, `length` long and `width` wide in all. It can start
       `back` yalms behind `from`. */
-  function line(from: Point, facing: number, length: number, width: number, back = 0): Overlay {
+  function line(from: Point, facing: number, length: number, width: number, back = 0): Band {
     const d = polar(facing, 1, [0, 0]);
     const start = addVec(from, d, -yalms(back)),
       end = addVec(from, d, yalms(length));

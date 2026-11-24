@@ -80,7 +80,6 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
 - A knockback has its own overlay (`{t:"knockback"}`): wide, hollow arrows out from its source,
   like the push in the knockback icons (icons.tsx, rule 5; owner's request). Thin white guides
   were too faint to see.
-  M11S still draws its knockbacks as guides until the second pull request moves it.
 - A tower can show its soak count (`soak`): the tower icon in its middle, with the number in its
   column, in the highlight colour, as the mechanic icon shows it (owner's request). A puddle can
   carry its life in seconds (`life`).
@@ -91,6 +90,23 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
   choice).
 - The Cone sample is a wedge from near the middle of the arena out to its edge (60 degrees, 20
   yalms), so it reads as a cone and not as half the arena (owner's request).
+- M11S on the library (the second pull request): `m11s/attacks.ts` makes `ATTACK =
+  standardAttacks(BOSSMOD_ARENA_HALF)` and names M11S's attacks on it (`spreadHit`, `towerHit`,
+  `lineStack`, `proteanCone`, `scytheProteans`, `fireAndFury`, `gust`...), each at its BossMod size
+  in yalms. The old helpers in arena units (`aoe`, `donut`, `cleave`, `lineTo`) are gone. Sizes
+  that answer zones and geometry also use stay in arena units (`SPREAD_R`, `TOWER_R`, `PUDDLE_R`,
+  `SCYTHE_SAFE`, `SWORD_HALF`, `RAW_STACK_HALF`). The made-up attacks of the Learn pictures
+  (`FAKE`) are now in yalms too.
+- Checked as the move in #93 was: every Learn picture (both slots), every drill with 40 pattern
+  codes (both slots, played through with correct clicks), 15 full fights per slot and both
+  busters were written to JSON before and after, and compared. Only the far ends of lines and
+  cones changed: cones and lines now end at BossMod's range (60 yalms), where some ended at a
+  length the app had picked (80 or 150 units), and the sword's arms at its range (40 yalms) in
+  place of 150 units. A check that cuts each changed line to the arena found all 2,572 the same
+  inside it, and every cone keeps its edges. No size, zone, answer or step changed.
+- Not moved, so nothing changes on screen: M11S's towers stay towers with no soak count, and its
+  knockbacks stay guides. Those guides show where each player is thrown, which the standard
+  knockback (arrows out from a source) does not.
 
 ## Planned work
 

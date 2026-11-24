@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, gust, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, TOWER_R, RAW_STACK_HALF, SCYTHE_SAFE, atomicPuddle, axeHit, fireAndFury, gust, hurricaneLine, lineStack, safeRing, scytheDonut, scytheProteans, sharedCone, swordCross, swordPocket, tankCone } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -88,11 +88,11 @@ export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
       const pointAt = angOf(scytheAxis(w, i));
       // And a donut: only close to him is out of it, so the clock spots are close in. Its inner
       // edge shows as a green ring. Each player still takes their own protean cone there.
-      const cones = Array.from({length:8}, (_x, k) => cleave(P, pointAt + k * 45, PROTEAN_HALF, PROTEAN_LEN));
-      reveal = [donut(P, SCYTHE_SAFE), safeRing(P, SCYTHE_SAFE), ...cones];
+      const cones = scytheProteans(P, pointAt);
+      reveal = [scytheDonut(P), safeRing(P, SCYTHE_SAFE), ...cones];
       // Your own cone is the one at your end: the point (H2) is cone 0, the butt (H1) cone 4.
       const mine = bySlot(s, {H1:4, H2:0});
-      hits = [donut(P, SCYTHE_SAFE), ...cones.filter((_c, k) => k !== mine)];
+      hits = [scytheDonut(P), ...cones.filter((_c, k) => k !== mine)];
     } else {
       // Safe pocket: behind him (f < -HW) and on your side (sd > HW), outside both arms of the
       // cross. Anywhere in it inside the arena is correct, and the drawn pocket is the same area.
@@ -348,7 +348,7 @@ export function cometSpread(s: Slot, c: Point = CENTER): (results: StepResult[])
 }
 
 /** Fire and Fury: the boss, facing north, cleaves his front and back. */
-export const FIRE_AND_FURY: Overlay[] = [{t:"poly", pts:[[50, 50], [0, 0], [100, 0]]}, {t:"poly", pts:[[50, 50], [0, 100], [100, 100]]}];
+export const FIRE_AND_FURY: Overlay[] = fireAndFury([50, 50], 0);
 
 /* Orbital Omen, simplified to 4 lanes each way. Each set fires one north lane and one east lane.
    Set 2 always crosses in one of the four middle squares. */
@@ -502,7 +502,7 @@ export const AXE_SPREAD_SPOTS: Record<string, Point> = {M1:[37.5, 62.5], M2:[62.
 /* Raw Steel Trophy, scythe: three cleaves. A 90-degree cone on each tank (MT at 317 degrees, OT
    at 43), and a 45-degree cone behind him that the rest of the party shares. The party's spot is
    inside that shared cone, outside his hitbox. */
-export const SCYTHE_CLEAVES: Overlay[] = [cleave([50, 50], 317, RAW_TANK_HALF), cleave([50, 50], 43, RAW_TANK_HALF), cleave([50, 50], 180, RAW_STACK_HALF)];
+export const SCYTHE_CLEAVES: Overlay[] = [tankCone([50, 50], 317), tankCone([50, 50], 43), sharedCone([50, 50], 180)];
 /* Ultimate Trophy Weapons: the four tornadoes on the cardinals, and each one's two baits. Facing
    in from the tornado, the support stands on its left and the DPS on its right, at its edge. */
 export const TORNADO_BAITS: readonly {tornado: Point; support: Point; dps: Point}[] = [
@@ -521,8 +521,8 @@ const SCYTHE_STACK: Zone = {
   label:[50, 69], show:[{poly:[...STACK_EDGE.map(a => POINT_AT(a, 11)), ...[...STACK_EDGE].reverse().map(a => POINT_AT(a, 34))]}]};
 // TS note: `(x): Overlay => (...)` gives the arrow function a return type. Without it,
 // TypeScript would type t as plain string, and "puddle" would not fit the Overlay union.
-const NPUD = [22, 34, 46, 58, 70, 82].map((x): Overlay => ({t:"puddle", x, y:5, r:ATOMIC_R}));
-const SPUD = [18, 30, 42, 54, 66, 78].map((x): Overlay => ({t:"puddle", x, y:95, r:ATOMIC_R}));
+const NPUD = [22, 34, 46, 58, 70, 82].map(x => atomicPuddle([x, 5]));
+const SPUD = [18, 30, 42, 54, 66, 78].map(x => atomicPuddle([x, 95]));
 
 /* ---------- Arena Split ----------
    Two platforms, west and east, from Flatliner to the Crown of Arcadia, drawn from BossMod
@@ -937,7 +937,7 @@ export const DRILLS: readonly Drill[] = [
       boss:{x:50, y:50, f:null}, overlays:DANCE_LINES.map((l): Overlay => ({t:"lineaoe", ...l})),
       steps:[{q:"Click your pair spot.", z:{c:DANCE_PAIRS[s], r:5}, a:bySlot(s, {H1:["Relative SW, the outer spot, with R1."], H2:["Relative SE, the outer spot, with R2."]}),
         // The lines explode as the pairs land (Hurricane Explosion, 10 yalms wide).
-        reveal:DANCE_LINES.map((l): Overlay => ({t:"band", ...l, w:HURRICANE_W}))}],
+        reveal:DANCE_LINES.map(l => hurricaneLine([l.x, l.y], [l.x2, l.y2]))}],
       rule:["Open side = new south.", "H1 and R1: relative SW.", "H2 and R2: relative SE."]})},
   {id:"m-ultimate", order:11.5, random:true, follows:{pick:"ult"}, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: Six Weapons", kind:["stack", "protean", "lightPartyStack"],
     build:(s, _v, pick)=>ultimateScene(buildUltimate(s, pick ? pick === "cw" : undefined))},
@@ -1015,15 +1015,15 @@ export const DRILLS: readonly Drill[] = [
       boss:BOSS, overlays:[...NPUD, ...SPUD],
       steps:[{q:"Which Line Stack do you join? Click it.", z: v === "south" ? {rect:[60,43,84,57]} : {rect:[16,43,40,57]}, a: v === "south" ? ["The east Line Stack."] : ["The west Line Stack."],
         // You join one Line Stack; the other must miss you.
-        reveal:[lineTo([50, 50], [0, 50]), lineTo([50, 50], [100, 50])], hits:[lineTo([50, 50], v === "south" ? [0, 50] : [100, 50])]}],
+        reveal:[lineStack([50, 50], [0, 50]), lineStack([50, 50], [100, 50])], hits:[lineStack([50, 50], v === "south" ? [0, 50] : [100, 50])]}],
       rule:TWO_WAY_RULE})},
   {id:"m-ecl-four", order:26.6, variants:["north","south"], follows:{variant:"wall"}, phase:P4, time:"9:31", title:"Ecliptic Stampede: Four-way Fireball", kind:"pairStack",
     build:(_s, v)=>({setup:["You were marked. You dropped your puddles along the " + (v ?? "north").toUpperCase() + " wall.", "The boss casts Four-way Fireball: Pair Stacks on the four closest players."], ordered:true,
       boss:BOSS, overlays:[...NPUD, ...SPUD],
       steps:[{q:"Which Pair Stack do you take?", z: v === "south" ? {c:[57,43],r:5.5} : {c:[43,43],r:5.5}, a: v === "south" ? ["NE, under the boss."] : ["NW, under the boss."],
         // Four line stacks from the boss through the four closest pairs: NW, NE, SW and SE.
-        reveal:[315, 45, 225, 135].map(a => lineTo([50, 50], POINT_AT(a, 10))),
+        reveal:[315, 45, 225, 135].map(a => lineStack([50, 50], POINT_AT(a, 10))),
         // You take the NW (north wall) or NE (south wall) one; the other three must miss you.
-        hits:[315, 45, 225, 135].filter(a => a !== (v === "south" ? 45 : 315)).map(a => lineTo([50, 50], POINT_AT(a, 10)))}],
+        hits:[315, 45, 225, 135].filter(a => a !== (v === "south" ? 45 : 315)).map(a => lineStack([50, 50], POINT_AT(a, 10)))}],
       rule:FOUR_WAY_RULE})}
 ];
