@@ -95,13 +95,17 @@ type OverlayShape =
   | ({ t: "aim" } & Line)
   | ({ t: "tornado" } & At)
   | ({ t: "rock" } & At)
-  | ({ t: "tower"; r?: number } & At)
+  /** `soak` is how many players the tower needs; the tower shows it in the middle. */
+  | ({ t: "tower"; r?: number; soak?: number } & At)
   | ({ t: "target" } & At)
   /** ux, uy turn the weapon: its long side on the floor, from the handle end to the tip. `held`
       is a weapon in the boss's hand, drawn without the cut in the floor. */
   | ({ t: "axe"; ux?: number; uy?: number; held?: boolean } & At)
   | ({ t: "sword"; ux?: number; uy?: number; held?: boolean } & At)
-  | ({ t: "puddle"; r: number } & At)
+  /** `life` is how many seconds the puddle stays before it goes off; with none, it stays. */
+  | ({ t: "puddle"; r: number; life?: number } & At)
+  // An attack whose size no source gives yet: a dashed grey ring with a "?".
+  | ({ t: "unknown" } & At)
   | ({ t: "tag"; s: string } & At)
   | ({ t: "mark"; l: string; r: MarkRole } & At)
   /** `n` numbers Orbital Omen's portals; the Arena Split's tether portals have none. */

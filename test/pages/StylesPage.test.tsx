@@ -67,3 +67,15 @@ test("the styles page shows the tether beside the guide, short and stretched", (
   assert.ok(lines.querySelector(".tether.stretched"), "a blue tether");
   assert.ok(lines.querySelector(".guide"), "a guide");
 });
+
+test("the styles page draws each standard attack, and the mark of an unknown size", () => {
+  render(<StylesPage />);
+  const attacks = screen.getByRole("heading", { level: 2, name: "Standard Attacks" }).closest("section");
+  assert.ok(attacks);
+  assert.deepEqual(
+    [...attacks.querySelectorAll("h3")].map((h) => h.textContent),
+    ["Raidwide", "Circle", "Donut", "Cone", "Line", "Cross", "Half Arena", "Knockback Arrows", "Puddle", "Tower to Soak", "Size Unknown"],
+  );
+  assert.ok(attacks.querySelector(".unknown"), "the size unknown mark");
+  assert.equal(attacks.querySelector(".tower text")?.textContent, "2", "a tower shows its soak count");
+});
