@@ -91,7 +91,7 @@ Each kind of text has a place in the code and a job.
 | Every mechanic name is in Title Case: on the icons, in titles and inside a sentence. | "a Party Stack on a healer" | "a party stack on a healer" |
 | Mechanic titles are in Title Case, also the part after the colon and in parentheses. | "Raw Steel Trophy: Axe", "Void Stardust (Second Time)" | "Raw Steel Trophy: axe" |
 | Button labels, tab names and headings are in Title Case. A sentence on a button or a label stays a sentence. | "Show Me", "Lock In", "Cheat Sheet" | "Show me", "Lock in" |
-| Small words stay in lower case inside a title: a, an, and, as, at, by, for, in, into, of, on, or, the, to. | "Void Stardust into the Second Weapons" | "Void Stardust Into The Second Weapons" |
+| Small words stay in lower case inside a title: a, an, and, as, at, by, for, from, in, into, of, on, or, the, to. | "Void Stardust into the Second Weapons" | "Void Stardust Into The Second Weapons" |
 | A verb stays in lower case, also when it looks like a kind name. | "the party stacks", "Your light party stacks on you." | "the Party Stacks" |
 | A name from the game stays as the game writes it. | "Two-way Fireball" | "Two-Way Fireball" |
 | "Look Ahead" at the start of a line, then a colon. | "Look Ahead: which weapon goes first?" | "Look ahead -", "Saved for later" |
@@ -188,7 +188,7 @@ A wall is named by its direction in capitals inside a setup line: "along the NOR
 | MT, OT, H1, H2, M1, M2, R1, R2 | The eight slots. | Tank 1, D1 to D4 |
 | your lead | The person who decides your raid's strat. | your static, your raid lead's group |
 
-The header switch is "Light party", with the buttons 1 and 2.
+The header switch is "Light Party", with the buttons 1 and 2.
 
 ## Objects on the arena
 
@@ -288,7 +288,7 @@ These words name parts of the site. `CLAUDE.md`, "Words in the code", has the na
 | Watch the Correct Moves | The replay of the full fight. | |
 | Show Me | The button that shows the correct spot. | |
 | step chips | One chip per step of a mechanic: badges during a try, buttons in review. | |
-| Try From Here | After a try: answer the step shown and the ones after it again. | Retry, Redo |
+| Try from Here | After a try: answer the step shown and the ones after it again. | Retry, Redo |
 | phase | Phase 1 to 4 of the fight. Nothing else. | |
 | tab | Home, Learn, Practice, Timeline, Pressure, Cheat Sheet. | |
 

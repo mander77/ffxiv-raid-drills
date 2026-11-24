@@ -2,7 +2,7 @@ import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export interface ChipRowProps {
-  /** What the row is for, for screen readers: "Go to a mechanic". */
+  /** What the row is for, for screen readers: "Go to a Mechanic". */
   label: string;
   /** The chips. Mark the current one with aria-current="true". */
   children: ReactNode;

@@ -47,7 +47,7 @@ claim on the live site before you act on it.
 
 | Tab | Route | What it does |
 |-----|-------|--------------|
-| Home | `/` | An arena picture from a Learn card, "Start here" cards, and About me. |
+| Home | `/` | An arena picture from a Learn card, "Start Here" cards, and About Me. |
 | Learn | `/learn/<card>` | Quiz cards with arena pictures. Pick an answer to see it, then Lock In. Back, Next and one chip per mechanic. |
 | Practice | `/practice/<mechanic>/<code>` | Click where you stand, one mechanic at a time. Show Me, Reset, New Pattern. The code names the pattern. |
 | Timeline | `/timeline/<card>` | Which mechanic comes next, with a cactbot-style list. |
@@ -371,7 +371,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   Timeline, the quick round and Practice. After the answer it turns green or red and says how
   it went. On a narrow screen a `StickyBar` keeps it at the top of the screen.
 - **Review**: after a try (and always in Watch the Correct Moves), the step chips (`StepChips`
-  with `onPick`) go to a step. During a test they only show progress. **Try From Here** answers
+  with `onPick`) go to a step. During a test they only show progress. **Try from Here** answers
   the step shown and the ones after it again.
 
 ## Rules for the content

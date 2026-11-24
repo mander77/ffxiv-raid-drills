@@ -26,7 +26,7 @@ export function PressureStart({ onQuick, onRun, onWatch }: PressureStartProps) {
       <Card>
         <CardHeader>
           <CardDescription>Quick round · {QUICK_SIZE} questions</CardDescription>
-          <CardTitle className="font-display text-xl tracking-wide">Timed questions</CardTitle>
+          <CardTitle className="font-display text-xl tracking-wide">Timed Questions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm">Questions from Learn and Timeline. Time to read, then a short timer to decide. Aim for zero freezes.</p>
@@ -58,7 +58,7 @@ export function PressureStart({ onQuick, onRun, onWatch }: PressureStartProps) {
       <Card>
         <CardHeader>
           <CardDescription>Full fight · every mechanic in order</CardDescription>
-          <CardTitle className="font-display text-xl tracking-wide">The whole fight on the clock</CardTitle>
+          <CardTitle className="font-display text-xl tracking-wide">The Whole Fight on the Clock</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm">

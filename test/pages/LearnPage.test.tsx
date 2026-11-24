@@ -82,7 +82,7 @@ test("number keys pick, Enter locks in, and Enter again goes to the next card", 
 test("a chip goes to the first card of its mechanic", async () => {
   open(`/learn/${LEARN[0].id}`);
   const user = userEvent.setup();
-  const chips = screen.getByRole("group", { name: "Go to a mechanic" });
+  const chips = screen.getByRole("group", { name: "Go to a Mechanic" });
   assert.equal(chips.querySelector('[aria-current="true"]')?.textContent, "Raw Steel");
   await user.click(screen.getByRole("button", { name: "Weapons" }));
   assert.equal(where(), "/learn/k-first-weapon");

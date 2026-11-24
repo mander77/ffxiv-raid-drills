@@ -25,14 +25,14 @@ function draw(slot: "H1" | "H2"): void {
 
 test("the cheat sheet shows the timeline for your slot, one row per line", () => {
   draw("H2");
-  assert.ok(screen.getByText("Your timeline as H2"));
+  assert.ok(screen.getByText("Your Timeline as H2"));
   // One header row, then one row per timeline line.
   assert.equal(screen.getAllByRole("row").length, TIMELINE.length + 1);
 });
 
 test("every mechanic has its picture, under its phase, for your slot", () => {
   draw("H2");
-  assert.ok(screen.getByRole("heading", { name: "Every mechanic as H2" }));
+  assert.ok(screen.getByRole("heading", { name: "Every Mechanic as H2" }));
   assert.equal(screen.getAllByRole("img", { name: /on the arena/ }).length, REFERENCE.length);
   const phase3 = screen.getByRole("region", { name: "Phase 3: Arena Split" });
   assert.ok(within(phase3).getByRole("img", { name: /^Massive Meteor on the arena/ }));

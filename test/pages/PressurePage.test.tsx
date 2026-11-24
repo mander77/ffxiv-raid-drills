@@ -42,8 +42,8 @@ const where = (): string | null => screen.getByTestId("where").textContent;
 
 test("the start screen offers the quick round and the full fight", () => {
   open("/pressure");
-  assert.ok(screen.getByText("Timed questions"));
-  assert.ok(screen.getByText("The whole fight on the clock"));
+  assert.ok(screen.getByText("Timed Questions"));
+  assert.ok(screen.getByText("The Whole Fight on the Clock"));
   assert.ok(screen.getByRole("button", { name: "Start the Run" }));
   assert.ok(screen.getByRole("button", { name: "Watch the Correct Moves" }));
 });
@@ -77,7 +77,7 @@ test("Quit ends a quick round and goes back to the start", async () => {
   const user = userEvent.setup();
   await user.click(screen.getByRole("button", { name: "Start" }));
   await user.click(screen.getByRole("button", { name: "Quit" }));
-  assert.ok(screen.getByText("Timed questions"));
+  assert.ok(screen.getByText("Timed Questions"));
   assert.equal(screen.queryByText(/Card 1 of 12/), null);
 });
 
@@ -89,7 +89,7 @@ test("Start the run opens the run on /pressure, and Quit with no answer goes bac
   assert.ok(await screen.findByText(/Mechanic 1 of \d+/), "the first frame shows your progress");
   assert.ok(screen.getByRole("region", { name: "Casts coming up" }), "the casts coming up, as in the player");
   await user.click(screen.getByRole("button", { name: "Quit" }));
-  assert.ok(screen.getByText("Timed questions"));
+  assert.ok(screen.getByText("Timed Questions"));
 });
 
 test("Watch the correct moves opens the player at a new fight's address", async () => {

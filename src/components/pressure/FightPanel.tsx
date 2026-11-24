@@ -16,7 +16,7 @@ import { StepChips } from "../StepChips";
 export interface FightPanelProps {
   view: FightView;
   fight: Fight;
-  /** Go to a mechanic. */
+  /** Go to a Mechanic. */
   onGoTo: (g: FightSeg) => void;
   /** Go to step j of a mechanic, paused. */
   onGoToStep: (g: FightSeg, j: number) => void;
