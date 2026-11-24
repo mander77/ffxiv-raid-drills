@@ -22,7 +22,7 @@ export const FIGHT_END = Math.round((ENRAGE + AFTER_ENRAGE) * 10) / 10;
 /** The sheet's colour codes. "spot" is the sheet's "Positioning Required". */
 export type Category = "raid" | "tank" | "spot" | "dodge" | "target" | "mech" | "enrage";
 export const CATEGORIES: Record<Category, string> = {
-  raid:"Raid damage", tank:"Tank damage", spot:"Positioning", dodge:"Avoidable AoE",
+  raid:"Raid Damage", tank:"Tank Damage", spot:"Positioning", dodge:"Avoidable AoE",
   target:"Targeted AoE", mech:"Mechanic", enrage:"Enrage"
 };
 

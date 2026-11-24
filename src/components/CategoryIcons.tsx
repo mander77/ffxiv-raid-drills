@@ -89,5 +89,5 @@ export function CategoryIcons({ cats, className, plain = false }: CategoryIconsP
   );
 }
 
-/** The category names of a row, joined: "Raid damage, Mechanic". */
+/** The category names of a row, joined: "Raid Damage, Mechanic". */
 export const categoryNames = (cats: readonly Category[]): string => cats.map((c) => CATEGORIES[c]).join(", ") || "No category";
