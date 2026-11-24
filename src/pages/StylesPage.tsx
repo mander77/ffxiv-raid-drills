@@ -77,32 +77,32 @@ interface InterfaceIcon {
 /** The icons of the buttons and signs, grouped as icons.tsx groups them. */
 const INTERFACE_GROUPS: readonly { title: string; icons: readonly InterfaceIcon[] }[] = [
   {
-    title: "Moving on",
+    title: "Moving On",
     icons: [
-      { icon: NextMechanicIcon, name: "Next mechanic", meaning: "Go on to the next mechanic." },
-      { icon: PreviousCardIcon, name: "Previous card", meaning: "The card before, on Learn and Timeline." },
-      { icon: NextCardIcon, name: "Next card", meaning: "The card after, on Learn and Timeline." },
+      { icon: NextMechanicIcon, name: "Next Mechanic", meaning: "Go on to the next mechanic." },
+      { icon: PreviousCardIcon, name: "Previous Card", meaning: "The card before, on Learn and Timeline." },
+      { icon: NextCardIcon, name: "Next Card", meaning: "The card after, on Learn and Timeline." },
       { icon: ResetIcon, name: "Reset", meaning: "Start the same thing again: Reset, or Start over." },
     ],
   },
   {
-    title: "Pressure's player",
+    title: "Pressure's Player",
     icons: [
       { icon: PlayIcon, name: "Play", meaning: "Play the fight clock." },
       { icon: PauseIcon, name: "Pause", meaning: "Pause the fight clock." },
-      { icon: NewFightIcon, name: "New fight", meaning: "A new fight with new random parts." },
+      { icon: NewFightIcon, name: "New Fight", meaning: "A new fight with new random parts." },
       { icon: SettingsIcon, name: "Settings", meaning: "The settings, such as the pattern picks." },
-      { icon: OpenMenuIcon, name: "Open menu", meaning: "Open a menu of choices, such as the speed." },
-      { icon: DragHandleIcon, name: "Drag handle", meaning: "Drag a row into another place." },
+      { icon: OpenMenuIcon, name: "Open Menu", meaning: "Open a menu of choices, such as the speed." },
+      { icon: DragHandleIcon, name: "Drag Handle", meaning: "Drag a row into another place." },
     ],
   },
   {
-    title: "The header",
+    title: "The Header",
     icons: [
       { icon: TabMenuIcon, name: "Tabs", meaning: "Open the list of tabs, on a phone." },
       { icon: ShareIcon, name: "Share", meaning: "Copy the address of the page." },
-      { icon: LightModeIcon, name: "Light mode", meaning: "Switch to light mode." },
-      { icon: DarkModeIcon, name: "Dark mode", meaning: "Switch to dark mode." },
+      { icon: LightModeIcon, name: "Light Mode", meaning: "Switch to light mode." },
+      { icon: DarkModeIcon, name: "Dark Mode", meaning: "Switch to dark mode." },
       { icon: PickedIcon, name: "Picked", meaning: "The choice that is picked in a menu." },
     ],
   },
@@ -133,7 +133,7 @@ function noop(): void {}
 /** How the site shows an answer, each with the component that draws it. */
 const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode }[] = [
   {
-    name: "Answers before you answer",
+    name: "Answers Before You Answer",
     meaning: "An answer to pick, and on a Learn card, the one you picked before Lock in.",
     sample: (
       <div className="space-y-2">
@@ -143,7 +143,7 @@ const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode
     ),
   },
   {
-    name: "Answers after you answer",
+    name: "Answers After You Answer",
     meaning: "The correct answer in green, with why; your pick in red when it was not; the others faded.",
     sample: (
       <div className="space-y-2">
@@ -154,7 +154,7 @@ const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode
     ),
   },
   {
-    name: "Prompt bar",
+    name: "Prompt Bar",
     meaning:
       "The question and its button, in the same place on Learn, Timeline, Practice and the quick round. After the answer it turns green or red, says how it went and glows once. On a phone it stays at the top of the screen.",
     sample: (
@@ -174,7 +174,7 @@ const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode
     ),
   },
   {
-    name: "Last answer",
+    name: "Last Answer",
     meaning: "The step before: correct or not, its question and its answer.",
     sample: (
       <div className="space-y-2">
@@ -244,7 +244,7 @@ export function StylesPage() {
 
         <section className="space-y-4" aria-labelledby="categories">
           <h2 id="categories" className="font-display text-2xl font-bold">
-            Categories of the timeline
+            Categories of the Timeline
           </h2>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {(Object.keys(CATEGORIES) as Category[]).map((cat) => (
@@ -271,7 +271,7 @@ export function StylesPage() {
         ))}
 
         <section className="space-y-4">
-          <h2 className="font-display text-2xl font-bold">The boss's weapons</h2>
+          <h2 className="font-display text-2xl font-bold">The Boss's Weapons</h2>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {WEAPONS.map((w) => (
               <IconItem

@@ -28,7 +28,7 @@ test("the styles page shows every icon of icons.tsx", () => {
 
 test("the styles page shows how an answer looks, with the site's own components", () => {
   render(<StylesPage />);
-  for (const name of ["Answers before you answer", "Answers after you answer", "Prompt bar", "Last answer", "Steps", "Rule", "Tally"])
+  for (const name of ["Answers Before You Answer", "Answers After You Answer", "Prompt Bar", "Last Answer", "Steps", "Rule", "Tally"])
     assert.ok(screen.getByRole("heading", { name }));
   assert.ok(screen.getByRole("button", { name: /Your incorrect pick.*Your pick/ }));
   assert.ok(screen.getByRole("list", { name: "Steps" }));
