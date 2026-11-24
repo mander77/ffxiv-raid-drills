@@ -125,6 +125,31 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
 - Heartbreak Kick: BossMod lets up to 8 soak its tower, and cactbot says "Get Tower" to
   everyone. Statics do it either way: the tanks soak it with invulns, or the party soaks it
   (owner). The tower shows 8 dots, and `k-hb` and the timeline name both ways (owner's choice).
+- Ecliptic Stampede in Practice and Pressure (November 24, owner's choices): the drill
+  `m-ecl-start` ("Ecliptic Stampede: Puddles") now plays the marked path. You pick your start
+  spot, drop six puddles (one click each), then wait close to the boss while the others soak
+  the towers and take the tethers. The fireball segment that follows is unchanged.
+  - The puddle path follows Hector's M11S guide video (https://youtu.be/w1uuwzhyf5A, 19:06 to
+    20:15; the owner pointed to it). North wall: start in line with B, drop four puddles walking
+    west along the wall, then step in and drop two more in the gaps, walking back east. The
+    south wall is the mirror: start in line with D, walk east, then two back west.
+  - The two inner puddles are not fixed spots (owner's choice): any spot just inside the wall
+    puddles is correct when it is clear of the corners (25 units each side of the middle), out of
+    the towers, clear of every puddle you dropped, and at most 30 units from your wall
+    (`innerPuddle`). The six puddles end up as a triangle against the wall.
+  - The puddle spots (`WALL_SPOTS`, read from the video's frames: 15 units apart along the wall,
+    the inner row 13 units in, where the moving marker goes), the wait spots (`ECL_WAIT`) and the tower spots (`ECL_TOWERS`)
+    are the app's choices, not fight data.
+  - Your puddles stay on the floor to the end of the drill (`ATOMIC_PUDDLE`, BossMod's
+    `AtomicImpact` range, with no end). The drops layer is clipped to the arena, so a puddle at
+    the wall does not spill past it.
+  - The wait step is due at Majestic Meteowrath x4, the cactbot line where the fireball segment
+    starts. The puddle steps are due at Atomic Impact 1 to 6.
+  - The unmarked path (tower, tether and fireball for a player with no puddles) is later. It
+    needs the owner's answers: which four-way intercard spot, and how the portal picks the corner.
+- Heartbreak Kick in Practice and Pressure: the drill `m-hb` has two variants, from a new
+  Settings pick, "Heartbreak Kick": "Party soaks" (stand in the tower) or "Tanks invuln" (stand
+  anywhere out of it). Each of the three hits is one step, due at its cactbot line.
 - M11S's knockbacks stay guides. Those guides show where each player is thrown, which the
   standard knockback (arrows out from a source) does not.
 

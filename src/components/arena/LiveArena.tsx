@@ -29,7 +29,8 @@ export interface LiveArenaProps {
   /** The boss, when the fight clock places him. Left out, he follows the answers. */
   boss?: Boss | null;
   /** Whether the puddle of step i has gone off, so it fades. Left out, a puddle fades two steps
-      after it drops, or when a step with puddlesOff is asked. */
+      after it drops, or when a step with puddlesOff is asked, unless it stays for good (its life
+      has no end). */
   wentOff?: (i: number) => boolean;
   /** Label the last correct answer "Correct spot". Watch the correct moves leaves it out: your marker
       walks into each spot. */
@@ -128,7 +129,7 @@ export function LiveArena({
 
   // The puddles dropped before the last step with clearDrops (up to the one asked) are gone. A
   // puddle goes off two steps after it drops, or when a step with puddlesOff is asked: it fades
-  // out then.
+  // out then. A puddle with no end to its life (an Ecliptic fire puddle) stays.
   const kept = sc.steps.slice(0, asking + 1).reduce((from, st, i) => (st.clearDrops ? i : from), 0);
   const allOff = sc.steps.slice(0, asked + 1).some((st) => st.puddlesOff);
   const drops: ReactNode[] = [];
@@ -139,7 +140,7 @@ export function LiveArena({
         <circle
           // biome-ignore lint/suspicious/noArrayIndexKey: a puddle belongs to its step, which never moves.
           key={`drop-${i}`}
-          className={cn("drop", (wentOff ? wentOff(i) : allOff || i <= n - 2) && "fading")}
+          className={cn("drop", (wentOff ? wentOff(i) : Number.isFinite(puddle.life) && (allOff || i <= n - 2)) && "fading")}
           cx={round2(r.drop[0])}
           cy={round2(r.drop[1])}
           r={puddle.r}

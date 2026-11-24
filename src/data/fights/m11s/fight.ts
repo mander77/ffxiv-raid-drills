@@ -24,12 +24,12 @@ type WeaponOrder = `${WeaponType}-${WeaponType}-${WeaponType}`;
 
 /** How each random part of a fight comes out. `set1` and `set2` are the weapon orders of the
     Assault Evolved sets at 0:48 and 1:33. */
-export interface Picks { raw: "axe" | "scythe"; void: "stack" | "spread"; set1: WeaponOrder; set2: WeaponOrder; ult: "cw" | "ccw"; tether: "first" | "second"; fireball: "two" | "four"; wall: "north" | "south" }
+export interface Picks { raw: "axe" | "scythe"; void: "stack" | "spread"; set1: WeaponOrder; set2: WeaponOrder; ult: "cw" | "ccw"; tether: "first" | "second"; fireball: "two" | "four"; wall: "north" | "south"; kick: "party" | "tanks" }
 // TS note: Choices is a mapped type. `[K in keyof Picks]` walks every field of Picks, so Choices
 // has the same fields, and each one takes the same values or "random". Add a field to Picks and
 // Choices gets it too. C# has no direct match; you would write the second class by hand.
 export type Choices = { [K in keyof Picks]: Picks[K] | "random" };
-export const RANDOM: Choices = {raw:"random", void:"random", set1:"random", set2:"random", ult:"random", tether:"random", fireball:"random", wall:"random"};
+export const RANDOM: Choices = {raw:"random", void:"random", set1:"random", set2:"random", ult:"random", tether:"random", fireball:"random", wall:"random", kick:"random"};
 
 /** The six weapon orders, as [value, text]: "sword-axe-scythe" shows as "Sword, axe, scythe". */
 const orderText = (o: string): string => { const s = o.split("-").join(", "); return s.charAt(0).toUpperCase() + s.slice(1); };
@@ -54,7 +54,8 @@ export const CHOICE_ROWS = [
   {key:"ult", label:"Ultimate Trophy Weapons", options:[["cw", "Clockwise"], ["ccw", "Counterclockwise"]]},
   {key:"tether", label:"Your Arena Split tether", options:[["first", "First round"], ["second", "Second round"]]},
   {key:"fireball", label:"Ecliptic Fireball", options:[["two", "Two-way"], ["four", "Four-way"]]},
-  {key:"wall", label:"Your Ecliptic puddles", options:[["north", "North wall"], ["south", "South wall"]]}
+  {key:"wall", label:"Your Ecliptic puddles", options:[["north", "North wall"], ["south", "South wall"]]},
+  {key:"kick", label:"Heartbreak Kick", options:[["party", "Party soaks"], ["tanks", "Tanks invuln"]]}
 ] as const satisfies readonly ChoiceRow[];
 
 /** Choices from saved settings or a link. Anything unknown becomes "random". */
@@ -154,8 +155,10 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     // Its scene comes with the rest of Arena Split below, once the tether round is known.
     {title:"Arena Split: First Towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:cactbot("--tethers--", 3), due:[cactbot("Explosion", 6)]},
     {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)", 2), due:[cactbot("Orbital Omen 1", 2), cactbot("Orbital Omen 2", 2), cactbot("Orbital Omen 3", 2)]},
-    {title:"Ecliptic Stampede: Start", drills:["m-ecl-start"], scene:drill("m-ecl-start", s), k:0, from:cactbot("--middle--", 7), due:[cactbot("Atomic Impact 1")]},
-    {title:"Ecliptic Stampede: " + fireball, drills:[ecl], scene:drill(ecl, s, wall), k:0, from:cactbot("Weighty Impact"), due:[cactbot("Two-way Fireball / Four-way Fireball")]}
+    {title:"Ecliptic Stampede: Puddles", drills:["m-ecl-start"], scene:drill("m-ecl-start", s, wall), k:0, from:cactbot("--middle--", 7),
+      // Your start spot as the markers come (with the Mammoth Meteor cast), one drop at each Atomic Impact, then your wait spot as the tether lines go off.
+      due:[castStart("MammothMeteor", "Mammoth Meteor x2"), ...([1, 2, 3, 4, 5, 6] as const).map(n => cactbot(`Atomic Impact ${n}`)), cactbot("Majestic Meteowrath x4")]},
+    {title:"Ecliptic Stampede: " + fireball, drills:[ecl], scene:drill(ecl, s, wall), k:0, from:cactbot("Majestic Meteowrath x4"), due:[cactbot("Two-way Fireball / Four-way Fireball")]}
   );
   /* The rest of Arena Split, built last so the random parts above keep their codes. You have a
      tether in one round of the two and not in the other. Each tower knocks you away from its
@@ -204,6 +207,12 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
       pre:zoneCenter(SPLIT_INNER[side2])},
     {title:"Arcadion Avalanche", drills:["m-avalanche"], scene:avalancheScene(s, side2, end2, face, swing), k:0, from:cactbot("Massive Meteor x5"), due:[cactbot("Explosion", 8), cactbot("Arcadion Avalanche")]}
   );
+  /* Heartbreak Kick, last so the random parts above keep their codes. Its tower is hit 5, then 6,
+     then 7 times; each set is due at its first hit. Either the party soaks it, or the tanks do
+     with invulns (your pick). */
+  const kick = choose(c.kick, random() < 0.5 ? "party" : "tanks");
+  segs.push({title:"Heartbreak Kick", drills:["m-hb"], scene:drill("m-hb", s, kick), k:0, from:cactbot("Heartbreak Kick"),
+    due:[cactbot("Heartbreak Kick 1"), cactbot("Heartbreak Kick 1", 2), cactbot("Heartbreak Kick 1", 3)]});
   // TS note: sort with a compare function, like List.Sort(Comparison) in C#. It keeps equal items in order.
   segs.sort((a, b) => a.from - b.from);
   /* A Practice scene can mark where you stand (Arena Split's towers mark where you ended the
@@ -268,7 +277,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     L("Great Wall of Fire 1", 2), L("Great Wall of Fire 2", 2), L("Explosion 1", 2), L("Explosion 2", 2),
     L("Orbital Omen (castbar)", 2, "Orbital Omen"), L("Orbital Omen 1", 2), L("Fire and Fury", 2), L("Orbital Omen 2", 2), L("Orbital Omen 3", 2), L("Orbital Omen 4", 2),
     L("Crown of Arcadia", 4), L("--middle--", 7),
-    L("Ecliptic Stampede"), L("Mammoth Meteor x2"), L("Atomic Impact 1"), L("Atomic Impact 2"), L("Atomic Impact 3"),
+    L("Ecliptic Stampede"), [castStart("MammothMeteor", "Mammoth Meteor x2"), "Atomic Impact markers"], L("Mammoth Meteor x2"), L("Atomic Impact 1"), L("Atomic Impact 2"), L("Atomic Impact 3"),
     L("Atomic Impact 4"), L("Atomic Impact 5"), L("Atomic Impact 6"), L("Cosmic Kiss", 4),
     L("Majestic Meteowrath x4"), L("Two-way Fireball / Four-way Fireball", 1, fireball),
     L("Crown of Arcadia", 5), L("--middle--", 8),
@@ -277,12 +286,13 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   ];
   const events = lines.map(([t, name]): TLEvent => ({t, name, raidwide:RAIDWIDE.has(name), cast:BOSS_CAST.has(name) || name.endsWith(" drops")}));
   const picks: Picks = {raw:w1, void:stackFirst ? "stack" : "spread", set1:orderIn(A1), set2:orderIn(A2),
-    ult:U.cw ? "cw" : "ccw", tether:t1 ? "first" : "second", fireball:four ? "four" : "two", wall};
+    ult:U.cw ? "cw" : "ccw", tether:t1 ? "first" : "second", fireball:four ? "four" : "two", wall, kick};
   const summary = "Raw Steel Trophy: " + w1 + " first, then " + w2 + ". Assault Evolved at " + nearClock(cactbot("Assault Evolved")) + ": " + orderText(picks.set1).toLowerCase() +
     ". At " + nearClock(cactbot("Assault Evolved", 2)) + ": " + orderText(picks.set2).toLowerCase() + ". Void Stardust: " + (stackFirst ? "stack first, then spread." : "spread first, then stack.") +
     " Ultimate Trophy Weapons: " + (U.cw ? "clockwise." : "counterclockwise.") +
     " Arena Split: your tether in the " + (t1 ? "first" : "second") + " round." +
-    " Ecliptic Stampede: " + fireball + ", with your puddles along the " + wall + " wall.";
+    " Ecliptic Stampede: " + fireball + ", with your puddles along the " + wall + " wall." +
+    " Heartbreak Kick: " + (kick === "party" ? "the party soaks it." : "the tanks soak it with invulns.");
   return {segs, events, end:FIGHT_END, split:[cactbot("Flatliner (split)"), cactbot("Crown of Arcadia", 3)], summary, code, picks, choices:c};
 }
 

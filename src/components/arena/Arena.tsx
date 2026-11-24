@@ -10,7 +10,7 @@ import { hitsFirst, isWeapon, Shape } from "./Shape";
 /** The layers of an arena picture, from the bottom up. Every picture draws in this order, so a
     piece looks the same everywhere.
     ground: the attacks, then the other pieces on the floor (clipped to the arena).
-    drops: puddles and other pieces that stay on the floor after a step.
+    drops: puddles and other pieces that stay on the floor after a step (clipped to the arena).
     zones: where to stand, as the correct answer, a preview or a target (clipped to the arena).
     waymarks, then boss: the boss and his ring.
     weapons: the boss's weapons, over the waymarks they often land next to, and over the boss
@@ -21,7 +21,7 @@ import { hitsFirst, isWeapon, Shape } from "./Shape";
 export const LAYERS = ["ground", "drops", "zones", "waymarks", "boss", "weapons", "labels", "effects", "marks", "me"] as const;
 // TS note: `typeof LAYERS[number]` is the union of the array's values: "ground" | "drops" | ...
 export type Layer = (typeof LAYERS)[number];
-const CLIPPED: ReadonlySet<Layer> = new Set<Layer>(["ground", "zones"]);
+const CLIPPED: ReadonlySet<Layer> = new Set<Layer>(["ground", "drops", "zones"]);
 
 export interface Waymark {
   id: string;
