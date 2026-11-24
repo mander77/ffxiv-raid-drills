@@ -66,7 +66,7 @@ src/util.ts              small shared helpers
 src/geometry.ts          arena geometry
 src/data/                the fight: drills, pictures, questions, timeline, attacks
 test/                    Vitest tests
-scripts/                 setup, publish, wait-deploy and import-sources (plain Node.js)
+scripts/                 setup, publish, wait-deploy, import-sources and find-sources (plain Node.js)
 e2e/                     Playwright browser tests
 ```
 
@@ -114,6 +114,6 @@ npm run wait-deploy -- https://ffxiv-raid-drills.app index-AbCd1234.js
 - Mechanics: [Icy Veins M11S guide](https://www.icy-veins.com/ffxiv/aac-heavyweight-m3-savage-raid-guide) and [Thaliak M11S](https://thaliak.com/raids/m11s/)
 - Attack sizes: the [BossMod](https://github.com/awgil/ffxiv_bossmod) M11S module
 
-The app never types a fight time or an attack size by hand. `npm run import:sources` downloads the cactbot timeline and the BossMod module at the commits pinned in `scripts/import-sources.mjs` (into `.cache/sources/`, which git ignores) and writes `src/data/fights/m11s/source.gen.ts`. The data files read every time and size from it. `npm run check:sources` fails when the generated file no longer matches the pinned sources, then checks every time and size the app uses (`test/sources.test.ts`, which `npm test` runs too).
+The app never types a fight time or an attack size by hand. Each fight lists its sources in `src/data/fights/<id>/sources.json`: the cactbot and BossMod commits and files. `npm run import:sources` downloads them (into `.cache/sources/`, which git ignores) and writes the fight's `source.gen.ts`, which the data files read every time and size from, and `sources.extra.gen.json`, a short form of cactbot's triggers and BossMod's mechanic files. `npm run import:sources -- m11s` imports one fight. `npm run check:sources` fails when a generated file no longer matches its pinned sources, then runs the source tests (`npm test` runs them too).
 
-To add a fight, add its cactbot timeline and BossMod module to `scripts/import-sources.mjs`, run `npm run import:sources`, and read each time with `cactbot(...)` and each size with `bossmod(...)` from `src/data/fights/m11s/sources.ts`.
+To add a fight, run `npm run find:sources -- <id>`. It finds the fight's files at the newest commits and writes its `sources.json` with `"checked": false`. Check the list, set `"checked": true`, run `npm run import:sources -- <id>`, and read each time with `cactbot(...)` and each size with `bossmod(...)` from the fight's `sources.ts`.
