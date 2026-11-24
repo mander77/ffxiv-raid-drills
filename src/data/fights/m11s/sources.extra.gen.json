@@ -1,0 +1,1275 @@
+{
+  "_generated": "By npm run import:sources (scripts/import-sources.mjs). Do not edit it by hand.",
+  "pins": {
+    "cactbot": "96abb89fd22293744a9cdef58066a5b37520eda6",
+    "bossmod": "3004b0a7b5edd9ea8afaea69e71263c76668fff6"
+  },
+  "triggers": {
+    "file": "https://github.com/OverlayPlugin/cactbot/blob/96abb89fd22293744a9cdef58066a5b37520eda6/ui/raidboss/data/07-dt/raid/r11s.ts",
+    "list": [
+      {
+        "id": "R11S Phase Tracker",
+        "type": "StartsUsing",
+        "netRegex": "{ id: Object.keys(phaseMap), source: 'The Tyrant' }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {}
+      },
+      {
+        "id": "R11S ActorSetPos Tracker",
+        "type": "ActorSetPos",
+        "netRegex": "{ id: '4[0-9A-Fa-f]{7}', capture: true }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {}
+      },
+      {
+        "id": "R11S Crown of Arcadia",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B406', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B406"
+        ],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {}
+      },
+      {
+        "id": "R11S Raw Steel Trophy Axe",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B422', capture: false }",
+        "ids": [
+          "B422"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "partySpread": "Party Spread",
+          "sharedTankStack": "Tanks Stack",
+          "text": "${party}/${tank}"
+        }
+      },
+      {
+        "id": "R11S Raw Steel Trophy Scythe",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B423', capture: false }",
+        "ids": [
+          "B423"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "partyStack": "Party Stack",
+          "tankCleaves": "Tank Cleaves",
+          "text": "${party}/${tank}"
+        },
+        "notes": [
+          "For logic reasons Ultimate has to be before normal Trophy Weapons"
+        ]
+      },
+      {
+        "id": "R11S Ultimate Trophy Weapons",
+        "type": "ActorControlExtra",
+        "netRegex": "{ category: '0197', param1: ['11D1', '11D2', '11D3'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "bait": "Bait Gust",
+          "mechanicThenMove": "${mech} => ${move}",
+          "mechanicThenBait": "${mech} => ${bait}",
+          "healerGroups": "Outputs.healerGroups",
+          "stack": "Outputs.stackMiddle",
+          "protean": "Outputs.protean",
+          "move": "Outputs.moveAway"
+        }
+      },
+      {
+        "id": "R11S Trophy Weapons 2 Early Calls",
+        "type": "ActorControlExtra",
+        "netRegex": "{ category: '0197', param1: ['11D1', '11D2', '11D3'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "text": "${dir}: ${weapon} (1st later)",
+          "healerGroups": "Outputs.healerGroups",
+          "stack": "Outputs.stackMiddle",
+          "protean": "Outputs.protean"
+        }
+      },
+      {
+        "id": "R11S Trophy Weapons",
+        "type": "ActorControlExtra",
+        "netRegex": "{ category: '0197', param1: ['11D1', '11D2', '11D3'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "text": "${weapon1} => ${weapon2} => ${weapon3}",
+          "healerGroups": "Outputs.healerGroups",
+          "stack": "Outputs.stackMiddle",
+          "protean": "Outputs.protean"
+        },
+        "notes": [
+          "Have info for 1st or 2nd mech",
+          "First weapon is the one facing towards middle",
+          "remap dir to weapon1",
+          "second weapon is facing first weapon",
+          "third weapon is the last remaining one"
+        ]
+      },
+      {
+        "id": "R11S Void Stardust",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B412', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B412"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "baitPuddles": "Bait 3x puddles"
+        }
+      },
+      {
+        "id": "R11S Comet Spread Collect",
+        "type": "HeadMarker",
+        "netRegex": "{ id: headMarkerData['cometSpread'], capture: false }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {},
+        "notes": [
+          "Only setting this once"
+        ]
+      },
+      {
+        "id": "R11S Comet Spread",
+        "type": "HeadMarker",
+        "netRegex": "{ id: headMarkerData['cometSpread'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {}
+      },
+      {
+        "id": "R11S Crushing Comet Collect",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B415', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B415"
+        ],
+        "kinds": [],
+        "outputs": {},
+        "notes": [
+          "Only setting this once"
+        ]
+      },
+      {
+        "id": "R11S Crushing Comet",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B415', source: 'The Tyrant', capture: true }",
+        "ids": [
+          "B415"
+        ],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {}
+      },
+      {
+        "id": "R11S Void Stardust End",
+        "type": "StartsUsing",
+        "netRegex": "{ id: ['B418', 'B419', 'B41A'], source: 'The Tyrant', capture: true }",
+        "ids": [
+          "B418",
+          "B419",
+          "B41A"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "baitPuddlesThenStack": "Bait 3x Puddles => Stack",
+          "baitPuddlesThenSpread": "Bait 3x Puddles => Spread"
+        },
+        "notes": [
+          "The second set of comets does not have a startsUsing cast",
+          "Timing is on the last Assault Evolved"
+        ]
+      },
+      {
+        "id": "R11S Dance Of Domination Trophy",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B7BB', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B7BB"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "text": "AoE x6 => Big AoE"
+        },
+        "notes": [
+          "2s cast, but B41F damage cast (0.5s) starts ~6s later.",
+          "There are 12.9s from B7BB startsUsing to bigAoe B7EA Ability",
+          "Adapted from normal mode"
+        ]
+      },
+      {
+        "id": "R11S Dance Of Domination Trophy Safe Spots",
+        "type": "StartsUsingExtra",
+        "netRegex": "{ id: 'B7BC', capture: true }",
+        "ids": [
+          "B7BC"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "northSouth": "N/S Mid / ${dir} Outer + Partner Stacks",
+          "eastWest": "E/W Mid / ${dir} Outer + Partner Stacks"
+        },
+        "notes": [
+          "B7BC Explosion",
+          "Determine whether the AoE is orthogonal or diagonal",
+          "Discard diagonal headings, then count orthogonals.",
+          "clear the safe dirs array to prevent further outputs"
+        ]
+      },
+      {
+        "id": "R11S Charybdistopia",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B425', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B425"
+        ],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {}
+      },
+      {
+        "id": "R11S Maelstrom Count",
+        "type": "AddedCombatant",
+        "netRegex": "{ name: 'Maelstrom', capture: false }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {}
+      },
+      {
+        "id": "R11S Powerful Gust Reminder",
+        "type": "AddedCombatant",
+        "netRegex": "{ name: 'Maelstrom', capture: false }",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "bait": "Bait Gust"
+        }
+      },
+      {
+        "id": "R11S One and Only",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B429', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B429"
+        ],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {}
+      },
+      {
+        "id": "R11S Great Wall of Fire",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B42B', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B42B"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "sharedTankbuster": "Outputs.sharedTankbuster"
+        },
+        "notes": [
+          "Target is boss, Line AOE that will later explode"
+        ]
+      },
+      {
+        "id": "R11S Fire and Fury",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B42F', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B42F"
+        ],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {}
+      },
+      {
+        "id": "R11S Meteor",
+        "type": "HeadMarker",
+        "netRegex": "{ id: headMarkerData['meteor'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {}
+      },
+      {
+        "id": "R11S Fearsome Fireball",
+        "type": "HeadMarker",
+        "netRegex": "{ id: headMarkerData['lineStack'], capture: false }",
+        "ids": [],
+        "kinds": [
+          "alertText"
+        ],
+        "outputs": {
+          "wildCharge": "Wild Charge (behind tank)",
+          "wildChargeMeteor": "Wild Charge (behind meteor)",
+          "wildChargeTank": "Wild Charge (be in front)",
+          "tetherBusters": "Outputs.tetherBusters"
+        }
+      },
+      {
+        "id": "R11S Meteor Cleanup",
+        "type": "Ability",
+        "netRegex": "{ id: 'B435', source: 'Comet', capture: true }",
+        "ids": [
+          "B435"
+        ],
+        "kinds": [],
+        "outputs": {},
+        "notes": [
+          "Player hit by Cosmic Kiss"
+        ]
+      },
+      {
+        "id": "R11S Triple Tyrannhilation",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B43C', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B43C"
+        ],
+        "kinds": [
+          "alertText"
+        ],
+        "outputs": {
+          "losMeteor": "LoS behind 3x meteor"
+        }
+      },
+      {
+        "id": "R11S Flatliner",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B43F', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B43F"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "flatliner": "Short knockback to sides"
+        }
+      },
+      {
+        "id": "R11S Arena Split Majestic Meteorain Collect",
+        "type": "MapEffect",
+        "netRegex": "{ flags: '00200010', location: ['16', '17'], capture: true }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {},
+        "notes": [
+          "Two MapEffects happen simultaneously with tethers",
+          "Coincides with light tethers connecting the Meteorain portals",
+          "NOTE: Unsure location is which, but they are paired so only collect one",
+          "Location Pattern 1:",
+          "17 => West Out?",
+          "19 => East In?",
+          "Location Pattern 2:",
+          "16 => East Out?",
+          "18 => West In?",
+          "The second set of these can also be known from the first set as it will be oppposite"
+        ]
+      },
+      {
+        "id": "R11S Arena Split Majestic Meteowrath Tether Collect",
+        "type": "Tether",
+        "netRegex": "{ id: [headMarkerData.closeTether, headMarkerData.farTether], capture: true }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {},
+        "notes": [
+          "Tethers have 2 patterns",
+          "Pattern 1",
+          "(69, 85)",
+          "(131, 95)",
+          "(131, 105)",
+          "(69, 115)",
+          "Pattern 2:",
+          "(131, 85)",
+          "(69, 95)",
+          "(69, 105)",
+          "(131, 115)",
+          "Assuming log line of same player doesn't happen before 4 players collected",
+          "While two could be inter inter cards, furthest stretches will be an intercard"
+        ]
+      },
+      {
+        "id": "R11S Arena Split Fire Breath Bait Later",
+        "type": "Tether",
+        "netRegex": "{ id: [headMarkerData.closeTether, headMarkerData.farTether], capture: false }",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "fireBreathLater": "Bait Fire Breath (later)"
+        }
+      },
+      {
+        "id": "R11S Arena Split Majestic Meteowrath Tether Stretch Later",
+        "type": "Tether",
+        "netRegex": "{ id: [headMarkerData.closeTether, headMarkerData.farTether], capture: true }",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "stretchTetherDirLater": "Tether on YOU: Stretch ${dir} (later)",
+          "stretchTetherLater": "Tether on YOU: Stretch (later)"
+        },
+        "notes": [
+          "Prevent spamming tethers",
+          "While these are inter inter cards, furthest stretch will be an intercard"
+        ]
+      },
+      {
+        "id": "R11S Explosion Towers",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B444', source: 'The Tyrant', capture: true }",
+        "ids": [
+          "B444"
+        ],
+        "kinds": [
+          "alertText"
+        ],
+        "outputs": {
+          "knockbackTowers": "Get Knockback Towers",
+          "fireBreathTowers": "${mech1} => ${mech2}",
+          "tetherTowers": "${mech1} => ${mech2}",
+          "baitFireBreath": "Bait Near",
+          "northSouthSafe": "Tower Knockback to Same Platform",
+          "eastSafe": "Tower Knockback Across to East",
+          "westSafe": "Tower Knockback Across to West",
+          "avoidFireBreath": "Outputs.outOfHitbox"
+        },
+        "notes": [
+          "10s castTime",
+          "Get player location for output"
+        ]
+      },
+      {
+        "id": "R11S Fire Breath and Bait Puddles",
+        "type": "HeadMarker",
+        "netRegex": "{ id: headMarkerData['fireBreath'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "alertText"
+        ],
+        "outputs": {
+          "bait3Puddles": "Bait Puddles x3",
+          "back": "Inner Back",
+          "front": "Inner Front",
+          "lines": "Avoid Lines",
+          "fireBreathOnYou": "Fire Breath on YOU",
+          "fireBreathMechsPlayerWest": "${mech1} + ${mech2} => ${dir}",
+          "fireBreathMechsPlayerEast": "${mech1} + ${mech2} => ${dir}",
+          "fireBreathMechs": "${mech1} + ${mech2} => ${mech3}"
+        },
+        "notes": [
+          "Get player location for output"
+        ]
+      },
+      {
+        "id": "R11S Arena Split Majestic Meteowrath Tether Bait Puddles",
+        "type": "HeadMarker",
+        "netRegex": "{ id: headMarkerData['fireBreath'], capture: false }",
+        "ids": [],
+        "kinds": [
+          "alertText"
+        ],
+        "outputs": {
+          "bait3Puddles": "Bait Puddles x3",
+          "back": "Outer Back",
+          "front": "Outer Front",
+          "lines": "Avoid Lines",
+          "baitThenStretchMechs": "${mech1} => ${mech2}  + ${mech3}",
+          "stretchTether": "Stretch Tether",
+          "stretchTetherDir": "Stretch ${dir}",
+          "tetherMechsPlayerEast": "${mech1} => ${mech2} + ${dir}",
+          "tetherMechsPlayerWest": "${mech1} => ${mech2} + ${dir}"
+        },
+        "notes": [
+          "Get player location for output"
+        ]
+      },
+      {
+        "id": "R11S Majestic Meteowrath Tether and Fire Breath Reset",
+        "type": "Ability",
+        "netRegex": "{ id: 'B442', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B442"
+        ],
+        "kinds": [],
+        "outputs": {},
+        "notes": [
+          "Reset tracker on B442 Majestic Meteowrath for next set of tethers"
+        ]
+      },
+      {
+        "id": "R11S Massive Meteor",
+        "type": "HeadMarker",
+        "netRegex": "{ id: headMarkerData['fiveHitStack'], capture: false }",
+        "ids": [],
+        "kinds": [
+          "alertText"
+        ],
+        "outputs": {
+          "stackFivex": "Stack 5x"
+        }
+      },
+      {
+        "id": "R11S Arcadion Avalanche West Safe",
+        "type": "StartsUsing",
+        "netRegex": "{ id: ['B44E', 'B450'], source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B44E",
+          "B450"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "westSafe": "Tower Knockback to West"
+        }
+      },
+      {
+        "id": "R11S Arcadion Avalanche East Safe",
+        "type": "StartsUsing",
+        "netRegex": "{ id: ['B44A', 'B44C'], source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B44A",
+          "B44C"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "eastSafe": "Tower Knockback to East"
+        }
+      },
+      {
+        "id": "R11S Arcadion Avalanche Follow Up North Safe",
+        "type": "StartsUsing",
+        "netRegex": "{ id: ['B44B', 'B451'], source: 'The Tyrant', capture: true }",
+        "ids": [
+          "B44B",
+          "B451"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "goNorth": "Outputs.north"
+        }
+      },
+      {
+        "id": "R11S Arcadion Avalanche Follow Up South Safe",
+        "type": "StartsUsing",
+        "netRegex": "{ id: ['B44D', 'B44F'], source: 'The Tyrant', capture: true }",
+        "ids": [
+          "B44D",
+          "B44F"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "goSouth": "Outputs.south"
+        }
+      },
+      {
+        "id": "R11S Atomic Impact Collect",
+        "type": "HeadMarker",
+        "netRegex": "{ id: headMarkerData['atomicImpact'], capture: true }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {}
+      },
+      {
+        "id": "R11S Mammoth Meteor",
+        "type": "StartsUsingExtra",
+        "netRegex": "{ id: 'B453', capture: true }",
+        "ids": [
+          "B453"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "comboDir": "Go ${dir1}/${dir2} => Bait Impacts, Avoid Corners",
+          "getMiddle": "Proximity AoE; Get Middle => Bait Puddles",
+          "nw": "Outputs.dirNW",
+          "ne": "Outputs.dirNE",
+          "sw": "Outputs.dirSW",
+          "se": "Outputs.dirSE"
+        },
+        "notes": [
+          "Occurs same time as Atomic Impact headmarkers",
+          "Mammoth Meteor is always at two opposite intercardinals.",
+          "Once we see one, we know where the safespots are",
+          "without waiting on the second."
+        ]
+      },
+      {
+        "id": "R11S Cosmic Kiss",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B456', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B456"
+        ],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {}
+      },
+      {
+        "id": "R11S Ecliptic Stampede Majestic Meteowrath Tether Collect",
+        "type": "Tether",
+        "netRegex": "{ id: [headMarkerData.closeTether, headMarkerData.farTether], capture: true }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {}
+      },
+      {
+        "id": "R11S Ecliptic Stampede Majestic Meteowrath Tethers",
+        "type": "Tether",
+        "netRegex": "{ id: [headMarkerData.closeTether, headMarkerData.farTether], capture: true }",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "stretchTetherDir": "Stretch Tether ${dir}"
+        },
+        "notes": [
+          "TODO: Make config for options?"
+        ]
+      },
+      {
+        "id": "R11S Two-way Fireball",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B7BD', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B7BD"
+        ],
+        "kinds": [
+          "alertText"
+        ],
+        "outputs": {
+          "twoWayFront": "East/West Line Stack, Be in Front",
+          "twoWayBehind": "Move; East/West Line Stack, Get behind"
+        }
+      },
+      {
+        "id": "R11S Four-way Fireball",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B45A', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B45A"
+        ],
+        "kinds": [
+          "alertText"
+        ],
+        "outputs": {
+          "fourWayFront": "Intercardinal Line Stack, Be in Front",
+          "fourWayBehind": "Intercardinal Line Stack, Get behind"
+        }
+      },
+      {
+        "id": "R11S Heartbreaker (Enrage Sequence)",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B45D', source: 'The Tyrant', capture: false }",
+        "ids": [
+          "B45D"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "getTower": "Get Tower",
+          "stack5x": "Stack 5x",
+          "stack6x": "Stack 6x",
+          "stack7x": "Stack 7x",
+          "heartbreaker1": "${tower} => ${stack}",
+          "heartbreaker2": "${tower} => ${stack}",
+          "heartbreaker3": "${tower} => ${stack}"
+        }
+      }
+    ]
+  },
+  "mechanics": [
+    {
+      "file": "Firewall.cs",
+      "classes": [
+        {
+          "name": "Firewall",
+          "base": "Components.GenericWildCharge",
+          "aids": [
+            "GreatWallOfFireRect",
+            "GreatWallOfFireCast"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "FirewallExplosion",
+          "base": "Components.StandardAOEs",
+          "aids": [
+            "WallExplosion"
+          ],
+          "shapes": [
+            "Rect(60, 3)"
+          ],
+          "positions": []
+        }
+      ]
+    },
+    {
+      "file": "Flatliner.cs",
+      "classes": [
+        {
+          "name": "Flatliner",
+          "base": "Components.Knockback",
+          "aids": [
+            "Flatliner"
+          ],
+          "shapes": [],
+          "positions": [
+            "WDir(0, 1)"
+          ]
+        },
+        {
+          "name": "FlatlinerArena",
+          "base": "Components.GenericAOEs",
+          "aids": [
+            "Flatliner"
+          ],
+          "shapes": [
+            "Rect(20, 6, 20)"
+          ],
+          "positions": [
+            "WDir(0, 20)",
+            "WDir(10, 0)",
+            "WDir(16, 0)"
+          ]
+        },
+        {
+          "name": "ExplosionTower",
+          "base": "Components.CastTowers",
+          "aids": [
+            "ExplosionTower"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "ExplosionKnockback",
+          "base": "Components.KnockbackFromCastTarget",
+          "aids": [
+            "ExplosionTower",
+            "ArcadionAvalancheBoss1",
+            "ArcadionAvalancheBoss2",
+            "ArcadionAvalancheBoss3",
+            "ArcadionAvalancheBoss4"
+          ],
+          "shapes": [
+            "Circle(4)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "FireBreathMeteowrath",
+          "base": "Components.GenericBaitAway",
+          "aids": [
+            "FireBreathBoss",
+            "FireBreathRect",
+            "MajesticMeteowrathRect"
+          ],
+          "shapes": [
+            "Rect(80, 3)",
+            "Rect(80, 5)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "MajesticMeteorain",
+          "base": "Components.GenericAOEs",
+          "aids": [
+            "MajesticMeteorainRect",
+            "FireBreathBoss"
+          ],
+          "shapes": [
+            "Rect(60, 5)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "MajesticMeteor",
+          "base": "Components.StandardAOEs",
+          "aids": [
+            "MajesticMeteorAOE"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "FireBreathMeteowrathHints",
+          "base": "BossComponent",
+          "aids": [
+            "FireBreathBoss"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "MassiveMeteor",
+          "base": "Components.StackWithIcon",
+          "aids": [
+            "MassiveMeteorStack"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "ArcadionAvalancheRect",
+          "base": "Components.GroupedAOEs",
+          "aids": [
+            "ArcadionAvalanchePlatform4",
+            "ArcadionAvalanchePlatform2",
+            "ArcadionAvalanchePlatform1",
+            "ArcadionAvalanchePlatform3"
+          ],
+          "shapes": [
+            "Rect(40, 20)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "ArcadionAvalancheBoss",
+          "base": "Components.GroupedAOEs",
+          "aids": [
+            "ArcadionAvalancheBoss1",
+            "ArcadionAvalancheBoss2",
+            "ArcadionAvalancheBoss3",
+            "ArcadionAvalancheBoss4"
+          ],
+          "shapes": [
+            "Rect(40, 20)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "CrownOfArcadiaArena",
+          "base": "Components.GenericAOEs",
+          "aids": [
+            "CrownOfArcadia"
+          ],
+          "shapes": [
+            "Rect(6, 20)"
+          ],
+          "positions": []
+        }
+      ]
+    },
+    {
+      "file": "Heartbreaker.cs",
+      "classes": [
+        {
+          "name": "HeartbreakKick",
+          "base": "Components.GenericTowers",
+          "aids": [
+            "HeartbreakKickTower",
+            "HeartbreakKickBoss"
+          ],
+          "shapes": [],
+          "positions": []
+        }
+      ]
+    },
+    {
+      "file": "Meteorain.cs",
+      "classes": [
+        {
+          "name": "OrbitalOmen",
+          "base": "Components.StandardAOEs",
+          "aids": [
+            "OrbitalOmenRect"
+          ],
+          "shapes": [
+            "Rect(60, 5)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "FireAndFury",
+          "base": "Components.GroupedAOEs",
+          "aids": [
+            "FireAndFuryBack",
+            "FireAndFuryFront"
+          ],
+          "shapes": [
+            "Cone(60, 45.Degrees()"
+          ],
+          "positions": []
+        },
+        {
+          "name": "FearsomeFireball1",
+          "base": "Components.GenericWildCharge",
+          "aids": [
+            "FearsomeFireballCharge"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "FearsomeFireball2",
+          "base": "Components.GenericWildCharge",
+          "aids": [
+            "FearsomeFireballCharge"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "CosmicKiss",
+          "base": "Components.BaitAwayIcon",
+          "aids": [
+            "CosmicKiss"
+          ],
+          "shapes": [
+            "Circle(4)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "Comet",
+          "base": "BossComponent",
+          "aids": [
+            "CosmicKiss"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "CometExplosion",
+          "base": "Components.StandardAOEs",
+          "aids": [
+            "ExplosionComet"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "ForegoneFatality",
+          "base": "Components.CastCounter",
+          "aids": [
+            "ForegoneFatality"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "ShockwaveCounter",
+          "base": "Components.CastCounter",
+          "aids": [
+            "Shockwave"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "TripleTyrannhilation",
+          "base": "Components.GenericLineOfSightAOE",
+          "aids": [
+            "Shockwave",
+            "TripleTyrannhilationCast"
+          ],
+          "shapes": [],
+          "positions": []
+        }
+      ]
+    },
+    {
+      "file": "RawSteelTrophy.cs",
+      "classes": [
+        {
+          "name": "RawSteelTrophyCounter",
+          "base": "Components.CastCounterMulti",
+          "aids": [
+            "RawSteelAxeImpact",
+            "RawSteelScytheBuster"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "RawSteelTrophyAxe",
+          "base": "Components.GenericStackSpread",
+          "aids": [
+            "RawSteelTrophyAxe",
+            "RawSteelAxeBuster",
+            "RawSteelAxeImpact"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "RawSteelTrophyScythe",
+          "base": "Components.UntelegraphedBait",
+          "aids": [
+            "RawSteelTrophyScythe",
+            "RawSteelScytheBuster",
+            "RawSteelScytheHeavyHitter"
+          ],
+          "shapes": [
+            "Cone(60, 45.Degrees()",
+            "Cone(60, 22.5f.Degrees()"
+          ],
+          "positions": []
+        }
+      ]
+    },
+    {
+      "file": "Stampede.cs",
+      "classes": [
+        {
+          "name": "MammothMeteor",
+          "base": "Components.StandardAOEs",
+          "aids": [
+            "MammothMeteor"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "AtomicImpact",
+          "base": "Components.SpreadFromIcon",
+          "aids": [
+            "AtomicImpact"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "AtomicImpactPuddle",
+          "base": "Components.VoidzoneAtCastTarget",
+          "aids": [
+            "AtomicImpact"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "StampedeMajesticMeteor",
+          "base": "Components.StandardAOEs",
+          "aids": [
+            "MajesticMeteorEcliptic"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "ImpactKiss",
+          "base": "Components.GenericTowers",
+          "aids": [
+            "CosmicKissEcliptic",
+            "WeightyImpact"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "StampedeMajesticMeteowrath",
+          "base": "Components.GenericBaitAway",
+          "aids": [
+            "MajesticMeteowrathEcliptic"
+          ],
+          "shapes": [
+            "Rect(60, 5)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "NWayFireball",
+          "base": "Components.UntelegraphedBait",
+          "aids": [
+            "TwoWayFireballBoss",
+            "FourWayFireballBoss",
+            "TwoWayFireball",
+            "FourWayFireball"
+          ],
+          "shapes": [
+            "Rect(60, 3)"
+          ],
+          "positions": []
+        }
+      ]
+    },
+    {
+      "file": "TrophyWeapons.cs",
+      "classes": [
+        {
+          "name": "VoidStardustBait",
+          "base": "BossComponent",
+          "aids": [
+            "Cometite"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "Cometite",
+          "base": "Components.StandardAOEs",
+          "aids": [
+            "Cometite"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "Comets",
+          "base": "Components.CastStackSpread",
+          "aids": [
+            "CrushingCometStack",
+            "CometSpread"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "WeaponsAOE",
+          "base": "Components.GenericAOEs",
+          "aids": [
+            "AssaultEvolvedSwordAOE",
+            "AssaultEvolvedAxeAOE",
+            "AssaultEvolvedScytheAOE"
+          ],
+          "shapes": [
+            "Circle(8)",
+            "Donut(5, 60)",
+            "Cross(40, 5)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "WeaponsBait",
+          "base": "Components.UntelegraphedBait",
+          "aids": [
+            "AssaultEvolvedSwordAOE",
+            "AssaultEvolvedAxeAOE",
+            "AssaultEvolvedScytheAOE"
+          ],
+          "shapes": [
+            "Circle(8)",
+            "Circle(6)",
+            "Rect(60, 3)",
+            "Cone(60, 15f.Degrees()"
+          ],
+          "positions": []
+        },
+        {
+          "name": "WeaponsHints",
+          "base": "BossComponent",
+          "aids": [
+            "AssaultEvolvedLongCast",
+            "AssaultEvolvedSwordAOE",
+            "AssaultEvolvedAxeAOE",
+            "AssaultEvolvedScytheAOE"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "TrophyWeaponsAOE",
+          "base": "WeaponsAOE",
+          "aids": [
+            "AssaultEvolvedLongCast"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "TrophyWeaponsBait",
+          "base": "WeaponsBait",
+          "aids": [
+            "AssaultEvolvedLongCast"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "TrophyWeaponsHints",
+          "base": "WeaponsHints",
+          "aids": [
+            "AssaultEvolvedLongCast",
+            "AssaultEvolvedSwordAOE",
+            "AssaultEvolvedAxeAOE",
+            "AssaultEvolvedScytheAOE"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "UltimateTrophyWeaponsAOE",
+          "base": "WeaponsAOE",
+          "aids": [
+            "UltimateTrophyWeapons"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "UltimateTrophyWeaponsBait",
+          "base": "WeaponsBait",
+          "aids": [],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "UltimateTrophyWeaponsHints",
+          "base": "WeaponsHints",
+          "aids": [
+            "UltimateTrophyWeapons"
+          ],
+          "shapes": [],
+          "positions": []
+        }
+      ]
+    }
+  ]
+}

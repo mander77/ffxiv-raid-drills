@@ -1,0 +1,29 @@
+{
+  "fight": "M11S, The Tyrant (Savage)",
+  "checked": true,
+  "cactbot": {
+    "repo": "OverlayPlugin/cactbot",
+    "commit": "96abb89fd22293744a9cdef58066a5b37520eda6",
+    "timeline": "ui/raidboss/data/07-dt/raid/r11s.txt",
+    "triggers": "ui/raidboss/data/07-dt/raid/r11s.ts"
+  },
+  "bossmod": {
+    "repo": "awgil/ffxiv_bossmod",
+    "commit": "3004b0a7b5edd9ea8afaea69e71263c76668fff6",
+    "module": {
+      "folder": "BossMod.Modules/Dawntrail/Savage/RM11STheTyrant",
+      "mechanics": [
+        "Firewall.cs",
+        "Flatliner.cs",
+        "Heartbreaker.cs",
+        "Meteorain.cs",
+        "RawSteelTrophy.cs",
+        "Stampede.cs",
+        "TrophyWeapons.cs"
+      ]
+    }
+  },
+  "extras": {
+    "arenaSplit": "Flatliner.cs"
+  }
+}
