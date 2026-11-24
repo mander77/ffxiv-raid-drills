@@ -81,7 +81,7 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
   like the push in the knockback icons (icons.tsx, rule 5; owner's request). Thin white guides
   were too faint to see.
 - A tower can show its soak count (`soak`): one dot per player, spaced evenly around its ring,
-  the first at the top, in the players' highlight colour (icons.tsx, rule 2: a dot is a player).
+  turned 30 degrees from the top (`SOAK_TURN`), in the players' highlight colour (icons.tsx, rule 2: a dot is a player).
   Owner's choice, after trying the tower icon with a number (in the middle a waymark covered it;
   on the ring the number was too small, or the badge took too much room or did not match the
   app) and the dots in a pill. A puddle can
