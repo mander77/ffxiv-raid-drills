@@ -777,7 +777,10 @@ static wins.
       moving marker in Pressure). The other three or four show, stretched, when the lineup step
       is answered, on random players at the wall (the owner chose the lineup over the start).
     - Second Towers with a tether: your tether runs from a portal on your own side to your mark, so
-      the knockback to the other platform stretches it. First Towers has no tether pattern.
+      the knockback to the other platform stretches it. In the full fight, a round 1 tether shows
+      the same way from the First Towers on (cactbot's "--tethers--"), so you see it before the
+      knockback and can choose where to get knocked (the owner, November 2026). Practice's First
+      Towers has no tether pattern.
     - A tether is a solid cord on a light outline; a guide stays thin white dashes. `/styles` shows
       both. To fit the portals, the split arena is drawn smaller (`SPLIT_SCALE`).
   - Majestic Meteor (owner's answers, November 2026): three puddles, one click each. The first
