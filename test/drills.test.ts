@@ -12,6 +12,7 @@ import {
   DANCE_PAIRS,
   DRILLS,
   facingNext,
+  GUST_CONES,
   type JumpSet,
   jumpsNext,
   nextPuddle,
@@ -19,6 +20,7 @@ import {
   type SplitSide,
   splitRound,
   splitTowers,
+  TORNADO_BAITS,
   ultimateScene,
   voidAgain,
 } from "../src/data/drills";
@@ -511,4 +513,37 @@ test("Arcadion Avalanche: the far end of the platform he does not face, away fro
       assert.ok(onSide(p, face === "west" ? "east" : "west"), "behind him");
       assert.ok(atEnd(p, swing === "north" ? "south" : "north") && Math.abs(p[1] - 50) > 30, "the far end");
     }
+});
+
+test("Powerful Gust: each tornado cones its two baits, support on its left and DPS on its right, facing in", () => {
+  assert.equal(TORNADO_BAITS.length, 4);
+  for (const { tornado: t, support, dps } of TORNADO_BAITS) {
+    // Facing in from the tornado, left of the way you face is a negative cross product (y grows down).
+    const inward: Point = [50 - t[0], 50 - t[1]];
+    const side = (p: Point): number => inward[0] * (p[1] - t[1]) - inward[1] * (p[0] - t[0]);
+    assert.isBelow(side(support), 0, `the support at ${t} is on its left`);
+    assert.isAbove(side(dps), 0, `the DPS at ${t} is on its right`);
+  }
+  const cones = GUST_CONES.flatMap((o) => (o.t === "poly" ? [o.pts] : []));
+  assert.equal(cones.length, 8, "eight cones");
+  assert.equal(GUST_CONES.filter((o) => o.t === "aim").length, 8, "an arrow in each cone");
+  const baits = TORNADO_BAITS.flatMap(({ tornado, support, dps }) => [
+    [tornado, support],
+    [tornado, dps],
+  ]);
+  baits.forEach(([t, p], i) => {
+    const [apex, , middle] = cones[i];
+    assert.deepEqual(apex, t, "the cone starts at its tornado");
+    assert.closeTo(angOf([middle[0] - t[0], middle[1] - t[1]]), angOf([p[0] - t[0], p[1] - t[1]]), 1e-9, "and points at its bait");
+  });
+  const tornado = DRILLS.find((m) => m.id === "m-tornado");
+  for (const s of SLOTS) {
+    const step = tornado?.build(s, null).steps[0];
+    assert.deepEqual(step?.reveal, GUST_CONES, `${s} sees all eight cones after answering`);
+    const me = zoneCenter(zoneOf(step?.z));
+    assert.isTrue(
+      TORNADO_BAITS.some((b) => b.support[0] === me[0] && b.support[1] === me[1]),
+      `${s} baits as a support`,
+    );
+  }
 });

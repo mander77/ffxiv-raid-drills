@@ -5,7 +5,7 @@
 // Sizes come from BossMod's M11S module (awgil/ffxiv_bossmod, RM11STheTyrant), which lists each
 // ability's shape in yalms. Each size is read from source.gen.ts (`npm run import:sources`), by
 // the BossMod ability it belongs to. The arena is 40 yalms across and 100 units in this app.
-import { leftOf, polar, unit, addVec } from "../geometry";
+import { addVec, angOf, leftOf, polar, unit } from "../geometry";
 import { BOSSMOD_ACTORS } from "./source.gen";
 import { bossmod } from "./sources";
 import type { Overlay, Point } from "../types";
@@ -87,6 +87,19 @@ export const lineTo = (from: Point, to: Point, w = LINE_STACK_W): Overlay => {
 export function cleave(c: Point, a: number, half = 16, r = 80): Overlay {
   const p = (d: number): Point => polar(d, r, c);
   return {t:"poly", pts:[c, p(a - half), p(a), p(a + half)]};
+}
+
+/** Where an aim arrow starts and ends, in arena units from the cone's source: clear of a
+    tornado's icon, and out past the player it baits. The app's choice, for the picture. */
+const AIM_FROM = 6;
+const AIM_TO = 22;
+
+/** Powerful Gust: a tornado's cone on the player at `to`, with an arrow down its middle, so a
+    cone that the arena clips to a box still shows where it comes from. */
+export function gust(from: Point, to: Point): Overlay[] {
+  const d = unit([to[0] - from[0], to[1] - from[1]]);
+  const [a, b] = [addVec(from, d, AIM_FROM), addVec(from, d, AIM_TO)];
+  return [cleave(from, angOf(d), GUST_HALF, GUST_LEN), {t:"aim", x:a[0], y:a[1], x2:b[0], y2:b[1]}];
 }
 
 /** The axe hit: a circle around the boss at c. */

@@ -88,6 +88,8 @@ type OverlayShape =
   | ({ t: "lineaoe"; w?: number } & Line)
   | ({ t: "band"; w: number } & Line)
   | ({ t: "guide" } & Line)
+  // Where a cone points: an arrow from its source (x, y) out to (x2, y2).
+  | ({ t: "aim" } & Line)
   | ({ t: "tornado" } & At)
   | ({ t: "rock" } & At)
   | ({ t: "tower"; r?: number } & At)

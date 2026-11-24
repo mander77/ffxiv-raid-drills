@@ -8,8 +8,8 @@
 import { bySlot, withSeed } from "../util";
 import { markRole, partyOf } from "../party";
 import { angOf, polar, rotOverlay, zoneCenter } from "../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, type Weapon, type WeaponType } from "./drills";
-import { BREATH_W, GUST_HALF, GUST_LEN, PROXIMITY_DOT, PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, lineTo, swordCross } from "./attacks";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, type Weapon, type WeaponType } from "./drills";
+import { BREATH_W, PROXIMITY_DOT, PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, gust, lineTo, swordCross } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
 type Who = [string, MarkRole];
@@ -73,10 +73,15 @@ function stackHit(os: Overlay[], pad = 4.5): Overlay {
 }
 /** Proteans: a cone from `from` toward every player. */
 const proteans = (from: Point, os: Overlay[]): Overlay[] => spotsOf(os).map(p => cleave(from, angOf([p[0] - from[0], p[1] - from[1]]), PROTEAN_HALF, PROTEAN_LEN));
-/** A cone from `from` toward one spot. */
-const coneTo = (from: Point, to: Point, half = 12, r = 60): Overlay => cleave(from, angOf([to[0] - from[0], to[1] - from[1]]), half, r);
 /** One half of the arena, as a cleave: front is "north" for a boss facing north. */
 const half = (side: "north" | "south"): Overlay => ({t:"lane", rect:side === "north" ? [0, 0, 100, 50] : [0, 50, 100, 100]});
+
+/** Powerful Gust from one tornado: its cones on its two baits. */
+function gustsFrom(t: Point): Overlay[] {
+  const b = TORNADO_BAITS.find(x => x.tornado[0] === t[0] && x.tornado[1] === t[1]);
+  if(!b) throw new Error("no tornado at " + t.join(","));
+  return [...gust(t, b.support), ...gust(t, b.dps)];
+}
 
 /* ---------- answer previews ---------- */
 const other = (s: Slot): Slot => s === "H1" ? "H2" : "H1";
@@ -269,13 +274,14 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...spotTags(cw, false), say("ALL SIX AT ONCE", 8)])]}; },
   // Each tornado cones its two closest players, so a bait draws a cone from that tornado to you.
   "k-ult-tornado": s => { const d = fromDrill("m-tornado", s), d2 = fromDrill("m-tornado", other(s));
-    const own = bySlot<Point>(s, {H1:[20, 50], H2:[80, 50]}), oth = bySlot<Point>(s, {H1:[80, 50], H2:[20, 50]}), cone = (from: Point, z: Zone): Overlay => coneTo(from, zoneCenter(z), GUST_HALF, GUST_LEN);
-    return {...d, options:[hit(youIn(s, d.zone), [cone(own, d.zone)]), hit(youIn(s, d2.zone), [cone(oth, d2.zone)]),
-      hit(youAt(s, [40, 16], 6.5), [coneTo([50, 16], [40, 16], GUST_HALF, GUST_LEN)]), youAt(s, [57, 57], 9)]}; },
+    const own = bySlot<Point>(s, {H1:[20, 50], H2:[80, 50]}), oth = bySlot<Point>(s, {H1:[80, 50], H2:[20, 50]});
+    return {...d, options:[hit(youIn(s, d.zone), gustsFrom(own)), hit(youIn(s, d2.zone), gustsFrom(oth)),
+      hit(youAt(s, [40, 16], 6.5), gust([50, 16], [40, 16])), youAt(s, [57, 57], 9)]}; },
   "k-ult-touch": s => { const d = fromDrill("m-tornado", s), me = bySlot<Point>(s, {H1:[12, 42], H2:[88, 58]}), into = bySlot<Point>(s, {H1:[20, 50], H2:[80, 50]});
     // The words go on the side of the tornado away from your mark: below it for H1, above it for H2.
     const dy = bySlot(s, {H1:1, H2:-1}), near = (a: string, b?: string): Overlay[] => [tag(into[0], into[1] + 9 * dy, a), ...(b ? [tag(into[0], into[1] + 14 * dy, b)] : [])];
-    return {overlays:[...d.overlays, you(s, me), guide(me, into)], boss:d.boss, after:near("KNOCKBACK", "DAMAGE DOWN"), answer:d.answer,
+    // After the answer, your tornado's cones on its two baits show what the green spot is for.
+    return {overlays:[...d.overlays, you(s, me), guide(me, into)], boss:d.boss, after:[...gustsFrom(into), ...near("KNOCKBACK", "DAMAGE DOWN")], answer:d.answer,
       note:"The green spot is where you bait: at the edge of your tornado, not in it.", options:[
         show(near("KNOCKBACK", "DAMAGE DOWN")), show(near("NOTHING HAPPENS")), show(near("YOU DIE")), show(near("YOU GET HEALED"))]}; },
   "k-gwof": () => { const line: Overlay = {t:"band", x:50, y:50, x2:50, y2:-20, w:WALL_W}, tanks: Point = [50, 33], stack = cluster([30, 66], NONTANK, 3);

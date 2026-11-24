@@ -54,6 +54,29 @@ test("pieces go to their layers: attacks on the ground, weapons over the waymark
   assert.equal(layer("marks")?.textContent, "H1");
 });
 
+test("an aim is an arrow on the ground, drawn over the cone it points along", () => {
+  const os: Overlay[] = [
+    { t: "aim", x: 20, y: 50, x2: 4, y2: 34 },
+    {
+      t: "poly",
+      pts: [
+        [20, 50],
+        [0, 0],
+        [0, 100],
+      ],
+    },
+  ];
+  render(<Arena label="x" layers={pieceLayers(os)} />);
+  const ground = document.querySelector('[data-layer="ground"]');
+  assert.deepEqual(
+    [...(ground?.children ?? [])].map((e) => e.getAttribute("class")),
+    ["aoe", "aim"],
+  );
+  const aim = ground?.querySelector(".aim");
+  assert.equal(aim?.querySelectorAll("line").length, 1, "the shaft");
+  assert.include(aim?.querySelector("polygon")?.getAttribute("points") ?? "", "4,34", "the head ends at the tip");
+});
+
 test("the boss shows his facing only when he has one", () => {
   const plain = renderToStaticMarkup(<BossMark boss={{ x: 50, y: 50, f: null }} />);
   assert.notInclude(plain, "face");
