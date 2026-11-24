@@ -5,7 +5,12 @@ This is the reference for the words the site shows to players. Use it to:
 1. Write new text for a mechanic, a card or a fight.
 2. Check text that is already in the app.
 3. Convert text from an outside source (a guide, a timeline, a video script) to the words of
-   this site. A future import tool will do this step.
+   this site.
+
+`src/data/vocabulary.ts` has this file's conversion table and its Checklist searches as data.
+`test/vocabulary.test.ts` keeps the two the same, and runs the searches on every line of player
+text. When you change a table here, change `vocabulary.ts` too. The source import
+(`npm run import:sources`) brings in only names from the game, which stay as the game writes them.
 
 When this file and the code disagree, this file is correct. Fix the code. When this file has no
 rule for a word, ask the owner, then add the rule here.

@@ -7,3 +7,6 @@ export const sec = (t: string): number => {
 };
 /** 84 to "1:24". The seconds round down, as on a clock, so 119.6 is "1:59". */
 export const clock = (t: number): string => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+/** 84.6 to "1:25": the nearest second, as the cheat sheet's timeline and the mechanic text write
+    a time. */
+export const nearClock = (t: number): string => clock(Math.round(t));

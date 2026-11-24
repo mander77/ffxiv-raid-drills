@@ -3,58 +3,61 @@
 // changes everywhere at once.
 //
 // Sizes come from BossMod's M11S module (awgil/ffxiv_bossmod, RM11STheTyrant), which lists each
-// ability's shape in yalms. The arena is 40 yalms across and 100 units in this app.
+// ability's shape in yalms. Each size is read from source.gen.ts (`npm run import:sources`), by
+// the BossMod ability it belongs to. The arena is 40 yalms across and 100 units in this app.
 import { leftOf, polar, unit, addVec } from "../geometry";
+import { BOSSMOD_ACTORS } from "./source.gen";
+import { bossmod } from "./sources";
 import type { Overlay, Point } from "../types";
 
 /** Yalms to arena units. */
 const yalms = (n: number): number => n * 2.5;
 
 /** The boss's hitbox radius, drawn as his target ring (BossMod: R5.000). */
-export const HITBOX = yalms(5);
+export const HITBOX = yalms(BOSSMOD_ACTORS.Boss.radius);
 /** Melee range, from the boss's center: his hitbox, 3 yalms of melee reach and the player's own
     0.5 (BossMod's melee hint is 8.5 yalms). */
 export const MELEE_R = yalms(8.5);
 /** Half the width of each arm of the sword cross ("range 40 width 10 cross"). */
-export const SWORD_HALF = yalms(5);
+export const SWORD_HALF = yalms(bossmod("AssaultEvolvedSwordAOE").width / 2);
 /** The axe circle ("range 8 circle"). */
-export const AXE_R = yalms(8);
+export const AXE_R = yalms(bossmod("AssaultEvolvedAxeAOE").range);
 /** Every spread and stack: Raw Steel, Comet, Crushing Comet, Eye of the Hurricane and Massive
     Meteor ("range 6 circle"). */
-export const SPREAD_R = yalms(6);
+export const SPREAD_R = yalms(bossmod("CometSpread").range);
 /** A Void Stardust puddle (Cometite, "range 6 circle"). */
-export const PUDDLE_R = yalms(6);
+export const PUDDLE_R = yalms(bossmod("Cometite").range);
 /** How long a puddle stays on the floor after it drops, in seconds: Cometite is a 3.0 s cast
     that goes off once. Then it is gone. */
-export const PUDDLE_LIFE = 3;
+export const PUDDLE_LIFE = bossmod("Cometite").cast;
 /** Each scythe protean cone: 30 degrees wide (half each side, in degrees), and it reaches across
     the arena ("range 60 30-degree cone"). */
-export const PROTEAN_HALF = 15;
-export const PROTEAN_LEN = yalms(60);
+export const PROTEAN_HALF = bossmod("SweepingVictory").angle / 2;
+export const PROTEAN_LEN = yalms(bossmod("SweepingVictory").range);
 /** The weapon scythe's donut: safe only within 5 yalms of him ("range 5-60 donut"). Its
     proteans hit at the same time. */
-export const SCYTHE_SAFE = yalms(5);
+export const SCYTHE_SAFE = yalms(bossmod("AssaultEvolvedScytheAOE").inner);
 /** A line stack's full width: the Meteorain charge (Fearsome Fireball) and Two-way and Four-way
     Fireball ("range 60 width 6 rect"). */
-export const LINE_STACK_W = yalms(6);
+export const LINE_STACK_W = yalms(bossmod("FearsomeFireballCharge").width);
 /** A Hurricane Explosion line's full width, in Dance of Domination ("range 60 width 10 rect"). */
-export const HURRICANE_W = yalms(10);
+export const HURRICANE_W = yalms(bossmod("HurricaneExplosion").width);
 /** Raw Steel Trophy, scythe: half the angle of the cone on each tank ("range 60 90-degree
     cone") and of the cone the party shares ("range 60 45-degree cone"), in degrees. */
-export const RAW_TANK_HALF = 45;
-export const RAW_STACK_HALF = 22.5;
+export const RAW_TANK_HALF = bossmod("RawSteelScytheBuster").angle / 2;
+export const RAW_STACK_HALF = bossmod("RawSteelScytheHeavyHitter").angle / 2;
 /** The Great Wall of Fire line buster: its full width ("range 60 width 6 rect"). */
-export const WALL_W = yalms(6);
+export const WALL_W = yalms(bossmod("GreatWallOfFireRect").width);
 /** Every tower: the Arena Split towers (Explosion), the Ecliptic Stampede towers and Heartbreak
     Kick ("range 4 circle"). */
-export const TOWER_R = yalms(4);
+export const TOWER_R = yalms(bossmod("ExplosionTower").range);
 /** A baited Meteorain meteor (Cosmic Kiss, "range 4 circle"). */
-export const METEOR_R = yalms(4);
-/** A raidwide hits the whole arena, so BossMod gives it no shape. A circle this big reaches the
-    corners of the square arena (half its diagonal is about 71 units). */
+export const METEOR_R = yalms(bossmod("CosmicKiss").range);
+/** A raidwide hits the whole arena. This size is the app's choice, for the picture: a circle this
+    big reaches the corners of the square arena (half its diagonal is about 71 units). */
 export const RAIDWIDE_R = 72;
 /** An Atomic Impact hit in Ecliptic Stampede, and the fire puddle it leaves ("range 5 circle"). */
-export const ATOMIC_R = yalms(5);
+export const ATOMIC_R = yalms(bossmod("AtomicImpact").range);
 
 /** A circle that hits everything inside it. */
 export const aoe = (c: Point, r: number): Overlay => ({t:"aoe", x:c[0], y:c[1], r});
