@@ -1,9 +1,8 @@
 import { cn } from "@/lib/utils";
-import { addVec, dist, round2, unit } from "../../geometry";
+import { addVec, dist, polar, round2, unit } from "../../geometry";
 import { useArenaSizes } from "../../hooks/useFight";
 import { UNKNOWN_R } from "../../lib/attacks";
 import type { Overlay, Point } from "../../types";
-import { TowerIcon } from "../icons";
 import { Weapon } from "./Weapon";
 
 /** "x,y" for an SVG points or path list, to 2 decimals. */
@@ -181,24 +180,22 @@ interface SoakMarkProps {
   soak: number;
 }
 
-/** The radius of a tower's soak badge, and how wide the tower icon is in it, in arena units. The
-    app's choice, for the picture. */
-const SOAK_BADGE_R = 4.4;
-const SOAK_ICON = 7;
+/** The radius of each player dot on a tower's ring, in arena units. The app's choice, for the
+    picture. */
+const SOAK_DOT_R = 1.3;
 
-/** How many players soak a tower: a small round badge on the top of its ring, with the tower icon
-    and the number in its column, as the mechanic icon shows it (MechanicIcon). The column is
-    filled dark, so the light number on it reads at a phone's size. On the ring, not in the
-    middle, so a waymark or a player in the tower never covers it. */
+/** How many players soak a tower: one dot per player, spaced evenly around its ring, the first at
+    the top. A dot is a player, in the players' highlight colour, as in the mechanic icons
+    (icons.tsx, rule 2). On the ring, not in the middle, so a waymark or a player in the tower
+    never covers it. */
 function SoakMark({ r, soak }: SoakMarkProps) {
   return (
-    <g className="soak" transform={`translate(0 ${round2(-r)})`}>
-      <circle className="badge" r={SOAK_BADGE_R} />
-      <TowerIcon className="icon" x={-SOAK_ICON / 2} y={-SOAK_ICON / 2} width={SOAK_ICON} height={SOAK_ICON} />
-      {/* Up a little, in the column, clear of the ring, as MechanicIcon places it. */}
-      <text y={round2(-SOAK_ICON * 0.06)} fontSize={SOAK_ICON * 0.5}>
-        {soak}
-      </text>
+    <g className="soak" aria-label={`Soaked by ${soak}`}>
+      {Array.from({ length: soak }, (_, i) => {
+        const [x, y] = polar((360 * i) / soak, r, [0, 0]);
+        // biome-ignore lint/suspicious/noArrayIndexKey: the dots of a tower never change order.
+        return <circle key={i} className="player" cx={round2(x)} cy={round2(y)} r={SOAK_DOT_R} />;
+      })}
     </g>
   );
 }
