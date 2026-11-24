@@ -174,7 +174,7 @@ export function DrillScreen({
       actions={
         <>
           <Button size="sm" variant="outline" onClick={handleTryFromHere}>
-            Try from Here
+            Try From Here
           </Button>
           {nextMechanic}
           {reset}

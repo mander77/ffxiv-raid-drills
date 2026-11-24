@@ -463,9 +463,9 @@ Do not propose these again unless the owner brings them up.
   - After the try they are buttons. A click, or the arrow keys, shows that step: the arena as it
     was (the boss, the puddles down, your click, the green area), its answer under the chips, and
     "Step 2/4, Not there" in the bar. The step shown has a ring, apart from its check or cross.
-  - Try from Here, in the bar, answers the step shown and the ones after it again; the answers
+  - Try From Here, in the bar, answers the step shown and the ones after it again; the answers
     before it stay. It does not count in the score, as with Show Me (the app's choice: the first
-    try already counted). A mechanic with one step has no chips, so no Try from Here.
+    try already counted). A mechanic with one step has no chips, so no Try From Here.
   - Reset keeps one meaning: start the whole mechanic again.
   - The answer card sits under the chips, over the rule, so the step you review and its answer
     are together.
