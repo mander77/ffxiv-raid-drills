@@ -7,9 +7,9 @@
 // picture is built from that drill, so the two always agree.
 import { bySlot, withSeed } from "../../../util";
 import { markRole, partyOf } from "../../../party";
-import { angOf, polar, rotOverlay, zoneCenter } from "../../../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, avalancheScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
-import { PLATFORM_X, BREATH_W, PROXIMITY_DOT, PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, gust, lineTo, swordCross } from "./attacks";
+import { angOf, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, avalancheScene, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
+import { PLATFORM_X, BREATH_W, PROXIMITY_DOT, PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, TOWER_KNOCKBACK, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, gust, lineTo, swordCross } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../../../types";
 
 type Who = [string, MarkRole];
@@ -356,8 +356,13 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const knocked = (z: RectZone): Preview => hit(youIn(s, z), [guide(CENTER, zoneCenter(z))]);
     return {...d, options:[knocked(bySlot(s, {H1:WS, H2:ES})), knocked(bySlot(s, {H1:WN, H2:EN})), knocked(bySlot(s, {H1:ES, H2:WS})), youAt(s, [50, 60], 9)]}; },
   // You stand in your tower, a little toward the platform's middle, so your mark clears the number waymark.
-  "k-split-kb": s => { const d = fromDrill("m-split-tower", s), me = bySlot<Point>(s, {H1:[11, 70], H2:[89, 70]}), to = bySlot<Point>(s, {H1:[88, 70], H2:[12, 70]}), same = bySlot<Point>(s, {H1:[11, 38], H2:[89, 38]});
-    return {overlays:d.overlays, boss:BOSS, split:true, before:[you(s, me)], after:[you(s, me), guide(me, to)], answer:[bySlot(s, {H1:EAST, H2:WEST})], options:[
+  // The drill's first towers, with your tether's portal on your own side: you stand on the side
+  // of your tower facing the other platform, and the knockback sends you straight across.
+  "k-split-kb": s => { const home = homeSide(s), portal = portalAt(home, "north", "west"), d = firstTowersScene(s, {portal});
+    const z = stepZone(d.steps[0], []);
+    if(!z) throw new Error("the first towers step has no zone");
+    const me = zoneCenter(z), to: Point = [me[0] + (home === "west" ? 1 : -1) * TOWER_KNOCKBACK, me[1]], same: Point = [me[0], 30];
+    return {overlays:d.overlays, boss:BOSS, split:true, before:[tether(portal, me), you(s, me)], after:[tether(portal, to), you(s, me), guide(me, to)], answer:[bySlot(s, {H1:EAST, H2:WEST})], options:[
       show([you(s, me), guide(me, to)], [bySlot(s, {H1:EAST, H2:WEST})]),
       show([you(s, me), guide(me, same)], [bySlot(s, {H1:WEST, H2:EAST})]),
       show([you(s, bySlot<Point>(s, {H1:[19, 50], H2:[81, 50]})), say("NO TOWER", 8)]),
@@ -398,7 +403,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-split-towers23": s => {
     // The drill's second towers, with your last tether or marker in the SW quadrant (H1) or the NE one (H2).
     const side = bySlot<SplitSide>(s, {H1:"west", H2:"east"}), end = bySlot<SplitEnd>(s, {H1:"south", H2:"north"});
-    const sc = splitTowers(s, false, side, end), last = yourSpot(sc.overlays, s), answer = SPLIT_TOWER[side][end];
+    const sc = splitTowers(s, side, end, null), last = yourSpot(sc.overlays, s), answer = SPLIT_TOWER[side][end];
     const first = bySlot(s, {H1:TOWER_NW, H2:TOWER_SE}), odd = bySlot(s, {H1:TOWER_NE, H2:TOWER_SW});
     return {overlays:sc.overlays, split:sc.split, boss:sc.boss, after:[guide(last, answer)], answer:[circle(answer, TOWER_R)],
       note:"Example: your last tether or marker was in the " + bySlot(s, {H1:"SW", H2:"NE"}) + " quadrant.", options:[

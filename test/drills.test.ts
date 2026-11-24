@@ -1,6 +1,6 @@
 import { assert, test } from "vitest";
 import { WAYMARKS } from "../src/components/arena/Arena";
-import { isStretched, PLATFORM_X, PORTAL_LINE_X } from "../src/data/fights/m11s/attacks";
+import { isStretched, PLATFORM_X, PORTAL_LINE_X, TOWER_KNOCKBACK, TOWER_R } from "../src/data/fights/m11s/attacks";
 import {
   assaultScene,
   avalancheScene,
@@ -12,10 +12,12 @@ import {
   DANCE_LINES,
   DANCE_PAIRS,
   DRILLS,
+  firstTowersScene,
   GUST_CONES,
   type JumpSet,
   nextPuddle,
   portalAt,
+  SPLIT_TOWER,
   type SplitEnd,
   type SplitHalf,
   type SplitSide,
@@ -25,7 +27,7 @@ import {
   ultimateScene,
   voidAgain,
 } from "../src/data/fights/m11s/drills";
-import { angOf, inZone, zoneCenter } from "../src/geometry";
+import { angOf, inZone, stepZone, zoneCenter } from "../src/geometry";
 import { changes } from "../src/lib/practice";
 import { facingNext, jumpsNext } from "../src/lib/scene";
 import type { Point, ScytheOverlay, Slot, SlotName, StepResult, Zone } from "../src/types";
@@ -63,7 +65,7 @@ test("drills with no random parts build the same pattern every time", () => {
       for (let i = 0; i < 20; i++)
         assert.equal(JSON.stringify(m.build(s, null)), first, `${m.id} changed between builds, so mark it random`);
     }
-  assert.equal(DRILLS.filter((x) => !changes(x)).length, 11, "11 fixed drills");
+  assert.equal(DRILLS.filter((x) => !changes(x)).length, 10, "10 fixed drills");
 });
 
 test("Assault Evolved: the faced weapon goes first, then clockwise", () => {
@@ -602,30 +604,74 @@ test("Arena Split: a round puts you in close, then at your end, out of the porta
             }
 });
 
-test("Arena Split: with a tether at the second towers, it runs from a portal on your side to your mark", () => {
+/** Where the tower at c knocks a player standing at p: TOWER_KNOCKBACK straight away from c. */
+const landing = (c: Point, p: Point): Point => {
+  const d = Math.hypot(p[0] - c[0], p[1] - c[1]);
+  return [p[0] + ((p[0] - c[0]) / d) * TOWER_KNOCKBACK, p[1] + ((p[1] - c[1]) / d) * TOWER_KNOCKBACK];
+};
+/** True when p is on a platform's floor. */
+const onFloor = (p: Point): boolean => p[1] >= 0 && p[1] <= 100 && SIDES.some((sd) => onSide(p, sd));
+
+test("Arena Split: where you stand in a tower sends you where you need to go", () => {
   for (const side of SIDES)
     for (const end of ENDS)
-      for (const half of ENDS) {
-        const portal = portalAt(side, half, "west"),
-          sc = splitTowers("H1", true, side, end, portal);
-        assert.deepEqual(sc.tether?.portal, portal);
-        assert.ok(sc.tether && !isStretched(portal, [sc.tether.you.x, sc.tether.you.y]), "not stretched before the knockback");
-        assert.ok(!sc.overlays.some((o) => o.t === "mark" && o.l === "H1"), "your mark is the tether's end, drawn once");
-        assert.ok(
-          sc.overlays.some((o) => o.t === "portal"),
-          "its portal",
-        );
-        assert.isUndefined(splitTowers("H1", false, side, end, portal).tether, "no tether, none drawn");
+      for (const portalSide of [...SIDES, null]) {
+        const portal = portalSide ? portalAt(portalSide, end === "north" ? "south" : "north", "west") : null,
+          sc = splitTowers("H1", side, end, portal ? { portal } : null),
+          z = zoneOf(stepZone(sc.steps[0], [])),
+          p = zoneCenter(z),
+          c = SPLIT_TOWER[side][end],
+          to = landing(c, p),
+          what = `${side} ${end} portal ${portalSide ?? "none"}`;
+        assert.ok(inZone(p, z) && Math.hypot(p[0] - c[0], p[1] - c[1]) <= TOWER_R, `${what}: in the tower`);
+        assert.ok(onFloor(to), `${what}: lands on a platform`);
+        // A tether lands across from its portal; without one you stay and land at the other end.
+        const goal: SplitSide = portalSide ? (portalSide === "west" ? "east" : "west") : side;
+        assert.ok(onSide(to, goal), `${what}: lands on the ${goal} platform`);
+        if (goal === side) assert.ok(atEnd(to, end === "north" ? "south" : "north"), `${what}: at the other end`);
+        // The other half of the tower sends you elsewhere: it is not correct.
+        const away: Point = [2 * c[0] - p[0], 2 * c[1] - p[1]];
+        assert.isFalse(inZone(away, z), `${what}: only the half facing that way`);
+        // With a tether, it runs from its portal to your mark; without one, none is drawn.
+        if (portal) {
+          assert.deepEqual(sc.tether?.portal, portal);
+          assert.ok(!sc.overlays.some((o) => o.t === "mark" && o.l === "H1"), `${what}: your mark is the tether's end`);
+        } else assert.isUndefined(sc.tether, what);
       }
+});
+
+test("Arena Split: the first towers are your light party's, at the south end, and send you the way you need", () => {
+  for (const s of SLOTS)
+    for (const portalSide of [...SIDES, null]) {
+      const portal = portalSide ? portalAt(portalSide, "north", "west") : null,
+        sc = firstTowersScene(s, portal ? { portal } : null),
+        p = zoneCenter(zoneOf(stepZone(sc.steps[0], []))),
+        home: SplitSide = s === "H1" ? "west" : "east",
+        to = landing(SPLIT_TOWER[home].south, p),
+        goal: SplitSide = portalSide ? (portalSide === "west" ? "east" : "west") : home;
+      assert.ok(onSide(p, home) && atEnd(p, "south"), `${s}: your tower`);
+      assert.ok(onFloor(to) && onSide(to, goal), `${s} portal ${portalSide}: lands on the ${goal} platform`);
+      if (!portal) assert.ok(atEnd(to, "north"), `${s}: no tether, land at the north end`);
+    }
 });
 
 test("Arena Split: the towers are in the quadrant you ended in", () => {
   for (const side of SIDES)
     for (const end of ENDS) {
-      const towers = zoneCenter(zoneOf(splitTowers("H1", true, side, end).steps[0].z)),
-        avalanche = zoneCenter(zoneOf(avalancheScene("H1", side, end, "west", "north").steps[0].z));
+      const towers = zoneCenter(zoneOf(stepZone(splitTowers("H1", side, end, null).steps[0], []))),
+        avalanche = zoneCenter(zoneOf(stepZone(avalancheScene("H1", side, end, "west", "north").steps[0], [])));
       for (const p of [towers, avalanche]) assert.ok(onSide(p, side) && atEnd(p, end));
     }
+});
+
+test("Arcadion Avalanche: the towers send you to the platform he does not face", () => {
+  for (const side of SIDES)
+    for (const end of ENDS)
+      for (const face of SIDES) {
+        const p = zoneCenter(zoneOf(stepZone(avalancheScene("H1", side, end, face, "north").steps[0], []))),
+          to = landing(SPLIT_TOWER[side][end], p);
+        assert.ok(onFloor(to) && onSide(to, face === "west" ? "east" : "west"), `${side} ${end}, he faces ${face}`);
+      }
 });
 
 test("Arcadion Avalanche: the far end of the platform he does not face, away from his turn", () => {

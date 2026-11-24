@@ -3,7 +3,7 @@ import { MAJESTIC_PUDDLE, PLATFORM_X } from "../src/data/fights/m11s/attacks";
 import { DRILLS } from "../src/data/fights/m11s/drills";
 import { buildFight } from "../src/data/fights/m11s/fight";
 import { cactbot, type LineName } from "../src/data/fights/m11s/sources";
-import { inZone, rotZone, zoneCenter } from "../src/geometry";
+import { inZone, rotZone, stepZone, zoneCenter } from "../src/geometry";
 import { clock, sec } from "../src/time";
 import type { Slot, StepResult } from "../src/types";
 
@@ -140,7 +140,7 @@ test("Watch the Correct Moves: the spot it clicks is correct for every step", ()
     }
 });
 
-test("Arena Split: one round with a tether, and you stack for Massive Meteor on the other platform", () => {
+test("Arena Split: one round with a tether, and you stack for Massive Meteor where round 2 ended", () => {
   for (const s of SLOTS)
     for (let i = 0; i < REPEATS; i++) {
       const f = buildFight(s),
@@ -148,12 +148,9 @@ test("Arena Split: one round with a tether, and you stack for Massive Meteor on 
       assert.equal(rounds.length, 2);
       assert.deepEqual(rounds.map((g) => /tether/.test(g.scene.steps[3].q)).sort(), [false, true], "a tether in one round only");
       const massive = f.segs.find((g) => g.title === "Massive Meteor");
-      const p = zoneCenter(massive?.scene.steps[0].z ?? { c: [50, 50], r: 0 });
-      // H1 starts west and H2 east; the two rounds put each on the other platform.
-      assert.ok(
-        s === "H1" ? p[0] >= PLATFORM_X.east[0] : p[0] <= PLATFORM_X.west[1],
-        `${s} stacks on the ${s === "H1" ? "east" : "west"} platform`,
-      );
+      const p = zoneCenter(massive?.scene.steps[0].z ?? { c: [50, 50], r: 0 }),
+        side2 = platformOf(rounds[1]);
+      assert.ok(side2 === "west" ? p[0] <= PLATFORM_X.west[1] : p[0] >= PLATFORM_X.east[0], `${s} stacks on the ${side2} platform`);
     }
 });
 
@@ -174,20 +171,42 @@ test("Arena Split: the tethers swap in the second round", () => {
     }
 });
 
-test("Arena Split: without a tether, your end is the one you were knocked to", () => {
+/** A round's platform and end, from its setup: "You are on the west platform." and, with a
+    tether, the end away from its portal; without one, the end you were knocked to. */
+const platformOf = (g: { scene: { setup: readonly string[] } }): string =>
+  (g.scene.setup.join(" ").match(/on the (west|east) platform/) ?? [])[1] ?? "";
+const endOf = (g: { scene: { setup: readonly string[] } }): string => {
+  const text = g.scene.setup.join(" "),
+    knocked = text.match(/knocked to the (north|south) end/)?.[1],
+    portal = text.match(/toward the (north|south)\./)?.[1];
+  return knocked ?? (portal === "north" ? "south" : "north");
+};
+
+test("Arena Split: the towers send you across only for a tether whose portal is on your side", () => {
   for (const s of SLOTS)
     for (let i = 0; i < REPEATS; i++) {
-      const rounds = buildFight(s).segs.filter((g) => g.drills[0] === "m-split-fire"),
-        ends = rounds.map((g) => (g.scene.setup.join(" ").match(/knocked to the (north|south) end/) ?? [])[1]),
-        portals = rounds.map((g) => (g.scene.setup.join(" ").match(/toward the (north|south)\./) ?? [])[1]),
-        away = (e: string | undefined) => (e === "north" ? "south" : "north");
-      if (ends[0]) {
-        // Round 1 without a tether: the end of your first tower (Hector No Buddies: healers south).
-        assert.equal(ends[0], "south", `${s}: the first tower's end`);
-      } else {
-        // Round 1 with a tether, round 2 without: the second tower is where round 1 ended.
-        assert.equal(ends[1], away(portals[0]), `${s}: the end round 1 ended at`);
+      const f = buildFight(s),
+        rounds = f.segs.filter((g) => g.drills[0] === "m-split-fire"),
+        towers2 = f.segs.find((g) => g.title === "Arena Split: Second Towers"),
+        home = s === "H1" ? "west" : "east",
+        other = (e: string) => (e === "north" ? "south" : "north");
+      if (!towers2) throw new Error("no second towers");
+      const [side1, side2] = rounds.map(platformOf),
+        [end1, end2] = rounds.map(endOf);
+      // A tether ends across from its portal; without one you stay and land at the other end.
+      for (const [g, side] of [
+        [rounds[0], side1],
+        [rounds[1], side2],
+      ] as const) {
+        const portal = g.scene.tether?.portal;
+        if (portal) assert.equal(side, portal[0] < 50 ? "east" : "west", `${s}: across from the portal`);
       }
+      if (!rounds[0].scene.tether) assert.deepEqual([side1, end1], [home, "north"], `${s}: round 1, knocked along from the south tower`);
+      if (!rounds[1].scene.tether) assert.deepEqual([side2, end2], [side1, other(end1)], `${s}: round 2, knocked along from round 1's end`);
+      // The second towers are in the quadrant where round 1 ended.
+      const p = zoneCenter(stepZone(towers2.scene.steps[0], []) ?? { c: [50, 50], r: 0 });
+      assert.equal(p[0] < 50 ? "west" : "east", side1, `${s}: second towers, platform`);
+      assert.equal(p[1] < 50 ? "north" : "south", end1, `${s}: second towers, end`);
     }
 });
 
