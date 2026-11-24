@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { buildFight } from "../../src/data/fight";
+import { buildFight } from "../../src/data/fights/m11s/fight";
 import {
   activeSeg,
   answerFightStep,

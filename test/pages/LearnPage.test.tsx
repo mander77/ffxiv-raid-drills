@@ -5,7 +5,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, assert, beforeEach, test } from "vitest";
-import { LEARN_CARDS, TIMELINE_CARDS } from "../../src/data/questions";
+import { LEARN_CARDS, TIMELINE_CARDS } from "../../src/data/fights/m11s/questions";
 import { LearnPage } from "../../src/pages/LearnPage";
 import { TimelinePage } from "../../src/pages/TimelinePage";
 import { useProgressStore } from "../../src/stores/progress";

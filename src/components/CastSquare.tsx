@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { Category } from "../data/abilities";
+import type { Category } from "../data/fights/m11s/abilities";
 import type { DrillKind } from "../types";
 import { CATEGORY_BG, CATEGORY_BORDER } from "./CategoryIcons";
 import { KINDS, MechanicIcon } from "./MechanicIcon";

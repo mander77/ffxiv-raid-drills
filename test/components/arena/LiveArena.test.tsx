@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, assert, test } from "vitest";
 import { LiveArena } from "../../../src/components/arena/LiveArena";
-import { DRILLS, splitRound } from "../../../src/data/drills";
+import { DRILLS, splitRound } from "../../../src/data/fights/m11s/drills";
 import { stepZone, zoneCenter } from "../../../src/geometry";
 import { buildPattern } from "../../../src/lib/practice";
 import type { StepResult } from "../../../src/types";

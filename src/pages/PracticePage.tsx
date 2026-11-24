@@ -7,7 +7,7 @@ import { Navigate, useNavigate, useParams } from "react-router";
 import { PageContainer } from "../components/PageContainer";
 import { DrillScreen } from "../components/practice/DrillScreen";
 import { RoundDone } from "../components/RoundDone";
-import { changes, DRILLS } from "../data/drills";
+import { changes, DRILLS } from "../data/fights/m11s/drills";
 import { buildPattern } from "../lib/practice";
 import { useProgressStore } from "../stores/progress";
 import { useSlotStore } from "../stores/slot";

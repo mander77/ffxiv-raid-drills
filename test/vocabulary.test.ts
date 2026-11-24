@@ -3,12 +3,12 @@
 import { readFileSync } from "node:fs";
 import { assert, test } from "vitest";
 import { KINDS } from "../src/components/MechanicIcon";
-import { ABILITIES } from "../src/data/abilities";
-import { DRILLS } from "../src/data/drills";
-import { buildFight, CHOICE_ROWS } from "../src/data/fight";
-import { LEARN_PICTURES } from "../src/data/pictures";
-import { LEARN_CARDS, TIMELINE_CARDS } from "../src/data/questions";
-import { TIMELINE } from "../src/data/timeline";
+import { ABILITIES } from "../src/data/fights/m11s/abilities";
+import { DRILLS } from "../src/data/fights/m11s/drills";
+import { buildFight, CHOICE_ROWS } from "../src/data/fights/m11s/fight";
+import { LEARN_PICTURES } from "../src/data/fights/m11s/pictures";
+import { LEARN_CARDS, TIMELINE_CARDS } from "../src/data/fights/m11s/questions";
+import { TIMELINE } from "../src/data/fights/m11s/timeline";
 import { CHECKS, CONVERSIONS } from "../src/data/vocabulary";
 import type { Slot } from "../src/types";
 import { withSeed } from "../src/util";

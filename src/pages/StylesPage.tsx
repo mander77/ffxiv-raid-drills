@@ -37,8 +37,8 @@ import { AnswerButton } from "../components/quiz/AnswerButton";
 import { RuleBox } from "../components/RuleBox";
 import { StepChips } from "../components/StepChips";
 import { Tally } from "../components/Tally";
-import { ABILITIES, CATEGORIES, type Category } from "../data/abilities";
-import { DRILLS } from "../data/drills";
+import { ABILITIES, CATEGORIES, type Category } from "../data/fights/m11s/abilities";
+import { DRILLS } from "../data/fights/m11s/drills";
 import { kindsOf } from "../lib/practice";
 import type { DrillKind } from "../types";
 

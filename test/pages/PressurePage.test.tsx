@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, assert, beforeAll, beforeEach, test } from "vitest";
 import { TooltipProvider } from "../../src/components/ui/tooltip";
-import { RANDOM } from "../../src/data/fight";
+import { RANDOM } from "../../src/data/fights/m11s/fight";
 import { playerLink } from "../../src/lib/pressure";
 import { PressurePage } from "../../src/pages/PressurePage";
 import { usePressureStore } from "../../src/stores/pressure";

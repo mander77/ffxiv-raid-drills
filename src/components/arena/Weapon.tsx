@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { SCYTHE_SAFE } from "../../data/attacks";
+import { SCYTHE_SAFE } from "../../data/fights/m11s/attacks";
 import { round2, unit } from "../../geometry";
 import type { Overlay, Point } from "../../types";
 import { SAFE_INSET } from "./Shape";

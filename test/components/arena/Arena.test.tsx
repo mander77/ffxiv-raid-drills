@@ -7,8 +7,8 @@ import { ArenaLabel } from "../../../src/components/arena/ArenaLabel";
 import { BossMark } from "../../../src/components/arena/BossMark";
 import { LearnPicture } from "../../../src/components/arena/LearnPicture";
 import { ZoneLabel } from "../../../src/components/arena/ZoneLabel";
-import { LEARN_PICTURES } from "../../../src/data/pictures";
-import { LEARN_CARDS } from "../../../src/data/questions";
+import { LEARN_PICTURES } from "../../../src/data/fights/m11s/pictures";
+import { LEARN_CARDS } from "../../../src/data/fights/m11s/questions";
 import type { Overlay } from "../../../src/types";
 
 afterEach(cleanup);

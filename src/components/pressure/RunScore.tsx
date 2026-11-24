@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
-import type { Fight } from "../../data/fight";
+import type { Fight } from "../../data/fights/m11s/fight";
 import type { StepResult } from "../../types";
 import { Tally } from "../Tally";
 

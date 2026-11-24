@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { cn } from "@/lib/utils";
-import { busterPieces, isStretched, SPLIT_HALF_W } from "../../data/attacks";
-import type { Hit } from "../../data/fight";
+import { busterPieces, isStretched, SPLIT_HALF_W } from "../../data/fights/m11s/attacks";
+import type { Hit } from "../../data/fights/m11s/fight";
 import { runnerAt } from "../../data/route";
 import { useFightFrame } from "../../hooks/useFightFrame";
 import type { FightView } from "../../lib/fight";

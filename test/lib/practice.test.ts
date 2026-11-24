@@ -1,5 +1,5 @@
 import { assert, test } from "vitest";
-import { DRILLS } from "../../src/data/drills";
+import { DRILLS } from "../../src/data/fights/m11s/drills";
 import { inZone, rotZone, stepZone, zoneCenter } from "../../src/geometry";
 import { answerStep, buildPattern, kindsOf, statusAfter } from "../../src/lib/practice";
 import type { Point, StepResult } from "../../src/types";

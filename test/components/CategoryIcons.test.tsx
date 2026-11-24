@@ -5,7 +5,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, assert, test } from "vitest";
 import { CATEGORY_ICON, CategoryIcons } from "../../src/components/CategoryIcons";
 import { CategoryKey } from "../../src/components/CategoryKey";
-import { CATEGORIES, type Category } from "../../src/data/abilities";
+import { CATEGORIES, type Category } from "../../src/data/fights/m11s/abilities";
 
 afterEach(cleanup);
 

@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { MemoryRouter } from "react-router";
 import { afterEach, assert, test, vi } from "vitest";
 import { MechanicList } from "../../src/components/practice/MechanicList";
-import { DRILLS } from "../../src/data/drills";
+import { DRILLS } from "../../src/data/fights/m11s/drills";
 
 afterEach(cleanup);
 

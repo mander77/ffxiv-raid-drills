@@ -5,10 +5,10 @@
 // Sizes come from BossMod's M11S module (awgil/ffxiv_bossmod, RM11STheTyrant), which lists each
 // ability's shape in yalms. Each size is read from source.gen.ts (`npm run import:sources`), by
 // the BossMod ability it belongs to. The arena is 40 yalms across and 100 units in this app.
-import { addVec, angOf, dist, leftOf, polar, unit } from "../geometry";
+import { addVec, angOf, dist, leftOf, polar, unit } from "../../../geometry";
 import { BOSSMOD_ACTORS, BOSSMOD_SPLIT } from "./source.gen";
 import { bossmod } from "./sources";
-import type { Overlay, Point, Puddle } from "../types";
+import type { Overlay, Point, Puddle } from "../../../types";
 
 /** Yalms to arena units. */
 const yalms = (n: number): number => n * 2.5;

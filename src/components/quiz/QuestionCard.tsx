@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { LEARN_PICTURES } from "../../data/pictures";
+import { LEARN_PICTURES } from "../../data/fights/m11s/pictures";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { timerOf } from "../../lib/pressure";
 import type { Option, QuizItem, Slot } from "../../types";

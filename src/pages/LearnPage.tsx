@@ -2,7 +2,7 @@
 // arena picture; you pick an answer to see it on the picture, then lock it in.
 import { PageContainer } from "../components/PageContainer";
 import { type ChipGroup, QuizDeck } from "../components/quiz/QuizDeck";
-import { LEARN_CARDS, LEARN_GROUPS } from "../data/questions";
+import { LEARN_CARDS, LEARN_GROUPS } from "../data/fights/m11s/questions";
 import { tabOf } from "../tabs";
 
 /** The Learn cards, in fight order. */

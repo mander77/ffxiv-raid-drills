@@ -163,7 +163,7 @@ test("the Light Party switch changes the slot on the Cheat Sheet", async ({ page
 });
 
 test("Practice: a correct click and an incorrect click on the arena", async ({ page }) => {
-  const { DRILLS } = await import("../src/data/drills");
+  const { DRILLS } = await import("../src/data/fights/m11s/drills");
   const { buildPattern } = await import("../src/lib/practice");
   const { rotZone, stepZone, zoneCenter } = await import("../src/geometry");
   const drill = DRILLS.find((m) => m.id === "m-raw-axe");

@@ -5,12 +5,12 @@
 // does, not only where you go. After you answer, the picture shows what the mechanic really
 // does and the correct spot in green. Where a map drill already draws the same moment, the
 // picture is built from that drill, so the two always agree.
-import { bySlot, withSeed } from "../util";
-import { markRole, partyOf } from "../party";
-import { angOf, polar, rotOverlay, zoneCenter } from "../geometry";
+import { bySlot, withSeed } from "../../../util";
+import { markRole, partyOf } from "../../../party";
+import { angOf, polar, rotOverlay, zoneCenter } from "../../../geometry";
 import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, avalancheScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
 import { PLATFORM_X, BREATH_W, PROXIMITY_DOT, PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, gust, lineTo, swordCross } from "./attacks";
-import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
+import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../../../types";
 
 type Who = [string, MarkRole];
 const tag = (x: number, y: number, s: string): Overlay => ({t:"tag", x, y, s});

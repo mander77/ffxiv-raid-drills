@@ -1,7 +1,7 @@
 // The rules of Pressure, as plain functions: which cards the quick round asks, its timer (time to
 // read, then time to decide), and the address of the player.
-import { type Choices, choicesText } from "../data/fight";
-import { LEARN_CARDS, TIMELINE_CARDS } from "../data/questions";
+import { type Choices, choicesText } from "../data/fights/m11s/fight";
+import { LEARN_CARDS, TIMELINE_CARDS } from "../data/fights/m11s/questions";
 import type { Score } from "../stores/progress";
 import type { QuizItem } from "../types";
 import { readingMs } from "../util";

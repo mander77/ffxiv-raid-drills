@@ -5,7 +5,7 @@
 // so nothing here exists at run time. Other files bring these names in with
 // `import type { ... }`, which tells the compiler that the import is for type checking only.
 
-import type { Phase } from "./data/timeline";
+import type { Phase } from "./data/fights/m11s/timeline";
 
 /* ---------- party slots ---------- */
 // A party slot has two parts: the light party (1 or 2) and the role in it. Its short name comes

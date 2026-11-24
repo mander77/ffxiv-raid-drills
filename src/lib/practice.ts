@@ -1,6 +1,6 @@
 // The rules of a Practice mechanic, as plain functions: build its pattern from a code, and answer
 // a step with a click. The Practice page and its tests both use them.
-import { facingNext } from "../data/drills";
+import { facingNext } from "../data/fights/m11s/drills";
 import { inZone, rotOverlay, rotZone, stepZone, zoneCenter } from "../geometry";
 import type { Boss, Drill, DrillKind, Point, Scene, Slot, StepResult } from "../types";
 import { random, withSeed } from "../util";

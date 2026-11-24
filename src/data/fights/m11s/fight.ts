@@ -4,11 +4,11 @@
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6, `ENRAGE`).
 import { DRILLS, SPLIT_INNER, avalancheScene, firstTowerEnd, homeSide, massiveScene, otherEnd, otherSide, portalAt, randomEndsSide, randomHalf, randomOthers, splitRound, splitTowers, swappedOthers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
 import { ABILITIES, ENRAGE, FIGHT_END, type Category } from "./abilities";
-import { newCode, random, withSeed } from "../util";
-import { nearClock } from "../time";
-import { zoneCenter } from "../geometry";
+import { newCode, random, withSeed } from "../../../util";
+import { nearClock } from "../../../time";
+import { zoneCenter } from "../../../geometry";
 import { bossmod, cactbot, castStart, numberedAfter, tenth, type LineName } from "./sources";
-import type { Point, Scene, Slot } from "../types";
+import type { Point, Scene, Slot } from "../../../types";
 
 /** One line on the fight timeline: `name` happens at `t`, in seconds into the fight. */
 interface TLEvent { t: number; name: string; raidwide?: boolean; cast?: boolean }

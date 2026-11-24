@@ -1,5 +1,5 @@
 // Rule lines that a Practice drill and a Learn card both show, written once so the two stay the same.
-import type { Lines } from "../types";
+import type { Lines } from "../../../types";
 
 export const RAW_STEEL_RULE: Lines = [
   "Raw Steel Trophy: he holds the weapon.",

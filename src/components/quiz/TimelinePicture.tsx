@@ -1,5 +1,5 @@
-import { ABILITIES, ENRAGE, PHASES, timelineCategories } from "../../data/abilities";
-import { TIMELINE } from "../../data/timeline";
+import { ABILITIES, ENRAGE, PHASES, timelineCategories } from "../../data/fights/m11s/abilities";
+import { TIMELINE } from "../../data/fights/m11s/timeline";
 import { cn } from "../../lib/utils";
 import { clock, sec } from "../../time";
 import type { QuizItem } from "../../types";

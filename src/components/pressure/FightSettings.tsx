@@ -13,8 +13,8 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { WeaponType } from "../../data/drills";
-import { CHOICE_ROWS, type Choices, choicesText, cleanChoices, RANDOM } from "../../data/fight";
+import type { WeaponType } from "../../data/fights/m11s/drills";
+import { CHOICE_ROWS, type Choices, choicesText, cleanChoices, RANDOM } from "../../data/fights/m11s/fight";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { DragHandleIcon, SettingsIcon } from "../icons";
 

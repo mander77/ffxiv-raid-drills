@@ -12,8 +12,8 @@
 // The arena turn (`k`) is left out: it turns the zones and the attacks together, so it moves no
 // spot into or out of an attack.
 import { describe, expect, test } from "vitest";
-import { DRILLS, FIRST_PUDDLE } from "../src/data/drills";
-import { buildFight } from "../src/data/fight";
+import { DRILLS, FIRST_PUDDLE } from "../src/data/fights/m11s/drills";
+import { buildFight } from "../src/data/fights/m11s/fight";
 import { dist, stepZone, zoneCenter } from "../src/geometry";
 import { buildPattern } from "../src/lib/practice";
 import type { Drill, Overlay, Point, Slot, Step, StepResult } from "../src/types";

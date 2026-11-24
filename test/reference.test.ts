@@ -1,9 +1,9 @@
 import { assert, test } from "vitest";
-import { DRILLS } from "../src/data/drills";
-import { LEARN_PICTURES } from "../src/data/pictures";
-import { LEARN_CARDS } from "../src/data/questions";
-import { learnCard, practiceDrill, REFERENCE, referenceByPhase, slotAnswer, timelineCard } from "../src/data/reference";
-import { TIMELINE } from "../src/data/timeline";
+import { DRILLS } from "../src/data/fights/m11s/drills";
+import { LEARN_PICTURES } from "../src/data/fights/m11s/pictures";
+import { LEARN_CARDS } from "../src/data/fights/m11s/questions";
+import { learnCard, practiceDrill, REFERENCE, referenceByPhase, slotAnswer, timelineCard } from "../src/data/fights/m11s/reference";
+import { TIMELINE } from "../src/data/fights/m11s/timeline";
 
 /** Seconds from a time such as "4:52" (the first time in "0:50 to 1:45"). */
 function secs(t: string): number {

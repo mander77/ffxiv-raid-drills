@@ -1,7 +1,7 @@
 // The tabs of the site, in the order a player learns the fight. Each rebuild step adds its tab
 // here, with its page in src/pages/ and its route in App.tsx.
 
-import { FIGHT_INFO } from "./data/fightInfo";
+import { FIGHT_INFO } from "./data/fights/m11s/fightInfo";
 
 export interface TabInfo {
   /** The address of the tab, such as "/sheet". */

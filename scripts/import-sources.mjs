@@ -1,5 +1,5 @@
 // Imports the fight's times and attack sizes from its two sources, at pinned commits, into
-// src/data/source.gen.ts. The data files read every fight time and attack size from that file.
+// src/data/fights/m11s/source.gen.ts. The data files read every fight time and attack size from that file.
 //
 //   npm run import:sources            downloads the pinned files and writes the generated file
 //   npm run import:sources -- --check  writes nothing; fails if the generated file is out of date
@@ -21,7 +21,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const OUT = join(ROOT, "src", "data", "source.gen.ts");
+const OUT = join(ROOT, "src", "data", "fights", "m11s", "source.gen.ts");
 const CACHE = join(ROOT, ".cache", "sources");
 
 /** The pinned sources of M11S (The Tyrant, Savage). */
@@ -230,13 +230,13 @@ async function main() {
   if (check) {
     const now = existsSync(OUT) ? readFileSync(OUT, "utf8").replace(/\r\n/g, "\n") : "";
     if (now !== text) {
-      console.error("src/data/source.gen.ts does not match the pinned sources. Run: npm run import:sources");
+      console.error("src/data/fights/m11s/source.gen.ts does not match the pinned sources. Run: npm run import:sources");
       process.exit(1);
     }
-    console.log("src/data/source.gen.ts matches the pinned sources.");
+    console.log("src/data/fights/m11s/source.gen.ts matches the pinned sources.");
   } else {
     writeFileSync(OUT, text);
-    console.log("wrote src/data/source.gen.ts");
+    console.log("wrote src/data/fights/m11s/source.gen.ts");
   }
 }
 

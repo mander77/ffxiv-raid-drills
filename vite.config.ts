@@ -3,7 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 import { defineConfig } from "vitest/config";
-import { FIGHT_INFO } from "./src/data/fightInfo.ts";
+import { FIGHT_INFO } from "./src/data/fights/m11s/fightInfo.ts";
 
 /** Writes the fight's short name into the page title in index.html, before Vite reads the page.
     The title stays in the HTML file, so link previews show it without running the app. */
