@@ -1,8 +1,8 @@
 // The M11S fight timeline and the phase labels.
-import { bySlot } from "../util";
-import { nearClock } from "../time";
+import { bySlot } from "../../../util";
+import { nearClock } from "../../../time";
 import { cactbot, type LineName } from "./sources";
-import type { TimelineEvent } from "../types";
+import type { TimelineEvent } from "../../../types";
 
 /** The phases of the fight in order, by this app's names. Drills, cards and the ability list
     take their phase from here. */

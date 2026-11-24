@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { FIGHT_INFO } from "../data/fightInfo";
+import { FIGHT_INFO } from "../data/fights/m11s/fightInfo";
 import { ModeToggle } from "./ModeToggle";
 import { PageContainer } from "./PageContainer";
 import { ShareButton } from "./ShareButton";

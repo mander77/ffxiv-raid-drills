@@ -2,8 +2,8 @@
 // fight timeline at that moment, the way the cactbot overlay shows it.
 import { PageContainer } from "../components/PageContainer";
 import { type ChipGroup, QuizDeck } from "../components/quiz/QuizDeck";
-import { PHASES } from "../data/abilities";
-import { TIMELINE_CARDS } from "../data/questions";
+import { PHASES } from "../data/fights/m11s/abilities";
+import { TIMELINE_CARDS } from "../data/fights/m11s/questions";
 import { tabOf } from "../tabs";
 import { sec } from "../time";
 

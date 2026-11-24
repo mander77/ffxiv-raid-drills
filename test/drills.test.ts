@@ -1,5 +1,5 @@
 import { assert, test } from "vitest";
-import { isStretched, PLATFORM_X, PORTAL_LINE_X } from "../src/data/attacks";
+import { isStretched, PLATFORM_X, PORTAL_LINE_X } from "../src/data/fights/m11s/attacks";
 import {
   assaultScene,
   avalancheScene,
@@ -26,7 +26,7 @@ import {
   TORNADO_BAITS,
   ultimateScene,
   voidAgain,
-} from "../src/data/drills";
+} from "../src/data/fights/m11s/drills";
 import { angOf, inZone, zoneCenter } from "../src/geometry";
 import type { Point, ScytheOverlay, Slot, SlotName, StepResult, Zone } from "../src/types";
 import { assertLines } from "./lines";

@@ -2,7 +2,7 @@
 // rule lines of its Learn cards, and the Practice drills and Timeline card that train it. The time
 // and the phase come from the picture's card.
 
-import type { Drill, QuizItem, Slot } from "../types";
+import type { Drill, QuizItem, Slot } from "../../../types";
 import { DRILLS } from "./drills";
 import { LEARN_CARDS, TIMELINE_CARDS } from "./questions";
 

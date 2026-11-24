@@ -6,7 +6,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, assert, beforeAll, beforeEach, test } from "vitest";
 import { TooltipProvider } from "../../src/components/ui/tooltip";
-import { DRILLS } from "../../src/data/drills";
+import { DRILLS } from "../../src/data/fights/m11s/drills";
 import { rotZone, stepZone, zoneCenter } from "../../src/geometry";
 import { buildPattern } from "../../src/lib/practice";
 import { PracticePage } from "../../src/pages/PracticePage";

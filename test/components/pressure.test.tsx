@@ -9,8 +9,8 @@ import { RunScore } from "../../src/components/pressure/RunScore";
 import { WatchDone } from "../../src/components/pressure/WatchDone";
 import { QuestionCard } from "../../src/components/quiz/QuestionCard";
 import { TooltipProvider } from "../../src/components/ui/tooltip";
-import { buildFight, type Choices, RANDOM } from "../../src/data/fight";
-import { LEARN_CARDS } from "../../src/data/questions";
+import { buildFight, type Choices, RANDOM } from "../../src/data/fights/m11s/fight";
+import { LEARN_CARDS } from "../../src/data/fights/m11s/questions";
 import type { StepResult } from "../../src/types";
 
 afterEach(() => {

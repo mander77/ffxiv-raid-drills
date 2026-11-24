@@ -3,7 +3,7 @@
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, assert, test, vi } from "vitest";
 import { CastList } from "../../src/components/pressure/CastList";
-import { buildFight } from "../../src/data/fight";
+import { buildFight } from "../../src/data/fights/m11s/fight";
 import type { CastControls } from "../../src/hooks/useCastTimeline";
 import { FightFrameContext, type FrameFn } from "../../src/hooks/useFightFrame";
 import { newFightState } from "../../src/lib/fight";

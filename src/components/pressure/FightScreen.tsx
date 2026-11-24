@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { Fight, FightSeg } from "../../data/fight";
+import type { Fight, FightSeg } from "../../data/fights/m11s/fight";
 import type { CastControls } from "../../hooks/useCastTimeline";
 import { FightFrameContext, type FrameFn } from "../../hooks/useFightFrame";
 import { useFightKeys } from "../../hooks/useFightKeys";

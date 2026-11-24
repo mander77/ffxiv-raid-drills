@@ -8,7 +8,7 @@
 // (25 and about 41 units out). So 1 unit is 0.4 yalm, and the arena is 40 x 40 yalms. No guide
 // states the size; this follows from the waymarks.
 import { dist, inZone, rot, rotZone, stepZone, zoneCenter } from "../geometry";
-import type { Fight, FightSeg } from "./fight";
+import type { Fight, FightSeg } from "./fights/m11s/fight";
 import type { Point, StepResult, Zone } from "../types";
 
 /** Normal movement speed, about 6 yalms a second, in arena units a second (6 / 0.4). Tune it here. */

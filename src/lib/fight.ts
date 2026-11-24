@@ -2,9 +2,9 @@
 // run skips ahead, when a result shows, the 3-2-1 before a mechanic, and the look-ahead answer
 // to look ahead to. The fight screen calls them on every frame; the tests call them too.
 
-import { type Category, categoriesAt } from "../data/abilities";
-import { facingNext, jumpsNext } from "../data/drills";
-import { buildHits, type Fight, type FightSeg, type Hit } from "../data/fight";
+import { type Category, categoriesAt } from "../data/fights/m11s/abilities";
+import { facingNext, jumpsNext } from "../data/fights/m11s/drills";
+import { buildHits, type Fight, type FightSeg, type Hit } from "../data/fights/m11s/fight";
 import { clickRoute, correctRoute, type Stop, showOf } from "../data/route";
 import { inZone, rotOverlay, rotZone, stepZone, zoneCenter } from "../geometry";
 import type { Boss, Point, Scene, StepResult, Zone } from "../types";

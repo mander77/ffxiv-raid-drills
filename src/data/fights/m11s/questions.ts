@@ -1,9 +1,9 @@
 // Quiz questions: the mechanics (Learn), and questions made from the timeline (Timeline).
-import { bySlot, shuffle } from "../util";
+import { bySlot, shuffle } from "../../../util";
 import { P1, P2, P3, P4, type Phase, TIMELINE } from "./timeline";
 import { tlAbilities } from "./abilities";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
-import type { Question, QuizItem, Slot, TimelineEvent } from "../types";
+import type { Question, QuizItem, Slot, TimelineEvent } from "../../../types";
 
 /* ---------- mechanic questions ---------- */
 function mq(id: string, order: number, phase: Phase, time: string, build: (s: Slot) => Question): QuizItem {

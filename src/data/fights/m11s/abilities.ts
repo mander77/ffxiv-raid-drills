@@ -7,7 +7,7 @@
 // with two abilities, for example), it takes the colours of the abilities it names.
 // The notes are written for this app.
 import { P1, P2, P3, P4, type Phase, TIMELINE } from "./timeline";
-import { sec } from "../time";
+import { sec } from "../../../time";
 import { cactbot } from "./sources";
 
 /** The enrage (Heartbreaker), in seconds into the fight: the last line of the cactbot timeline.

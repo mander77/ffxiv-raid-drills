@@ -1,8 +1,8 @@
 import { assert, test } from "vitest";
-import { MAJESTIC_PUDDLE, PLATFORM_X } from "../src/data/attacks";
-import { DRILLS } from "../src/data/drills";
-import { buildFight } from "../src/data/fight";
-import { cactbot, type LineName } from "../src/data/sources";
+import { MAJESTIC_PUDDLE, PLATFORM_X } from "../src/data/fights/m11s/attacks";
+import { DRILLS } from "../src/data/fights/m11s/drills";
+import { buildFight } from "../src/data/fights/m11s/fight";
+import { cactbot, type LineName } from "../src/data/fights/m11s/sources";
 import { inZone, rotZone, zoneCenter } from "../src/geometry";
 import { clock, sec } from "../src/time";
 import type { Slot, StepResult } from "../src/types";

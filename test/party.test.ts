@@ -1,5 +1,5 @@
 import { assert, test } from "vitest";
-import { cleanChoices, parseChoices, RANDOM } from "../src/data/fight";
+import { cleanChoices, parseChoices, RANDOM } from "../src/data/fights/m11s/fight";
 import { isSlot, markRole, partyOf, ROLES, slotName } from "../src/party";
 import type { SlotName } from "../src/types";
 

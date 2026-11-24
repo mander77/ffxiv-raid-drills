@@ -3,7 +3,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, assert, test } from "vitest";
 import { FightArena } from "../../src/components/pressure/FightArena";
-import { buildFight } from "../../src/data/fight";
+import { buildFight } from "../../src/data/fights/m11s/fight";
 import { type FightMode, newFightState, seek, viewOf } from "../../src/lib/fight";
 
 afterEach(cleanup);

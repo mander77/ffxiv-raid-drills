@@ -1,7 +1,7 @@
 import { type MouseEvent, type RefObject, useEffect, useEffectEvent, useRef } from "react";
 import { Link } from "react-router";
 import { cn } from "@/lib/utils";
-import { DRILLS } from "../../data/drills";
+import { DRILLS } from "../../data/fights/m11s/drills";
 import { useLineDrag } from "../../hooks/useLineDrag";
 import { kindsOf } from "../../lib/practice";
 import type { Drill } from "../../types";

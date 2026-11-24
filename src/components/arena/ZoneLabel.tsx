@@ -1,4 +1,4 @@
-import { HITBOX } from "../../data/attacks";
+import { HITBOX } from "../../data/fights/m11s/attacks";
 import { unit, zoneCenter } from "../../geometry";
 import type { Point, Zone } from "../../types";
 import { ArenaLabel, type LabelLook } from "./ArenaLabel";

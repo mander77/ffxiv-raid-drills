@@ -1,7 +1,7 @@
 import "./arena.css";
 import { Fragment, type MouseEvent, type ReactNode, useId, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W } from "../../data/attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W } from "../../data/fights/m11s/attacks";
 import { round2 } from "../../geometry";
 import type { Overlay, Point } from "../../types";
 import { hitsFirst, isWeapon, Shape } from "./Shape";

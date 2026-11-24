@@ -4,14 +4,14 @@
 // A value that matches no source is listed below with the question for the owner, and the test
 // checks that it still matches none, so the list stays true.
 import { assert, test } from "vitest";
-import { ABILITIES, ENRAGE } from "../src/data/abilities";
-import * as ATTACKS from "../src/data/attacks";
-import { DRILLS } from "../src/data/drills";
-import { buildFight, cleanChoices } from "../src/data/fight";
-import { LEARN_CARDS, TIMELINE_CARDS } from "../src/data/questions";
-import { BOSSMOD_ABILITIES, BOSSMOD_ACTORS, BOSSMOD_ARENA_HALF, CACTBOT_LINES } from "../src/data/source.gen";
-import { bossmod } from "../src/data/sources";
-import { TIMELINE } from "../src/data/timeline";
+import { ABILITIES, ENRAGE } from "../src/data/fights/m11s/abilities";
+import * as ATTACKS from "../src/data/fights/m11s/attacks";
+import { DRILLS } from "../src/data/fights/m11s/drills";
+import { buildFight, cleanChoices } from "../src/data/fights/m11s/fight";
+import { LEARN_CARDS, TIMELINE_CARDS } from "../src/data/fights/m11s/questions";
+import { BOSSMOD_ABILITIES, BOSSMOD_ACTORS, BOSSMOD_ARENA_HALF, CACTBOT_LINES } from "../src/data/fights/m11s/source.gen";
+import { bossmod } from "../src/data/fights/m11s/sources";
+import { TIMELINE } from "../src/data/fights/m11s/timeline";
 import { nearClock } from "../src/time";
 import type { Slot } from "../src/types";
 

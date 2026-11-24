@@ -1,7 +1,7 @@
 import { assert, test } from "vitest";
-import { ABILITIES, ENRAGE, FIGHT_END } from "../src/data/abilities";
-import { DRILLS } from "../src/data/drills";
-import { buildFight, buildHits } from "../src/data/fight";
+import { ABILITIES, ENRAGE, FIGHT_END } from "../src/data/fights/m11s/abilities";
+import { DRILLS } from "../src/data/fights/m11s/drills";
+import { buildFight, buildHits } from "../src/data/fights/m11s/fight";
 
 test("the ability list runs in time order, and every row says what it does", () => {
   ABILITIES.forEach((a, i) => {

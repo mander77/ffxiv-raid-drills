@@ -1,7 +1,7 @@
 import { assert, test } from "vitest";
-import { tlAbilities } from "../src/data/abilities";
-import { LEARN_CARDS, LEARN_GROUPS, TIMELINE_CARDS } from "../src/data/questions";
-import { TIMELINE } from "../src/data/timeline";
+import { tlAbilities } from "../src/data/fights/m11s/abilities";
+import { LEARN_CARDS, LEARN_GROUPS, TIMELINE_CARDS } from "../src/data/fights/m11s/questions";
+import { TIMELINE } from "../src/data/fights/m11s/timeline";
 import { sec } from "../src/time";
 import type { Slot } from "../src/types";
 import { readingMs } from "../src/util";

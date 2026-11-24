@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
-import { ABILITIES } from "../../data/abilities";
-import type { Fight, FightSeg } from "../../data/fight";
+import { ABILITIES } from "../../data/fights/m11s/abilities";
+import type { Fight, FightSeg } from "../../data/fights/m11s/fight";
 import { useFightFrame } from "../../hooks/useFightFrame";
 import { activeSeg, type FightView, nextSeg, upcoming, watchQuestion } from "../../lib/fight";
 import { clock } from "../../time";

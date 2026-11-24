@@ -4,11 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { LearnPicture } from "../components/arena/LearnPicture";
 import { PageContainer } from "../components/PageContainer";
-import { DRILLS } from "../data/drills";
-import { FIGHT_INFO } from "../data/fightInfo";
-import { LEARN_PICTURES } from "../data/pictures";
-import { LEARN_CARDS, TIMELINE_CARDS } from "../data/questions";
-import { BOSSMOD, CACTBOT, WTFDIG } from "../data/sources";
+import { DRILLS } from "../data/fights/m11s/drills";
+import { FIGHT_INFO } from "../data/fights/m11s/fightInfo";
+import { LEARN_PICTURES } from "../data/fights/m11s/pictures";
+import { LEARN_CARDS, TIMELINE_CARDS } from "../data/fights/m11s/questions";
+import { BOSSMOD, CACTBOT, WTFDIG } from "../data/fights/m11s/sources";
 import { useSlotStore } from "../stores/slot";
 
 /** The Learn card whose answer picture is at the top of the page: the first mechanic of the

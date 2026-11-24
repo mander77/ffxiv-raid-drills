@@ -10,7 +10,7 @@ import { PressureStart } from "../components/pressure/PressureStart";
 import { QuickRound } from "../components/pressure/QuickRound";
 import { RunScore } from "../components/pressure/RunScore";
 import { WatchDone } from "../components/pressure/WatchDone";
-import { buildFight, type Choices, type Fight, parseChoices, RANDOM } from "../data/fight";
+import { buildFight, type Choices, type Fight, parseChoices, RANDOM } from "../data/fights/m11s/fight";
 import { playerLink } from "../lib/pressure";
 import { usePressureStore } from "../stores/pressure";
 import { useSlotStore } from "../stores/slot";

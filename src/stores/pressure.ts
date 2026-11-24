@@ -3,7 +3,7 @@
 // Watch the correct moves.
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { type Choices, cleanChoices, RANDOM } from "../data/fight";
+import { type Choices, cleanChoices, RANDOM } from "../data/fights/m11s/fight";
 
 /** The seconds to decide that the quick round offers. */
 export const DECIDE_SECONDS = [4, 6, 8, 10] as const;

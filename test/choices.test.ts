@@ -1,6 +1,15 @@
 import { assert, test } from "vitest";
-import { DRILLS } from "../src/data/drills";
-import { buildFight, CHOICE_ROWS, type Choices, choicesText, type Fight, type Picks, parseChoices, RANDOM } from "../src/data/fight";
+import { DRILLS } from "../src/data/fights/m11s/drills";
+import {
+  buildFight,
+  CHOICE_ROWS,
+  type Choices,
+  choicesText,
+  type Fight,
+  type Picks,
+  parseChoices,
+  RANDOM,
+} from "../src/data/fights/m11s/fight";
 import { newCode } from "../src/util";
 
 const REPEATS = 40;

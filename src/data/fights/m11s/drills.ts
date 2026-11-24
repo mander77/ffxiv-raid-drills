@@ -1,11 +1,11 @@
 // Map drills: the arena scenes and the rules that decide each answer zone.
-import { bySlot, shuffle, random } from "../util";
+import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
-import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../geometry";
+import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
 import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, gust, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
-import { markRole, partyOf } from "../party";
-import type { Boss, Drill, Lines, Overlay, Point, RectZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../types";
+import { markRole, partyOf } from "../../../party";
+import type { Boss, Drill, Lines, Overlay, Point, RectZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../../../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
 /** One weapon in a jump set. `a` is its direction from the arena center, in degrees clockwise from north.

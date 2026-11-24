@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { HITBOX, isStretched, TOWER_R } from "../../data/attacks";
+import { HITBOX, isStretched, TOWER_R } from "../../data/fights/m11s/attacks";
 import { round2, unit } from "../../geometry";
 import type { Overlay, Point } from "../../types";
 import { Weapon } from "./Weapon";

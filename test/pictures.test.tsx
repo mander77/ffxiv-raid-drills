@@ -3,9 +3,9 @@ import { assert, test } from "vitest";
 import { WAYMARKS } from "../src/components/arena/Arena";
 import { DOT_R } from "../src/components/arena/BossMark";
 import { LearnPicture } from "../src/components/arena/LearnPicture";
-import { SPLIT_HALF_W } from "../src/data/attacks";
-import { LEARN_PICTURES } from "../src/data/pictures";
-import { LEARN_CARDS } from "../src/data/questions";
+import { SPLIT_HALF_W } from "../src/data/fights/m11s/attacks";
+import { LEARN_PICTURES } from "../src/data/fights/m11s/pictures";
+import { LEARN_CARDS } from "../src/data/fights/m11s/questions";
 import type { Overlay, Picture, Preview, Slot } from "../src/types";
 
 /** A Learn picture as SVG text. */
