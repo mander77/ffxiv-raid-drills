@@ -24,12 +24,13 @@ tokens or account details.
   push changes the app, the Preview workflow waits for the owner's approval, then makes the preview.
   See `docs/decisions.md` for the hosting details.
 - CI: GitHub Actions (`.github/workflows/ci.yml`) runs lint, the type check, the unit tests, the
-  build and the browser tests on every branch push. A ruleset on `main` takes only a commit on
-  which both CI jobs passed, and blocks force pushes, deletion and merge commits. Only the owner
-  may push to `main` directly; anyone else needs a pull request.
+  build and the browser tests on pull requests to `main` and on pushes to `main`, not on a
+  branch push alone, to save Actions minutes. Every change reaches `main` through a pull
+  request, merged with "Rebase and merge": a ruleset on `main` merges one only after both CI
+  jobs passed on its last commit, and blocks force pushes, deletion and merge commits. GitHub
+  rebases the branch as it merges, so a branch that fell behind `main` needs no new CI run.
 - Merged branches: GitHub deletes a pull request's branch when the pull request merges (the
-  repository setting "Automatically delete head branches"). The publish script deletes the
-  branches that reach `main` by a direct push.
+  repository setting "Automatically delete head branches").
 
 ## The aim of the tool
 
@@ -207,29 +208,31 @@ e2e/                 Playwright browser tests
 
 ## How to publish
 
-These steps put a branch on `main`, the live site.
+These steps put a branch on `main`, the live site, through its pull request. Other sessions
+can publish in between: GitHub rebases the branch onto `main` as it merges, so you do not
+rebase, run CI or approve a preview again when `main` moves.
 
-1. `git fetch origin`, then make sure that the branch contains `origin/main`:
-   `git merge-base --is-ancestor origin/main <branch>`. Another session can publish in between. If
-   main moved, rebase the branch and check again.
-2. Run `npm run build` and note the bundle name, `dist/assets/index-<hash>.js`.
-3. From the branch checkout, run `npm run publish` (any shell, PowerShell too). The script runs
-   the type check, the tests and the lint, then pushes the branch as `mander77`. The push starts CI on GitHub.
-4. If the branch changed the app, wait for CI to pass, then ask the owner to approve the
+1. Run `npm run build` and note the bundle name, `dist/assets/index-<hash>.js`.
+2. From the branch checkout, run `npm run publish` (any shell, PowerShell too). The script runs
+   the type check, the tests and the lint, pushes the branch as `mander77` and opens its pull
+   request, if it has none yet. The pull request starts CI on GitHub.
+3. If the branch changed the app, wait for CI to pass, then ask the owner to approve the
    waiting Preview run on GitHub. Then run
    `npm run wait-deploy -- https://<branch>.ffxiv-raid-drills.app index-<hash>.js` and
    test the preview in a browser. A branch with only docs, tests or tooling gets no preview: skip
    this step.
-5. From the same branch checkout, run `npm run publish -- main`. Never use the main checkout:
-   another session may be working there. The script checks that the branch still contains
-   `origin/main`, then waits for the branch's CI run on that commit and stops if it failed:
-   GitHub refuses a commit on `main` that has not passed CI. Then it pushes the branch to `main`
-   and deletes every branch on GitHub that `main`
-   already contains. A branch that merged `main` into itself must be rebased first, because `main`
-   takes no merge commits.
-6. Run `npm run wait-deploy -- https://ffxiv-raid-drills.app index-<hash>.js` and check the
-   live site (again, only when the app changed). Then remove the worktree and delete the local
-   branch.
+4. From the same branch checkout, run `npm run publish -- main`. Never use the main checkout:
+   another session may be working there. The script pushes the branch, waits for CI on its last
+   commit and stops if it failed, then merges the pull request with "Rebase and merge". GitHub
+   deletes the branch on GitHub. If GitHub cannot rebase the branch (a conflict with `main`),
+   rebase it on `origin/main` yourself and run the script again; that push needs a new CI run.
+   A branch that merged `main` into itself must be rebased first, because `main` takes no merge
+   commits.
+5. Run `npm run wait-deploy -- https://ffxiv-raid-drills.app index-<hash>.js` and check the
+   live site (again, only when the app changed). CI also runs on `main` after the merge; if it
+   fails, two branches that passed on their own broke each other, so fix it at once. Then remove
+   the worktree and delete the local branch (`git branch -D <branch>`: its commits reached
+   `main` with new names, so `-d` does not see them as merged).
 
 ## Accounts and identity
 
