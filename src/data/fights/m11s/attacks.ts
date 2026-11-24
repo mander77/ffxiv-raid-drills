@@ -38,6 +38,10 @@ export const PUDDLE_R = yalms(bossmod("Cometite").range);
 export const VOID_PUDDLE: Puddle = {r:PUDDLE_R, life:bossmod("Cometite").cast};
 /** A Majestic Meteor puddle in Arena Split (MajesticMeteorAOE, "range 6 circle", 3.0 s cast). */
 export const MAJESTIC_PUDDLE: Puddle = {r:yalms(bossmod("MajesticMeteorAOE").range), life:bossmod("MajesticMeteorAOE").cast};
+/** An Atomic Impact fire puddle in Ecliptic Stampede, as the marked player drops it ("range 5
+    circle"). It stays on the floor: BossMod draws it as a voidzone (AtomicImpactPuddle) that does
+    not go off. */
+export const ATOMIC_PUDDLE: Puddle = {r:yalms(bossmod("AtomicImpact").range), life:Number.POSITIVE_INFINITY};
 /** The weapon scythe's donut: safe only within 5 yalms of him ("range 5-60 donut"). Its
     proteans hit at the same time. */
 export const SCYTHE_SAFE = yalms(bossmod("AssaultEvolvedScytheAOE").inner);
@@ -104,6 +108,8 @@ export const soloTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("CosmicK
 /** An Ecliptic Stampede pair tower (Weighty Impact, "range 4 circle"): two players soak it, a melee
     and a healer or ranged (BossMod's ImpactKiss: 2 soakers). */
 export const pairTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("WeightyImpact").range, 2);
+/** The radius of an Ecliptic Stampede tower, solo or pair (both "range 4 circle"). */
+export const ECL_TOWER_R = yalms(Math.max(bossmod("CosmicKissEcliptic").range, bossmod("WeightyImpact").range));
 /** The Heartbreak Kick tower ("range 4 circle"). BossMod lets up to 8 soak it; the app shows all 8
     (the owner's choice): either the whole party soaks it, or the tanks do with invulns. */
 export const kickTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("HeartbreakKickTower").range, 8);

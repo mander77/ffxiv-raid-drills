@@ -2,11 +2,11 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, TOWER_R, RAW_STACK_HALF, SCYTHE_SAFE, atomicPuddle, axeHit, fireAndFury, gust, hurricaneLine, lineStack, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, swordCross, swordPocket, tankCone } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, ECL_TOWER_R, TOWER_R, RAW_STACK_HALF, SCYTHE_SAFE, atomicPuddle, axeHit, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
-import type { Boss, Drill, Lines, Overlay, Point, RectZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../../../types";
+import type { Boss, CircleZone, Drill, Lines, Overlay, Point, RectZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../../../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
 /** One weapon in a jump set. `a` is its direction from the arena center, in degrees clockwise from north.
@@ -519,10 +519,115 @@ const STACK_EDGE = [-1, -0.5, 0, 0.5, 1].map(k => 180 + k * RAW_STACK_HALF);
 const SCYTHE_STACK: Zone = {
   fn:p => { const v: Point = [p[0] - 50, p[1] - 50], r = Math.hypot(v[0], v[1]); return r >= 11 && r <= 40 && Math.abs(angOf(v) - 180) <= RAW_STACK_HALF; },
   label:[50, 69], show:[{poly:[...STACK_EDGE.map(a => POINT_AT(a, 11)), ...[...STACK_EDGE].reverse().map(a => POINT_AT(a, 34))]}]};
-// TS note: `(x): Overlay => (...)` gives the arrow function a return type. Without it,
-// TypeScript would type t as plain string, and "puddle" would not fit the Overlay union.
-const NPUD = [22, 34, 46, 58, 70, 82].map(x => atomicPuddle([x, 5]));
-const SPUD = [18, 30, 42, 54, 66, 78].map(x => atomicPuddle([x, 95]));
+/* Ecliptic Stampede: where the two marked players drop their six fire puddles, in the order they
+   drop them (Hector's M11S guide video, 19:06 to 20:15). The north one starts on the north wall
+   in line with B and drops four puddles walking west along it; the south one starts on the south
+   wall in line with D and walks east. Then each steps in from the wall and drops two more in the
+   gaps between the wall puddles, walking back, so the corners stay clear. The spots are the
+   app's choice, read from the video: wall puddles 15 units (6 yalms) apart, more than a
+   puddle's 5 yalms, and the inner row 13 units from the wall, just clear of the wall puddles. */
+type EclWall = "north" | "south";
+const WALL_SPOTS: Record<EclWall, Point[]> = {
+  north:[[75, 5], [60, 5], [45, 5], [30, 5], [37.5, 18], [52.5, 18]],
+  south:[[25, 95], [40, 95], [55, 95], [70, 95], [62.5, 82], [47.5, 82]]
+};
+const NPUD = WALL_SPOTS.north.map(atomicPuddle);
+const SPUD = WALL_SPOTS.south.map(atomicPuddle);
+/** Where you wait by the boss after your puddles, while the others soak the towers: NW of him
+    from the north wall, NE from the south wall (the same spots as the Four-way Fireball bait). */
+const ECL_WAIT: Record<EclWall, CircleZone> = {north:{c:[43, 43], r:5.5}, south:{c:[57, 43], r:5.5}};
+/** The Ecliptic towers in the Learn card's example: tank towers NE and SE, two-player towers NW
+    and SW. The spots change from pull to pull; these are the app's example. */
+const ECL_TOWERS: Point[] = [[72, 28], [72, 72], [28, 28], [28, 72]];
+/** How far your two inner puddles may go from your wall, and from the north-south line through
+    the middle (so they stay clear of the corners). The app's choice: the owner wants them only
+    clear of the corners and, as much as they can be, of the towers. */
+const INNER_DEPTH = 30, INNER_HALF_W = 25;
+
+/* Your fifth and sixth Ecliptic puddles: anywhere just inside your wall puddles, clear of the
+   corners, out of the towers, and clear of every puddle you dropped. Together the six puddles
+   end up as a triangle against the wall. `best` is the spot from Hector's video. The map draws
+   the area as rays from the boss, with the towers and the puddles cut out. */
+function innerPuddle(wall: EclWall, best: Point): (results: StepResult[]) => Zone {
+  const north = wall === "north";
+  return results => {
+    const holes = [...ECL_TOWERS.map(q => ({q, r:ECL_TOWER_R})),
+      ...results.flatMap(r => r.drop ? [{q:r.drop, r:ATOMIC_PUDDLE.r}] : [])];
+    const fn = (p: Point): boolean => inArena(p) && Math.abs(p[0] - 50) <= INNER_HALF_W
+      && (north ? p[1] <= INNER_DEPTH : p[1] >= 100 - INNER_DEPTH) && holes.every(h => dist(p, h.q) > h.r);
+    const part = (deg: number): Stretch | null => {
+      const cos = Math.abs(Math.cos(deg * DEG)), sin = Math.abs(Math.sin(deg * DEG));
+      const far = Math.min(toEdge(CENTER, deg), sin > 1e-9 ? INNER_HALF_W / sin : Infinity);
+      return cutOut([[(50 - INNER_DEPTH) / cos, far]], CENTER, deg, holes)[0] ?? null;
+    };
+    const mid = north ? 0 : 180;
+    const degs = Array.from({length:101}, (_x, i) => mid - 50 + i);
+    const label = fn(best) ? best : nearestTo(best, fn) ?? best;
+    return {fn, label, show:rayArea(CENTER, degs, part).map(poly => ({poly}))};
+  };
+}
+
+/* Heartbreak Kick: one tower in the middle of the arena (BossMod's HeartbreakKick: the arena's
+   center, up to 8 soakers), hit 5, then 6, then 7 times. Statics do it one of two ways: the
+   party soaks it, or the tanks soak it with invulns while everyone else stays out (the owner;
+   Pressure's Settings pick it). With the tanks, any spot out of the tower is correct. */
+function kickScene(way: "party" | "tanks"): Scene {
+  const tower = kickTower(CENTER), hit = towerHit(CENTER);
+  const outside = (deg: number): Stretch | null => [TOWER_R, toEdge(CENTER, deg)];
+  const out: Zone = {fn:p => inArena(p) && dist(p, CENTER) > TOWER_R, label:[50, 72],
+    show:rayArea(CENTER, Array.from({length:361}, (_x, d) => d), outside).map(poly => ({poly}))};
+  const where: Zone = way === "party" ? {c:CENTER, r:TOWER_R} : out;
+  const steps = [5, 6, 7].map((n): Step => ({
+    q:`Heartbreak Kick: ${n} hits. Where do you stand?`, z:where,
+    a:way === "party" ? ["In the tower, with the party.", "Heal between the hits."]
+      : ["Anywhere out of the tower.", "The tanks soak it with invulns. Heal them between the hits."],
+    // With the party you take the hits on purpose; with the tanks they must miss you.
+    reveal:[hit], ...(way === "party" ? {hits:[]} : {})}));
+  return {setup:["One tower in the middle, hit 5, then 6, then 7 times.",
+      way === "party" ? "Here the party soaks it." : "Here the tanks soak it with invulns."],
+    boss:BOSS, overlays:[tower], steps,
+    rule:["The tanks soak it with invulns, or the party soaks it.", "Heal between the hits."]};
+}
+
+/* Ecliptic Stampede for a marked player: your start spot as the markers come, then your six
+   puddles along your wall, one at each Atomic Impact, then your spot by the boss while the
+   others soak the towers and take the tethers. The tethers lock on to the players closest to
+   the middle of each tower, so the four players by the boss are never tethered (the video). Your puddles stay on the floor (ATOMIC_PUDDLE). The other marked
+   player drops theirs along the other wall at the same times. */
+function eclipticScene(s: Slot, wall: EclWall): Scene {
+  const other: EclWall = wall === "north" ? "south" : "north", spots = WALL_SPOTS[wall];
+  const north = wall === "north";
+  const dir = north ? "west" : "east", back = north ? "east" : "west", waymark = north ? "B" : "D";
+  // A wall spot reaches 4 units ahead and 2 units back, so a correct click stays clear of the last
+  // puddle (15 units back, 12.5 units wide). The two inner spots are open areas (innerPuddle).
+  const wallDrop = (p: Point): RectZone => ({rect:north ? [p[0] - 4, p[1] - 5, p[0] + 2, p[1] + 5] : [p[0] - 2, p[1] - 5, p[0] + 4, p[1] + 5]});
+  const answer = (i: number): Lines => {
+    if (i === 0) return [`The ${wall} wall, in line with ${waymark}.`, `Then walk ${dir} along the wall, one puddle at a time.`];
+    if (i < 4) return [`One step ${dir} along the ${wall} wall, clear of the last puddle.`];
+    if (i === 4) return ["Step in from the wall, just inside your puddles.", "Stay clear of the corners and the towers."];
+    return [`Another one just inside your puddles, a step ${back}.`, "Clear of the corners, the towers and your puddles."];
+  };
+  const towers: Overlay[] = [soloTower(ECL_TOWERS[0]), soloTower(ECL_TOWERS[1]), pairTower(ECL_TOWERS[2]), pairTower(ECL_TOWERS[3])];
+  const drops: Step[] = spots.map((p, i): Step => ({
+    q:i === 0 ? `You are marked, and your wall is the ${wall.toUpperCase()} wall. Where do you drop your first puddle?` : `Puddle ${i + 1}?`,
+    ...(i < 4 ? {z:wallDrop(p)} : {zf:innerPuddle(wall, p)}), stand:p, drop:ATOMIC_PUDDLE, a:answer(i),
+    // The other marked player drops a puddle along the other wall at the same time; the towers
+    // appear while the fifth puddle drops.
+    cue:[atomicPuddle(WALL_SPOTS[other][i]), ...(i === 4 ? towers : [])]
+  }));
+  return {setup:["Tanks and melee stack under the boss.", "Healers and ranged stay out to bait the markers.",
+      "Marked? Drop four fire puddles along your wall, then two just inside them.", "Then wait by the boss while the others soak the towers."],
+    boss:BOSS, overlays:[{t:"mark",x:25,y:25,l:"R1",r:"D"},{t:"mark",x:75,y:25,l:"R2",r:"D"}],
+    steps:[
+      {q:"Where do you stand?", z:bySlot(s, {H1:{c:[25,74],r:9}, H2:{c:[75,74],r:9}}), a:bySlot(s, {H1:["SW, outside."], H2:["SE, outside."]})},
+      ...drops,
+      {q:"Puddles done. The others soak the towers and take the tethers. Where do you wait?", z:ECL_WAIT[wall],
+        a:wall === "north" ? ["NW of the boss, under him.", "The south wall's player takes NE.", "Close to the middle, so no tether goes to you."]
+          : ["NE of the boss, under him.", "The north wall's player takes NW.", "Close to the middle, so no tether goes to you."]}],
+    rule:["Marked? Go to the safe corner on your wall.", "Two marked on one side? The one closer to the proximity AoE moves.",
+      "North wall: in line with B, walk west. South: in line with D, walk east.",
+      "After four, drop two more just inside them, clear of the corners and towers.", "Then wait by the boss: north wall NW, south wall NE."]};
+}
 
 /* ---------- Arena Split ----------
    Two platforms, west and east, from Flatliner to the Crown of Arcadia, drawn from BossMod
@@ -1007,11 +1112,8 @@ export const DRILLS: readonly Drill[] = [
     build:s=>massiveScene(otherSide(homeSide(s)))},
   {id:"m-avalanche", order:21, random:true, phase:P3, time:"7:39", title:"Arcadion Avalanche", kind:"towerKnockback", soak:SPLIT_SOAK,
     build:s=>avalancheScene(s, otherSide(homeSide(s)), randomEnd(), randomSide(), randomEnd())},
-  {id:"m-ecl-start", order:26, phase:P4, time:"8:54", title:"Ecliptic Stampede: Start", kind:"puddles",
-    build:s=>({setup:["Tanks and melee stack under the boss.", "Healers and ranged stay out to bait the markers."],
-      boss:BOSS, overlays:[{t:"mark",x:25,y:25,l:"R1",r:"D"},{t:"mark",x:75,y:25,l:"R2",r:"D"}],
-      steps:[{q:"Where do you stand?", z:bySlot(s, {H1:{c:[25,74],r:9}, H2:{c:[75,74],r:9}}), a:bySlot(s, {H1:["SW, outside."], H2:["SE, outside."]})}],
-      rule:["Marked? Go to the safe corner on your wall.", "Two marked on one side? The one closer to the proximity AoE moves."]})},
+  {id:"m-ecl-start", order:26, variants:["south","north"], follows:{variant:"wall"}, phase:P4, time:"8:54 to 9:27", title:"Ecliptic Stampede: Puddles", kind:"puddles",
+    build:(s, v)=>eclipticScene(s, v === "north" ? "north" : "south")},
   {id:"m-ecl-two", order:26.5, variants:["north","south"], follows:{variant:"wall"}, phase:P4, time:"9:31", title:"Ecliptic Stampede: Two-way Fireball", kind:"lineStack",
     build:(_s, v)=>({setup:["You were marked. You dropped your puddles along the " + (v ?? "north").toUpperCase() + " wall.", "The boss casts Two-way Fireball: two Line Stacks, east and west."], ordered:true,
       boss:BOSS, overlays:[...NPUD, ...SPUD],
@@ -1027,5 +1129,7 @@ export const DRILLS: readonly Drill[] = [
         reveal:[315, 45, 225, 135].map(a => lineStack([50, 50], POINT_AT(a, 10))),
         // You take the NW (north wall) or NE (south wall) one; the other three must miss you.
         hits:[315, 45, 225, 135].filter(a => a !== (v === "south" ? 45 : 315)).map(a => lineStack([50, 50], POINT_AT(a, 10)))}],
-      rule:FOUR_WAY_RULE})}
+      rule:FOUR_WAY_RULE})},
+  {id:"m-hb", order:28, variants:["party", "tanks"], follows:{variant:"kick"}, phase:P4, time:"9:53 to 10:34", title:"Heartbreak Kick", kind:"tower", soak:8,
+    build:(_s, v)=>kickScene(v === "tanks" ? "tanks" : "party")}
 ];

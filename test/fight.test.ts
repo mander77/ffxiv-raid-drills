@@ -235,3 +235,14 @@ test("Arena Split: a round 1 tether shows from the first towers, before the knoc
       assert.include(towers.scene.setup.join(" "), round1.scene.tether ? "You have a tether" : "No tether", s);
     }
 });
+
+test("no two mechanics run at once: each one's last click is due before the next one starts", () => {
+  for (const s of ["H1", "H2"] as const)
+    for (let i = 0; i < 20; i++) {
+      const f = buildFight(s);
+      f.segs.slice(1).forEach((g, k) => {
+        const prev = f.segs[k];
+        assert.isAtMost(Math.max(...prev.due), g.from, `${prev.title} runs into ${g.title}`);
+      });
+    }
+});
