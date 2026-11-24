@@ -74,3 +74,38 @@ test("the next step's cue shows after a correct answer, and waits after an incor
   rerender(<LiveArena scene={scene} k={0} results={answer(false)} showLast={false} hint={false} />);
   assert.ok(screen.queryByText("PORTAL LINES"), "shown once the next step is asked");
 });
+
+test("Void Stardust: every puddle fades when Comet is asked, but stays for the stack", () => {
+  const drill = DRILLS.find((d) => d.id === "m-void");
+  if (!drill) throw new Error("no m-void");
+  // Answer every step up to the third puddle, so the step after it (Comet or the stack) is asked.
+  const puddlesBefore = (variant: string) => {
+    const scene = drill.build("H1", variant),
+      results: StepResult[] = [],
+      lastDrop = scene.steps.map((st) => Boolean(st.drop)).lastIndexOf(true);
+    for (const st of scene.steps.slice(0, lastDrop + 1)) {
+      const z = stepZone(st, results);
+      if (!z) throw new Error("no zone");
+      results.push({ p: zoneCenter(z), ok: true, z, drop: st.drop ? zoneCenter(z) : null });
+    }
+    return { scene, results };
+  };
+  // A correct third puddle asks the next step at once, so it fades with or without its answer on
+  // the floor. An incorrect one waits for Next step.
+  for (const [variant, ok, showLast, lastFades] of [
+    ["spread", true, false, true],
+    ["spread", true, true, true],
+    ["spread", false, true, false],
+    ["stack", true, false, false],
+    ["stack", true, true, false],
+  ] as const) {
+    const { scene, results } = puddlesBefore(variant);
+    results[results.length - 1] = { ...results[results.length - 1], ok };
+    const { container, unmount } = render(<LiveArena scene={scene} k={0} results={results} showLast={showLast} hint={false} />);
+    const drops = [...container.querySelectorAll("circle.drop")];
+    const name = `${variant}, ${ok ? "correct" : "incorrect"}, showLast ${showLast}`;
+    assert.equal(drops.length, 3, `${name}: three puddles`);
+    assert.equal(drops[2].classList.contains("fading"), lastFades, `${name}: the last puddle`);
+    unmount();
+  }
+});

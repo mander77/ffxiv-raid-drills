@@ -29,7 +29,7 @@ export interface LiveArenaProps {
   /** The boss, when the fight clock places him. Left out, he follows the answers. */
   boss?: Boss | null;
   /** Whether the puddle of step i has gone off, so it fades. Left out, a puddle fades two steps
-      after it drops. */
+      after it drops, or when a step with puddlesOff is asked. */
   wentOff?: (i: number) => boolean;
   /** Label the last correct answer "Correct spot". Watch the correct moves leaves it out: your marker
       walks into each spot. */
@@ -117,9 +117,15 @@ export function LiveArena({
   const lastStep = last ? sc.steps[n - 1] : undefined;
   const reveal = lastStep?.reveal ? hitsFirst(lastStep.reveal.map((o) => rotOverlay(o, k))) : [];
 
+  // After a correct answer the next question is already asked; after an incorrect one it waits
+  // for Next step.
+  const asked = showLast && !results[n - 1]?.ok ? n - 1 : n;
+
   // The puddles dropped before the last step with clearDrops (up to the one asked) are gone. A
-  // puddle goes off two steps after it drops: it fades out then.
+  // puddle goes off two steps after it drops, or when a step with puddlesOff is asked: it fades
+  // out then.
   const kept = sc.steps.slice(0, asking + 1).reduce((from, st, i) => (st.clearDrops ? i : from), 0);
+  const allOff = sc.steps.slice(0, asked + 1).some((st) => st.puddlesOff);
   const drops: ReactNode[] = [];
   results.forEach((r, i) => {
     const puddle = sc.steps[i].drop;
@@ -128,7 +134,7 @@ export function LiveArena({
         <circle
           // biome-ignore lint/suspicious/noArrayIndexKey: a puddle belongs to its step, which never moves.
           key={`drop-${i}`}
-          className={cn("drop", (wentOff ? wentOff(i) : i <= n - 2) && "fading")}
+          className={cn("drop", (wentOff ? wentOff(i) : allOff || i <= n - 2) && "fading")}
           cx={round2(r.drop[0])}
           cy={round2(r.drop[1])}
           r={puddle.r}
@@ -141,12 +147,9 @@ export function LiveArena({
         <Shape key={`leave-${i}`} overlay={leave} />,
       );
   });
-  // Cues show with their step's question and stay. After a correct answer the next question is
-  // already asked, so its cue shows too; after an incorrect one it waits for Next step. Player
-  // marks in a cue go in the marks layer.
-  const cuesTo = showLast && !results[n - 1]?.ok ? n - 1 : n;
+  // Cues show with their step's question and stay. Player marks in a cue go in the marks layer.
   const cues = sc.steps
-    .slice(0, cuesTo + 1)
+    .slice(0, asked + 1)
     .flatMap((st) => st.cue ?? [])
     .map((o) => rotOverlay(o, k));
 

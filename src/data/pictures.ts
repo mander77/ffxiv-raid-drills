@@ -230,12 +230,13 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...stackOn("R1"), tag(68, 83, "STACK, RANDOM DPS")]),
       show([...spreadHits(stackedMarks), ...ALL.map(([l]) => target(inStack(l))), tag(68, 83, "8 STACKS")])]}; },
   "k-void-spread": s => { const gaps = cometSpread(s)(VOID_RESULTS), spreadWith = (p: Point): Overlay[] => spreadHits([...FIXED_SPREAD_MARKS, you(s, p)]);
-    return {overlays:[...PUDDLE_PIECES, ...FIXED_SPREAD_MARKS], boss:BOSS, after:[...spreadWith(zoneCenter(gaps)), you(s, zoneCenter(gaps))], answer:[gaps], options:[
+    // Every puddle went off before Comet, so none is drawn.
+    return {overlays:FIXED_SPREAD_MARKS, boss:BOSS, after:[...spreadWith(zoneCenter(gaps)), you(s, zoneCenter(gaps))], answer:[gaps], options:[
       hit(youIn(s, gaps), spreadWith(zoneCenter(gaps))), hit(youAt(s, [37, 71]), spreadWith([37, 71])),
       show([stackHit(stackedMarks), ...stackedMarks]), hit(youAt(s, [50, 58], 9), [donut(CENTER, FAKE.voidDonut)])]}; },
   "k-void-sprint": s => { const R = buildJumpSet(s, faceApproach(weapons([[180, "scythe"]]))), open = cometSpread(s)(VOID_RESULTS), lb = zoneCenter(open);
     const waitAt = bySlot<Point>(s, {H1:[83, 50], H2:[50, 17]});
-    return {overlays:[...PUDDLE_PIECES, ...R.overlays, ...FIXED_SPREAD_MARKS], boss:STILL, after:[aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], answer:[open],
+    return {overlays:[...R.overlays, ...FIXED_SPREAD_MARKS], boss:STILL, after:[aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], answer:[open],
       note:"Example: the first weapon of the second set is a scythe in the south.", options:[
         show([aoe(lb, SPREAD_R), you(s, lb), guide(lb, R.W[0].p)], [open]),
         show([aoe(waitAt, SPREAD_R), you(s, waitAt), say("WAIT FOR HIS FACING", 8)], [open]),

@@ -161,6 +161,9 @@ export interface Step {
   /** The puddles dropped before this step are gone from the moment it is asked. After Void
       Stardust, the puddles stay only until the weapons start. */
   clearDrops?: boolean;
+  /** Every puddle dropped before this step has gone off by the time it is asked, so Practice
+      fades them then. The full fight times each puddle itself. */
+  puddlesOff?: boolean;
   /** Drawn after this step is answered. */
   reveal?: Overlay[];
   /** The attacks of this step that the correct spot must stay out of, when they are not all of
