@@ -109,10 +109,30 @@
 
 /* The fonts, bundled with the site (src/main.tsx imports them). Source Sans 3 for text, Saira
    Condensed for the site name, tabs, headings and big numbers: as Tailwind names, font-sans and
-   font-display. */
+   font-display. Each one has a "fallback" face next to it: a font the computer already has, resized
+   to take the same space, so the text does not move when the web font arrives (index.html preloads
+   the files too). test/fonts.test.ts checks these values against the font files. */
+@font-face {
+  font-family: "Source Sans 3 Variable fallback";
+  src: local("Arial"), local("ArialMT"), local("Helvetica Neue"), local("Roboto");
+  size-adjust: 89.2775%;
+  ascent-override: 114.6985%;
+  descent-override: 44.8041%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Saira Condensed fallback";
+  src: local("Arial"), local("ArialMT"), local("Helvetica Neue"), local("Roboto");
+  size-adjust: 79.632%;
+  ascent-override: 142.5307%;
+  descent-override: 55.1286%;
+  line-gap-override: 0%;
+}
+
 @theme {
-  --font-sans: "Source Sans 3 Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Saira Condensed", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Source Sans 3 Variable", "Source Sans 3 Variable fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Saira Condensed", "Saira Condensed fallback", ui-sans-serif, system-ui, sans-serif;
 }
 
 @theme inline {
