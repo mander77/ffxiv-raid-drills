@@ -188,7 +188,7 @@ test("Try from here keeps the answers before the step and asks it again, without
   const scored = useProgressStore.getState().scores.H1?.[VOID.id];
   const user = userEvent.setup();
   await user.click(stepButtons()[2]);
-  await user.click(screen.getByRole("button", { name: "Try from Here" }));
+  await user.click(screen.getByRole("button", { name: "Try From Here" }));
   assert.ok(screen.getByText(`3/${steps.length}`), "step 3 is asked");
   assert.ok(screen.getByRole("listitem", { name: "Step 2, incorrect" }), "the answers before it stay");
   assert.ok(screen.getByRole("listitem", { name: "Step 3, now" }));

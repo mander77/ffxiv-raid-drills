@@ -56,7 +56,7 @@ const CATEGORY_MEANING: Record<Category, string> = {
     (a test checks the page names each kind once). */
 const KIND_GROUPS: readonly { title: string; kinds: readonly DrillKind[] }[] = [
   { title: "Spread and Stacks", kinds: ["spread", "stack", "pairStack", "lightPartyStack", "roleStack"] },
-  { title: "Lines from the Boss", kinds: ["lineStack", "wildCharge"] },
+  { title: "Lines From the Boss", kinds: ["lineStack", "wildCharge"] },
   { title: "Towers", kinds: ["tower", "towerKnockback", "tankTower"] },
   { title: "Tethers", kinds: ["chains", "pairTether"] },
   { title: "Tank Busters", kinds: ["tankBuster", "sharedTankBuster"] },
