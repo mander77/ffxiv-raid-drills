@@ -98,7 +98,10 @@ async function publish() {
     const who = output("gh", ["api", "user", "--jq", ".login"]);
     if (who !== OWNER) throw new Error(`Stopped: the GitHub CLI is signed in as ${who}, not ${OWNER}.`);
 
-    gitgh(["push", "-u", "origin", branch]);
+    // A rebased branch needs a force push. --force-with-lease replaces the branch on GitHub only
+    // if it is still where this checkout last saw it, and --force-if-includes only if this
+    // checkout has had that commit, so a push from another session is never lost.
+    gitgh(["push", "--force-with-lease", "--force-if-includes", "-u", "origin", branch]);
     const number = pullRequestOf(branch);
     console.log(`Pushed ${branch}, pull request #${number}. CI runs on GitHub: gh pr checks ${number}`);
     if (!toMain) {
