@@ -119,7 +119,7 @@ src/components/      React components: Header, Footer (links to the pages that a
                      PageContainer, SlotSwitch, ShareButton (a toast
                      says the link was copied), TabNav, TabMenu (the tabs as one button below lg), ThemeProvider and ModeToggle (light and
                      dark mode),
-                     CategoryDots and CategoryKey (the ability category colours), icons (every icon
+                     CategoryIcons and CategoryKey (the ability category icons, in their colours), icons (every icon
                      the site uses, named by its meaning, and the rules they follow), MechanicIcon
                      (the icon of a mechanic's kind), CastSquare (a row's square on Pressure's casts
                      coming up and Practice's list: filled for a hit, outlined for the boss's
@@ -338,7 +338,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
   `MechanicIcon` draws its icon; the rules for
   the icons are at the top of `src/components/icons.tsx`. Not a category.
 - **Category**: an ability category of the timeline (raid damage, tank damage...).
-  `CategoryDots` draws its coloured dots.
+  `CategoryIcons` draws its icon, in its colour (rule 14 in `icons.tsx`).
 - **Picture**: an arena picture with its data (`Picture`, `LEARN_PICTURES`, `LearnPicture`).
 - **Round**: the answers so far on one tab, for one slot. The **quick round** is Pressure's 12
   timed cards (`QuickRound`).

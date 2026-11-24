@@ -6,7 +6,7 @@ import type { Fight, FightSeg } from "../../data/fight";
 import { useFightFrame } from "../../hooks/useFightFrame";
 import { activeSeg, type FightView, nextSeg, upcoming, watchQuestion } from "../../lib/fight";
 import { clock } from "../../time";
-import { CategoryDots, categoryNames } from "../CategoryDots";
+import { CategoryIcons, categoryNames } from "../CategoryIcons";
 import { LastAnswer } from "../LastAnswer";
 import { LineList } from "../LineList";
 import { RuleBox } from "../RuleBox";
@@ -160,7 +160,7 @@ function Between({ paused, fight, onGoTo }: BetweenProps) {
           <p className="text-muted-foreground">Next ability · {clock(a.t)}</p>
           <p className="font-semibold">{a.name}</p>
           <p className="flex items-center gap-2 text-muted-foreground">
-            <CategoryDots cats={a.cats} size="md" />
+            <CategoryIcons cats={a.cats} />
             {categoryNames(a.cats)}
           </p>
           <p>{a.note}</p>

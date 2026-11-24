@@ -160,8 +160,8 @@
   --color-banner: var(--banner);
 }
 
-/* The colours of the fight's ability categories (the marks in the timeline), as Tailwind names:
-   bg-cat-raid, bg-cat-tank and so on. */
+/* The colours of the fight's ability categories (their squares and icons in the timeline), as
+   Tailwind names: bg-cat-raid, text-cat-raid and so on. */
 @theme {
   --color-cat-raid: oklch(0.572 0.194 28.814);
   --color-cat-tank: oklch(0.677 0.164 57.116);
@@ -171,6 +171,12 @@
   --color-cat-mech: oklch(0.542 0.227 287.798);
   --color-cat-enrage: oklch(0.347 0.13 28.701);
   --color-cat-none: oklch(0.761 0.021 260.166);
+}
+
+/* Enrage's dark red is lost on the dark background, so its icon reads poorly in dark mode; dark
+   mode lifts it to a lighter red. */
+.dark {
+  --color-cat-enrage: oklch(0.55 0.16 15);
 }
 
 /* The full fight: a label over the arena (the name of a hit, your result in the run) shows for a

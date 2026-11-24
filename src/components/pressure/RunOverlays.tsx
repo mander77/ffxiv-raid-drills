@@ -2,7 +2,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useFightFrame } from "../../hooks/useFightFrame";
 import { type Answered, activeSeg, countdownOf } from "../../lib/fight";
-import { CategoryDots } from "../CategoryDots";
+import { CategoryIcons } from "../CategoryIcons";
 import type { ShownHit } from "./FightArena";
 
 // The small parts that sit over the fight's arena: the name of a hit (the run and the player),
@@ -12,14 +12,14 @@ export interface HitLabelProps {
   hit: ShownHit;
 }
 
-/** The name of a hit over the arena for a moment, after its category's colour mark. */
+/** The name of a hit over the arena for a moment, after its category's icon (in the label's text colour, which shows on its fill). */
 export function HitLabel({ hit }: HitLabelProps) {
   return (
     <div
       role="status"
       className="pointer-events-none absolute top-[8%] left-1/2 flex max-w-[94%] -translate-x-1/2 animate-flash-label items-center gap-1.5 rounded-md bg-foreground px-2.5 py-1 text-sm font-semibold whitespace-nowrap text-background"
     >
-      <CategoryDots cats={[hit.hit.cat]} size="md" />
+      <CategoryIcons cats={[hit.hit.cat]} plain />
       <span className="truncate">{hit.hit.name}</span>
     </div>
   );

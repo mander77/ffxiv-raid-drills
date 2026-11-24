@@ -6,8 +6,10 @@ import type { ComponentProps, ReactNode } from "react";
 import "../components/arena/arena.css";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { Weapon } from "../components/arena/Weapon";
 import { CastSquare } from "../components/CastSquare";
+import { CATEGORY_ICON, CATEGORY_TEXT } from "../components/CategoryIcons";
 import {
   DarkModeIcon,
   DragHandleIcon,
@@ -34,9 +36,24 @@ import { AnswerButton } from "../components/quiz/AnswerButton";
 import { RuleBox } from "../components/RuleBox";
 import { StepChips } from "../components/StepChips";
 import { Tally } from "../components/Tally";
+import { ABILITIES, CATEGORIES, type Category } from "../data/abilities";
 import { DRILLS } from "../data/drills";
 import { kindsOf } from "../lib/practice";
 import type { DrillKind } from "../types";
+
+/** What each ability category means, for its card. */
+const CATEGORY_MEANING: Record<Category, string> = {
+  raid: "The whole party takes a hit.",
+  tank: "A hit on the tanks.",
+  spot: "Go to your spot.",
+  dodge: "An AoE on the floor: move out of it.",
+  target: "An AoE aimed at players.",
+  mech: "The boss starts a mechanic.",
+  enrage: "The boss ends the fight.",
+};
+
+/** How many abilities of the fight have a category. */
+const rowsWith = (cat: Category): number => ABILITIES.filter((a) => a.cats.includes(cat)).length;
 
 /** An icon of the site's buttons and signs, with its name and what it means. */
 interface InterfaceIcon {
@@ -213,6 +230,17 @@ export function StylesPage() {
           </ul>
         </section>
 
+        <section className="space-y-4" aria-labelledby="categories">
+          <h2 id="categories" className="font-display text-2xl font-bold">
+            Categories of the timeline
+          </h2>
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {(Object.keys(CATEGORIES) as Category[]).map((cat) => (
+              <CategoryItem key={cat} cat={cat} />
+            ))}
+          </ul>
+        </section>
+
         {INTERFACE_GROUPS.map((group) => (
           <section key={group.title} className="space-y-4">
             <h2 className="font-display text-2xl font-bold">{group.title}</h2>
@@ -327,6 +355,32 @@ function KindItem({ kind }: KindItemProps) {
       meaning={meaning}
     >
       <p className="text-xs text-muted-foreground">{drills.length ? drills.join(" · ") : "No mechanic uses it yet."}</p>
+    </IconItem>
+  );
+}
+
+interface CategoryItemProps {
+  cat: Category;
+}
+
+/** An ability category: its icon large, in its colour, and at its size beside a name, with how many
+    abilities of the fight have it. */
+function CategoryItem({ cat }: CategoryItemProps) {
+  const Icon = CATEGORY_ICON[cat];
+  const rows = rowsWith(cat);
+  return (
+    <IconItem
+      picture={
+        <>
+          <Icon aria-hidden="true" className={cn("size-10", CATEGORY_TEXT[cat])} />
+          <Icon aria-hidden="true" className={cn("size-4", CATEGORY_TEXT[cat])} />
+        </>
+      }
+      zoomed={<Icon aria-hidden="true" className={cn("size-48", CATEGORY_TEXT[cat])} />}
+      name={CATEGORIES[cat]}
+      meaning={CATEGORY_MEANING[cat]}
+    >
+      <p className="text-xs text-muted-foreground">{rows === 1 ? "1 ability in the fight." : `${rows} abilities in the fight.`}</p>
     </IconItem>
   );
 }

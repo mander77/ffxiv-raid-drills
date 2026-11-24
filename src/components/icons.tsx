@@ -42,6 +42,13 @@
 //    on the list. Check it there, in the browser, in light and dark mode, before you keep it.
 // 13. Every icon here is on the styles page (/styles, StylesPage) with what it means; a test fails
 //    when one is missing. The page shows them side by side, large and at their real size.
+//
+// The ability categories
+// 14. A category icon says what kind of hit a row of the timeline is, so a player tells the
+//    categories apart by shape, not only by colour (CategoryIcons draws them). It is drawn in one
+//    colour, its category's, with its players as dots in that same colour, so it reads beside a
+//    name at 16 pixels. It reuses a meaning above where one fits: chevrons are the boss's hit
+//    (rule 3), a shield is a tank (rule 7), a ring is a spot on the floor (rule 1).
 import { createLucideIcon, type IconNode } from "lucide-react";
 
 export type { LucideIcon } from "lucide-react";
@@ -276,4 +283,37 @@ export const DodgeSequenceIcon = createLucideIcon("dodge-sequence", [
   ["circle", { cx: "4", cy: "5", r: "2.5", className: PLAYER, key: "player" }],
   ["path", { d: "M7 5h10a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h14", key: "path" }],
   ["path", { d: "m18 14 3 3-3 3", key: "path-head" }],
+]);
+
+/* ---------- the ability categories (see CategoryIcons) ---------- */
+
+/** A player in a category icon: a dot filled in the icon's own colour (rule 14). */
+const SAME_COLOUR_DOT = "fill-current stroke-none";
+
+export {
+  // Avoidable AoE: an AoE on the floor (a ring) and the arrow of you moving out of it.
+  CircleArrowOutUpRight as AvoidableAoeIcon,
+  // Targeted AoE: a crosshair, an AoE aimed at a player.
+  Crosshair as TargetedAoeIcon,
+  // Positioning: a map pin, a spot to stand on.
+  MapPin as PositioningIcon,
+  // Mechanic: a puzzle piece, something to solve.
+  Puzzle as MechanicCategoryIcon,
+  // Enrage: a skull, the end of the fight.
+  Skull as EnrageIcon,
+} from "lucide-react";
+
+/** Raid damage: two chevrons, the boss's hit, coming down on the whole party, three players in a row. */
+export const RaidDamageIcon = createLucideIcon("raid-damage", [
+  ["path", { d: "m3 3 9 5 9-5", key: "hit-top" }],
+  ["path", { d: "m3 9 9 5 9-5", key: "hit-bottom" }],
+  ["circle", { cx: "5", cy: "20", r: "2", className: SAME_COLOUR_DOT, key: "west" }],
+  ["circle", { cx: "12", cy: "20", r: "2", className: SAME_COLOUR_DOT, key: "middle" }],
+  ["circle", { cx: "19", cy: "20", r: "2", className: SAME_COLOUR_DOT, key: "east" }],
+]);
+
+/** Tank damage: a player behind a shield, as on the Tank Buster, all in the icon's own colour. */
+export const TankDamageIcon = createLucideIcon("tank-damage", [
+  ...SHIELD,
+  ["circle", { cx: "12", cy: "12", r: "3", className: SAME_COLOUR_DOT, key: "player" }],
 ]);
