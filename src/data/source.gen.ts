@@ -345,3 +345,8 @@ export const BOSSMOD_ABILITIES = {
 
 /** Half the width of BossMod's square arena, in yalms. */
 export const BOSSMOD_ARENA_HALF = 20;
+
+/** BossMod's Arena Split, in yalms from the arena's center: the center of each platform (west
+    and east), its half width and half length, and the x of each side portal line
+    (Majestic Meteorain). */
+export const BOSSMOD_SPLIT = {platformCenter:16, platformHalfWidth:10, platformHalfLength:20, lines:[-21, -11, 11, 21]} as const;
