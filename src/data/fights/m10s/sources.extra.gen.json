@@ -458,7 +458,7 @@
             "SickestTakeOffAOE"
           ],
           "shapes": [
-            "Rect(50, 7.5f)"
+            "Rect(50, 7.5)"
           ],
           "positions": []
         },
@@ -493,7 +493,8 @@
             "ReverseAlleyOopFirst"
           ],
           "shapes": [
-            "Cone(60, 30.Degrees()"
+            "Cone(60, 30deg)",
+            "Cone(60, 15deg)"
           ],
           "positions": []
         },
@@ -507,8 +508,8 @@
             "ReverseAlleyOopRepeat"
           ],
           "shapes": [
-            "Cone(60, 15.Degrees()",
-            "Cone(60, 7.5f.Degrees()"
+            "Cone(60, 15deg)",
+            "Cone(60, 7.5deg)"
           ],
           "positions": []
         },
@@ -615,7 +616,8 @@
             "BlastingSnapAOE"
           ],
           "shapes": [
-            "Circle(6)"
+            "Circle(6)",
+            "Cone(60, 22.5deg)"
           ],
           "positions": []
         },
@@ -627,7 +629,7 @@
             "ReEntryBlastAOE"
           ],
           "shapes": [
-            "Cone(60, 22.5f.Degrees()"
+            "Cone(60, 22.5deg)"
           ],
           "positions": []
         },
@@ -753,7 +755,7 @@
             "CutbackBlaze"
           ],
           "shapes": [
-            "Cone(60, 165f.Degrees()"
+            "Cone(60, 165deg)"
           ],
           "positions": []
         },
@@ -790,7 +792,7 @@
             "DeepVarialAOE"
           ],
           "shapes": [
-            "Cone(60, 60.Degrees()"
+            "Cone(60, 60deg)"
           ],
           "positions": []
         },
@@ -801,7 +803,7 @@
             "DeepVarialAOE"
           ],
           "shapes": [
-            "Cone(60, 60.Degrees()"
+            "Cone(60, 60deg)"
           ],
           "positions": []
         },
@@ -843,7 +845,7 @@
           ],
           "shapes": [
             "Circle(9)",
-            "Cone(60, 60.Degrees()",
+            "Cone(60, 60deg)",
             "Rect(50, 25)"
           ],
           "positions": []

@@ -5,7 +5,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { assert, test } from "vitest";
 // @ts-expect-error: a plain Node.js script with no type declarations.
-import { parseBossmod, parseMechanics, parseTriggers, REPOS } from "../scripts/import-sources.mjs";
+import { fillShapes, parseBossmod, parseMechanics, parseTriggers, REPOS } from "../scripts/import-sources.mjs";
 
 const FIGHTS = join(import.meta.dirname, "..", "src", "data", "fights");
 const lists = readdirSync(FIGHTS).filter((d) => existsSync(join(FIGHTS, d, "sources.json")));
@@ -65,19 +65,65 @@ test("a trigger: its id (with an escaped quote and a comment after it), ability 
   ]);
 });
 
-test("a mechanic file: each class with its base, abilities, shapes and positions", () => {
+test("a mechanic file: each class with its base, abilities, shapes (as BossMod writes them) and positions", () => {
   const text = [
     "class HotAerial(BossModule module) : Components.GenericAOEs(module, AID.HotAerialAOE)",
     "{",
     "    private static readonly AOEShapeCircle _shape = new AOEShapeCircle(6);",
     "    private readonly WPos _center = new WPos(100f, 90);",
     "}",
-    "class Split(BossModule module) : BossComponent(module) { }",
+    "class Blast(BossModule module) : FlamePuddle(module, [AID.BlastAOE], new AOEShapeCone(60, 22.5f.Degrees()), OID.Cone);",
+    "class Deep(BossModule module) : Components.StandardAOEs(module, AID.DeepAOE, BigCone)",
+    "{",
+    "    public static readonly AOEShapeCone BigCone = new(60, 60.Degrees());",
+    "}",
   ].join("\n");
   assert.deepEqual(parseMechanics(text), [
     { name: "HotAerial", base: "Components.GenericAOEs", aids: ["HotAerialAOE"], shapes: ["Circle(6)"], positions: ["WPos(100, 90)"] },
-    { name: "Split", base: "BossComponent", aids: [], shapes: [], positions: [] },
+    { name: "Blast", base: "FlamePuddle", aids: ["BlastAOE"], shapes: ["Cone(60, 22.5deg)"], positions: [] },
+    { name: "Deep", base: "Components.StandardAOEs", aids: ["DeepAOE"], shapes: ["Cone(60, 60deg)"], positions: [] },
   ]);
+});
+
+test("a shape the enums leave out comes from the one class that names it, in full widths", () => {
+  const unknown = (text: string) => ({ id: "B5F5", from: "Helper->self", cast: 0, shape: "unknown", text });
+  const abilities = {
+    Blast: unknown("range 60 ?-degree cone"),
+    Floater: unknown("range 60 width ? rect"),
+    Two: unknown("range 60 ?-degree cone"),
+    Lost: unknown("???"),
+  };
+  const mechanics = [
+    {
+      file: "Air.cs",
+      classes: [
+        { name: "Puddle", aids: ["Blast"], shapes: ["Cone(60, 22.5deg)"] },
+        { name: "Floaters", aids: ["Floater"], shapes: ["Rect(60, 4)"] },
+        { name: "Proteans", aids: ["Two"], shapes: ["Cone(60, 30deg)", "Cone(60, 15deg)"] },
+      ],
+    },
+  ];
+  const out = fillShapes(abilities, mechanics);
+  assert.deepEqual(out.Blast, {
+    id: "B5F5",
+    from: "Helper->self",
+    cast: 0,
+    shape: "cone",
+    range: 60,
+    angle: 45,
+    sizeFrom: "Air.cs Puddle",
+  });
+  assert.deepEqual(out.Floater, {
+    id: "B5F5",
+    from: "Helper->self",
+    cast: 0,
+    shape: "rect",
+    range: 60,
+    width: 8,
+    sizeFrom: "Air.cs Floaters",
+  });
+  assert.equal(out.Two.shape, "unknown", "two sizes: the sources do not say which");
+  assert.equal(out.Lost.shape, "unknown", "no class names it");
 });
 
 test("an ability with no shape BossMod states keeps its text", () => {

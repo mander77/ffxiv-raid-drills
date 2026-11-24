@@ -943,7 +943,7 @@
             "FireAndFuryFront"
           ],
           "shapes": [
-            "Cone(60, 45.Degrees()"
+            "Cone(60, 45deg)"
           ],
           "positions": []
         },
@@ -1057,8 +1057,8 @@
             "RawSteelScytheHeavyHitter"
           ],
           "shapes": [
-            "Cone(60, 45.Degrees()",
-            "Cone(60, 22.5f.Degrees()"
+            "Cone(60, 45deg)",
+            "Cone(60, 22.5deg)"
           ],
           "positions": []
         }
@@ -1198,7 +1198,9 @@
             "Circle(8)",
             "Circle(6)",
             "Rect(60, 3)",
-            "Cone(60, 15f.Degrees()"
+            "Cone(60, 15deg)",
+            "Donut(5, 60)",
+            "Cross(40, 5)"
           ],
           "positions": []
         },
@@ -1211,7 +1213,11 @@
             "AssaultEvolvedAxeAOE",
             "AssaultEvolvedScytheAOE"
           ],
-          "shapes": [],
+          "shapes": [
+            "Circle(8)",
+            "Donut(5, 60)",
+            "Cross(40, 5)"
+          ],
           "positions": []
         },
         {
@@ -1250,14 +1256,22 @@
           "aids": [
             "UltimateTrophyWeapons"
           ],
-          "shapes": [],
+          "shapes": [
+            "Circle(8)",
+            "Donut(5, 60)",
+            "Cross(40, 5)"
+          ],
           "positions": []
         },
         {
           "name": "UltimateTrophyWeaponsBait",
           "base": "WeaponsBait",
           "aids": [],
-          "shapes": [],
+          "shapes": [
+            "Circle(8)",
+            "Donut(5, 60)",
+            "Cross(40, 5)"
+          ],
           "positions": []
         },
         {
@@ -1266,7 +1280,11 @@
           "aids": [
             "UltimateTrophyWeapons"
           ],
-          "shapes": [],
+          "shapes": [
+            "Circle(8)",
+            "Donut(5, 60)",
+            "Cross(40, 5)"
+          ],
           "positions": []
         }
       ]

@@ -207,22 +207,127 @@ export function parseTriggers(text) {
   });
 }
 
+/** The text inside the brackets that open at `open` (the index of a "("), with brackets inside it. */
+function inBrackets(text, open) {
+  let depth = 0;
+  for (let i = open; i < text.length; i++) {
+    if (text[i] === "(") depth++;
+    else if (text[i] === ")" && --depth === 0) return text.slice(open + 1, i);
+  }
+  return text.slice(open + 1);
+}
+
+/** One argument of a BossMod shape: a number ("60", "7.5f"), an angle ("22.5f.Degrees()", as
+    { deg: 22.5 }), or its text when it is neither. */
+function shapeArg(text) {
+  const t = text.trim();
+  if (/^-?\d+(?:\.\d+)?f?$/.test(t)) return Number(t.replace(/f$/, ""));
+  const deg = /^(-?\d+(?:\.\d+)?)f?\.Degrees\(\)$/.exec(t);
+  return deg ? { deg: Number(deg[1]) } : t;
+}
+
+/** The arguments in a shape's brackets, split at the commas outside inner brackets. */
+function shapeArgs(inside) {
+  const out = [];
+  let depth = 0;
+  let from = 0;
+  for (let i = 0; i < inside.length; i++) {
+    if (inside[i] === "(") depth++;
+    else if (inside[i] === ")") depth--;
+    else if (inside[i] === "," && depth === 0) {
+      out.push(inside.slice(from, i));
+      from = i + 1;
+    }
+  }
+  if (inside.trim()) out.push(inside.slice(from));
+  return out.map(shapeArg);
+}
+
+/** A shape as short text: "Cone(60, 22.5deg)". */
+const shapeText = (s) => `${s.kind}(${s.args.map((a) => (typeof a === "object" ? `${a.deg}deg` : a)).join(", ")})`;
+
+/** The AoE shapes a piece of BossMod code makes, as BossMod writes them: "new AOEShapeCone(60,
+    22.5f.Degrees())", and "AOEShapeCone Cone = new(60, ...)" for a named shape. `named` (by name)
+    collects the named ones, so a class that only names one ("BigCone") makes it too. */
+function shapesIn(text, named = new Map()) {
+  const out = [];
+  for (const m of text.matchAll(/new AOEShape(\w+)\(/g))
+    out.push({ kind: m[1], args: shapeArgs(inBrackets(text, m.index + m[0].length - 1)) });
+  for (const m of text.matchAll(/AOEShape(\w+) (\w+) = new\(/g)) {
+    const shape = { kind: m[1], args: shapeArgs(inBrackets(text, m.index + m[0].length - 1)) };
+    named.set(m[2], shape);
+    out.push(shape);
+  }
+  for (const m of text.matchAll(/AOEShape (\w+) = new AOEShape(\w+)\(/g)) {
+    named.set(m[1], { kind: m[2], args: shapeArgs(inBrackets(text, m.index + m[0].length - 1)) });
+  }
+  return out;
+}
+
 /** The classes in one BossMod mechanic file, each with what it is built on (its base class),
-    the abilities it names (AID.x), the AoE shapes it makes ("Circle(5)") and the positions and
-    directions it names ("WPos(100, 90)"), in yalms. */
+    the abilities it names (AID.x), the AoE shapes it makes (as BossMod writes them: "Cone(60,
+    22.5deg)", where a cone's angle is half its width, and a rectangle's or a cross's width is
+    half its width) and the positions and directions it names ("WPos(100, 90)"), in yalms. */
 export function parseMechanics(text) {
   const starts = [...text.matchAll(/^(?:public |internal |sealed |abstract )*class (\w+)(?:\([^)]*\))?\s*:\s*([\w.]+(?:<[^>]*>)?)/gm)];
+  const named = new Map();
+  shapesIn(text, named);
   return starts.map((m, i) => {
     const block = text.slice(m.index, starts[i + 1]?.index ?? text.length);
     const all = (re) => [...new Set([...block.matchAll(re)].map((x) => x[1]))];
+    const shapes = [...shapesIn(block), ...[...named].filter(([name]) => new RegExp(`\\b${name}\\b`).test(block)).map(([, s]) => s)];
     return {
       name: m[1],
       base: m[2],
       aids: all(/\bAID\.(\w+)/g),
-      shapes: all(/new (AOEShape\w+\([^)]*\))/g).map((x) => x.replace(/^AOEShape/, "")),
+      shapes: [...new Set(shapes.map(shapeText))],
       positions: all(/new (W(?:Pos|Dir)\(\s*-?[\d.]+f?,\s*-?[\d.]+f?\s*\))/g).map((x) => x.replace(/f(?=[,)])/g, "").replace(/\s+/g, " ")),
     };
   });
+}
+
+/** A BossMod shape as source.gen.ts writes a shape, in full widths: a cone's angle and a
+    rectangle's or a cross's width are twice BossMod's half values. Null for a shape the site
+    does not draw, or one with a size that is not a number. */
+function fullShape(text) {
+  const m = /^(\w+)\((.*)\)$/.exec(text);
+  if (!m) return null;
+  const args = m[2] ? m[2].split(", ").map((a) => (a.endsWith("deg") ? Number(a.slice(0, -3)) : Number(a))) : [];
+  if (args.some((a) => !Number.isFinite(a))) return null;
+  const [a, b, c] = args;
+  if (m[1] === "Circle" && args.length === 1) return { shape: "circle", range: a };
+  if (m[1] === "Donut" && args.length === 2) return { shape: "donut", inner: a, range: b };
+  if (m[1] === "Cone" && args.length === 2) return { shape: "cone", range: a, angle: b * 2 };
+  if (m[1] === "Rect" && args.length >= 2) return { shape: "rect", range: a, width: b * 2, ...(c ? { back: c } : {}) };
+  if (m[1] === "Cross" && args.length === 2) return { shape: "cross", range: a, width: b * 2 };
+  return null;
+}
+
+/** Fill in each ability whose enums comment gives no full shape ("range 60 ?-degree cone",
+    "???") from the mechanic files: when the classes that name the ability make exactly one shape
+    that fits what the comment does say (its kind and range), that shape is the ability's, and
+    `sizeFrom` names the file and the class. The others stay "unknown". */
+export function fillShapes(abilities, mechanics) {
+  for (const [name, a] of Object.entries(abilities)) {
+    if (a.shape !== "unknown") continue;
+    const kind = /\b(circle|donut|cone|rect|cross)$/.exec(a.text)?.[1];
+    const range = /^range (\d+(?:\.\d+)?)\b/.exec(a.text)?.[1];
+    const found = new Map();
+    for (const { file, classes } of mechanics)
+      for (const c of classes)
+        if (c.aids.includes(name))
+          for (const text of c.shapes) {
+            const shape = fullShape(text);
+            if (shape && (!kind || shape.shape === kind) && (!range || shape.range === Number(range)))
+              found.set(ts(shape), { shape, from: `${file} ${c.name}` });
+          }
+    if (found.size !== 1) continue;
+    const [{ shape, from }] = found.values();
+    const { text, ...rest } = a;
+    delete rest.shape;
+    abilities[name] = { ...rest, ...shape, sizeFrom: from };
+  }
+  return abilities;
 }
 
 /** The extras a fight can ask for: each reads one more file of the BossMod module folder and
@@ -330,6 +435,7 @@ export async function importFight(fight, s = readSources(fight)) {
   };
   const mechanics = [];
   for (const file of files) mechanics.push({ file, classes: parseMechanics(await get(s.bossmod.repo, `${folder}/${file}`)) });
+  fillShapes(bossmod.abilities, mechanics);
   const extras = {};
   for (const [extra, file] of Object.entries(s.extras ?? {}))
     extras[extra] = EXTRAS[extra].parse(await get(s.bossmod.repo, `${folder}/${file}`));
