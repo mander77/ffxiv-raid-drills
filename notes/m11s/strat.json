@@ -1,0 +1,1436 @@
+{
+  "_generated": "By npm run import:strat (scripts/import-strat.mjs) from wtfdig. Do not edit it by hand.",
+  "address": "https://wtfdig.info/74/m11s#hector::fixed",
+  "fight": {
+    "id": "m11s",
+    "tier": "74",
+    "name": "M11S",
+    "title": "AAC Heavyweight M3 (Savage)",
+    "patch": "M11S Patch 7.4"
+  },
+  "strat": {
+    "name": "hector",
+    "label": "Hector (Toxic/No Buddies)",
+    "notes": "Updated to use Hector video as source for Arena Split, select 'Kindred No Buddies' for raidplan version"
+  },
+  "toggles": {
+    "arenasplit": {
+      "label": "Arena Split",
+      "value": "hector",
+      "name": "Hector No Buddies",
+      "source": {
+        "name": "Video by Hector Hectorson",
+        "url": "https://www.youtube.com/watch?v=w1uuwzhyf5A"
+      }
+    },
+    "ecliptic": {
+      "label": "Ecliptic",
+      "value": "fixed",
+      "name": "Fixed (3CJ)",
+      "source": {
+        "name": "M11S Fixed Stampede Raidplan",
+        "url": "https://raidplan.io/plan/KXVlSGwV3zqON3CJ"
+      }
+    }
+  },
+  "sources": {
+    "Video by Hector Hectorson": "https://www.youtube.com/watch?v=w1uuwzhyf5A",
+    "Toxic Friends Raidplan": "https://raidplan.io/plan/HJAbE7fuWodELUSB",
+    "kindred flatliner raidplan (slides 1-2, 7-18)": "https://raidplan.io/plan/hvbysrfwvrc55ahz"
+  },
+  "phases": [
+    {
+      "phase": "Raw Steel Trophy",
+      "mechanics": [
+        {
+          "mechanic": "Axe",
+          "lines": [
+            "Tanks stack, Party spread"
+          ],
+          "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#1",
+          "roles": [
+            {
+              "role": "Tank",
+              "party": 1,
+              "lines": [
+                "Stack for TB"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-axe.webp",
+              "spot": {
+                "x": 50,
+                "y": 36.4,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Tank",
+              "party": 2,
+              "lines": [
+                "Stack for TB"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-axe.webp",
+              "spot": {
+                "x": 50,
+                "y": 36.4,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 1,
+              "lines": [
+                "SSW far"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-axe.webp",
+              "spot": {
+                "x": 41.1,
+                "y": 84.8,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 2,
+              "lines": [
+                "SSE far"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-axe.webp",
+              "spot": {
+                "x": 59.1,
+                "y": 84.9,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 1,
+              "lines": [
+                "SW max melee"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-axe.webp",
+              "spot": {
+                "x": 43,
+                "y": 62.4,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 2,
+              "lines": [
+                "SE max melee"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-axe.webp",
+              "spot": {
+                "x": 57.1,
+                "y": 62.7,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 1,
+              "lines": [
+                "WSW far"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-axe.webp",
+              "spot": {
+                "x": 26.7,
+                "y": 69.1,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 2,
+              "lines": [
+                "ESE far"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-axe.webp",
+              "spot": {
+                "x": 72.7,
+                "y": 69.1,
+                "r": 7.5
+              }
+            }
+          ]
+        },
+        {
+          "mechanic": "Scythe",
+          "lines": [
+            "Tanks spread, Party stack"
+          ],
+          "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#2",
+          "roles": [
+            {
+              "role": "Tank",
+              "party": 1,
+              "lines": [
+                "NW for split TB"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-scythe.webp",
+              "spot": {
+                "x": 42.9,
+                "y": 37.6,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Tank",
+              "party": 2,
+              "lines": [
+                "NE for split TB"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-scythe.webp",
+              "spot": {
+                "x": 57,
+                "y": 38,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 1,
+              "lines": [
+                "Stack South"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-scythe.webp",
+              "spot": {
+                "x": 49.9,
+                "y": 67.1,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 2,
+              "lines": [
+                "Stack South"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-scythe.webp",
+              "spot": {
+                "x": 49.9,
+                "y": 67.1,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 1,
+              "lines": [
+                "Stack South"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-scythe.webp",
+              "spot": {
+                "x": 49.9,
+                "y": 67.1,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 2,
+              "lines": [
+                "Stack South"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-scythe.webp",
+              "spot": {
+                "x": 49.9,
+                "y": 67.1,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 1,
+              "lines": [
+                "Stack South"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-scythe.webp",
+              "spot": {
+                "x": 49.9,
+                "y": 67.1,
+                "r": 7.5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 2,
+              "lines": [
+                "Stack South"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-raw-scythe.webp",
+              "spot": {
+                "x": 49.9,
+                "y": 67.1,
+                "r": 7.5
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "phase": "Assault Evolved",
+      "lines": [
+        "Boss will spawn one axe, sword, and scythe and turn to resolve them",
+        "First 2 sets of 3 weapons will go clockwise"
+      ],
+      "mechanics": [
+        {
+          "mechanic": "Axe",
+          "lines": [
+            "Party stack out of AOE"
+          ],
+          "image": "https://wtfdig.info/74/m11s/toxic-assault-axe.webp",
+          "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#3"
+        },
+        {
+          "mechanic": "Sword",
+          "lines": [
+            "Light Party stacks",
+            "G1 Left, G2 Right"
+          ],
+          "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#4",
+          "roles": [
+            {
+              "role": "Tank",
+              "party": 1,
+              "lines": [
+                "Left facing boss"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-sword.webp",
+              "spot": {
+                "x": 34.2,
+                "y": 70.8,
+                "r": 5
+              }
+            },
+            {
+              "role": "Tank",
+              "party": 2,
+              "lines": [
+                "Right facing boss"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-sword.webp",
+              "spot": {
+                "x": 48.2,
+                "y": 46.7,
+                "r": 5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 1,
+              "lines": [
+                "Left facing boss"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-sword.webp",
+              "spot": {
+                "x": 34.2,
+                "y": 70.8,
+                "r": 5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 2,
+              "lines": [
+                "Right facing boss"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-sword.webp",
+              "spot": {
+                "x": 48.2,
+                "y": 46.7,
+                "r": 5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 1,
+              "lines": [
+                "Left facing boss"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-sword.webp",
+              "spot": {
+                "x": 34.2,
+                "y": 70.8,
+                "r": 5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 2,
+              "lines": [
+                "Right facing boss"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-sword.webp",
+              "spot": {
+                "x": 48.2,
+                "y": 46.7,
+                "r": 5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 1,
+              "lines": [
+                "Left facing boss"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-sword.webp",
+              "spot": {
+                "x": 34.2,
+                "y": 70.8,
+                "r": 5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 2,
+              "lines": [
+                "Right facing boss"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-sword.webp",
+              "spot": {
+                "x": 48.2,
+                "y": 46.7,
+                "r": 5
+              }
+            }
+          ]
+        },
+        {
+          "mechanic": "Scythe",
+          "lines": [
+            "Boss relative Proteans"
+          ],
+          "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#5",
+          "roles": [
+            {
+              "role": "Tank",
+              "party": 1,
+              "lines": [
+                "Relative North"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-scythe.webp"
+            },
+            {
+              "role": "Tank",
+              "party": 2,
+              "lines": [
+                "Relative South"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-scythe.webp"
+            },
+            {
+              "role": "Healer",
+              "party": 1,
+              "lines": [
+                "Relative West"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-scythe.webp"
+            },
+            {
+              "role": "Healer",
+              "party": 2,
+              "lines": [
+                "Relative East"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-scythe.webp"
+            },
+            {
+              "role": "Melee",
+              "party": 1,
+              "lines": [
+                "Relative Southwest"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-scythe.webp"
+            },
+            {
+              "role": "Melee",
+              "party": 2,
+              "lines": [
+                "Relative Southeast"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-scythe.webp"
+            },
+            {
+              "role": "Ranged",
+              "party": 1,
+              "lines": [
+                "Relative Northwest"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-scythe.webp"
+            },
+            {
+              "role": "Ranged",
+              "party": 2,
+              "lines": [
+                "Relative Northeast"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-assault-scythe.webp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "phase": "Void Stardust",
+      "lines": [
+        "3 baited AOEs",
+        "Start North and bait clockwise",
+        "Stack or spread after 3rd bait"
+      ],
+      "image": "https://wtfdig.info/74/m11s/toxic-void.webp",
+      "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#6",
+      "mechanics": []
+    },
+    {
+      "phase": "Dance of Domination Trophy",
+      "lines": [
+        "Open side is new South"
+      ],
+      "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#7",
+      "mechanics": [
+        {
+          "mechanic": "Pairs",
+          "lines": [
+            "Pair stacks in gaps relative to new orientation"
+          ],
+          "roles": [
+            {
+              "role": "Tank",
+              "party": 1,
+              "lines": [
+                "Relative West with M1",
+                "Use inner letter markers"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-dance.webp",
+              "spot": {
+                "x": 50.3,
+                "y": 72.1,
+                "r": 5
+              }
+            },
+            {
+              "role": "Tank",
+              "party": 2,
+              "lines": [
+                "Relative East with M2",
+                "Use inner letter markers"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-dance.webp",
+              "spot": {
+                "x": 50,
+                "y": 27.8,
+                "r": 5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 1,
+              "lines": [
+                "Relative Southwest with R1"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-dance.webp",
+              "spot": {
+                "x": 74.8,
+                "y": 68.6,
+                "r": 5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 2,
+              "lines": [
+                "Relative Southeast with R2"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-dance.webp",
+              "spot": {
+                "x": 74.7,
+                "y": 31.2,
+                "r": 5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 1,
+              "lines": [
+                "Relative West with MT",
+                "Use inner letter markers"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-dance.webp",
+              "spot": {
+                "x": 50.3,
+                "y": 72.1,
+                "r": 5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 2,
+              "lines": [
+                "Relative East with OT",
+                "Use inner letter markers"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-dance.webp",
+              "spot": {
+                "x": 50,
+                "y": 27.8,
+                "r": 5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 1,
+              "lines": [
+                "Relative Southwest with H1"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-dance.webp",
+              "spot": {
+                "x": 74.8,
+                "y": 68.6,
+                "r": 5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 2,
+              "lines": [
+                "Relative Southeast with H2"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-dance.webp",
+              "spot": {
+                "x": 74.7,
+                "y": 31.2,
+                "r": 5
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "phase": "Ultimate Trophy Weapons",
+      "mechanics": [
+        {
+          "mechanic": "Weapons + Tornadoes",
+          "lines": [
+            "6 weapons, resolve in the order they spawn",
+            "Bait tornadoes after last weapon"
+          ],
+          "image": "https://wtfdig.info/74/m11s/toxic-ultimate.webp",
+          "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#8"
+        }
+      ]
+    },
+    {
+      "phase": "Great Wall of Fire",
+      "lines": [
+        "Double hit double tankbuster that leaves a line",
+        "If not invulning, MT in front for first, then rotate 45 degrees CW for second"
+      ],
+      "image": "https://wtfdig.info/74/m11s/toxic-great-wall.webp",
+      "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#9",
+      "mechanics": []
+    },
+    {
+      "phase": "Orbital Omen",
+      "lines": [
+        "Tanks point boss North",
+        "4 pairs of portals spawn North and East and fire lines",
+        "Boss flanks are safe, dodge into intersecting lines after they go off"
+      ],
+      "image": "https://wtfdig.info/74/m11s/toxic-orbital.webp",
+      "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#10",
+      "mechanics": []
+    },
+    {
+      "phase": "Meteorain",
+      "lines": [
+        "Meteor bait order M > H > R",
+        "Closest 2 players bait meteor markers",
+        "Should end up with 3 meteors lined up SW",
+        "MT grabs NE/NW tether",
+        "OT grabs SW tether"
+      ],
+      "mechanics": [
+        {
+          "mechanic": "1st Set",
+          "lines": [
+            "Melees close to bait meteors, then go NE/SW",
+            "Party stack NW",
+            "Tanks in front for the first line stack"
+          ],
+          "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#11",
+          "roles": [
+            {
+              "role": "Tank",
+              "party": 1,
+              "lines": [
+                "Stand in front of NW line stack"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-1.webp",
+              "spot": {
+                "x": 44.5,
+                "y": 43.5,
+                "r": 5
+              }
+            },
+            {
+              "role": "Tank",
+              "party": 2,
+              "lines": [
+                "Stand in front of NW line stack"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-1.webp",
+              "spot": {
+                "x": 44.5,
+                "y": 43.5,
+                "r": 5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 1,
+              "lines": [
+                "Stand in NW line stack, then get ready to bait 2nd meteors"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-1.webp",
+              "spot": {
+                "x": 41.8,
+                "y": 37.7,
+                "r": 5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 2,
+              "lines": [
+                "Stand in NW line stack, then get ready to bait 2nd meteors"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-1.webp",
+              "spot": {
+                "x": 41.8,
+                "y": 37.7,
+                "r": 5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 1,
+              "lines": [
+                "Bait meteor close, then drop NE"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-1.webp",
+              "spot": {
+                "x": 57.1,
+                "y": 38,
+                "r": 5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 2,
+              "lines": [
+                "Bait meteor close, then drop SW"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-1.webp",
+              "spot": {
+                "x": 43,
+                "y": 62.9,
+                "r": 5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 1,
+              "lines": [
+                "Stand in NW line stack"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-1.webp",
+              "spot": {
+                "x": 41.8,
+                "y": 37.6,
+                "r": 5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 2,
+              "lines": [
+                "Stand in NW line stack"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-1.webp",
+              "spot": {
+                "x": 41.8,
+                "y": 37.6,
+                "r": 5
+              }
+            }
+          ]
+        },
+        {
+          "mechanic": "2nd Set",
+          "lines": [
+            "Healers close to bait meteors, then go NW/SW",
+            "Party stack behind NE meteor to blow it up",
+            "MT take NE tether, OT take SW tether"
+          ],
+          "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#12",
+          "roles": [
+            {
+              "role": "Tank",
+              "party": 1,
+              "lines": [
+                "Take NE tank tether"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-2.webp",
+              "spot": {
+                "x": 52,
+                "y": 18.7,
+                "r": 5
+              }
+            },
+            {
+              "role": "Tank",
+              "party": 2,
+              "lines": [
+                "Take SW tank tether"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-2.webp",
+              "spot": {
+                "x": 45.8,
+                "y": 72.3,
+                "r": 5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 1,
+              "lines": [
+                "Bait meteor close, then drop NW"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-2.webp",
+              "spot": {
+                "x": 43,
+                "y": 38.1,
+                "r": 5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 2,
+              "lines": [
+                "Bait meteor close, then drop SW in line with first meteor"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-2.webp",
+              "spot": {
+                "x": 36.1,
+                "y": 74.9,
+                "r": 5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 1,
+              "lines": [
+                "Stand in NE line stack behind meteor"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-2.webp",
+              "spot": {
+                "x": 59.3,
+                "y": 33.9,
+                "r": 5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 2,
+              "lines": [
+                "Stand in NE line stack behind meteor"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-2.webp",
+              "spot": {
+                "x": 59.3,
+                "y": 33.9,
+                "r": 5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 1,
+              "lines": [
+                "Stand in NE line stack, then get ready to bait 3rd meteors"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-2.webp",
+              "spot": {
+                "x": 59.3,
+                "y": 33.9,
+                "r": 5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 2,
+              "lines": [
+                "Stand in NE line stack, then get ready to bait 3rd meteors"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-2.webp",
+              "spot": {
+                "x": 59.3,
+                "y": 33.9,
+                "r": 5
+              }
+            }
+          ]
+        },
+        {
+          "mechanic": "3rd Set",
+          "lines": [
+            "Ranged close to bait meteors, then go NE/SW",
+            "Party stack behind NW meteor to blow it up",
+            "MT take NW tether, OT take SW tether"
+          ],
+          "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#13",
+          "roles": [
+            {
+              "role": "Tank",
+              "party": 1,
+              "lines": [
+                "Take NW tank tether"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-3.webp"
+            },
+            {
+              "role": "Tank",
+              "party": 2,
+              "lines": [
+                "Take SW tank tether"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-3.webp"
+            },
+            {
+              "role": "Healer",
+              "party": 1,
+              "lines": [
+                "Stand in NW line stack behind meteor"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-3.webp",
+              "spot": {
+                "x": 41,
+                "y": 33.3,
+                "r": 5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 2,
+              "lines": [
+                "Stand in NW line stack behind meteor"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-3.webp",
+              "spot": {
+                "x": 41,
+                "y": 33.3,
+                "r": 5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 1,
+              "lines": [
+                "Stand in NW line stack behind meteor"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-3.webp",
+              "spot": {
+                "x": 41,
+                "y": 33.3,
+                "r": 5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 2,
+              "lines": [
+                "Stand in NW line stack behind meteor"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-3.webp",
+              "spot": {
+                "x": 41,
+                "y": 33.3,
+                "r": 5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 1,
+              "lines": [
+                "Bait meteor close, then drop SW far in line with other two meteors"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-3.webp",
+              "spot": {
+                "x": 28.8,
+                "y": 87.5,
+                "r": 5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 2,
+              "lines": [
+                "Bait meteor close, then drop NE"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-meteorain-3.webp",
+              "spot": {
+                "x": 57,
+                "y": 37.6,
+                "r": 5
+              }
+            }
+          ]
+        },
+        {
+          "mechanic": "4th Set",
+          "lines": [
+            "Party stack behind NE meteor to blow it up",
+            "Run SW after to hide"
+          ],
+          "image": "https://wtfdig.info/74/m11s/toxic-meteorain-4.webp",
+          "source": "https://raidplan.io/plan/HJAbE7fuWodELUSB#14"
+        }
+      ]
+    },
+    {
+      "phase": "Arena Split",
+      "toggle": "arenasplit",
+      "option": "hector",
+      "mechanics": [
+        {
+          "mechanic": "Split + Conga",
+          "lines": [
+            "4 players get tethered, 2 on each side",
+            "G1 West, G2 East",
+            "Hector has Tank/Ranged North and Healers/Melee South",
+            "ℹ️ Original raidplan has supports NW/SE, DPS SW/NE"
+          ],
+          "image": "https://wtfdig.info/74/m11s/hector-split-start.webp"
+        },
+        {
+          "mechanic": "Towers",
+          "lines": [
+            "EVERYONE take a tower",
+            "KB to other side if you need to stretch tether",
+            "Otherwise KB to same side"
+          ],
+          "image": "https://wtfdig.info/74/m11s/hector-split-towers.webp"
+        },
+        {
+          "mechanic": "Fire Breath Baits",
+          "lines": [
+            "Non-tethers close to boss to bait fire breaths",
+            "Stack center E/W after for puddles"
+          ],
+          "image": "https://wtfdig.info/74/m11s/hector-split-baits.webp"
+        },
+        {
+          "mechanic": "Puddles",
+          "lines": [
+            "Everyone go center E/W to bait puddles, one pair go North, one pair go South",
+            "Tethers go to the side you need to stretch",
+            "Non-tethers use body language/stay where you got knocked to"
+          ],
+          "image": "https://wtfdig.info/74/m11s/hector-split-puddles.webp"
+        },
+        {
+          "mechanic": "Lineup + Portal",
+          "lines": [
+            "Tethers on edge, markers on outer safe corner of number markers",
+            "ℹ️ Original raidplan and Hector use outer corner markers, newer version of the raidplan uses inner corner markers"
+          ],
+          "image": "https://wtfdig.info/74/m11s/hector-split-tethers.webp"
+        },
+        {
+          "mechanic": "Towers 2 + 3",
+          "lines": [
+            "Take the tower in the quadrant you resolved the last set of tethers/markers",
+            "2nd towers, another tethers + markers, 3rd towers, then stack AOEs"
+          ],
+          "image": "https://wtfdig.info/74/m11s/hector-split-towers-2.webp"
+        },
+        {
+          "mechanic": "Get Slabbed",
+          "lines": [
+            "KB to back of boss, then look at hitbox to dodge AOE"
+          ],
+          "image": "https://wtfdig.info/74/m11s/hector-slab.webp"
+        }
+      ]
+    },
+    {
+      "phase": "Ecliptic Stampede",
+      "toggle": "ecliptic",
+      "option": "fixed",
+      "mechanics": [
+        {
+          "mechanic": "Start",
+          "lines": [
+            "Ranged + Healers out, Melees + Tanks in",
+            "If 2 on the same side get marked, the one closer to the proximity AOE will adjust"
+          ],
+          "source": "https://raidplan.io/plan/KXVlSGwV3zqON3CJ#1",
+          "roles": [
+            {
+              "role": "Tank",
+              "party": 1,
+              "lines": [
+                "Stack middle under boss"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-ecliptic-start.webp",
+              "spot": {
+                "x": 49.8,
+                "y": 50,
+                "r": 5
+              }
+            },
+            {
+              "role": "Tank",
+              "party": 2,
+              "lines": [
+                "Stack middle under boss"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-ecliptic-start.webp",
+              "spot": {
+                "x": 49.8,
+                "y": 50,
+                "r": 5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 1,
+              "lines": [
+                "Southwest to bait markers"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-ecliptic-start.webp",
+              "spot": {
+                "x": 35.7,
+                "y": 74.5,
+                "r": 5
+              }
+            },
+            {
+              "role": "Healer",
+              "party": 2,
+              "lines": [
+                "Southeast to bait markers"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-ecliptic-start.webp",
+              "spot": {
+                "x": 63.9,
+                "y": 74.3,
+                "r": 5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 1,
+              "lines": [
+                "Stack middle under boss"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-ecliptic-start.webp",
+              "spot": {
+                "x": 50,
+                "y": 50.1,
+                "r": 5
+              }
+            },
+            {
+              "role": "Melee",
+              "party": 2,
+              "lines": [
+                "Stack middle under boss"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-ecliptic-start.webp",
+              "spot": {
+                "x": 50,
+                "y": 50.1,
+                "r": 5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 1,
+              "lines": [
+                "Northwest to bait markers"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-ecliptic-start.webp",
+              "spot": {
+                "x": 35.9,
+                "y": 25.9,
+                "r": 5
+              }
+            },
+            {
+              "role": "Ranged",
+              "party": 2,
+              "lines": [
+                "Northeast to bait markers"
+              ],
+              "image": "https://wtfdig.info/74/m11s/toxic-ecliptic-start.webp",
+              "spot": {
+                "x": 63.7,
+                "y": 25.7,
+                "r": 5
+              }
+            }
+          ]
+        },
+        {
+          "mechanic": "Towers",
+          "lines": [
+            "Melees on edge of tower, Ranged dead center",
+            "H1 > H2 > R1 > R2 Clockwise priority"
+          ],
+          "source": "https://raidplan.io/plan/KXVlSGwV3zqON3CJ#2",
+          "roles": [
+            {
+              "role": "Tank",
+              "party": 1,
+              "lines": [
+                "Take CW solo tower from A",
+                "Take tether opposite + CW"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-start.webp"
+            },
+            {
+              "role": "Tank",
+              "party": 2,
+              "lines": [
+                "Take CCW solo tower from A",
+                "Take tether opposite + CW"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-start.webp"
+            },
+            {
+              "role": "Healer",
+              "party": 1,
+              "lines": [
+                "‼️ Stand dead center of tower",
+                "If not marked, take first tower Cw from A",
+                "Take tether opposite + CW"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-start.webp"
+            },
+            {
+              "role": "Healer",
+              "party": 2,
+              "lines": [
+                "‼️ Stand dead center of tower",
+                "If not marked, take tower H1 > H2 > R1 > R2 CW from A",
+                "Take tether opposite + CW"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-start.webp"
+            },
+            {
+              "role": "Melee",
+              "party": 1,
+              "lines": [
+                "‼️ Stand on edge of tower",
+                "Take CW pair tower from A"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-start.webp"
+            },
+            {
+              "role": "Melee",
+              "party": 2,
+              "lines": [
+                "‼️ Stand on edge of tower",
+                "Take CCW pair tower from A"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-start.webp"
+            },
+            {
+              "role": "Ranged",
+              "party": 1,
+              "lines": [
+                "‼️ Stand dead center of tower",
+                "If not marked, take tower H1 > H2 > R1 > R2 CW from A",
+                "Take tether opposite + CW"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-start.webp"
+            },
+            {
+              "role": "Ranged",
+              "party": 2,
+              "lines": [
+                "‼️ Stand dead center of tower",
+                "If not marked, take first tower CCw from A",
+                "Take tether opposite + CW"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-start.webp"
+            }
+          ]
+        },
+        {
+          "mechanic": "Two-way Fireball",
+          "lines": [],
+          "source": "https://raidplan.io/plan/KXVlSGwV3zqON3CJ#5",
+          "roles": [
+            {
+              "role": "Tank",
+              "party": 1,
+              "lines": [
+                "Join line stack on East or West"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-2.webp"
+            },
+            {
+              "role": "Tank",
+              "party": 2,
+              "lines": [
+                "Join line stack on East or West"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-2.webp"
+            },
+            {
+              "role": "Healer",
+              "party": 1,
+              "lines": [
+                "If you baited puddles, join line stack",
+                "North puddles = West, South puddles = East",
+                "Otherwise join line stack East or West"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-2.webp"
+            },
+            {
+              "role": "Healer",
+              "party": 2,
+              "lines": [
+                "If you baited puddles, join line stack",
+                "North puddles = West, South puddles = East",
+                "Otherwise join line stack East or West"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-2.webp"
+            },
+            {
+              "role": "Melee",
+              "party": 1,
+              "lines": [
+                "Bait on hitbox ring West"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-2.webp"
+            },
+            {
+              "role": "Melee",
+              "party": 2,
+              "lines": [
+                "Bait on hitbox ring East"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-2.webp"
+            },
+            {
+              "role": "Ranged",
+              "party": 1,
+              "lines": [
+                "If you baited puddles, join line stack",
+                "North puddles = West, South puddles = East",
+                "Otherwise join line stack East or West"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-2.webp"
+            },
+            {
+              "role": "Ranged",
+              "party": 2,
+              "lines": [
+                "If you baited puddles, join line stack",
+                "North puddles = West, South puddles = East",
+                "Otherwise join line stack East or West"
+              ],
+              "image": "https://wtfdig.info/74/m11s/hector-fixed-stampede-2.webp"
+            }
+          ]
+        },
+        {
+          "mechanic": "Four-way Fireball",
+          "lines": [],
+          "source": "https://raidplan.io/plan/KXVlSGwV3zqON3CJ#4",
+          "roles": [
+            {
+              "role": "Tank",
+              "party": 1,
+              "lines": [
+                "Join line stack on intercard"
+              ],
+              "image": "https://wtfdig.info/74/m11s/fixed-ecliptic-3.webp"
+            },
+            {
+              "role": "Tank",
+              "party": 2,
+              "lines": [
+                "Join line stack on intercard"
+              ],
+              "image": "https://wtfdig.info/74/m11s/fixed-ecliptic-3.webp"
+            },
+            {
+              "role": "Healer",
+              "party": 1,
+              "lines": [
+                "If you baited puddles, bait on hitbox ring",
+                "North puddles = Northwest, South puddles = Northeast",
+                "Otherwise join line stack on intercard"
+              ],
+              "image": "https://wtfdig.info/74/m11s/fixed-ecliptic-3.webp"
+            },
+            {
+              "role": "Healer",
+              "party": 2,
+              "lines": [
+                "If you baited puddles, bait on hitbox ring",
+                "North puddles = Northwest, South puddles = Northeast",
+                "Otherwise join line stack on intercard"
+              ],
+              "image": "https://wtfdig.info/74/m11s/fixed-ecliptic-3.webp"
+            },
+            {
+              "role": "Melee",
+              "party": 1,
+              "lines": [
+                "Bait on hitbox ring Southwest"
+              ],
+              "image": "https://wtfdig.info/74/m11s/fixed-ecliptic-3.webp"
+            },
+            {
+              "role": "Melee",
+              "party": 2,
+              "lines": [
+                "Bait on hitbox ring Southeast"
+              ],
+              "image": "https://wtfdig.info/74/m11s/fixed-ecliptic-3.webp"
+            },
+            {
+              "role": "Ranged",
+              "party": 1,
+              "lines": [
+                "If you baited puddles, bait on hitbox ring",
+                "North puddles = Northwest, South puddles = Northeast",
+                "Otherwise join line stack on intercard"
+              ],
+              "image": "https://wtfdig.info/74/m11s/fixed-ecliptic-3.webp"
+            },
+            {
+              "role": "Ranged",
+              "party": 2,
+              "lines": [
+                "If you baited puddles, bait on hitbox ring",
+                "North puddles = Northwest, South puddles = Northeast",
+                "Otherwise join line stack on intercard"
+              ],
+              "image": "https://wtfdig.info/74/m11s/fixed-ecliptic-3.webp"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

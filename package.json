@@ -23,6 +23,7 @@
     "import:sources": "node scripts/import-sources.mjs",
     "check:sources": "node scripts/import-sources.mjs --check && vitest run test/sources.test.ts test/importSources.test.ts",
     "find:sources": "node scripts/find-sources.mjs",
+    "import:strat": "node scripts/import-strat.mjs",
     "publish": "node scripts/publish.mjs",
     "wait-deploy": "node scripts/wait-deploy.mjs"
   },
