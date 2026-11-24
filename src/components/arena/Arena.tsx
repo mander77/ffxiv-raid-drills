@@ -32,16 +32,18 @@ export interface Waymark {
   sq: boolean;
 }
 
-/** The waymarks of the fight, in arena units. */
+/** The waymarks of the fight, in arena units: the "Kindred Outside" preset (A to D 10 yalms from
+    the middle; 1 to 4 at x 84 and 116, z 89 and 111 in the game), the set Hector's video uses so a
+    Fire Breath marker can stand on the outer corner. */
 export const WAYMARKS: readonly Waymark[] = [
   { id: "A", x: 50, y: 25, c: "red", sq: false },
   { id: "B", x: 75, y: 50, c: "yellow", sq: false },
   { id: "C", x: 50, y: 75, c: "blue", sq: false },
   { id: "D", x: 25, y: 50, c: "purple", sq: false },
-  { id: "1", x: 9, y: 19, c: "red", sq: true },
-  { id: "2", x: 91, y: 19, c: "yellow", sq: true },
-  { id: "3", x: 91, y: 81, c: "blue", sq: true },
-  { id: "4", x: 9, y: 81, c: "purple", sq: true },
+  { id: "1", x: 10, y: 22.5, c: "red", sq: true },
+  { id: "2", x: 90, y: 22.5, c: "yellow", sq: true },
+  { id: "3", x: 90, y: 77.5, c: "blue", sq: true },
+  { id: "4", x: 10, y: 77.5, c: "purple", sq: true },
 ];
 
 function Waymarks() {

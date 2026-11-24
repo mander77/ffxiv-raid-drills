@@ -182,8 +182,8 @@ test("Arena Split: without a tether, your end is the one you were knocked to", (
         portals = rounds.map((g) => (g.scene.setup.join(" ").match(/toward the (north|south)\./) ?? [])[1]),
         away = (e: string | undefined) => (e === "north" ? "south" : "north");
       if (ends[0]) {
-        // Round 1 without a tether: the end of your first tower (H1 NW, H2 SE).
-        assert.equal(ends[0], s === "H1" ? "north" : "south", `${s}: the first tower's end`);
+        // Round 1 without a tether: the end of your first tower (Hector No Buddies: healers south).
+        assert.equal(ends[0], "south", `${s}: the first tower's end`);
       } else {
         // Round 1 with a tether, round 2 without: the second tower is where round 1 ended.
         assert.equal(ends[1], away(portals[0]), `${s}: the end round 1 ended at`);

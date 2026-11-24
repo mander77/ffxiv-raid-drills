@@ -111,6 +111,12 @@ export const lineTo = (from: Point, to: Point, w = LINE_STACK_W): Overlay => {
   const d = unit([to[0] - from[0], to[1] - from[1]]);
   return {t:"band", x:from[0], y:from[1], x2:from[0] + d[0] * 150, y2:from[1] + d[1] * 150, w};
 };
+/** Majestic Meteowrath: when a tether goes off, a line from its portal through the tethered player
+    ("range 60 width 10 rect"). */
+export const wrathLine = (portal: Point, player: Point): Extract<Overlay, {t: "band"}> => {
+  const d = unit([player[0] - portal[0], player[1] - portal[1]]), len = yalms(bossmod("MajesticMeteowrathRect").range);
+  return {t:"band", x:portal[0], y:portal[1], x2:portal[0] + d[0] * len, y2:portal[1] + d[1] * len, w:yalms(bossmod("MajesticMeteowrathRect").width)};
+};
 
 /** A cone from c toward a (degrees clockwise from north), `half` degrees to each side, r units long. */
 export function cleave(c: Point, a: number, half = 16, r = 80): Overlay {

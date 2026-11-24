@@ -416,7 +416,7 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 ## Rules for the content
 
 - Positions follow the owner's static, which uses the wtfdig guide:
-  https://wtfdig.info/74/m11s#hector:nobuddies:fixed (Hector/Toxic, Kindred No Buddies split,
+  https://wtfdig.info/74/m11s#hector:hector:fixed (Hector/Toxic, Hector No Buddies split,
   Fixed (3CJ) Ecliptic).
 - Every fight time and attack size must come from a source that anyone can check: fight times
   from the cactbot timeline (`r11s.txt`), attack sizes and shapes from the BossMod module

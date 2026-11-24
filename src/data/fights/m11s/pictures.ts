@@ -354,9 +354,9 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-split-side": s => { const d = fromDrill("m-split-line", s);
     const WN = platformPart(PLATFORM_X.west, 8, 48), WS = platformPart(PLATFORM_X.west, 52, 92), EN = platformPart(PLATFORM_X.east, 8, 48), ES = platformPart(PLATFORM_X.east, 52, 92);
     const knocked = (z: RectZone): Preview => hit(youIn(s, z), [guide(CENTER, zoneCenter(z))]);
-    return {...d, options:[knocked(bySlot(s, {H1:WN, H2:ES})), knocked(bySlot(s, {H1:WS, H2:EN})), knocked(bySlot(s, {H1:EN, H2:WS})), youAt(s, [50, 60], 9)]}; },
+    return {...d, options:[knocked(bySlot(s, {H1:WS, H2:ES})), knocked(bySlot(s, {H1:WN, H2:EN})), knocked(bySlot(s, {H1:ES, H2:WS})), youAt(s, [50, 60], 9)]}; },
   // You stand in your tower, a little toward the platform's middle, so your mark clears the number waymark.
-  "k-split-kb": s => { const d = fromDrill("m-split-tower", s), me = bySlot<Point>(s, {H1:[11, 27], H2:[89, 73]}), to = bySlot<Point>(s, {H1:[88, 27], H2:[12, 73]}), same = bySlot<Point>(s, {H1:[11, 62], H2:[89, 38]});
+  "k-split-kb": s => { const d = fromDrill("m-split-tower", s), me = bySlot<Point>(s, {H1:[11, 70], H2:[89, 70]}), to = bySlot<Point>(s, {H1:[88, 70], H2:[12, 70]}), same = bySlot<Point>(s, {H1:[11, 38], H2:[89, 38]});
     return {overlays:d.overlays, boss:BOSS, split:true, before:[you(s, me)], after:[you(s, me), guide(me, to)], answer:[bySlot(s, {H1:EAST, H2:WEST})], options:[
       show([you(s, me), guide(me, to)], [bySlot(s, {H1:EAST, H2:WEST})]),
       show([you(s, me), guide(me, same)], [bySlot(s, {H1:WEST, H2:EAST})]),
@@ -406,11 +406,11 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
         show([guide(last, first)], [circle(first, TOWER_R)]),
         show([guide(last, odd), say("CLOSEST TO THE BOSS?", 8)], [circle(odd, TOWER_R)]),
         // The "?" sits toward the platform middle, clear of the number marker next to each tower.
-        show([TOWER_NW, TOWER_NE, TOWER_SW, TOWER_SE].map(p => tag(p[0], p[1] + (p[1] < 50 ? 4 : -4), "?")))]}; },
+        show([TOWER_NW, TOWER_NE, TOWER_SW, TOWER_SE].map(p => tag(p[0], p[1] + (p[1] < 50 ? 6.5 : -6.5), "?")))]}; },
   "k-massive": () => {
     // Spread down the platform, between the number markers at its two ends. After the two rounds of
     // tethers, light party 1 is on the east platform and light party 2 on the west; each stacks in close.
-    const ROWS = [27, 42, 57, 72], spread = (g: Who[], x: number): Overlay[] => g.map(([l, r], i) => mark(x, ROWS[i], l, r));
+    const ROWS = [30, 43, 57, 70], spread = (g: Who[], x: number): Overlay[] => g.map(([l, r], i) => mark(x, ROWS[i], l, r));
     // Stacked just north of waymark B or D, so no mark hides it.
     const stacked = (g: Who[], x: number): Overlay[] => g.map(([l, r], i) => mark(x + (i % 2) * 7, 37 + Math.floor(i / 2) * 7, l, r));
     const apart = [...spread(G2, 12), ...spread(G1, 88)], s1 = stacked(G1, 67), s2 = stacked(G2, 26);

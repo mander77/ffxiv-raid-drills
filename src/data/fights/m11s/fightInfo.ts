@@ -6,5 +6,5 @@ import type { FightInfo } from "../types";
 export const FIGHT_INFO: FightInfo = {
   short: "M11S",
   full: "The Tyrant (Savage)",
-  strats: ["Hector (Toxic)", "Kindred No Buddies", "Fixed (3CJ)"],
+  strats: ["Hector (Toxic)", "Hector No Buddies", "Fixed (3CJ)"],
 };

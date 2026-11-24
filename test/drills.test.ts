@@ -1,4 +1,5 @@
 import { assert, test } from "vitest";
+import { WAYMARKS } from "../src/components/arena/Arena";
 import { isStretched, PLATFORM_X, PORTAL_LINE_X } from "../src/data/fights/m11s/attacks";
 import {
   assaultScene,
@@ -666,5 +667,27 @@ test("Powerful Gust: each tornado cones its two baits, support on its left and D
       TORNADO_BAITS.some((b) => b.support[0] === me[0] && b.support[1] === me[1]),
       `${s} baits as a support`,
     );
+  }
+});
+
+test("the number waymarks are the Kindred Outside preset, the set Hector's video uses", () => {
+  // The preset in game coordinates (naurffxiv's M11S page); the arena's middle is (100, 100).
+  const preset: Record<string, [number, number]> = { "1": [84, 89], "2": [116, 89], "3": [116, 111], "4": [84, 111] };
+  for (const w of WAYMARKS.filter((m) => m.sq)) {
+    const [x, z] = preset[w.id];
+    assert.deepEqual([w.x, w.y], [(x - 80) * 2.5, (z - 80) * 2.5], `waymark ${w.id}`);
+  }
+});
+
+test("Arena Split: when the tethers go off, a line runs from each portal through its player", () => {
+  for (const tether of [true, false]) {
+    const others = OTHERS.filter((o) => o !== "H1").slice(0, tether ? 3 : 4),
+      sc = splitRound("H1", { tether, side: "west", end: "south", covered: "inner", endsSide: "east", others }),
+      lineup = sc.steps[3],
+      lines = (lineup.reveal ?? []).filter((o) => o.t === "band");
+    assert.equal(lines.length, 4, "every tether's line");
+    for (const l of lines) assert.equal(l.t === "band" && l.w, 25, "10 yalms wide (BossMod)");
+    // With a tether, your own line goes through you; the others' lines are the ones to miss.
+    assert.equal(lineup.hits?.length ?? lines.length, tether ? 3 : 4);
   }
 });

@@ -320,7 +320,7 @@ screen.
 | Ecliptic Stampede, Two-way Fireball, Four-way Fireball | The last phase. |
 | Heartbreak Kick, Heartbreaker | The towers and the enrage. |
 | Hector's dodge | The Orbital Omen strat. A strat name from the guide: keep it. |
-| Kindred No Buddies, Fixed (3CJ) | Strat names: keep them. |
+| Hector No Buddies, Fixed (3CJ) | Strat names: keep them. |
 
 Mechanic titles on screen are built from these names: "Name: Part" ("Meteorain: First Line
 Stack") or "Name (Part)" ("Void Stardust (Second Time)"), in Title Case.
