@@ -21,7 +21,8 @@
     "lint": "biome check",
     "format": "biome check --write",
     "import:sources": "node scripts/import-sources.mjs",
-    "check:sources": "node scripts/import-sources.mjs --check && vitest run test/sources.test.ts",
+    "check:sources": "node scripts/import-sources.mjs --check && vitest run test/sources.test.ts test/importSources.test.ts",
+    "find:sources": "node scripts/find-sources.mjs",
     "publish": "node scripts/publish.mjs",
     "wait-deploy": "node scripts/wait-deploy.mjs"
   },
