@@ -10,12 +10,51 @@ this file in the same commit.
   the same questions under time pressure. A screen must work with very little reading.
 - The tabs are Home, Learn, Practice, Timeline, Pressure and Cheat Sheet. The tabs "My job" and
   "Someone died" were deleted. Git history keeps their code.
-- The site has one fight and one role today. The long-term plan is many raid fights and every
+- The site has one fight and one role today, and can hold more fights (see "More than one
+  fight"). The long-term plan is many raid fights and every
   role (tanks, healers, melee, ranged and casters), each with its own slots (MT/OT, H1/H2, M1/M2,
   R1/R2). A new fight comes from data files, with little or no change to the engine code.
 - The site does not replace wtfdig. The owner likes the site's own diagrams, so the plan has a
   reference view of every mechanic in fight order, for a second screen (issue #2), at the top of
   the Cheat Sheet.
+
+## More than one fight (issue #93)
+
+November 24: the site can hold more than one fight. This is step 0 of issue #99 (a job that
+drafts a new fight). M11S is still the only fight, so nothing changed for the player.
+
+- Each fight has a folder, `src/data/fights/<id>/`. Its `index.ts` exports one `FightData`
+  (`src/data/fights/types.ts`): its names and strats, sources, drills, cards, pictures, timeline,
+  abilities, reference, arena sizes and full fight. `FIGHTS` in `src/data/fights/index.ts` lists
+  the fights. The shared code reads a fight only through `FightData`, never from a fight's files,
+  so a new fight needs no change to the shared code. A made-up test fight in
+  `test/fixtures/testFight/` proves it: it opens every tab.
+- The M11S files kept their names and shapes; `m11s/index.ts` only joins them up. The moves came
+  in a commit of their own, so branches that change the M11S files rebase over them.
+- Parts that every fight uses moved out of the M11S files: the category names
+  (`src/data/categories.ts`), the fight types (`src/types.ts`), the boss's moves in a scene
+  (`src/lib/scene.ts`), the source lookups (`src/data/sourceLookups.ts`), the Cheat Sheet lookups
+  (`src/lib/reference.ts`) and the moving marker (`src/data/route.ts`, which stayed where it was).
+  No data value changed: every pattern, picture, card and fight builds the same as before.
+- Addresses (owner's choice): a fight's pages start with its id, `/<fight>/<tab>`, such as
+  `/m11s/learn/k-sword`. The id comes first because it is the widest part. Rejected:
+  `/<tab>/<fight>/...` (harder to tell from mechanic ids and codes) and `?fight=<id>` (easy to
+  drop when a link is copied by hand).
+- With one fight, an address needs no id (`/learn/k-sword`), and the header shows no picker.
+  The routes, the chooser and the picker are already built and tested; they show once `FIGHTS`
+  has a second fight (owner's choice: build now, hidden).
+- With two or more fights, an address with no id asks the player to pick a fight, then opens
+  the same page in it (owner's choice). This holds for old shared links too: the owner chose
+  "every bare address asks" over "old deep links open M11S". The header's fight picker opens the
+  same tab in the other fight.
+- Saved data: progress (`raid-drills-progress`, version 2) and the Pressure picks
+  (`raid-drills-pressure`, version 2) are kept for each fight. The seconds to decide, the stops,
+  the speed and the slot stay shared. The owner said old links and saved data need not keep
+  working while the app has no real users, so saved progress of version 1 is dropped. The
+  pattern codes still build the same patterns: every `random()` call stays in its order.
+- Not done yet: `scripts/import-sources.mjs` still has one set of pins (issue #94). The full
+  fight's engine still knows the Arena Split (`Fight.split`, `ArenaSizes.split`) and the boss
+  weapons (`ArenaSizes.scytheSafe`); a fight without them gives `[0, 0]` and leaves `split` out.
 
 ## Planned work
 
@@ -27,7 +66,7 @@ make sure that each one still matches the code before you start it.
   "Positions to remember", not in a new tab, so the phone keeps its short list of tabs. It is one
   scrolling page, not one mechanic at a time. Each mechanic gets
   one key picture, not one per Learn card: 26 mechanics in fight order (`REFERENCE` in
-  `src/data/reference.ts`), each with the answer picture of one Learn card for your slot, the
+  `src/data/fights/m11s/reference.ts`), each with the answer picture of one Learn card for your slot, the
   one-line rules of its Learn cards (1 to 3), its time and a Learn link. Together they hold every
   Learn card once. The text is the cards' own rules, so the sheet adds no strat text of its own.
   The hand-written lines and the sword example picture went away (owner's choice).
@@ -113,7 +152,7 @@ make sure that each one still matches the code before you start it.
     `LiveArena`, since the fight uses it too. The unused `LS`, `esc` and `el` helpers are gone.
     "Run" now means only the scored full fight, with the owner's OK: Practice's `DrillRun` is
     `DrillScreen` (one go at a drill is a try), the quick round ends with Go again like the other
-    rounds, and a weapon run in `src/data/drills.ts` is a jump set (`JumpSet`, `buildJumpSet`).
+    rounds, and a weapon run in `src/data/fights/m11s/drills.ts` is a jump set (`JumpSet`, `buildJumpSet`).
     Names only, never a value.
   - Rebuild 5, after review: the player's Settings opens in a shadcn/ui Sheet, from the right on a
     wide screen (the arena stays in view) and from the bottom on a phone. The owner chose Sheet
@@ -246,7 +285,7 @@ make sure that each one still matches the code before you start it.
     Evolved 1"). A cast is a dashed, outlined square with its name in plain text; a hit is a filled
     square with its name in bold; a small key says Cast and Hit. Which lines are casts comes from
     BossMod: the abilities it lists as "Boss->self, N s cast, single-target", matched by the
-    ability id on each cactbot line (`BOSS_CAST` in `src/data/fight.ts`). A Cometite puddle's
+    ability id on each cactbot line (`BOSS_CAST` in `src/data/fights/m11s/fight.ts`). A Cometite puddle's
     "drops" line is the start of its cast, so it counts as a cast too.
   - When a hit crosses the now mark in a playing fight, the mark flashes in the hit's category
     colour (it glows and grows for 0.6 s) and the hit's square pops (owner's idea: show that it went
@@ -323,7 +362,7 @@ Do not propose these again unless the owner brings them up.
 - The setup always shows in full. It does not fold after the first answer, and it has no More or
   Less (owner's choice: the player must see every step at a glance, with no click). This replaces
   the Collapsible from issue #29.
-- A rule that a drill and a Learn card both show is written once, in `src/data/rules.ts`.
+- A rule that a drill and a Learn card both show is written once, in `src/data/fights/m11s/rules.ts`.
 - Mechanic names are in Title Case everywhere, on the icons and in the text (owner's choice, issue
   #58). The rule is in `docs/vocabulary.md`.
 - One idea has one phrase on screen (owner's choices, issue #58). The list is in `docs/vocabulary.md`. The owner chose "under the boss" and "max melee" as the only hitbox words, "light party
@@ -344,7 +383,7 @@ Do not propose these again unless the owner brings them up.
   the boss does, not only where you stand.
 - After an answer, the correct answer holds its explanation, and an incorrect pick gets a "Your pick" tag.
 - Cards whose answer is your own spot show your role marker on the answer picture.
-- Back, Next and one chip per mechanic (`LEARN_GROUPS` in `src/data/questions.ts`). A test makes sure
+- Back, Next and one chip per mechanic (`LEARN_GROUPS` in `src/data/fights/m11s/questions.ts`). A test makes sure
   that each card is in exactly one chip.
 - One prompt bar on every tab that asks something (owner's choice, November 23, "Option A"): Learn,
   Timeline, Pressure's quick round and Practice share `PromptBar`. It holds the question (with
@@ -373,7 +412,7 @@ Do not propose these again unless the owner brings them up.
 - The incorrect answers are random rows of the timeline. A row whose name points back to an
   earlier row ("the other weapon", "second set", "second time") is not offered before that
   earlier row has happened, because the name gives it away (`POINTS_BACK` in
-  `src/data/questions.ts`).
+  `src/data/fights/m11s/questions.ts`).
 - The phase on a card is the phase of the ability nearest the card's time. The timeline's times
   are rounded, so Orbital Omen (4:26) was shown in Phase 1 before.
 
@@ -765,11 +804,11 @@ static wins.
 - The arena is 40 by 40 yalms. One arena unit is 0.4 yalm. No guide states the size. It follows
   from the M11S waymark presets (A to D 10 yalms from the center).
 - Sizes come from BossMod (`BossMod.Modules/Dawntrail/Savage/RM11STheTyrant`, read on GitHub). The
-  boss hitbox is 5 yalms. The shared sizes and shapes live in `src/data/attacks.ts`.
+  boss hitbox is 5 yalms. The shared sizes and shapes live in `src/data/fights/m11s/attacks.ts`.
 - Times come from cactbot (`ui/raidboss/data/07-dt/raid/r11s.txt`). Branch labels in that file add
   offsets, so subtract them.
 - Issue #14 (November 23): `npm run import:sources` imports both sources at pinned commits into
-  `src/data/source.gen.ts`, and the data files read every time and size from it. The owner chose
+  `src/data/fights/m11s/source.gen.ts`, and the data files read every time and size from it. The owner chose
   a generated file over a check alone. The downloads stay in `.cache/sources/`, never committed.
   The import keeps game names as cactbot writes them, so it converts no text. A value that
   matches no source stays typed by hand, on a list in `test/sources.test.ts`, as a question for
