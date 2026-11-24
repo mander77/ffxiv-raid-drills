@@ -157,6 +157,23 @@ test("Arena Split: one round with a tether, and you stack for Massive Meteor on 
     }
 });
 
+test("Arena Split: the tethers swap in the second round", () => {
+  for (const s of SLOTS)
+    for (let i = 0; i < REPEATS; i++) {
+      const f = buildFight(s),
+        rounds = f.segs.filter((g) => g.drills[0] === "m-split-fire"),
+        tethered = rounds.map((g) => [
+          ...(g.scene.tether ? [s] : []),
+          ...(g.scene.steps[3].reveal ?? []).flatMap((o) => (o.t === "mark" ? [o.l] : [])),
+        ]);
+      for (const t of tethered) assert.equal(t.length, 4, `${s}: four tethered players each round`);
+      assert.deepEqual([...tethered[0], ...tethered[1]].sort(), ["H1", "H2", "M1", "M2", "MT", "OT", "R1", "R2"], `${s}: everyone once`);
+      // A tether at the second towers is the second round's tether: the same portal.
+      const towers = f.segs.find((g) => g.title === "Arena Split: Second Towers");
+      assert.deepEqual(towers?.scene.tether?.portal, rounds[1].scene.tether?.portal, `${s}: the second towers' portal`);
+    }
+});
+
 test("Arena Split: without a tether, your end is the one you were knocked to", () => {
   for (const s of SLOTS)
     for (let i = 0; i < REPEATS; i++) {

@@ -54,3 +54,16 @@ test("a click on an icon's card opens it zoomed in, in a dialog named after it",
   const dialog = screen.getByRole("dialog", { name: "Wild Charge" });
   assert.ok(dialog.querySelector("svg.lucide-wild-charge"));
 });
+
+test("the styles page shows the tether beside the guide, short and stretched", () => {
+  render(<StylesPage />);
+  const lines = screen.getByRole("heading", { level: 2, name: "Lines on the Arena" }).closest("section");
+  assert.ok(lines);
+  assert.deepEqual(
+    [...lines.querySelectorAll("h3")].map((h) => h.textContent),
+    ["Guide", "Tether", "Stretched Tether", "Portal"],
+  );
+  assert.ok(lines.querySelector(".tether:not(.stretched)"), "a red tether");
+  assert.ok(lines.querySelector(".tether.stretched"), "a blue tether");
+  assert.ok(lines.querySelector(".guide"), "a guide");
+});

@@ -352,6 +352,9 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Overlay**: a piece drawn on the arena (an attack, a weapon, a tag, a player mark); `Shape`
   draws one.
 - **Mark**: a player's mark on the arena, or the boss (`BossMark`).
+- **Tether**: a line from a portal to a player (`{t:"tether"}`, `Tether` in `Shape.tsx`), red until
+  it is **stretched** (`TETHER_STRETCH`), then blue. A scene's `tether` is your own: it follows
+  you. A **guide** is a move, not a tether.
 - **Kind**: what you do in a Practice mechanic: spread, a stack (party, pair, light party or role
   stack), line stack, bait, puddle drop sequence, proteans (clock spots), dodge sequence, tower,
   knockback tower, tank tower, wild charge, look ahead, knockback, chains, pair

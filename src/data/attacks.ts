@@ -5,7 +5,7 @@
 // Sizes come from BossMod's M11S module (awgil/ffxiv_bossmod, RM11STheTyrant), which lists each
 // ability's shape in yalms. Each size is read from source.gen.ts (`npm run import:sources`), by
 // the BossMod ability it belongs to. The arena is 40 yalms across and 100 units in this app.
-import { addVec, angOf, leftOf, polar, unit } from "../geometry";
+import { addVec, angOf, dist, leftOf, polar, unit } from "../geometry";
 import { BOSSMOD_ACTORS, BOSSMOD_SPLIT } from "./source.gen";
 import { bossmod } from "./sources";
 import type { Overlay, Point, Puddle } from "../types";
@@ -83,6 +83,15 @@ export const PLATFORM_X = {
 } as const satisfies Record<"west" | "east", readonly [number, number]>;
 /** Half the split arena's width, from the boss to the outer edge of a platform. */
 export const SPLIT_HALF_W = yalms(SPLIT.platformCenter + SPLIT.platformHalfWidth);
+/** A tether counts as stretched this far from its portal (BossMod's StretchDistance, which it
+    calls an estimate; the owner chose to use it). Shorter, it shows red; this long, blue. */
+export const TETHER_STRETCH = yalms(SPLIT.stretch);
+/** True when a tether from its portal to p is stretched. */
+export const isStretched = (portal: Point, p: Point): boolean => dist(portal, p) >= TETHER_STRETCH;
+/** How far outside a platform's outer wall the tether portals stand: 3 yalms. BossMod has no
+    portal spots (it reads them from the game), so this comes from Hector's guide video, drawn to
+    scale (the owner's choice). */
+export const PORTAL_OUT = yalms(3);
 /** The side portal lines (Majestic Meteorain, "range 60 width 10 rect"): each one runs the whole
     length of a platform and covers this west to east range, half the platform's width. */
 export const PORTAL_LINE_X: readonly (readonly [number, number])[] = SPLIT.lines.map((x) => {

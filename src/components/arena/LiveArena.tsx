@@ -4,7 +4,7 @@ import { bossFor } from "../../lib/practice";
 import { cn } from "../../lib/utils";
 import type { Boss, Overlay, Point, Scene, StepResult, Zone } from "../../types";
 import { Arena, pieceLayers } from "./Arena";
-import { hitsFirst, Shape } from "./Shape";
+import { Shape, Tether } from "./Shape";
 import { TurningBoss } from "./TurningBoss";
 import { ZoneArea } from "./ZoneArea";
 import { ZoneLabel } from "./ZoneLabel";
@@ -41,7 +41,7 @@ export interface LiveArenaProps {
   target?: Zone | null;
   /** What the fight draws over the arena: the flash of a hit, the countdown ring, a tank buster. */
   effects?: ReactNode;
-  /** Your moving marker, on top of everything. */
+  /** Your moving marker, on top of everything. It draws your tether too, so the arena leaves it out. */
   runner?: ReactNode;
 }
 
@@ -115,7 +115,12 @@ export function LiveArena({
   // What the last answer revealed (the attack) goes under the weapons, so their icons stay sharp.
   const last = showLast ? results[n - 1] : undefined;
   const lastStep = last ? sc.steps[n - 1] : undefined;
-  const reveal = lastStep?.reveal ? hitsFirst(lastStep.reveal.map((o) => rotOverlay(o, k))) : [];
+  const reveal = pieceLayers(lastStep?.reveal?.map((o) => rotOverlay(o, k)) ?? []);
+
+  // Your tether, from its portal to where you stand: your last click, or your mark before the first.
+  const mine = runner === undefined ? sc.tether : undefined;
+  const lastSpot = [...results].reverse().find((r) => !r.missed)?.p;
+  const tetherTo: Point | undefined = mine && (lastSpot ?? [mine.you.x, mine.you.y]);
 
   // After a correct answer the next question is already asked; after an incorrect one it waits
   // for Next step.
@@ -171,7 +176,7 @@ export function LiveArena({
       layers={{
         ground: (
           <>
-            {shapes(reveal)}
+            {reveal.ground}
             {base.ground}
           </>
         ),
@@ -184,7 +189,10 @@ export function LiveArena({
         drops: (
           <>
             {drops}
+            {base.drops}
+            {reveal.drops}
             {shapes(cues.filter((o) => o.t !== "mark"))}
+            {mine && tetherTo && <Tether portal={mine.portal} to={tetherTo} />}
           </>
         ),
         zones: (
@@ -198,6 +206,7 @@ export function LiveArena({
         labels: (
           <>
             {base.labels}
+            {reveal.labels}
             {last && lastStep && (lastStep.lookAhead || correctLabel) && (
               <ZoneLabel zone={last.z} kind={lastStep.lookAhead ? "later" : "correct"} boss={bossAt} />
             )}
@@ -207,7 +216,9 @@ export function LiveArena({
         marks: (
           <>
             {base.marks}
+            {reveal.marks}
             {shapes(cues.filter((o) => o.t === "mark"))}
+            {mine && results.length === 0 && <Shape overlay={mine.you} />}
           </>
         ),
         effects,

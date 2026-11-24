@@ -32,6 +32,9 @@
     --arena-wm-blue: oklch(0.553 0.125 249.557);
     --arena-wm-purple: oklch(0.541 0.168 302.527);
     --arena-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    /* A tether: red until it is stretched, then blue (the owner's choice, as in the game). */
+    --arena-tether: oklch(0.577 0.215 27.325);
+    --arena-tether-stretched: oklch(0.546 0.191 259.69);
   }
 
   /* The floor: sand tiles inside a brown edge. A split arena has a void strip down the middle. */
@@ -175,6 +178,21 @@
     stroke-width: 0.6;
     stroke-dasharray: 1.6 1.2;
     opacity: 0.9;
+  }
+  /* A tether: a solid cord on a light outline, unlike a guide's thin white dashes. */
+  .arena .tether .halo {
+    stroke: var(--arena-sand);
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0.85;
+  }
+  .arena .tether .cord {
+    stroke: var(--arena-tether);
+    stroke-width: 0.9;
+    stroke-linecap: round;
+  }
+  .arena .tether.stretched .cord {
+    stroke: var(--arena-tether-stretched);
   }
 
   /* Pieces on the floor: tornadoes, rocks, towers and portals. */

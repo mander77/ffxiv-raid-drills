@@ -8,7 +8,7 @@
 import { bySlot, withSeed } from "../util";
 import { markRole, partyOf } from "../party";
 import { angOf, polar, rotOverlay, zoneCenter } from "../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, avalancheScene, homeSide, markerCorner, platformZone, portalLines, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, avalancheScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
 import { PLATFORM_X, BREATH_W, PROXIMITY_DOT, PUDDLE_R, RAIDWIDE_R, SPREAD_R, PROTEAN_HALF, PROTEAN_LEN, WALL_W, TOWER_R, METEOR_R, RAW_TANK_HALF, RAW_STACK_HALF, aoe, axeHit, cleave, donut, gust, lineTo, swordCross } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../types";
 
@@ -17,6 +17,8 @@ const tag = (x: number, y: number, s: string): Overlay => ({t:"tag", x, y, s});
 const mark = (x: number, y: number, l: string, r: MarkRole): Overlay => ({t:"mark", x, y, l, r});
 const target = (p: Point): Overlay => ({t:"target", x:p[0], y:p[1]});
 const guide = (a: Point, b: Point): Overlay => ({t:"guide", x:a[0], y:a[1], x2:b[0], y2:b[1]});
+/** A tether from its portal to a player. */
+const tether = (portal: Point, p: Point): Overlay => ({t:"tether", x:portal[0], y:portal[1], x2:p[0], y2:p[1]});
 const puddle = (p: Point, r = PUDDLE_R): Overlay => ({t:"puddle", x:p[0], y:p[1], r});
 const circle = (c: Point, r: number): ZoneShape => ({c, r});
 // TS note: the return type is RectZone, not the wider ZoneShape, so a rectangle can also go
@@ -363,16 +365,19 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   // Fire Breath is a line from the boss through each marked player.
   "k-split-fb": s => { const start = bySlot<Point>(s, {H1:[10, 50], H2:[90, 50]}), edge = bySlot<Point>(s, {H1:[-12, 50], H2:[112, 50]});
     // The drill's first step without a tether: in close, at the middle of the platform's inner edge.
-    const sc = splitRound(s, false, homeSide(s), "north", "inner"), z = sc.steps[0].z;
+    // The example round: the west side's portals near the ends, and four others tethered.
+    const side = homeSide(s), sc = splitRound(s, {tether:false, side, end:"north", covered:"inner", endsSide:"west", others:["MT", "OT", "M1", "R2"]}), z = sc.steps[0].z;
     if(!z) throw new Error("the first Fire Breath step has no fixed zone");
     // Your mark stands in that area, a little north (H1) or south (H2), so it clears waymark D or B.
     const inner = bySlot<Point>(s, {H1:[29, 42], H2:[71, 58]});
     const tethered = bySlot<Point>(s, {H1:[10, 57], H2:[90, 43]}), tank = mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T"), breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W);
+    // The tank's tether, before it is stretched: from a portal on the other side.
+    const tankTether = tether(portalAt(otherSide(side), bySlot(s, {H1:"north", H2:"south"}), "west"), tethered);
     return {overlays:sc.overlays, split:sc.split, boss:sc.boss, before:[you(s, start)], after:[breath(inner), you(s, inner)],
       answer:[z], options:[
         show([breath(inner), you(s, inner)], [z]),
         show([breath(edge), you(s, edge)], [bySlot(s, {H1:rect(-15, 38, -9, 62), H2:rect(109, 38, 115, 62)})]),
-        show([breath(start), you(s, start), tank, guide(tethered, CENTER), tag(tethered[0], tethered[1] + bySlot(s, {H1:6, H2:-6}), "TETHER")]),
+        show([breath(start), you(s, start), tank, tankTether, tag(tethered[0], tethered[1] + bySlot(s, {H1:6, H2:-6}), "TETHER")]),
         show([breath(start), you(s, start), say("STAND STILL", 8)])]}; },
   // An example round: the portal lines cover the inner half of the west platform, so the outer
   // half of the east one. H1 shows the west platform, H2 the east one: one example of each side.
@@ -382,11 +387,13 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const markers = (["north", "south"] as const).map(e => markerCorner(side, e, covered)), corner = markers[0];
     const breath = (p: Point): Overlay => lineTo(CENTER, p, BREATH_W), edge = bySlot<Point>(s, {H1:[-12, 40], H2:[112, 60]});
     const tethered = bySlot<Point>(s, {H1:[4, 3], H2:[85, 97]}), nextTo = bySlot<Point>(s, {H1:[3, 9], H2:[80, 92]}), middle = bySlot<Point>(s, {H1:[10, 50], H2:[90, 50]});
-    return {overlays:lines, split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[31, 50], H2:[69, 50]}))], answer:markers.map(p => circle(p, 4.5)),
+    // The tank's tether at the wall, stretched from a portal on the other side, at the other end.
+    const tankTether = tether(portalAt(otherSide(side), bySlot(s, {H1:"south", H2:"north"}), "west"), tethered);
+    return {overlays:[...portalsOf("west"), ...lines], split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[31, 50], H2:[69, 50]}))], answer:markers.map(p => circle(p, 4.5)),
       note:"Example: the portal lines cover the half shown. Tethers go to the north or south wall.", options:[
         show([breath(corner), you(s, corner)], markers.map(p => circle(p, 4.5))),
         show([breath(edge), you(s, edge)], [bySlot(s, {H1:rect(-15, 10, -10, 90), H2:rect(110, 10, 115, 90)})]),
-        show([breath(nextTo), you(s, nextTo), mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T")]),
+        show([breath(nextTo), you(s, nextTo), tankTether, mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T")]),
         hit(youAt(s, middle, 6), [breath(middle)])]}; },
   "k-split-towers23": s => {
     // The drill's second towers, with your last tether or marker in the SW quadrant (H1) or the NE one (H2).

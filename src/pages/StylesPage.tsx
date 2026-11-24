@@ -7,6 +7,7 @@ import "../components/arena/arena.css";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { Shape, Tether } from "../components/arena/Shape";
 import { Weapon } from "../components/arena/Weapon";
 import { CastSquare } from "../components/CastSquare";
 import { CATEGORY_ICON, CATEGORY_TEXT } from "../components/CategoryIcons";
@@ -121,6 +122,32 @@ const WEAPONS: readonly { overlay: ComponentProps<typeof Weapon>["overlay"]; nam
     overlay: { t: "sword", x: 50, y: 50, held: true },
     name: "Sword",
     meaning: "A wide blade, point down, with a crossguard and a round pommel.",
+  },
+];
+
+/** Lines and pieces on the arena that look alike at a glance, each on a small piece of floor. A
+    guide is a move; a tether ties a player to a portal. The tether runs from a portal at the left
+    to the right, short or long enough to be stretched (TETHER_STRETCH is 120 units). */
+const ARENA_LINES: readonly { name: string; meaning: string; piece: ReactNode }[] = [
+  {
+    name: "Guide",
+    meaning: "A move: where you go, or where a knockback sends you. Thin white dashes.",
+    piece: <Shape overlay={{ t: "guide", x: 4, y: 10, x2: 56, y2: 10 }} />,
+  },
+  {
+    name: "Tether",
+    meaning: "A tether from its portal to a player, not long enough yet: red.",
+    piece: <Tether portal={[4, 10]} to={[56, 10]} stretched={false} />,
+  },
+  {
+    name: "Stretched Tether",
+    meaning: "A tether at least 48 yalms long (BossMod's estimate): blue.",
+    piece: <Tether portal={[4, 10]} to={[56, 10]} stretched />,
+  },
+  {
+    name: "Portal",
+    meaning: "Where a tether starts, outside a platform's wall. Orbital Omen's portals carry a number.",
+    piece: <Shape overlay={{ t: "portal", x: 30, y: 10, vert: false }} />,
   },
 ];
 
@@ -271,6 +298,21 @@ export function StylesPage() {
         ))}
 
         <section className="space-y-4">
+          <h2 className="font-display text-2xl font-bold">Lines on the Arena</h2>
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {ARENA_LINES.map((l) => (
+              <IconItem
+                key={l.name}
+                picture={<ArenaPiece className="h-6 w-18">{l.piece}</ArenaPiece>}
+                zoomed={<ArenaPiece className="h-24 w-72">{l.piece}</ArenaPiece>}
+                name={l.name}
+                meaning={l.meaning}
+              />
+            ))}
+          </ul>
+        </section>
+
+        <section className="space-y-4">
           <h2 className="font-display text-2xl font-bold">The Boss's Weapons</h2>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {WEAPONS.map((w) => (
@@ -294,6 +336,21 @@ export function StylesPage() {
         </section>
       </PageContainer>
     </main>
+  );
+}
+
+interface ArenaPieceProps {
+  children: ReactNode;
+  className?: string;
+}
+
+/** A small strip of the arena floor, 60 by 20 units, with one piece on it. */
+function ArenaPiece({ children, className }: ArenaPieceProps) {
+  return (
+    <svg className={cn("arena", className)} viewBox="0 0 60 20" aria-hidden="true">
+      <rect className="floor" x="0" y="0" width="60" height="20" />
+      {children}
+    </svg>
   );
 }
 

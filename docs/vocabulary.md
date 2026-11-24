@@ -210,6 +210,7 @@ The header switch is "Light Party", with the buttons 1 and 2.
 | puddle | A ground AoE that a player drops. | void zone, baited circle |
 | tower | A circle that players soak. | |
 | tether | A line between a player and something else. | |
+| stretched | A tether that is long enough. Arena Split: 48 yalms from its portal. | long enough, pulled |
 | cone | A hit shaped like a slice. Use as a noun. | (do not use "cones" as a verb in new text) |
 | AoE | An area hit. Use with a name: "the axe AoE", "proximity AoE". | |
 | portal | Orbital Omen's line sources, numbered #1 to #4. In the Arena Split, where each tether starts. | |

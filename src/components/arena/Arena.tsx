@@ -1,7 +1,8 @@
 import "./arena.css";
 import { Fragment, type MouseEvent, type ReactNode, useId, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { PLATFORM_X, SPLIT_HALF_W } from "../../data/attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W } from "../../data/attacks";
+import { round2 } from "../../geometry";
 import type { Overlay, Point } from "../../types";
 import { hitsFirst, isWeapon, Shape } from "./Shape";
 
@@ -53,11 +54,6 @@ function Waymarks() {
   ));
 }
 
-/** A split arena is wider than the square one (its platforms reach past 0 and 100), so it is
-    drawn smaller about the arena's center, to fit the same box. Every piece on it shrinks with
-    it, so each size stays true to the others. */
-const SPLIT_SCALE = 50 / SPLIT_HALF_W;
-const SPLIT_TRANSFORM = `translate(50 50) scale(${SPLIT_SCALE}) translate(-50 -50)`;
 /** The floor of a split arena: from the west platform's outer edge to the east one's. */
 const SPLIT_LEFT = 50 - SPLIT_HALF_W;
 
@@ -87,6 +83,15 @@ function Floor({ split, tiles }: FloorProps) {
 /** The picture's viewBox, in arena units: the 100 by 100 floor, with room around it for the
     compass (6 above, 4 on the other sides). */
 export const ARENA_VIEW = { x: -4, y: -6, width: 108, height: 110 } as const;
+/** How far out from a split arena's outer walls the picture must reach: the tether portals and
+    their width (a portal is 2.2 units across each way), with a little room. */
+const SPLIT_REACH = SPLIT_HALF_W + PORTAL_OUT + 3;
+/** A split arena is wider than the square one (its platforms reach past 0 and 100, and its
+    portals further), so it is drawn smaller about the arena's center, to fit the square floor's
+    0 to 100: what sits beside the floor (Practice's list, Pressure's casts) lines up with that
+    square. Every piece on it shrinks with it, so each size stays true to the others. */
+const SPLIT_SCALE = 50 / SPLIT_REACH;
+const SPLIT_TRANSFORM = `translate(50 50) scale(${round2(SPLIT_SCALE)}) translate(-50 -50)`;
 /** The picture's width over its height. */
 export const ARENA_ASPECT = ARENA_VIEW.width / ARENA_VIEW.height;
 
@@ -157,16 +162,19 @@ function toArena(e: MouseEvent<SVGSVGElement>, world: SVGGElement | null): Point
   return [q.x, q.y];
 }
 
-/** Overlays sorted into their layers: name tags are labels, role marks are marks, the boss's
-    weapons are weapons, and the rest is ground, with the attacks under the other pieces. */
-export function pieceLayers(os: readonly Overlay[]): Pick<Record<Layer, ReactNode>, "ground" | "weapons" | "labels" | "marks"> {
+/** Overlays sorted into their layers: name tags and portals are labels, tethers are drops, role
+    marks are marks, the boss's weapons are weapons, and the rest is ground, with the attacks under
+    the other pieces. Portals and tethers stay out of the ground, which is clipped to the floor: a
+    tether portal stands outside the wall. */
+export function pieceLayers(os: readonly Overlay[]): Pick<Record<Layer, ReactNode>, "ground" | "drops" | "weapons" | "labels" | "marks"> {
   const draw = (list: readonly Overlay[]): ReactNode =>
     // biome-ignore lint/suspicious/noArrayIndexKey: a picture's pieces never change order.
     list.map((o, i) => <Shape key={i} overlay={o} />);
   return {
-    ground: draw(hitsFirst(os.filter((o) => o.t !== "tag" && o.t !== "mark" && !isWeapon(o)))),
+    ground: draw(hitsFirst(os.filter((o) => o.t !== "tag" && o.t !== "mark" && o.t !== "portal" && o.t !== "tether" && !isWeapon(o)))),
+    drops: draw(os.filter((o) => o.t === "tether")),
     weapons: draw(os.filter(isWeapon)),
-    labels: draw(os.filter((o) => o.t === "tag")),
+    labels: draw(os.filter((o) => o.t === "tag" || o.t === "portal")),
     marks: draw(os.filter((o) => o.t === "mark")),
   };
 }
