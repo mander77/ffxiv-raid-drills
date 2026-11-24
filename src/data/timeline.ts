@@ -19,8 +19,7 @@ const at = (name: LineName, n = 1): string => nearClock(cactbot(name, n));
 export const TIMELINE: readonly TimelineEvent[] = [
   {t:at("Crown of Arcadia"), n:"Crown of Arcadia", job:s=>["Physical raidwide.", "Mitigate it, then heal the party."]},
   {t:at("Raw Steel Trophy (Scythe/Axe)"), n:"Raw Steel Trophy (Axe or Scythe)", job:s=>[`Hits land at ${at("Raw Steel (Axe)")} to ${at("Heavy Hitter (Scythe)/Impact x6 (Axe)")}.`, "Axe: tanks stack, you spread " + bySlot(s, {H1:"SSW", H2:"SSE"}) + " far out.", "Scythe: tanks spread, party stacks south."]},
-  // "0:55" and "1:00" are typed by hand: cactbot has 0:55.5 and 1:00.6. A question for the owner.
-  {t:at("Trophy Weapons"), n:"Trophy Weapons, Then Assault Evolved", job:s=>["Weapon hits at 0:50, 0:55 and 1:00.", "The weapon he faces goes first, then clockwise.", "Every hit adds a vulnerability, so keep healing."]},
+  {t:at("Trophy Weapons"), n:"Trophy Weapons, Then Assault Evolved", job:s=>[`Weapon hits at ${at("Assault Evolved 1")}, ${at("Assault Evolved 2")} and ${at("Assault Evolved 3")}.`, "The weapon he faces goes first, then clockwise.", "Every hit adds a vulnerability, so keep healing."]},
   {t:at("Trophy Weapons", 2), n:"Trophy Weapons and Void Stardust", job:s=>["Bait 3 puddles from north, each just outside the last, clockwise, in max melee.", `At ${at("Comet/Crushing Comet?")}: a spread (Comet) or a Party Stack on a healer (Crushing Comet).`, "Stack: one more step clockwise, just past the third puddle.", "Spread: any open spot. Tanks and melee own NW, NE, SW, SE.", "Look Ahead: find the first weapon of the next set.", "If it is far: use Sprint, a movement ability or Expedient."]},
   {t:at("Assault Evolved", 2), n:"Assault Evolved (Second Set)", job:s=>["The weapon with its flat side square to the boss goes first, then clockwise.", `Weapon hits at ${at("Assault Evolved 1", 2)}, ${at("Assault Evolved 2", 2)} and ${at("Assault Evolved 3", 2)}.`]},
   {t:at("Cometite 1", 2), n:"Void Stardust (Second Time)", job:s=>["Puddles again.", `The spread or stack at ${at("Comet", 2)} is the opposite of the first one.`]},
@@ -28,9 +27,7 @@ export const TIMELINE: readonly TimelineEvent[] = [
   {t:at("Dance of Domination Trophy"), n:"Dance of Domination Trophy", job:s=>[`Seven raidwide hits from ${at("Dance of Domination 1")} to ${at("Dance of Domination 7")}. The last one is the biggest.`, `Pair Stacks at ${at("Eye of the Hurricane")}: you go relative ` + bySlot(s, {H1:"SW with R1", H2:"SE with R2"}) + "."]},
   {t:at("Raw Steel Trophy Axe", 2), n:"Raw Steel Trophy (Second Time)", job:s=>["The opposite of the first one.", "Mitigate it.", "You do not need to heal after it: Charybdistopia sets HP to 1."]},
   {t:at("Charybdistopia"), n:"Charybdistopia", job:s=>["Every player goes to 1 HP.", "Heal the party immediately, yourself too."]},
-  // "3:14" is typed by hand: cactbot's first weapon is at 3:14.6, which is 3:15 to the nearest
-  // second. A question for the owner (see test/sources.test.ts).
-  {t:at("Ultimate Trophy Weapons"), n:"Ultimate Trophy Weapons", job:s=>["Six weapons from 3:14 to 3:40.", "Use strong heals here.", "A dead player must be up by the third weapon."]},
+  {t:at("Ultimate Trophy Weapons"), n:"Ultimate Trophy Weapons", job:s=>[`Six weapons from ${at("Assault Evolved 1", 3)} to ${at("Assault Evolved 6")}.`, "Use strong heals here.", "A dead player must be up by the third weapon."]},
   {t:at("Powerful Gust"), n:"Powerful Gust (Tornadoes)", job:s=>["Bait your tornado: " + bySlot(s, {H1:"west tornado, north side", H2:"east tornado, south side"}) + "."]},
   {t:at("One and Only"), n:"One and Only", job:s=>["Heavy physical raidwide.", "Mitigate it."]},
   {t:at("Great Wall of Fire (castbar)"), n:"Great Wall of Fire", job:s=>["Two Shared Tank Busters.", "Shield and heal the tanks.", "Stay out of the fire trail it leaves."]},
@@ -42,13 +39,11 @@ export const TIMELINE: readonly TimelineEvent[] = [
   {t:at("Massive Meteor (castbar)"), n:"Massive Meteor", job:s=>["A five-hit stack on each platform.", "All four players stack.", "Mitigate and heal."]},
   {t:at("Arcadion Avalanche (castbar)"), n:"Arcadion Avalanche", job:s=>["Towers again.", "Get knocked to the platform the boss is not facing.", `Then run away from the side he swings from (hit at ${at("Arcadion Avalanche")}).`]},
   {t:at("Crown of Arcadia", 3), n:"Crown of Arcadia", job:s=>["Raidwide.", "The arena is whole again."]},
-  // "8:10" is typed by hand: cactbot's cast ends at 8:10.5. A question for the owner.
-  {t:"8:10", n:"Great Wall of Fire", job:s=>["Tanks share it with smaller cooldowns.", "Heal them."]},
+  {t:at("Great Wall of Fire (castbar)", 2), n:"Great Wall of Fire", job:s=>["Tanks share it with smaller cooldowns.", "Heal them."]},
   {t:at("Orbital Omen (castbar)", 2), n:"Orbital Omen and Fire and Fury", job:s=>["Same as before.", "Play it safe."]},
   {t:at("Crown of Arcadia", 4), n:"Crown of Arcadia", job:s=>["Raidwide.", "Heal the party before Ecliptic Stampede."]},
   {t:at("Ecliptic Stampede"), n:"Ecliptic Stampede", job:s=>["Start " + bySlot(s, {H1:"SW", H2:"SE"}) + ", outside.", `Puddles ${at("Atomic Impact 1")} to ${at("Atomic Impact 6")}.`, `Towers ${at("Cosmic Kiss", 4)}.`, `Tethers ${at("--tethers--", 5)}.`, `Two-way or Four-way Fireball ${at("Two-way Fireball / Four-way Fireball")}.`]},
   {t:at("Crown of Arcadia", 5), n:"Crown of Arcadia", job:s=>["Raidwide.", "Then the enrage sequence starts."]},
-  // "10:33" is typed by hand: cactbot has 10:33.5. A question for the owner.
-  {t:at("Heartbreak Kick"), n:"Heartbreak Kick (Three Towers)", job:s=>["The tower hits 5, then 6, then 7 times (9:53, 10:12, 10:33).", "Heal the tanks between hits."]},
+  {t:at("Heartbreak Kick"), n:"Heartbreak Kick (Three Towers)", job:s=>[`The tower hits 5, then 6, then 7 times (${at("Heartbreak Kick")}, ${at("Heartbreak Kick", 2)}, ${at("Heartbreak Kick", 3)}).`, "Heal the tanks between hits."]},
   {t:at("Heartbreaker (Enrage)"), n:"Heartbreaker (Enrage)", job:s=>["The boss must be dead before this."]}
 ];

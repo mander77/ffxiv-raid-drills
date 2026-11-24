@@ -78,7 +78,7 @@ export const LEARN_CARDS: QuizItem[] = [
     rule:["H1 and R1: relative SW.", "H2 and R2: relative SE."]})),
   mq("k-charyb", 10, P1, "2:59", s=>({prompt:"Charybdistopia goes off at 2:59. What does it do, and what is your job?",
     options:[{t:"Every player goes to 1 HP. Heal the party immediately, yourself too.", ok:true},{t:"It kills the tank. Raise them."},{t:"It is a Tank Buster. Shield the tank."},{t:"Nothing. Keep doing damage."}],
-    why:["The weapons start hitting at 3:14. Anyone still at 1 HP then dies.", "Save strong heals for this part."],
+    why:["The weapons start hitting at 3:15. Anyone still at 1 HP then dies.", "Save strong heals for this part."],
     rule:["After Charybdistopia: heal the party before the first weapon."]})),
   mq("k-ult-tornado", 12, P1, "3:46", s=>({prompt:"The tornadoes are up after the last weapon. Which one do you bait?",
     options:[{t:bySlot(s, {H1:"The west tornado (D), on its north side.", H2:"The east tornado (B), on its south side."}), ok:true},

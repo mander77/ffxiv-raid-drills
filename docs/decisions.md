@@ -700,7 +700,16 @@ static wins.
   The import keeps game names as cactbot writes them, so it converts no text. A value that
   matches no source stays typed by hand, on a list in `test/sources.test.ts`, as a question for
   the owner. `npm test` runs that test; `npm run check:sources` also compares the generated file
-  with the pinned sources, which needs the network, so CI does not run that part yet.
+  with the pinned sources, which needs the network, so CI does not run that part yet (the
+  owner's choice).
+- The owner's answers to the import's questions (November 24):
+  - A scene appears at the first cactbot line after the last hit of the mechanic before it, so
+    that result stays on the arena for a moment. Void Stardust (Second Time) keeps 1:46: no line
+    comes between the last weapon (1:45.1) and its first puddle (1:47.2).
+  - Times in the text follow cactbot, rounded to the second (0:55.5 shows as 0:56).
+  - The tornado cones and Fire Breath are drawn at BossMod's sizes: a 90-degree cone, 60 yalms
+    long, and a line 6 yalms wide. The proximity AoE stays a small circle where it lands, the
+    app's choice: the real one covers the whole arena.
 
 ## Hosting
 

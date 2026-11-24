@@ -314,8 +314,9 @@ rebase, run CI or approve a preview again when `main` moves.
   cactbot and BossMod. Names may change, with the owner's OK.
 - A fight time or an attack size is never typed by hand: read it from `source.gen.ts` with
   `cactbot("Crown of Arcadia", 2)` or `bossmod("CometSpread").range` (in `src/data/sources.ts`).
-  `test/sources.test.ts` fails on a time that matches no cactbot line or cast start. Its two
-  lists (`SCENE_STARTS`, `TYPED_CLOCKS`) hold the values that are still questions for the owner.
+  `test/sources.test.ts` fails on a time that matches no cactbot line or cast start, and on a
+  time in the text that is not a cactbot line rounded to the second. Its list `SCENE_STARTS`
+  holds the values that are still questions for the owner.
 - The player marks are always the top layer of an arena picture.
 - New attack sizes go in `src/data/attacks.ts`, not in a drill or a picture.
 - A drill pattern comes from a seeded code (`withSeed`), so the same code builds the same pattern.
