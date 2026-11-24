@@ -1,16 +1,27 @@
-import { fileURLToPath } from "node:url";
+import { existsSync, readdirSync } from "node:fs";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 import { defineConfig } from "vitest/config";
-import { FIGHTS } from "./src/data/fights/index.ts";
+import type { FightInfo } from "./src/data/fights/types.ts";
+
+/** Each fight's short name, from its fightInfo.ts, in the order of the fight folders. The config
+    reads only these small files, not the fights' data. */
+const FIGHTS_DIR = fileURLToPath(new URL("./src/data/fights", import.meta.url));
+const shortNames: string[] = [];
+for (const dir of readdirSync(FIGHTS_DIR).sort()) {
+  if (!existsSync(`${FIGHTS_DIR}/${dir}/fightInfo.ts`)) continue;
+  const { FIGHT_INFO }: { FIGHT_INFO: FightInfo } = await import(pathToFileURL(`${FIGHTS_DIR}/${dir}/fightInfo.ts`).href);
+  shortNames.push(FIGHT_INFO.short);
+}
 
 /** Writes the fights' short names into the page title in index.html, before Vite reads the page.
     The title stays in the HTML file, so link previews show it without running the app. */
 function fightTitle(): Plugin {
   return {
     name: "fight-title",
-    transformIndexHtml: { order: "pre", handler: (html) => html.replaceAll("%FIGHT_SHORT%", FIGHTS.map((f) => f.info.short).join(", ")) },
+    transformIndexHtml: { order: "pre", handler: (html) => html.replaceAll("%FIGHT_SHORT%", shortNames.join(", ")) },
   };
 }
 
