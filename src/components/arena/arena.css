@@ -229,8 +229,8 @@
     fill: var(--arena-text);
     opacity: 0.55;
   }
-  /* A tower's soak count: a badge on its ring, with the tower icon and the number of players in
-     its column, in the highlight colour, as the mechanic icon shows it. */
+  /* A tower's soak count: a badge on its ring, with the tower icon and the number of players
+     beside it, in the highlight colour, as the mechanic icons show a count. */
   .arena .tower .soak .badge {
     fill: oklch(1 0 0);
     stroke: var(--arena-text);
