@@ -1,6 +1,6 @@
 # FFXIV Raid Drills
 
-Practice drills for Final Fantasy XIV raids. The site has one fight and one role today: M11S (The Tyrant, Savage) for healers. The M11S drills follow one static's strategy: Hector/Toxic, Kindred No Buddies split and Fixed (3CJ) Ecliptic.
+Practice drills for Final Fantasy XIV raids. The site has one fight and one role today: M11S (The Tyrant, Savage) for healers. The M11S drills follow one static's strategy: Hector/Toxic, Hector No Buddies split and Fixed (3CJ) Ecliptic.
 
 The site is written in TypeScript and built with Vite. If you know C# and are new to TypeScript, read [TypeScript for C# developers](docs/typescript-for-csharp.md) first.
 
@@ -109,7 +109,7 @@ npm run wait-deploy -- https://ffxiv-raid-drills.app index-AbCd1234.js
 
 ## Sources
 
-- Strategy: [wtfdig M11S](https://wtfdig.info/74/m11s#hector:nobuddies:fixed) and [Hector's video guide](https://www.youtube.com/watch?v=w1uuwzhyf5A)
+- Strategy: [wtfdig M11S](https://wtfdig.info/74/m11s#hector:hector:fixed) and [Hector's video guide](https://www.youtube.com/watch?v=w1uuwzhyf5A)
 - Times: [cactbot r11s timeline](https://github.com/OverlayPlugin/cactbot/blob/main/ui/raidboss/data/07-dt/raid/r11s.txt)
 - Mechanics: [Icy Veins M11S guide](https://www.icy-veins.com/ffxiv/aac-heavyweight-m3-savage-raid-guide) and [Thaliak M11S](https://thaliak.com/raids/m11s/)
 - Attack sizes: the [BossMod](https://github.com/awgil/ffxiv_bossmod) M11S module

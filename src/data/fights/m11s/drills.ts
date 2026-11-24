@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, gust, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, wrathLine, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, gust, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import type { Boss, Drill, Lines, Overlay, Point, RectZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../../../types";
@@ -525,7 +525,7 @@ const SPUD = [18, 30, 42, 54, 66, 78].map((x): Overlay => ({t:"puddle", x, y:95,
 
 /* ---------- Arena Split ----------
    Two platforms, west and east, from Flatliner to the Crown of Arcadia, drawn from BossMod
-   (PLATFORM_X). Light party 1 (H1) starts west, light party 2 (H2) east (Kindred No Buddies).
+   (PLATFORM_X). Light party 1 (H1) starts west, light party 2 (H2) east (Hector No Buddies).
    Each tower knocks you back: with a tether to the other platform, without one to the same
    platform. You have a tether in one of the two rounds and not in the other. So H1 is on the
    east platform after the second round, and H2 on the west, whichever round had the tether
@@ -557,16 +557,15 @@ export const SPLIT_TOWER: Record<SplitSide, Record<SplitEnd, Point>> = {west:{no
 const SPLIT_TOWERS: Overlay[] = [SPLIT_TOWER.west.north, SPLIT_TOWER.east.north, SPLIT_TOWER.west.south, SPLIT_TOWER.east.south].map(([x, y]): Overlay => ({t:"tower", x, y}));
 /** The number waymark at each end of each platform, where a Fire Breath marker goes. */
 const WAYMARK: Record<SplitSide, Record<SplitEnd, {n: number; p: Point}>> = {
-  west:{north:{n:1, p:[9, 19]}, south:{n:4, p:[9, 81]}}, east:{north:{n:2, p:[91, 19]}, south:{n:3, p:[91, 81]}}};
+  west:{north:{n:1, p:[10, 22.5]}, south:{n:4, p:[10, 77.5]}}, east:{north:{n:2, p:[90, 22.5]}, south:{n:3, p:[90, 77.5]}}};
 const quadrant = (side: SplitSide, end: SplitEnd): string => (end === "north" ? "N" : "S") + (side === "west" ? "W" : "E");
 /** Your mark on the arena, where you stood at the end of the last tethers and markers: the outer
     corner at that end of the platform, clear of its tower and of the tower's label. */
 const lastSpot = (s: Slot, side: SplitSide, end: SplitEnd): Overlay =>
   ({t:"mark", x:side === "west" ? PLATFORM_X.west[0] + 5 : PLATFORM_X.east[1] - 5, y:end === "north" ? 5 : 95, l:s, r:"H"});
-/** The end of the tower you soaked first: where a light party's tower sends you (Hector's video:
-    tanks and ranged north, healers and melee south; the app's healers follow the support towers
-    of the first towers, H1 NW and H2 SE). */
-export const firstTowerEnd = (s: Slot): SplitEnd => bySlot<SplitEnd>(s, {H1:"north", H2:"south"});
+/** The end of the tower you soaked first: where your tower sends you. Hector No Buddies puts
+    tanks and ranged north, healers and melee south, so both healers start south (H1 SW, H2 SE). */
+export const firstTowerEnd = (_s: Slot): SplitEnd => "south";
 const randomEnd = (): SplitEnd => random() < 0.5 ? "north" : "south";
 const randomSide = (): SplitSide => random() < 0.5 ? "west" : "east";
 export const randomHalf = (): SplitHalf => random() < 0.5 ? "inner" : "outer";
@@ -633,18 +632,44 @@ function splitPuddleAfter(side: SplitSide, end: SplitEnd): (results: StepResult[
     return {fn, label, show:[{c:label, r:4.5}]};
   };
 }
-/** A circle a zone leaves out. */
-interface Hole { q: Point; r: number }
+type Band = Extract<Overlay, {t: "band"}>;
+/** What a zone leaves out: a circle, or a band (a line attack) across it. */
+type Hole = {q: Point; r: number} | {band: Band};
+/** A unit vector across a band, square to its middle line. */
+const across = (b: Band): Point => { const d = unit([b.x2 - b.x, b.y2 - b.y]); return [-d[1], d[0]]; };
+/** True when p is clear of the hole. A band counts across its whole width, as it crosses the platforms. */
+const clearOf = (p: Point, h: Hole): boolean => {
+  if ("q" in h) return dist(p, h.q) >= h.r;
+  const n = across(h.band);
+  return Math.abs((p[0] - h.band.x) * n[0] + (p[1] - h.band.y) * n[1]) >= h.band.w / 2;
+};
+/** Where the ray from c at `deg` is inside the hole, or null if it misses. */
+function crossHole(c: Point, deg: number, h: Hole): Stretch | null {
+  if ("q" in h) return crossCircle(c, deg, h.q, h.r);
+  const n = across(h.band), u = ray(deg), half = h.band.w / 2;
+  const s0 = (c[0] - h.band.x) * n[0] + (c[1] - h.band.y) * n[1], s1 = u[0] * n[0] + u[1] * n[1];
+  if (Math.abs(s1) < 1e-9) return Math.abs(s0) < half ? [-Infinity, Infinity] : null;
+  const t1 = (-half - s0) / s1, t2 = (half - s0) / s1;
+  return [Math.min(t1, t2), Math.max(t1, t2)];
+}
+/** The longest stretch of the ray from c at `deg`, up to `to`, outside every hole. */
+function clearStretch(c: Point, deg: number, to: number, holes: readonly Hole[]): Stretch | null {
+  const parts = holes.reduce((ps: Stretch[], h) => {
+    const x = crossHole(c, deg, h);
+    return x ? ps.flatMap(([lo, hi]): Stretch[] => [[lo, Math.min(hi, x[0])], [Math.max(lo, x[1]), hi]]).filter(([lo, hi]) => hi - lo > 0.3) : ps;
+  }, [[0, to]]);
+  return parts.sort((x, y) => (y[1] - y[0]) - (x[1] - x[0]))[0] ?? null;
+}
 /** The zone `base` (the area within reach(deg) of c along each ray) without the last puddle. The
     last puddle is still on the floor when the tethers and markers resolve: it goes off 0.2
     seconds after Fire Breath (cactbot). `best` is the spot to show when it is clear. `away`
-    leaves out more circles. */
+    leaves out more circles and bands. */
 function outOfLastPuddle(base: Zone, c: Point, reach: (deg: number) => number, best: Point, away: readonly Hole[] = []): (results: StepResult[]) => Zone {
   return results => {
     const drops = results.flatMap(r => r.drop ? [r.drop] : []), last = drops[drops.length - 1];
-    const holes = [...(last ? [{q:last, r:MAJESTIC_PUDDLE.r}] : []), ...away];
-    const fn = (p: Point): boolean => inZone(p, base) && holes.every(h => dist(p, h.q) >= h.r);
-    const part = (deg: number): Stretch | null => cutOut([[0, reach(deg)]], c, deg, holes)[0] ?? null;
+    const holes: Hole[] = [...(last ? [{q:last, r:MAJESTIC_PUDDLE.r}] : []), ...away];
+    const fn = (p: Point): boolean => inZone(p, base) && holes.every(h => clearOf(p, h));
+    const part = (deg: number): Stretch | null => clearStretch(c, deg, reach(deg), holes);
     const degs = Array.from({length:361}, (_x, d) => d);
     // Start from a ray that misses, so the area is drawn as one piece.
     const from = degs.find(d => !part(d)) ?? 0;
@@ -672,18 +697,19 @@ function tetherBest(side: SplitSide, end: SplitEnd, covered: SplitHalf): Point {
 }
 /** Where a tether stretches: the north or south wall at your end, in the half of the platform
     the portal lines leave safe, far enough from the portal to be stretched. */
-function tetherSpot(side: SplitSide, end: SplitEnd, covered: SplitHalf, portal: Point): (results: StepResult[]) => Zone {
+function tetherSpot(side: SplitSide, end: SplitEnd, covered: SplitHalf, portal: Point, lines: readonly Band[]): (results: StepResult[]) => Zone {
   const [x0, x1] = halfX(side, otherHalf(covered));
   const [y0, y1] = end === "north" ? [0, WALL_STRIP] : [100 - WALL_STRIP, 100];
-  return rectOutOfLastPuddle([x0, y0, x1, y1], tetherBest(side, end, covered), [{q:portal, r:TETHER_STRETCH}]);
+  return rectOutOfLastPuddle([x0, y0, x1, y1], tetherBest(side, end, covered), [{q:portal, r:TETHER_STRETCH}, ...lines.map(band => ({band}))]);
 }
 /** Where a Fire Breath marker stands: the corner of the number waymark at your end that is
-    nearest the wall, on the side of the waymark the portal lines leave safe (Hector's video). */
-function markerSpot(side: SplitSide, end: SplitEnd, covered: SplitHalf): (results: StepResult[]) => Zone {
+    nearest the wall, on the side of the waymark the portal lines leave safe (Hector's video). The
+    other tethers' lines pass just by it, so the area leaves them out (the owner's choice). */
+function markerSpot(side: SplitSide, end: SplitEnd, covered: SplitHalf, lines: readonly Band[]): (results: StepResult[]) => Zone {
   const {p} = WAYMARK[side][end], [h0, h1] = halfX(side, otherHalf(covered));
   const x0 = Math.max(h0, p[0] - WAYMARK_REACH), x1 = Math.min(h1, p[0] + WAYMARK_REACH);
   const [y0, y1] = end === "north" ? [p[1] - WAYMARK_REACH, p[1]] : [p[1], p[1] + WAYMARK_REACH];
-  return rectOutOfLastPuddle([x0, y0, x1, y1], markerCorner(side, end, covered));
+  return rectOutOfLastPuddle([x0, y0, x1, y1], markerCorner(side, end, covered), lines.map(band => ({band})));
 }
 /** The corner of the number waymark at one end of a platform where a Fire Breath marker stands:
     toward the wall, on the side of the waymark the portal lines leave safe. It sits just off the
@@ -714,14 +740,21 @@ export interface SplitRound {
 /** The tethers of the other players at the lineup. Each platform has two tethered players, one
     at each end, each stretched from a portal on the other side, at the opposite end. */
 function otherTethers(r: SplitRound): Overlay[] {
+  return othersAtLineup(r).flatMap(({who, p, portal}): Overlay[] =>
+    [{t:"tether", x:portal[0], y:portal[1], x2:p[0], y2:p[1]}, {t:"mark", x:p[0], y:p[1], l:who, r:markRole(partyOf(who).role)}]);
+}
+/** Each other tethered player at the lineup: who, where, and their tether's portal. */
+function othersAtLineup(r: SplitRound): {who: SlotName; p: Point; portal: Point}[] {
   const spots = SIDES.flatMap(sd => ENDS.map(e => ({sd, e}))).filter(({sd, e}) => !(r.tether && sd === r.side && e === r.end));
-  return spots.flatMap(({sd, e}, i): Overlay[] => {
+  return spots.flatMap(({sd, e}, i) => {
     const who = r.others[i];
     if (!who) return [];
-    const p = tetherBest(sd, e, sd === r.side ? r.covered : otherHalf(r.covered)), portal = portalAt(otherSide(sd), otherEnd(e), r.endsSide);
-    return [{t:"tether", x:portal[0], y:portal[1], x2:p[0], y2:p[1]}, {t:"mark", x:p[0], y:p[1], l:who, r:markRole(partyOf(who).role)}];
+    return [{who, p:tetherBest(sd, e, sd === r.side ? r.covered : otherHalf(r.covered)), portal:portalAt(otherSide(sd), otherEnd(e), r.endsSide)}];
   });
 }
+/** The other players' tethers going off (Majestic Meteowrath): a line from each portal through
+    its player. They must miss you. */
+const otherWraths = (r: SplitRound): Band[] => othersAtLineup(r).map(({p, portal}) => wrathLine(portal, p));
 
 /** One round of tethers and Fire Breath markers, on your platform, ending at your end. Without a
     tether you bait Fire Breath and get a marker. */
@@ -745,11 +778,12 @@ export function splitRound(s: Slot, r: SplitRound): Scene {
       {q:"Third puddle?", zf:next, drop:MAJESTIC_PUDDLE,
         a:["Just outside the second puddle, toward the " + end + " end again.", "Stay tight against the inner edge."]},
       tether
-        ? {q:"The portal lines cover half of each platform. Where do you stretch your tether?", zf:tetherSpot(side, end, covered, portal),
-          cue:portalLines(side, covered), reveal:otherTethers(r),
+        ? {q:"The portal lines cover half of each platform. Where do you stretch your tether?", zf:tetherSpot(side, end, covered, portal, otherWraths(r)),
+          // Your own line goes through you, as it should; the others' lines must miss you.
+          cue:portalLines(side, covered), reveal:[wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r)], hits:otherWraths(r),
           a:["The " + end + " wall, just outside the portal lines.", "That end is away from your portal.", "Stay out of the third puddle."]}
-        : {q:"The portal lines cover half of each platform. You have a marker. Where do you stand?", zf:markerSpot(side, end, covered),
-          cue:portalLines(side, covered), reveal:otherTethers(r),
+        : {q:"The portal lines cover half of each platform. You have a marker. Where do you stand?", zf:markerSpot(side, end, covered, otherWraths(r)),
+          cue:portalLines(side, covered), reveal:[...otherWraths(r), ...otherTethers(r)],
           a:["The wall-side corner of waymark " + wm.n + ", out of the portal lines.", "Stay out of the third puddle."]}],
     rule:SPLIT_ROUND_RULE};
 }
@@ -873,13 +907,12 @@ export const DRILLS: readonly Drill[] = [
   {id:"m-split-line", order:18, phase:P3, time:"6:02", title:"Arena Split: Lineup", kind:"knockback",
     build:s=>({setup:["Flatliner knocks the party back.", "It splits the arena into two platforms."], ordered:true,
       split:true, boss:BOSS, overlays:[],
-      steps:[{q:"Click your lineup spot.", z:bySlot(s, {H1:{rect:[PLATFORM_X.west[0],8,PLATFORM_X.west[1],48]}, H2:{rect:[PLATFORM_X.east[0],52,PLATFORM_X.east[1],92]}}), a:bySlot(s, {H1:["West platform (light party 1), north end.", "Supports (tanks and healers) go NW."], H2:["East platform (light party 2), south end.", "Supports (tanks and healers) go SE."]})}],
-      rule:["Light party 1 west, light party 2 east.", "Supports (tanks and healers) NW and SE. DPS SW and NE.",
-        "Hector's video puts tanks and ranged north, healers and melee south.", "Ask your lead which one you use."]})},
+      steps:[{q:"Click your lineup spot.", z:bySlot(s, {H1:{rect:[PLATFORM_X.west[0],52,PLATFORM_X.west[1],92]}, H2:{rect:[PLATFORM_X.east[0],52,PLATFORM_X.east[1],92]}}), a:bySlot(s, {H1:["West platform (light party 1), south end.", "Healers and melee go south."], H2:["East platform (light party 2), south end.", "Healers and melee go south."]})}],
+      rule:["Light party 1 west, light party 2 east.", "Tanks and ranged north, healers and melee south."]})},
   {id:"m-split-tower", order:19, phase:P3, time:"6:29", title:"Arena Split: First Towers", kind:"towerKnockback", soak:2,
     build:s=>({setup:["Four towers appear: two on each platform.", "Every player soaks a tower."],
       split:true, boss:BOSS, overlays:[{t:"tower",x:11,y:23},{t:"tower",x:89,y:23},{t:"tower",x:11,y:77},{t:"tower",x:89,y:77}],
-      steps:[{q:"Which tower do you soak?", z:bySlot(s, {H1:{c:[11,23],r:TOWER_R}, H2:{c:[89,77],r:TOWER_R}}), a:bySlot(s, {H1:["The NW tower, with the MT."], H2:["The SE tower, with the OT."]})}],
+      steps:[{q:"Which tower do you soak?", z:bySlot(s, {H1:{c:[11,77],r:TOWER_R}, H2:{c:[89,77],r:TOWER_R}}), a:bySlot(s, {H1:["The SW tower, with M1."], H2:["The SE tower, with M2."]})}],
       rule:["Tethered: get knocked to the other platform.", "Not tethered: get knocked to the same platform."]})},
   // The first round: a tether knocked you to the other platform, no tether left you on your own.
   {id:"m-split-fire", order:19.1, variants:["tether", "marker"], random:true, phase:P3, time:"6:35", title:"Arena Split: Fire Breath", kind:["bait", "chains"],

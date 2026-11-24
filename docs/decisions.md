@@ -724,8 +724,16 @@ static wins.
   first SW rock, farther out. Icy Veins swaps H1 and H2 here. The site follows wtfdig.
 - The tank tethers in Meteorain are tank busters at 5:09, 5:19 and 5:29.
 - Crown of Arcadia, a raidwide, comes five times.
-- Arena Split after the first towers (owner's answers, checked against wtfdig's Kindred No Buddies
-  pictures, November 2026):
+- Arena Split follows Hector No Buddies (wtfdig `#hector:hector:fixed`), the owner's choice in
+  November 2026; before that the app followed Kindred No Buddies. The two differ in the conga:
+  Hector puts tanks and ranged north and healers and melee south, so H1 lines up SW and soaks the
+  SW tower with M1, and H2 the SE tower with M2. Kindred had supports NW and SE.
+- The number waymarks are the "Kindred Outside" preset (naurffxiv's M11S page: 1 to 4 at x 84 and
+  116, z 89 and 111; A to D 10 yalms from the middle), the set Hector's video uses so a Fire
+  Breath marker can stand on the outer corner. Measured from the video, it matches to 0.1 yalm.
+  The app had the Toxic Friends preset (z 87.5 and 112.5), which is made for the inside corner.
+- Arena Split after the first towers (owner's answers, checked against wtfdig and Hector's video,
+  November 2026):
   - You have a tether in one of the two rounds, not both: the tethers swap in the second round.
     Pressure's Settings pick says which round ("Your Arena Split tether").
   - Each tower knocks you back: with a tether to the other platform, without one to the same
@@ -748,7 +756,7 @@ static wins.
       12:34). Your portal is on the other platform's side. The tether goes to the north or south
       wall at your end, just outside the portal lines.
     - Without a tether, your end is the one you were knocked to: in round 1 your first tower's end
-      (H1 north, H2 south), in round 2 the end where round 1 ended. A Fire Breath marker goes to
+      (south for both healers), in round 2 the end where round 1 ended. A Fire Breath marker goes to
       the number waymark at that end, on its corner nearest the wall, on the side of the waymark
       the portal lines leave safe (the owner's choice, from Hector's video). The number waymarks
       sit on the line between the two halves, as in Hector's video.
@@ -779,6 +787,12 @@ static wins.
     `MajesticMeteorAOE`, range 6).
   - The third puddle goes off 0.2 seconds after Fire Breath, so it is still on the floor at the
     lineup. A tether and a marker both stay out of it.
+  - When the tethers go off (Majestic Meteowrath, "range 60 width 10 rect"), a line runs from each
+    portal through its player. The lineup step shows all four lines after you answer. The other
+    players' lines must miss you (`Step.hits`). Hector's video says they "just barely" miss the
+    markers; with the app's approximate spots a line can still clip the waymark's corner by up to
+    0.6 yalms, so the marker's and the tether's correct areas leave those lines out (the owner's
+    choice): the best spot shifts a little off the corner when it has to.
   - The second and third towers: the tower in the quadrant where your last tether or marker was.
   - Massive Meteor: the four on a platform stack at the middle of its inner edge, next to the boss,
     so the melee can hit him. Learn's Massive Meteor picture shows it there too.
