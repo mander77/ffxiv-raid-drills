@@ -108,3 +108,14 @@ test("the standard attacks draw M11S's attacks the same as its own helpers", () 
     old = kindOf(M11.lineTo(boss, [50, 60]), "band");
   for (const k of ["x", "y", "x2", "y2", "w"] as const) assert.closeTo(l[k], old[k], 1e-9, k);
 });
+
+test("proteans are eight cones out from the boss, evenly around him", () => {
+  const cones = A.proteans(MID, 30, 20).map((o) => kindOf(o, "poly"));
+  assert.equal(cones.length, 8);
+  cones.forEach((c, i) => {
+    assert.deepEqual(c.pts[0], MID, "each starts at the boss");
+    const [middle, want] = [c.pts[2], polar(45 * i, 50, MID)];
+    assert.closeTo(middle?.[0] ?? Number.NaN, want[0], 1e-9, `cone ${i} points to its clock spot`);
+    assert.closeTo(middle?.[1] ?? Number.NaN, want[1], 1e-9);
+  });
+});

@@ -74,7 +74,20 @@ test("the styles page draws each standard attack, and the mark of an unknown siz
   assert.ok(attacks);
   assert.deepEqual(
     [...attacks.querySelectorAll("h3")].map((h) => h.textContent),
-    ["Raidwide", "Circle", "Donut", "Cone", "Line", "Cross", "Half Arena", "Knockback Arrows", "Puddle", "Tower to Soak", "Size Unknown"],
+    [
+      "Raidwide",
+      "Circle",
+      "Donut",
+      "Cone",
+      "Proteans",
+      "Line",
+      "Cross",
+      "Half Arena",
+      "Knockback Arrows",
+      "Puddle",
+      "Tower to Soak",
+      "Size Unknown",
+    ],
   );
   assert.ok(attacks.querySelector(".unknown"), "the size unknown mark");
   assert.equal(attacks.querySelector(".tower text")?.textContent, "2", "a tower shows its soak count");
@@ -85,5 +98,8 @@ test("a kind of mechanic shows the standard attack it resolves with, where one f
   const card = (name: string) => screen.getByRole("heading", { level: 3, name }).closest("li");
   assert.ok(card("Line Stack")?.textContent?.includes("Attack: Line"));
   assert.ok(card("Puddle Drop Sequence")?.querySelector(".puddle"), "the puddle beside the icon");
+  const proteans = card("Proteans (Clock Spots)");
+  assert.equal(proteans?.querySelectorAll("polygon.aoe").length, 8, "eight cones beside the icon");
+  assert.ok(proteans?.querySelector(".bosscore"), "out from the boss");
   assert.notInclude(card("Pair Tether")?.textContent ?? "", "Attack:", "a tether has no one attack");
 });

@@ -63,6 +63,7 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
 - Two pull requests (owner's choice). The first adds the library, `fromBossmod`, the "size
   unknown" mark and the attacks on the styles page. M11S does not change. The second moves
   M11S's drills and pictures onto the library, and checks that each one builds the same as before.
+- `proteans(from, angle, range, count = 8)` was added after the first ten (owner's request): the clock spots, eight cones evenly around the boss. The styles page lists it with the other attacks.
 - All ten attacks of the issue are built now, also those M11S does not use (owner's choice):
   raidwide, circle, donut, cone, line, cross, half arena, knockback, puddle and tower. A new
   fight, such as M10S, then draws with no new code.
@@ -81,7 +82,7 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
   mechanic kinds "Knockback" and "Tower" already have cards there.
 - On the styles page, each kind of mechanic that resolves with one standard attack shows that
   attack beside its icon, with "Attack: <name>" (owner's request). Stacks and spreads show a
-  circle, line stacks and wild charges a line, proteans a cone, towers a tower, puddle drops a
+  circle, line stacks and wild charges a line, proteans eight cones out from the boss (owner's request), towers a tower, puddle drops a
   puddle, and a knockback its arrows. Chains, tethers, tank busters, baits, dodge sequences and
   look ahead show none: they end in more than one attack, or in none.
 

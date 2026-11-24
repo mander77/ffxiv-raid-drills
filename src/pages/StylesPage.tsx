@@ -8,6 +8,7 @@ import "../components/arena/arena.css";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { BossMark } from "../components/arena/BossMark";
 import { hitsFirst, Shape, Tether } from "../components/arena/Shape";
 import { Weapon } from "../components/arena/Weapon";
 import { CastSquare } from "../components/CastSquare";
@@ -42,7 +43,7 @@ import { CATEGORIES } from "../data/categories";
 import { FIGHTS } from "../data/fights";
 import { standardAttacks } from "../lib/attacks";
 import { kindsOf } from "../lib/practice";
-import type { Category, DrillKind, Overlay, Point } from "../types";
+import type { Boss, Category, DrillKind, Overlay, Point } from "../types";
 
 /** What each ability category means, for its card. */
 const CATEGORY_MEANING: Record<Category, string> = {
@@ -168,13 +169,24 @@ interface AttackSample {
   overlays: readonly Overlay[];
   /** The part of the arena to show (an SVG viewBox), when not all of it. */
   view?: string;
+  /** The boss, when the attack comes out from him. */
+  boss?: Boss;
 }
+
+/** The boss in the middle, with no facing, for an attack that comes out from him. */
+const MID_BOSS: Boss = { x: 50, y: 50, f: null };
 
 const ATTACKS = {
   raidwide: { name: "Raidwide", meaning: "Hits the whole arena: the party takes it.", overlays: [EXAMPLE.raidwide()] },
   circle: { name: "Circle", meaning: "Hits everything inside the circle.", overlays: [EXAMPLE.circle(MID, 8)] },
   donut: { name: "Donut", meaning: "Hits everything outside its inner ring: stand inside it.", overlays: [EXAMPLE.donut(MID, 5, 60)] },
   cone: { name: "Cone", meaning: "Hits a wedge out from its source.", overlays: [EXAMPLE.cone([50, 90], 0, 90, 60)] },
+  proteans: {
+    name: "Proteans",
+    meaning: "Eight cones out from the boss, one on each player: take your clock spot.",
+    overlays: EXAMPLE.proteans(MID, 30, 60),
+    boss: MID_BOSS,
+  },
   line: { name: "Line", meaning: "Hits a straight line out from its source.", overlays: [EXAMPLE.line([50, 100], 0, 60, 6)] },
   cross: { name: "Cross", meaning: "Hits two lines across each other.", overlays: EXAMPLE.cross(MID, 0, 40, 10) },
   halfArena: { name: "Half Arena", meaning: "Hits one half of the arena: go to the other half.", overlays: EXAMPLE.halfArena("west") },
@@ -213,7 +225,7 @@ const KIND_ATTACK: Partial<Record<DrillKind, keyof typeof ATTACKS>> = {
   tower: "tower",
   towerKnockback: "tower",
   tankTower: "tower",
-  protean: "cone",
+  protean: "proteans",
   knockback: "knockback",
   puddles: "puddle",
 };
@@ -389,8 +401,8 @@ export function StylesPage() {
             {Object.values(ATTACKS).map((a: AttackSample) => (
               <IconItem
                 key={a.name}
-                picture={<ArenaSquare className="size-16" overlays={a.overlays} view={a.view} />}
-                zoomed={<ArenaSquare className="size-56" overlays={a.overlays} view={a.view} />}
+                picture={<ArenaSquare className="size-16" sample={a} />}
+                zoomed={<ArenaSquare className="size-56" sample={a} />}
                 name={a.name}
                 meaning={a.meaning}
               />
@@ -441,21 +453,21 @@ function ArenaPiece({ children, className }: ArenaPieceProps) {
 }
 
 interface ArenaSquareProps {
-  overlays: readonly Overlay[];
-  /** The part of the arena to show, as an SVG viewBox. By default, all of it. */
-  view?: string;
+  sample: AttackSample;
   className?: string;
 }
 
-/** The whole arena floor, 100 units across, with the attacks on it and its edge on top. */
-function ArenaSquare({ overlays, view = "0 0 100 100", className }: ArenaSquareProps) {
+/** The arena floor, 100 units across (or the part of it the sample asks for), with the attack on
+    it, the boss when the attack comes out from him, and the arena's edge on top. */
+function ArenaSquare({ sample, className }: ArenaSquareProps) {
   return (
-    <svg className={cn("arena", className)} viewBox={view} aria-hidden="true">
+    <svg className={cn("arena", className)} viewBox={sample.view ?? "0 0 100 100"} aria-hidden="true">
       <rect className="floor" x="0" y="0" width="100" height="100" />
-      {hitsFirst(overlays).map((o, i) => (
+      {hitsFirst(sample.overlays).map((o, i) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: the pieces of a sample never change order.
         <Shape key={i} overlay={o} />
       ))}
+      {sample.boss && <BossMark boss={sample.boss} />}
       <rect className="edge" x="0" y="0" width="100" height="100" />
     </svg>
   );
@@ -520,7 +532,7 @@ function KindItem({ kind }: KindItemProps) {
             <MechanicIcon kind={kind} soak={soak} className="size-10" />
           </span>
           <CastSquare mark={{ cats: [], kind, soak }} />
-          {attack && <ArenaSquare className="size-12" overlays={attack.overlays} view={attack.view} />}
+          {attack && <ArenaSquare className="size-12" sample={attack} />}
         </>
       }
       zoomed={
@@ -529,7 +541,7 @@ function KindItem({ kind }: KindItemProps) {
             <MechanicIcon kind={kind} soak={soak} className="size-48" />
           </span>
           <CastSquare mark={{ cats: [], kind, soak }} />
-          {attack && <ArenaSquare className="size-40" overlays={attack.overlays} view={attack.view} />}
+          {attack && <ArenaSquare className="size-40" sample={attack} />}
         </>
       }
       name={name}
