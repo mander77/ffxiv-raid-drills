@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, wrathLine, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, gust, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, gust, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import type { Boss, Drill, Lines, Overlay, Point, RectZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../../../types";
@@ -801,12 +801,36 @@ export const knockDir = (side: SplitSide, end: SplitEnd, knock: Knock): Point =>
     when its portal is on your own side; when the portal is already across, you stay. */
 export const knockFor = (side: SplitSide, portal: Point | null): Knock =>
   portal && (portal[0] < 50 ? "west" : "east") === side ? "across" : "along";
-/** The half of the tower at (side, end) that sends you `knock`: the half facing that way. */
+/** The part of the tower at (side, end) that sends you `knock`: the spots from which the
+    knockback, straight out from the tower's middle, lands you on the right platform. From the
+    SW tower, to cross that is about straight east, or a little north-east; further round, the
+    knockback throws you off the arena or into the gap. */
 function towerHalf(side: SplitSide, end: SplitEnd, knock: Knock): Zone {
-  const c = SPLIT_TOWER[side][end], d = knockDir(side, end, knock), a = angOf(d);
-  const fn = (p: Point): boolean => dist(p, c) <= TOWER_R && (p[0] - c[0]) * d[0] + (p[1] - c[1]) * d[1] >= 0;
-  const arc = Array.from({length:19}, (_x, i) => polar(a - 90 + i * 10, TOWER_R, c));
-  return {fn, label:addVec(c, d, TOWER_R / 2), show:[{poly:arc}]};
+  const c = SPLIT_TOWER[side][end], d = knockDir(side, end, knock);
+  const fn = (p: Point): boolean => { const r = dist(p, c); return r >= TOWER_CORE && r <= TOWER_R && landsWell(side, end, knock, knockedFrom(c, p)); };
+  // Each ray from the middle: the stretch of it that lands you where you need to go.
+  const part = (deg: number): Stretch | null => {
+    const ok = Array.from({length:41}, (_x, i) => TOWER_CORE + (TOWER_R - TOWER_CORE) * i / 40).filter(r => fn(polar(deg, r, c)));
+    return ok.length ? [ok[0], ok[ok.length - 1]] : null;
+  };
+  const degs = Array.from({length:360}, (_x, i) => i), from = degs.find(g => !part(g)) ?? 0;
+  const best = addVec(c, d, TOWER_R / 2);
+  return {fn, label:fn(best) ? best : nearestTo(best, fn) ?? best, show:rayArea(c, degs.map(g => g + from), part).map(poly => ({poly}))};
+}
+/** Where a tower at c knocks a player standing at p: TOWER_KNOCKBACK straight away from c. */
+export const knockedFrom = (c: Point, p: Point): Point => {
+  const r = dist(p, c);
+  return r < 1e-6 ? p : addVec(p, [(p[0] - c[0]) / r, (p[1] - c[1]) / r], TOWER_KNOCKBACK);
+};
+/** How close to a platform's edge a landing may be, and how far out from a tower's middle a
+    spot must be to have a clear way out: the app's choice. */
+const LAND_MARGIN = 2.5, TOWER_CORE = 1;
+/** True when a landing at q is where `knock` must send you from the tower at (side, end): on the
+    other platform, or on yours at its other end. Off the platforms you fall. */
+function landsWell(side: SplitSide, end: SplitEnd, knock: Knock, q: Point): boolean {
+  const [x0, x1] = PLATFORM_X[knock === "across" ? otherSide(side) : side];
+  if (q[0] < x0 + LAND_MARGIN || q[0] > x1 - LAND_MARGIN || q[1] < LAND_MARGIN || q[1] > 100 - LAND_MARGIN) return false;
+  return knock === "across" || (end === "north" ? q[1] > 50 : q[1] < 50);
 }
 /** "east", "south"...: the way a unit vector points. */
 const way = (d: Point): string => d[0] > 0.5 ? "east" : d[0] < -0.5 ? "west" : d[1] > 0 ? "south" : "north";
