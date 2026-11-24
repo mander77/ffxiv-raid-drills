@@ -742,8 +742,11 @@ static wins.
     Pressure's Settings pick says which round ("Your Arena Split tether").
   - Each tower knocks the players in it 23 yalms straight away from its middle (BossMod's
     `ExplosionKnockback`, `TOWER_KNOCKBACK`), so where you stand in it decides where you land
-    (owner's answers, November 2026, from Hector's video at 13:08). The correct area is the half
-    of your tower facing that way (`towerHalf`):
+    (owner's answers, November 2026, from Hector's video at 13:08). The correct area is the part
+    of your tower from which that knockback lands you on the right platform (`towerHalf`, with
+    `knockedFrom` and `landsWell`): to cross from the SW tower, about due east or a little
+    north-east. The owner pointed out that a whole half was wrong: from its SE edge the knockback
+    throws you off the arena.
     - A tether ends on the platform across from its portal. With its portal on your side, stand
       on the side facing the other platform: you land across. With its portal already across,
       you stay (Hector 13:16, wtfdig "KB to other side if you need to stretch tether").

@@ -631,13 +631,36 @@ test("Arena Split: where you stand in a tower sends you where you need to go", (
         if (goal === side) assert.ok(atEnd(to, end === "north" ? "south" : "north"), `${what}: at the other end`);
         // The other half of the tower sends you elsewhere: it is not correct.
         const away: Point = [2 * c[0] - p[0], 2 * c[1] - p[1]];
-        assert.isFalse(inZone(away, z), `${what}: only the half facing that way`);
+        assert.isFalse(inZone(away, z), `${what}: only the side facing that way`);
+        // Every correct spot in the tower lands you where you need to go, never off the arena.
+        for (let dx = -TOWER_R; dx <= TOWER_R; dx += 0.5)
+          for (let dy = -TOWER_R; dy <= TOWER_R; dy += 0.5) {
+            const q: Point = [c[0] + dx, c[1] + dy];
+            if (!inZone(q, z)) continue;
+            const t = landing(c, q);
+            assert.ok(onFloor(t) && onSide(t, goal), `${what}: (${q}) lands on the ${goal} platform`);
+            if (goal === side) assert.ok(atEnd(t, end === "north" ? "south" : "north"), `${what}: (${q}) lands at the other end`);
+          }
         // With a tether, it runs from its portal to your mark; without one, none is drawn.
         if (portal) {
           assert.deepEqual(sc.tether?.portal, portal);
           assert.ok(!sc.overlays.some((o) => o.t === "mark" && o.l === "H1"), `${what}: your mark is the tether's end`);
         } else assert.isUndefined(sc.tether, what);
       }
+});
+
+test("Arena Split: to cross from the SW tower, stand about due east: its SE edge throws you off the arena", () => {
+  const sc = splitTowers("H1", "west", "south", { portal: portalAt("west", "north", "west") }),
+    z = zoneOf(stepZone(sc.steps[0], [])),
+    c = SPLIT_TOWER.west.south,
+    at = (deg: number): Point => [
+      c[0] + Math.sin((deg * Math.PI) / 180) * TOWER_R * 0.9,
+      c[1] - Math.cos((deg * Math.PI) / 180) * TOWER_R * 0.9,
+    ];
+  assert.ok(inZone(at(90), z), "due east");
+  assert.ok(inZone(at(80), z), "a little north-east");
+  assert.isFalse(inZone(at(135), z), "the SE edge");
+  assert.isFalse(onFloor(landing(c, at(135))), "from the SE edge you land off the arena");
 });
 
 test("Arena Split: the first towers are your light party's, at the south end, and send you the way you need", () => {
