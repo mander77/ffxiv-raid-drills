@@ -43,21 +43,52 @@ jobs:
       - run: npm test
       - run: npm run build
 
-  e2e:
-    name: Browser tests
+  # The Playwright version in package-lock.json, for the image of the browser tests below.
+  # Read from the lockfile, so a Dependabot update of @playwright/test moves the image with it.
+  playwright:
+    name: Playwright version
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          sparse-checkout: package-lock.json
+          sparse-checkout-cone-mode: false
+      - id: version
+        run: >-
+          echo "version=$(node -p
+          "require('./package-lock.json').packages['node_modules/@playwright/test'].version")"
+          >> "$GITHUB_OUTPUT"
+
+  # The browser tests run in Playwright's own image, as the Playwright CI docs recommend. It has
+  # Chromium, Firefox and WebKit and their system libraries, so the job downloads no browser and
+  # runs no apt-get: a slow Ubuntu mirror once hung `npx playwright install --with-deps` here.
+  # The image tag must match @playwright/test exactly, or Playwright finds no browsers.
+  e2e:
+    name: Browser tests
+    needs: playwright
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.playwright.outputs.version }}-noble
+      # The runner's user id, as in the Playwright CI docs: it owns the checkout and the home
+      # folder GitHub mounts, and Firefox will not start as root with a home it does not own.
+      options: --user 1001
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The image has its own Node.js; the site needs the version in .node-version.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .node-version
           cache: npm
+      # A slow npm registry fails the run in minutes, not after the job's 20.
       - run: npm ci
-      # Chromium, Firefox and WebKit, with the system libraries they need.
-      - run: npx playwright install --with-deps
+        timeout-minutes: 5
       # The list for the log, and the HTML report to download when a test fails.
       - run: npm run e2e -- --reporter=list,html
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
