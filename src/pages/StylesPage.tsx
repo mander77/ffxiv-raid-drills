@@ -55,13 +55,13 @@ const CATEGORY_MEANING: Record<Category, string> = {
 /** The kinds of mechanic in groups, so related icons sit side by side. Every kind is in one group
     (a test checks the page names each kind once). */
 const KIND_GROUPS: readonly { title: string; kinds: readonly DrillKind[] }[] = [
-  { title: "Spread and stacks", kinds: ["spread", "stack", "pairStack", "lightPartyStack", "roleStack"] },
-  { title: "Lines from the boss", kinds: ["lineStack", "wildCharge"] },
+  { title: "Spread and Stacks", kinds: ["spread", "stack", "pairStack", "lightPartyStack", "roleStack"] },
+  { title: "Lines from the Boss", kinds: ["lineStack", "wildCharge"] },
   { title: "Towers", kinds: ["tower", "towerKnockback", "tankTower"] },
   { title: "Tethers", kinds: ["chains", "pairTether"] },
-  { title: "Tank busters", kinds: ["tankBuster", "sharedTankBuster"] },
-  { title: "Your spot", kinds: ["bait", "protean", "knockback"] },
-  { title: "Order and timing", kinds: ["sequence", "puddles", "later"] },
+  { title: "Tank Busters", kinds: ["tankBuster", "sharedTankBuster"] },
+  { title: "Your Spot", kinds: ["bait", "protean", "knockback"] },
+  { title: "Order and Timing", kinds: ["sequence", "puddles", "later"] },
 ];
 
 /** How many abilities of the fight have a category. */
