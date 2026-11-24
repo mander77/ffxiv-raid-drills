@@ -907,6 +907,27 @@ static wins.
   boss hitbox is 5 yalms. The shared sizes and shapes live in `src/data/fights/m11s/attacks.ts`.
 - Times come from cactbot (`ui/raidboss/data/07-dt/raid/r11s.txt`). Branch labels in that file add
   offsets, so subtract them.
+- Issue #96 (November 24): `npm run import:video -- <fight> <YouTube address>...` reads a fight's
+  guide videos with yt-dlp and ffmpeg. For each video it writes `notes/<fight>/videos/<id>.json`:
+  each chapter's name and span, its caption lines with their times, and a still frame every 3
+  seconds. With no address it imports again every video the fight has notes for.
+  - A fight can have more than one guide video (owner's choice): M11S has Hector's guide
+    (`w1uuwzhyf5A`) and his Fixed Stampede mini-guide (`p8cL88OKEWE`, now also on the Cheat
+    Sheet's sources). The script takes any YouTube address, and nothing else.
+  - Frames for every chapter (owner's choice over only named chapters): the whole video is
+    downloaded once, at 720p, video only. The video and the frames stay in `.cache/video/`; the
+    chapter text is committed (owner's choice, as for the strat notes).
+  - The captions are YouTube's auto-captions, which repeat each line as they roll; the script
+    keeps only each caption's new words. They are not exact.
+  - The rule stays: a video is only for understanding. Never take a fight time or an attack size
+    from it, and mark every position read from it "owner to check". Each notes file says so.
+  - `npm run setup` lists yt-dlp and ffmpeg in its "To do" when one is missing; only this script
+    needs them.
+  - naurffxiv's guide (https://naurffxiv.com/savage/m11s) is already a link on the Cheat Sheet's
+    sources, for people. The draft job does not read it (owner's choice): the site's robots.txt
+    blocks AI crawlers by name, Anthropic's among them, and allows no AI input
+    (`Content-Signal: search=yes,ai-train=no,use=reference`). Do not propose an import of it
+    unless naurffxiv allows it.
 - Issue #95 (November 24): `npm run import:strat -- "<wtfdig address>"` writes wtfdig's strat
   notes for one fight into `notes/<fight>/strat.json`. The address is the one wtfdig shows, with
   the strat and each toggle's option after "#" (owner's choice over a fight id and choices); an
