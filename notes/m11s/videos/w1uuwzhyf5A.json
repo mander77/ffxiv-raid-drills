@@ -1,0 +1,4686 @@
+{
+  "_generated": "By npm run import:video (scripts/import-video.mjs). Do not edit it by hand.",
+  "rule": "Only for understanding: never take a fight time or an attack size from the video. Mark every position read from it 'owner to check'.",
+  "video": {
+    "id": "w1uuwzhyf5A",
+    "url": "https://www.youtube.com/watch?v=w1uuwzhyf5A",
+    "title": "M11S Guide - AAC Heavyweight M3 Savage (The Tyrant)",
+    "channel": "Hector Hectorson - Hector Lectures",
+    "duration": 1417
+  },
+  "captions": "YouTube's English captions (made by YouTube unless the channel wrote them): not exact",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Introduction",
+      "start": 0,
+      "end": 60,
+      "span": "0:00 to 1:00",
+      "lines": [
+        {
+          "t": 0.7,
+          "text": "Warning, this guide features week 1"
+        },
+        {
+          "t": 2.5,
+          "text": "strats. Better strats can and will be"
+        },
+        {
+          "t": 5,
+          "text": "found if they haven't already, so be"
+        },
+        {
+          "t": 9.1,
+          "text": "Hi guys, and welcome to a Hector lecture"
+        },
+        {
+          "t": 11,
+          "text": "guide to the fight M11s."
+        },
+        {
+          "t": 13,
+          "text": "This is the tyrant."
+        },
+        {
+          "t": 17,
+          "text": "Before we begin anything in this fight,"
+        },
+        {
+          "t": 18.5,
+          "text": "be aware there are two very similar, but"
+        },
+        {
+          "t": 20.7,
+          "text": "not quite the same sets of way marks"
+        },
+        {
+          "t": 22.4,
+          "text": "going around right now. These are the"
+        },
+        {
+          "t": 24,
+          "text": "Toxic Friends way marks, and these are"
+        },
+        {
+          "t": 26.6,
+          "text": "the Kindred way marks. They are very,"
+        },
+        {
+          "t": 28.6,
+          "text": "very similar, but for one mechanic,"
+        },
+        {
+          "t": 30.2,
+          "text": "using the wrong way marks, and the strat"
+        },
+        {
+          "t": 31.8,
+          "text": "that associates with them can get you"
+        },
+        {
+          "t": 33.7,
+          "text": "killed. So, make sure you've got your"
+        },
+        {
+          "t": 35.3,
+          "text": "way marks correct."
+        },
+        {
+          "t": 37.5,
+          "text": "For this fight, you're going to need"
+        },
+        {
+          "t": 38.6,
+          "text": "light parties."
+        },
+        {
+          "t": 40.8,
+          "text": "You'll also want clock spots. Standard"
+        },
+        {
+          "t": 42.5,
+          "text": "clock spots work great, and you'll use"
+        },
+        {
+          "t": 44.6,
+          "text": "them boss relative."
+        },
+        {
+          "t": 47.4,
+          "text": "You'll need spread positions for a"
+        },
+        {
+          "t": 48.9,
+          "text": "mechanic early on, and these can be used"
+        },
+        {
+          "t": 51,
+          "text": "for other mechanics as well. Use them"
+        },
+        {
+          "t": 52.9,
+          "text": "relative as well."
+        },
+        {
+          "t": 55.5,
+          "text": "Fight begins with Crown of Arcadia. This"
+        },
+        {
+          "t": 57.1,
+          "text": "is a raidwide."
+        }
+      ],
+      "frames": [
+        {
+          "t": 0,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/001.jpg"
+        },
+        {
+          "t": 3,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/002.jpg"
+        },
+        {
+          "t": 6,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/003.jpg"
+        },
+        {
+          "t": 9,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/004.jpg"
+        },
+        {
+          "t": 12,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/005.jpg"
+        },
+        {
+          "t": 15,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/006.jpg"
+        },
+        {
+          "t": 18,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/007.jpg"
+        },
+        {
+          "t": 21,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/008.jpg"
+        },
+        {
+          "t": 24,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/009.jpg"
+        },
+        {
+          "t": 27,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/010.jpg"
+        },
+        {
+          "t": 30,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/011.jpg"
+        },
+        {
+          "t": 33,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/012.jpg"
+        },
+        {
+          "t": 36,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/013.jpg"
+        },
+        {
+          "t": 39,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/014.jpg"
+        },
+        {
+          "t": 42,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/015.jpg"
+        },
+        {
+          "t": 45,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/016.jpg"
+        },
+        {
+          "t": 48,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/017.jpg"
+        },
+        {
+          "t": 51,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/018.jpg"
+        },
+        {
+          "t": 54,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/019.jpg"
+        },
+        {
+          "t": 57,
+          "file": ".cache/video/w1uuwzhyf5A/frames/01-introduction/020.jpg"
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Raw Steel Trophy",
+      "start": 60,
+      "end": 94,
+      "span": "1:00 to 1:34",
+      "lines": [
+        {
+          "t": 60.1,
+          "text": "Immediately afterwards, the boss will"
+        },
+        {
+          "t": 61.5,
+          "text": "cast a raw steel trophy and start to"
+        },
+        {
+          "t": 63.3,
+          "text": "pull out either an axe or a scythe. If"
+        },
+        {
+          "t": 66.3,
+          "text": "they pull out an axe, the tanks will"
+        },
+        {
+          "t": 68,
+          "text": "stack together for a tank buster that"
+        },
+        {
+          "t": 69.4,
+          "text": "they're sharing and the party will"
+        },
+        {
+          "t": 70.6,
+          "text": "spread. If the boss pulls out a scythe,"
+        },
+        {
+          "t": 73.1,
+          "text": "the tanks will spread and the party will"
+        },
+        {
+          "t": 74.8,
+          "text": "stack instead. Here we see axe first, so"
+        },
+        {
+          "t": 78.4,
+          "text": "the tanks stack together with mitigation"
+        },
+        {
+          "t": 80.2,
+          "text": "and the party spreads."
+        },
+        {
+          "t": 83.1,
+          "text": "Had the boss pulled out a scythe"
+        },
+        {
+          "t": 86.9,
+          "text": "the tanks would split up for their tank"
+        },
+        {
+          "t": 88.4,
+          "text": "buster while the party stacked. These"
+        },
+        {
+          "t": 90.2,
+          "text": "are conal cleaves."
+        },
+        {
+          "t": 93.6,
+          "text": "The boss will now cast trophy weapons,"
+        }
+      ],
+      "frames": [
+        {
+          "t": 60,
+          "file": ".cache/video/w1uuwzhyf5A/frames/02-raw-steel-trophy/001.jpg"
+        },
+        {
+          "t": 63,
+          "file": ".cache/video/w1uuwzhyf5A/frames/02-raw-steel-trophy/002.jpg"
+        },
+        {
+          "t": 66,
+          "file": ".cache/video/w1uuwzhyf5A/frames/02-raw-steel-trophy/003.jpg"
+        },
+        {
+          "t": 69,
+          "file": ".cache/video/w1uuwzhyf5A/frames/02-raw-steel-trophy/004.jpg"
+        },
+        {
+          "t": 72,
+          "file": ".cache/video/w1uuwzhyf5A/frames/02-raw-steel-trophy/005.jpg"
+        },
+        {
+          "t": 75,
+          "file": ".cache/video/w1uuwzhyf5A/frames/02-raw-steel-trophy/006.jpg"
+        },
+        {
+          "t": 78,
+          "file": ".cache/video/w1uuwzhyf5A/frames/02-raw-steel-trophy/007.jpg"
+        },
+        {
+          "t": 81,
+          "file": ".cache/video/w1uuwzhyf5A/frames/02-raw-steel-trophy/008.jpg"
+        },
+        {
+          "t": 84,
+          "file": ".cache/video/w1uuwzhyf5A/frames/02-raw-steel-trophy/009.jpg"
+        },
+        {
+          "t": 87,
+          "file": ".cache/video/w1uuwzhyf5A/frames/02-raw-steel-trophy/010.jpg"
+        },
+        {
+          "t": 90,
+          "file": ".cache/video/w1uuwzhyf5A/frames/02-raw-steel-trophy/011.jpg"
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Trophy Weapons",
+      "start": 94,
+      "end": 231,
+      "span": "1:34 to 3:51",
+      "lines": [
+        {
+          "t": 95.3,
+          "text": "and we're going to get three weapons"
+        },
+        {
+          "t": 96.8,
+          "text": "spawning in the ground. This is always"
+        },
+        {
+          "t": 98.6,
+          "text": "each of the three weapons, scythe, axe,"
+        },
+        {
+          "t": 102,
+          "text": "and sword."
+        },
+        {
+          "t": 105.1,
+          "text": "The boss will cast assault evolved and"
+        },
+        {
+          "t": 106.8,
+          "text": "face one of the weapons at random. This"
+        },
+        {
+          "t": 108.7,
+          "text": "will be the first weapon activated. And"
+        },
+        {
+          "t": 110.2,
+          "text": "from this point onwards, they will"
+        },
+        {
+          "t": 111.5,
+          "text": "always go in clockwise order from this"
+        },
+        {
+          "t": 113.8,
+          "text": "first weapon. These are the same"
+        },
+        {
+          "t": 115.5,
+          "text": "mechanics that you saw in normal mode,"
+        },
+        {
+          "t": 117.3,
+          "text": "but they come with an additional twist."
+        },
+        {
+          "t": 119.5,
+          "text": "The sword is still going to be dodged to"
+        },
+        {
+          "t": 121,
+          "text": "the inner cardinals of the boss, but we"
+        },
+        {
+          "t": 123.7,
+          "text": "need to split into light parties at the"
+        },
+        {
+          "t": 125.2,
+          "text": "same time as two line AoE's for light"
+        },
+        {
+          "t": 127.4,
+          "text": "party stacks go off. Group one left,"
+        },
+        {
+          "t": 129.9,
+          "text": "group two right. Scythe is still a"
+        },
+        {
+          "t": 132.3,
+          "text": "donut, but we're also going to get"
+        },
+        {
+          "t": 134.2,
+          "text": "targeted with cleaves at the same time."
+        },
+        {
+          "t": 135.6,
+          "text": "So, we split into our clock spots. These"
+        },
+        {
+          "t": 138.2,
+          "text": "will only target a alive player, so if"
+        },
+        {
+          "t": 139.8,
+          "text": "anybody's dead, you won't get doubled"
+        },
+        {
+          "t": 141,
+          "text": "up. Finally, the axe is an out, but also"
+        },
+        {
+          "t": 145.2,
+          "text": "a party stack."
+        },
+        {
+          "t": 148.1,
+          "text": "The boss will now cast trophy weapons"
+        },
+        {
+          "t": 149.8,
+          "text": "again, spawn three more weapons in the"
+        },
+        {
+          "t": 151.9,
+          "text": "triangle format. But before this begins,"
+        },
+        {
+          "t": 154.3,
+          "text": "the boss will cast void stardust. This"
+        },
+        {
+          "t": 156.2,
+          "text": "is three puddles followed by stacks or"
+        },
+        {
+          "t": 158,
+          "text": "spreads. So, we just start north, bait"
+        },
+        {
+          "t": 160.1,
+          "text": "the puddles together clockwise around"
+        },
+        {
+          "t": 161.6,
+          "text": "the boss,"
+        },
+        {
+          "t": 164.4,
+          "text": "and then look to see if it's stack or"
+        },
+        {
+          "t": 165.8,
+          "text": "spread. The boss will face its first"
+        },
+        {
+          "t": 167.4,
+          "text": "weapon at this point. If it's stack, you"
+        },
+        {
+          "t": 170.4,
+          "text": "just stay together in the middle and"
+        },
+        {
+          "t": 171.4,
+          "text": "take the stack. You can cheat towards"
+        },
+        {
+          "t": 173,
+          "text": "the first weapon if you want to. For"
+        },
+        {
+          "t": 175.8,
+          "text": "spreads, you can either yolo these"
+        },
+        {
+          "t": 177.5,
+          "text": "spreads or you can use the exact same"
+        },
+        {
+          "t": 179.8,
+          "text": "spread positions you used for axe spread"
+        },
+        {
+          "t": 181.8,
+          "text": "and the tanks for scythe spread at the"
+        },
+        {
+          "t": 183.8,
+          "text": "very beginning of the fight. Up to you"
+        },
+        {
+          "t": 185.4,
+          "text": "how you do this. However you resolve it,"
+        },
+        {
+          "t": 188,
+          "text": "pay attention to the weapon the boss is"
+        },
+        {
+          "t": 189.6,
+          "text": "already facing and deal with that"
+        },
+        {
+          "t": 191,
+          "text": "mechanic. Here it's an axe, so we go out"
+        },
+        {
+          "t": 192.9,
+          "text": "and stack."
+        },
+        {
+          "t": 195.7,
+          "text": "Next up is scythe, so we split into our"
+        },
+        {
+          "t": 197.4,
+          "text": "clock spots, boss relative."
+        },
+        {
+          "t": 200.6,
+          "text": "And next is sword, so we split into our"
+        },
+        {
+          "t": 202.2,
+          "text": "light parties. Group one left, group two"
+        },
+        {
+          "t": 206.1,
+          "text": "We now stack behind the boss for three"
+        },
+        {
+          "t": 207.7,
+          "text": "more puddles. And the opposite of what"
+        },
+        {
+          "t": 209.2,
+          "text": "we had before, if we had spread first,"
+        },
+        {
+          "t": 211,
+          "text": "it would be stack, and vice versa. Here,"
+        },
+        {
+          "t": 213,
+          "text": "the group knows that they had stack"
+        },
+        {
+          "t": 214.4,
+          "text": "first, so they're going to split off"
+        },
+        {
+          "t": 215.7,
+          "text": "because they know they're going to"
+        },
+        {
+          "t": 216.6,
+          "text": "spread next."
+        },
+        {
+          "t": 218.9,
+          "text": "Just like before, you can either yolo"
+        },
+        {
+          "t": 220.7,
+          "text": "these spreads or you can use the same"
+        },
+        {
+          "t": 223.2,
+          "text": "spreads I showed before, but rotate them"
+        },
+        {
+          "t": 225.1,
+          "text": "towards where the boss is now"
+        },
+        {
+          "t": 229.1,
+          "text": "We get a crown of Arcadia raidwide."
+        }
+      ],
+      "frames": [
+        {
+          "t": 94,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/001.jpg"
+        },
+        {
+          "t": 97,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/002.jpg"
+        },
+        {
+          "t": 100,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/003.jpg"
+        },
+        {
+          "t": 103,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/004.jpg"
+        },
+        {
+          "t": 106,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/005.jpg"
+        },
+        {
+          "t": 109,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/006.jpg"
+        },
+        {
+          "t": 112,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/007.jpg"
+        },
+        {
+          "t": 115,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/008.jpg"
+        },
+        {
+          "t": 118,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/009.jpg"
+        },
+        {
+          "t": 121,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/010.jpg"
+        },
+        {
+          "t": 124,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/011.jpg"
+        },
+        {
+          "t": 127,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/012.jpg"
+        },
+        {
+          "t": 130,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/013.jpg"
+        },
+        {
+          "t": 133,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/014.jpg"
+        },
+        {
+          "t": 136,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/015.jpg"
+        },
+        {
+          "t": 139,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/016.jpg"
+        },
+        {
+          "t": 142,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/017.jpg"
+        },
+        {
+          "t": 145,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/018.jpg"
+        },
+        {
+          "t": 148,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/019.jpg"
+        },
+        {
+          "t": 151,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/020.jpg"
+        },
+        {
+          "t": 154,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/021.jpg"
+        },
+        {
+          "t": 157,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/022.jpg"
+        },
+        {
+          "t": 160,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/023.jpg"
+        },
+        {
+          "t": 163,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/024.jpg"
+        },
+        {
+          "t": 166,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/025.jpg"
+        },
+        {
+          "t": 169,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/026.jpg"
+        },
+        {
+          "t": 172,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/027.jpg"
+        },
+        {
+          "t": 175,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/028.jpg"
+        },
+        {
+          "t": 178,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/029.jpg"
+        },
+        {
+          "t": 181,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/030.jpg"
+        },
+        {
+          "t": 184,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/031.jpg"
+        },
+        {
+          "t": 187,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/032.jpg"
+        },
+        {
+          "t": 190,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/033.jpg"
+        },
+        {
+          "t": 193,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/034.jpg"
+        },
+        {
+          "t": 196,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/035.jpg"
+        },
+        {
+          "t": 199,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/036.jpg"
+        },
+        {
+          "t": 202,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/037.jpg"
+        },
+        {
+          "t": 205,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/038.jpg"
+        },
+        {
+          "t": 208,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/039.jpg"
+        },
+        {
+          "t": 211,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/040.jpg"
+        },
+        {
+          "t": 214,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/041.jpg"
+        },
+        {
+          "t": 217,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/042.jpg"
+        },
+        {
+          "t": 220,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/043.jpg"
+        },
+        {
+          "t": 223,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/044.jpg"
+        },
+        {
+          "t": 226,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/045.jpg"
+        },
+        {
+          "t": 229,
+          "file": ".cache/video/w1uuwzhyf5A/frames/03-trophy-weapons/046.jpg"
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "title": "Dance of Domination Trophy",
+      "start": 231,
+      "end": 301,
+      "span": "3:51 to 5:01",
+      "lines": [
+        {
+          "t": 231.9,
+          "text": "Next is dance of domination trophy. The"
+        },
+        {
+          "t": 234.6,
+          "text": "boss will pull out a sword and after"
+        },
+        {
+          "t": 237.3,
+          "text": "several hard-hitting raid wides, very"
+        },
+        {
+          "t": 239.3,
+          "text": "fast one after another, we get this"
+        },
+        {
+          "t": 241.7,
+          "text": "pattern carved into the ground and"
+        },
+        {
+          "t": 243.4,
+          "text": "partner stacks on either all supports or"
+        },
+        {
+          "t": 245,
+          "text": "all DPS. This pattern here, if I overlay"
+        },
+        {
+          "t": 247.9,
+          "text": "the AoE's, leaves four safe spots. Two"
+        },
+        {
+          "t": 250.5,
+          "text": "in melee range and two on a far wall."
+        },
+        {
+          "t": 252.9,
+          "text": "This is the only pattern you get, but it"
+        },
+        {
+          "t": 254.5,
+          "text": "can be rotated towards any of the"
+        },
+        {
+          "t": 255.9,
+          "text": "cardinals. To be able to figure out"
+        },
+        {
+          "t": 258,
+          "text": "where we send each pair,"
+        },
+        {
+          "t": 260.8,
+          "text": "find this upside down cup here, and"
+        },
+        {
+          "t": 263.2,
+          "text": "treat the top of it as your new north."
+        },
+        {
+          "t": 266.1,
+          "text": "Group one will go left facing this, and"
+        },
+        {
+          "t": 267.6,
+          "text": "group two will go right facing this with"
+        },
+        {
+          "t": 269.3,
+          "text": "tanks and melee staying in and healers"
+        },
+        {
+          "t": 270.9,
+          "text": "in range going to the wall. Get to your"
+        },
+        {
+          "t": 273,
+          "text": "safe spots and the AoE's will telegraph"
+        },
+        {
+          "t": 274.8,
+          "text": "for a brief moment, giving you time to"
+        },
+        {
+          "t": 276.2,
+          "text": "adjust if you're slightly off."
+        },
+        {
+          "t": 278.7,
+          "text": "Afterwards, boss will cast Raw Steel"
+        },
+        {
+          "t": 280.4,
+          "text": "Trophy again and pull out the opposite"
+        },
+        {
+          "t": 282,
+          "text": "weapon from the beginning. If they"
+        },
+        {
+          "t": 283.2,
+          "text": "pulled out axe first, this time it will"
+        },
+        {
+          "t": 285.1,
+          "text": "be a scythe."
+        },
+        {
+          "t": 289.4,
+          "text": "Next up is Cherub Dystopia. This is not"
+        },
+        {
+          "t": 292,
+          "text": "a raid wide. It does no damage, but it"
+        },
+        {
+          "t": 293.9,
+          "text": "will drop everyone to one HP. So,"
+        },
+        {
+          "t": 295.5,
+          "text": "there's no need to heal anyone up before"
+        },
+        {
+          "t": 297,
+          "text": "this. Afterwards, definitely heal them"
+        },
+        {
+          "t": 299.5,
+          "text": "up. Now we get ultimate trophy weapons."
+        }
+      ],
+      "frames": [
+        {
+          "t": 231,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/001.jpg"
+        },
+        {
+          "t": 234,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/002.jpg"
+        },
+        {
+          "t": 237,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/003.jpg"
+        },
+        {
+          "t": 240,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/004.jpg"
+        },
+        {
+          "t": 243,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/005.jpg"
+        },
+        {
+          "t": 246,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/006.jpg"
+        },
+        {
+          "t": 249,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/007.jpg"
+        },
+        {
+          "t": 252,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/008.jpg"
+        },
+        {
+          "t": 255,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/009.jpg"
+        },
+        {
+          "t": 258,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/010.jpg"
+        },
+        {
+          "t": 261,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/011.jpg"
+        },
+        {
+          "t": 264,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/012.jpg"
+        },
+        {
+          "t": 267,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/013.jpg"
+        },
+        {
+          "t": 270,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/014.jpg"
+        },
+        {
+          "t": 273,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/015.jpg"
+        },
+        {
+          "t": 276,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/016.jpg"
+        },
+        {
+          "t": 279,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/017.jpg"
+        },
+        {
+          "t": 282,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/018.jpg"
+        },
+        {
+          "t": 285,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/019.jpg"
+        },
+        {
+          "t": 288,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/020.jpg"
+        },
+        {
+          "t": 291,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/021.jpg"
+        },
+        {
+          "t": 294,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/022.jpg"
+        },
+        {
+          "t": 297,
+          "file": ".cache/video/w1uuwzhyf5A/frames/04-dance-of-domination-trophy/023.jpg"
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "title": "Ultimate Trophy Weapons",
+      "start": 301,
+      "end": 437,
+      "span": "5:01 to 7:17",
+      "lines": [
+        {
+          "t": 302.8,
+          "text": "The boss is going to spawn six weapons"
+        },
+        {
+          "t": 305.4,
+          "text": "one at a time. This is always going to"
+        },
+        {
+          "t": 307.3,
+          "text": "be the three different weapons and then"
+        },
+        {
+          "t": 309.4,
+          "text": "the three different weapons again, but"
+        },
+        {
+          "t": 311,
+          "text": "the order in each of those threes is"
+        },
+        {
+          "t": 313,
+          "text": "totally random. The these weapons can"
+        },
+        {
+          "t": 316,
+          "text": "now go either clockwise or"
+        },
+        {
+          "t": 317.5,
+          "text": "counterclockwise. And you can tell"
+        },
+        {
+          "t": 319.2,
+          "text": "immediately from the first weapon. If"
+        },
+        {
+          "t": 320.6,
+          "text": "it's clockwise from C, it's going"
+        },
+        {
+          "t": 322.1,
+          "text": "clockwise. But because this sword is"
+        },
+        {
+          "t": 323.6,
+          "text": "counterclockwise from C, we will be"
+        },
+        {
+          "t": 325.7,
+          "text": "rotating counterclockwise."
+        },
+        {
+          "t": 328.2,
+          "text": "We position for the first weapon, the"
+        },
+        {
+          "t": 329.8,
+          "text": "sword, and our light parties. As the"
+        },
+        {
+          "t": 332.2,
+          "text": "second weapon spawn,"
+        },
+        {
+          "t": 334.9,
+          "text": "we deal with our sword. And now I'll"
+        },
+        {
+          "t": 336.4,
+          "text": "pause for a second because sword and"
+        },
+        {
+          "t": 338,
+          "text": "decythe is the hardest combination for"
+        },
+        {
+          "t": 340.6,
+          "text": "many roles. You have to be very fast."
+        },
+        {
+          "t": 342.8,
+          "text": "And if you're a tank or a range,"
+        },
+        {
+          "t": 344.4,
+          "text": "especially if you're far away like R2 in"
+        },
+        {
+          "t": 346.5,
+          "text": "this case, you're probably going to want"
+        },
+        {
+          "t": 347.7,
+          "text": "to cast sprint before you do this."
+        },
+        {
+          "t": 350.9,
+          "text": "Position for the second weapon."
+        },
+        {
+          "t": 353.7,
+          "text": "And now from the third weapon onwards,"
+        },
+        {
+          "t": 355.8,
+          "text": "each of these is going to drop a tornado"
+        },
+        {
+          "t": 357.5,
+          "text": "underneath when the boss finishes their"
+        },
+        {
+          "t": 359.1,
+          "text": "attack. Just be aware that about a"
+        },
+        {
+          "t": 361.3,
+          "text": "second or two after the tornado appears,"
+        },
+        {
+          "t": 362.9,
+          "text": "it's active and walking into it will"
+        },
+        {
+          "t": 364.5,
+          "text": "send you flying in a random direction"
+        },
+        {
+          "t": 366.2,
+          "text": "and probably kill you."
+        },
+        {
+          "t": 368.6,
+          "text": "The boss will now jump to the fourth"
+        },
+        {
+          "t": 372.3,
+          "text": "The fifth weapon, it's all repeats from"
+        },
+        {
+          "t": 374.4,
+          "text": "what we saw earlier. And then the final"
+        },
+        {
+          "t": 376.2,
+          "text": "weapon will always be at true north."
+        },
+        {
+          "t": 379.6,
+          "text": "There will be four tornadoes now, each"
+        },
+        {
+          "t": 381.5,
+          "text": "of them roughly at a cardinal. And we're"
+        },
+        {
+          "t": 383.2,
+          "text": "going to send everyone out to fixed"
+        },
+        {
+          "t": 384.7,
+          "text": "positions to bait two cleaves off of"
+        },
+        {
+          "t": 387,
+          "text": "each tornado. The boss will start a cast"
+        },
+        {
+          "t": 389.2,
+          "text": "of Immortal Rain, but only a tiny bit of"
+        },
+        {
+          "t": 391.4,
+          "text": "the way into that cast, the cleaves go"
+        },
+        {
+          "t": 393.3,
+          "text": "off. So make sure you're positioned so"
+        },
+        {
+          "t": 394.8,
+          "text": "that you don't actually bait any into"
+        },
+        {
+          "t": 396.6,
+          "text": "anyone else. Tanks and melees, you can"
+        },
+        {
+          "t": 398.6,
+          "text": "immediately gap close after your hit."
+        },
+        {
+          "t": 400.2,
+          "text": "The tornado disappears instantly."
+        },
+        {
+          "t": 404.2,
+          "text": "Immortal Rain would transform the boss"
+        },
+        {
+          "t": 405.6,
+          "text": "into its new form, and we get one and"
+        },
+        {
+          "t": 407.3,
+          "text": "only, which is an ultimate raidwide"
+        },
+        {
+          "t": 409.3,
+          "text": "attack. Mitigate this."
+        },
+        {
+          "t": 412,
+          "text": "Now that we're in the new phase, we get"
+        },
+        {
+          "t": 413.7,
+          "text": "some new mechanics. Great wall of fire"
+        },
+        {
+          "t": 415.6,
+          "text": "is a tank buster. It hits twice. It's"
+        },
+        {
+          "t": 418.1,
+          "text": "meant to be a shared tank buster,"
+        },
+        {
+          "t": 419.5,
+          "text": "leaving a vone on the nearest player,"
+        },
+        {
+          "t": 421.1,
+          "text": "and it leaves an AoE underneath you need"
+        },
+        {
+          "t": 422.7,
+          "text": "to dodge. If you want to deal this with"
+        },
+        {
+          "t": 424.6,
+          "text": "both tanks, have main tank in front for"
+        },
+        {
+          "t": 426.8,
+          "text": "the first hit while both tanks use cool"
+        },
+        {
+          "t": 428.4,
+          "text": "downs, dodge clockwise, and have off"
+        },
+        {
+          "t": 430.5,
+          "text": "tank in front for the second hit."
+        },
+        {
+          "t": 433.2,
+          "text": "You can also have one tank just take"
+        },
+        {
+          "t": 434.7,
+          "text": "both hits with involved. Up to you."
+        }
+      ],
+      "frames": [
+        {
+          "t": 301,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/001.jpg"
+        },
+        {
+          "t": 304,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/002.jpg"
+        },
+        {
+          "t": 307,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/003.jpg"
+        },
+        {
+          "t": 310,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/004.jpg"
+        },
+        {
+          "t": 313,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/005.jpg"
+        },
+        {
+          "t": 316,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/006.jpg"
+        },
+        {
+          "t": 319,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/007.jpg"
+        },
+        {
+          "t": 322,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/008.jpg"
+        },
+        {
+          "t": 325,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/009.jpg"
+        },
+        {
+          "t": 328,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/010.jpg"
+        },
+        {
+          "t": 331,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/011.jpg"
+        },
+        {
+          "t": 334,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/012.jpg"
+        },
+        {
+          "t": 337,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/013.jpg"
+        },
+        {
+          "t": 340,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/014.jpg"
+        },
+        {
+          "t": 343,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/015.jpg"
+        },
+        {
+          "t": 346,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/016.jpg"
+        },
+        {
+          "t": 349,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/017.jpg"
+        },
+        {
+          "t": 352,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/018.jpg"
+        },
+        {
+          "t": 355,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/019.jpg"
+        },
+        {
+          "t": 358,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/020.jpg"
+        },
+        {
+          "t": 361,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/021.jpg"
+        },
+        {
+          "t": 364,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/022.jpg"
+        },
+        {
+          "t": 367,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/023.jpg"
+        },
+        {
+          "t": 370,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/024.jpg"
+        },
+        {
+          "t": 373,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/025.jpg"
+        },
+        {
+          "t": 376,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/026.jpg"
+        },
+        {
+          "t": 379,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/027.jpg"
+        },
+        {
+          "t": 382,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/028.jpg"
+        },
+        {
+          "t": 385,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/029.jpg"
+        },
+        {
+          "t": 388,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/030.jpg"
+        },
+        {
+          "t": 391,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/031.jpg"
+        },
+        {
+          "t": 394,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/032.jpg"
+        },
+        {
+          "t": 397,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/033.jpg"
+        },
+        {
+          "t": 400,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/034.jpg"
+        },
+        {
+          "t": 403,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/035.jpg"
+        },
+        {
+          "t": 406,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/036.jpg"
+        },
+        {
+          "t": 409,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/037.jpg"
+        },
+        {
+          "t": 412,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/038.jpg"
+        },
+        {
+          "t": 415,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/039.jpg"
+        },
+        {
+          "t": 418,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/040.jpg"
+        },
+        {
+          "t": 421,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/041.jpg"
+        },
+        {
+          "t": 424,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/042.jpg"
+        },
+        {
+          "t": 427,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/043.jpg"
+        },
+        {
+          "t": 430,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/044.jpg"
+        },
+        {
+          "t": 433,
+          "file": ".cache/video/w1uuwzhyf5A/frames/05-ultimate-trophy-weapons/045.jpg"
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "title": "Orbital Omen",
+      "start": 437,
+      "end": 542,
+      "span": "7:17 to 9:02",
+      "lines": [
+        {
+          "t": 437.8,
+          "text": "The boss will now cast orbital omen."
+        },
+        {
+          "t": 440,
+          "text": "This is what looks to be a very"
+        },
+        {
+          "t": 441.6,
+          "text": "complicated mechanic. Portals spawn in"
+        },
+        {
+          "t": 443.9,
+          "text": "the north and the east in pairs."
+        },
+        {
+          "t": 448.8,
+          "text": "After the third portals appear, the boss"
+        },
+        {
+          "t": 450.9,
+          "text": "will cast fire and fury and lock in"
+        },
+        {
+          "t": 453,
+          "text": "place where they're facing cleaves that"
+        },
+        {
+          "t": 455,
+          "text": "will go both in front and behind the"
+        },
+        {
+          "t": 456.6,
+          "text": "boss, only leaving their sides safe."
+        },
+        {
+          "t": 460,
+          "text": "If we look at the fire and fury AoE's,"
+        },
+        {
+          "t": 463.1,
+          "text": "you can see the safe spots from those"
+        },
+        {
+          "t": 464.9,
+          "text": "relative to where the boss is facing."
+        },
+        {
+          "t": 466.9,
+          "text": "These will go off at the same time as"
+        },
+        {
+          "t": 468.3,
+          "text": "the first line AoE's from the portals."
+        },
+        {
+          "t": 471.4,
+          "text": "And after this first set goes off, it's"
+        },
+        {
+          "t": 473.4,
+          "text": "fast. The fire and fury in the first"
+        },
+        {
+          "t": 475.4,
+          "text": "set, the second set, the third set, and"
+        },
+        {
+          "t": 478.2,
+          "text": "the fourth set. All you have to do is"
+        },
+        {
+          "t": 480.6,
+          "text": "dodge. But finding the safe spot can"
+        },
+        {
+          "t": 482.6,
+          "text": "seem tricky. Here's a cheap way to make"
+        },
+        {
+          "t": 484.5,
+          "text": "it really easy. Thank you to Violet"
+        },
+        {
+          "t": 487.3,
+          "text": "Stardust, who is who I first saw this"
+        },
+        {
+          "t": 490.9,
+          "text": "After the second portals appear with"
+        },
+        {
+          "t": 492.8,
+          "text": "their lines out of it, the boss will"
+        },
+        {
+          "t": 494.6,
+          "text": "cast fire and fury. Main tank, keep the"
+        },
+        {
+          "t": 496.6,
+          "text": "boss facing perfectly north. At this"
+        },
+        {
+          "t": 498.3,
+          "text": "time, everyone's going to go into the"
+        },
+        {
+          "t": 501.2,
+          "text": "same quadrant as where those two lines"
+        },
+        {
+          "t": 503.7,
+          "text": "from the second portal appear. This will"
+        },
+        {
+          "t": 505.5,
+          "text": "always be in melee range. Get into that"
+        },
+        {
+          "t": 508.6,
+          "text": "quadrant and make sure you're not"
+        },
+        {
+          "t": 509.9,
+          "text": "getting hit by the section of the fire"
+        },
+        {
+          "t": 511.8,
+          "text": "and fury going through where you are"
+        },
+        {
+          "t": 513.7,
+          "text": "right now. If you're positioned here,"
+        },
+        {
+          "t": 515.9,
+          "text": "you are guaranteed safe from the first"
+        },
+        {
+          "t": 517.6,
+          "text": "hit. Both the first portals and the"
+        },
+        {
+          "t": 519.1,
+          "text": "first fire and fury. Diagonally from"
+        },
+        {
+          "t": 521.4,
+          "text": "this is guaranteed safe from the second"
+        },
+        {
+          "t": 523.2,
+          "text": "hit. and back where you started is"
+        },
+        {
+          "t": 526,
+          "text": "guaranteed save from the third hit. So"
+        },
+        {
+          "t": 527.8,
+          "text": "simply start here, dodge diagonal for"
+        },
+        {
+          "t": 531.2,
+          "text": "the first hit"
+        },
+        {
+          "t": 534.1,
+          "text": "and then straight back."
+        },
+        {
+          "t": 537.8,
+          "text": "This works every single time. Really"
+        },
+        {
+          "t": 540,
+          "text": "quick and easy. Just need to get the"
+        },
+        {
+          "t": 541.3,
+          "text": "timing right."
+        }
+      ],
+      "frames": [
+        {
+          "t": 437,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/001.jpg"
+        },
+        {
+          "t": 440,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/002.jpg"
+        },
+        {
+          "t": 443,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/003.jpg"
+        },
+        {
+          "t": 446,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/004.jpg"
+        },
+        {
+          "t": 449,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/005.jpg"
+        },
+        {
+          "t": 452,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/006.jpg"
+        },
+        {
+          "t": 455,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/007.jpg"
+        },
+        {
+          "t": 458,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/008.jpg"
+        },
+        {
+          "t": 461,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/009.jpg"
+        },
+        {
+          "t": 464,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/010.jpg"
+        },
+        {
+          "t": 467,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/011.jpg"
+        },
+        {
+          "t": 470,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/012.jpg"
+        },
+        {
+          "t": 473,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/013.jpg"
+        },
+        {
+          "t": 476,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/014.jpg"
+        },
+        {
+          "t": 479,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/015.jpg"
+        },
+        {
+          "t": 482,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/016.jpg"
+        },
+        {
+          "t": 485,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/017.jpg"
+        },
+        {
+          "t": 488,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/018.jpg"
+        },
+        {
+          "t": 491,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/019.jpg"
+        },
+        {
+          "t": 494,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/020.jpg"
+        },
+        {
+          "t": 497,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/021.jpg"
+        },
+        {
+          "t": 500,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/022.jpg"
+        },
+        {
+          "t": 503,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/023.jpg"
+        },
+        {
+          "t": 506,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/024.jpg"
+        },
+        {
+          "t": 509,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/025.jpg"
+        },
+        {
+          "t": 512,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/026.jpg"
+        },
+        {
+          "t": 515,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/027.jpg"
+        },
+        {
+          "t": 518,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/028.jpg"
+        },
+        {
+          "t": 521,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/029.jpg"
+        },
+        {
+          "t": 524,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/030.jpg"
+        },
+        {
+          "t": 527,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/031.jpg"
+        },
+        {
+          "t": 530,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/032.jpg"
+        },
+        {
+          "t": 533,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/033.jpg"
+        },
+        {
+          "t": 536,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/034.jpg"
+        },
+        {
+          "t": 539,
+          "file": ".cache/video/w1uuwzhyf5A/frames/06-orbital-omen/035.jpg"
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "title": "Meteorain",
+      "start": 542,
+      "end": 724,
+      "span": "9:02 to 12:04",
+      "lines": [
+        {
+          "t": 543.8,
+          "text": "Meteor Rain is next. For meteor rain,"
+        },
+        {
+          "t": 546.5,
+          "text": "you're going to send two players into"
+        },
+        {
+          "t": 548.1,
+          "text": "the middle underneath the boss because"
+        },
+        {
+          "t": 549.4,
+          "text": "the nearest two players are going to"
+        },
+        {
+          "t": 550.6,
+          "text": "bait these meteor markers. They're going"
+        },
+        {
+          "t": 552.2,
+          "text": "to drop meteors on themselves shortly."
+        },
+        {
+          "t": 554.6,
+          "text": "The other players are positioning in the"
+        },
+        {
+          "t": 556.4,
+          "text": "northwest, ready for a line stack. For"
+        },
+        {
+          "t": 559.9,
+          "text": "the two meteor players, send M1"
+        },
+        {
+          "t": 561.8,
+          "text": "northeast, M2 southeast. Always these"
+        },
+        {
+          "t": 564.6,
+          "text": "positions. This line stack is a wild"
+        },
+        {
+          "t": 567.4,
+          "text": "charge, meaning the nearest players are"
+        },
+        {
+          "t": 568.9,
+          "text": "going to take more damage. So, we make"
+        },
+        {
+          "t": 570.2,
+          "text": "sure our tanks are in front for this."
+        },
+        {
+          "t": 573,
+          "text": "The line stack and the meteors go off at"
+        },
+        {
+          "t": 574.8,
+          "text": "the same time."
+        },
+        {
+          "t": 576.3,
+          "text": "Note that the meteors dropping gives a"
+        },
+        {
+          "t": 578.3,
+          "text": "physical van to those players, meaning"
+        },
+        {
+          "t": 580,
+          "text": "they can't take another set of meteors"
+        },
+        {
+          "t": 581.4,
+          "text": "for the rest of the mechanic. Speaking"
+        },
+        {
+          "t": 583,
+          "text": "of, immediately send two more players"
+        },
+        {
+          "t": 585.8,
+          "text": "in. In this case, it's the healers"
+        },
+        {
+          "t": 587.8,
+          "text": "because they're also going to be baiting"
+        },
+        {
+          "t": 591,
+          "text": "Now, three things happen at once. We get"
+        },
+        {
+          "t": 593.8,
+          "text": "two portals on random cardinals. One"
+        },
+        {
+          "t": 595.6,
+          "text": "will tether to the northern meteor that"
+        },
+        {
+          "t": 597.1,
+          "text": "spawn and one will tether to the"
+        },
+        {
+          "t": 598.3,
+          "text": "southern meteor that spawned and try to"
+        },
+        {
+          "t": 599.8,
+          "text": "destroy them like you saw in normal"
+        },
+        {
+          "t": 601.5,
+          "text": "mode. We also get markers on the two"
+        },
+        {
+          "t": 603.6,
+          "text": "nearest players to the boss, and we want"
+        },
+        {
+          "t": 605,
+          "text": "those on the healers. They're going to"
+        },
+        {
+          "t": 606.2,
+          "text": "drop more meteors. And we get a line"
+        },
+        {
+          "t": 608.3,
+          "text": "stack on one of the other four players."
+        },
+        {
+          "t": 611.9,
+          "text": "Have your tanks positioned to pick up"
+        },
+        {
+          "t": 613.5,
+          "text": "these tethers. Main tank should always"
+        },
+        {
+          "t": 615.4,
+          "text": "pick up the tether tethered to the"
+        },
+        {
+          "t": 616.9,
+          "text": "northern meteor and off tank should pick"
+        },
+        {
+          "t": 619.4,
+          "text": "up the one tethered to the southern"
+        },
+        {
+          "t": 620.7,
+          "text": "meteor. You need light cool downs to be"
+        },
+        {
+          "t": 623.1,
+          "text": "able to survive each of these hits, but"
+        },
+        {
+          "t": 624.6,
+          "text": "be aware that these hits do not cleave."
+        },
+        {
+          "t": 628.6,
+          "text": "your healers evaded meteors. H1 will"
+        },
+        {
+          "t": 630.5,
+          "text": "always go northwest and H2 is going to"
+        },
+        {
+          "t": 632.6,
+          "text": "go a little bit further southwest. You"
+        },
+        {
+          "t": 635.2,
+          "text": "cannot drop two meteors too close or"
+        },
+        {
+          "t": 636.8,
+          "text": "they will explode. So, make sure you're"
+        },
+        {
+          "t": 638.2,
+          "text": "just far enough away. Everyone else is"
+        },
+        {
+          "t": 641.2,
+          "text": "going to take the line stack in the"
+        },
+        {
+          "t": 642.5,
+          "text": "northeast. That's because it's still a"
+        },
+        {
+          "t": 644.1,
+          "text": "wild charge. The first thing hit is"
+        },
+        {
+          "t": 645.7,
+          "text": "still going to take extra damage. And if"
+        },
+        {
+          "t": 647.3,
+          "text": "it's a player, they'll die. So, we want"
+        },
+        {
+          "t": 649,
+          "text": "the first thing hit to be the meteor"
+        },
+        {
+          "t": 650.4,
+          "text": "instead. It's going to take the extra"
+        },
+        {
+          "t": 651.8,
+          "text": "damage for us. All three of these things"
+        },
+        {
+          "t": 654.4,
+          "text": "go off at roughly the same time. The"
+        },
+        {
+          "t": 656.8,
+          "text": "meteor you've hit with the wild charge"
+        },
+        {
+          "t": 658.2,
+          "text": "will start to explode, but you can just"
+        },
+        {
+          "t": 659.5,
+          "text": "walk out of this AoE."
+        },
+        {
+          "t": 662.2,
+          "text": "Finally, send your ranged in to make"
+        },
+        {
+          "t": 664.2,
+          "text": "sure they're the two nearest players as"
+        },
+        {
+          "t": 666.1,
+          "text": "they're going to bait the next two"
+        },
+        {
+          "t": 667.5,
+          "text": "meteors. And everything repeats here."
+        },
+        {
+          "t": 669.8,
+          "text": "Tanks pick up their tank buster tethers."
+        },
+        {
+          "t": 674.5,
+          "text": "For the ranged meteors, R1, which should"
+        },
+        {
+          "t": 677.6,
+          "text": "usually be your physical range, send"
+        },
+        {
+          "t": 679.3,
+          "text": "them all the way to the southwest corner"
+        },
+        {
+          "t": 680.7,
+          "text": "as it's the most movement. R2, just nice"
+        },
+        {
+          "t": 683.7,
+          "text": "in melee range in the northeast."
+        },
+        {
+          "t": 686.9,
+          "text": "The line stack is once again behind the"
+        },
+        {
+          "t": 688.5,
+          "text": "meteor to protect them."
+        },
+        {
+          "t": 691.9,
+          "text": "There's no more meteors to bait, but"
+        },
+        {
+          "t": 693.8,
+          "text": "there's one more line stack and one more"
+        },
+        {
+          "t": 695.3,
+          "text": "set of tethers. Main tank always takes"
+        },
+        {
+          "t": 697.5,
+          "text": "the tether tethered to the northern"
+        },
+        {
+          "t": 698.7,
+          "text": "meteor and off tank the one to the"
+        },
+        {
+          "t": 700.4,
+          "text": "southern and the rest of the party just"
+        },
+        {
+          "t": 702.6,
+          "text": "stacks nicely behind the final meteor in"
+        },
+        {
+          "t": 704.9,
+          "text": "the north."
+        },
+        {
+          "t": 706.8,
+          "text": "Now, the reason we've done it in this"
+        },
+        {
+          "t": 708.2,
+          "text": "exact pattern is because we need three"
+        },
+        {
+          "t": 711.1,
+          "text": "meteors lined up for triple"
+        },
+        {
+          "t": 715.8,
+          "text": "Melees can stand in just until the first"
+        },
+        {
+          "t": 717.7,
+          "text": "hit goes off and then everybody needs to"
+        },
+        {
+          "t": 719.4,
+          "text": "be behind all three meteors in a line to"
+        },
+        {
+          "t": 721.7,
+          "text": "survive the attacks."
+        }
+      ],
+      "frames": [
+        {
+          "t": 542,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/001.jpg"
+        },
+        {
+          "t": 545,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/002.jpg"
+        },
+        {
+          "t": 548,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/003.jpg"
+        },
+        {
+          "t": 551,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/004.jpg"
+        },
+        {
+          "t": 554,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/005.jpg"
+        },
+        {
+          "t": 557,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/006.jpg"
+        },
+        {
+          "t": 560,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/007.jpg"
+        },
+        {
+          "t": 563,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/008.jpg"
+        },
+        {
+          "t": 566,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/009.jpg"
+        },
+        {
+          "t": 569,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/010.jpg"
+        },
+        {
+          "t": 572,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/011.jpg"
+        },
+        {
+          "t": 575,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/012.jpg"
+        },
+        {
+          "t": 578,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/013.jpg"
+        },
+        {
+          "t": 581,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/014.jpg"
+        },
+        {
+          "t": 584,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/015.jpg"
+        },
+        {
+          "t": 587,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/016.jpg"
+        },
+        {
+          "t": 590,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/017.jpg"
+        },
+        {
+          "t": 593,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/018.jpg"
+        },
+        {
+          "t": 596,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/019.jpg"
+        },
+        {
+          "t": 599,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/020.jpg"
+        },
+        {
+          "t": 602,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/021.jpg"
+        },
+        {
+          "t": 605,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/022.jpg"
+        },
+        {
+          "t": 608,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/023.jpg"
+        },
+        {
+          "t": 611,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/024.jpg"
+        },
+        {
+          "t": 614,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/025.jpg"
+        },
+        {
+          "t": 617,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/026.jpg"
+        },
+        {
+          "t": 620,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/027.jpg"
+        },
+        {
+          "t": 623,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/028.jpg"
+        },
+        {
+          "t": 626,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/029.jpg"
+        },
+        {
+          "t": 629,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/030.jpg"
+        },
+        {
+          "t": 632,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/031.jpg"
+        },
+        {
+          "t": 635,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/032.jpg"
+        },
+        {
+          "t": 638,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/033.jpg"
+        },
+        {
+          "t": 641,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/034.jpg"
+        },
+        {
+          "t": 644,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/035.jpg"
+        },
+        {
+          "t": 647,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/036.jpg"
+        },
+        {
+          "t": 650,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/037.jpg"
+        },
+        {
+          "t": 653,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/038.jpg"
+        },
+        {
+          "t": 656,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/039.jpg"
+        },
+        {
+          "t": 659,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/040.jpg"
+        },
+        {
+          "t": 662,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/041.jpg"
+        },
+        {
+          "t": 665,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/042.jpg"
+        },
+        {
+          "t": 668,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/043.jpg"
+        },
+        {
+          "t": 671,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/044.jpg"
+        },
+        {
+          "t": 674,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/045.jpg"
+        },
+        {
+          "t": 677,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/046.jpg"
+        },
+        {
+          "t": 680,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/047.jpg"
+        },
+        {
+          "t": 683,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/048.jpg"
+        },
+        {
+          "t": 686,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/049.jpg"
+        },
+        {
+          "t": 689,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/050.jpg"
+        },
+        {
+          "t": 692,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/051.jpg"
+        },
+        {
+          "t": 695,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/052.jpg"
+        },
+        {
+          "t": 698,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/053.jpg"
+        },
+        {
+          "t": 701,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/054.jpg"
+        },
+        {
+          "t": 704,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/055.jpg"
+        },
+        {
+          "t": 707,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/056.jpg"
+        },
+        {
+          "t": 710,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/057.jpg"
+        },
+        {
+          "t": 713,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/058.jpg"
+        },
+        {
+          "t": 716,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/059.jpg"
+        },
+        {
+          "t": 719,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/060.jpg"
+        },
+        {
+          "t": 722,
+          "file": ".cache/video/w1uuwzhyf5A/frames/07-meteorain/061.jpg"
+        }
+      ]
+    },
+    {
+      "n": 8,
+      "title": "Flatliner",
+      "start": 724,
+      "end": 1018,
+      "span": "12:04 to 16:58",
+      "lines": [
+        {
+          "t": 725,
+          "text": "Afterwards, the boss will cast"
+        },
+        {
+          "t": 726.2,
+          "text": "flatliner. This does raidwide damage and"
+        },
+        {
+          "t": 728.1,
+          "text": "is going to knock you over towards one"
+        },
+        {
+          "t": 730.4,
+          "text": "of the platforms. You're welcome to"
+        },
+        {
+          "t": 731.8,
+          "text": "stand in what looks like a line AoE. It"
+        },
+        {
+          "t": 733.8,
+          "text": "doesn't hit for more damage or anything."
+        },
+        {
+          "t": 735.3,
+          "text": "It just means you'll be closer to the"
+        },
+        {
+          "t": 736.4,
+          "text": "boss when you land. Send group one left,"
+        },
+        {
+          "t": 739,
+          "text": "group two right."
+        },
+        {
+          "t": 743.3,
+          "text": "When you get there, we're going to stay"
+        },
+        {
+          "t": 744.7,
+          "text": "roughly in pairs, ready for Majestic"
+        },
+        {
+          "t": 747.3,
+          "text": "Meteor. It's because when this finishes"
+        },
+        {
+          "t": 749.3,
+          "text": "casting, we get four twoperson knockback"
+        },
+        {
+          "t": 751.9,
+          "text": "towers, one in each corner. Four portals"
+        },
+        {
+          "t": 754.7,
+          "text": "will spawn either on the north and south"
+        },
+        {
+          "t": 757.1,
+          "text": "edge of the platform or in the middle of"
+        },
+        {
+          "t": 759,
+          "text": "the platform. And you also get two more"
+        },
+        {
+          "t": 761.6,
+          "text": "that are either north or south, just"
+        },
+        {
+          "t": 763.6,
+          "text": "sending a line AoE straight up one half"
+        },
+        {
+          "t": 766.1,
+          "text": "of the platform. Lots going in at once."
+        },
+        {
+          "t": 768.9,
+          "text": "Let's break down how we're going to do"
+        },
+        {
+          "t": 770,
+          "text": "this. First off, the towers you soak are"
+        },
+        {
+          "t": 772.5,
+          "text": "fixed for this first one. Simply send"
+        },
+        {
+          "t": 774.3,
+          "text": "your takes and range to the north"
+        },
+        {
+          "t": 775.7,
+          "text": "towers, your melees and healers to the"
+        },
+        {
+          "t": 777.3,
+          "text": "southern tower. Within the tower, what"
+        },
+        {
+          "t": 780.2,
+          "text": "you do depends on if you have a tether."
+        },
+        {
+          "t": 782.5,
+          "text": "If you have a tether, you need to"
+        },
+        {
+          "t": 783.9,
+          "text": "stretch that tether. You may need to"
+        },
+        {
+          "t": 785.5,
+          "text": "make sure you land opposite the portal"
+        },
+        {
+          "t": 787.3,
+          "text": "that you're attached to. So, in this"
+        },
+        {
+          "t": 788.7,
+          "text": "case, R1 and off tank need to get"
+        },
+        {
+          "t": 790.6,
+          "text": "knocked to the opposite platform to"
+        },
+        {
+          "t": 792.2,
+          "text": "stretch their tether. If you have a"
+        },
+        {
+          "t": 794.1,
+          "text": "tether that's already kind of stretched,"
+        },
+        {
+          "t": 796.2,
+          "text": "like the other two tethers, like R2 and"
+        },
+        {
+          "t": 798,
+          "text": "M1, don't do anything. you're fine. Stay"
+        },
+        {
+          "t": 800.4,
+          "text": "on the same platform and get knocked on"
+        },
+        {
+          "t": 801.8,
+          "text": "that platform. If you don't have a"
+        },
+        {
+          "t": 803.4,
+          "text": "tether, never get knocked across. This"
+        },
+        {
+          "t": 806,
+          "text": "is what's sometimes referred to as no"
+        },
+        {
+          "t": 807.5,
+          "text": "buddies cuz you're not going to follow"
+        },
+        {
+          "t": 809.1,
+          "text": "your tower buddy. You're going to do"
+        },
+        {
+          "t": 810.9,
+          "text": "your own thing based on what you have."
+        },
+        {
+          "t": 814.8,
+          "text": "The towers will resolve and you should"
+        },
+        {
+          "t": 817,
+          "text": "end up with a 44 split. Two tethered"
+        },
+        {
+          "t": 819.6,
+          "text": "players and two untethered players on"
+        },
+        {
+          "t": 821.1,
+          "text": "each side. Immediately send your"
+        },
+        {
+          "t": 823.2,
+          "text": "untethered players into the hitbox and"
+        },
+        {
+          "t": 825,
+          "text": "have one position more north and one"
+        },
+        {
+          "t": 826.5,
+          "text": "position more south. This might resolve"
+        },
+        {
+          "t": 829,
+          "text": "itself quite naturally and sometimes you"
+        },
+        {
+          "t": 831,
+          "text": "might have to adjust to each other. For"
+        },
+        {
+          "t": 832.7,
+          "text": "the tether players, also make your way"
+        },
+        {
+          "t": 834.2,
+          "text": "towards mid, but stay out of the hit box"
+        },
+        {
+          "t": 836,
+          "text": "and cross your tethers. The boss will"
+        },
+        {
+          "t": 838.8,
+          "text": "cast fire breath and markers will get"
+        },
+        {
+          "t": 840.6,
+          "text": "baited on the four nearest players. We"
+        },
+        {
+          "t": 842.2,
+          "text": "want this to be the untethered players."
+        },
+        {
+          "t": 844.4,
+          "text": "They're going to get targeted with line"
+        },
+        {
+          "t": 845.8,
+          "text": "AoE's at the same time as the tethers"
+        },
+        {
+          "t": 847.8,
+          "text": "resolve and you can't get hit by two"
+        },
+        {
+          "t": 849.4,
+          "text": "things or you're probably going to die."
+        },
+        {
+          "t": 852.6,
+          "text": "Immediately after these are baited and"
+        },
+        {
+          "t": 853.9,
+          "text": "you see the markers appear, everybody"
+        },
+        {
+          "t": 855.6,
+          "text": "stacks in the middle."
+        },
+        {
+          "t": 857.6,
+          "text": "We're going to get three sets of puddles"
+        },
+        {
+          "t": 859.1,
+          "text": "and we're going to break off into pairs"
+        },
+        {
+          "t": 860.6,
+          "text": "for this. Tethers, you're going"
+        },
+        {
+          "t": 862.3,
+          "text": "whichever side you have to to cross your"
+        },
+        {
+          "t": 863.8,
+          "text": "tethers. Untethered players. This is why"
+        },
+        {
+          "t": 866.2,
+          "text": "one of you positioned more north and one"
+        },
+        {
+          "t": 867.7,
+          "text": "of you positioned more south to"
+        },
+        {
+          "t": 869.4,
+          "text": "naturally have a side that you're going"
+        },
+        {
+          "t": 870.8,
+          "text": "to go to."
+        },
+        {
+          "t": 872.6,
+          "text": "Second puddles. Note that these all need"
+        },
+        {
+          "t": 874.6,
+          "text": "to be baited really tight against the"
+        },
+        {
+          "t": 877.2,
+          "text": "middle gap."
+        },
+        {
+          "t": 880,
+          "text": "Third puddles. And now we think about"
+        },
+        {
+          "t": 881.6,
+          "text": "where we're going to go to resolve the"
+        },
+        {
+          "t": 884.5,
+          "text": "Be aware that each platform has a half"
+        },
+        {
+          "t": 886.2,
+          "text": "that is completely unsafe as seen by the"
+        },
+        {
+          "t": 888.8,
+          "text": "line going through it. So, we're going"
+        },
+        {
+          "t": 890.6,
+          "text": "to avoid that. If you are a tethered"
+        },
+        {
+          "t": 893.4,
+          "text": "player, you are going to go just outside"
+        },
+        {
+          "t": 895.6,
+          "text": "of that all the way on the north or"
+        },
+        {
+          "t": 897.1,
+          "text": "south wall. That's going to be the best"
+        },
+        {
+          "t": 899,
+          "text": "way to make the most room for the other"
+        },
+        {
+          "t": 900.3,
+          "text": "players. If you are untethered, so"
+        },
+        {
+          "t": 903.7,
+          "text": "you're one of the marker players, marker"
+        },
+        {
+          "t": 905.5,
+          "text": "players go to the way marks, and you're"
+        },
+        {
+          "t": 907.6,
+          "text": "always going to go to the outside corner"
+        },
+        {
+          "t": 909.4,
+          "text": "of your way mark, the ones nearer to"
+        },
+        {
+          "t": 910.9,
+          "text": "north or south."
+        },
+        {
+          "t": 913.3,
+          "text": "If you position perfectly in these"
+        },
+        {
+          "t": 917.8,
+          "text": "the tethers will stretch."
+        },
+        {
+          "t": 920.3,
+          "text": "The tether AoE's will just barely avoid"
+        },
+        {
+          "t": 923.7,
+          "text": "any of the players with markers. This is"
+        },
+        {
+          "t": 925.5,
+          "text": "the tightest possible pattern, and even"
+        },
+        {
+          "t": 927.1,
+          "text": "then, the outside corner is still"
+        },
+        {
+          "t": 928.6,
+          "text": "perfectly safe."
+        },
+        {
+          "t": 930.4,
+          "text": "And the line AoE's baited on the boss"
+        },
+        {
+          "t": 931.9,
+          "text": "towards the fire breath players also are"
+        },
+        {
+          "t": 934.1,
+          "text": "going to avoid hitting anyone else."
+        },
+        {
+          "t": 937.3,
+          "text": "When you resolve all of this, well done."
+        },
+        {
+          "t": 940.8,
+          "text": "Now do it again. The only difference"
+        },
+        {
+          "t": 943.5,
+          "text": "this time is unlike before where we were"
+        },
+        {
+          "t": 945.4,
+          "text": "in our light parties, now we're all"
+        },
+        {
+          "t": 947.1,
+          "text": "mixed up. So whichever quadrant you just"
+        },
+        {
+          "t": 949.6,
+          "text": "resolved the mechanic in, that's the"
+        },
+        {
+          "t": 951.4,
+          "text": "tower you go to. Otherwise, everything"
+        },
+        {
+          "t": 953.6,
+          "text": "is exactly the same."
+        },
+        {
+          "t": 956.3,
+          "text": "Be aware, some partyfinder groups,"
+        },
+        {
+          "t": 958,
+          "text": "especially those labeled kindred, might"
+        },
+        {
+          "t": 959.5,
+          "text": "use a conga line to assign their towers"
+        },
+        {
+          "t": 961.5,
+          "text": "at the very beginning of this. For this,"
+        },
+        {
+          "t": 963.2,
+          "text": "you line up in a congal line from north"
+        },
+        {
+          "t": 964.6,
+          "text": "to south. And then when the tethers"
+        },
+        {
+          "t": 966.2,
+          "text": "appear, you want one player with a"
+        },
+        {
+          "t": 968.2,
+          "text": "tether and one player with a non-tether"
+        },
+        {
+          "t": 969.8,
+          "text": "in each tower. With this version of the"
+        },
+        {
+          "t": 971.7,
+          "text": "strat, this just makes it a little bit"
+        },
+        {
+          "t": 973.5,
+          "text": "simpler after the knock back to figure"
+        },
+        {
+          "t": 975.3,
+          "text": "out which non-tethers going north and"
+        },
+        {
+          "t": 977.2,
+          "text": "which non-tethers going south. But"
+        },
+        {
+          "t": 979.3,
+          "text": "personally, my group found this kind of"
+        },
+        {
+          "t": 980.6,
+          "text": "unnecessary and preferred the fixed"
+        },
+        {
+          "t": 981.9,
+          "text": "towers. Entirely up to you what you"
+        },
+        {
+          "t": 983.5,
+          "text": "decide to do. However you decide to"
+        },
+        {
+          "t": 986,
+          "text": "resolve the mechanic. When you finish"
+        },
+        {
+          "t": 987.8,
+          "text": "up, you'll once again be in a specific"
+        },
+        {
+          "t": 991.9,
+          "text": "Hurry in towards middle at the end of"
+        },
+        {
+          "t": 993.4,
+          "text": "the second set, but stay and still"
+        },
+        {
+          "t": 995.9,
+          "text": "remember which quadrant you came from."
+        },
+        {
+          "t": 997.8,
+          "text": "That's going to be important in a"
+        },
+        {
+          "t": 998.9,
+          "text": "second. The boss will cast massive"
+        },
+        {
+          "t": 1000.8,
+          "text": "meteor. This is a five hit shared stack,"
+        },
+        {
+          "t": 1003.8,
+          "text": "one on each platform. Make sure you're"
+        },
+        {
+          "t": 1005.6,
+          "text": "near middle, as the healers might both"
+        },
+        {
+          "t": 1007,
+          "text": "be on the same platform at this time."
+        },
+        {
+          "t": 1010.8,
+          "text": "After five hits, you'll see there's"
+        },
+        {
+          "t": 1013.3,
+          "text": "already towers that have spawned. This"
+        },
+        {
+          "t": 1014.7,
+          "text": "is why you remember what quadrant you"
+        },
+        {
+          "t": 1016.2,
+          "text": "just came from. Go to the tower that was"
+        }
+      ],
+      "frames": [
+        {
+          "t": 724,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/001.jpg"
+        },
+        {
+          "t": 727,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/002.jpg"
+        },
+        {
+          "t": 730,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/003.jpg"
+        },
+        {
+          "t": 733,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/004.jpg"
+        },
+        {
+          "t": 736,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/005.jpg"
+        },
+        {
+          "t": 739,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/006.jpg"
+        },
+        {
+          "t": 742,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/007.jpg"
+        },
+        {
+          "t": 745,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/008.jpg"
+        },
+        {
+          "t": 748,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/009.jpg"
+        },
+        {
+          "t": 751,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/010.jpg"
+        },
+        {
+          "t": 754,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/011.jpg"
+        },
+        {
+          "t": 757,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/012.jpg"
+        },
+        {
+          "t": 760,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/013.jpg"
+        },
+        {
+          "t": 763,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/014.jpg"
+        },
+        {
+          "t": 766,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/015.jpg"
+        },
+        {
+          "t": 769,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/016.jpg"
+        },
+        {
+          "t": 772,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/017.jpg"
+        },
+        {
+          "t": 775,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/018.jpg"
+        },
+        {
+          "t": 778,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/019.jpg"
+        },
+        {
+          "t": 781,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/020.jpg"
+        },
+        {
+          "t": 784,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/021.jpg"
+        },
+        {
+          "t": 787,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/022.jpg"
+        },
+        {
+          "t": 790,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/023.jpg"
+        },
+        {
+          "t": 793,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/024.jpg"
+        },
+        {
+          "t": 796,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/025.jpg"
+        },
+        {
+          "t": 799,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/026.jpg"
+        },
+        {
+          "t": 802,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/027.jpg"
+        },
+        {
+          "t": 805,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/028.jpg"
+        },
+        {
+          "t": 808,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/029.jpg"
+        },
+        {
+          "t": 811,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/030.jpg"
+        },
+        {
+          "t": 814,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/031.jpg"
+        },
+        {
+          "t": 817,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/032.jpg"
+        },
+        {
+          "t": 820,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/033.jpg"
+        },
+        {
+          "t": 823,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/034.jpg"
+        },
+        {
+          "t": 826,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/035.jpg"
+        },
+        {
+          "t": 829,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/036.jpg"
+        },
+        {
+          "t": 832,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/037.jpg"
+        },
+        {
+          "t": 835,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/038.jpg"
+        },
+        {
+          "t": 838,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/039.jpg"
+        },
+        {
+          "t": 841,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/040.jpg"
+        },
+        {
+          "t": 844,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/041.jpg"
+        },
+        {
+          "t": 847,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/042.jpg"
+        },
+        {
+          "t": 850,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/043.jpg"
+        },
+        {
+          "t": 853,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/044.jpg"
+        },
+        {
+          "t": 856,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/045.jpg"
+        },
+        {
+          "t": 859,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/046.jpg"
+        },
+        {
+          "t": 862,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/047.jpg"
+        },
+        {
+          "t": 865,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/048.jpg"
+        },
+        {
+          "t": 868,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/049.jpg"
+        },
+        {
+          "t": 871,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/050.jpg"
+        },
+        {
+          "t": 874,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/051.jpg"
+        },
+        {
+          "t": 877,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/052.jpg"
+        },
+        {
+          "t": 880,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/053.jpg"
+        },
+        {
+          "t": 883,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/054.jpg"
+        },
+        {
+          "t": 886,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/055.jpg"
+        },
+        {
+          "t": 889,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/056.jpg"
+        },
+        {
+          "t": 892,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/057.jpg"
+        },
+        {
+          "t": 895,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/058.jpg"
+        },
+        {
+          "t": 898,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/059.jpg"
+        },
+        {
+          "t": 901,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/060.jpg"
+        },
+        {
+          "t": 904,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/061.jpg"
+        },
+        {
+          "t": 907,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/062.jpg"
+        },
+        {
+          "t": 910,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/063.jpg"
+        },
+        {
+          "t": 913,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/064.jpg"
+        },
+        {
+          "t": 916,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/065.jpg"
+        },
+        {
+          "t": 919,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/066.jpg"
+        },
+        {
+          "t": 922,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/067.jpg"
+        },
+        {
+          "t": 925,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/068.jpg"
+        },
+        {
+          "t": 928,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/069.jpg"
+        },
+        {
+          "t": 931,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/070.jpg"
+        },
+        {
+          "t": 934,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/071.jpg"
+        },
+        {
+          "t": 937,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/072.jpg"
+        },
+        {
+          "t": 940,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/073.jpg"
+        },
+        {
+          "t": 943,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/074.jpg"
+        },
+        {
+          "t": 946,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/075.jpg"
+        },
+        {
+          "t": 949,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/076.jpg"
+        },
+        {
+          "t": 952,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/077.jpg"
+        },
+        {
+          "t": 955,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/078.jpg"
+        },
+        {
+          "t": 958,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/079.jpg"
+        },
+        {
+          "t": 961,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/080.jpg"
+        },
+        {
+          "t": 964,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/081.jpg"
+        },
+        {
+          "t": 967,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/082.jpg"
+        },
+        {
+          "t": 970,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/083.jpg"
+        },
+        {
+          "t": 973,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/084.jpg"
+        },
+        {
+          "t": 976,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/085.jpg"
+        },
+        {
+          "t": 979,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/086.jpg"
+        },
+        {
+          "t": 982,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/087.jpg"
+        },
+        {
+          "t": 985,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/088.jpg"
+        },
+        {
+          "t": 988,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/089.jpg"
+        },
+        {
+          "t": 991,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/090.jpg"
+        },
+        {
+          "t": 994,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/091.jpg"
+        },
+        {
+          "t": 997,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/092.jpg"
+        },
+        {
+          "t": 1000,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/093.jpg"
+        },
+        {
+          "t": 1003,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/094.jpg"
+        },
+        {
+          "t": 1006,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/095.jpg"
+        },
+        {
+          "t": 1009,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/096.jpg"
+        },
+        {
+          "t": 1012,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/097.jpg"
+        },
+        {
+          "t": 1015,
+          "file": ".cache/video/w1uuwzhyf5A/frames/08-flatliner/098.jpg"
+        }
+      ]
+    },
+    {
+      "n": 9,
+      "title": "Arcadion Avalanche",
+      "start": 1018,
+      "end": 1082,
+      "span": "16:58 to 18:02",
+      "lines": [
+        {
+          "t": 1018.2,
+          "text": "in the quadrant you just finished off"
+        },
+        {
+          "t": 1020.1,
+          "text": "in. The boss will cast Arcadian"
+        },
+        {
+          "t": 1022,
+          "text": "Avalanche and look at which way the boss"
+        },
+        {
+          "t": 1024.2,
+          "text": "is facing. Just like in normal mode,"
+        },
+        {
+          "t": 1026.1,
+          "text": "that platform is about to be destroyed."
+        },
+        {
+          "t": 1027.8,
+          "text": "So, if you're on that platform, adjust"
+        },
+        {
+          "t": 1029.9,
+          "text": "so that you'll get knocked to the other"
+        },
+        {
+          "t": 1034.6,
+          "text": "When you land, hurry towards the middle"
+        },
+        {
+          "t": 1036.2,
+          "text": "of that platform."
+        },
+        {
+          "t": 1038.5,
+          "text": "The boss is going to lift up one of the"
+        },
+        {
+          "t": 1040.7,
+          "text": "platforms, and they're about to slam it"
+        },
+        {
+          "t": 1042.3,
+          "text": "back down on the one you're on, just"
+        },
+        {
+          "t": 1044.3,
+          "text": "like normal mode, but with a much"
+        },
+        {
+          "t": 1046.3,
+          "text": "shorter telegraph. So, now we're going"
+        },
+        {
+          "t": 1047.7,
+          "text": "to pay attention to some cues. As soon"
+        },
+        {
+          "t": 1049.5,
+          "text": "as you see one side dipping, that's the"
+        },
+        {
+          "t": 1052,
+          "text": "side you can dodge toward safely."
+        },
+        {
+          "t": 1054.2,
+          "text": "Alternatively, when the boss turns"
+        },
+        {
+          "t": 1055.9,
+          "text": "around, the way they turn around is the"
+        },
+        {
+          "t": 1057.6,
+          "text": "unsafe side. So, they turn towards A."
+        },
+        {
+          "t": 1059.8,
+          "text": "We're getting away from that side. Run"
+        },
+        {
+          "t": 1061.8,
+          "text": "towards the correct position and avoid"
+        },
+        {
+          "t": 1064,
+          "text": "the giant AoE."
+        },
+        {
+          "t": 1065.9,
+          "text": "Afterwards, there's a crown of Arcadia"
+        },
+        {
+          "t": 1067.5,
+          "text": "raidwide to heal and mitigate through"
+        },
+        {
+          "t": 1069.4,
+          "text": "and we transition back to the original"
+        },
+        {
+          "t": 1074.6,
+          "text": "We get another great wall of fire tank"
+        },
+        {
+          "t": 1076.3,
+          "text": "buster, another orbital omen, exactly"
+        },
+        {
+          "t": 1078.8,
+          "text": "the same as you saw before, and a crown"
+        },
+        {
+          "t": 1080.9,
+          "text": "of arcadia raidwide before the final"
+        }
+      ],
+      "frames": [
+        {
+          "t": 1018,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/001.jpg"
+        },
+        {
+          "t": 1021,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/002.jpg"
+        },
+        {
+          "t": 1024,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/003.jpg"
+        },
+        {
+          "t": 1027,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/004.jpg"
+        },
+        {
+          "t": 1030,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/005.jpg"
+        },
+        {
+          "t": 1033,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/006.jpg"
+        },
+        {
+          "t": 1036,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/007.jpg"
+        },
+        {
+          "t": 1039,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/008.jpg"
+        },
+        {
+          "t": 1042,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/009.jpg"
+        },
+        {
+          "t": 1045,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/010.jpg"
+        },
+        {
+          "t": 1048,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/011.jpg"
+        },
+        {
+          "t": 1051,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/012.jpg"
+        },
+        {
+          "t": 1054,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/013.jpg"
+        },
+        {
+          "t": 1057,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/014.jpg"
+        },
+        {
+          "t": 1060,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/015.jpg"
+        },
+        {
+          "t": 1063,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/016.jpg"
+        },
+        {
+          "t": 1066,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/017.jpg"
+        },
+        {
+          "t": 1069,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/018.jpg"
+        },
+        {
+          "t": 1072,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/019.jpg"
+        },
+        {
+          "t": 1075,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/020.jpg"
+        },
+        {
+          "t": 1078,
+          "file": ".cache/video/w1uuwzhyf5A/frames/09-arcadion-avalanche/021.jpg"
+        }
+      ]
+    },
+    {
+      "n": 10,
+      "title": "Ecliptic Stampede",
+      "start": 1082,
+      "end": 1309,
+      "span": "18:02 to 21:49",
+      "lines": [
+        {
+          "t": 1083,
+          "text": "major mechanic, ecliptic stampede. For"
+        },
+        {
+          "t": 1085.8,
+          "text": "this one, send all of your tanks and"
+        },
+        {
+          "t": 1087.4,
+          "text": "melees into the middle of the boss. Send"
+        },
+        {
+          "t": 1089.7,
+          "text": "your healers and ranged out in"
+        },
+        {
+          "t": 1091,
+          "text": "intercardinals like this."
+        },
+        {
+          "t": 1093.6,
+          "text": "When the cast finishes, you're going to"
+        },
+        {
+          "t": 1095.1,
+          "text": "get two proximities in two opposite"
+        },
+        {
+          "t": 1097.1,
+          "text": "corners, and you're going to get two"
+        },
+        {
+          "t": 1098.6,
+          "text": "markers on two of the four furthest"
+        },
+        {
+          "t": 1100.6,
+          "text": "players from the boss. It could be one"
+        },
+        {
+          "t": 1103,
+          "text": "range, one healer, or both range, both"
+        },
+        {
+          "t": 1105.2,
+          "text": "healers. These players want to split up"
+        },
+        {
+          "t": 1107.9,
+          "text": "into the two safe corners, one in each"
+        },
+        {
+          "t": 1110.1,
+          "text": "corner. Right now, the safe corners are"
+        },
+        {
+          "t": 1112.1,
+          "text": "two and four. If it was one range and"
+        },
+        {
+          "t": 1115,
+          "text": "one healer, the range always goes north"
+        },
+        {
+          "t": 1116.5,
+          "text": "and the healer always goes south. But"
+        },
+        {
+          "t": 1118,
+          "text": "here, we have two ranged, and so we're"
+        },
+        {
+          "t": 1119.8,
+          "text": "going to adjust to the nearest corner"
+        },
+        {
+          "t": 1121.4,
+          "text": "that's safe for us. Our two is heading"
+        },
+        {
+          "t": 1123.2,
+          "text": "to two, and R1 will adjust across to"
+        },
+        {
+          "t": 1125.1,
+          "text": "four. Don't go all the way to the"
+        },
+        {
+          "t": 1126.8,
+          "text": "corner. Instead, go all the way on the"
+        },
+        {
+          "t": 1128.4,
+          "text": "north south wall and align yourself with"
+        },
+        {
+          "t": 1130.1,
+          "text": "the B and D way marks. Everyone else"
+        },
+        {
+          "t": 1133,
+          "text": "stacks nice and tightly under the boss."
+        },
+        {
+          "t": 1135.3,
+          "text": "Everybody's now getting puddles. The"
+        },
+        {
+          "t": 1137.1,
+          "text": "range players that are out baiting are"
+        },
+        {
+          "t": 1138.8,
+          "text": "going to get persisting fire puddles"
+        },
+        {
+          "t": 1140.8,
+          "text": "while everybody else is just puddles"
+        },
+        {
+          "t": 1142.6,
+          "text": "like we saw before that we're going to"
+        },
+        {
+          "t": 1143.8,
+          "text": "walk out of to avoid."
+        },
+        {
+          "t": 1146.1,
+          "text": "After the explosions go off, the puddles"
+        },
+        {
+          "t": 1147.8,
+          "text": "begin. The range players are going to"
+        },
+        {
+          "t": 1150.4,
+          "text": "bait theirs sort of smooshed against the"
+        },
+        {
+          "t": 1152.1,
+          "text": "north and south wall to keep it out of"
+        },
+        {
+          "t": 1153.5,
+          "text": "the way for later mechanics. and"
+        },
+        {
+          "t": 1155.4,
+          "text": "everyone else is going to be in the"
+        },
+        {
+          "t": 1156.9,
+          "text": "middle. First puddle in the middle, then"
+        },
+        {
+          "t": 1158.8,
+          "text": "move north and then rotate clockwise"
+        },
+        {
+          "t": 1164.6,
+          "text": "The puddles middle go a little bit"
+        },
+        {
+          "t": 1165.8,
+          "text": "faster than the ones on the outside."
+        },
+        {
+          "t": 1168.7,
+          "text": "After four fire puddles on the wall, the"
+        },
+        {
+          "t": 1171.2,
+          "text": "range need to make sure they don't cover"
+        },
+        {
+          "t": 1173,
+          "text": "up the corners, so they're going to move"
+        },
+        {
+          "t": 1175.2,
+          "text": "in towards north and hug really tight"
+        },
+        {
+          "t": 1177.1,
+          "text": "against their fire puddles. The players"
+        },
+        {
+          "t": 1179.3,
+          "text": "middle after their sixth baited puddle"
+        },
+        {
+          "t": 1181.3,
+          "text": "will see some towers have spawned. two"
+        },
+        {
+          "t": 1183.6,
+          "text": "tank buster towers and two twoperson"
+        },
+        {
+          "t": 1185.5,
+          "text": "towers. There are six of us in the"
+        },
+        {
+          "t": 1187.3,
+          "text": "middle right now. So, the tanks are each"
+        },
+        {
+          "t": 1188.8,
+          "text": "going to go to one tower. We're going to"
+        },
+        {
+          "t": 1190.2,
+          "text": "send both of the melees to one of the"
+        },
+        {
+          "t": 1191.6,
+          "text": "twoerson towers. And whichever healers"
+        },
+        {
+          "t": 1193.5,
+          "text": "in ranger middle, they'll take the last"
+        },
+        {
+          "t": 1195,
+          "text": "tower. To resolve this, we stick to a"
+        },
+        {
+          "t": 1197.5,
+          "text": "priority. Main tank will look northeast"
+        },
+        {
+          "t": 1200.1,
+          "text": "and clockwise to find their tank tower."
+        },
+        {
+          "t": 1201.8,
+          "text": "Same for the healer and the range pair."
+        },
+        {
+          "t": 1204.6,
+          "text": "Off tank will look northwest and"
+        },
+        {
+          "t": 1206,
+          "text": "counterclockwise. And same for the melee"
+        },
+        {
+          "t": 1209.1,
+          "text": "Find your respective tower"
+        },
+        {
+          "t": 1211.5,
+          "text": "and resolve those as the last fire"
+        },
+        {
+          "t": 1213.1,
+          "text": "puddles get baited on the range that are"
+        },
+        {
+          "t": 1214.7,
+          "text": "out. Now, four players, what is seems to"
+        },
+        {
+          "t": 1218.1,
+          "text": "be one player per tower is about to get"
+        },
+        {
+          "t": 1220.2,
+          "text": "tethered. They need to stretch these"
+        },
+        {
+          "t": 1222.3,
+          "text": "tethers out while everybody else who's"
+        },
+        {
+          "t": 1223.9,
+          "text": "untethered hides middle."
+        },
+        {
+          "t": 1227.9,
+          "text": "When stretching these out, you just may"
+        },
+        {
+          "t": 1229.3,
+          "text": "need to make sure you've agreed if"
+        },
+        {
+          "t": 1230.6,
+          "text": "you're rotating everyone clockwise or"
+        },
+        {
+          "t": 1232.2,
+          "text": "everyone counterclockwise. I'm going to"
+        },
+        {
+          "t": 1233.4,
+          "text": "show PF standard clockwise."
+        },
+        {
+          "t": 1236.6,
+          "text": "The tethers get all stretched. The"
+        },
+        {
+          "t": 1238.2,
+          "text": "players that are in middle, you want to"
+        },
+        {
+          "t": 1240.1,
+          "text": "preposition loosely in sort of like a"
+        },
+        {
+          "t": 1242.3,
+          "text": "square formation with one in each"
+        },
+        {
+          "t": 1244.2,
+          "text": "intercardinal. You're doing this inside"
+        },
+        {
+          "t": 1246.1,
+          "text": "of the hitbox to avoid the attacks. And"
+        },
+        {
+          "t": 1248.2,
+          "text": "you're just going to have to use eyes"
+        },
+        {
+          "t": 1249.3,
+          "text": "cuz it's random which four players will"
+        },
+        {
+          "t": 1250.7,
+          "text": "be in there."
+        },
+        {
+          "t": 1253.1,
+          "text": "Each tether gives a fire to the player's"
+        },
+        {
+          "t": 1257.1,
+          "text": "Be aware that the boss has already been"
+        },
+        {
+          "t": 1258.5,
+          "text": "casting either four-way fireball or"
+        },
+        {
+          "t": 1260.2,
+          "text": "two-way fireball. Four-way fireball is"
+        },
+        {
+          "t": 1263.2,
+          "text": "four AOE's baited on the nearest player."
+        },
+        {
+          "t": 1266.2,
+          "text": "These should be taken as pair stacks."
+        },
+        {
+          "t": 1268,
+          "text": "The way to best resolve these is to have"
+        },
+        {
+          "t": 1269.5,
+          "text": "your four inner players just slide to"
+        },
+        {
+          "t": 1271,
+          "text": "the outside edge of the hitbox. And the"
+        },
+        {
+          "t": 1272.9,
+          "text": "other four players need to make sure"
+        },
+        {
+          "t": 1274.1,
+          "text": "that they are further away but stay at"
+        },
+        {
+          "t": 1275.6,
+          "text": "their intercardinal. This will shoot off"
+        },
+        {
+          "t": 1277.5,
+          "text": "the four line AoE's in intercardinal"
+        },
+        {
+          "t": 1279.6,
+          "text": "directions and they'll all be shared as"
+        },
+        {
+          "t": 1281,
+          "text": "twos quite easily."
+        },
+        {
+          "t": 1283.4,
+          "text": "If instead after the tethers go off,"
+        },
+        {
+          "t": 1285.8,
+          "text": "we'd gotten two-way fireball. Same idea,"
+        },
+        {
+          "t": 1288.1,
+          "text": "but this is now two line AoE's baited at"
+        },
+        {
+          "t": 1290.8,
+          "text": "the two nearest players. And these are"
+        },
+        {
+          "t": 1292.3,
+          "text": "meant to be shared by four players each."
+        },
+        {
+          "t": 1295,
+          "text": "Collapse to east west, making sure that"
+        },
+        {
+          "t": 1297,
+          "text": "the inner players are still the two"
+        },
+        {
+          "t": 1298.7,
+          "text": "nearest players in each line stack, but"
+        },
+        {
+          "t": 1300.6,
+          "text": "only one player in each is inside the"
+        },
+        {
+          "t": 1302.4,
+          "text": "hitbox, so you don't accidentally bait"
+        },
+        {
+          "t": 1303.9,
+          "text": "two the same way."
+        },
+        {
+          "t": 1306.8,
+          "text": "We have a crown of Arcadia raidwide."
+        }
+      ],
+      "frames": [
+        {
+          "t": 1082,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/001.jpg"
+        },
+        {
+          "t": 1085,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/002.jpg"
+        },
+        {
+          "t": 1088,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/003.jpg"
+        },
+        {
+          "t": 1091,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/004.jpg"
+        },
+        {
+          "t": 1094,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/005.jpg"
+        },
+        {
+          "t": 1097,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/006.jpg"
+        },
+        {
+          "t": 1100,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/007.jpg"
+        },
+        {
+          "t": 1103,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/008.jpg"
+        },
+        {
+          "t": 1106,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/009.jpg"
+        },
+        {
+          "t": 1109,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/010.jpg"
+        },
+        {
+          "t": 1112,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/011.jpg"
+        },
+        {
+          "t": 1115,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/012.jpg"
+        },
+        {
+          "t": 1118,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/013.jpg"
+        },
+        {
+          "t": 1121,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/014.jpg"
+        },
+        {
+          "t": 1124,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/015.jpg"
+        },
+        {
+          "t": 1127,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/016.jpg"
+        },
+        {
+          "t": 1130,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/017.jpg"
+        },
+        {
+          "t": 1133,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/018.jpg"
+        },
+        {
+          "t": 1136,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/019.jpg"
+        },
+        {
+          "t": 1139,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/020.jpg"
+        },
+        {
+          "t": 1142,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/021.jpg"
+        },
+        {
+          "t": 1145,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/022.jpg"
+        },
+        {
+          "t": 1148,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/023.jpg"
+        },
+        {
+          "t": 1151,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/024.jpg"
+        },
+        {
+          "t": 1154,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/025.jpg"
+        },
+        {
+          "t": 1157,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/026.jpg"
+        },
+        {
+          "t": 1160,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/027.jpg"
+        },
+        {
+          "t": 1163,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/028.jpg"
+        },
+        {
+          "t": 1166,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/029.jpg"
+        },
+        {
+          "t": 1169,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/030.jpg"
+        },
+        {
+          "t": 1172,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/031.jpg"
+        },
+        {
+          "t": 1175,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/032.jpg"
+        },
+        {
+          "t": 1178,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/033.jpg"
+        },
+        {
+          "t": 1181,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/034.jpg"
+        },
+        {
+          "t": 1184,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/035.jpg"
+        },
+        {
+          "t": 1187,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/036.jpg"
+        },
+        {
+          "t": 1190,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/037.jpg"
+        },
+        {
+          "t": 1193,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/038.jpg"
+        },
+        {
+          "t": 1196,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/039.jpg"
+        },
+        {
+          "t": 1199,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/040.jpg"
+        },
+        {
+          "t": 1202,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/041.jpg"
+        },
+        {
+          "t": 1205,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/042.jpg"
+        },
+        {
+          "t": 1208,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/043.jpg"
+        },
+        {
+          "t": 1211,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/044.jpg"
+        },
+        {
+          "t": 1214,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/045.jpg"
+        },
+        {
+          "t": 1217,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/046.jpg"
+        },
+        {
+          "t": 1220,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/047.jpg"
+        },
+        {
+          "t": 1223,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/048.jpg"
+        },
+        {
+          "t": 1226,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/049.jpg"
+        },
+        {
+          "t": 1229,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/050.jpg"
+        },
+        {
+          "t": 1232,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/051.jpg"
+        },
+        {
+          "t": 1235,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/052.jpg"
+        },
+        {
+          "t": 1238,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/053.jpg"
+        },
+        {
+          "t": 1241,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/054.jpg"
+        },
+        {
+          "t": 1244,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/055.jpg"
+        },
+        {
+          "t": 1247,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/056.jpg"
+        },
+        {
+          "t": 1250,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/057.jpg"
+        },
+        {
+          "t": 1253,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/058.jpg"
+        },
+        {
+          "t": 1256,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/059.jpg"
+        },
+        {
+          "t": 1259,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/060.jpg"
+        },
+        {
+          "t": 1262,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/061.jpg"
+        },
+        {
+          "t": 1265,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/062.jpg"
+        },
+        {
+          "t": 1268,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/063.jpg"
+        },
+        {
+          "t": 1271,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/064.jpg"
+        },
+        {
+          "t": 1274,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/065.jpg"
+        },
+        {
+          "t": 1277,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/066.jpg"
+        },
+        {
+          "t": 1280,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/067.jpg"
+        },
+        {
+          "t": 1283,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/068.jpg"
+        },
+        {
+          "t": 1286,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/069.jpg"
+        },
+        {
+          "t": 1289,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/070.jpg"
+        },
+        {
+          "t": 1292,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/071.jpg"
+        },
+        {
+          "t": 1295,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/072.jpg"
+        },
+        {
+          "t": 1298,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/073.jpg"
+        },
+        {
+          "t": 1301,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/074.jpg"
+        },
+        {
+          "t": 1304,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/075.jpg"
+        },
+        {
+          "t": 1307,
+          "file": ".cache/video/w1uuwzhyf5A/frames/10-ecliptic-stampede/076.jpg"
+        }
+      ]
+    },
+    {
+      "n": 11,
+      "title": "Heartbreak Kick (Soft enrage)",
+      "start": 1309,
+      "end": 1381,
+      "span": "21:49 to 23:01",
+      "lines": [
+        {
+          "t": 1309.5,
+          "text": "And that's all that's left is the"
+        },
+        {
+          "t": 1311.1,
+          "text": "softened raid. Heartbreak kick is going"
+        },
+        {
+          "t": 1313.1,
+          "text": "to be the tower that we saw in normal"
+        },
+        {
+          "t": 1314.6,
+          "text": "mode, but we're going to get three of"
+        },
+        {
+          "t": 1315.7,
+          "text": "them. The first one hits for five hits"
+        },
+        {
+          "t": 1317.6,
+          "text": "in 9 seconds. Second one is six hits in"
+        },
+        {
+          "t": 1320.8,
+          "text": "a roughly 11 seconds. And the third one"
+        },
+        {
+          "t": 1323,
+          "text": "is seven hits in about 13 seconds. You"
+        },
+        {
+          "t": 1325.6,
+          "text": "can resolve this any way you want to,"
+        },
+        {
+          "t": 1327,
+          "text": "but just to showcase a way that my group"
+        },
+        {
+          "t": 1328.8,
+          "text": "did it entirely with tanks. We had our"
+        },
+        {
+          "t": 1331.8,
+          "text": "main tank take the first one entirely"
+        },
+        {
+          "t": 1333.3,
+          "text": "with their invol"
+        },
+        {
+          "t": 1335.2,
+          "text": "for the second one which goes a little"
+        },
+        {
+          "t": 1336.6,
+          "text": "bit longer than an invol. Both main tank"
+        },
+        {
+          "t": 1339,
+          "text": "and off tank used some light cool downs"
+        },
+        {
+          "t": 1340.7,
+          "text": "to survive the first hit. And then off"
+        },
+        {
+          "t": 1343.1,
+          "text": "tank used their invol for the rest of"
+        },
+        {
+          "t": 1344.7,
+          "text": "these. This means you can't involve the"
+        },
+        {
+          "t": 1346.6,
+          "text": "earlier Great Wall of Fire, but it's not"
+        },
+        {
+          "t": 1349,
+          "text": "too hard to take with cooldowns."
+        },
+        {
+          "t": 1351.4,
+          "text": "Finally, for the last one, tanks soak"
+        },
+        {
+          "t": 1355.1,
+          "text": "all seven hits together with literally"
+        },
+        {
+          "t": 1357.2,
+          "text": "everything that they've got left, as"
+        },
+        {
+          "t": 1358.4,
+          "text": "well as any party mitigation you've got."
+        },
+        {
+          "t": 1360.8,
+          "text": "Just a suggestion. Don't have to follow"
+        },
+        {
+          "t": 1362.4,
+          "text": "it, but something that worked for us."
+        },
+        {
+          "t": 1365.3,
+          "text": "When all three heartbreak kicks are"
+        },
+        {
+          "t": 1366.6,
+          "text": "done, it's time for a heartbreaker. The"
+        },
+        {
+          "t": 1369.1,
+          "text": "DPS check on this fight can be very"
+        },
+        {
+          "t": 1370.7,
+          "text": "tight in week one gear, so hopefully"
+        },
+        {
+          "t": 1372.5,
+          "text": "you'll manage to make it past it. Can't"
+        },
+        {
+          "t": 1374.7,
+          "text": "kill the boss before it's out. It's game"
+        },
+        {
+          "t": 1377.1,
+          "text": "over. Thank you so much for watching."
+        },
+        {
+          "t": 1379.3,
+          "text": "Hope you enjoyed."
+        }
+      ],
+      "frames": [
+        {
+          "t": 1309,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/001.jpg"
+        },
+        {
+          "t": 1312,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/002.jpg"
+        },
+        {
+          "t": 1315,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/003.jpg"
+        },
+        {
+          "t": 1318,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/004.jpg"
+        },
+        {
+          "t": 1321,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/005.jpg"
+        },
+        {
+          "t": 1324,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/006.jpg"
+        },
+        {
+          "t": 1327,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/007.jpg"
+        },
+        {
+          "t": 1330,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/008.jpg"
+        },
+        {
+          "t": 1333,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/009.jpg"
+        },
+        {
+          "t": 1336,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/010.jpg"
+        },
+        {
+          "t": 1339,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/011.jpg"
+        },
+        {
+          "t": 1342,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/012.jpg"
+        },
+        {
+          "t": 1345,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/013.jpg"
+        },
+        {
+          "t": 1348,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/014.jpg"
+        },
+        {
+          "t": 1351,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/015.jpg"
+        },
+        {
+          "t": 1354,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/016.jpg"
+        },
+        {
+          "t": 1357,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/017.jpg"
+        },
+        {
+          "t": 1360,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/018.jpg"
+        },
+        {
+          "t": 1363,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/019.jpg"
+        },
+        {
+          "t": 1366,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/020.jpg"
+        },
+        {
+          "t": 1369,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/021.jpg"
+        },
+        {
+          "t": 1372,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/022.jpg"
+        },
+        {
+          "t": 1375,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/023.jpg"
+        },
+        {
+          "t": 1378,
+          "file": ".cache/video/w1uuwzhyf5A/frames/11-heartbreak-kick-soft-enrage/024.jpg"
+        }
+      ]
+    },
+    {
+      "n": 12,
+      "title": "Special Thanks! (+ cat)",
+      "start": 1381,
+      "end": 1417,
+      "span": "23:01 to 23:37",
+      "lines": [
+        {
+          "t": 1409.2,
+          "text": "&gt;&gt; Heat. Hey, Heat."
+        }
+      ],
+      "frames": [
+        {
+          "t": 1381,
+          "file": ".cache/video/w1uuwzhyf5A/frames/12-special-thanks-cat/001.jpg"
+        },
+        {
+          "t": 1384,
+          "file": ".cache/video/w1uuwzhyf5A/frames/12-special-thanks-cat/002.jpg"
+        },
+        {
+          "t": 1387,
+          "file": ".cache/video/w1uuwzhyf5A/frames/12-special-thanks-cat/003.jpg"
+        },
+        {
+          "t": 1390,
+          "file": ".cache/video/w1uuwzhyf5A/frames/12-special-thanks-cat/004.jpg"
+        },
+        {
+          "t": 1393,
+          "file": ".cache/video/w1uuwzhyf5A/frames/12-special-thanks-cat/005.jpg"
+        },
+        {
+          "t": 1396,
+          "file": ".cache/video/w1uuwzhyf5A/frames/12-special-thanks-cat/006.jpg"
+        },
+        {
+          "t": 1399,
+          "file": ".cache/video/w1uuwzhyf5A/frames/12-special-thanks-cat/007.jpg"
+        },
+        {
+          "t": 1402,
+          "file": ".cache/video/w1uuwzhyf5A/frames/12-special-thanks-cat/008.jpg"
+        },
+        {
+          "t": 1405,
+          "file": ".cache/video/w1uuwzhyf5A/frames/12-special-thanks-cat/009.jpg"
+        },
+        {
+          "t": 1408,
+          "file": ".cache/video/w1uuwzhyf5A/frames/12-special-thanks-cat/010.jpg"
+        },
+        {
+          "t": 1411,
+          "file": ".cache/video/w1uuwzhyf5A/frames/12-special-thanks-cat/011.jpg"
+        },
+        {
+          "t": 1414,
+          "file": ".cache/video/w1uuwzhyf5A/frames/12-special-thanks-cat/012.jpg"
+        }
+      ]
+    }
+  ]
+}
