@@ -195,7 +195,12 @@ const ATTACKS: readonly AttackSample[] = [
     overlays: [EXAMPLE.puddle(MID, 6, 3)],
     view: CLOSE,
   },
-  { name: "Tower to Soak", meaning: "Soaked by as many players as its number.", overlays: [EXAMPLE.tower(MID, 4, 2)], view: CLOSE },
+  {
+    name: "Tower to Soak",
+    meaning: "Soaked by as many players as the dots on its ring.",
+    overlays: [EXAMPLE.tower(MID, 4, 2)],
+    view: CLOSE,
+  },
   {
     name: "Size Unknown",
     meaning: "An attack whose size no source gives yet. It is not drawn to size.",
