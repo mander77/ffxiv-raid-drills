@@ -183,16 +183,19 @@ interface SoakMarkProps {
 /** The radius of each player dot on a tower's ring, in arena units. The app's choice, for the
     picture. */
 const SOAK_DOT_R = 1.3;
+/** How far the first dot is turned from the top of the ring, in degrees clockwise, so the dots sit
+    a little off the tower's centre lines. The app's choice, for the picture. */
+const SOAK_TURN = 30;
 
-/** How many players soak a tower: one dot per player, spaced evenly around its ring, the first at
-    the top. A dot is a player, in the players' highlight colour, as in the mechanic icons
-    (icons.tsx, rule 2). On the ring, not in the middle, so a waymark or a player in the tower
-    never covers it. */
+/** How many players soak a tower: one dot per player, spaced evenly around its ring, turned a
+    little from the top (SOAK_TURN). A dot is a player, in the players' highlight colour, as in
+    the mechanic icons (icons.tsx, rule 2). On the ring, not in the middle, so a waymark or a
+    player in the tower never covers it. */
 function SoakMark({ r, soak }: SoakMarkProps) {
   return (
     <g className="soak" aria-label={`Soaked by ${soak}`}>
       {Array.from({ length: soak }, (_, i) => {
-        const [x, y] = polar((360 * i) / soak, r, [0, 0]);
+        const [x, y] = polar(SOAK_TURN + (360 * i) / soak, r, [0, 0]);
         // biome-ignore lint/suspicious/noArrayIndexKey: the dots of a tower never change order.
         return <circle key={i} className="player" cx={round2(x)} cy={round2(y)} r={SOAK_DOT_R} />;
       })}
