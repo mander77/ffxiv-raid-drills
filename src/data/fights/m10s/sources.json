@@ -1,0 +1,26 @@
+{
+  "fight": "M10S, AAC Heavyweight M2 (Savage)",
+  "checked": true,
+  "cactbot": {
+    "repo": "OverlayPlugin/cactbot",
+    "commit": "33896d3e20a0e0e69d5ab3d5b8bc0129a13615bd",
+    "timeline": "ui/raidboss/data/07-dt/raid/r10s.txt",
+    "triggers": "ui/raidboss/data/07-dt/raid/r10s.ts"
+  },
+  "bossmod": {
+    "repo": "awgil/ffxiv_bossmod",
+    "commit": "02a16b4425ceed2b63994468da406adddefcd57b",
+    "module": {
+      "folder": "BossMod.Modules/Dawntrail/Savage/RM10STheXtremes",
+      "mechanics": [
+        "BlueComponents.cs",
+        "Bubble.cs",
+        "InsaneAir.cs",
+        "Puddles.cs",
+        "RedComponents.cs",
+        "Snaking.cs",
+        "Split.cs"
+      ]
+    }
+  }
+}

@@ -1,0 +1,927 @@
+{
+  "_generated": "By npm run import:sources (scripts/import-sources.mjs). Do not edit it by hand.",
+  "pins": {
+    "cactbot": "33896d3e20a0e0e69d5ab3d5b8bc0129a13615bd",
+    "bossmod": "02a16b4425ceed2b63994468da406adddefcd57b"
+  },
+  "triggers": {
+    "file": "https://github.com/OverlayPlugin/cactbot/blob/33896d3e20a0e0e69d5ab3d5b8bc0129a13615bd/ui/raidboss/data/07-dt/raid/r10s.ts",
+    "list": [
+      {
+        "id": "R10S Phase Tracker",
+        "type": "StartsUsing",
+        "netRegex": "{ id: Object.keys(phaseMap), source: 'Red Hot' }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {}
+      },
+      {
+        "id": "R10S ActorSetPos Tracker",
+        "type": "ActorSetPos",
+        "netRegex": "{ id: '4[0-9A-Fa-f]{7}', capture: true }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {}
+      },
+      {
+        "id": "R10S AddedCombatant Tracker",
+        "type": "AddedCombatant",
+        "netRegex": "{ id: '4[0-9A-Fa-f]{7}', capture: true }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {}
+      },
+      {
+        "id": "R10S Divers' Dare Collect",
+        "type": "StartsUsing",
+        "netRegex": "{ id: ['B5B8', 'B5B9'], source: ['Red Hot', 'Deep Blue'], capture: false }",
+        "ids": [
+          "B5B8",
+          "B5B9"
+        ],
+        "kinds": [],
+        "outputs": {}
+      },
+      {
+        "id": "R10S Divers' Dare",
+        "type": "StartsUsing",
+        "netRegex": "{ id: ['B5B8', 'B5B9'], source: ['Red Hot', 'Deep Blue'], capture: false }",
+        "ids": [
+          "B5B8",
+          "B5B9"
+        ],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {},
+        "notes": [
+          "cactbot-builtin-response"
+        ]
+      },
+      {
+        "id": "R10S Hot Impact Buster",
+        "type": "HeadMarker",
+        "netRegex": "{ id: headMarkerData['sharedBusterRed'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {}
+      },
+      {
+        "id": "R10S Flame Floater Order",
+        "type": "GainsEffect",
+        "netRegex": "{ effectId: ['BBC', 'BBD', 'BBE', 'D7B'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "bait": "${order} bait",
+          "first": "First",
+          "second": "Second",
+          "third": "Third",
+          "fourth": "Fourth"
+        }
+      },
+      {
+        "id": "R10S Flame Floater and Hot Aerial Move",
+        "type": "GainsEffect",
+        "netRegex": "{ effectId: 'B79', capture: true }",
+        "ids": [],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {},
+        "notes": [
+          "Fire Resistance Down II"
+        ]
+      },
+      {
+        "id": "R10S Alley-oop Inferno Spread",
+        "type": "HeadMarker",
+        "netRegex": "{ id: headMarkerData['spreadFirePuddleRed'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {},
+        "notes": [
+          "cactbot-builtin-response"
+        ]
+      },
+      {
+        "id": "R10S Cutback Blaze",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B5C9', source: 'Red Hot', capture: false }",
+        "ids": [
+          "B5C9"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "cleaveTowardsFire": "Bait cleave towards Fire"
+        },
+        "notes": [
+          "Targets furthers player from Red Hot with 315? degree cleave from boss",
+          "Second cutback targets furthest with firesnaking debuff or without a debuff"
+        ]
+      },
+      {
+        "id": "R10S Pyrotation Stack",
+        "type": "HeadMarker",
+        "netRegex": "{ id: headMarkerData['partyStackFire'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "alertText"
+        ],
+        "outputs": {
+          "stackFinal": "${stack} Near Blue",
+          "stackOnYou": "Outputs.stackOnYou",
+          "stackOnTarget": "Outputs.stackOnPlayer",
+          "stackMarker": "Outputs.stackMarker"
+        },
+        "notes": [
+          "Let Deep Impact trigger output instead for final Pyrotation"
+        ]
+      },
+      {
+        "id": "R10S Sickest Take-off Debuff",
+        "type": "GainsEffect",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "waterStack": "Water Stack",
+          "waterStackFireDebuff": "Water Stack",
+          "waterSpreadFireDebuff": "Avoid Water Players",
+          "healerGroups": "Outputs.healerGroups",
+          "spread": "Outputs.spread",
+          "waterSpread": "Outputs.spread"
+        }
+      },
+      {
+        "id": "R10S Sick Swell Wave Collector",
+        "type": "Tether",
+        "netRegex": "{ source: 'Deep Blue', id: headMarkerData['sickSwellTether'], capture: true }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {},
+        "notes": [
+          "Slight delay as this line/packet arrives at the same time as ActorSetPos"
+        ]
+      },
+      {
+        "id": "R10S Sick Swell",
+        "type": "StartsUsingExtra",
+        "netRegex": "{ id: 'B5CE', capture: true }",
+        "ids": [
+          "B5CE"
+        ],
+        "kinds": [
+          "alertText"
+        ],
+        "outputs": {
+          "text": "KB from ${dir1} + away from ${dir2}",
+          "middle": "Outputs.middle"
+        }
+      },
+      {
+        "id": "R10S Sick Swell Wave Collector (Snaking)",
+        "type": "Tether",
+        "netRegex": "{ source: 'Deep Blue', id: headMarkerData['sickSwellTether'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "text": "Wave ${waveDir}/Cone ${coneDir}"
+        },
+        "notes": [
+          "Slight delay as this line/packet arrives at the same time as ActorSetPos",
+          "Only run once"
+        ]
+      },
+      {
+        "id": "R10S Reverse Alley-oop/Alley-oop Double-dip",
+        "type": "StartsUsing",
+        "netRegex": "{ id: ['B5E0', 'B5DD'], source: 'Deep Blue', capture: true }",
+        "ids": [
+          "B5E0",
+          "B5DD"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "stay": "Stay",
+          "text": "${protean} => ${action}",
+          "watersnaking": "${protean} => ${action}",
+          "arenaSplitReverse": "Reverse Alley-oop",
+          "arenaSplitDoubleDip": "Double-Dip Protean",
+          "protean": "Outputs.protean",
+          "move": "Outputs.moveAway"
+        },
+        "notes": [
+          "TODO: Handle Arena Split with boss/postion checking?",
+          "During snaking it is always move since the baits are too close"
+        ]
+      },
+      {
+        "id": "R10S Reverse Alley-oop/Alley-oop Double-dip 2nd Hit",
+        "type": "Ability",
+        "netRegex": "{ id: ['B5E0', 'B5DD'], source: 'Deep Blue', capture: true }",
+        "ids": [
+          "B5E0",
+          "B5DD"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "stay": "Stay",
+          "move": "Outputs.moveAway"
+        },
+        "notes": [
+          "TODO: Handle Arena Split with boss/postion checking?",
+          "During saking it is always move since the baits are too close."
+        ]
+      },
+      {
+        "id": "R10S Xtreme Spectacular",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B5D9', source: 'Red Hot', capture: true }",
+        "ids": [
+          "B5D9"
+        ],
+        "kinds": [
+          "alertText"
+        ],
+        "outputs": {
+          "text": "Go N/S + Big AoE"
+        }
+      },
+      {
+        "id": "R10S Snaking Flags Collector",
+        "type": "MapEffect",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "text1": "${water}: ${waterMech}/${fire}: ${fireMech}",
+          "text2": "${mech} (${swap})",
+          "fire": "Fire",
+          "water": "Water",
+          "buster": "Buster",
+          "swapText": "${role} Swap",
+          "melee": "Melee",
+          "ranged": "Ranged",
+          "stack": "Outputs.getTogether",
+          "protean": "Outputs.protean",
+          "tank": "Outputs.tank",
+          "healer": "Outputs.healer"
+        },
+        "notes": [
+          "Not using Outputs.tankBuster for brevity"
+        ]
+      },
+      {
+        "id": "R10S Deep Impact Buster",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B5B7', source: 'Deep Blue', capture: false }",
+        "ids": [
+          "B5B7"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "beNearBlue": "Be Near Blue",
+          "baitBlueBuster": "Bait Blue Knockback Buster"
+        },
+        "notes": [
+          "Let Pyrotation trigger for non tanks in final phase"
+        ]
+      },
+      {
+        "id": "R10S Firesnaking/WaterSnaking",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B381', source: 'Red Hot', capture: false }",
+        "ids": [
+          "B381"
+        ],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {}
+      },
+      {
+        "id": "R10S Snaking Debuff Collect",
+        "type": "GainsEffect",
+        "netRegex": "{ effectId: ['136E', '136F'], capture: true }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {},
+        "notes": [
+          "136E Firesnaking",
+          "136F Watersnaking"
+        ]
+      },
+      {
+        "id": "R10S Snaking Debuff Cleanup",
+        "type": "LosesEffect",
+        "netRegex": "{ effectId: ['136E', '136F'], capture: true }",
+        "ids": [],
+        "kinds": [],
+        "outputs": {}
+      },
+      {
+        "id": "R10S Snaking Debuff Target",
+        "type": "GainsEffect",
+        "netRegex": "{ effectId: ['136E', '136F'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "firesnaking": "Red\\'s Target",
+          "watersnaking": "Blue\\'s Target"
+        }
+      },
+      {
+        "id": "R10S Deep Varial",
+        "type": "MapEffect",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "stack": "Water Stack",
+          "spread": "Water Spread",
+          "text": "${dir} + ${mech} + Fire Spread",
+          "north": "Outputs.north",
+          "south": "Outputs.south"
+        }
+      },
+      {
+        "id": "R10S Hot Aerial",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B5C4', source: 'Red Hot', capture: false }",
+        "ids": [
+          "B5C4"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "baitHotAerial": "Bait Hot Aerial"
+        }
+      },
+      {
+        "id": "R10S Deep Aerial Tower",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B5E3', source: 'Deep Blue', capture: false }",
+        "ids": [
+          "B5E3"
+        ],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "getTower": "Get Tower"
+        }
+      },
+      {
+        "id": "R10S Xtreme Wave Tethers",
+        "type": "HeadMarker",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "redTether": "Red Tether on YOU",
+          "blueTether": "Blue Tether on YOU"
+        }
+      },
+      {
+        "id": "R10S Flame Floater Split",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B5D4', source: 'Red Hot', capture: false }",
+        "ids": [
+          "B5D4"
+        ],
+        "kinds": [
+          "alertText"
+        ],
+        "outputs": {
+          "text": "E/W Groups, Out of Middle"
+        }
+      },
+      {
+        "id": "R10S Xtreme Firesnaking/WaterSnaking",
+        "type": "StartsUsing",
+        "netRegex": "{ id: 'B5AE', source: 'Red Hot', capture: false }",
+        "ids": [
+          "B5AE"
+        ],
+        "kinds": [
+          "response"
+        ],
+        "outputs": {}
+      },
+      {
+        "id": "R10S Xtreme Firesnaking/WaterSnaking Debuffs",
+        "type": "GainsEffect",
+        "netRegex": "{ effectId: ['12DB', '12DC'], capture: true }",
+        "ids": [],
+        "kinds": [
+          "infoText"
+        ],
+        "outputs": {
+          "xtremeFiresnaking": "Red Debuff (Fire)",
+          "xtremeWatersnaking": "Blue Debuff (Water)"
+        }
+      }
+    ]
+  },
+  "mechanics": [
+    {
+      "file": "BlueComponents.cs",
+      "classes": [
+        {
+          "name": "SickestTakeOff",
+          "base": "Components.StandardAOEs",
+          "aids": [
+            "SickestTakeOffAOE"
+          ],
+          "shapes": [
+            "Rect(50, 7.5f)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "SickSwell",
+          "base": "Components.KnockbackFromCastTarget",
+          "aids": [
+            "SickSwellAOE"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "AwesomeSplab",
+          "base": "Components.GenericStackSpread",
+          "aids": [
+            "AwesomeSplash1",
+            "AwesomeSplash2",
+            "AwesomeSlab1",
+            "AwesomeSlab2"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "AlleyOopProteans",
+          "base": "Components.GenericBaitAway",
+          "aids": [
+            "AlleyOopDoubleDipCast",
+            "ReverseAlleyOopCast",
+            "AlleyOopDoubleDipFirst",
+            "ReverseAlleyOopFirst"
+          ],
+          "shapes": [
+            "Cone(60, 30.Degrees()"
+          ],
+          "positions": []
+        },
+        {
+          "name": "AlleyOopProteanRepeat",
+          "base": "Components.GenericAOEs",
+          "aids": [
+            "AlleyOopDoubleDipFirst",
+            "ReverseAlleyOopFirst",
+            "AlleyOopDoubleDipRepeat",
+            "ReverseAlleyOopRepeat"
+          ],
+          "shapes": [
+            "Cone(60, 15.Degrees()",
+            "Cone(60, 7.5f.Degrees()"
+          ],
+          "positions": []
+        },
+        {
+          "name": "DeepImpactBait",
+          "base": "Components.GenericBaitAway",
+          "aids": [
+            "DeepImpactCast",
+            "DeepImpact"
+          ],
+          "shapes": [
+            "Circle(6)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "DeepImpactKB",
+          "base": "Components.Knockback",
+          "aids": [],
+          "shapes": [],
+          "positions": []
+        }
+      ]
+    },
+    {
+      "file": "Bubble.cs",
+      "classes": [
+        {
+          "name": "BubbleBounds",
+          "base": "Components.GenericAOEs",
+          "aids": [],
+          "shapes": [
+            "Donut(20, 100)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "DeepAerial",
+          "base": "Components.CastTowers",
+          "aids": [
+            "DeepAerialTower"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "WateryGrave",
+          "base": "Components.Adds",
+          "aids": [],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "BubbleTether",
+          "base": "Components.GenericAOEs",
+          "aids": [
+            "XtremeWaveRedRect",
+            "XtremeWaveBlueRect"
+          ],
+          "shapes": [
+            "Rect(60, 4)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "ScathingSteam",
+          "base": "Components.RaidwideCast",
+          "aids": [
+            "ScathingSteam"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "ImpactZone",
+          "base": "Components.CastCounter",
+          "aids": [
+            "ImpactZone2"
+          ],
+          "shapes": [],
+          "positions": []
+        }
+      ]
+    },
+    {
+      "file": "InsaneAir.cs",
+      "classes": [
+        {
+          "name": "Air2Assignments",
+          "base": "BossComponent",
+          "aids": [],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "AirBaits",
+          "base": "Components.UntelegraphedBait",
+          "aids": [
+            "ReEntryBlastAOE",
+            "VerticalBlastAOE",
+            "ReEntryPlungeAOE",
+            "VerticalPlungeAOE",
+            "PlungingSnapAOE",
+            "BlastingSnapAOE"
+          ],
+          "shapes": [
+            "Circle(6)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "AirPuddleCone",
+          "base": "FlamePuddle",
+          "aids": [
+            "BlastingSnapAOE",
+            "ReEntryBlastAOE"
+          ],
+          "shapes": [
+            "Cone(60, 22.5f.Degrees()"
+          ],
+          "positions": []
+        },
+        {
+          "name": "AirPuddleCircle",
+          "base": "FlamePuddle",
+          "aids": [
+            "VerticalBlastAOE"
+          ],
+          "shapes": [
+            "Circle(6)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "Air2Baits",
+          "base": "AirBaits",
+          "aids": [
+            "Bailout2",
+            "Bailout1"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "Bailout",
+          "base": "Components.UniformStackSpread",
+          "aids": [
+            "Bailout2",
+            "Bailout1"
+          ],
+          "shapes": [],
+          "positions": []
+        }
+      ]
+    },
+    {
+      "file": "Puddles.cs",
+      "classes": [
+        {
+          "name": "FlamePuddle",
+          "base": "Components.GenericAOEs",
+          "aids": [],
+          "shapes": [],
+          "positions": []
+        }
+      ]
+    },
+    {
+      "file": "RedComponents.cs",
+      "classes": [
+        {
+          "name": "HotImpact",
+          "base": "Components.CastSharedTankbuster",
+          "aids": [
+            "HotImpact1"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "FlameFloater",
+          "base": "Components.GenericAOEs",
+          "aids": [
+            "FlameFloater1",
+            "FlameFloater2",
+            "FlameFloater3",
+            "FlameFloater4"
+          ],
+          "shapes": [
+            "Rect(60, 4)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "FlameFloaterPuddle",
+          "base": "FlamePuddle",
+          "aids": [
+            "FlameFloater1",
+            "FlameFloater2",
+            "FlameFloater3",
+            "FlameFloater4"
+          ],
+          "shapes": [
+            "Rect(60, 4)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "AlleyOopInfernoSpread",
+          "base": "Components.SpreadFromCastTargets",
+          "aids": [
+            "AlleyOopInferno"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "AlleyOopInfernoPuddle",
+          "base": "FlamePuddle",
+          "aids": [
+            "AlleyOopInferno"
+          ],
+          "shapes": [
+            "Circle(5)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "CutbackBlazeBait",
+          "base": "Components.CastCounter",
+          "aids": [
+            "CutbackBlaze",
+            "CutbackBlazeCast"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "CutbackBlazePuddle",
+          "base": "FlamePuddle",
+          "aids": [
+            "CutbackBlaze"
+          ],
+          "shapes": [
+            "Cone(60, 165f.Degrees()"
+          ],
+          "positions": []
+        },
+        {
+          "name": "Pyrotation",
+          "base": "Components.StackWithIcon",
+          "aids": [
+            "PyrotationSpread",
+            "DeepImpactCast"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "PyrotationPuddle",
+          "base": "FlamePuddle",
+          "aids": [
+            "PyrotationSpread"
+          ],
+          "shapes": [
+            "Circle(6)"
+          ],
+          "positions": []
+        }
+      ]
+    },
+    {
+      "file": "Snaking.cs",
+      "classes": [
+        {
+          "name": "DeepVarial",
+          "base": "Components.StandardAOEs",
+          "aids": [
+            "DeepVarialAOE"
+          ],
+          "shapes": [
+            "Cone(60, 60.Degrees()"
+          ],
+          "positions": []
+        },
+        {
+          "name": "DeepVarialPredict",
+          "base": "Components.GenericAOEs",
+          "aids": [
+            "DeepVarialAOE"
+          ],
+          "shapes": [
+            "Cone(60, 60.Degrees()"
+          ],
+          "positions": []
+        },
+        {
+          "name": "DeepVarialSpreadStack",
+          "base": "Components.GenericStackSpread",
+          "aids": [
+            "AwesomeSplash2",
+            "AwesomeSlab2"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "SnakingHotImpact",
+          "base": "Components.CastSharedTankbuster",
+          "aids": [
+            "HotImpact2"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "SteamBurst",
+          "base": "Components.StandardAOEs",
+          "aids": [
+            "SteamBurst"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "SteamBurstPredict",
+          "base": "Components.GenericAOEs",
+          "aids": [
+            "DeepVarialAOE",
+            "SickSwellAOE",
+            "SteamBurst"
+          ],
+          "shapes": [
+            "Circle(9)",
+            "Cone(60, 60.Degrees()",
+            "Rect(50, 25)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "HotAerial",
+          "base": "Components.GenericBaitAway",
+          "aids": [
+            "HotAerialCast",
+            "HotAerialJump"
+          ],
+          "shapes": [
+            "Circle(6)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "HotAerialPuddle",
+          "base": "FlamePuddle",
+          "aids": [
+            "HotAerialSpread1",
+            "HotAerialSpread2",
+            "HotAerialSpread3",
+            "HotAerialSpread4"
+          ],
+          "shapes": [
+            "Circle(6)"
+          ],
+          "positions": []
+        }
+      ]
+    },
+    {
+      "file": "Split.cs",
+      "classes": [
+        {
+          "name": "FlameFloaterSplit",
+          "base": "Components.GenericAOEs",
+          "aids": [
+            "FlameFloaterSplitCast"
+          ],
+          "shapes": [
+            "Rect(60, 4)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "SplitPuddle",
+          "base": "FlamePuddle",
+          "aids": [
+            "FlameFloaterSplitCast"
+          ],
+          "shapes": [
+            "Rect(60, 4)"
+          ],
+          "positions": []
+        },
+        {
+          "name": "FreakyPyrotation",
+          "base": "Components.StackWithIcon",
+          "aids": [
+            "FreakyPyrotationStack"
+          ],
+          "shapes": [],
+          "positions": []
+        },
+        {
+          "name": "FreakyPyrotationPuddle",
+          "base": "FlamePuddle",
+          "aids": [
+            "FreakyPyrotationStack"
+          ],
+          "shapes": [
+            "Circle(6)"
+          ],
+          "positions": []
+        }
+      ]
+    }
+  ]
+}
