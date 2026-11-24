@@ -181,24 +181,22 @@ interface SoakMarkProps {
   soak: number;
 }
 
-/** A tower's soak badge, in arena units: its width and height, how wide the tower icon is in it,
-    and the size of the number. The app's choice, for the picture: the number must read at a
-    phone's size. */
-const SOAK_BADGE_W = 13;
-const SOAK_BADGE_H = 7.6;
-const SOAK_ICON = 5.6;
-const SOAK_TEXT = 5.6;
+/** The radius of a tower's soak badge, and how wide the tower icon is in it, in arena units. The
+    app's choice, for the picture. */
+const SOAK_BADGE_R = 4.4;
+const SOAK_ICON = 7;
 
-/** How many players soak a tower: a badge on the top of its ring, with the tower icon and the
-    number beside it, large, in the highlight colour as the mechanic icons show a count. On the
-    ring, not in the middle, so a waymark or a player in the tower never covers it. */
+/** How many players soak a tower: a small round badge on the top of its ring, with the tower icon
+    and the number in its column, as the mechanic icon shows it (MechanicIcon). The column is
+    filled dark, so the light number on it reads at a phone's size. On the ring, not in the
+    middle, so a waymark or a player in the tower never covers it. */
 function SoakMark({ r, soak }: SoakMarkProps) {
-  const left = -SOAK_BADGE_W / 2;
   return (
     <g className="soak" transform={`translate(0 ${round2(-r)})`}>
-      <rect className="badge" x={left} y={-SOAK_BADGE_H / 2} width={SOAK_BADGE_W} height={SOAK_BADGE_H} rx={SOAK_BADGE_H / 2} />
-      <TowerIcon className="icon" x={left + 1} y={-SOAK_ICON / 2} width={SOAK_ICON} height={SOAK_ICON} />
-      <text x={round2(left + 1 + SOAK_ICON + (SOAK_BADGE_W - SOAK_ICON - 2) / 2)} fontSize={SOAK_TEXT}>
+      <circle className="badge" r={SOAK_BADGE_R} />
+      <TowerIcon className="icon" x={-SOAK_ICON / 2} y={-SOAK_ICON / 2} width={SOAK_ICON} height={SOAK_ICON} />
+      {/* Up a little, in the column, clear of the ring, as MechanicIcon places it. */}
+      <text y={round2(-SOAK_ICON * 0.06)} fontSize={SOAK_ICON * 0.5}>
         {soak}
       </text>
     </g>
