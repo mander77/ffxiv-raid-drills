@@ -9,7 +9,7 @@ import { bySlot, withSeed } from "../../../util";
 import { markRole, partyOf } from "../../../party";
 import { angOf, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
 import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, avalancheScene, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
-import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, axeHit, fireBreath, gust, inYalms, lineStack, meteorHit, proteanCone, proximityDot, raidwide, sharedCone, spreadHit, swordCross, tankCone, towerHit, voidPuddle, wallOfFire } from "./attacks";
+import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, meteorHit, pairTower, proteanCone, proximityDot, raidwide, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, wallOfFire } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../../../types";
 
 type Who = [string, MarkRole];
@@ -454,22 +454,27 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       proximityDot([66, 93]), tag(66, 85, "PROXIMITY")], boss:BOSS, after:[up(75)], answer:[circle([75, 74], 7)],
       note:"Example: the proximity AoE is closer to H2, so H2 moves north.", options:[
         show([up(75)], [circle([75, 74], 7)]), show([up(25)], [circle([25, 74], 7)]), show([say("NOBODY MOVES", 8)]), show([up(25), up(75)], [circle([25, 74], 7), circle([75, 74], 7)])]}; },
-  "k-ecl-prio": s => { const T: Point[] = [[50, 13], [87, 50], [50, 87], [13, 50]];
-    /** Labels on the towers N, E, S, W, and your tower circled when you have one. */
-    const labels = (who: string[]): Preview => { const i = who.indexOf(s); return show(T.map((p, k) => tag(p[0], p[1], who[k])), i >= 0 ? [circle(T[i], TOWER_R)] : []); };
-    const correct = labels(["H1", "H2", "R1", "R2"]);
-    return {overlays:T.map(([x, y]): Overlay => ({t:"tower", x, y})), boss:BOSS, after:correct.pieces, answer:correct.zones,
-      note:"Example tower spots. Count clockwise from A: H1 soaks the first tower, then H2, R1 and R2.", options:[
-        correct, labels(["R1", "H2", "H1", "R2"]), labels(["M1", "M2", "?", "?"]), labels(["MT", "OT", "MT", "OT"])]}; },
+  // Hector's Fixed Stampede example: tank towers NE and SE, two-player towers NW and SW, and R1 and
+  // R2 marked for the puddles. The tower spots are the app's example; they change from pull to pull.
+  // Clockwise from A, the first two-player tower is SW (with M1, and H1 first in H1 > H2 > R1 > R2);
+  // counterclockwise, it is NW (with M2 and H2). In each, the melee stands on the edge nearest the
+  // boss and the healer dead center.
+  "k-ecl-prio": s => { const NE: Point = [72, 28], SE: Point = [72, 72], SW: Point = [28, 72], NW: Point = [28, 28];
+    const ring = (c: Point): Zone => ({c, r:TOWER_R}), cw = ring(SW), ccw = ring(NW), edge = (c: Point): Point => at(angOf([CENTER[0] - c[0], CENTER[1] - c[1]]), TOWER_R * 0.65, c);
+    const mine = bySlot<Point>(s, {H1:SW, H2:NW}), partner = bySlot<Point>(s, {H1:NW, H2:SW}), other = bySlot<Who>(s, {H1:["H2", "H"], H2:["H1", "H"]});
+    const everyone = [mark(...NE, "MT", "T"), mark(...SE, "OT", "T"), mark(...edge(SW), "M1", "D"), mark(...edge(NW), "M2", "D"), mark(...partner, ...other), you(s, mine)];
+    return {overlays:[soloTower(NE), soloTower(SE), pairTower(SW), pairTower(NW), say("R1 AND R2 HAVE PUDDLES", 94)], boss:BOSS, after:everyone, answer:[bySlot(s, {H1:cw, H2:ccw})],
+      note:"Example: R1 and R2 have puddles. T towers are tank towers; dots are two-player towers.", options:[
+        youIn(s, cw, SW), youIn(s, ccw, NW), youIn(s, ring(NE), NE), show([you(s, [50, 94 - 8]), say("YOU STAY OUT", 8)])]}; },
   // The tether goes to the player in the middle of the tower, so it draws from the boss to whoever the answer puts there.
   // M1 stands on the tower's edge. The answers put you in the middle, just inside the edge,
   // outside the tower, and on the edge.
   "k-ecl-center": s => { const c: Point = [28, 30], m1 = at(135, TOWER_R, c), inside = at(225, TOWER_R * 0.8, c), tether = (p: Point): Overlay => guide(CENTER, p);
-    return {overlays:[{t:"tower", x:c[0], y:c[1]}, mark(...m1, "M1", "D")], boss:BOSS, after:[tether(c), you(s, c)], answer:[circle(c, 3.5)], options:[
+    return {overlays:[pairTower(c), mark(...m1, "M1", "D")], boss:BOSS, after:[tether(c), you(s, c)], answer:[circle(c, 3.5)], options:[
       hit(youAt(s, c, 3.5), [tether(c)]), hit(youAt(s, inside, 3.5), [tether(inside)]),
       hit(youAt(s, at(225, TOWER_R * 1.45, c), 3.5), [tether(m1)]), hit(youAt(s, at(225, TOWER_R, c), 3.5), [tether(m1)])]}; },
   "k-ecl-tether": s => { const tower: Point = [50, 13], wall: Point = [50, 94];
-    return {overlays:[{t:"tower", x:tower[0], y:tower[1]}], boss:BOSS, before:[you(s, tower)],
+    return {overlays:[pairTower(tower)], boss:BOSS, before:[you(s, tower)],
       after:[guide(tower, wall), guide(wall, [6, 94]), you(s, [6, 94])], answer:[circle([6, 94], 6)],
       note:"Example: your tower is north. Take the tether to the south wall, then clockwise into the SW corner.", options:[
         show([guide(tower, wall), guide(wall, [6, 94]), you(s, [6, 94])], [circle([6, 94], 6)]),
@@ -487,8 +492,8 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       hit(youIn(s, d.zone), [lineStack(CENTER, zoneCenter(d.zone))]), hit(youAt(s, [43, 43], 5.5), [lineStack(CENTER, [43, 43])]),
       show([lineStack(CENTER, [100, 50]), you(s, [68, 50])], [rect(60, 43, 84, 57)]), hit(youAt(s, [6, 94], 6), [lineStack(CENTER, [6, 94])])]}; },
   "k-hb": s => { const tanks = [mark(47, 31, "MT", "T"), mark(53, 31, "OT", "T")], tower: Point = [50, 31];
-    return {overlays:[{t:"tower", x:tower[0], y:tower[1]}], boss:BOSS, before:tanks, after:[towerHit(tower), ...tanks, say("5, THEN 6, THEN 7 HITS", 8)], answer:[circle(tower, TOWER_R)],
-      note:"Example spot. The tanks soak the tower, and you heal them between the hits.", options:[
+    return {overlays:[kickTower(tower)], boss:BOSS, before:tanks, after:[towerHit(tower), ...tanks, say("5, THEN 6, THEN 7 HITS", 8)], answer:[circle(tower, TOWER_R)],
+      note:"Example: the tanks soak it with invulns. Or the party soaks it.", options:[
         show([towerHit(tower), ...tanks, say("5, THEN 6, THEN 7 HITS", 8)], [circle(tower, TOWER_R)]),
         show([towerHit(tower), you(s, tower), say("YOU SOAK IT ALONE", 8)], [circle(tower, TOWER_R)]),
         show([...tanks, say("RAISE THE PARTY", 8)]),

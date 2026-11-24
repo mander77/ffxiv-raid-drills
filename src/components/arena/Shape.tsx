@@ -50,7 +50,7 @@ export function Shape({ overlay: o }: ShapeProps) {
         <g className="tower" transform={`translate(${round2(o.x)} ${round2(o.y)})`}>
           <circle className="out" r={o.r ?? sizes.tower} />
           <circle className="in" r="1.1" />
-          {o.soak != null && <SoakMark r={o.r ?? sizes.tower} soak={o.soak} />}
+          {o.soak != null && <SoakMark r={o.r ?? sizes.tower} soak={o.soak} tank={o.tank} />}
         </g>
       );
     case "unknown":
@@ -178,6 +178,8 @@ interface SoakMarkProps {
   /** The tower's radius, in arena units. */
   r: number;
   soak: number;
+  /** Only tanks soak it. */
+  tank?: boolean;
 }
 
 /** The radius of each player dot on a tower's ring, in arena units. The app's choice, for the
@@ -187,17 +189,37 @@ const SOAK_DOT_R = 1.3;
     a little off the tower's centre lines. The app's choice, for the picture. */
 const SOAK_TURN = 30;
 
+/** Half the side of a tank tower's "T" mark, in arena units: the size of a player mark. */
+const SOAK_MARK_HALF = 2.4;
+
 /** How many players soak a tower: one dot per player, spaced evenly around its ring, turned a
     little from the top (SOAK_TURN). A dot is a player, in the players' highlight colour, as in
-    the mechanic icons (icons.tsx, rule 2). On the ring, not in the middle, so a waymark or a
-    player in the tower never covers it. */
-function SoakMark({ r, soak }: SoakMarkProps) {
+    the mechanic icons (icons.tsx, rule 2). A tower only tanks soak shows a tank's "T" mark, as
+    the arena marks a tank, in place of each dot. On the ring, not in the middle, so a waymark or
+    a player in the tower never covers it. */
+function SoakMark({ r, soak, tank }: SoakMarkProps) {
   return (
-    <g className="soak" aria-label={`Soaked by ${soak}`}>
+    <g className="soak" aria-label={tank ? `Soaked by ${soak} tank${soak === 1 ? "" : "s"}` : `Soaked by ${soak}`}>
       {Array.from({ length: soak }, (_, i) => {
         const [x, y] = polar(SOAK_TURN + (360 * i) / soak, r, [0, 0]);
-        // biome-ignore lint/suspicious/noArrayIndexKey: the dots of a tower never change order.
-        return <circle key={i} className="player" cx={round2(x)} cy={round2(y)} r={SOAK_DOT_R} />;
+        return tank ? (
+          // biome-ignore lint/suspicious/noArrayIndexKey: the marks of a tower never change order.
+          <g key={i} className="mk T">
+            <rect
+              x={round2(x - SOAK_MARK_HALF)}
+              y={round2(y - SOAK_MARK_HALF)}
+              width={2 * SOAK_MARK_HALF}
+              height={2 * SOAK_MARK_HALF}
+              rx=".9"
+            />
+            <text x={round2(x)} y={round2(y)}>
+              T
+            </text>
+          </g>
+        ) : (
+          // biome-ignore lint/suspicious/noArrayIndexKey: the dots of a tower never change order.
+          <circle key={i} className="player" cx={round2(x)} cy={round2(y)} r={SOAK_DOT_R} />
+        );
       })}
     </g>
   );

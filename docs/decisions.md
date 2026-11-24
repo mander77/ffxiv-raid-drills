@@ -108,8 +108,23 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
   place of 150 units. A check that cuts each changed line to the arena found all 2,572 the same
   inside it, and every cone keeps its edges. No size, zone, answer or step changed.
 - The Arena Split towers (the split and Arcadion Avalanche) show their soak count, 2 dots, from
-  the drills' own `soak` (owner's choice). The Ecliptic Stampede and Heartbreak Kick towers
-  show none: no source or drill gives their count yet.
+  the drills' own `soak` (owner's choice).
+- Ecliptic Stampede towers (November 24, from BossMod's `ImpactKiss` component and Hector's
+  "Fixed Stampede - M11S Mini-Guide", https://www.youtube.com/watch?v=p8cL88OKEWE, 0:24 to
+  1:20): four towers, two tank towers (Cosmic Kiss, 1 soaker) and two two-player towers
+  (Weighty Impact, 2 soakers). Which spots are which changes from pull to pull.
+  - Tanks: MT the first tank tower clockwise from A, OT the first counterclockwise.
+  - Two-player towers: M1 clockwise, M2 counterclockwise, each with one healer or ranged. The
+    two players with puddles soak no tower; of the others, the first in H1 > H2 > R1 > R2 goes
+    clockwise. The melee stands on the edge nearest the boss, the healer or ranged dead center.
+  - A tank tower shows a tank's "T" mark on its ring in place of a dot (owner's choice,
+    `tank` on the tower overlay); a two-player tower shows 2 dots.
+  - The Learn card `k-ecl-prio` was wrong (it put H1, H2, R1 and R2 in four towers clockwise)
+    and now follows the video (owner's OK): its example has tank towers NE and SE, two-player
+    towers NW and SW, and R1 and R2 with puddles.
+- Heartbreak Kick: BossMod lets up to 8 soak its tower, and cactbot says "Get Tower" to
+  everyone. Statics do it either way: the tanks soak it with invulns, or the party soaks it
+  (owner). The tower shows 8 dots, and `k-hb` and the timeline name both ways (owner's choice).
 - M11S's knockbacks stay guides. Those guides show where each player is thrown, which the
   standard knockback (arrows out from a source) does not.
 
