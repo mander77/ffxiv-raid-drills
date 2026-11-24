@@ -552,8 +552,8 @@ Do not propose these again unless the owner brings them up.
 ### Everywhere
 
 - Each ability category has its own icon (`CategoryIcons`, rule 14 in `icons.tsx`), so no place
-  tells the categories apart by colour alone: Raid damage two chevrons over three players, Tank
-  damage the tank buster's shield, Positioning a map pin, Avoidable AoE a ring with an arrow out,
+  tells the categories apart by colour alone: Raid Damage two chevrons over three players, Tank
+  Damage the tank buster's shield, Positioning a map pin, Avoidable AoE a ring with an arrow out,
   Targeted AoE a crosshair, Mechanic a puzzle piece, Enrage a skull. The icon keeps its category's
   colour as a second cue (owner's choice). A row with two categories shows both icons. In the
   casts coming up the square keeps its colour and its seconds, and the icons go before the name

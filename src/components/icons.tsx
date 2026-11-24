@@ -315,7 +315,7 @@ export {
   Skull as EnrageIcon,
 } from "lucide-react";
 
-/** Raid damage: two chevrons, the boss's hit, coming down on the whole party, three players in a row. */
+/** Raid Damage: two chevrons, the boss's hit, coming down on the whole party, three players in a row. */
 export const RaidDamageIcon = createLucideIcon("raid-damage", [
   ["path", { d: "m3 3 9 5 9-5", key: "hit-top" }],
   ["path", { d: "m3 9 9 5 9-5", key: "hit-bottom" }],
@@ -324,7 +324,7 @@ export const RaidDamageIcon = createLucideIcon("raid-damage", [
   ["circle", { cx: "19", cy: "20", r: "2", className: SAME_COLOUR_DOT, key: "east" }],
 ]);
 
-/** Tank damage: a player behind a shield, as on the Tank Buster, all in the icon's own colour. */
+/** Tank Damage: a player behind a shield, as on the Tank Buster, all in the icon's own colour. */
 export const TankDamageIcon = createLucideIcon("tank-damage", [
   ...SHIELD,
   ["circle", { cx: "12", cy: "12", r: "3", className: SAME_COLOUR_DOT, key: "player" }],

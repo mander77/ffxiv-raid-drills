@@ -77,6 +77,7 @@ Each kind of text has a place in the code and a job.
 | Picture caption | `Picture.note` (`src/data/pictures.ts`) | What the arena picture shows. | One or two sentences. |
 | Picture tag | `tag(...)` and `say(...)` in `src/data/pictures.ts` | A label on the arena. | CAPITAL LETTERS, a few words. Must not cover a waymark (a test checks this). |
 | Kind name | `KINDS` in `src/components/MechanicIcon.tsx` | The name on a mechanic's icon. | Title Case. |
+| Category name | `CATEGORIES` in `src/data/abilities.ts` | The name of a timeline category. | Title Case. |
 
 ## Capital letters
 
