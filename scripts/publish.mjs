@@ -1,14 +1,16 @@
-// Runs the type check, the tests and the lint, then pushes the current branch to GitHub:
-// `npm run publish`. Runs on Windows, macOS and Linux.
-// `npm run publish -- main` puts the current branch on main instead, from any checkout, so the
-// main checkout is never needed: the branch must contain origin/main (a fast-forward), and its
-// CI must have passed.
-// GitHub runs CI on each push. Cloudflare builds main as the live site, and skips the build
-// when only docs, tests or tooling changed. For another branch, GitHub Actions makes a
-// preview when the push changed the app and the owner approved it.
-// main takes only a commit on which CI already passed (when its branch was pushed). To publish
-// main, the script waits for those checks, and stops if they failed or never ran.
-// After it pushed main, it deletes every branch that main already contains, on GitHub and locally.
+// Runs the type check, the tests and the lint, then pushes the current branch to GitHub and
+// opens its pull request to main, if it has none yet: `npm run publish`. Runs on Windows,
+// macOS and Linux.
+// `npm run publish -- main` also merges that pull request, from any checkout, so the main
+// checkout is never needed. It waits for CI on the branch's last commit, then merges with
+// "Rebase and merge": GitHub puts the branch's commits on top of main, so a branch that fell
+// behind main needs no local rebase and no new CI run. It stops when GitHub cannot rebase the
+// branch (a conflict): rebase it on origin/main yourself, then run it again.
+// CI runs on pull requests and on main, not on a branch push alone. Cloudflare builds main as
+// the live site, and skips the build when only docs, tests or tooling changed. For another
+// branch, GitHub Actions makes a preview when the push changed the app and the owner approved it.
+// GitHub deletes the branch on GitHub when its pull request merges (the repository setting
+// "Automatically delete head branches").
 // Pushes as the repository owner. Ignores any GH_TOKEN or GITHUB_TOKEN in the
 // shell, and switches the GitHub CLI back to the previous account at the end.
 import { spawnSync } from "node:child_process";
@@ -65,29 +67,26 @@ async function waitForCi(sha) {
     const state = output("gh", ["api", `repos/${REPO}/commits/${sha}/check-runs`, "--jq", query]);
     if (state === "passed") return;
     if (state === "failed") throw new Error(`Stopped: CI failed on ${sha}. See: gh run list --commit ${sha}`);
-    if (i === 120) throw new Error(`Stopped: CI has not passed on ${sha} (${state}). Publish its branch first, then main.`);
+    if (i === 120) throw new Error(`Stopped: CI has not passed on ${sha} (${state}). See: gh run list --commit ${sha}`);
     await sleep(15_000);
   }
 }
 
-/** Deletes every branch on GitHub that main already contains, and its local copy. */
-function deleteMergedBranches() {
-  gitgh(["fetch", "--prune", "origin"]);
-  const refs = output("git", ["for-each-ref", "--merged", "origin/main", "--format=%(refname:short)", "refs/remotes/origin"]);
-  for (const ref of refs.split("\n").filter(Boolean)) {
-    const branch = ref.replace(/^origin\//, "");
-    if (["main", "HEAD", "origin"].includes(branch)) continue;
-    gitgh(["push", "origin", "--delete", branch]);
-    spawnSync("git", ["branch", "-d", branch], { stdio: "ignore" });
-    console.log(`Deleted the merged branch ${branch}.`);
-  }
+/** Returns the number of the branch's open pull request to main, and opens one if it has none. */
+function pullRequestOf(branch) {
+  const query = ["--head", branch, "--base", "main", "--state", "open", "--json", "number", "--jq", ".[0].number // empty"];
+  const open = output("gh", ["pr", "list", "--repo", REPO, ...query]);
+  if (open !== "") return open;
+  // The title and the description come from the branch's first commit.
+  run("gh", ["pr", "create", "--repo", REPO, "--base", "main", "--head", branch, "--fill-first"]);
+  return output("gh", ["pr", "list", "--repo", REPO, ...query]);
 }
 
 async function publish() {
   const branch = output("git", ["branch", "--show-current"]);
-  if (branch === "") throw new Error("Stopped: check out a branch before you publish.");
-  // Publish to main: from main itself, or with "main" after npm run publish --.
-  const toMain = branch === "main" || process.argv.slice(2).includes("main");
+  if (branch === "" || branch === "main") throw new Error("Stopped: check out a branch other than main before you publish.");
+  // Merge into main too, with "main" after npm run publish --.
+  const toMain = process.argv.slice(2).includes("main");
 
   npm("typecheck");
   npm("test");
@@ -99,22 +98,26 @@ async function publish() {
     const who = output("gh", ["api", "user", "--jq", ".login"]);
     if (who !== OWNER) throw new Error(`Stopped: the GitHub CLI is signed in as ${who}, not ${OWNER}.`);
 
-    if (toMain) {
-      gitgh(["fetch", "origin"]);
-      const ahead = spawnSync("git", ["merge-base", "--is-ancestor", "origin/main", "HEAD"]);
-      if (ahead.status !== 0) throw new Error("Stopped: main moved. Rebase the branch on origin/main, publish it, then try again.");
-      await waitForCi(output("git", ["rev-parse", "HEAD"]));
-    }
-
+    gitgh(["push", "-u", "origin", branch]);
+    const number = pullRequestOf(branch);
+    console.log(`Pushed ${branch}, pull request #${number}. CI runs on GitHub: gh pr checks ${number}`);
     if (!toMain) {
-      gitgh(["push", "-u", "origin", branch]);
-      console.log(`Pushed ${branch}. CI runs on GitHub: gh run list --branch ${branch}`);
       console.log("If the app changed, approve its Preview run on GitHub once CI passed.");
       return;
     }
-    gitgh(["push", "origin", "HEAD:refs/heads/main"]);
-    console.log("Pushed main. Cloudflare deploys the live site in about a minute if the app changed.");
-    deleteMergedBranches();
+
+    const sha = output("git", ["rev-parse", "HEAD"]);
+    await waitForCi(sha);
+    // --match-head-commit: merge only the commit that CI checked, never a newer push.
+    const merged = spawnSync("gh", ["pr", "merge", number, "--repo", REPO, "--rebase", "--match-head-commit", sha], { stdio: "inherit" });
+    if (merged.status !== 0) {
+      throw new Error(
+        `Stopped: GitHub did not merge #${number}. If it cannot rebase the branch, rebase it on origin/main, then run this again.`,
+      );
+    }
+    gitgh(["fetch", "--prune", "origin"]);
+    console.log(`Merged #${number} into main. Cloudflare deploys the live site in about a minute if the app changed.`);
+    console.log(`Delete the local branch when you are done with it: git branch -D ${branch}`);
   } finally {
     spawnSync("gh", ["auth", "switch", "--hostname", "github.com", "--user", prev], { stdio: "ignore" });
   }

@@ -93,7 +93,7 @@ To test the Wrangler configuration without a deploy, run `npm run build`, then r
 npx wrangler deploy --dry-run
 ```
 
-The publish script (only for the owner, `mander77`) runs the type check, the tests and the lint, then pushes the current branch as the repository owner. With `-- main` (`npm run publish -- main`), it puts the current branch on `main` instead, from any checkout: it first checks that the branch contains `origin/main`, then waits for the branch's checks on that commit. The script ignores a `GH_TOKEN` or `GITHUB_TOKEN` in your shell. At the end, the script switches the GitHub CLI back to the account that was active before.
+The publish script (only for the owner, `mander77`) runs the type check, the tests and the lint, then pushes the current branch as the repository owner and opens its pull request to `main`, if it has none yet. With `-- main` (`npm run publish -- main`), it also merges that pull request, from any checkout: it waits for the checks on the branch's last commit, then merges with "Rebase and merge", so a branch that fell behind `main` needs no rebase. The script ignores a `GH_TOKEN` or `GITHUB_TOKEN` in your shell. At the end, the script switches the GitHub CLI back to the account that was active before.
 
 It needs the GitHub CLI, signed in as the owner (`gh auth login`, then `gh auth setup-git`).
 

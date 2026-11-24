@@ -1,14 +1,15 @@
 # The checks: lint, type check, unit tests, build and browser tests.
-# They run on every push to any branch, so a branch has its result before it goes on main,
-# and on pull requests to main. main accepts a commit only after both jobs passed on it.
-# It has no path filter: GitHub leaves a skipped workflow's checks pending, and main requires
-# them on every commit. Cloudflare deploys main on its own; preview.yml makes branch previews.
+# They run on pull requests to main and on each push to main. A branch push alone runs nothing,
+# so a branch uses no Actions minutes until its pull request opens. main merges a pull request
+# only after both jobs passed on its last commit. GitHub rebases the pull request onto main as
+# it merges, so a branch that fell behind main merges without a new run.
+# It has no path filter: GitHub leaves a skipped workflow's checks pending, and a pull request
+# needs them. Cloudflare deploys main on its own; preview.yml makes branch previews.
 name: CI
 
 on:
   push:
-    # Dependabot's branches run once, as pull requests.
-    branches: ["**", "!dependabot/**"]
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -16,10 +17,11 @@ on:
 permissions:
   contents: read
 
-# A new push to the same branch or pull request cancels the run that is still going.
+# A new push to the same pull request cancels its run that is still going. On main, each
+# commit keeps its run, so each one gets a result.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check:

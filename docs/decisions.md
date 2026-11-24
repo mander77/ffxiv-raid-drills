@@ -689,8 +689,8 @@ static wins.
 - The Cloudflare check run on GitHub has no log text. Read the state with
   `gh api repos/mander77/ffxiv-raid-drills/commits/<sha>/check-runs`. The owner can paste logs from
   the dashboard.
-- The repository merges by fast-forward push, not by pull requests. The publish script deletes
-  merged branches on GitHub.
+- The repository merges by pull request with "Rebase and merge", not by fast-forward push.
+  GitHub deletes the merged branch on GitHub.
 - Build watch paths (Cloudflare dashboard: the Worker, Production chosen at the top, then
   Settings > Build > Build watch paths) cover `main` only: a push to `main` that changes only
   files outside the app makes no live deploy. Branch builds ignore them (tested with two
@@ -718,15 +718,26 @@ static wins.
 
 ## CI and the main ruleset
 
-- GitHub Actions, `.github/workflows/ci.yml`, on every branch push and on pull requests to
-  `main`. Two jobs: "Lint, types, tests, build" and "Browser tests" (Chromium, Firefox and WebKit;
-  the Playwright report is kept for 14 days when a test fails). Actions are pinned to a commit,
-  the token can only read, and a newer push cancels an older run of the same branch. CI does not
-  skip any path, because `main` needs its result on every commit.
+- GitHub Actions, `.github/workflows/ci.yml`, on pull requests to `main` and on pushes to
+  `main`, not on a branch push alone: the owner chose this on November 23 to save Actions
+  minutes, so a branch runs CI only once it is ready for a pull request. Two jobs: "Lint, types,
+  tests, build" and "Browser tests" (Chromium, Firefox and WebKit; the Playwright report is kept
+  for 14 days when a test fails). Actions are pinned to a commit, the token can only read, and a
+  newer push cancels an older run of the same pull request (not on `main`, where each commit
+  keeps its run). CI does not skip any path, because a pull request needs both checks.
+- Pull requests, not fast-forward pushes (owner's choice, November 23). With several sessions
+  at work, each publish moved `main`, so every other branch had to rebase, and each rebase was a
+  new commit with a new CI run and a new preview approval. The ruleset's required checks are not
+  strict (a branch need not be up to date with `main`), so GitHub merges a pull request whose
+  last commit passed CI even when `main` moved, and "Rebase and merge" puts its commits on top.
+  The cost: two branches that passed on their own are not tested together before the merge. CI
+  on `main` runs after it. GitHub's merge queue would close that gap, but it needs a repository
+  owned by an organization.
 - A repository ruleset, "main", on the default branch, with no bypass (the owner too): the two CI
-  jobs must have passed on the commit, no force push, no deletion, linear history (no merge
-  commits). The owner chose this over pull requests for themselves, so the fast-forward publish
-  stays. In an emergency, turn the ruleset off in Settings > Rules > Rulesets, and back on after.
+  jobs must have passed (on a pull request's last commit, or on the commit a direct push ends
+  on), no force push, no deletion, linear history (no merge commits). CI no longer runs on branch
+  pushes, so a direct push to `main` always fails this rule: every change goes through a pull
+  request. In an emergency, turn the ruleset off in Settings > Rules > Rulesets, and back on after.
 - A second ruleset, "main: pull requests": only the owner may push to `main` directly. Everyone
   else needs a pull request, merged by rebase or squash. It needs no approval: the owner chose
   this so their own pull requests merge without a bypass. GitHub cannot tell rules apart by who
@@ -734,9 +745,9 @@ static wins.
   the owner. Give someone else write access, and set the approvals back to 1 first. The
   repository admin role (only the owner) bypasses this ruleset only. It is a ruleset of its own,
   because a bypass covers a whole ruleset, and the CI rule must bind the owner too.
-- GitHub checks the commit a push to `main` ends on, by the CI run on that same commit when its
-  branch was pushed. So push the branch, wait for CI, then push `main`. `npm run publish -- main`
-  waits for the two checks.
+- `npm run publish` pushes the branch and opens its pull request. `npm run publish -- main`
+  waits for the two checks on the branch's last commit, then runs
+  `gh pr merge --rebase --match-head-commit <sha>`, so it merges only the commit CI checked.
 - Branch previews come from GitHub Actions, not from Cloudflare's builds:
   `.github/workflows/preview.yml`, on branch pushes, with GitHub's `paths-ignore` filter (the
   same list as the watch paths), so a docs-only push makes no preview and the last one stays.
