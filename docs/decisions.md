@@ -52,8 +52,7 @@ drafts a new fight). M11S is still the only fight, so nothing changed for the pl
   the speed and the slot stay shared. The owner said old links and saved data need not keep
   working while the app has no real users, so saved progress of version 1 is dropped. The
   pattern codes still build the same patterns: every `random()` call stays in its order.
-- Not done yet: `scripts/import-sources.mjs` still has one set of pins (issue #94). The full
-  fight's engine still knows the Arena Split (`Fight.split`, and `ArenaSizes.split` with its
+- Not done yet: the full fight's engine still knows the Arena Split (`Fight.split`, and `ArenaSizes.split` with its
   platforms, portals and tether stretch distance) and the boss
   weapons (`ArenaSizes.scytheSafe`); a fight without them gives `[0, 0]` and leaves `split` out.
 
@@ -830,6 +829,30 @@ static wins.
   boss hitbox is 5 yalms. The shared sizes and shapes live in `src/data/fights/m11s/attacks.ts`.
 - Times come from cactbot (`ui/raidboss/data/07-dt/raid/r11s.txt`). Branch labels in that file add
   offsets, so subtract them.
+- Issue #94 (November 24): the import takes any fight. Each fight lists its sources in
+  `src/data/fights/<id>/sources.json`, next to its data (owner's choice over one list in
+  `scripts/`). `npm run import:sources -- <id>` imports one fight; with no id it imports every
+  fight with a list, and `--check` checks them all.
+  - `npm run find:sources -- <id>` finds a new fight's files at the newest commits through
+    GitHub's file lists (`m10s` is cactbot's `r10s.txt` and `r10s.ts`, and BossMod's folder
+    `RM10S*`), and writes the list with `"checked": false`. The import refuses an unchecked
+    list, and `test/importSources.test.ts` fails on one, so a person checks every list.
+  - The import also reads cactbot's triggers and BossMod's mechanic files, into a short,
+    committed summary (`sources.extra.gen.json`): each trigger's id, ability ids, English
+    callouts and comments, and each mechanic class's abilities, shapes and positions. Owner's
+    choice over raw copies (other projects' code, which needs their licence notices) and over
+    the cache only (a fresh clone would lack them). The site does not read it; the draft does.
+  - A BossMod ability with no shape the import knows ("???", "range 60 ?-degree cone") is kept
+    as `shape: "unknown"` with its text, so a new fight imports without a code change. M11S has
+    none.
+  - M11S's Arena Split is an "extra" in its list (`"arenaSplit": "Flatliner.cs"`), read by the
+    import's own parser. M11S's generated data stayed the same; only its header comment changed.
+  - M10S is imported (owner's choice, November 24) at the newest commits, for the draft. It has
+    only its list and generated files, and is not one of the site's fights.
+  - M12S waits (owner's choice). It will need more than the import has today: its timeline has
+    a second part that starts when the first boss is defeated, so jumps reach that label from
+    different times; it has two BossMod module folders (`RM12S1TheLindwurm`,
+    `RM12S2TheLindwurm`); and their arenas are a rectangle and a circle, not a square.
 - Issue #14 (November 23): `npm run import:sources` imports both sources at pinned commits into
   `src/data/fights/m11s/source.gen.ts`, and the data files read every time and size from it. The owner chose
   a generated file over a check alone. The downloads stay in `.cache/sources/`, never committed.
