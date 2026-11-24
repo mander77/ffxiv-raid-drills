@@ -3,7 +3,6 @@
 // to look ahead to. The fight screen calls them on every frame; the tests call them too.
 
 import { type Category, categoriesAt } from "../data/abilities";
-import { PUDDLE_LIFE } from "../data/attacks";
 import { facingNext, jumpsNext } from "../data/drills";
 import { buildHits, type Fight, type FightSeg, type Hit } from "../data/fight";
 import { clickRoute, correctRoute, type Stop, showOf } from "../data/route";
@@ -356,8 +355,11 @@ export function viewOf(s: FightState): FightView {
   // After a weapon hits, he turns to face the next one. He lands on it JUMP_LEAD seconds before it hits.
   const facing = res.length > 0 && s.t >= lastHit + TURN_AFTER;
   const jumped = Boolean(g && res.length < g.due.length && s.t >= g.due[res.length] - JUMP_LEAD && jumpsNext(g.scene, res.length));
-  // A puddle goes off PUDDLE_LIFE seconds after it drops.
-  const wentOff = res.map((r, i) => Boolean(g && r.drop && s.t >= g.due[i] + PUDDLE_LIFE));
+  // A puddle goes off its life in seconds after it drops.
+  const wentOff = res.map((r, i) => {
+    const puddle = g?.scene.steps[i].drop;
+    return Boolean(g && r.drop && puddle && s.t >= g.due[i] + puddle.life);
+  });
   const gone = wentOff.filter(Boolean).length;
   const sc = g ? g.scene : where === "split" ? IDLE_SPLIT : IDLE;
   const k = g ? g.k : 0;

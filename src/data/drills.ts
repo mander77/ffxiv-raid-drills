@@ -1,8 +1,8 @@
 // Map drills: the arena scenes and the rules that decide each answer zone.
 import { bySlot, shuffle, random } from "../util";
 import { P1, P2, P3, P4 } from "./timeline";
-import { DEG, unit, addVec, leftOf, angOf, inArena, polar, dist } from "../geometry";
-import { HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, gust, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
+import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../geometry";
+import { HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, PROTEAN_HALF, PROTEAN_LEN, TOWER_R, ATOMIC_R, RAW_TANK_HALF, RAW_STACK_HALF, SCYTHE_SAFE, HURRICANE_W, axeHit, cleave, gust, donut, lineTo, safeRing, swordCross, swordPocket } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
 import type { Boss, Drill, Lines, Overlay, Point, RectZone, Scene, Slot, Step, StepResult, Zone } from "../types";
 
@@ -320,7 +320,7 @@ function firstPuddle(start: Point, c: Point): Zone {
 
 /* Comet, the spread that can end Void Stardust. Only the tanks and melee have fixed spots,
    at the intercardinals just outside the hitbox. Healers and ranged take any open spot.
-   Nobody stands on a puddle that is still there (Amanda). Each one goes off PUDDLE_LIFE (3)
+   Nobody stands on a puddle that is still there (Amanda). Each one goes off VOID_PUDDLE.life (3)
    seconds after it drops (BossMod: Cometite, 3.0 s cast) and then it is gone, and they drop 2
    seconds apart. So by the spread only the last one is still on the floor: you leave it as it
    goes off, on the way to your spot. The first two have faded from the map. */
@@ -408,9 +408,9 @@ const NORTH_START = {p:FIRST_PUDDLE, a:["North of the boss, in max melee."]};
 function voidSteps(s: Slot, spread: boolean, c: Point = CENTER, start = NORTH_START): Step[] {
   const next = puddleAfter(c);
   return [
-    {q:"Where do you drop the first puddle?", z:firstPuddle(start.p, c), a:start.a, drop:true},
-    {q:"Second puddle?", zf:next, a:["Just outside your first puddle, one small step clockwise.", "Stay in max melee."], drop:true},
-    {q:"Third puddle?", zf:next, a:["Just outside the second puddle, clockwise again.", "Stay in max melee."], drop:true},
+    {q:"Where do you drop the first puddle?", z:firstPuddle(start.p, c), a:start.a, drop:VOID_PUDDLE},
+    {q:"Second puddle?", zf:next, a:["Just outside your first puddle, one small step clockwise.", "Stay in max melee."], drop:VOID_PUDDLE},
+    {q:"Third puddle?", zf:next, a:["Just outside the second puddle, clockwise again.", "Stay in max melee."], drop:VOID_PUDDLE},
     spread
       ? {q:"Puddles done. Comet: every player spreads. Tanks and melee go to fixed spots. Where do you go?",
           zf:cometSpread(s, c), cue:spreadMarks(c),
@@ -566,8 +566,52 @@ const lastSpot = (s: Slot, side: SplitSide, end: SplitEnd): Overlay => {
 const randomEnd = (): SplitEnd => random() < 0.5 ? "north" : "south";
 const randomSide = (): SplitSide => random() < 0.5 ? "west" : "east";
 
-const SPLIT_ROUND_RULE: Lines = ["No tether: go in close to bait Fire Breath.", "Everyone baits the puddles in close.",
-  "Then the safe end: a tether to the edge, a marker to the waymark."];
+const SPLIT_ROUND_RULE: Lines = ["No tether: go in close to bait Fire Breath.", "Everyone baits the first puddle in close.",
+  "Then each puddle just outside the last, toward the safe end.",
+  "Then the safe end: a tether to the edge, a marker to the waymark's outer corner."];
+
+/* Majestic Meteor: three puddles drop on the party, 2 seconds apart. The first goes in close, at
+   the middle of the platform's inner edge. Each next one goes just outside the last, along the
+   inner edge, toward the safe end (the owner's strat). The next spot is judged from where the
+   last puddle actually dropped. */
+/** The inner edge of a platform, where the second and third puddles go: the app's choice. A
+    puddle is wider than the platform, so it must stay this far in to leave the outer edge and
+    the waymark's outer corner clear for the tethers and markers. */
+const INNER_STRIP: Record<SplitSide, [number, number]> = {west:[19, 25.5], east:[74.5, 81]};
+function splitPuddleAfter(side: SplitSide, end: SplitEnd): (results: StepResult[]) => Zone {
+  const [xa, xb] = INNER_STRIP[side], dir = end === "north" ? -1 : 1, R = MAJESTIC_PUDDLE.r;
+  return results => {
+    const q: Point = results[results.length - 1].drop ?? zoneCenter(SPLIT_INNER[side]);
+    const fn = (p: Point): boolean => {
+      const d = dist(p, q);
+      return inArena(p) && p[0] >= xa && p[0] <= xb && (p[1] - q[1]) * dir > 0 && d >= R && d <= R + 6;
+    };
+    const ideal: Point = [(xa + xb) / 2, q[1] + dir * (R + 1)];
+    const label = fn(ideal) ? ideal : nearestTo(ideal, fn) ?? ideal;
+    return {fn, label, show:[{c:label, r:4.5}]};
+  };
+}
+/** The zone `base` (the area within reach(deg) of c along each ray) without the last puddle. The
+    last puddle is still on the floor when the tethers and markers resolve: it goes off 0.2
+    seconds after Fire Breath (cactbot). `best` is the spot to show when it is clear. */
+function outOfLastPuddle(base: Zone, c: Point, reach: (deg: number) => number, best: Point): (results: StepResult[]) => Zone {
+  return results => {
+    const drops = results.flatMap(r => r.drop ? [r.drop] : []), last = drops[drops.length - 1];
+    const holes = last ? [{q:last, r:MAJESTIC_PUDDLE.r}] : [];
+    const fn = (p: Point): boolean => inZone(p, base) && (!last || dist(p, last) >= MAJESTIC_PUDDLE.r);
+    const part = (deg: number): Stretch | null => cutOut([[0, reach(deg)]], c, deg, holes)[0] ?? null;
+    const degs = Array.from({length:361}, (_x, d) => d);
+    // Start from a ray that misses, so the area is drawn as one piece.
+    const from = degs.find(d => !part(d)) ?? 0;
+    const label = fn(best) ? best : nearestTo(best, fn) ?? best;
+    return {fn, label, show:rayArea(c, degs.map(d => d + from), part).map(poly => ({poly}))};
+  };
+}
+/** How far a ray from the middle of a rectangle runs before it leaves it. */
+const rectReach = (rect: RectZone["rect"]) => (deg: number): number => {
+  const u = ray(deg), hw = (rect[2] - rect[0]) / 2, hh = (rect[3] - rect[1]) / 2;
+  return Math.min(Math.abs(u[0]) > 1e-9 ? hw / Math.abs(u[0]) : Infinity, Math.abs(u[1]) > 1e-9 ? hh / Math.abs(u[1]) : Infinity);
+};
 
 /** One round of tethers and Fire Breath markers, on the platform `side`. The portal lines leave
     one end of the platform safe (`end`). Without a tether you bait Fire Breath and get a marker. */
@@ -576,17 +620,30 @@ export function splitRound(s: Slot, tether: boolean, side: SplitSide, end: Split
   const x0 = side === "west" ? 0 : 74.5, x1 = side === "west" ? 25.5 : 100, [u0, u1] = HALF[otherEnd(end)];
   // The portal lines cover the other end of your platform: drawn as a soft lane, the app's way to show it.
   const lines: Overlay[] = [{t:"lane", rect:[x0, u0, x1, u1], soft:true}, {t:"tag", x:(x0 + x1) / 2, y:(u0 + u1) / 2, s:"PORTAL LINES"}];
+  const next = splitPuddleAfter(side, end);
+  const edge: RectZone = {rect:[o0, y0, o1, y1]}, edgeMid = zoneCenter(edge);
+  // The waymark's outer corner: toward the arena's corner at that end. A marker stands at the
+  // waymark, out to the wall beside it (the app's choice), out of the third puddle.
+  const outer: Point = [wm.p[0] + (side === "west" ? -4 : 4), wm.p[1] + (end === "north" ? -4 : 4)];
+  const marker: RectZone = {rect:side === "west" ? [0, wm.p[1] - 6.5, wm.p[0] + 6.5, wm.p[1] + 6.5] : [wm.p[0] - 6.5, wm.p[1] - 6.5, 100, wm.p[1] + 6.5]};
   return {setup:[tether ? "You have a tether. You are on the " + side + " platform." : "No tether. You are on the " + side + " platform.",
-      "Three puddles drop on the party, in close.", "Then the portal lines leave one end of the platform safe."], ordered:true,
+      "Three puddles drop on the party, one after another.", "The portal lines leave one end of the platform safe."], ordered:true,
     split:true, boss:BOSS, overlays:[],
     steps:[
       tether
-        ? {q:"Where do you bait the puddles?", z:SPLIT_INNER[side], a:["In close, at the middle of the platform's inner edge.", "Bait the puddles with the party."]}
-        : {q:"No tether. Where do you go?", z:SPLIT_INNER[side], a:["In close, at the middle of the platform's inner edge.", "Bait Fire Breath, then the puddles, there."]},
+        ? {q:"Where do you bait the first puddle?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE,
+          a:["In close, at the middle of the platform's inner edge.", "Bait the puddles with the party."]}
+        : {q:"No tether. Where do you go?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE,
+          a:["In close, at the middle of the platform's inner edge.", "Bait Fire Breath and the first puddle there."]},
+      {q:"The portal lines cover one end. Second puddle?", zf:next, cue:lines, drop:MAJESTIC_PUDDLE,
+        a:["Just outside the first puddle, toward the safe " + end + " end.", "Stay at the inner edge."]},
+      {q:"Third puddle?", zf:next, drop:MAJESTIC_PUDDLE,
+        a:["Just outside the second puddle, toward the " + end + " end again.", "Stay at the inner edge."]},
       tether
-        ? {q:"Where do you stretch your tether?", z:{rect:[o0, y0, o1, y1]}, cue:lines, a:["The outer edge, at the " + end + " end."]}
-        : {q:"You have a Fire Breath marker. Where do you stand?", z:{c:wm.p, r:6.5}, cue:lines,
-          a:["A corner of waymark " + wm.n + ", at the " + end + " end.", "Inner or outer corner: ask your lead."]}],
+        ? {q:"Where do you stretch your tether?", zf:outOfLastPuddle(edge, edgeMid, rectReach(edge.rect), edgeMid),
+          a:["The outer edge, at the " + end + " end.", "Stay out of the third puddle."]}
+        : {q:"You have a Fire Breath marker. Where do you stand?", zf:outOfLastPuddle(marker, zoneCenter(marker), rectReach(marker.rect), outer),
+          a:["The outer corner of waymark " + wm.n + ", at the " + end + " end.", "The inner corner is in the third puddle."]}],
     rule:SPLIT_ROUND_RULE};
 }
 

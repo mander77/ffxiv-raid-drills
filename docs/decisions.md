@@ -689,7 +689,16 @@ static wins.
   - Each round: everyone goes in close, to the middle of the platform's inner edge, to bait the
     puddles; without a tether you bait Fire Breath there first. Then the portal lines leave one end
     of the platform safe (north or south, random each round): a tether goes to the outer edge at
-    that end, a Fire Breath marker to the number waymark there. Inner and outer corners both count.
+    that end, a Fire Breath marker to the number waymark there.
+  - Majestic Meteor (owner's answers, November 2026): three puddles, one click each. The first
+    goes in close at the middle of the inner edge. Each next one goes just outside the last, along
+    the inner edge, toward the safe end. A puddle drops when its cast starts ("--meteor 1--" to
+    "--meteor 3--") and goes off 3 seconds later (BossMod `MajesticMeteorAOE`, range 6).
+  - The third puddle goes off 0.2 seconds after Fire Breath, so it is still on the floor at the
+    lineup. It covers the waymark's inner corner, so a Fire Breath marker takes the outer corner
+    (the owner's choice), and a tether stays out of it too. The second and third puddles stay
+    within the inner strip of the platform (`INNER_STRIP`, the app's choice), so the outer edge
+    and the outer corner stay clear.
   - The second and third towers: the tower in the quadrant where your last tether or marker was.
   - Massive Meteor: the four on a platform stack at the middle of its inner edge, next to the boss,
     so the melee can hit him. Learn's Massive Meteor picture shows it there too.

@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { PUDDLE_R } from "../../data/attacks";
 import { rotOverlay, rotZone, round2, stepZone, unit } from "../../geometry";
 import { bossFor } from "../../lib/practice";
 import { cn } from "../../lib/utils";
@@ -123,7 +122,8 @@ export function LiveArena({
   const kept = sc.steps.slice(0, asking + 1).reduce((from, st, i) => (st.clearDrops ? i : from), 0);
   const drops: ReactNode[] = [];
   results.forEach((r, i) => {
-    if (r.drop && i >= kept)
+    const puddle = sc.steps[i].drop;
+    if (r.drop && puddle && i >= kept)
       drops.push(
         <circle
           // biome-ignore lint/suspicious/noArrayIndexKey: a puddle belongs to its step, which never moves.
@@ -131,7 +131,7 @@ export function LiveArena({
           className={cn("drop", (wentOff ? wentOff(i) : i <= n - 2) && "fading")}
           cx={round2(r.drop[0])}
           cy={round2(r.drop[1])}
-          r={PUDDLE_R}
+          r={puddle.r}
         />,
       );
     const leave = sc.steps[i].leave;
