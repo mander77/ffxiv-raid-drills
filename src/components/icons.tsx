@@ -232,9 +232,9 @@ export const KnockbackTowerIcon = createLucideIcon("knockback-tower", [
   ["path", { d: "M5.5 20 7 9.5 1.5 11.5C5.5 7.5 9.5 4 12 1c2.5 3 6.5 6.5 10.5 10.5L17 9.5l1.5 10.5", key: "arrow" }],
 ]);
 
-/** A stretch tether: two players (filled dots) joined by a tether, and the arrow of their moving
+/** Chains: two players (filled dots) joined by a tether, and the arrow of their moving
     apart to stretch it. */
-export const StretchTetherIcon = createLucideIcon("stretch-tether", [
+export const ChainsIcon = createLucideIcon("chains", [
   ["circle", { cx: "5", cy: "17", r: "3", className: PLAYER, key: "west-player" }],
   ["circle", { cx: "19", cy: "17", r: "3", className: PLAYER, key: "east-player" }],
   ["path", { d: "M8 17h8", key: "tether" }],
@@ -244,7 +244,7 @@ export const StretchTetherIcon = createLucideIcon("stretch-tether", [
 ]);
 
 /** A pair tether: two players (filled dots) joined by a short tether, and the arrows of their
-    staying close as they move: the inverse of the stretch tether, its arrows pointing in. */
+    staying close as they move: the inverse of Chains, its arrows pointing in. */
 export const PairTetherIcon = createLucideIcon("pair-tether", [
   ["circle", { cx: "5", cy: "17", r: "3", className: PLAYER, key: "west-player" }],
   ["circle", { cx: "19", cy: "17", r: "3", className: PLAYER, key: "east-player" }],

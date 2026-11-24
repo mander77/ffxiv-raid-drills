@@ -45,7 +45,7 @@ test("related kinds of mechanic sit together, under one heading", () => {
   const tethers = screen.getByRole("heading", { level: 2, name: "Tethers" }).closest("section");
   assert.ok(tethers);
   const names = [...tethers.querySelectorAll("h3")].map((h) => h.textContent);
-  assert.deepEqual(names, ["Stretch Tether", "Pair Tether"]);
+  assert.deepEqual(names, ["Chains (Break Your Chains)", "Pair Tether"]);
 });
 
 test("a click on an icon's card opens it zoomed in, in a dialog named after it", async () => {
