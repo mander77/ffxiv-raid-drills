@@ -50,7 +50,8 @@ export function Shape({ overlay: o }: ShapeProps) {
       return (
         <g className="tower" transform={`translate(${round2(o.x)} ${round2(o.y)})`}>
           <circle className="out" r={o.r ?? sizes.tower} />
-          {o.soak == null ? <circle className="in" r="1.1" /> : <SoakMark r={o.r ?? sizes.tower} soak={o.soak} />}
+          <circle className="in" r="1.1" />
+          {o.soak != null && <SoakMark r={o.r ?? sizes.tower} soak={o.soak} />}
         </g>
       );
     case "unknown":
@@ -180,21 +181,24 @@ interface SoakMarkProps {
   soak: number;
 }
 
-/** How wide the tower icon is, as a part of the tower's width. The app's choice, for the picture. */
-const SOAK_ICON = 0.6;
+/** The radius of a tower's soak badge, and how wide the tower icon is inside it, in arena units.
+    The app's choice, for the picture. */
+const SOAK_BADGE_R = 4.2;
+const SOAK_ICON = 6;
 
-/** The tower icon in the middle of a tower, with how many players soak it in its column, as the
-    mechanic icon shows it (MechanicIcon). Drawn around the tower's middle. */
+/** How many players soak a tower: a badge on the top of its ring, with the tower icon and the
+    number in its column, as the mechanic icon shows it (MechanicIcon). On the ring, not in the
+    middle, so a waymark or a player in the tower never covers it. */
 function SoakMark({ r, soak }: SoakMarkProps) {
-  const size = 2 * r * SOAK_ICON;
   return (
-    <>
-      <TowerIcon className="icon" x={-size / 2} y={-size / 2} width={size} height={size} />
+    <g className="soak" transform={`translate(0 ${round2(-r)})`}>
+      <circle className="badge" r={SOAK_BADGE_R} />
+      <TowerIcon className="icon" x={-SOAK_ICON / 2} y={-SOAK_ICON / 2} width={SOAK_ICON} height={SOAK_ICON} />
       {/* Up a little, in the column, clear of the ring, as MechanicIcon places it. */}
-      <text y={-size * 0.06} fontSize={size * 0.5}>
+      <text y={round2(-SOAK_ICON * 0.06)} fontSize={SOAK_ICON * 0.5}>
         {soak}
       </text>
-    </>
+    </g>
   );
 }
 

@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, TOWER_R, RAW_STACK_HALF, SCYTHE_SAFE, atomicPuddle, axeHit, fireAndFury, gust, hurricaneLine, lineStack, safeRing, scytheDonut, scytheProteans, sharedCone, swordCross, swordPocket, tankCone } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, TOWER_R, RAW_STACK_HALF, SCYTHE_SAFE, atomicPuddle, axeHit, fireAndFury, gust, hurricaneLine, lineStack, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, swordCross, swordPocket, tankCone } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -555,7 +555,9 @@ export const SPLIT_INNER: Record<SplitSide, RectZone> = {
   west:{rect:[PLATFORM_X.west[1] - 10.5, 38, PLATFORM_X.west[1], 62]}, east:{rect:[PLATFORM_X.east[0], 38, PLATFORM_X.east[0] + 10.5, 62]}};
 /** The four towers, one in each quadrant (as in the first towers). */
 export const SPLIT_TOWER: Record<SplitSide, Record<SplitEnd, Point>> = {west:{north:[11, 23], south:[11, 77]}, east:{north:[89, 23], south:[89, 77]}};
-const SPLIT_TOWERS: Overlay[] = [SPLIT_TOWER.west.north, SPLIT_TOWER.east.north, SPLIT_TOWER.west.south, SPLIT_TOWER.east.south].map(([x, y]): Overlay => ({t:"tower", x, y}));
+/** How many players soak each Arena Split tower (the drills of the split and Arcadion Avalanche). */
+const SPLIT_SOAK = 2;
+const SPLIT_TOWERS: Overlay[] = [SPLIT_TOWER.west.north, SPLIT_TOWER.east.north, SPLIT_TOWER.west.south, SPLIT_TOWER.east.south].map(p => soakTower(p, SPLIT_SOAK));
 /** The number waymark at each end of each platform, where a Fire Breath marker goes. */
 const WAYMARK: Record<SplitSide, Record<SplitEnd, {n: number; p: Point}>> = {
   west:{north:{n:1, p:[10, 22.5]}, south:{n:4, p:[10, 77.5]}}, east:{north:{n:2, p:[90, 22.5]}, south:{n:3, p:[90, 77.5]}}};
@@ -989,7 +991,7 @@ export const DRILLS: readonly Drill[] = [
       split:true, boss:BOSS, overlays:[],
       steps:[{q:"Click your lineup spot.", z:bySlot(s, {H1:{rect:[PLATFORM_X.west[0],52,PLATFORM_X.west[1],92]}, H2:{rect:[PLATFORM_X.east[0],52,PLATFORM_X.east[1],92]}}), a:bySlot(s, {H1:["West platform (light party 1), south end.", "Healers and melee go south."], H2:["East platform (light party 2), south end.", "Healers and melee go south."]})}],
       rule:["Light party 1 west, light party 2 east.", "Tanks and ranged north, healers and melee south."]})},
-  {id:"m-split-tower", order:19, phase:P3, time:"6:29", title:"Arena Split: First Towers", kind:"towerKnockback", soak:2,
+  {id:"m-split-tower", order:19, phase:P3, time:"6:29", title:"Arena Split: First Towers", kind:"towerKnockback", soak:SPLIT_SOAK,
     variants:["tether", "marker"], random:true,
     // A tether's portal is on either side, so the tether may need the knockback across or not.
     build:(s, v)=>firstTowersScene(s, v === "tether" ? {portal:portalAt(randomSide(), randomEnd(), randomEndsSide())} : null)},
@@ -998,12 +1000,12 @@ export const DRILLS: readonly Drill[] = [
     build:(s, v)=>{ const tether = v === "tether", home = homeSide(s);
       return splitRound(s, {tether, side:tether ? randomSide() : home, end:randomEnd(), covered:randomHalf(), endsSide:randomEndsSide(), others:randomOthers(s, tether ? 3 : 4)}); }},
   // The second towers: you start in the quadrant where the first round ended, on either platform.
-  {id:"m-split-towers2", order:19.2, variants:["tether", "marker"], random:true, phase:P3, time:"7:01", title:"Arena Split: Second Towers", kind:"towerKnockback", soak:2,
+  {id:"m-split-towers2", order:19.2, variants:["tether", "marker"], random:true, phase:P3, time:"7:01", title:"Arena Split: Second Towers", kind:"towerKnockback", soak:SPLIT_SOAK,
     build:(s, v)=>{ const side = randomSide(), end = randomEnd();
       return splitTowers(s, side, end, v === "tether" ? {portal:portalAt(randomSide(), randomEnd(), randomEndsSide())} : null); }},
   {id:"m-massive", order:20, phase:P3, time:"7:25", title:"Massive Meteor", kind:"lightPartyStack",
     build:s=>massiveScene(otherSide(homeSide(s)))},
-  {id:"m-avalanche", order:21, random:true, phase:P3, time:"7:39", title:"Arcadion Avalanche", kind:"towerKnockback", soak:2,
+  {id:"m-avalanche", order:21, random:true, phase:P3, time:"7:39", title:"Arcadion Avalanche", kind:"towerKnockback", soak:SPLIT_SOAK,
     build:s=>avalancheScene(s, otherSide(homeSide(s)), randomEnd(), randomSide(), randomEnd())},
   {id:"m-ecl-start", order:26, phase:P4, time:"8:54", title:"Ecliptic Stampede: Start", kind:"puddles",
     build:s=>({setup:["Tanks and melee stack under the boss.", "Healers and ranged stay out to bait the markers."],

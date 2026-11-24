@@ -96,6 +96,8 @@ export const spreadHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("CometS
 /** A tower going off: the Arena Split towers (Explosion), the Ecliptic Stampede towers and
     Heartbreak Kick ("range 4 circle"). */
 export const towerHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("ExplosionTower").range);
+/** A tower to soak ("range 4 circle"), with how many players soak it. */
+export const soakTower = (p: Point, soak: number): Overlay => ATTACK.tower(p, bossmod("ExplosionTower").range, soak);
 /** A baited Meteorain meteor (Cosmic Kiss, "range 4 circle"). */
 export const meteorHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("CosmicKiss").range);
 /** Where the Mammoth Meteor proximity AoE lands (PROXIMITY_DOT). */

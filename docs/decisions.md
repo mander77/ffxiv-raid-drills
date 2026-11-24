@@ -80,8 +80,9 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
 - A knockback has its own overlay (`{t:"knockback"}`): wide, hollow arrows out from its source,
   like the push in the knockback icons (icons.tsx, rule 5; owner's request). Thin white guides
   were too faint to see.
-- A tower can show its soak count (`soak`): the tower icon in its middle, with the number in its
-  column, in the highlight colour, as the mechanic icon shows it (owner's request). A puddle can
+- A tower can show its soak count (`soak`): a badge on its ring with the tower icon and the
+  number in its column, in the highlight colour, as the mechanic icon shows it (owner's request;
+  first in its middle, moved to the ring so a waymark cannot cover it). A puddle can
   carry its life in seconds (`life`).
 - On the styles page, "Knockback Arrows" and "Tower to Soak" have these names because the
   mechanic kinds "Knockback" and "Tower" already have cards there.
@@ -104,9 +105,13 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
   length the app had picked (80 or 150 units), and the sword's arms at its range (40 yalms) in
   place of 150 units. A check that cuts each changed line to the arena found all 2,572 the same
   inside it, and every cone keeps its edges. No size, zone, answer or step changed.
-- Not moved, so nothing changes on screen: M11S's towers stay towers with no soak count, and its
-  knockbacks stay guides. Those guides show where each player is thrown, which the standard
-  knockback (arrows out from a source) does not.
+- The Arena Split towers (the split and Arcadion Avalanche) show their soak count, 2, from the
+  drills' own `soak` (owner's choice). The count is a badge on the tower's ring, not in its
+  middle, because the waymarks 1 to 4 stand on the tower centres and covered it (owner's
+  choice). The Ecliptic Stampede and Heartbreak Kick towers show none: no source or drill gives
+  their count yet.
+- M11S's knockbacks stay guides. Those guides show where each player is thrown, which the
+  standard knockback (arrows out from a source) does not.
 
 ## Planned work
 
