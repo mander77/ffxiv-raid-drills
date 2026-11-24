@@ -829,6 +829,22 @@ static wins.
   boss hitbox is 5 yalms. The shared sizes and shapes live in `src/data/fights/m11s/attacks.ts`.
 - Times come from cactbot (`ui/raidboss/data/07-dt/raid/r11s.txt`). Branch labels in that file add
   offsets, so subtract them.
+- Issue #95 (November 24): `npm run import:strat -- "<wtfdig address>"` writes wtfdig's strat
+  notes for one fight into `notes/<fight>/strat.json`. The address is the one wtfdig shows, with
+  the strat and each toggle's option after "#" (owner's choice over a fight id and choices); an
+  empty part is the strat's default, so the static's `#hector::fixed` is Hector, its Arena Split
+  (Hector No Buddies) and the Fixed (3CJ) Ecliptic.
+  - The notes are committed, outside `src/data/` (owner's choice over the cache only, which a
+    fresh clone would lack). The images stay in `.cache/wtfdig/`.
+  - wtfdig draws its pages in the browser. The script fetches the page, its route file and the
+    chunks it imports until one holds the fight's config (`fightKey`), and reads that chunk with
+    Vite's JavaScript parser (`parseAst`): it never runs wtfdig's code. (TypeScript 7, the
+    project's compiler, has no JavaScript API to parse with.)
+  - Every download is cached, the page too, so a second run sends no requests; `--refresh` reads
+    the page again. Requests wait 400 ms apart.
+  - For each mechanic the notes keep its text as lines, its image, its source, and for each
+    role and light party the text, the image and the spot wtfdig rings on it (in percent of
+    the image). A phase with no mechanics keeps its own text, image and source.
 - Issue #94 (November 24): the import takes any fight. Each fight lists its sources in
   `src/data/fights/<id>/sources.json`, next to its data (owner's choice over one list in
   `scripts/`). `npm run import:sources -- <id>` imports one fight; with no id it imports every
