@@ -19,7 +19,7 @@
 // 3. Chevrons are a hit from the boss, running down the line toward the players (a line stack, a
 //    wild charge).
 // 4. Arrows are a move the players make themselves (spread, a dodge, a stack coming together, puddles
-//    dropped in a row, a tether pulled apart).
+//    dropped in a row, a tether pulled apart or kept close).
 // 5. A knockback is a burst (where it comes from) and a wide, hollow arrow (the push), never a thin
 //    arrow: you do not move yourself. A knockback tower is that wide, hollow arrow bursting up out
 //    of a tower's ring, with the number of players who soak it inside.
@@ -241,6 +241,18 @@ export const StretchTetherIcon = createLucideIcon("stretch-tether", [
   ["path", { d: "M3 7h18", key: "apart" }],
   ["path", { d: "m6 4-3 3 3 3", key: "apart-west" }],
   ["path", { d: "m18 4 3 3-3 3", key: "apart-east" }],
+]);
+
+/** A pair tether: two players (filled dots) joined by a short tether, and the arrows of their
+    staying close as they move: the inverse of the stretch tether, its arrows pointing in. */
+export const PairTetherIcon = createLucideIcon("pair-tether", [
+  ["circle", { cx: "5", cy: "17", r: "3", className: PLAYER, key: "west-player" }],
+  ["circle", { cx: "19", cy: "17", r: "3", className: PLAYER, key: "east-player" }],
+  ["path", { d: "M8 17h8", key: "tether" }],
+  ["path", { d: "M3 7h7", key: "close-west" }],
+  ["path", { d: "m7 4 3 3-3 3", key: "close-west-head" }],
+  ["path", { d: "M21 7h-7", key: "close-east" }],
+  ["path", { d: "m17 4-3 3 3 3", key: "close-east-head" }],
 ]);
 
 /** The shield of a tank buster: lucide's Shield. */
