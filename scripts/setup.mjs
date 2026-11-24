@@ -66,6 +66,16 @@ if (output("gh", ["--version"]) === null) {
   console.log("GitHub CLI: signed in");
 }
 
+// The TypeScript language server: only for the typescript-lsp plugin in .claude/settings.json.
+// It is a .cmd script on Windows, so the check runs in the shell.
+const lsp = spawnSync("typescript-language-server --version", { shell: true, stdio: "ignore" });
+if (lsp.status !== 0) {
+  hints.push(
+    "The TypeScript language server is not installed. Claude Code's typescript-lsp plugin needs it:",
+    "  npm install -g typescript-language-server typescript",
+  );
+}
+
 step("Install the packages", "npm ci");
 step("Install the browsers for the browser tests", "npx playwright install");
 if (process.platform === "linux") {
