@@ -754,7 +754,10 @@ static wins.
   the owner. Give someone else write access, and set the approvals back to 1 first. The
   repository admin role (only the owner) bypasses this ruleset only. It is a ruleset of its own,
   because a bypass covers a whole ruleset, and the CI rule must bind the owner too.
-- `npm run publish` pushes the branch and opens its pull request. `npm run publish -- main`
+- `npm run publish` pushes the branch and opens its pull request. It pushes with
+  `--force-with-lease --force-if-includes`, so a rebased branch goes up with no manual force
+  push, but a commit that another session pushed to the branch, and this checkout has not seen,
+  stops the push instead of being lost. `npm run publish -- main`
   waits for the two checks on the branch's last commit, then runs
   `gh pr merge --rebase --match-head-commit <sha>`, so it merges only the commit CI checked.
 - Branch previews come from GitHub Actions, not from Cloudflare's builds:
