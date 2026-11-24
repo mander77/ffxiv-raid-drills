@@ -668,6 +668,12 @@ static wins.
 - Ultimate Trophy Weapons: the first spawn is south. Slightly west means clockwise, slightly east
   means counterclockwise. The second is NW or NE, then the cardinals. He resolves them in spawn
   order. No source supports "the last one is always north", so the site does not ask it.
+- Ultimate Trophy Weapons, the tornadoes (issue #79, the owner's answer, November 24): every
+  tornado has two baits. Facing in from the tornado, the support stands on its left and the DPS
+  on its right, at its edge, 45 degrees off the line to the middle (`TORNADO_BAITS`). After the
+  answer, Practice, Pressure and Learn show all eight Powerful Gust cones. A 90-degree cone that
+  points 45 degrees off a cardinal runs along the grid, so the arena clips it to a box. An arrow
+  from each tornado toward its bait (`aim`, the app's choice) shows which way each cone goes.
 - Orbital Omen (Hector's dodge): stay against the boss hitbox, at his side, where the #2 lines
   cross. After #1, cross through him to the other side. After #2, cross back.
 - Meteorain, your meteor: H1 drops it NW, inside the boss hitbox. H2 drops it SW, in line with the

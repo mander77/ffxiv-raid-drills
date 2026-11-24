@@ -1,5 +1,5 @@
 import { HITBOX, TOWER_R } from "../../data/attacks";
-import { round2 } from "../../geometry";
+import { round2, unit } from "../../geometry";
 import type { Overlay, Point } from "../../types";
 import { Weapon } from "./Weapon";
 
@@ -97,6 +97,8 @@ export function Shape({ overlay: o }: ShapeProps) {
     case "safe":
       // Drawn SAFE_INSET inside its true edge, so it never sits under the boss's ring.
       return <circle className="safe" cx={round2(o.x)} cy={round2(o.y)} r={round2(o.r - SAFE_INSET)} />;
+    case "aim":
+      return <Aim from={[o.x, o.y]} to={[o.x2, o.y2]} />;
     case "guide":
       return <line className="guide" x1={round2(o.x)} y1={round2(o.y)} x2={round2(o.x2)} y2={round2(o.y2)} />;
     case "portal":
@@ -107,6 +109,29 @@ export function Shape({ overlay: o }: ShapeProps) {
         </g>
       );
   }
+}
+
+interface AimProps {
+  from: Point;
+  to: Point;
+}
+
+/** How long the arrowhead of an aim is, and how wide each side of it is, in arena units. The
+    app's choice, for the picture. */
+const HEAD_LEN = 2.6;
+const HEAD_HALF = 1.6;
+
+/** An arrow from a cone's source along its middle, so a wide cone shows where it comes from. */
+function Aim({ from, to }: AimProps) {
+  const d = unit([to[0] - from[0], to[1] - from[1]]);
+  const back: Point = [to[0] - d[0] * HEAD_LEN, to[1] - d[1] * HEAD_LEN];
+  const side = (s: number): Point => [back[0] - d[1] * HEAD_HALF * s, back[1] + d[0] * HEAD_HALF * s];
+  return (
+    <g className="aim">
+      <line x1={round2(from[0])} y1={round2(from[1])} x2={round2(back[0])} y2={round2(back[1])} />
+      <polygon points={[to, side(1), side(-1)].map(pt).join(" ")} />
+    </g>
+  );
 }
 
 /** True for one of the boss's weapons. */

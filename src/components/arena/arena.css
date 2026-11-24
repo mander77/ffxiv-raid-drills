@@ -123,6 +123,14 @@
     stroke: var(--arena-aoe);
     stroke-width: 0.4;
   }
+  /* Where a cone points: an arrow from its source, in the attack's colour. */
+  .arena .aim line {
+    stroke: var(--arena-aoe);
+    stroke-width: 0.8;
+  }
+  .arena .aim polygon {
+    fill: var(--arena-aoe);
+  }
   .arena .aoeband {
     stroke: var(--arena-aoe);
     opacity: 0.4;
