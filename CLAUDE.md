@@ -170,6 +170,10 @@ src/components/pressure/  Pressure: PressureStart, QuickRound, FightScreen (the 
 src/lib/fight.ts     the fight clock's rules as plain functions: newFightState, tickFight, seek,
                      answerFightStep, viewOf, promptOf, castOf, castsAhead, castPositions
 src/lib/pressure.ts  the quick round's rules (weighted cards, the timer) and playerLink
+src/lib/attacks.ts   the standard attacks for every fight: standardAttacks(arenaHalf) gives raidwide,
+                     circle, donut, cone, line, cross, halfArena, knockback, puddle, tower, unknown
+                     (the "size unknown" mark) and fromBossmod (a BossMod ability as its attack).
+                     Sizes in yalms, drawn to the fight's arena
 src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round), QuestionCard
                      (answers, previews, Lock In, keys, the timer of a timed card), AnswerButton
                      (one answer, before and after you answer), TimerBar,

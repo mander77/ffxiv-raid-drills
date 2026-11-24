@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { dist, round2, unit } from "../../geometry";
 import { useArenaSizes } from "../../hooks/useFight";
+import { UNKNOWN_R } from "../../lib/attacks";
 import type { Overlay, Point } from "../../types";
 import { Weapon } from "./Weapon";
 
@@ -48,7 +49,15 @@ export function Shape({ overlay: o }: ShapeProps) {
       return (
         <g className="tower" transform={`translate(${round2(o.x)} ${round2(o.y)})`}>
           <circle className="out" r={o.r ?? sizes.tower} />
-          <circle className="in" r="1.1" />
+          {o.soak == null ? <circle className="in" r="1.1" /> : <text>{o.soak}</text>}
+        </g>
+      );
+    case "unknown":
+      return (
+        <g className="unknown" transform={`translate(${round2(o.x)} ${round2(o.y)})`} aria-label="Attack, size unknown">
+          <title>Attack, size unknown</title>
+          <circle r={UNKNOWN_R} />
+          <text>?</text>
         </g>
       );
     case "target":

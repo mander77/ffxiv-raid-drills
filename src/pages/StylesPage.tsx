@@ -1,13 +1,14 @@
 // The styles page (/styles): how the site shows an answer, and every icon it uses, with what each
 // one means. No tab leads here, only the footer; it is a reference for the owner, to check the styles side by
 // side in light and dark mode. Each sample is the site's own component, so it shows the real style.
+// The standard attacks come from src/lib/attacks.ts, the functions every fight draws them with.
 // A click on an icon's card opens it zoomed in.
 import type { ComponentProps, ReactNode } from "react";
 import "../components/arena/arena.css";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { Shape, Tether } from "../components/arena/Shape";
+import { hitsFirst, Shape, Tether } from "../components/arena/Shape";
 import { Weapon } from "../components/arena/Weapon";
 import { CastSquare } from "../components/CastSquare";
 import { CATEGORY_ICON, CATEGORY_TEXT } from "../components/CategoryIcons";
@@ -39,8 +40,9 @@ import { StepChips } from "../components/StepChips";
 import { Tally } from "../components/Tally";
 import { CATEGORIES } from "../data/categories";
 import { FIGHTS } from "../data/fights";
+import { standardAttacks } from "../lib/attacks";
 import { kindsOf } from "../lib/practice";
-import type { Category, DrillKind } from "../types";
+import type { Category, DrillKind, Overlay, Point } from "../types";
 
 /** What each ability category means, for its card. */
 const CATEGORY_MEANING: Record<Category, string> = {
@@ -148,6 +150,36 @@ const ARENA_LINES: readonly { name: string; meaning: string; piece: ReactNode }[
     name: "Portal",
     meaning: "Where a tether starts, outside a platform's wall. Orbital Omen's portals carry a number.",
     piece: <Shape overlay={{ t: "portal", x: 30, y: 10, vert: false }} />,
+  },
+];
+
+/** The standard attacks, drawn on an arena 40 yalms across (BossMod's ArenaBoundsSquare(20), as in
+    M11S and M10S). The sizes below are examples, the app's choice, not any fight's attack. */
+const EXAMPLE = standardAttacks(20);
+const MID: Point = [50, 50];
+/** The middle of the arena, closer up, for an attack much smaller than the arena. */
+const CLOSE = "25 25 50 50";
+const ATTACKS: readonly { name: string; meaning: string; overlays: readonly Overlay[]; view?: string }[] = [
+  { name: "Raidwide", meaning: "Hits the whole arena: the party takes it.", overlays: [EXAMPLE.raidwide()] },
+  { name: "Circle", meaning: "Hits everything inside the circle.", overlays: [EXAMPLE.circle(MID, 8)] },
+  { name: "Donut", meaning: "Hits everything outside its inner ring: stand inside it.", overlays: [EXAMPLE.donut(MID, 5, 60)] },
+  { name: "Cone", meaning: "Hits a wedge out from its source.", overlays: [EXAMPLE.cone([50, 90], 0, 90, 60)] },
+  { name: "Line", meaning: "Hits a straight line out from its source.", overlays: [EXAMPLE.line([50, 100], 0, 60, 6)] },
+  { name: "Cross", meaning: "Hits two lines across each other.", overlays: EXAMPLE.cross(MID, 0, 40, 10) },
+  { name: "Half Arena", meaning: "Hits one half of the arena: go to the other half.", overlays: EXAMPLE.halfArena("west") },
+  {
+    name: "Knockback Arrows",
+    meaning: "Pushes you away from its source, as far as the arrows.",
+    overlays: EXAMPLE.knockback(MID, 6),
+    view: CLOSE,
+  },
+  { name: "Puddle", meaning: "Stays on the floor for a few seconds, then goes off.", overlays: [EXAMPLE.puddle(MID, 6, 3)], view: CLOSE },
+  { name: "Tower to Soak", meaning: "Soaked by as many players as its number.", overlays: [EXAMPLE.tower(MID, 4, 2)], view: CLOSE },
+  {
+    name: "Size Unknown",
+    meaning: "An attack whose size no source gives yet. It is not drawn to size.",
+    overlays: [EXAMPLE.unknown(MID)],
+    view: CLOSE,
   },
 ];
 
@@ -316,6 +348,22 @@ export function StylesPage() {
         </section>
 
         <section className="space-y-4">
+          <h2 className="font-display text-2xl font-bold">Standard Attacks</h2>
+          <p className="text-muted-foreground">Every attack is one of these. Only its size changes.</p>
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {ATTACKS.map((a) => (
+              <IconItem
+                key={a.name}
+                picture={<ArenaSquare className="size-16" overlays={a.overlays} view={a.view} />}
+                zoomed={<ArenaSquare className="size-56" overlays={a.overlays} view={a.view} />}
+                name={a.name}
+                meaning={a.meaning}
+              />
+            ))}
+          </ul>
+        </section>
+
+        <section className="space-y-4">
           <h2 className="font-display text-2xl font-bold">The Boss's Weapons</h2>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {WEAPONS.map((w) => (
@@ -353,6 +401,27 @@ function ArenaPiece({ children, className }: ArenaPieceProps) {
     <svg className={cn("arena", className)} viewBox="0 0 60 20" aria-hidden="true">
       <rect className="floor" x="0" y="0" width="60" height="20" />
       {children}
+    </svg>
+  );
+}
+
+interface ArenaSquareProps {
+  overlays: readonly Overlay[];
+  /** The part of the arena to show, as an SVG viewBox. By default, all of it. */
+  view?: string;
+  className?: string;
+}
+
+/** The whole arena floor, 100 units across, with the attacks on it and its edge on top. */
+function ArenaSquare({ overlays, view = "0 0 100 100", className }: ArenaSquareProps) {
+  return (
+    <svg className={cn("arena", className)} viewBox={view} aria-hidden="true">
+      <rect className="floor" x="0" y="0" width="100" height="100" />
+      {hitsFirst(overlays).map((o, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: the pieces of a sample never change order.
+        <Shape key={i} overlay={o} />
+      ))}
+      <rect className="edge" x="0" y="0" width="100" height="100" />
     </svg>
   );
 }

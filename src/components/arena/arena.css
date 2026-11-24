@@ -220,6 +220,31 @@
     fill: var(--arena-text);
     opacity: 0.55;
   }
+  /* A tower's soak count, in its middle. */
+  .arena .tower text {
+    fill: var(--arena-text);
+    font-family: var(--arena-mono);
+    font-weight: 700;
+    font-size: 3.6px;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  /* An attack whose size no source gives yet: a dashed grey ring and a "?", never the orange of a
+     real attack, so it cannot pass for a real size. */
+  .arena .unknown circle {
+    fill: oklch(0.65 0.011 267.316 / 0.18);
+    stroke: var(--arena-text-2);
+    stroke-width: 0.5;
+    stroke-dasharray: 1.4 1;
+  }
+  .arena .unknown text {
+    fill: var(--arena-text-2);
+    font-family: var(--arena-mono);
+    font-weight: 700;
+    font-size: 6px;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
   .arena .portal ellipse {
     fill: oklch(1 0 0);
     stroke: var(--arena-text-2);

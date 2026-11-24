@@ -56,6 +56,30 @@ drafts a new fight). M11S is still the only fight, so nothing changed for the pl
   platforms, portals and tether stretch distance) and the boss
   weapons (`ArenaSizes.scytheSafe`); a fight without them gives `[0, 0]` and leaves `split` out.
 
+## Standard attacks (issue #110)
+
+November 24: every fight draws its attacks with one set of functions, `src/lib/attacks.ts`.
+
+- Two pull requests (owner's choice). The first adds the library, `fromBossmod`, the "size
+  unknown" mark and the attacks on the styles page. M11S does not change. The second moves
+  M11S's drills and pictures onto the library, and checks that each one builds the same as before.
+- All ten attacks of the issue are built now, also those M11S does not use (owner's choice):
+  raidwide, circle, donut, cone, line, cross, half arena, knockback, puddle and tower. A new
+  fight, such as M10S, then draws with no new code.
+- Each function takes its size in yalms. `standardAttacks(arenaHalf)` gets the scale from the
+  fight's arena (`BOSSMOD_ARENA_HALF`), so a fight with a bigger arena draws to scale. M11S and
+  M10S both have a 40-yalm arena: 2.5 units a yalm.
+- An ability with no known size (`shape: "unknown"`) draws a dashed grey ring with a "?"
+  (owner's choice), never the orange of a real attack. Its size (`UNKNOWN_R`) is the app's
+  choice. The import keeps such an ability, with its text; it does not stop.
+- A cone keeps three points on its round edge up to 90 degrees, as M11S's `cleave` draws it. A
+  wider cone gets one more point for each 45 degrees.
+- A knockback is drawn as guides (thin white dashes) out from its source, as M11S draws its
+  knockbacks today. A tower can show its soak count in its middle (`soak`), and a puddle can
+  carry its life in seconds (`life`).
+- On the styles page, "Knockback Arrows" and "Tower to Soak" have these names because the
+  mechanic kinds "Knockback" and "Tower" already have cards there.
+
 ## Planned work
 
 The plans are GitHub issues in `mander77/ffxiv-raid-drills`. Read them with `gh issue list` and
