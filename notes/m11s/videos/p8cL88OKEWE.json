@@ -1,0 +1,650 @@
+{
+  "_generated": "By npm run import:video (scripts/import-video.mjs). Do not edit it by hand.",
+  "rule": "Only for understanding: never take a fight time or an attack size from the video. Mark every position read from it 'owner to check'.",
+  "video": {
+    "id": "p8cL88OKEWE",
+    "url": "https://www.youtube.com/watch?v=p8cL88OKEWE",
+    "title": "Fixed Stampede - M11S Mini-Guide",
+    "channel": "Hector Hectorson - Hector Lectures",
+    "duration": 174
+  },
+  "captions": "YouTube's English captions (made by YouTube unless the channel wrote them): not exact",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Initial stampede phase",
+      "start": 0,
+      "end": 24,
+      "span": "0:00 to 0:24",
+      "lines": [
+        {
+          "t": 0.3,
+          "text": "Hi guys, Hector here with a super quick"
+        },
+        {
+          "t": 1.9,
+          "text": "mini guide to the fixed stampede strat"
+        },
+        {
+          "t": 4,
+          "text": "for Ecliptic Stampede at the end of"
+        },
+        {
+          "t": 5.9,
+          "text": "M11s. For this strat, the beginning of"
+        },
+        {
+          "t": 8.5,
+          "text": "it plays out exactly as you're probably"
+        },
+        {
+          "t": 10.2,
+          "text": "used to. Melees hiding middle, range"
+        },
+        {
+          "t": 12.2,
+          "text": "players out, two random range players"
+        },
+        {
+          "t": 14.2,
+          "text": "marked, and one of them goes to the"
+        },
+        {
+          "t": 15.5,
+          "text": "north wall, one of them goes to the"
+        },
+        {
+          "t": 16.7,
+          "text": "south wall. They dodge the proximity"
+        },
+        {
+          "t": 18.5,
+          "text": "explosions. And from here, it's just"
+        },
+        {
+          "t": 20.1,
+          "text": "puddle baiting. This plays out exactly"
+        },
+        {
+          "t": 22.2,
+          "text": "the same as you're probably used to."
+        }
+      ],
+      "frames": [
+        {
+          "t": 0,
+          "file": ".cache/video/p8cL88OKEWE/frames/01-initial-stampede-phase/001.jpg"
+        },
+        {
+          "t": 3,
+          "file": ".cache/video/p8cL88OKEWE/frames/01-initial-stampede-phase/002.jpg"
+        },
+        {
+          "t": 6,
+          "file": ".cache/video/p8cL88OKEWE/frames/01-initial-stampede-phase/003.jpg"
+        },
+        {
+          "t": 9,
+          "file": ".cache/video/p8cL88OKEWE/frames/01-initial-stampede-phase/004.jpg"
+        },
+        {
+          "t": 12,
+          "file": ".cache/video/p8cL88OKEWE/frames/01-initial-stampede-phase/005.jpg"
+        },
+        {
+          "t": 15,
+          "file": ".cache/video/p8cL88OKEWE/frames/01-initial-stampede-phase/006.jpg"
+        },
+        {
+          "t": 18,
+          "file": ".cache/video/p8cL88OKEWE/frames/01-initial-stampede-phase/007.jpg"
+        },
+        {
+          "t": 21,
+          "file": ".cache/video/p8cL88OKEWE/frames/01-initial-stampede-phase/008.jpg"
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Tower priority system",
+      "start": 24,
+      "end": 80,
+      "span": "0:24 to 1:20",
+      "lines": [
+        {
+          "t": 25,
+          "text": "Where things start to differ is when the"
+        },
+        {
+          "t": 27,
+          "text": "towers spawn in. We're going to use a"
+        },
+        {
+          "t": 29.7,
+          "text": "different priority to decide who's going"
+        },
+        {
+          "t": 31.1,
+          "text": "where for towers. Tanks are going to use"
+        },
+        {
+          "t": 33,
+          "text": "the usual priority of main tank going"
+        },
+        {
+          "t": 34.7,
+          "text": "clockwise from north and off tank going"
+        },
+        {
+          "t": 36.6,
+          "text": "counterclockwise. But for the other"
+        },
+        {
+          "t": 38.4,
+          "text": "players, this is going to be a different"
+        },
+        {
+          "t": 39.9,
+          "text": "order. We're going to actually split the"
+        },
+        {
+          "t": 41.6,
+          "text": "melees up. M1 will go clockwise and M2"
+        },
+        {
+          "t": 44.6,
+          "text": "will go counterclockwise. Each of them"
+        },
+        {
+          "t": 46.5,
+          "text": "partnered with a healer arranged in"
+        },
+        {
+          "t": 48,
+          "text": "their tower. For the healers in range,"
+        },
+        {
+          "t": 50.1,
+          "text": "things are a little bit more"
+        },
+        {
+          "t": 51,
+          "text": "complicated. Because any two of the four"
+        },
+        {
+          "t": 53.4,
+          "text": "ranged players could be middle, we need"
+        },
+        {
+          "t": 55,
+          "text": "to use a four player priority system to"
+        },
+        {
+          "t": 56.8,
+          "text": "decide who's going where. This means"
+        },
+        {
+          "t": 58.8,
+          "text": "that if it's a healer in a range middle,"
+        },
+        {
+          "t": 60.5,
+          "text": "the healer goes clockwise. The range"
+        },
+        {
+          "t": 62.1,
+          "text": "goes counterclockwise."
+        },
+        {
+          "t": 64,
+          "text": "If it's two healers, H1 goes clockwise"
+        },
+        {
+          "t": 65.8,
+          "text": "and H2 goes counterclockwise. And if"
+        },
+        {
+          "t": 67.9,
+          "text": "it's two ranged, R1 goes clockwise and"
+        },
+        {
+          "t": 69.8,
+          "text": "R2 goes counterclockwise. This means H1"
+        },
+        {
+          "t": 72.1,
+          "text": "is always going clockwise. R2 is always"
+        },
+        {
+          "t": 74,
+          "text": "going counterclockwise. And it's only R1"
+        },
+        {
+          "t": 76.1,
+          "text": "and H2 that have to adjust."
+        }
+      ],
+      "frames": [
+        {
+          "t": 24,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/001.jpg"
+        },
+        {
+          "t": 27,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/002.jpg"
+        },
+        {
+          "t": 30,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/003.jpg"
+        },
+        {
+          "t": 33,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/004.jpg"
+        },
+        {
+          "t": 36,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/005.jpg"
+        },
+        {
+          "t": 39,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/006.jpg"
+        },
+        {
+          "t": 42,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/007.jpg"
+        },
+        {
+          "t": 45,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/008.jpg"
+        },
+        {
+          "t": 48,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/009.jpg"
+        },
+        {
+          "t": 51,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/010.jpg"
+        },
+        {
+          "t": 54,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/011.jpg"
+        },
+        {
+          "t": 57,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/012.jpg"
+        },
+        {
+          "t": 60,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/013.jpg"
+        },
+        {
+          "t": 63,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/014.jpg"
+        },
+        {
+          "t": 66,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/015.jpg"
+        },
+        {
+          "t": 69,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/016.jpg"
+        },
+        {
+          "t": 72,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/017.jpg"
+        },
+        {
+          "t": 75,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/018.jpg"
+        },
+        {
+          "t": 78,
+          "file": ".cache/video/p8cL88OKEWE/frames/02-tower-priority-system/019.jpg"
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Tether management",
+      "start": 80,
+      "end": 140,
+      "span": "1:20 to 2:20",
+      "lines": [
+        {
+          "t": 80,
+          "text": "Once players go to their towers, you'll"
+        },
+        {
+          "t": 81.5,
+          "text": "see that now we've got one melee and one"
+        },
+        {
+          "t": 83.4,
+          "text": "range in each of the twoerson towers."
+        },
+        {
+          "t": 85.4,
+          "text": "And how they position the towers is"
+        },
+        {
+          "t": 87,
+          "text": "important. See, we've worked out that"
+        },
+        {
+          "t": 88.7,
+          "text": "the tethers that are going to appear"
+        },
+        {
+          "t": 90.1,
+          "text": "from portals shortly always lock on to"
+        },
+        {
+          "t": 92.6,
+          "text": "the nearest player to the middle of each"
+        },
+        {
+          "t": 94.8,
+          "text": "tower. If the melees hug near to the"
+        },
+        {
+          "t": 96.9,
+          "text": "boss and the healers a range stack right"
+        },
+        {
+          "t": 98.9,
+          "text": "in the middle of their tower, that"
+        },
+        {
+          "t": 100.3,
+          "text": "should mean the melees are never going"
+        },
+        {
+          "t": 101.6,
+          "text": "to get tethered."
+        },
+        {
+          "t": 104.4,
+          "text": "This is super helpful for uptime as both"
+        },
+        {
+          "t": 106.5,
+          "text": "melees will get to keep their uptime on"
+        },
+        {
+          "t": 107.9,
+          "text": "the boss throughout this mechanic,"
+        },
+        {
+          "t": 109.2,
+          "text": "helping you with a pretty tight DPS"
+        },
+        {
+          "t": 110.8,
+          "text": "check. More importantly though, we don't"
+        },
+        {
+          "t": 113.1,
+          "text": "have to use eyes because the four"
+        },
+        {
+          "t": 115,
+          "text": "players in middle are always going to be"
+        },
+        {
+          "t": 117.4,
+          "text": "the two melees and the two fire puddle"
+        },
+        {
+          "t": 119.8,
+          "text": "baiters. So, we're going to use fixed"
+        },
+        {
+          "t": 121.4,
+          "text": "positions in middle for them. Melees are"
+        },
+        {
+          "t": 123.4,
+          "text": "always on the southern corners of the"
+        },
+        {
+          "t": 125,
+          "text": "boss in these positions. And the fire"
+        },
+        {
+          "t": 127.2,
+          "text": "baiters are going to go to the northern"
+        },
+        {
+          "t": 129,
+          "text": "corners. The north fire baiter to the"
+        },
+        {
+          "t": 130.9,
+          "text": "northwest and the south fire baiter to"
+        },
+        {
+          "t": 132.9,
+          "text": "the northeast. Tether players are going"
+        },
+        {
+          "t": 135,
+          "text": "to do exactly as before. Go opposite"
+        },
+        {
+          "t": 136.8,
+          "text": "your portal and stretch it out"
+        }
+      ],
+      "frames": [
+        {
+          "t": 80,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/001.jpg"
+        },
+        {
+          "t": 83,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/002.jpg"
+        },
+        {
+          "t": 86,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/003.jpg"
+        },
+        {
+          "t": 89,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/004.jpg"
+        },
+        {
+          "t": 92,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/005.jpg"
+        },
+        {
+          "t": 95,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/006.jpg"
+        },
+        {
+          "t": 98,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/007.jpg"
+        },
+        {
+          "t": 101,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/008.jpg"
+        },
+        {
+          "t": 104,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/009.jpg"
+        },
+        {
+          "t": 107,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/010.jpg"
+        },
+        {
+          "t": 110,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/011.jpg"
+        },
+        {
+          "t": 113,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/012.jpg"
+        },
+        {
+          "t": 116,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/013.jpg"
+        },
+        {
+          "t": 119,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/014.jpg"
+        },
+        {
+          "t": 122,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/015.jpg"
+        },
+        {
+          "t": 125,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/016.jpg"
+        },
+        {
+          "t": 128,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/017.jpg"
+        },
+        {
+          "t": 131,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/018.jpg"
+        },
+        {
+          "t": 134,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/019.jpg"
+        },
+        {
+          "t": 137,
+          "file": ".cache/video/p8cL88OKEWE/frames/03-tether-management/020.jpg"
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "title": "Four-way and two-way fire",
+      "start": 140,
+      "end": 174,
+      "span": "2:20 to 2:54",
+      "lines": [
+        {
+          "t": 140.6,
+          "text": "From here, four-way fireball plays out"
+        },
+        {
+          "t": 142.5,
+          "text": "exactly as you're used to. We're taking"
+        },
+        {
+          "t": 144,
+          "text": "it in pairs on the intercardinals, and"
+        },
+        {
+          "t": 145.5,
+          "text": "we're already splits into twos. But for"
+        },
+        {
+          "t": 148.2,
+          "text": "two-way fireball, we can now fix things"
+        },
+        {
+          "t": 150.2,
+          "text": "to avoid any shuffle of who's doing what"
+        },
+        {
+          "t": 152.6,
+          "text": "for the inner players. Melees should"
+        },
+        {
+          "t": 154.6,
+          "text": "always be two of the players that are"
+        },
+        {
+          "t": 155.9,
+          "text": "inside the hitbox right now. So melees"
+        },
+        {
+          "t": 158.2,
+          "text": "are always going to be the ones to bait"
+        },
+        {
+          "t": 159.6,
+          "text": "these. M1 baiting it left, M2 baiting it"
+        },
+        {
+          "t": 162.4,
+          "text": "right, and this is always going to be"
+        },
+        {
+          "t": 163.8,
+          "text": "with them standing on the hitbox and"
+        },
+        {
+          "t": 165.4,
+          "text": "everyone else being slightly outside of"
+        },
+        {
+          "t": 167,
+          "text": "the hitbox to not accidentally bait two"
+        },
+        {
+          "t": 168.8,
+          "text": "the same way. And that's it. That's the"
+        },
+        {
+          "t": 170.9,
+          "text": "whole strat. This is cashing on pretty"
+        },
+        {
+          "t": 172.4,
+          "text": "quickly in PartyFinder."
+        }
+      ],
+      "frames": [
+        {
+          "t": 140,
+          "file": ".cache/video/p8cL88OKEWE/frames/04-four-way-and-two-way-fire/001.jpg"
+        },
+        {
+          "t": 143,
+          "file": ".cache/video/p8cL88OKEWE/frames/04-four-way-and-two-way-fire/002.jpg"
+        },
+        {
+          "t": 146,
+          "file": ".cache/video/p8cL88OKEWE/frames/04-four-way-and-two-way-fire/003.jpg"
+        },
+        {
+          "t": 149,
+          "file": ".cache/video/p8cL88OKEWE/frames/04-four-way-and-two-way-fire/004.jpg"
+        },
+        {
+          "t": 152,
+          "file": ".cache/video/p8cL88OKEWE/frames/04-four-way-and-two-way-fire/005.jpg"
+        },
+        {
+          "t": 155,
+          "file": ".cache/video/p8cL88OKEWE/frames/04-four-way-and-two-way-fire/006.jpg"
+        },
+        {
+          "t": 158,
+          "file": ".cache/video/p8cL88OKEWE/frames/04-four-way-and-two-way-fire/007.jpg"
+        },
+        {
+          "t": 161,
+          "file": ".cache/video/p8cL88OKEWE/frames/04-four-way-and-two-way-fire/008.jpg"
+        },
+        {
+          "t": 164,
+          "file": ".cache/video/p8cL88OKEWE/frames/04-four-way-and-two-way-fire/009.jpg"
+        },
+        {
+          "t": 167,
+          "file": ".cache/video/p8cL88OKEWE/frames/04-four-way-and-two-way-fire/010.jpg"
+        },
+        {
+          "t": 170,
+          "file": ".cache/video/p8cL88OKEWE/frames/04-four-way-and-two-way-fire/011.jpg"
+        }
+      ]
+    }
+  ]
+}
