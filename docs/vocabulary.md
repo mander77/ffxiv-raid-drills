@@ -70,19 +70,19 @@ Each kind of text has a place in the code and a job.
 
 | Text | Code | Job | Form |
 |------|------|-----|------|
-| Setup | `Scene.setup` (`src/data/drills.ts`) | What happens in the mechanic. | `Lines`. Numbered when `Scene.ordered` is true. |
-| Rule | `Scene.rule`, `Question.rule`, shared lines in `src/data/rules.ts` | Why the correct spot is correct. | `Lines`. A rule that a drill and a card both show is written once in `rules.ts`. |
+| Setup | `Scene.setup` (`src/data/fights/m11s/drills.ts`) | What happens in the mechanic. | `Lines`. Numbered when `Scene.ordered` is true. |
+| Rule | `Scene.rule`, `Question.rule`, shared lines in `src/data/fights/m11s/rules.ts` | Why the correct spot is correct. | `Lines`. A rule that a drill and a card both show is written once in `rules.ts`. |
 | Step question | `Step.q` | The question for one click. | One sentence. Ends with "?" or "Click it." |
 | Step answer | `Step.a` | The correct move. | `Lines`. The first line is the move itself. The prompt bar and the HUD show only the first line. |
 | Card prompt | `Question.prompt` | The question on a Learn or Timeline card. | One or two sentences. |
 | Card answers | `Question.options[].t` | The answers to pick from. | Short. Incorrect answers use the same words as the correct one. |
 | Card explanation | `Question.why` | Why the correct answer is correct. | `Lines`. |
-| Timeline row | `TimelineEvent.n`, `TimelineEvent.job` (`src/data/timeline.ts`) | The mechanic's name and what you do. | `n` in Title Case. `job` is `Lines`. |
-| Ability note | `N` in `src/data/abilities.ts` | What a boss ability does. | One or two sentences. |
-| Picture caption | `Picture.note` (`src/data/pictures.ts`) | What the arena picture shows. | One or two sentences. |
-| Picture tag | `tag(...)` and `say(...)` in `src/data/pictures.ts` | A label on the arena. | CAPITAL LETTERS, a few words. Must not cover a waymark (a test checks this). |
+| Timeline row | `TimelineEvent.n`, `TimelineEvent.job` (`src/data/fights/m11s/timeline.ts`) | The mechanic's name and what you do. | `n` in Title Case. `job` is `Lines`. |
+| Ability note | `N` in `src/data/fights/m11s/abilities.ts` | What a boss ability does. | One or two sentences. |
+| Picture caption | `Picture.note` (`src/data/fights/m11s/pictures.ts`) | What the arena picture shows. | One or two sentences. |
+| Picture tag | `tag(...)` and `say(...)` in `src/data/fights/m11s/pictures.ts` | A label on the arena. | CAPITAL LETTERS, a few words. Must not cover a waymark (a test checks this). |
 | Kind name | `KINDS` in `src/components/MechanicIcon.tsx` | The name on a mechanic's icon. | Title Case. |
-| Category name | `CATEGORIES` in `src/data/abilities.ts` | The name of a timeline category. | Title Case. |
+| Category name | `CATEGORIES` in `src/data/categories.ts` | The name of a timeline category. | Title Case. |
 
 ## Capital letters
 

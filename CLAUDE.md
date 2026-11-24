@@ -60,6 +60,11 @@ components), and every icon the site uses, with what it means and which mechanic
 on an icon's card opens it zoomed in. Check it when you add or change an icon or an answer style.
 Any other address opens Home, including the old site's addresses (`/mech/...`, `/map/...`).
 
+Each tab's address can start with the fight's id: `/m11s/learn/<card>`, `/m11s/pressure/<code>`.
+With one fight (today), the addresses above have no id and the header has no fight picker. With
+two or more, an address with no id asks you to pick a fight (`FightChooser`), and the header
+gets a fight picker (`FightPicker`). An unknown id opens Home.
+
 The slot switch is in the header: the role (only Healer works today; the others show "not yet
 available") and the light party (1 or 2; wtfdig calls it the group). Each drill and question builds its answer for the
 role.
@@ -103,7 +108,7 @@ npm run format      # Biome: format and fix
 npm run build       # tsc, then Vite writes dist/
 npm run publish     # the owner: checks, then pushes the branch (see "How to publish")
 npm run wait-deploy -- <site> <bundle>   # waits until a deploy serves that bundle
-npm run import:sources   # downloads the pinned cactbot and BossMod files, writes src/data/source.gen.ts
+npm run import:sources   # downloads the pinned cactbot and BossMod files, writes src/data/fights/m11s/source.gen.ts
 npm run check:sources    # fails if source.gen.ts is out of date, then runs test/sources.test.ts
 ```
 
@@ -122,6 +127,9 @@ src/stores/slot.ts   your slot (H1 or H2), a Zustand store kept in the browser
 src/stores/progress.ts  your scores (kept in the browser) and the round of Learn, Practice and Timeline
 src/stores/pressure.ts  your Pressure settings: seconds to decide, stops, pattern picks, speed
 src/components/      React components: Header, Footer (links to the pages that are not tabs),
+                     FightGate (the fight's pages: an unknown fight opens Home), FightChooser
+                     (Pick a Fight, for an address with no fight when there are several),
+                     FightPicker (the header's fight menu, only with more than one fight),
                      PageContainer, SlotSwitch, ShareButton (a toast
                      says the link was copied), TabNav, TabMenu (the tabs as one button below lg), ThemeProvider and ModeToggle (light and
                      dark mode),
@@ -173,28 +181,43 @@ src/lib/             cn() for class names; dom.ts: isPageKey (a key belongs to t
 scripts/             setup.mjs (npm run setup), publish.mjs (npm run publish), wait-deploy.mjs
                      (npm run wait-deploy), import-sources.mjs (npm run import:sources and
                      check:sources): plain Node.js, so they run the same on every OS
-src/types.ts         drills, steps, zones, overlays, questions
+src/types.ts         drills, steps, zones, overlays, questions, abilities, the full fight (Fight,
+                     FightSeg, Hit, Choices) and the Cheat Sheet's ReferenceEntry
 src/party.ts         party slots: roles, light parties, slot names
 src/util.ts          helpers: bySlot, seeded random, pattern codes, shuffle, readingMs
 src/geometry.ts      arena geometry: zones, rotation, inZone
-src/data/fightInfo.ts  the fight's names and the strats (FIGHT_INFO), for the header and Home
-src/data/drills.ts   Practice drills (DRILLS), scenes, safe spots, stack and spread rules
-src/data/rules.ts    rule lines that a drill and a Learn card both show, written once
-src/data/pictures.ts Learn card pictures (LEARN_PICTURES)
-src/data/questions.ts  Learn cards (LEARN_CARDS, LEARN_GROUPS) and Timeline cards (TIMELINE_CARDS)
-src/data/fight.ts    the full fight: segments, due times, pattern picks and codes
-src/data/route.ts    the moving marker's route (correctRoute, clickRoute, runnerAt, showOf)
-src/data/timeline.ts the fight timeline and "what you do" per row
-src/data/reference.ts  the Cheat Sheet's mechanics in fight order (REFERENCE): a Learn picture
+src/fightScope.ts    the fight in the address (scopeOf, withoutFight, inFight) and FightContext
+src/hooks/useFight.ts  useFight (the fight you are on), useFightLink (an address in it),
+                     useArenaSizes, useFightScope
+src/lib/scene.ts     the boss's moves in a scene (jumpsNext, facingNext), for every fight
+src/lib/reference.ts the Cheat Sheet lookups (learnCard, practiceDrill, slotAnswer, referenceByPhase)
+src/data/fights/index.ts  the fights (FIGHTS) and fightById. Add a new fight here.
+src/data/fights/types.ts  FightData: what a fight gives the site (its data, arena sizes, full fight)
+src/data/categories.ts    the ability categories' names (CATEGORIES), shared by every fight
+src/data/sourceLookups.ts the lookups a fight binds to its source.gen.ts (cactbot, bossmod...)
+src/data/route.ts    the moving marker's route (correctRoute, clickRoute, runnerAt, showOf), shared
+src/data/fights/m11s/  M11S, one folder per fight:
+  index.ts           M11S's FightData: joins the files below for the site. The shared code reads
+                     only this.
+  fightInfo.ts       the fight's names and the strats (FIGHT_INFO), for the header and Home
+  drills.ts          Practice drills (DRILLS), scenes, safe spots, stack and spread rules
+  rules.ts           rule lines that a drill and a Learn card both show, written once
+  pictures.ts        Learn card pictures (LEARN_PICTURES)
+  questions.ts       Learn cards (LEARN_CARDS, LEARN_GROUPS) and Timeline cards (TIMELINE_CARDS)
+  fight.ts           the full fight: segments, due times, pattern picks and codes
+  timeline.ts        the fight timeline and "what you do" per row
+  reference.ts       the Cheat Sheet's mechanics in fight order (REFERENCE): a Learn picture
                      and the Learn cards whose rules each one lists, its drills and Timeline card
-src/data/abilities.ts  the ability list, phases and colour categories
-src/data/attacks.ts  attack sizes and shapes (from BossMod). Put new sizes here.
-src/data/source.gen.ts  generated by npm run import:sources: the cactbot lines and the BossMod
+  abilities.ts       the ability list and phases
+  attacks.ts         attack sizes and shapes (from BossMod). Put new sizes here.
+  source.gen.ts      generated by npm run import:sources: the cactbot lines and the BossMod
                      abilities at the pinned commits. Never edit it by hand.
-src/data/sources.ts  the links to the sources, and the lookups into source.gen.ts: cactbot(name, n)
+  sources.ts         the links to the sources, and the lookups into source.gen.ts: cactbot(name, n)
                      (the nth time of a line), bossmod(ability) (its cast and shape), castStart
 src/data/vocabulary.ts  the conversion table and the Checklist searches of docs/vocabulary.md
-test/                Vitest tests; test/components and test/pages for React
+test/                Vitest tests; test/components and test/pages for React. test/m11s.ts builds an
+                     M11S fight the way the engine reads it; test/fixtures/testFight is a made-up
+                     second fight for the tests of more than one fight
 e2e/                 Playwright browser tests
 ```
 
@@ -313,12 +336,13 @@ rebase, run CI or approve a preview again when `main` moves.
   - Each component and page has a test in `test/components/` or `test/pages/`. Find elements by role and
     text, the way a player would.
   - Biome checks every file in `src/`, `test/`, `e2e/` and `scripts/` by itself (globs in
-    `files.includes` in `biome.json`), so a new file needs no entry. Only `src/data/` stays
-    out, except `fightInfo.ts` and `reference.ts`.
+    `files.includes` in `biome.json`), so a new file needs no entry. Only the files right in
+    `src/data/` and in `src/data/fights/m11s/` stay out, except `categories.ts`,
+    `sourceLookups.ts` and M11S's `index.ts`, `fightInfo.ts` and `reference.ts`.
 - Leave the values in `src/data/` and `src/geometry.ts` as they are. They are checked against
   cactbot and BossMod. Names may change, with the owner's OK.
 - A fight time or an attack size is never typed by hand: read it from `source.gen.ts` with
-  `cactbot("Crown of Arcadia", 2)` or `bossmod("CometSpread").range` (in `src/data/sources.ts`).
+  `cactbot("Crown of Arcadia", 2)` or `bossmod("CometSpread").range` (in `src/data/fights/m11s/sources.ts`).
   `test/sources.test.ts` fails on a time that matches no cactbot line or cast start, and on a
   time in the text that is not a cactbot line rounded to the second. Its list `SCENE_STARTS`
   holds the values that are still questions for the owner.
@@ -327,7 +351,7 @@ rebase, run CI or approve a preview again when `main` moves.
   stack, a bait, their own cone), set `Step.hits` to the attacks that must miss them. Never
   move a spot to make it pass: ask the owner, and list the case in its `KNOWN` until they answer.
 - The player marks are always the top layer of an arena picture.
-- New attack sizes go in `src/data/attacks.ts`, not in a drill or a picture.
+- New attack sizes go in `src/data/fights/m11s/attacks.ts`, not in a drill or a picture.
 - A drill pattern comes from a seeded code (`withSeed`), so the same code builds the same pattern.
   Keep every random choice inside `random()`, or old codes change.
 
@@ -367,6 +391,9 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Picture**: an arena picture with its data (`Picture`, `LEARN_PICTURES`, `LearnPicture`).
 - **Round**: the answers so far on one tab, for one slot. The **quick round** is Pressure's 12
   timed cards (`QuickRound`).
+- **Fight data**: one raid fight the site holds (`FightData`, `FIGHTS`), with its id in the
+  address (`/m11s/...`). `useFight` gives the one you are on. Progress and Pressure picks are
+  kept for each one. Not the same as **Fight**, the full fight on the clock.
 - **Fight**: the full fight on the clock (`Fight`, `FightScreen`), in two modes (`FightMode`):
   **the run** (`"run"`), where you click your spots and get a score ("run" means only this), and **Watch the Correct Moves**
   (`"watch"`), the player. A **frame** is one step of the fight clock (`tickFight`,
@@ -394,16 +421,20 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - Every fight time and attack size must come from a source that anyone can check: fight times
   from the cactbot timeline (`r11s.txt`), attack sizes and shapes from the BossMod module
   (`RM11STheTyrant`). `npm run import:sources` brings both in at pinned commits, and
-  `src/data/sources.ts` reads them. Never guess, round or invent one, and never take one from a
+  `src/data/fights/m11s/sources.ts` reads them. Never guess, round or invent one, and never take one from a
   video, a guide's picture or memory. When a source is missing or unclear, ask the owner.
 - To move a pin (a new cactbot or BossMod commit), change the commit in
   `scripts/import-sources.mjs`, run `npm run import:sources` and `npm test`, and commit the new
   `source.gen.ts` on its own. A changed time or size goes to the owner before it ships.
-- To add a fight: add its pins and paths to `scripts/import-sources.mjs` (one fight today, so
-  the script has one set), run the import, and read every time and size through the lookups.
+- To add a fight: give it a folder in `src/data/fights/` (the M11S folder shows the shape) with
+  an `index.ts` that exports its `FightData`, and add it to `FIGHTS` in
+  `src/data/fights/index.ts`. The shared code needs no change. Add its pins and paths to
+  `scripts/import-sources.mjs` (one fight today, so the script has one set; issue #94 makes it
+  take more), run the import, and read every time and size through the lookups, bound to the
+  fight's own `source.gen.ts` with `sourceLookups`.
 - A number the app chooses for itself is not a fight time. Examples: how long the clock runs past
   the enrage (`AFTER_ENRAGE`), and the made-up attacks in incorrect answers (`FAKE` in
-  `src/data/pictures.ts`). Give it a name and a comment that says it is the app's choice.
+  `src/data/fights/m11s/pictures.ts`). Give it a name and a comment that says it is the app's choice.
 - Never change a strat, a position or a rule without the owner. When a source and the owner
   disagree, ask.
 - Words: "pattern", not "layout". "Look Ahead" is a mechanic that the boss shows early and
