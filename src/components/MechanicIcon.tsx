@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import type { DrillKind } from "../types";
 import {
   BaitIcon,
+  ChainsIcon,
   DodgeSequenceIcon,
   KnockbackIcon,
   KnockbackTowerIcon,
@@ -17,7 +18,6 @@ import {
   SharedTankBusterIcon,
   SpreadIcon,
   StackIcon,
-  StretchTetherIcon,
   TankBusterIcon,
   TankTowerIcon,
   TowerIcon,
@@ -98,10 +98,10 @@ export const KINDS: Record<DrillKind, KindInfo> = {
   },
   later: { name: "Look Ahead", meaning: "Spot it early. Act on it later.", icon: LookAheadIcon },
   knockback: { name: "Knockback", meaning: "Stand where the knockback throws you to your spot.", icon: KnockbackIcon },
-  stretchTether: {
-    name: "Stretch Tether",
+  chains: {
+    name: "Chains (Break Your Chains)",
     meaning: "Move away from the other end of your tether until it is long enough.",
-    icon: StretchTetherIcon,
+    icon: ChainsIcon,
   },
   pairTether: {
     name: "Pair Tether",

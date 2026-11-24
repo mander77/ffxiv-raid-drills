@@ -422,11 +422,11 @@ Do not propose these again unless the owner brings them up.
     the inverse of spread, since it needs no room in the middle (owner's choice).
   - Void Stardust and Ecliptic Stampede: start are puddle drop sequences (owner's choice). Saved for
     later keeps its icon and its kind, though no drill uses it now.
-  - Stretch tether, tank buster, shared tank buster and tank tower are kinds with no drill yet, like Tower: the
+  - Chains (Break Your Chains), tank buster, shared tank buster and tank tower are kinds with no drill yet, like Tower: the
     owner wants them ready for later roles. Arena Split's tethers stretch, but its first towers stay
     knockback towers, because you click a tower there.
   - Pair tether is a kind with no drill yet too (owner's choice): two tethered players stay close
-    while they move. Its icon is the inverse of the stretch tether's (owner's choice): the same two
+    while they move. Its icon is the inverse of the Chains icon (owner's choice): the same two
     players on a tether, with the line above them as two arrows pointing in.
   - Stacks share one icon, four arrows from the corners coming together, with the number of
     players in the middle, in Source Sans 3 bold (Saira Condensed's R looked like an A) and its own

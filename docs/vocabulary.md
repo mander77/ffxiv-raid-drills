@@ -115,7 +115,7 @@ The kind of a mechanic is what you do in it. Each kind has one name and one icon
 | Wild Charge | A Line Stack with a tank or a rock in front, to take the biggest hit. | wild charge, tank in front line stack |
 | Look Ahead | Spot it early. Act on it later. | look ahead, saved for later, remember for later, delayed mechanic |
 | Knockback | Stand where the knockback throws you to your spot. | knockback, KB, push |
-| Stretch Tether | Move away from the other end of your tether until it is long enough. | stretch tether, tether stretch, take the tether far |
+| Chains (Break Your Chains) | Move away from the other end of your tether until it is long enough. | Stretch Tether, stretch tether, tether stretch, take the tether far |
 | Pair Tether | Stay close to the player you are tethered to while you both move. | pair tether, partner tether, buddy tether, stay together |
 | Tank Buster | A heavy hit on one tank. | tank buster, TB, buster, tankbuster |
 | Shared Tank Buster | A heavy hit that two tanks share. | shared buster, shared TB, tank share, tankbuster share |

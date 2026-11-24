@@ -58,7 +58,7 @@ const KIND_GROUPS: readonly { title: string; kinds: readonly DrillKind[] }[] = [
   { title: "Spread and stacks", kinds: ["spread", "stack", "pairStack", "lightPartyStack", "roleStack"] },
   { title: "Lines from the boss", kinds: ["lineStack", "wildCharge"] },
   { title: "Towers", kinds: ["tower", "towerKnockback", "tankTower"] },
-  { title: "Tethers", kinds: ["stretchTether", "pairTether"] },
+  { title: "Tethers", kinds: ["chains", "pairTether"] },
   { title: "Tank busters", kinds: ["tankBuster", "sharedTankBuster"] },
   { title: "Your spot", kinds: ["bait", "protean", "knockback"] },
   { title: "Order and timing", kinds: ["sequence", "puddles", "later"] },

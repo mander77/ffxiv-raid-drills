@@ -202,7 +202,7 @@ export type DrillKind =
   | "wildCharge"
   | "later"
   | "knockback"
-  | "stretchTether"
+  | "chains"
   | "pairTether"
   | "tankBuster"
   | "sharedTankBuster";
