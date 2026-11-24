@@ -616,7 +616,11 @@ static wins.
 - First set (0:48): the three weapons spawn at once. The tell is his facing. At the start of the
   6-second cast, he turns to the first weapon. Then he goes clockwise.
 - Second set (1:33, during the first Void Stardust): the first weapon is the one with its flat side
-  square to him. Then clockwise. Each weapon of this set faces where he jumps from.
+  square to him. Then clockwise. Each weapon of this set faces where he jumps from (cactbot's
+  "R11S Trophy Weapons" trigger reads the order this way). He never jumps straight across the
+  middle: a weapon reached that way would face the middle too, as square as the first. Where the
+  spots would give that jump, its weapon moves 45° back (owner's choice), so a later weapon is
+  always at least 22.5° off square.
 - Sword: stand in the pocket behind him, on the side he jumped from. H1 takes his left, H2 his
   right, and the light party stacks on the healer. Stand a few steps in from the inner corner,
   about 2 yalms clear of each arm. The whole pocket inside the arena counts as correct.
