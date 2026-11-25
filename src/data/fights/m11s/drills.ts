@@ -1215,6 +1215,35 @@ export function avalancheScene(s: Slot, side: SplitSide, end: SplitEnd, face: Sp
 }
 // TS note: the `Drill[]` annotation is what checks every drill below. Each build function
 // must return a Scene, so a missing field or a misspelled one is a compile error.
+/* Meteorain: where each meteor lands, as a rock. The spots are the app's choice, on the intercard
+   lines, at the distances measured in Hector's guide video (https://youtu.be/w1uuwzhyf5A, 9:02 to
+   12:04) and close to wtfdig's picture of the second set: the rocks near the boss are in his max
+   melee, not under him (the owner, November 25). The SW row runs out along one line, so the
+   three rocks there block Triple Tyrannhilation together. */
+export const METEOR_ROCKS = {
+  /** M1's, the first set. */
+  ne: polar(45, 20),
+  /** M2's, the first set: the start of the SW row. */
+  sw: polar(225, 15.5),
+  /** The best spot for H1's, the second set. Any spot NW in max melee is correct. */
+  nw: polar(315, 20),
+  /** H2's, the second set: farther out on the SW row. */
+  sw2: [26, 74] as Point,
+  /** R1's, the third set: the end of the SW row. */
+  sw3: [10, 90] as Point,
+  /** R2's, the third set. */
+  ne2: polar(45, 18),
+} as const;
+/** How far from the boss the party stacks behind a rock to break it. The app's choice, from the video. */
+export const BEHIND_ROCK = 30;
+/** A rock on the arena. */
+const rock = ([x, y]: Point): Overlay => ({t:"rock", x, y});
+/** H1's meteor: anywhere NW of the boss in his max melee. */
+const H1_METEOR: Zone = {
+  fn:p => { const r = dist(p, CENTER), a = angOf([p[0] - 50, p[1] - 50]); return r >= HITBOX && r <= MELEE_R && a >= 285 && a <= 345; },
+  label:METEOR_ROCKS.nw,
+  show:[{poly:[...[285, 300, 315, 330, 345].map((a): Point => polar(a, HITBOX)), ...[345, 330, 315, 300, 285].map((a): Point => polar(a, MELEE_R))]}]};
+
 export const DRILLS: readonly Drill[] = [
   {id:"m-raw-axe", order:2, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: Axe", kind:"spread",
     build:s=>({setup:["The boss pulls out an axe.", "The two tanks stack for a Shared Tank Buster.", "The other six players each get an AoE, so they spread."],
@@ -1262,31 +1291,31 @@ export const DRILLS: readonly Drill[] = [
       boss:BOSS, overlays:O.overlays, steps:O.steps,
       rule:ORBITAL_RULE}; }},
   {id:"m-meteor-1", order:16, phase:P2, time:"5:00", title:"Meteorain: First Line Stack", kind:"wildCharge",
-    build:s=>({setup:["The melee bait the first two meteors.", "They drop them under the boss, NE and SW.", "The first Line Stack goes off next."], ordered:true,
-      boss:BOSS, overlays:[{t:"target",x:57,y:43},{t:"target",x:43,y:57},{t:"mark",x:57,y:43,l:"M1",r:"D"},{t:"mark",x:43,y:57,l:"M2",r:"D"}],
+    build:s=>({setup:["The melee bait the first two meteors.", "They drop them in max melee, NE and SW.", "The first Line Stack goes off next."], ordered:true,
+      boss:BOSS, overlays:[{t:"target",x:METEOR_ROCKS.ne[0],y:METEOR_ROCKS.ne[1]},{t:"target",x:METEOR_ROCKS.sw[0],y:METEOR_ROCKS.sw[1]},
+        {t:"mark",x:METEOR_ROCKS.ne[0],y:METEOR_ROCKS.ne[1],l:"M1",r:"D"},{t:"mark",x:METEOR_ROCKS.sw[0],y:METEOR_ROCKS.sw[1],l:"M2",r:"D"}],
       steps:[{q:"Where do you stand for the first Line Stack?", z:{c:[36,37],r:8}, a:["NW, in the Line Stack.", "The tanks stand in front for this first one."]}],
       rule:METEOR_ORDER_RULE})},
   {id:"m-meteor-2", order:16.1, phase:P2, time:"5:03", title:"Meteorain: Your Meteor", kind:"bait",
-    build:s=>({setup:["Healers bait the second set. You have a meteor marker.", "Two rocks are already down under the boss: one NE and one SW."],
-      boss:BOSS, overlays:[{t:"rock",x:57,y:43},{t:"rock",x:43,y:57}],
+    build:s=>({setup:["Healers bait the second set. You have a meteor marker.", "Two rocks are already down in max melee: one NE and one SW."],
+      boss:BOSS, overlays:[rock(METEOR_ROCKS.ne), rock(METEOR_ROCKS.sw)],
       steps:[{q:"Where do you drop your meteor?",
         // S<Zone>: the H1 answer is a rule zone and the H2 answer is a circle, so name the shared type.
-        z:bySlot<Zone>(s, {H1:{fn:p => { const r = Math.hypot(p[0] - 50, p[1] - 50), a = angOf([p[0] - 50, p[1] - 50]); return r >= 3 && r <= 11.5 && a >= 285 && a <= 345; },
-                label:[43, 43], show:[{poly:[[50, 50], ...[285, 300, 315, 330, 345].map((a): Point => polar(a, 11))]}]}, H2:{c:[26, 74], r:8}}),
-        a:bySlot(s, {H1:["Under the boss, on his NW side."], H2:["SW, in a row with the first SW rock.", "About halfway to the edge."]})}],
-      rule:[...bySlot(s, {H1:["H1 drops NW, under the boss."],
-          H2:["H2 drops SW, in a row with the first rock.", "That rock is under the boss.", "Two rocks too close together explode, so yours goes farther out."]}),
+        z:bySlot<Zone>(s, {H1:H1_METEOR, H2:{c:METEOR_ROCKS.sw2, r:8}}),
+        a:bySlot(s, {H1:["NW, in max melee."], H2:["SW, in a row with the first SW rock.", "About halfway to the edge."]})}],
+      rule:[...bySlot(s, {H1:["H1 drops NW, in max melee."],
+          H2:["H2 drops SW, in a row with the first rock.", "That rock is in max melee.", "Two rocks too close together explode, so yours goes farther out."]}),
         "Icy Veins swaps H1 and H2 here, so do not mix guides."]})},
   {id:"m-meteor-3", order:16.2, phase:P2, time:"5:20", title:"Meteorain: Third Line Stack", kind:"wildCharge",
-    build:s=>({setup:["The ranged bait the third set.", "Rocks: NW (from H1, under the boss), and a row of two SW.", "Each stack breaks the rock in front of it."],
-      boss:BOSS, overlays:[{t:"rock",x:43,y:43},{t:"rock",x:43,y:57},{t:"rock",x:26,y:74}],
-      steps:[{q:"Where do you stand for this Line Stack?", z:{c:[35,35],r:7}, a:["NW, behind the NW rock.", "Farther from the boss than the rock."]}],
+    build:s=>({setup:["The ranged bait the third set.", "Rocks: NW (from H1), and a row of two SW.", "Each stack breaks the rock in front of it."],
+      boss:BOSS, overlays:[rock(METEOR_ROCKS.nw), rock(METEOR_ROCKS.sw), rock(METEOR_ROCKS.sw2)],
+      steps:[{q:"Where do you stand for this Line Stack?", z:{c:polar(315, BEHIND_ROCK),r:7}, a:["NW, behind the NW rock.", "Farther from the boss than the rock."]}],
       rule:["Stack behind a rock to break it.", "Keep the SW row of rocks whole."]})},
   {id:"m-meteor-4", order:16.3, phase:P2, time:"5:30 to 5:43", title:"Meteorain: Last Line Stack", kind:"wildCharge",
     build:s=>({setup:["The last stack has no meteor baits.", "Rocks: NE (from R2), and a row of three SW."],
-      boss:BOSS, overlays:[{t:"rock",x:57,y:43},{t:"rock",x:43,y:57},{t:"rock",x:26,y:74},{t:"rock",x:10,y:90}],
+      boss:BOSS, overlays:[rock(METEOR_ROCKS.ne2), rock(METEOR_ROCKS.sw), rock(METEOR_ROCKS.sw2), rock(METEOR_ROCKS.sw3)],
       steps:[
-        {q:"Where do you stand for the fourth Line Stack?", z:{c:[65,35],r:7}, a:["Behind the NE rock, to break it."]},
+        {q:"Where do you stand for the fourth Line Stack?", z:{c:polar(45, BEHIND_ROCK),r:7}, a:["Behind the NE rock, to break it."]},
         {q:"Triple Tyrannhilation is next. Where do you hide?", z:{c:[5,96],r:6.5}, a:["SW, behind the row of three rocks."]}],
       rule:["After the fourth Line Stack: run SW.", "Hide behind the row of three rocks."]})},
   {id:"m-split-line", order:18, phase:P3, time:"6:02", title:"Arena Split: Lineup", kind:"knockback",
