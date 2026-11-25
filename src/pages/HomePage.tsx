@@ -6,11 +6,9 @@ import { LearnPicture } from "../components/arena/LearnPicture";
 import { PageContainer } from "../components/PageContainer";
 import type { FightData } from "../data/fights/types";
 import { useFight, useFightLink } from "../hooks/useFight";
+import { ROLES } from "../party";
 import { useSlotStore } from "../stores/slot";
-
-/** The strats in one phrase, such as "A, B and C". */
-const stratList = (strats: readonly string[]): string =>
-  strats.length > 1 ? `${strats.slice(0, -1).join(", ")} and ${strats.at(-1)}` : (strats[0] ?? "");
+import type { Role } from "../types";
 
 /** A card under "Start Here": one tab, in the order to learn the fight. */
 interface StartCard {
@@ -54,6 +52,17 @@ const ABOUT_ME = [
   "I have played Final Fantasy XIV for more than ten years and tried savage raiding many times. As a casual player, I struggle to master the mechanics, and I cannot practice in the game as much as I would like.",
   "So I built this tool to learn fights outside the game, at my own pace, without making seven other people wait for me. I hope it helps you too.",
 ];
+
+/** Each role as its players, inside a sentence. */
+const PLAYERS: Record<Role, string> = { Tank: "tanks", Healer: "healers", Melee: "melee", Ranged: "ranged" };
+
+/** The roles that have drills today, at the start of a sentence, such as "Healers" or "Tanks and
+    healers". They come from the role switch, so Home needs no change when a role comes in. */
+const rolesToday = (): string => {
+  const words = ROLES.filter((r) => r.ready).map((r) => PLAYERS[r.role]);
+  const list = words.length > 1 ? `${words.slice(0, -1).join(", ")} and ${words.at(-1)}` : (words[0] ?? "");
+  return list.charAt(0).toUpperCase() + list.slice(1);
+};
 
 interface OutLinkProps {
   href: string;
@@ -101,7 +110,13 @@ export function HomePage() {
           )}
           <div className="space-y-3">
             <h2 className="font-display text-3xl tracking-wide text-balance">Practice Savage Mechanics Without a Party</h2>
-            <p>Learn the mechanics, practice where you stand, then do it all fast. The answers follow {stratList(fight.info.strats)}.</p>
+            {/* What the site is for and who it is for, first: a player who has read the guides
+                practices here, and a player on another strat or role sees the spots will not match. */}
+            <p className="font-semibold">Practice fights you already studied, without being in the game.</p>
+            <p>Read the guide and watch a video first. This site does not teach a fight from scratch.</p>
+            <p>
+              Spots follow the <OutLink href={fight.links.guide}>wtfdig strat</OutLink> named at the top. {rolesToday()} only for now.
+            </p>
             <p>
               You are set as <span className="font-semibold">{slot}</span>. Change it with the Light Party switch at the top. Your progress
               stays in this browser.
