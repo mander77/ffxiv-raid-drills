@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -245,7 +245,7 @@ export function ultimateScene(U: JumpSet): Scene {
       "South and slightly east = counterclockwise."],
     spawnPlay:true, spawnAhead:3, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,
     rule:["First weapon south: slightly west = clockwise, slightly east = counterclockwise.",
-      "The second is NW or NE. Then the cardinals.",
+      "The second is NW or NE. Then the cardinals, ending north.",
       "Use the normal rule for each weapon."]};
 }
 
@@ -381,20 +381,22 @@ export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
   const outer = shuffle([0, 3]), inner = shuffle([1, 2]);
   const V = [outer[0], inner[0]].concat(shuffle([outer[1], inner[1]]));
   const H = shuffle([1, 2]).concat(shuffle([0, 3]));
-  const lane = (n: number, vert: boolean): RectZone => vert ? {rect:[n * 25, 0, n * 25 + 25, 100]} : {rect:[0, n * 25, 100, n * 25 + 25]};
-  const inV = (p: Point, n: number): boolean => p[0] >= n * 25 && p[0] <= n * 25 + 25;
-  const inH = (p: Point, n: number): boolean => p[1] >= n * 25 && p[1] <= n * 25 + 25;
+  // Four lanes each way span the arena, so a lane is a quarter of it (BossMod OrbitalOmenRect).
+  const W = ORBITAL_LANE;
+  const lane = (n: number, vert: boolean): RectZone => vert ? {rect:[n * W, 0, (n + 1) * W, 100]} : {rect:[0, n * W, 100, (n + 1) * W]};
+  const inV = (p: Point, n: number): boolean => p[0] >= n * W && p[0] <= (n + 1) * W;
+  const inH = (p: Point, n: number): boolean => p[1] >= n * W && p[1] <= (n + 1) * W;
   /* Hector's dodge: stay in the four middle squares against the boss hitbox and cross it
      to whichever middle square the next lines miss. */
-  const mid = (p: Point): boolean => p[0] >= 25 && p[0] <= 75 && p[1] >= 25 && p[1] <= 75;
+  const mid = (p: Point): boolean => p[0] >= W && p[0] <= 3 * W && p[1] >= W && p[1] <= 3 * W;
   const side = (p: Point): boolean => Math.abs(p[0] - 50) > Math.abs(p[1] - 50);
   const misses = (p: Point, sets: number[]): boolean => sets.every(i => !inV(p, V[i]) && !inH(p, H[i]));
-  const cellRect = (c: number, r: number): RectZone => ({rect:[c * 25, r * 25, c * 25 + 25, r * 25 + 25]});
+  const cellRect = (c: number, r: number): RectZone => ({rect:[c * W, r * W, (c + 1) * W, (r + 1) * W]});
   const spot = (c: number, r: number): Point => [c === 1 ? 38 : 62, r === 1 ? 44 : 56];
   const c2 = V[1], r2 = H[1], cOpp = 3 - V[1], r1 = H[0];
   const overlays: Overlay[] = [];
-  V.forEach((n, i) => overlays.push({t:"guide", x:n * 25 + 12.5, y:0, x2:n * 25 + 12.5, y2:100}, {t:"portal", x:n * 25 + 12.5, y:2.6, vert:true, n:i + 1}));
-  H.forEach((n, i) => overlays.push({t:"guide", x:0, y:n * 25 + 12.5, x2:100, y2:n * 25 + 12.5}, {t:"portal", x:97.4, y:n * 25 + 12.5, vert:false, n:i + 1}));
+  V.forEach((n, i) => overlays.push({t:"guide", x:n * W + W / 2, y:0, x2:n * W + W / 2, y2:100}, {t:"portal", x:n * W + W / 2, y:2.6, vert:true, n:i + 1}));
+  H.forEach((n, i) => overlays.push({t:"guide", x:0, y:n * W + W / 2, x2:100, y2:n * W + W / 2}, {t:"portal", x:97.4, y:n * W + W / 2, vert:false, n:i + 1}));
   const lanes = (sets: number[], soft = false): Overlay[] =>
     sets.flatMap((i): Overlay[] => [{t:"lane", rect:lane(V[i], true).rect, soft}, {t:"lane", rect:lane(H[i], false).rect, soft}]);
   return {
@@ -409,7 +411,7 @@ export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
         a:["Cross under the boss to the opposite middle square.", "The #2 lines miss it."],
         reveal:lanes([1])},
       {q:"The #2 lines went off. Where do you go now?",
-        z:{fn:p => mid(p) && misses(p, [2, 3]), label:spot(c2, r2), show:[{rect:[c2 * 25, 25, c2 * 25 + 25, 75]}]},
+        z:{fn:p => mid(p) && misses(p, [2, 3]), label:spot(c2, r2), show:[{rect:[c2 * W, W, (c2 + 1) * W, 3 * W]}]},
         a:["Cross back into the column the #2 line already hit.", "The #3 and #4 lines miss it, so stay there."],
         reveal:lanes([2, 3], true)}
     ]

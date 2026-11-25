@@ -104,4 +104,5 @@ test("each attack size is BossMod's, and one size stands for each group of attac
   );
   same(yalms(ATTACKS.TOWER_R), ["ExplosionTower", "CosmicKissEcliptic", "WeightyImpact", "HeartbreakKickTower"], "range");
   same(yalms(ATTACKS.lineStack([50, 50], [0, 50]).w), ["FearsomeFireballCharge", "TwoWayFireball", "FourWayFireball"], "width");
+  assert.equal(ATTACKS.ORBITAL_LANE * 4, 100, "four Orbital Omen lanes span the arena");
 });
