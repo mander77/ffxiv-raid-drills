@@ -6,9 +6,10 @@
 //   FIGHT=<id> npx vitest run test/zone-sweep.test.ts
 // read the list in the failure message, then delete the copy. FIGHT defaults to the first fight.
 //
-// What it covers: every Practice drill, and every scene of the full fight (Pressure), so a
-// mechanic that only the full fight plays is checked too. What it leaves out: puddles dropped at
-// earlier steps (test/answers.test.ts times those), and look-ahead steps (you do not stand there).
+// What it covers: every Practice drill, and every scene of the full fight (Pressure) for every
+// value of every pick, so a mechanic that only the full fight plays is checked too. What it
+// leaves out: puddles dropped at earlier steps (test/answers.test.ts times those), and
+// look-ahead steps (you do not stand there).
 import { expect, test } from "vitest";
 import { FIGHTS, fightById } from "../src/data/fights";
 import { dist, inZone, stepZone, zoneCenter } from "../src/geometry";
@@ -22,7 +23,13 @@ const CODES = "2222 2345 3K7Q 4ZZ9 5MPA 6BXR 7HJW 8C3T 9DLE AF4N".split(" ");
 const GRID = 0.5;
 
 const isAttack = (o: Overlay): boolean =>
-  o.t === "aoe" || o.t === "donut" || o.t === "lineaoe" || o.t === "band" || o.t === "puddle" || o.t === "poly" || (o.t === "lane" && !o.soft);
+  o.t === "aoe" ||
+  o.t === "donut" ||
+  o.t === "lineaoe" ||
+  o.t === "band" ||
+  o.t === "puddle" ||
+  o.t === "poly" ||
+  (o.t === "lane" && !o.soft);
 
 function inLine(p: Point, a: Point, b: Point, w: number): boolean {
   const d: Point = [b[0] - a[0], b[1] - a[1]];
@@ -98,7 +105,8 @@ function sweep(s: Slot, where: string, scene: Scene, worst: Worst): void {
       // The question can name the pattern ("The stack went off"), so the key leaves it out.
       const key = `${where}, step ${i + 1}`;
       const prev = worst.get(key);
-      if (bad && (!prev || bad / total > prev.bad / prev.total)) worst.set(key, { bad, total, example, attack, slots: new Set([...(prev?.slots ?? []), s]) });
+      if (bad && (!prev || bad / total > prev.bad / prev.total))
+        worst.set(key, { bad, total, example, attack, slots: new Set([...(prev?.slots ?? []), s]) });
       else if (bad && prev) prev.slots.add(s);
     }
     const p = step.stand ?? zoneCenter(zone);
@@ -113,8 +121,19 @@ test(`every point of each correct area in ${fight.id} is out of its step's attac
       for (const drill of fight.drills) sweep(s, `Practice ${drill.id}`, buildPattern(drill, s, code).scene, worst);
       for (const seg of fight.clock.build(s, code, fight.clock.random).segs) sweep(s, `Pressure "${seg.title}"`, seg.scene, worst);
     }
+  // Every value of every pick, so a pattern that random codes rarely build is checked too.
+  for (const s of SLOTS)
+    for (const row of fight.clock.rows)
+      for (const [value] of row.options)
+        for (const code of CODES.slice(0, 3))
+          for (const seg of fight.clock.build(s, code, { ...fight.clock.random, [row.key]: value }).segs)
+            sweep(s, `Pressure "${seg.title}"`, seg.scene, worst);
   const found = [...worst]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, w]) => `${key} (${[...w.slots].join(", ")}): ${w.bad} of ${w.total} points in an attack (${w.attack}), for example (${w.example.join(", ")})`);
+    .map(
+      ([key, w]) =>
+        `${key} (${[...w.slots].join(", ")}): ${w.bad} of ${w.total} points in an attack (${w.attack}), for example (${w.example.join(", ")})`,
+    );
   expect(found).toEqual([]);
-});
+  // It builds every pattern and samples every area, so it runs longer than a unit test.
+}, 600_000);
