@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, ECL_TOWER_R, TOWER_R, RAW_STACK_HALF, SCYTHE_SAFE, atomicPuddle, axeHit, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, ECL_TOWER_R, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -80,8 +80,8 @@ export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
       a = ["Axe, " + where + ": Party Stack in the middle.", "Stay outside the axe AoE."];
       reveal = [axeHit(P)];
     } else if(w.type === "scythe"){
-      // H1 at the butt end, H2 at the point end, as the scythe is drawn.
-      z = {c:addVec(P, scytheAxis(w, i), -9.5 * side), r:5};
+      // H1 at the butt end, H2 at the point end, as the scythe is drawn: the spot, close in.
+      z = scytheSpot(P, addVec(P, scytheAxis(w, i), -9.5 * side));
       a = ["Scythe, " + where + ": close in at the " + bySlot(s, {H1:"butt (the handle end).", H2:"point (the blade end)."})];
       // Proteans: a cone on every player, so each player takes a clock spot close around him.
       // The point and the butt (H2 and H1) are two of the eight spots, opposite each other.
@@ -111,6 +111,30 @@ export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
     return {q:ORDINALS[i] + " weapon: click where you go.", z, a, reveal, leave, stand, ...(hits ? {hits} : {})};
   });
   return {W, states, steps, overlays};
+}
+
+/** How far from the scythe spot a click still counts, before the safe ground cuts it down: the
+    app's choice. */
+const SCYTHE_REACH = 5;
+
+/* The scythe's correct area: within SCYTHE_REACH of your spot (its best spot), but only where
+   nothing else hits you. The donut leaves only SCYTHE_SAFE around him, and the next player's
+   protean cone starts SCYTHE_CLEAR_DEG off your clock spot. The map draws the same area. */
+function scytheSpot(P: Point, spot: Point): Zone {
+  const mine = angOf([spot[0] - P[0], spot[1] - P[1]]);
+  /** How many degrees the direction from him to p is off your clock spot. */
+  const off = (p: Point): number => Math.abs(((angOf([p[0] - P[0], p[1] - P[1]]) - mine + 540) % 360) - 180);
+  const fn = (p: Point): boolean => dist(p, spot) <= SCYTHE_REACH && dist(p, P) <= SCYTHE_SAFE && off(p) < SCYTHE_CLEAR_DEG;
+  // Each ray from him: the stretch of it that is near the spot and inside the safe ring.
+  const part = (deg: number): Stretch | null => {
+    const x = crossCircle(P, deg, spot, SCYTHE_REACH);
+    if(!x) return null;
+    const f: Stretch = [Math.max(0, x[0]), Math.min(x[1], SCYTHE_SAFE)];
+    return f[1] - f[0] > 0.3 ? f : null;
+  };
+  const edge = Math.ceil(SCYTHE_CLEAR_DEG) - 1;
+  const degs = Array.from({length:2 * edge + 1}, (_x, k) => mine - edge + k);
+  return {fn, label:spot, show:rayArea(P, degs, part).map(poly => ({poly}))};
 }
 
 /* Assault Evolved: three weapons. The boss faces the first, then goes clockwise.

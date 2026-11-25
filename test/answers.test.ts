@@ -14,7 +14,7 @@
 import { describe, expect, test } from "vitest";
 import { DRILLS, FIRST_PUDDLE } from "../src/data/fights/m11s/drills";
 import { buildFight } from "../src/data/fights/m11s/fight";
-import { dist, stepZone, zoneCenter } from "../src/geometry";
+import { dist, inZone, stepZone, zoneCenter } from "../src/geometry";
 import { buildPattern } from "../src/lib/practice";
 import type { Drill, Overlay, Point, Slot, Step, StepResult } from "../src/types";
 import { random, withSeed } from "../src/util";
@@ -207,6 +207,33 @@ describe("no correct answer stands in an attack", () => {
     expect(problemsIn(moved("m-raw-scythe", 1, [38, 30]), "H1", "2222").map(message)).toEqual([
       "m-raw-scythe, H1, code 2222, step 1: the correct spot is in poly from (50.0, 50.0)",
     ]);
+  });
+
+  test("every point of a scythe area is out of the donut and the other players' cones", () => {
+    // The test above checks only a zone's center. A scythe area is close to two attacks (the
+    // donut's inner edge, the next protean cone), so here every point of it counts.
+    let checked = 0;
+    for (const id of ["m-assault", "m-void", "m-ultimate"]) {
+      const drill = DRILLS.find((d) => d.id === id);
+      if (!drill) throw new Error(`missing drill ${id}`);
+      for (const s of SLOTS)
+        for (const code of CODES) {
+          const { scene } = buildPattern(drill, s, code);
+          scene.steps.forEach((step, i) => {
+            if (!step.a[0].startsWith("Scythe") || !step.z) return;
+            const zone = step.z;
+            for (let x = 0; x <= 100; x += 0.5)
+              for (let y = 0; y <= 100; y += 0.5) {
+                const p: Point = [x, y];
+                if (!inZone(p, zone)) continue;
+                checked++;
+                const hit = attacksOf(step).find((o) => hits(o, p));
+                expect(hit && nameOf(hit), `${id}, ${s}, code ${code}, step ${i + 1}: (${x}, ${y}) counts as correct`).toBeUndefined();
+              }
+          });
+        }
+    }
+    expect(checked).toBeGreaterThan(1000);
   });
 
   test("a puddle dropped on the last one fails", () => {

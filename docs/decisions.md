@@ -825,7 +825,9 @@ static wins.
   about 2 yalms clear of each arm. The whole pocket inside the arena counts as correct.
 - Scythe: proteans, so everyone takes a clock spot close around him. He always lands on the flat
   side, so you can pre-position on the weapon. H1 takes the butt (handle end), H2 the point (blade
-  end).
+  end). The correct area (issue #124) is near your spot, but only inside the donut's 5-yalm safe
+  ring and less than 30 degrees off your clock spot, where the next player's cone starts. Before,
+  a circle around the spot reached past both, so a click in the donut counted as correct.
 - Axe: the whole party stacks in the middle, out of the axe hit.
 
 ### Void Stardust
