@@ -14,7 +14,13 @@ export const REFERENCE: readonly ReferenceEntry[] = [
   { name: "Scythe", picture: "k-scythe", cards: ["k-scythe"], drills: ["m-assault"] },
   { name: "Void Stardust", picture: "k-void", cards: ["k-void", "k-void-target", "k-void-spread"], drills: ["m-void"], timeline: "n-2" },
   { name: "Second Weapon Set", picture: "k-assault-2", cards: ["k-void-sprint", "k-assault-2"], drills: ["m-void"], timeline: "n-3" },
-  { name: "Void Stardust (Second Time)", picture: "k-void-2", cards: ["k-void-2"], drills: ["m-void"], timeline: "n-4" },
+  {
+    name: "Void Stardust (Second Time)",
+    picture: "k-void-2-start",
+    cards: ["k-void-2-start", "k-void-2"],
+    drills: ["m-void-2"],
+    timeline: "n-4",
+  },
   {
     name: "Dance of Domination",
     picture: "k-dance-pair",

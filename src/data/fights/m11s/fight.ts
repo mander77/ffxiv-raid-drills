@@ -126,7 +126,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
       due:[cactbot("Void Stardust"), ...placed(puddles(1)), cactbot("Comet"), ...SET2], pre:FIRST_PUDDLE},
     // 1:46 is typed by hand: no cactbot line comes between the last weapon (1:45.1) and the first
     // puddle (1:47.2). A question for the owner.
-    {title:"Void Stardust (Second Time)", drills:[], scene:voidAgain(s, stackFirst, lastBoss), k:0, from:106, due:[...placed(puddles(2)), cactbot("Comet", 2)], pre:behind(lastBoss)},
+    {title:"Void Stardust (Second Time)", drills:["m-void-2"], scene:voidAgain(s, stackFirst, lastBoss), k:0, from:106, due:[...placed(puddles(2)), cactbot("Comet", 2)], pre:behind(lastBoss)},
     // The lines on the floor show only with the 7th and last hit, so the scene with the lines
     // appears then, not at the Trophy cast. Until then the arena stays empty.
     {title:"Dance of Domination", drills:["m-dance"], scene:drill("m-dance", s), k:Math.floor(random() * 4), from:cactbot("Dance of Domination 7"), due:[cactbot("Eye of the Hurricane")]},

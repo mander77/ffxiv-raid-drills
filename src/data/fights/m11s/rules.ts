@@ -19,3 +19,7 @@ export const METEOR_ORDER_RULE: Lines = ["Meteor bait order: melee, then healers
 export const TWO_WAY_RULE: Lines = ["Two-way: north puddles = west, south puddles = east."];
 
 export const FOUR_WAY_RULE: Lines = ["Four-way: north puddles = NW, south puddles = NE.", "M1 is always SW, M2 always SE."];
+
+export const VOID_2_START_RULE: Lines = ["Void Stardust (Second Time): the boss stays on the third weapon.", "Puddles start directly behind the boss, in max melee."];
+
+export const VOID_2_SPREAD_RULE: Lines = ["Spread: the first spread's spots, turned with the boss.", "His front is relative north."];

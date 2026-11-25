@@ -7,10 +7,10 @@
 // picture is built from that drill, so the two always agree.
 import { bySlot, withSeed } from "../../../util";
 import { markRole, partyOf } from "../../../party";
-import { angOf, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
+import { angOf, dist, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
 import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, meteorHit, pairTower, proteanCone, proximityDot, raidwide, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, wallOfFire } from "./attacks";
-import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Slot, StepResult, Zone, ZoneShape } from "../../../types";
+import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Scene, Slot, StepResult, Zone, ZoneShape } from "../../../types";
 
 type Who = [string, MarkRole];
 const tag = (x: number, y: number, s: string): Overlay => ({t:"tag", x, y, s});
@@ -169,6 +169,31 @@ const inStack = (l: string): Point => { const i = ALL.findIndex(w => w[0] === l)
 /** Pair spots at the four cardinals, just outside the waymarks. */
 const GAPS: Point[] = [[50, 15], [86, 50], [50, 85], [14, 50]];
 
+/* Void Stardust (Second Time): the boss stays on the third weapon of the second set. Here he
+   jumped from NW to NE, so he faces east. The drill (voidAgain) places the puddles, the spread
+   and the stack, so the pictures always agree with it. */
+const VOID_2_BOSS: Boss = {x:atAngle(45)[0], y:atAngle(45)[1], f:90};
+const VOID_2_AT: Point = [VOID_2_BOSS.x, VOID_2_BOSS.y];
+/** His jump onto the third weapon. */
+const VOID_2_JUMP = guide(atAngle(315), VOID_2_AT);
+/** The first three steps of a Void Stardust scene, each puddle where the drill puts it. */
+const puddlesOf = (sc: Scene): Point[] => [0, 1, 2].reduce((ps: Point[], i) => {
+  const z = stepZone(sc.steps[i], asDrops(ps));
+  if(!z) throw new Error("a puddle step has no zone");
+  return [...ps, zoneCenter(z)];
+}, []);
+/** Spots just outside his hitbox, north of him and directly in front of him: incorrect first puddles. */
+const VOID_2_OUT = dist(behind(VOID_2_BOSS), VOID_2_AT);
+const VOID_2_NORTH: Point = [VOID_2_AT[0], VOID_2_AT[1] - VOID_2_OUT], VOID_2_FRONT: Point = at(90, VOID_2_OUT, VOID_2_AT);
+/** How far a puddle's number sits in from its middle, toward the boss, so it stays clear of
+    waymark A. The app's choice. */
+const NUMBER_IN = 4;
+/** Numbered puddles around the boss. */
+const numbered = (ps: Point[]): Overlay[] => ps.flatMap((p, i) => {
+  const n = at(angOf([VOID_2_AT[0] - p[0], VOID_2_AT[1] - p[1]]), NUMBER_IN, p);
+  return [puddle(p), tag(n[0], n[1], String(i + 1))];
+});
+
 /* Arena Split: the platforms (PLATFORM_X, from BossMod) and the four towers. */
 const WEST = platformZone("west"), EAST = platformZone("east");
 /** A platform from y0 to y1. */
@@ -259,12 +284,25 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...inOrder(W, [1, 2, 0]), say("THE ONE HE FACED IN SET 1", 94)], [circle(W[1].p, 9)]),
       show(inOrder(W, [2, 1, 0]), [circle(W[2].p, 9)]),
       show([you(s, [24, 33]), ...path([W[1].p]), numAt(W[1], "1")], [circle(W[1].p, 9)])]}; },
-  "k-void-2": s => { const gaps = cometSpread(s)(VOID_RESULTS), pairs = pairsAt(GAPS), me = you(s, zoneCenter(gaps));
-    return {overlays:[...PUDDLE_PIECES, tag(50, 8, "FIRST ENDED: STACK")], boss:BOSS, after:[tag(50, 94, "SECOND ENDS: SPREAD"), ...spreadHits([...FIXED_SPREAD_MARKS, me]), ...FIXED_SPREAD_MARKS, me], answer:[gaps], options:[
-      show([...spreadHits([...FIXED_SPREAD_MARKS, me]), ...FIXED_SPREAD_MARKS, me], [gaps]),
-      show([stackHit(stackedMarks), ...stackedMarks]),
+  "k-void-2-start": s => { const sc = voidAgain(s, true, VOID_2_BOSS), first = sc.steps[0].z, ps = puddlesOf(sc);
+    if(!first) throw new Error("the first puddle step has no zone");
+    return {overlays:[VOID_2_JUMP, tag(50, 8, "BOSS ON THE THIRD WEAPON")], boss:VOID_2_BOSS, after:numbered(ps), answer:[first], options:[
+      show(numbered(ps), [first]),
+      youAt(s, VOID_2_NORTH, 5, [puddle(VOID_2_NORTH)]),
+      youAt(s, FIRST_PUDDLE, 5, [puddle(FIRST_PUDDLE)]),
+      youAt(s, VOID_2_FRONT, 5, [puddle(VOID_2_FRONT)])]}; },
+  // Every puddle went off before Comet, so the spread draws none. The stack still shows them, as
+  // a guide to its spot.
+  "k-void-2": s => { const sc = voidAgain(s, true, VOID_2_BOSS), spread = sc.steps[3], gaps = stepZone(spread, VOID_RESULTS), marks = spread.cue ?? [];
+    if(!gaps) throw new Error("the spread step has no zone");
+    const stackSc = voidAgain(s, false, VOID_2_BOSS), ps = puddlesOf(stackSc), stackZone = stepZone(stackSc.steps[3], asDrops(ps));
+    if(!stackZone) throw new Error("the stack step has no zone");
+    const stacked = cluster(zoneCenter(stackZone)), pairs = pairsAt(GAPS), me = you(s, zoneCenter(gaps));
+    return {overlays:[VOID_2_JUMP, tag(50, 8, "FIRST ENDED: STACK")], boss:VOID_2_BOSS, after:[tag(50, 94, "SECOND ENDS: SPREAD"), ...spreadHits([...marks, me]), ...marks, me], answer:[gaps], options:[
+      show([...spreadHits([...marks, me]), ...marks, me], [gaps]),
+      show([...ps.map(p => puddle(p)), stackHit(stacked), ...stacked]),
       show([...pairs.map(p => stackHit(p)), ...pairs.flat()]),
-      show([fakeCircle([50, 36], FAKE.buster), mark(50, 36, "MT", "T"), target([50, 36]), say("TANK BUSTER", 94)])]}; },
+      show([fakeCircle(VOID_2_FRONT, FAKE.buster), mark(...VOID_2_FRONT, "MT", "T"), target(VOID_2_FRONT), say("TANK BUSTER", 94)])]}; },
   // The pairs at their wtfdig spots. The tank and melee pairs stand on waymarks D and B, so they
   // show as their stack only, and the waymarks stay readable.
   "k-dance": s => { const d = fromDrill("m-dance", s), pairs = [cluster(DANCE_PAIRS.H1, PAIRED.slice(4, 6), 2), cluster(DANCE_PAIRS.H2, PAIRED.slice(6, 8), 2)];
