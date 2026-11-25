@@ -1147,6 +1147,19 @@ static wins.
   together, a major alone) and for the GitHub Actions, a week after a release. Merge one with
   "Rebase and merge" (linear history), or pull its branch and publish it as usual.
 
+## Fight review (issue #120)
+
+- `/fight-review <fight id> [mechanic]` (`.claude/skills/fight-review/`) reviews a fight for
+  accuracy. Accuracy comes first: a player takes what the site shows into the raid.
+- Each kind of fact has one source: times from cactbot, sizes and shapes from BossMod, both at
+  the pinned commits; strats and positions from the static, then wtfdig. Videos never decide a
+  time, a size or a position.
+- It checks the facts, the correct spot for each slot, the order of steps, that every tab gives
+  the same answer, and what a new player would do from the first line and the picture.
+- It only reads. It never moves a spot or changes a strat. When sources disagree it asks the
+  owner. Its findings become issues after the owner checks them.
+- It runs in a fresh session, so it reads the sources and not what a session remembers.
+
 ## Tips
 
 - Vitest hides `console.log` in a passing test. To see a value in a probe test, throw it.
