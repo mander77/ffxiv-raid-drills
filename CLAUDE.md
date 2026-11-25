@@ -190,7 +190,7 @@ src/lib/             cn() for class names; dom.ts: isPageKey (a key belongs to t
 scripts/             setup.mjs (npm run setup), publish.mjs (npm run publish), wait-deploy.mjs
                      (npm run wait-deploy), import-sources.mjs (npm run import:sources and
                      check:sources), find-sources.mjs (npm run find:sources), import-strat.mjs
-                     (npm run import:strat), import-video.mjs (npm run import:video; it needs
+                     (npm run import:strat), import-video.mjs (npm run import:video; npm ci brings its
                      yt-dlp and ffmpeg): plain Node.js, so they run the same on every OS
 notes/<fight>/strat.json  wtfdig's strat notes for the static's strats, written by
                      npm run import:strat: each mechanic's text for each role and light party, its

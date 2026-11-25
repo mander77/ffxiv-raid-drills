@@ -11,9 +11,11 @@
 // the captions and the frames stay in .cache/video/<video id>/ (git ignores it); every download
 // is cached, so a second run downloads nothing.
 //
-// It needs yt-dlp and ffmpeg (npm run setup says if one is missing). It reads only YouTube.
+// It runs yt-dlp and ffmpeg from npm: npm ci downloads them (the packages ytdlp-nodejs and
+// ffmpeg-static), so nothing else needs to be installed. It reads only YouTube.
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -76,10 +78,25 @@ const slug = (n, title) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")}`;
 
+const require = createRequire(import.meta.url);
+
+/** The path of a tool's program from its npm package, or its name, to find it on the PATH, when
+    the package is missing (npm ci leaves out an optional package whose download failed). */
+function toolPath(name, fromPackage) {
+  try {
+    return fromPackage() ?? name;
+  } catch {
+    return name;
+  }
+}
+
+const YT_DLP = toolPath("yt-dlp", () => require("ytdlp-nodejs").helpers.findYtdlpBinary());
+const FFMPEG = toolPath("ffmpeg", () => require("ffmpeg-static"));
+
 /** Run a tool, and stop with its message when it fails. */
 function run(program, args) {
   const r = spawnSync(program, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
-  if (r.error) throw new Error(`${program} is not installed: see npm run setup`);
+  if (r.error) throw new Error(`${program} is missing: run npm ci again (${r.error.message})`);
   if (r.status !== 0) throw new Error(`${program} ${args.join(" ")}\n${r.stderr.trim()}`);
   return r.stdout;
 }
@@ -90,15 +107,16 @@ function importVideo(fight, url) {
   const dir = join(CACHE, id);
   mkdirSync(dir, { recursive: true });
   const link = `https://www.youtube.com/watch?v=${id}`;
-  const quiet = ["--quiet", "--no-warnings", "--no-playlist"];
+  // YouTube needs a JavaScript runtime: the Node.js that runs this script.
+  const quiet = ["--quiet", "--no-warnings", "--no-playlist", "--js-runtimes", `node:${process.execPath}`];
 
   const infoFile = join(dir, "info.json");
-  if (!existsSync(infoFile)) writeFileSync(infoFile, run("yt-dlp", [...quiet, "--skip-download", "--dump-single-json", link]));
+  if (!existsSync(infoFile)) writeFileSync(infoFile, run(YT_DLP, [...quiet, "--skip-download", "--dump-single-json", link]));
   const info = JSON.parse(readFileSync(infoFile, "utf8"));
 
   const captionsFile = join(dir, "captions.en.vtt");
   if (!existsSync(captionsFile)) {
-    run("yt-dlp", [
+    run(YT_DLP, [
       ...quiet,
       "--skip-download",
       "--write-subs",
@@ -116,7 +134,7 @@ function importVideo(fight, url) {
 
   let video = readdirSync(dir).find((f) => f.startsWith("video."));
   if (!video) {
-    run("yt-dlp", [...quiet, "-f", `bv*[height<=${HEIGHT}]/b[height<=${HEIGHT}]`, "-o", join(dir, "video.%(ext)s"), link]);
+    run(YT_DLP, [...quiet, "-f", `bv*[height<=${HEIGHT}]/b[height<=${HEIGHT}]`, "-o", join(dir, "video.%(ext)s"), link]);
     video = readdirSync(dir).find((f) => f.startsWith("video."));
     if (!video) throw new Error(`yt-dlp wrote no video for ${link}`);
   }
@@ -125,7 +143,7 @@ function importVideo(fight, url) {
     const folder = join(dir, "frames", slug(i + 1, c.title));
     if (!existsSync(folder) || readdirSync(folder).length === 0) {
       mkdirSync(folder, { recursive: true });
-      run("ffmpeg", [
+      run(FFMPEG, [
         "-loglevel",
         "error",
         "-ss",

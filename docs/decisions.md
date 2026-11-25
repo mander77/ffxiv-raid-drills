@@ -969,7 +969,7 @@ static wins.
 - Times come from cactbot (`ui/raidboss/data/07-dt/raid/r11s.txt`). Branch labels in that file add
   offsets, so subtract them.
 - Issue #96 (November 24): `npm run import:video -- <fight> <YouTube address>...` reads a fight's
-  guide videos with yt-dlp and ffmpeg. For each video it writes `notes/<fight>/videos/<id>.json`:
+  guide videos with yt-dlp and ffmpeg (both from npm). For each video it writes `notes/<fight>/videos/<id>.json`:
   each chapter's name and span, its caption lines with their times, and a still frame every 3
   seconds. With no address it imports again every video the fight has notes for.
   - A fight can have more than one guide video (owner's choice): M11S has Hector's guide
@@ -982,8 +982,24 @@ static wins.
     keeps only each caption's new words. They are not exact.
   - The rule stays: a video is only for understanding. Never take a fight time or an attack size
     from it, and mark every position read from it "owner to check". Each notes file says so.
-  - `npm run setup` lists yt-dlp and ffmpeg in its "To do" when one is missing; only this script
-    needs them.
+  - yt-dlp and ffmpeg come from npm (November 24), so the script works after `npm ci` on Windows,
+    macOS and Linux with nothing else to install (owner's choice). They are optional
+    dependencies: when a download fails (GitHub down, a CI runner), `npm ci` leaves the package
+    out and goes on, and the script then looks for the tool on the PATH.
+    - ffmpeg: `ffmpeg-static` (over 4 million downloads a week, kept up). Its install script
+      downloads a static ffmpeg for the platform from the package's own GitHub releases, pinned
+      to the package version. The binary is GPL; the site does not ship it, only this script
+      runs it.
+    - yt-dlp: `ytdlp-nodejs` (MIT). Its install script downloads the official standalone
+      yt-dlp of the platform (`yt-dlp.exe`, `yt-dlp_macos`, `yt-dlp_linux`...) from yt-dlp's
+      latest GitHub release. Not `youtube-dl-exec`, the better known one: on macOS and Linux it
+      downloads the Python zipapp, which needs Python 3.10 or newer (macOS has 3.9 at most). It
+      has one maintainer, so the version is exact in `package.json`. The latest yt-dlp at each
+      install is on purpose: YouTube breaks old ones.
+    - YouTube now needs a JavaScript runtime for yt-dlp; the script gives it the Node.js that
+      runs it (`--js-runtimes node:<path>`).
+    - npm 11 warns that their install scripts are not in `allowScripts`, as it does for esbuild
+      and workerd. Today npm still runs them.
   - naurffxiv's guide (https://naurffxiv.com/savage/m11s) is already a link on the Cheat Sheet's
     sources, for people. The draft job does not read it (owner's choice): the site's robots.txt
     blocks AI crawlers by name, Anthropic's among them, and allows no AI input
