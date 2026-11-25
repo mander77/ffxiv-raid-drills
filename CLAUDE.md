@@ -495,6 +495,10 @@ The plans are GitHub issues. Run `gh issue list --repo mander77/ffxiv-raid-drill
 
 ## Where to find more
 
+- `.claude/skills/fight-review/`: `/fight-review <fight id> [mechanic]` reviews a fight against
+  its pinned sources and the static's strat, and checks that each screen teaches the correct
+  move in the correct order. It only reads and reports. Run it in a fresh session, after a
+  change to a mechanic and before a new fight ships.
 - `docs/vocabulary.md`: the words the site shows, with a conversion table for outside sources.
 - `docs/decisions.md`: decisions, ideas the owner rejected (do not propose them again), fight
   facts and corrections, planned work, and hosting details.
