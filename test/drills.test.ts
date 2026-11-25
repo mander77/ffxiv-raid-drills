@@ -85,34 +85,43 @@ test("Assault Evolved: the faced weapon goes first, then clockwise", () => {
   }
 });
 
-test("Assault Evolved, second set: each weapon faces where he jumps from, the first faces the middle", () => {
-  for (let i = 0; i < REPEATS; i++) {
-    const A = buildAssault2("H1");
-    assert.isNull(A.states[0].f, "the boss does not point at the first weapon");
-    let prev: Point = [50, 50];
-    A.W.forEach((w, k) => {
-      if (!w.axis) throw new Error("every second-set weapon is turned");
-      const l = Math.hypot(w.p[0] - prev[0], w.p[1] - prev[1]),
-        t: Point = [(w.p[0] - prev[0]) / l, (w.p[1] - prev[1]) / l];
-      // The long side lies square across his jump into it (the first: across the line to the middle).
-      assert.closeTo(w.axis[0] * t[0] + w.axis[1] * t[1], 0, 1e-9, `weapon ${k + 1} is square to his jump`);
-      // The long side runs from the butt to the tip, so the butt is on his left: u . left < 0.
-      assert.isBelow(w.axis[0] * t[1] - w.axis[1] * t[0], 0, `weapon ${k + 1}: the butt is on his left`);
-      prev = w.p;
-    });
-    const a = A.W.map((w) => w.a),
-      d1 = (a[1] - a[0] + 360) % 360,
-      d2 = (a[2] - a[0] + 360) % 360;
-    assert.ok(d1 > 0 && d1 < d2, "clockwise after the first");
-  }
+test("Assault Evolved, second set: the boss does not point at the first weapon", () => {
+  assert.isNull(buildAssault2("H1").states[0].f);
 });
 
-test("Assault Evolved, second set: only the first weapon lies square to the middle", () => {
+// Both sets: cactbot's "R11S Trophy Weapons" trigger reads the order from the weapons' facing.
+const ASSAULT_SETS: Record<string, (s: Slot) => JumpSet> = { "first set": buildAssault, "second set": buildAssault2 };
+
+test.each(Object.entries(ASSAULT_SETS))(
+  "Assault Evolved, %s: each weapon faces where he jumps from, the first faces the middle",
+  (_name, build) => {
+    for (let i = 0; i < REPEATS; i++) {
+      const A = build("H1");
+      let prev: Point = [50, 50];
+      A.W.forEach((w, k) => {
+        if (!w.axis) throw new Error("every weapon is turned");
+        const l = Math.hypot(w.p[0] - prev[0], w.p[1] - prev[1]),
+          t: Point = [(w.p[0] - prev[0]) / l, (w.p[1] - prev[1]) / l];
+        // The long side lies square across his jump into it (the first: across the line to the middle).
+        assert.closeTo(w.axis[0] * t[0] + w.axis[1] * t[1], 0, 1e-9, `weapon ${k + 1} is square to his jump`);
+        // The long side runs from the butt to the tip, so the butt is on his left: u . left < 0.
+        assert.isBelow(w.axis[0] * t[1] - w.axis[1] * t[0], 0, `weapon ${k + 1}: the butt is on his left`);
+        prev = w.p;
+      });
+      const a = A.W.map((w) => w.a),
+        d1 = (a[1] - a[0] + 360) % 360,
+        d2 = (a[2] - a[0] + 360) % 360;
+      assert.ok(d1 > 0 && d1 < d2, "clockwise after the first");
+    }
+  },
+);
+
+test.each(Object.entries(ASSAULT_SETS))("Assault Evolved, %s: only the first weapon lies square to the middle", (_name, build) => {
   for (let i = 0; i < REPEATS; i++) {
-    const A = buildAssault2("H1");
+    const A = build("H1");
     // How far each weapon's long side is from square to the line to the middle, in degrees.
     const off = A.W.map((w) => {
-      if (!w.axis) throw new Error("every second-set weapon is turned");
+      if (!w.axis) throw new Error("every weapon is turned");
       const out = Math.atan2(w.p[1] - 50, w.p[0] - 50),
         along = Math.atan2(w.axis[1], w.axis[0]);
       const d = Math.abs((((along - out) * 180) / Math.PI) % 180);

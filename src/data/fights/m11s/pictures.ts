@@ -211,7 +211,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...AXE_HITS, ...heldWeapon("axe"), ...TANKS_TOGETHER, ...AXE_SPREAD]),
       show([tag(...HELD_TAG, "AXE OR SCYTHE")]),
       show([...swordCross(CENTER, [0, -1]), ...heldWeapon("sword")])]}; },
-  "k-first-weapon": s => { const R = buildJumpSet(s, weapons([[315, "scythe"], [90, "axe"], [180, "sword"]])), W = R.W;
+  "k-first-weapon": s => { const R = buildJumpSet(s, faceApproach(weapons([[315, "scythe"], [90, "axe"], [180, "sword"]]))), W = R.W;
     return {overlays:R.overlays, boss:R.states[0], after:inOrder(W, [0, 1, 2]), answer:[circle(W[0].p, 9)], options:[
       show(inOrder(W, [0, 1, 2]), [circle(W[0].p, 9)]),
       show([...path([W[2].p]), numAt(W[2], "1"), say("ALWAYS THE SWORD FIRST", 8)], [circle(W[2].p, 9)]),
