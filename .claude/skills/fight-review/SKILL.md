@@ -9,6 +9,10 @@ argument-hint: "<fight id> [mechanic]"
 Review the fight `$ARGUMENTS` (a fight id such as `m11s`, optionally followed by one mechanic
 name). With no mechanic, review every mechanic in fight order.
 
+With no fight id, read `FIGHTS` in `src/data/fights/index.ts`. If it holds one fight, review that
+one and say so at the top of the report. If it holds more, ask which fight before you start: a
+whole review is long, and the wrong fight wastes it.
+
 ## Why this review matters
 
 The site teaches players the steps to solve each mechanic. A player trusts it and takes what it
@@ -21,19 +25,35 @@ data but teaches the move in a way that leads a player to the wrong move.
 
 ## This is a review only
 
-Do not edit, commit, push or publish anything. Do not move a spot to make a test pass. Do not
-change a strat, a position or a rule, even when a source seems to say so: the owner decides,
-because the static's strat can differ from a guide on purpose. Report and wait.
+Do not edit, commit, push or publish anything. The one exception is the review worktree below:
+it is yours, and you copy the whole-area check into it. Do not move a spot to make a test pass.
+Do not change a strat, a position or a rule, even when a source seems to say so: the owner
+decides, because the static's strat can differ from a guide on purpose. Report and wait.
 
 Other sessions may work in this checkout. Do not switch branches, do not touch uncommitted
 files, and do not run `npm install` or `npm run format`.
+
+## Where to work
+
+The review runs the tests and a script, so it needs `node_modules`. Do not install them in the
+shared checkout. Review from a detached worktree of the commit you review, outside the checkout:
+
+```sh
+git fetch origin
+git worktree add --detach ../ffxiv-raid-drills-review origin/main
+cd ../ffxiv-raid-drills-review && npm ci
+```
+
+Name the commit at the top of the report. When you are done, remove the worktree
+(`git worktree remove --force ../ffxiv-raid-drills-review`): nothing in it is kept.
 
 ## Read first
 
 1. `CLAUDE.md`: "Rules for the content", "Words in the code" and the code map.
 2. `docs/decisions.md`: "Fight facts and strat corrections" and "Ideas the owner rejected or
-   declined" (the file is long: find them with a search for `^## `). The owner already decided these. A fact there wins over a guide; do not report a
-   decided fact as a finding unless a pinned source now contradicts it, and then as a Question.
+   declined" (the file is long: find them with a search for `^## `). The owner already decided
+   these. A fact there wins over a guide; do not report a decided fact as a finding unless a
+   pinned source now contradicts it, and then as a Question.
 3. `docs/vocabulary.md`: the words the site may show.
 
 The fight's data is in `src/data/fights/<id>/`. In M11S's shape:
@@ -82,12 +102,25 @@ cannot be opened, say so under "Not checked" rather than guess what it shows.
 1. Run `npm run check:sources`. If a generated file is out of date, stop and say so: the review
    would compare against the wrong data.
 2. Run `npm test -- answers` (the check that no correct spot stands in an attack) and note any
-   failure; it is already a finding. It covers only Practice drills: a scene that only the full
-   fight plays (a segment in `fight.ts` with `drills: []`) is not in it, so check those spots
-   yourself.
-3. List the mechanics in fight order from the segments in `fight.ts`; `reference.ts` groups
+   failure; it is already a finding. It checks only the center (or `stand` point) of each
+   correct area, and only Practice drills.
+3. Run the whole-area check, which samples every point of each correct area, in Practice and in
+   the full fight (Pressure):
+
+   ```sh
+   cp .claude/skills/fight-review/scripts/zone-sweep.test.ts test/
+   FIGHT=<id> npx vitest run test/zone-sweep.test.ts
+   rm test/zone-sweep.test.ts
+   ```
+
+   It fails with one line per step whose area lets a click that counts as correct stand in an
+   attack. Each line gives the share of the area, the kind of attack (`poly` is a cone, `band` a
+   line) and an example point.
+   Read the step's zone in the code to see why, and report it under its mechanic. It leaves
+   out puddles dropped at earlier steps, so check those yourself where puddles drop.
+4. List the mechanics in fight order from the segments in `fight.ts`; `reference.ts` groups
    them for the Cheat Sheet and mixes in parts of mechanics. Then work one mechanic at a time.
-4. For each mechanic, search its name (and its drill id) across `src/data/fights/<id>/`,
+5. For each mechanic, search its name (and its drill id) across `src/data/fights/<id>/`,
    `notes/<id>/` and `docs/`. A mechanic is often in several files, and a second or third time
    in the fight can live only in Pressure.
 
@@ -135,9 +168,17 @@ cannot be opened, say so under "Not checked" rather than guess what it shows.
 ## Look at the site, not only the data
 
 The data can be correct and the screen still wrong. When a browser tool works in this session
-(the app's browser pane, Playwright, or Chrome), start the dev server on a free port (`npm run dev -- --port 5180 --strictPort`), and open each mechanic on
-Learn, Practice (with Show Me) and Watch the Correct Moves at 1280 px wide. Check what the
-player sees. Stop the server at the end. If you cannot run a browser, say so in the report.
+(the app's browser pane, Playwright, or Chrome), open each mechanic on Learn, Practice (with
+Show Me) and Watch the Correct Moves at 1280 px wide, and check what the player sees.
+
+- **Reviewing `main`:** use the live site, https://ffxiv-raid-drills.app. It is built from
+  `main`, so first make sure that your worktree is at `origin/main`. Pressure's player opens at
+  a moment with `/pressure/<code>/<picks>?t=<seconds>` (for example
+  `/pressure/ABCD/void=stack?t=109`).
+- **Reviewing a branch:** run the dev server from the review worktree on a free port
+  (`npm run dev -- --port 5180 --strictPort`), and stop it at the end.
+
+If you cannot run a browser, say so in the report.
 
 ## Check before you report
 
@@ -152,8 +193,8 @@ Write the report in plain, short sentences. Use this shape:
 ```markdown
 # Fight review: <fight> (<date>, cactbot <short commit>, BossMod <short commit>)
 
-Scope: <the whole fight, or the mechanic asked for>
-Start checks: <check:sources and the answers test: passed, or what failed>
+Scope: <the whole fight, or the mechanic asked for>, at <commit>
+Start checks: <check:sources, the answers test and the whole-area check: passed, or what failed>
 
 ## Summary
 <counts per severity, and the three findings that most risk a wipe>

@@ -1200,6 +1200,13 @@ static wins.
 - It only reads. It never moves a spot or changes a strat. When sources disagree it asks the
   owner. Its findings become issues after the owner checks them.
 - It runs in a fresh session, so it reads the sources and not what a session remembers.
+- It works in a detached worktree with its own `npm ci`, never in the shared checkout
+  (issue #130). With no fight id it reviews the only fight, or asks which one.
+- Its whole-area check (`scripts/zone-sweep.test.ts` in the skill) samples every point of each
+  correct area, in Practice and in the full fight, because `test/answers.test.ts` checks only
+  each area's center. It is not one of the site's tests: the first review found steps it fails
+  on (issues #124 and #126), so it would fail CI today. It may join the tests once they are fixed.
+- To check screens on `main`, it uses the live site, which is built from `main`.
 
 ## Tips
 
