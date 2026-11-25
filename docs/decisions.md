@@ -135,12 +135,21 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
     west along the wall, then step in and drop two more in the gaps, walking back east. The
     south wall is the mirror: start in line with D, walk east, then two back west.
   - The two inner puddles are not fixed spots (owner's choice): any spot just inside the wall
-    puddles is correct when it is clear of the corners (25 units each side of the middle), out of
-    the towers, clear of every puddle you dropped, and at most 30 units from your wall
-    (`innerPuddle`). The six puddles end up as a triangle against the wall.
-  - The puddle spots (`WALL_SPOTS`, read from the video's frames: 15 units apart along the wall,
-    the inner row 13 units in, where the moving marker goes), the wait spots (`ECL_WAIT`) and the tower spots (`ECL_TOWERS`)
-    are the app's choices, not fight data.
+    puddles is correct when it is clear of the corners (25 units each side of the middle), clear
+    of the middle of each tower, clear of every puddle you dropped, and at most 30 units from
+    your wall (`innerPuddle`). The six puddles end up as a triangle against the wall.
+  - The middle of a tower (`ECL_SOAK_R`, 4 units from its center, where the healer or ranged
+    soaks a two-player tower) stays out of the fire, so a puddle's center stays 16.5 units from
+    a tower's center (November 25, owner's choice). A puddle may still cover a tower's edge: a
+    puddle (5 yalms, BossMod's `AtomicImpactPuddle`) and a tower (4 yalms) need 22.5 units
+    between their centers, and with the four wall puddles there is room for only one inner
+    puddle that far from the example towers.
+  - The puddle spots (`WALL_SPOTS`: the wall puddles read from the video's frames, 15 units
+    apart; the inner row 13 units in, at [43.5, 18] and [56.5, 18] on the north wall, mirrored on
+    the south, where the moving marker goes), the wait spots (`ECL_WAIT`) and the tower spots
+    (`ECL_TOWERS`) are the app's choices, not fight data.
+  - Four-way Fireball: the spot by the boss leaves out the two Line Stacks beside yours, which
+    overlap near him, and the tethered player's spot leaves out the fire puddles.
   - Your puddles stay on the floor to the end of the drill (`ATOMIC_PUDDLE`, BossMod's
     `AtomicImpact` range, with no end). The drops layer is clipped to the arena, so a puddle at
     the wall does not spill past it.

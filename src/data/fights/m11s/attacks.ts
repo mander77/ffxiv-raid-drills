@@ -114,8 +114,6 @@ export const soloTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("CosmicK
 /** An Ecliptic Stampede pair tower (Weighty Impact, "range 4 circle"): two players soak it, a melee
     and a healer or ranged (BossMod's ImpactKiss: 2 soakers). */
 export const pairTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("WeightyImpact").range, 2);
-/** The radius of an Ecliptic Stampede tower, solo or pair (both "range 4 circle"). */
-export const ECL_TOWER_R = yalms(Math.max(bossmod("CosmicKissEcliptic").range, bossmod("WeightyImpact").range));
 /** The Heartbreak Kick tower ("range 4 circle"). BossMod lets up to 8 soak it; the app shows all 8
     (the owner's choice): either the whole party soaks it, or the tanks do with invulns. */
 export const kickTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("HeartbreakKickTower").range, 8);
@@ -157,6 +155,9 @@ export const fireAndFury = (c: Point, facing: number): Overlay[] => {
   const front = bossmod("FireAndFuryFront"), back = bossmod("FireAndFuryBack");
   return [ATTACK.cone(c, facing, front.angle, front.range), ATTACK.cone(c, facing + 180, back.angle, back.range)];
 };
+/** Half a line stack's width, in arena units: a spot this far or further from its middle line is
+    out of it. */
+export const LINE_STACK_HALF = yalms(bossmod("FearsomeFireballCharge").width) / 2;
 /** A line stack from `from` through `to`: the Meteorain charge (Fearsome Fireball) and Two-way and
     Four-way Fireball ("range 60 width 6 rect"). */
 export const lineStack = (from: Point, to: Point): Band => {
