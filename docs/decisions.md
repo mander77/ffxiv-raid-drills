@@ -829,6 +829,9 @@ static wins.
   ring and less than 30 degrees off your clock spot, where the next player's cone starts. Before,
   a circle around the spot reached past both, so a click in the donut counted as correct.
 - Axe: the whole party stacks in the middle, out of the axe hit.
+- The axe's Party Stack is always on a healer (owner, 2026-11-25, issue #128). BossMod's
+  `WeaponsBait` lets it land on any player, and no other source names a role, so the owner is
+  the source for "a random healer".
 
 ### Void Stardust
 
@@ -843,6 +846,9 @@ static wins.
   puddles. The stack step and its pictures still show the puddles, as a guide to the stack spot.
 - Crushing Comet stack: one more step clockwise, just past the third puddle, where a fourth
   puddle would go. The same for both Void Stardusts. It is clear of the third puddle by its place.
+- Crushing Comet's Party Stack is always on a healer (owner, 2026-11-25, issue #128). cactbot
+  (`stackMarkerOn`), BossMod (`CastStackSpread`) and wtfdig name no role, so the owner is the
+  source. The Learn card `k-void-target` keeps "A random DPS" as an incorrect answer.
 - Every puddle and the stack stay in the boss's max melee range (owner, 2026-11-23).
 - Comet spread: healers and ranged take any open spot. Tanks and melee each take a fixed spot:
   MT NW, OT NE, M1 SW, M2 SE. The map shows the open ground as four slices, one for each side
