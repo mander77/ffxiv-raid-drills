@@ -530,8 +530,10 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   // Two-way Fireball is two line stacks from the boss, east and west. Four-way is four line stacks
   // of two players each, NW, NE, SW and SE. Both are 6 yalms wide (BossMod).
   "k-ecl-two": s => { const d = fromDrill("m-ecl-two", s, "north");
-    return {...d, after:[...d.hits, you(s, [32, 50])], options:[
-      show([lineStack(CENTER, [0, 50]), you(s, [32, 50])], [d.zone]), show([lineStack(CENTER, [100, 50]), you(s, [68, 50])], [rect(60, 43, 84, 57)]),
+    // The east Line Stack, mirrored from your spot in the west one.
+    const me = zoneCenter(d.zone), mirror: Point = [100 - me[0], me[1]];
+    return {...d, after:[...d.hits, you(s, me)], options:[
+      show([lineStack(CENTER, [0, 50]), you(s, me)], [d.zone]), show([lineStack(CENTER, [100, 50]), you(s, mirror)], [circle(mirror, 5)]),
       hit(youAt(s, [43, 43], 5.5), [lineStack(CENTER, [43, 43])]), show([fakeCircle(CENTER, FAKE.smallCircle), you(s, [50, 58])], [circle(CENTER, 9)])]}; },
   "k-ecl-four": s => { const d = fromDrill("m-ecl-four", s, "south");
     return {...d, options:[

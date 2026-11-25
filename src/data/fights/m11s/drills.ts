@@ -768,13 +768,27 @@ export function eclipticFreeScene(s: Slot, corner: EclCorner): Scene {
 const eclFireSetup = (p: EclPlace): string => isEclCorner(p) ? `You were not marked. You stretched your tether to the ${p.toUpperCase()} corner.`
   : `You were marked. You dropped your puddles along the ${p.toUpperCase()} wall.`;
 
+/** How far out from the boss you stand in a Two-way Fireball Line Stack, in units: [nearest,
+    farthest, best]. The melee bait each Line Stack on his hitbox (12.5). Behind them, a marked
+    player stands just outside it and a tethered player farther out (the owner, November 25, from
+    Hector's Fixed Stampede mini-guide at 2:44: about 11.5, 16 and 20; the raidplan says "Baits ON
+    the hitbox, non-baits OUTSIDE the hitbox"). So nobody but the melee baits the line. */
+const TWO_WAY_MARKED = [13.5, 20, 16] as const, TWO_WAY_TETHERED = [18, 34, 20] as const;
+/** Your Two-way Fireball spot: the east or west Line Stack, `at` units out from the boss. */
+function twoWaySpot(east: boolean, [lo, hi, best]: readonly [number, number, number]): Zone {
+  const sx = east ? 1 : -1, rect: RectZone["rect"] = [Math.min(50 + sx * lo, 50 + sx * hi), 43, Math.max(50 + sx * lo, 50 + sx * hi), 57];
+  return {fn:p => inZone(p, {rect}), label:[50 + sx * best, 50], show:[{rect}]};
+}
+
 /** Ecliptic Stampede's Two-way Fireball: two Line Stacks, east and west. The south wall's player,
     and a tether in an east corner, join the east one (the mini-guide, 2:40). */
 export function eclTwoWayScene(p: EclPlace): Scene {
-  const east = p === "south" || p === "ne" || p === "se";
+  const east = p === "south" || p === "ne" || p === "se", tethered = isEclCorner(p), side = east ? "east" : "west";
   return {setup:[eclFireSetup(p), "The boss casts Two-way Fireball: two Line Stacks, east and west."], ordered:true,
     boss:BOSS, overlays:[...NPUD, ...SPUD],
-    steps:[{q:"Which Line Stack do you join? Click it.", z: east ? {rect:[60,43,84,57]} : {rect:[16,43,40,57]}, a: east ? ["The east Line Stack."] : ["The west Line Stack."],
+    steps:[{q:"Which Line Stack do you join? Click it.", z:twoWaySpot(east, tethered ? TWO_WAY_TETHERED : TWO_WAY_MARKED),
+      a:tethered ? [`The ${side} Line Stack, behind the players by the boss.`, "The melee bait it under the boss, so stay farther out."]
+        : [`The ${side} Line Stack, in max melee.`, "The melee bait it under the boss, in front of you."],
       // You join one Line Stack; the other must miss you.
       reveal:[lineStack([50, 50], [0, 50]), lineStack([50, 50], [100, 50])], hits:[lineStack([50, 50], east ? [0, 50] : [100, 50])]}],
     rule:TWO_WAY_RULE};

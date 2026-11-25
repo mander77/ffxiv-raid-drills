@@ -170,6 +170,12 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
     is yours is random.
   - Two-way Fireball: a tether in a west corner joins the west Line Stack, an east corner the
     east one. Four-way: stay on your corner's intercard, behind the player at max melee.
+  - Two-way Fireball, how far out (owner, November 25, after a fight review): the melee bait each
+    Line Stack under the boss. A marked player stands just outside his hitbox, 13.5 to 20 units out
+    (best 16), and a tethered player behind them, 18 to 34 (best 20), so nobody else baits the line
+    (`TWO_WAY_MARKED`, `TWO_WAY_TETHERED`). The mini-guide at 2:44 shows about 11.5, 16 and 20; the
+    raidplan says "Baits ON the hitbox, non-baits OUTSIDE the hitbox". Before this, any spot from 10
+    to 34 counted, inside the hitbox too.
   - The marked players show at their walls: a ranged north and a healer south (Hector's guide);
     two ranged, R2 north and R1 south (the mini-guide's example).
   - The app's choices, not fight data: the portal spots, the corner boxes (15 units), the tower

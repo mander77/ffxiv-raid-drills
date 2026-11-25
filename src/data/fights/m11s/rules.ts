@@ -16,7 +16,7 @@ export const ORBITAL_RULE: Lines = [
 
 export const METEOR_ORDER_RULE: Lines = ["Meteor bait order: melee, then healers, then ranged."];
 
-export const TWO_WAY_RULE: Lines = ["Two-way: north puddles = west, south puddles = east."];
+export const TWO_WAY_RULE: Lines = ["Two-way: north puddles = west, south puddles = east.", "The melee bait it under the boss. Everyone else stands farther out."];
 
 export const FOUR_WAY_RULE: Lines = ["Four-way: north puddles = NW, south puddles = NE.", "M1 is always SW, M2 always SE."];
 
