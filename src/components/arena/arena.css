@@ -19,6 +19,7 @@
     --arena-ring: oklch(0.544 0.179 28.857);
     --arena-ok: oklch(0.496 0.108 156.526);
     --arena-pick: oklch(0.54 0.153 253.398);
+    --arena-turn: oklch(0.8 0.14 225);
     --arena-later: oklch(0.542 0.227 287.798);
     --arena-miss: oklch(0.481 0.168 28.973);
     --arena-text: oklch(0.22 0.035 266.478);
@@ -146,6 +147,24 @@
   }
   .arena .aim .head {
     fill: var(--arena-aim);
+  }
+  /* The boss turning: a bright blue arrow (a hint, as the arena's hints are blue) on a dark
+     outline. The outline shows it on the sand, the bright core on the dark floor. */
+  .arena .turnarrow .halo {
+    fill: var(--arena-text);
+    stroke: var(--arena-text);
+    stroke-width: 2.4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .arena .turnarrow .shaft {
+    fill: none;
+    stroke: var(--arena-turn);
+    stroke-width: 1.2;
+    stroke-linecap: round;
+  }
+  .arena .turnarrow .head {
+    fill: var(--arena-turn);
   }
   /* Where a knockback pushes you: a wide, hollow arrow, as in the knockback icons. */
   .arena .push {

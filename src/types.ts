@@ -93,6 +93,9 @@ type OverlayShape =
   | ({ t: "tether" } & Line)
   // Where a cone points: an arrow from its source (x, y) out to (x2, y2).
   | ({ t: "aim" } & Line)
+  /** The boss turning: an arrow along an arc of radius `r` around (x, y), from the facing `from`
+      to the facing `to`, in degrees clockwise from north. */
+  | ({ t: "turn"; r: number; from: number; to: number } & At)
   // Where a knockback pushes you: a bold dark arrow from (x, y) out to (x2, y2).
   | ({ t: "knockback" } & Line)
   | ({ t: "tornado" } & At)

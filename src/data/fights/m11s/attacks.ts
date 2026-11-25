@@ -180,6 +180,12 @@ export const wrathLine = (portal: Point, player: Point): Band => {
   const s = bossmod("MajesticMeteowrathRect");
   return ATTACK.line(portal, toward(portal, player), s.range, s.width);
 };
+/** Majestic Meteowrath in Ecliptic Stampede: the same line from a portal through its tethered
+    player ("range 60 width 10 rect", MajesticMeteowrathEcliptic). */
+export const eclipticWrath = (portal: Point, player: Point): Band => {
+  const s = bossmod("MajesticMeteowrathEcliptic");
+  return ATTACK.line(portal, toward(portal, player), s.range, s.width);
+};
 /** A Void Stardust puddle on the floor (Cometite, "range 6 circle"). */
 export const voidPuddle = (p: Point): Overlay => ATTACK.puddle(p, bossmod("Cometite").range);
 /** The fire puddle an Atomic Impact leaves in Ecliptic Stampede ("range 5 circle"). */
