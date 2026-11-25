@@ -145,8 +145,29 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
     the wall does not spill past it.
   - The wait step is due at Majestic Meteowrath x4, the cactbot line where the fireball segment
     starts. The puddle steps are due at Atomic Impact 1 to 6.
-  - The unmarked path (tower, tether and fireball for a player with no puddles) is later. It
-    needs the owner's answers: which four-way intercard spot, and how the portal picks the corner.
+- Ecliptic Stampede with no puddles (November 24, the owner asked for it to follow Hector's Fixed
+  Stampede mini-guide, https://www.youtube.com/watch?v=p8cL88OKEWE, read in a browser, 1:20 to
+  2:45): the Settings pick "Your Ecliptic puddles" has a third value, "No puddles", and the drills
+  `m-ecl-start`, `m-ecl-two` and `m-ecl-four` a third variant, `none`. In a random fight you have
+  puddles half the time (two of the four healers and ranged are marked).
+  - The steps: your start spot; under the boss (due at Atomic Impact 1); dead center of your
+    two-player tower (due at Cosmic Kiss 4); your tether's corner (due at Majestic Meteowrath x4).
+  - The towers stand on the intercards (as in the frames). Which two are tank towers, and which
+    other healer or ranged is in the middle with you, are random. H1 takes the first two-player
+    tower clockwise from A; H2 too when H1 is marked, else the first counterclockwise.
+  - The portals are at the middle of each wall. Your tether ends in the corner opposite your
+    portal, then clockwise: a north portal sends you SW, east NW, south NE, west SE. Which portal
+    is yours is random.
+  - Two-way Fireball: a tether in a west corner joins the west Line Stack, an east corner the
+    east one. Four-way: stay on your corner's intercard, behind the player at max melee.
+  - The marked players show at their walls: a ranged north and a healer south (Hector's guide);
+    two ranged, R2 north and R1 south (the mini-guide's example).
+  - The app's choices, not fight data: the portal spots, the corner boxes (15 units), the tower
+    spot (4 units from its center) and the Four-way spot (24 units out). Owner to check.
+  - Not in the drill: the small puddles the middle group dodges while the marked players drop
+    theirs.
+- Arcadion Avalanche: the boss's turn is a bright blue arrow on a dark outline (`turn` overlay),
+  not white dashes, so it shows on the dark floor between the platforms and on the sand (owner).
 - Heartbreak Kick in Practice and Pressure: the drill `m-hb` has two variants, from a new
   Settings pick, "Heartbreak Kick": "Party soaks" (stand in the tower) or "Tanks invuln" (stand
   anywhere out of it). Each of the three hits is one step, due at its cactbot line.

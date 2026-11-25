@@ -47,10 +47,16 @@ const SHOWS: { [K in keyof Picks]: (f: Fight, v: string) => boolean } = {
     return Boolean(g && g.drills[0] === `m-ecl-${v}` && g.title.endsWith(v === "four" ? "Four-way Fireball" : "Two-way Fireball"));
   },
   // The fireball says which wall you dropped your puddles on, and the puddle drops walk along it.
+  // With no puddles, you go under the boss, and the fireball says where your tether ended.
   wall: (f, v) =>
-    Boolean(
-      f.segs.find((g) => /^m-ecl-(two|four)$/.test(g.drills[0]))?.scene.setup.some((line) => line.includes(`${v.toUpperCase()} wall`)),
-    ) && seg(f, "Ecliptic Stampede: Puddles").scene.steps[1].a[0].includes(`${v} wall`),
+    v === "none"
+      ? seg(f, "Ecliptic Stampede: Puddles").scene.steps[1].a[0].startsWith("Under the boss") &&
+        Boolean(
+          f.segs.find((g) => /^m-ecl-(two|four)$/.test(g.drills[0]))?.scene.setup.some((line) => line.startsWith("You were not marked")),
+        )
+      : Boolean(
+          f.segs.find((g) => /^m-ecl-(two|four)$/.test(g.drills[0]))?.scene.setup.some((line) => line.includes(`${v.toUpperCase()} wall`)),
+        ) && seg(f, "Ecliptic Stampede: Puddles").scene.steps[1].a[0].includes(`${v} wall`),
   // With the party, the answer is in the tower; with the tanks, out of it.
   kick: (f, v) =>
     seg(f, "Heartbreak Kick").scene.steps[0].a[0] === (v === "party" ? "In the tower, with the party." : "Anywhere out of the tower."),

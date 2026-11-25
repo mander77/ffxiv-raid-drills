@@ -108,6 +108,8 @@ export function Shape({ overlay: o }: ShapeProps) {
       return <circle className="safe" cx={round2(o.x)} cy={round2(o.y)} r={round2(o.r - SAFE_INSET)} />;
     case "aim":
       return <Aim from={[o.x, o.y]} to={[o.x2, o.y2]} />;
+    case "turn":
+      return <Turn at={[o.x, o.y]} r={o.r} from={o.from} to={o.to} />;
     case "knockback":
       return <Push from={[o.x, o.y]} to={[o.x2, o.y2]} />;
     case "guide":
@@ -169,6 +171,36 @@ function Aim({ from, to }: AimProps) {
     <g className="aim">
       <path className="halo" d={`${shaft} ${head}`} />
       <path className="shaft" d={shaft} />
+      <path className="head" d={head} />
+    </g>
+  );
+}
+
+interface TurnProps {
+  at: Point;
+  r: number;
+  from: number;
+  to: number;
+}
+
+/** How far back from its tip a turn's arrowhead starts, in degrees of its arc. The app's choice,
+    for the picture. */
+const TURN_HEAD_DEG = 14;
+
+/** The boss turning: an arc around him from his old facing to his new one, with an arrowhead at
+    its end. A bright core on a dark outline, so it shows on the sand and on the dark floor
+    between the platforms alike. */
+function Turn({ at, r, from, to }: TurnProps) {
+  const dir = to >= from ? 1 : -1;
+  const tip = polar(to, r, at);
+  const base = to - dir * TURN_HEAD_DEG;
+  const large = Math.abs(base - from) > 180 ? 1 : 0;
+  const arc = `M${pt(polar(from, r, at))} A${r},${r} 0 ${large},${dir > 0 ? 1 : 0} ${pt(polar(base, r, at))}`;
+  const head = `M${pt(tip)} L${pt(polar(base, r - HEAD_HALF, at))} L${pt(polar(base, r + HEAD_HALF, at))} Z`;
+  return (
+    <g className="turnarrow">
+      <path className="halo" d={`${arc} ${head}`} />
+      <path className="shaft" d={arc} />
       <path className="head" d={head} />
     </g>
   );

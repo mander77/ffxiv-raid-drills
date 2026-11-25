@@ -137,6 +137,11 @@ const ARENA_LINES: readonly { name: string; meaning: string; piece: ReactNode }[
     piece: <Shape overlay={{ t: "guide", x: 4, y: 10, x2: 56, y2: 10 }} />,
   },
   {
+    name: "Boss Turn",
+    meaning: "The way the boss turns: a bright blue arrow on a dark outline, around him.",
+    piece: <Shape overlay={{ t: "turn", x: 30, y: 17, r: 9, from: 270, to: 450 }} />,
+  },
+  {
     name: "Tether",
     meaning: "A tether from its portal to a player, not long enough yet: red.",
     piece: <Tether portal={[4, 10]} to={[56, 10]} stretched={false} />,

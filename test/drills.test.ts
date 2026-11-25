@@ -12,6 +12,10 @@ import {
   DANCE_LINES,
   DANCE_PAIRS,
   DRILLS,
+  ECL_CORNERS,
+  eclFourWayScene,
+  eclipticFreeScene,
+  eclTwoWayScene,
   firstTowersScene,
   GUST_CONES,
   type JumpSet,
@@ -31,6 +35,7 @@ import { angOf, inZone, stepZone, zoneCenter } from "../src/geometry";
 import { changes } from "../src/lib/practice";
 import { facingNext, jumpsNext } from "../src/lib/scene";
 import type { Point, ScytheOverlay, Slot, SlotName, StepResult, Zone } from "../src/types";
+import { withSeed } from "../src/util";
 import { assertLines } from "./lines";
 
 const REPEATS = 300;
@@ -768,5 +773,32 @@ test("each Arena Split tower shows how many players soak it, as its drill says",
     const towers = d.build("H1", d.variants?.[0] ?? null).overlays.filter((o) => o.t === "tower");
     assert.isAbove(towers.length, 0, `${id} draws its towers`);
     for (const t of towers) assert.equal(t.soak, d.soak, id);
+  }
+});
+
+// Ecliptic Stampede with no puddles (Hector's Fixed Stampede mini-guide): your tether ends in the
+// corner opposite your portal, then clockwise, and the fireball follows that corner.
+test("Ecliptic with no puddles: the tether goes opposite the portal, then clockwise", () => {
+  const PORTAL = { sw: "north", nw: "east", ne: "south", se: "west" } as const;
+  for (const corner of ECL_CORNERS)
+    for (const s of ["H1", "H2"] as const) {
+      const sc = withSeed("ECL1", () => eclipticFreeScene(s, corner));
+      const tether = sc.steps[3];
+      assert.include(tether.q, `the ${PORTAL[corner]} portal`, `${s} ${corner}: the portal`);
+      assert.equal(tether.a[0], `The ${corner.toUpperCase()} corner.`);
+      assert.ok(tether.stand && inZone(tether.stand, tether.z ?? { c: [0, 0], r: 0 }), `${corner}: the corner spot is correct`);
+      const east = corner === "ne" || corner === "se";
+      assert.equal(eclTwoWayScene(corner).steps[0].a[0], east ? "The east Line Stack." : "The west Line Stack.");
+      assert.ok(eclFourWayScene(corner).steps[0].a[0].startsWith(corner.toUpperCase()));
+    }
+});
+
+test("Ecliptic with no puddles: H1 always goes clockwise, H2 only when H1 is marked", () => {
+  for (let i = 0; i < 40; i++) {
+    const h1 = withSeed(`E${i}`, () => eclipticFreeScene("H1", "ne"));
+    assert.equal(h1.steps[2].a[1], "H1 always takes the first two-player tower clockwise from A.");
+    const h2 = withSeed(`E${i}`, () => eclipticFreeScene("H2", "ne"));
+    const h1Marked = h2.steps[1].q.includes("H1");
+    assert.equal(h2.steps[2].a[1].includes("you go clockwise"), h1Marked, h2.steps[1].q);
   }
 });
