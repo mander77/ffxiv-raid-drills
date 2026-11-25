@@ -15,10 +15,11 @@ import { hitsFirst, isWeapon, Shape } from "./Shape";
     waymarks, then boss: the boss and his ring.
     weapons: the boss's weapons, over the waymarks they often land next to, and over the boss
     when he stands on one (his dot shows through the clear badge).
+    pushes: knockback arrows, over the waymarks and the boss so the push is never hidden.
     labels: name tags for weapons and zones, over the boss so they stay readable.
     effects: what the full fight adds over the arena (the flash, the countdown ring, a tank buster).
     marks: the other players. me: your own click and your moving marker, on top of everything. */
-export const LAYERS = ["ground", "drops", "zones", "waymarks", "boss", "weapons", "labels", "effects", "marks", "me"] as const;
+export const LAYERS = ["ground", "drops", "zones", "waymarks", "boss", "weapons", "pushes", "labels", "effects", "marks", "me"] as const;
 // TS note: `typeof LAYERS[number]` is the union of the array's values: "ground" | "drops" | ...
 export type Layer = (typeof LAYERS)[number];
 const CLIPPED: ReadonlySet<Layer> = new Set<Layer>(["ground", "drops", "zones"]);
@@ -178,18 +179,26 @@ function toArena(e: MouseEvent<SVGSVGElement>, world: SVGGElement | null): Point
   return [q.x, q.y];
 }
 
-/** Overlays sorted into their layers: name tags and portals are labels, tethers are drops, role
-    marks are marks, the boss's weapons are weapons, and the rest is ground, with the attacks under
-    the other pieces. Portals and tethers stay out of the ground, which is clipped to the floor: a
-    tether portal stands outside the wall. */
-export function pieceLayers(os: readonly Overlay[]): Pick<Record<Layer, ReactNode>, "ground" | "drops" | "weapons" | "labels" | "marks"> {
+/** Overlays sorted into their layers: name tags and portals are labels, tethers are drops,
+    knockback arrows are pushes, role marks are marks, the boss's weapons are weapons, and the rest
+    is ground, with the attacks under the other pieces. Portals, tethers and knockback arrows stay
+    out of the ground, which is clipped to the floor: a tether portal stands outside the wall, and
+    a knockback arrow must show over the waymarks (owner's choice). */
+export function pieceLayers(
+  os: readonly Overlay[],
+): Pick<Record<Layer, ReactNode>, "ground" | "drops" | "weapons" | "pushes" | "labels" | "marks"> {
   const draw = (list: readonly Overlay[]): ReactNode =>
     // biome-ignore lint/suspicious/noArrayIndexKey: a picture's pieces never change order.
     list.map((o, i) => <Shape key={i} overlay={o} />);
   return {
-    ground: draw(hitsFirst(os.filter((o) => o.t !== "tag" && o.t !== "mark" && o.t !== "portal" && o.t !== "tether" && !isWeapon(o)))),
+    ground: draw(
+      hitsFirst(
+        os.filter((o) => o.t !== "tag" && o.t !== "mark" && o.t !== "portal" && o.t !== "tether" && o.t !== "knockback" && !isWeapon(o)),
+      ),
+    ),
     drops: draw(os.filter((o) => o.t === "tether")),
     weapons: draw(os.filter(isWeapon)),
+    pushes: draw(os.filter((o) => o.t === "knockback")),
     labels: draw(os.filter((o) => o.t === "tag" || o.t === "portal")),
     marks: draw(os.filter((o) => o.t === "mark")),
   };

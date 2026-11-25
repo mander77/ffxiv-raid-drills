@@ -85,6 +85,7 @@ test("the styles page draws each standard attack, and the mark of an unknown siz
       "Cross",
       "Half Arena",
       "Knockback Arrows",
+      "Knocked Back",
       "Puddle",
       "Tower to Soak",
       "Size Unknown",
@@ -100,6 +101,8 @@ test("proteans are eight cones, a knockback shows hollow arrows, and a tower one
   const proteans = card("Proteans");
   assert.equal(proteans?.querySelectorAll("polygon.aoe").length, 8, "eight cones");
   assert.equal(card("Knockback Arrows")?.querySelectorAll("polygon.push").length, 8, "eight hollow arrows");
+  assert.equal(card("Knocked Back")?.querySelectorAll("polygon.push").length, 1, "one arrow, from you to where you land");
+  assert.ok(card("Raidwide")?.querySelector(".raidwide .glow"), "a raidwide glows inside the arena's edge");
   assert.equal(card("Tower to Soak")?.querySelectorAll(".tower .soak .player").length, 2, "two dots on the ring");
 });
 

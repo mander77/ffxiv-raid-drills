@@ -85,6 +85,8 @@ interface Line extends At {
 // hierarchy and pattern matching. The `&` joins two types into one (an intersection).
 type OverlayShape =
   | ({ t: "aoe"; r: number } & At)
+  // A raidwide: the whole floor is hit. A tint over the floor, with a glow inside its edge.
+  | { t: "raidwide" }
   | ({ t: "donut"; r1: number; r2: number } & At)
   | ({ t: "lineaoe"; w?: number } & Line)
   | ({ t: "band"; w: number } & Line)

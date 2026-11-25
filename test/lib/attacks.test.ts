@@ -4,7 +4,7 @@ import { assert, test } from "vitest";
 import * as M10S from "../../src/data/fights/m10s/source.gen";
 import * as M11S from "../../src/data/fights/m11s/source.gen";
 import { dist, polar } from "../../src/geometry";
-import { RAIDWIDE_R, standardAttacks } from "../../src/lib/attacks";
+import { standardAttacks } from "../../src/lib/attacks";
 import type { Overlay, Point } from "../../src/types";
 
 const A = standardAttacks(M11S.BOSSMOD_ARENA_HALF);
@@ -24,10 +24,8 @@ test("yalms draw to the arena's scale: 40 yalms across is 100 units", () => {
   assert.deepEqual([d.r1, d.r2], [12.5, 150]);
 });
 
-test("a raidwide covers the whole arena, corners too", () => {
-  const r = kindOf(A.raidwide(), "aoe");
-  assert.isAbove(r.r, dist(MID, [0, 0]));
-  assert.equal(r.r, RAIDWIDE_R);
+test("a raidwide is the whole arena, with no size of its own", () => {
+  assert.deepEqual(A.raidwide(), { t: "raidwide" });
 });
 
 test("a cone is as wide and as long as its size, toward its facing", () => {
@@ -63,6 +61,15 @@ test("half the arena, with and without its knockback", () => {
   const push = A.halfArena("east", { from: MID, distance: 10 });
   assert.equal(push.length, 9, "the half, then the arrows");
   for (const g of A.knockback(MID, 10).map((o) => kindOf(o, "knockback"))) assert.closeTo(dist([g.x, g.y], [g.x2, g.y2]), 25, 1e-9);
+});
+
+test("a knockback on a player is one arrow from the player, straight away from its source", () => {
+  const [only, ...more] = A.knockback(MID, 10, [60, 50]);
+  assert.isEmpty(more);
+  const a = kindOf(only, "knockback");
+  assert.deepEqual([a.x, a.y], [60, 50], "it starts where the player stands");
+  assert.deepEqual([a.x2, a.y2], [85, 50], "it lands 10 yalms further from the source");
+  assert.deepEqual(A.thrown([10, 20], [30, 40]), { t: "knockback", x: 10, y: 20, x2: 30, y2: 40 });
 });
 
 test("a puddle keeps its life, and a tower its soak count", () => {

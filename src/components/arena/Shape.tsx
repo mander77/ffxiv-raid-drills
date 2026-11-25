@@ -30,6 +30,13 @@ export function Shape({ overlay: o }: ShapeProps) {
   switch (o.t) {
     case "aoe":
       return <circle className="aoe" cx={round2(o.x)} cy={round2(o.y)} r={o.r} />;
+    case "raidwide":
+      return (
+        <g className="raidwide">
+          <rect className="tint" x="-60" y="0" width="220" height="100" />
+          <rect className="glow" x="0" y="0" width="100" height="100" />
+        </g>
+      );
     case "donut":
       return <path className="aoe" fillRule="evenodd" d={`${circlePath(o.x, o.y, o.r2)} ${circlePath(o.x, o.y, o.r1)}`} />;
     case "lineaoe":
@@ -292,7 +299,7 @@ export const isWeapon = (o: Overlay): boolean => o.t === "axe" || o.t === "sword
 
 /** True for the filled area of an attack. */
 export const isHit = (o: Overlay): boolean =>
-  o.t === "aoe" || o.t === "donut" || o.t === "band" || o.t === "poly" || (o.t === "lane" && !o.soft);
+  o.t === "aoe" || o.t === "raidwide" || o.t === "donut" || o.t === "band" || o.t === "poly" || (o.t === "lane" && !o.soft);
 
 /** Overlays with the attacks first, then the rest (safe rings, towers) on top, so an attack never
     covers them. */
