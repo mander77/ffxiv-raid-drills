@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, ECL_TOWER_R, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, HITBOX, MELEE_R, SWORD_HALF, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -548,12 +548,13 @@ const SCYTHE_STACK: Zone = {
    in line with B and drops four puddles walking west along it; the south one starts on the south
    wall in line with D and walks east. Then each steps in from the wall and drops two more in the
    gaps between the wall puddles, walking back, so the corners stay clear. The spots are the
-   app's choice, read from the video: wall puddles 15 units (6 yalms) apart, more than a
-   puddle's 5 yalms, and the inner row 13 units from the wall, just clear of the wall puddles. */
+   app's choice: the wall puddles read from the video, 15 units (6 yalms) apart, more than a
+   puddle's 5 yalms. The inner row is 13 units from the wall, just clear of the wall puddles,
+   and close enough to the middle to keep the middle of each tower clear (ECL_SOAK_R). */
 type EclWall = "north" | "south";
 const WALL_SPOTS: Record<EclWall, Point[]> = {
-  north:[[75, 5], [60, 5], [45, 5], [30, 5], [37.5, 18], [52.5, 18]],
-  south:[[25, 95], [40, 95], [55, 95], [70, 95], [62.5, 82], [47.5, 82]]
+  north:[[75, 5], [60, 5], [45, 5], [30, 5], [43.5, 18], [56.5, 18]],
+  south:[[25, 95], [40, 95], [55, 95], [70, 95], [56.5, 82], [43.5, 82]]
 };
 const NPUD = WALL_SPOTS.north.map(atomicPuddle);
 const SPUD = WALL_SPOTS.south.map(atomicPuddle);
@@ -563,19 +564,24 @@ const ECL_WAIT: Record<EclWall, CircleZone> = {north:{c:[43, 43], r:5.5}, south:
 /** The Ecliptic towers in the Learn card's example: tank towers NE and SE, two-player towers NW
     and SW. The spots change from pull to pull; these are the app's example. */
 const ECL_TOWERS: Point[] = [[72, 28], [72, 72], [28, 28], [28, 72]];
+/** The middle of an Ecliptic tower: where a two-player tower's healer or ranged stands, dead
+    center, so its tether goes to them. No fire puddle may reach into it. A whole tower cannot
+    stay clear: a puddle and a tower are 22.5 units across together, and the six puddles leave no
+    room for that. The app's choice (the owner's OK). */
+export const ECL_SOAK_R = 4;
 /** How far your two inner puddles may go from your wall, and from the north-south line through
     the middle (so they stay clear of the corners). The app's choice: the owner wants them only
-    clear of the corners and, as much as they can be, of the towers. */
+    clear of the corners and of the middle of each tower. */
 const INNER_DEPTH = 30, INNER_HALF_W = 25;
 
 /* Your fifth and sixth Ecliptic puddles: anywhere just inside your wall puddles, clear of the
-   corners, out of the towers, and clear of every puddle you dropped. Together the six puddles
-   end up as a triangle against the wall. `best` is the spot from Hector's video. The map draws
-   the area as rays from the boss, with the towers and the puddles cut out. */
+   corners, clear of the middle of each tower, and clear of every puddle you dropped. Together
+   the six puddles end up as a triangle against the wall. `best` is the app's example spot. The
+   map draws the area as rays from the boss, with the towers' middles and the puddles cut out. */
 function innerPuddle(wall: EclWall, best: Point): (results: StepResult[]) => Zone {
   const north = wall === "north";
   return results => {
-    const holes = [...ECL_TOWERS.map(q => ({q, r:ECL_TOWER_R})),
+    const holes = [...ECL_TOWERS.map(q => ({q, r:ECL_SOAK_R + ATOMIC_PUDDLE.r})),
       ...results.flatMap(r => r.drop ? [{q:r.drop, r:ATOMIC_PUDDLE.r}] : [])];
     const fn = (p: Point): boolean => inArena(p) && Math.abs(p[0] - 50) <= INNER_HALF_W
       && (north ? p[1] <= INNER_DEPTH : p[1] >= 100 - INNER_DEPTH) && holes.every(h => dist(p, h.q) > h.r);
@@ -628,8 +634,8 @@ function eclipticScene(s: Slot, wall: EclWall): Scene {
   const answer = (i: number): Lines => {
     if (i === 0) return [`The ${wall} wall, in line with ${waymark}.`, `Then walk ${dir} along the wall, one puddle at a time.`];
     if (i < 4) return [`One step ${dir} along the ${wall} wall, clear of the last puddle.`];
-    if (i === 4) return ["Step in from the wall, just inside your puddles.", "Stay clear of the corners and the towers."];
-    return [`Another one just inside your puddles, a step ${back}.`, "Clear of the corners, the towers and your puddles."];
+    if (i === 4) return ["Step in from the wall, just inside your puddles.", "Clear of the corners and the middle of each tower."];
+    return [`Another one just inside your puddles, a step ${back}.`, "Clear of the corners, the tower middles and your puddles."];
   };
   const towers: Overlay[] = [soloTower(ECL_TOWERS[0]), soloTower(ECL_TOWERS[1]), pairTower(ECL_TOWERS[2]), pairTower(ECL_TOWERS[3])];
   const drops: Step[] = spots.map((p, i): Step => ({
@@ -650,7 +656,7 @@ function eclipticScene(s: Slot, wall: EclWall): Scene {
           : ["NE of the boss, under him.", "The north wall's player takes NW.", "Close to the middle, so no tether goes to you."]}],
     rule:["Marked? Go to the safe corner on your wall.", "Two marked on one side? The one closer to the proximity AoE moves.",
       "North wall: in line with B, walk west. South: in line with D, walk east.",
-      "After four, drop two more just inside them, clear of the corners and towers.", "Then wait by the boss: north wall NW, south wall NE."]};
+      "After four, drop two more just inside them, clear of the corners and tower middles.", "Then wait by the boss: north wall NW, south wall NE."]};
 }
 
 /** The arena's four corners, by name. A player with no Ecliptic puddles stretches their tether
@@ -728,7 +734,7 @@ export function eclipticFreeScene(s: Slot, corner: EclCorner): Scene {
       {q:"Where do you stand?", z:bySlot(s, {H1:{c:ECL_START.H1, r:9}, H2:{c:ECL_START.H2, r:9}}), a:bySlot(s, {H1:["SW, outside."], H2:["SE, outside."]})},
       {q:`${marked[0]} and ${marked[1]} are marked. You are not. Where do you go?`, z:{c:CENTER, r:HITBOX}, cue:wallMarks,
         a:["Under the boss, with the tanks and melee.", "The marked players drop their puddles along the north and south walls."]},
-      {q:"Towers. Which one do you soak?", z:{c:tower, r:4}, stand:tower, cue:[...NPUD, ...SPUD, ...towers],
+      {q:"Towers. Which one do you soak?", z:{c:tower, r:ECL_SOAK_R}, stand:tower, cue:[...NPUD, ...SPUD, ...towers],
         a:[`The ${mine.toUpperCase()} two-player tower, dead center.`, why, "A melee stands on its edge, by the boss."]},
       {q:`A tether from the ${wall} portal. Where do you stretch it?`, z:CORNER_BOX[corner], stand, cue:[...portals, {t:"tether", x:portal[0], y:portal[1], x2:tower[0], y2:tower[1]}],
         a:[`The ${corner.toUpperCase()} corner.`, `Opposite your portal is the ${OPPOSITE[wall]} wall. Then clockwise, to the corner.`],
@@ -754,13 +760,40 @@ export function eclTwoWayScene(p: EclPlace): Scene {
     rule:TWO_WAY_RULE};
 }
 
+/** Your Four-way Fireball spot by the boss: the circle, less the parts inside the two Line Stacks
+    beside yours. Those two run square to your own line, through the boss, so a spot is out of them
+    when it is at least half a line's width out along your own line. */
+function fourWayNear(deg: number, {c, r}: CircleZone): Zone {
+  const out = (p: Point): number => (p[0] - 50) * Math.sin(deg * DEG) - (p[1] - 50) * Math.cos(deg * DEG);
+  const part = (d: number): Stretch | null => {
+    const x = crossCircle(CENTER, d, c, r);
+    if(!x) return null;
+    const lo = Math.max(x[0], LINE_STACK_HALF / Math.cos((d - deg) * DEG));
+    return x[1] - lo > 0.3 ? [lo, x[1]] : null;
+  };
+  return {fn:p => dist(p, c) <= r && out(p) >= LINE_STACK_HALF, label:c,
+    show:rayArea(CENTER, Array.from({length:81}, (_x, i) => deg - 40 + i), part).map(poly => ({poly}))};
+}
+
+/** A tethered player's Four-way Fireball spot, out on the intercard: the circle, with the fire
+    puddles on the floor cut out. */
+function fourWayOut(deg: number, {c, r}: CircleZone): Zone {
+  const holes = [...WALL_SPOTS.north, ...WALL_SPOTS.south].map(q => ({q, r:ATOMIC_PUDDLE.r}));
+  const part = (d: number): Stretch | null => {
+    const x = crossCircle(CENTER, d, c, r);
+    return x ? cutOut([x], CENTER, d, holes)[0] ?? null : null;
+  };
+  return {fn:p => dist(p, c) <= r && holes.every(h => dist(p, h.q) > h.r), label:c,
+    show:rayArea(CENTER, Array.from({length:41}, (_x, i) => deg - 20 + i), part).map(poly => ({poly}))};
+}
+
 /** Ecliptic Stampede's Four-way Fireball: Pair Stacks on the four closest players. A marked player
     takes NW (north wall) or NE (south wall), under the boss. A tethered player stays on their
     corner's intercard, further out, behind the player at max melee (the mini-guide, 2:25). The
     spot 24 units out is the app's choice. */
 export function eclFourWayScene(p: EclPlace): Scene {
   const deg = isEclCorner(p) ? CORNER_DEG[p] : p === "south" ? 45 : 315;
-  const z: CircleZone = isEclCorner(p) ? {c:POINT_AT(deg, 24), r:7} : p === "south" ? {c:[57,43],r:5.5} : {c:[43,43],r:5.5};
+  const z: Zone = isEclCorner(p) ? fourWayOut(deg, {c:POINT_AT(deg, 24), r:7}) : fourWayNear(deg, ECL_WAIT[p]);
   return {setup:[eclFireSetup(p), "The boss casts Four-way Fireball: Pair Stacks on the four closest players."], ordered:true,
     boss:BOSS, overlays:[...NPUD, ...SPUD],
     steps:[{q:"Which Pair Stack do you take?", z,

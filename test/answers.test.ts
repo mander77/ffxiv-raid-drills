@@ -12,7 +12,8 @@
 // The arena turn (`k`) is left out: it turns the zones and the attacks together, so it moves no
 // spot into or out of an attack.
 import { describe, expect, test } from "vitest";
-import { DRILLS, FIRST_PUDDLE } from "../src/data/fights/m11s/drills";
+import { ATOMIC_PUDDLE } from "../src/data/fights/m11s/attacks";
+import { DRILLS, ECL_SOAK_R, FIRST_PUDDLE } from "../src/data/fights/m11s/drills";
 import { buildFight } from "../src/data/fights/m11s/fight";
 import { dist, inZone, stepZone, zoneCenter } from "../src/geometry";
 import { buildPattern } from "../src/lib/practice";
@@ -234,6 +235,57 @@ describe("no correct answer stands in an attack", () => {
         }
     }
     expect(checked).toBeGreaterThan(1000);
+  });
+
+  test("every point of a Four-way Fireball area is out of the fire and the other Line Stacks", () => {
+    // Near the boss the four lines overlap, and the fire puddles on the floor reach the intercards.
+    const drill = DRILLS.find((d) => d.id === "m-ecl-four");
+    if (!drill) throw new Error("missing drill m-ecl-four");
+    let checked = 0;
+    for (const s of SLOTS)
+      for (const code of CODES) {
+        const { scene } = buildPattern(drill, s, code);
+        const step = scene.steps[0];
+        const attacks = [...attacksOf(step), ...scene.overlays.filter(isAttack)];
+        for (let x = 0; x <= 100; x += 0.5)
+          for (let y = 0; y <= 100; y += 0.5) {
+            const p: Point = [x, y];
+            if (!step.z || !inZone(p, step.z)) continue;
+            checked++;
+            const hit = attacks.find((o) => hits(o, p));
+            expect(hit && nameOf(hit), `${s}, code ${code}: (${x}, ${y}) counts as correct`).toBeUndefined();
+          }
+      }
+    expect(checked).toBeGreaterThan(1000);
+  });
+
+  test("an inner Ecliptic puddle never reaches the middle of a tower", () => {
+    // Where the healer or ranged soaks a two-player tower, dead center: no fire may cover it.
+    const drill = DRILLS.find((d) => d.id === "m-ecl-start");
+    if (!drill) throw new Error("missing drill m-ecl-start");
+    let checked = 0;
+    for (const variant of ["north", "south"]) {
+      const scene = drill.build("H1", variant);
+      const towers = scene.steps.flatMap((st) => st.cue ?? []).filter((o) => o.t === "tower");
+      expect(towers).toHaveLength(4);
+      const results: StepResult[] = [];
+      for (const step of scene.steps) {
+        const zone = stepZone(step, results);
+        if (!zone) throw new Error(`m-ecl-start has a step with no zone`);
+        if (step.zf)
+          for (let x = 0; x <= 100; x += 0.5)
+            for (let y = 0; y <= 100; y += 0.5) {
+              const p: Point = [x, y];
+              if (!inZone(p, zone)) continue;
+              checked++;
+              const near = towers.find((o) => dist(p, [o.x, o.y]) < ECL_SOAK_R + ATOMIC_PUDDLE.r);
+              expect(near && nameOf(near), `${variant} wall: a puddle at (${x}, ${y}) counts as correct`).toBeUndefined();
+            }
+        const p = step.stand ?? zoneCenter(zone);
+        results.push({ p, ok: true, z: zone, drop: step.drop ? p : null });
+      }
+    }
+    expect(checked).toBeGreaterThan(100);
   });
 
   test("a puddle dropped on the last one fails", () => {
