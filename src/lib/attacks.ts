@@ -4,7 +4,7 @@
 // (`standardAttacks(BOSSMOD_ARENA_HALF)`), so the same yalms draw to scale in every fight.
 //
 // Directions are degrees clockwise from north, as in geometry.ts. The arena is 100 units across.
-import { addVec, leftOf, polar } from "../geometry";
+import { addVec, leftOf, polar, unit } from "../geometry";
 import type { Overlay, Point } from "../types";
 
 /** An ability's shape, as a fight's source.gen.ts lists it (from BossMod), in yalms. A cone's
@@ -24,15 +24,8 @@ export type BossmodShape =
 /** The side of the arena that half-arena attacks hit. */
 export type ArenaSide = "north" | "east" | "south" | "west";
 
-/** The arena's center, in arena units. */
 /** A line attack, as the arena draws it: a band from one end to the other. */
 export type Band = Extract<Overlay, { t: "band" }>;
-
-const CENTER: Point = [50, 50];
-
-/** A raidwide hits the whole arena. This size is the app's choice, for the picture: a circle this
-    big reaches the corners of the square arena (half its diagonal is about 71 units). */
-export const RAIDWIDE_R = 72;
 
 /** The ring of an attack whose size no source gives yet, in arena units. The app's choice: big
     enough to see, and clearly not a real size (it is dashed and grey). */
@@ -61,8 +54,9 @@ export function standardAttacks(arenaHalf: number) {
   /** Yalms to arena units. */
   const yalms = (n: number): number => (n * 50) / arenaHalf;
 
-  /** The whole arena. */
-  const raidwide = (): Overlay => ({ t: "aoe", x: CENTER[0], y: CENTER[1], r: RAIDWIDE_R });
+  /** The whole arena: the floor in the attack's tint, with a glow inside its edge. It has no
+      size: it covers whatever floor the arena has. */
+  const raidwide = (): Overlay => ({ t: "raidwide" });
 
   /** A circle that hits everything inside `radius`. */
   const circle = (at: Point, radius: number): Overlay => ({ t: "aoe", x: at[0], y: at[1], r: yalms(radius) });
@@ -110,14 +104,21 @@ export function standardAttacks(arenaHalf: number) {
     return [arm(d), arm(leftOf(d))];
   }
 
-  /** Where a knockback from `from` sends you: bold arrows out from it in every direction,
-      `distance` yalms long. */
-  function knockback(from: Point, distance: number): Overlay[] {
+  /** One knockback arrow: a player thrown from `from` to `to`. For a throw whose distance no
+      source gives, where the picture chooses the landing spot. */
+  const thrown = (from: Point, to: Point): Overlay => ({ t: "knockback", x: from[0], y: from[1], x2: to[0], y2: to[1] });
+
+  /** Where a knockback from `from` sends you, `distance` yalms. With no player, bold arrows out
+      from it in every direction. With a player standing `on` a spot, one arrow from that spot,
+      straight away from `from`, to where the player lands. */
+  function knockback(from: Point, distance: number, on?: Point): Overlay[] {
+    if (on) {
+      const away = unit([on[0] - from[0], on[1] - from[1]]);
+      return [thrown(on, addVec(on, away, yalms(distance)))];
+    }
     return Array.from({ length: KNOCKBACK_ARROWS }, (_, i) => {
       const deg = (360 * i) / KNOCKBACK_ARROWS;
-      const a = polar(deg, KNOCKBACK_FROM, from),
-        b = polar(deg, KNOCKBACK_FROM + yalms(distance), from);
-      return { t: "knockback", x: a[0], y: a[1], x2: b[0], y2: b[1] };
+      return thrown(polar(deg, KNOCKBACK_FROM, from), polar(deg, KNOCKBACK_FROM + yalms(distance), from));
     });
   }
 
@@ -171,7 +172,7 @@ export function standardAttacks(arenaHalf: number) {
     }
   }
 
-  return { yalms, raidwide, circle, donut, cone, proteans, line, cross, halfArena, knockback, puddle, tower, unknown, fromBossmod };
+  return { yalms, raidwide, circle, donut, cone, proteans, line, cross, halfArena, knockback, thrown, puddle, tower, unknown, fromBossmod };
 }
 
 /** The set of standard attacks of one arena. */

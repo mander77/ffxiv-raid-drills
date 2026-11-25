@@ -195,6 +195,12 @@ const ATTACKS: readonly AttackSample[] = [
     view: CLOSE,
   },
   {
+    name: "Knocked Back",
+    meaning: "Throws you straight away from its source: the arrow ends where you land.",
+    overlays: [...EXAMPLE.knockback([36, 50], 8, [41, 50]), { t: "mark", x: 41, y: 50, l: "H1", r: "H" }],
+    view: CLOSER,
+  },
+  {
     name: "Puddle",
     meaning: "Stays on the floor for a few seconds, then goes off.",
     overlays: [EXAMPLE.puddle(MID, 6, 3)],

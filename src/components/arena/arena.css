@@ -131,6 +131,17 @@
     stroke: var(--arena-aoe);
     stroke-width: 0.4;
   }
+  /* A raidwide: the whole floor in the attack's tint, and a glow inside its edge (the arena's
+     clip keeps only the inner half of the wide stroke). */
+  .arena .raidwide .tint {
+    fill: var(--arena-aoe-fill);
+  }
+  .arena .raidwide .glow {
+    fill: none;
+    stroke: var(--arena-aoe);
+    stroke-width: 7;
+    stroke-opacity: 0.55;
+  }
   /* Where a cone points: a bold arrow from its source, darker than the attack, on a light outline
      so it stands out on the cone. */
   .arena .aim .halo {

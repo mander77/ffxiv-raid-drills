@@ -87,7 +87,8 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
   app) and the dots in a pill. A puddle can
   carry its life in seconds (`life`).
 - On the styles page, "Knockback Arrows" and "Tower to Soak" have these names because the
-  mechanic kinds "Knockback" and "Tower" already have cards there.
+  mechanic kinds "Knockback" and "Tower" already have cards there. "Knocked Back" shows the
+  knockback on one player: its arrow from the player to where they land.
 - Rejected: an attack's picture beside each mechanic kind's icon on the styles page. A kind does
   not always map to one attack. Every attack is in the Standard Attacks section instead (owner's
   choice).
@@ -171,8 +172,30 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
 - Heartbreak Kick in Practice and Pressure: the drill `m-hb` has two variants, from a new
   Settings pick, "Heartbreak Kick": "Party soaks" (stand in the tower) or "Tanks invuln" (stand
   anywhere out of it). Each of the three hits is one step, due at its cactbot line.
-- M11S's knockbacks stay guides. Those guides show where each player is thrown, which the
-  standard knockback (arrows out from a source) does not.
+- M11S's knockbacks are standard knockback arrows, not guides (owner's choice, November 24). A
+  guide is a move you make; a knockback throws you, so it gets the wide, hollow arrow of the
+  knockback icons. The guides stayed at first because the standard knockback (arrows out from a
+  source) did not show where each player lands. Now `knockback(from, distance, on)` does: with a
+  player's spot `on`, it is one arrow from that spot, straight away from the source, to where the
+  player lands. `thrown(from, to)` is the same arrow for a throw whose distance no source gives.
+  - Arena Split towers (`k-split-kb`): `knockback` from the tower, `TOWER_KNOCKBACK` (BossMod).
+    It lands on the same spot the guide ended on before.
+  - Flatliner lineup (`k-split-side`): BossMod gives no knockback distance, so `thrown` ends at
+    the lineup spot (the app's choice, as the guide did).
+  - The made-up wrong answers (`k-split-kb` "same platform", `k-massive` "a knockback only",
+    `k-slab` "knocked to the platform he faces") use `thrown` to the spots they used before.
+  - The arrows are drawn in their own layer, `pushes`, over the waymarks, the boss and the
+    weapons and under the labels and the players (owner's request: a waymark must never hide
+    the push). That layer is not clipped to the floor.
+  - Practice and Pressure already throw your mark at a knockback (`Step.knock`); they draw no
+    arrow, and this did not change.
+  - The guides that are moves you make (routes, walks, the Ecliptic tethers' paths) stay guides.
+- A raidwide has its own overlay (`{t:"raidwide"}`, owner's choice, November 24): the whole floor
+  in the attack's tint, with a wider orange glow inside the floor's edge, so it reads as "the
+  whole arena is hit" and not as a big circle or a half arena. It has no size: before, it was a
+  circle of radius 72 (`RAIDWIDE_R`, now gone) that the arena's clip cut to the floor. The tint
+  covers any floor the arena clips to; the glow follows the square arena's edge (no raidwide
+  picture is on the split arena today).
 
 ## Planned work
 

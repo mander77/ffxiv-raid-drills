@@ -187,6 +187,12 @@ export function LiveArena({
             {weapons}
           </>
         ),
+        pushes: (
+          <>
+            {base.pushes}
+            {reveal.pushes}
+          </>
+        ),
         drops: (
           <>
             {drops}
