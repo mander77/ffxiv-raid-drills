@@ -1287,7 +1287,7 @@ export const DRILLS: readonly Drill[] = [
         // The lines explode as the pairs land (Hurricane Explosion, 10 yalms wide).
         reveal:DANCE_LINES.map(l => hurricaneLine([l.x, l.y], [l.x2, l.y2]))}],
       rule:["Open side = new south.", "H1 and R1: relative SW.", "H2 and R2: relative SE."]})},
-  {id:"m-ultimate", order:11.5, random:true, follows:{pick:"ult"}, phase:P1, time:"3:05 to 3:41", title:"Ultimate Trophy Weapons: Six Weapons", kind:["stack", "protean", "lightPartyStack"],
+  {id:"m-ultimate", order:11.5, random:true, follows:{pick:"ult"}, phase:P1, time:"3:05 to 3:40", title:"Ultimate Trophy Weapons: Six Weapons", kind:["stack", "protean", "lightPartyStack"],
     build:(s, _v, pick)=>ultimateScene(buildUltimate(s, pick ? pick === "cw" : undefined))},
   {id:"m-tornado", order:12, phase:P1, time:"3:46", title:"Ultimate Trophy Weapons: Tornadoes", kind:"bait",
     build:s=>({setup:["The sixth weapon resolved.", "Four tornadoes sit on the cardinals.", "Each one cones its two closest players."],
@@ -1365,6 +1365,6 @@ export const DRILLS: readonly Drill[] = [
     build:(_s, v)=>eclTwoWayScene(eclPlace(v))},
   {id:"m-ecl-four", order:26.6, variants:["north", "south", "none"], follows:{variant:"wall"}, phase:P4, time:"9:31", title:"Ecliptic Stampede: Four-way Fireball", kind:"pairStack",
     build:(_s, v)=>eclFourWayScene(eclPlace(v))},
-  {id:"m-hb", order:28, variants:["party", "tanks"], follows:{variant:"kick"}, phase:P4, time:"9:53 to 10:34", title:"Heartbreak Kick", kind:"tower", soak:8,
+  {id:"m-hb", order:28, variants:["party", "tanks"], follows:{variant:"kick"}, phase:P4, time:"9:53 to 10:47", title:"Heartbreak Kick", kind:"tower", soak:8,
     build:(_s, v)=>kickScene(v === "tanks" ? "tanks" : "party")}
 ];
