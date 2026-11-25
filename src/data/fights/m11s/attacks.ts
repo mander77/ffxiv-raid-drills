@@ -45,6 +45,12 @@ export const ATOMIC_PUDDLE: Puddle = {r:yalms(bossmod("AtomicImpact").range), li
 /** The weapon scythe's donut: safe only within 5 yalms of him ("range 5-60 donut"). Its
     proteans hit at the same time. */
 export const SCYTHE_SAFE = yalms(bossmod("AssaultEvolvedScytheAOE").inner);
+/** The weapon scythe's proteans: one cone ("range 60 30-degree cone") on each of the eight clock
+    spots around him. */
+const SCYTHE_PROTEANS = 8;
+/** How many degrees off your own clock spot the next player's protean cone starts: 45° between
+    spots, less half a cone. Closer to your own spot than this, only your own cone hits you. */
+export const SCYTHE_CLEAR_DEG = 360 / SCYTHE_PROTEANS - bossmod("SweepingVictory").angle / 2;
 /** Raw Steel Trophy, scythe: half the angle of the cone the party shares ("range 60 45-degree
     cone"), in degrees. Its answer zone stands inside it. */
 export const RAW_STACK_HALF = bossmod("RawSteelScytheHeavyHitter").angle / 2;
@@ -133,7 +139,7 @@ export const proteanCone = (from: Point, facing: number): Overlay => {
 /** The weapon scythe's proteans: eight cones out from the boss at c, the first toward `facing`. */
 export const scytheProteans = (c: Point, facing: number): Overlay[] => {
   const s = bossmod("SweepingVictory");
-  return ATTACK.proteans(c, s.angle, s.range, 8, facing);
+  return ATTACK.proteans(c, s.angle, s.range, SCYTHE_PROTEANS, facing);
 };
 /** Raw Steel Trophy, scythe: the cone on each tank ("range 60 90-degree cone"). */
 export const tankCone = (from: Point, facing: number): Overlay => {
