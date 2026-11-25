@@ -193,7 +193,7 @@ test("Practice: a correct click and an incorrect click on the arena", async ({ p
   await expect(page.getByRole("status")).toHaveText("Not there");
 });
 
-test("Practice: Next mechanic after Void Stardust's eight steps opens Dance of Domination", async ({ page }) => {
+test("Practice: Next mechanic after Void Stardust's eight steps opens its second time", async ({ page }) => {
   await page.goto("/practice/m-void/K7Q2");
   const arena = page.getByRole("img", { name: "Arena map. Click where you stand." });
   // A click in the arena's corner is off every spot: each step is incorrect, then Next step.
@@ -203,8 +203,8 @@ test("Practice: Next mechanic after Void Stardust's eight steps opens Dance of D
   }
   await expect(page.getByRole("status")).toHaveText(/of 8 correct/);
   await page.getByRole("button", { name: "Next Mechanic" }).click();
-  await expect(page).toHaveURL(/\/practice\/m-dance\/[^/]+$/);
-  await expect(page.getByRole("heading", { name: "Dance of Domination" })).toBeVisible();
+  await expect(page).toHaveURL(/\/practice\/m-void-2\/[^/]+$/);
+  await expect(page.getByRole("heading", { name: "Void Stardust (Second Time)" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Show Me" })).toBeVisible();
 });
 
