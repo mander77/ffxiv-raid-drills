@@ -152,7 +152,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   segs.push(
     {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)"), due:[cactbot("Orbital Omen 1"), cactbot("Orbital Omen 2"), cactbot("Orbital Omen 3")]},
     {title:"Meteorain: First Line Stack", drills:["m-meteor-1"], scene:drill("m-meteor-1", s), k:0, from:cactbot("Meteorain"), due:[cactbot("Fearsome Fireball")]},
-    {title:"Meteorain: Your Meteor", drills:["m-meteor-2"], scene:drill("m-meteor-2", s), k:0, from:cactbot("Cosmic Kiss"), due:[cactbot("Cosmic Kiss", 2)]},
+    {title:"Meteorain: Your Meteor", drills:["m-meteor-2"], scene:drill("m-meteor-2", s), k:0, from:cactbot("Cosmic Kiss"), due:[cactbot("--Meteor Markers 2--"), cactbot("Cosmic Kiss", 2)]},
     {title:"Meteorain: Third Line Stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:cactbot("--tethers--", 2), due:[cactbot("Fearsome Fireball", 3)]},
     {title:"Meteorain: Last Line Stack", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:cactbot("Cosmic Kiss", 3), due:[cactbot("Fearsome Fireball", 4), cactbot("Triple Tyrannhilation")]},
     {title:"Arena Split: Lineup", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:cactbot("Flatliner (split)"), due:[cactbot("Majestic Meteor")]},
@@ -275,7 +275,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     L("Great Wall of Fire 1"), L("Great Wall of Fire 2"), L("Explosion 1"), L("Explosion 2"),
     L("Orbital Omen (castbar)", 1, "Orbital Omen"), L("Orbital Omen 1"), L("Fire and Fury"), L("Orbital Omen 2"), L("Orbital Omen 3"), L("Orbital Omen 4"),
     L("--middle--", 6),
-    L("Meteorain"), L("Fearsome Fireball"), L("Cosmic Kiss"),
+    L("Meteorain"), L("Fearsome Fireball"), L("Cosmic Kiss"), L("--Meteor Markers 2--", 1, "Meteor markers"),
     L("Foregone Fatality"), L("Fearsome Fireball", 2), L("Cosmic Kiss", 2), L("Explosion", 3),
     L("Foregone Fatality", 2), L("Fearsome Fireball", 3), L("Cosmic Kiss", 3), L("Explosion", 4),
     L("Foregone Fatality", 3), L("Fearsome Fireball", 4), L("Explosion", 5),

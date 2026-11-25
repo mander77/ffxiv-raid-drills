@@ -916,6 +916,11 @@ static wins.
   (video 20.2), M2's SW rock 15.5 (15.4), H1's NW drop anywhere NW in max melee, best at 20
   (22.6; wtfdig's picture 19.5), R2's NE rock 18 (18.2). H2's and R1's rocks stay (34 and 57).
   The party stacks 30 units out behind a rock (`BEHIND_ROCK`; video 28 to 32).
+- Meteorain, the healers' markers (owner, November 25, after a fight review): "Meteorain: Your
+  Meteor" first asks the healers to go under the boss, so they are the two closest when the
+  second set of markers comes (cactbot's "--Meteor Markers 2--", 5:03, a "Meteor markers" line in
+  the full fight). Hector's guide video (9:43 to 9:59) and wtfdig ("Bait meteor close") both say
+  so. Anywhere inside his hitbox is correct. Then the drop, as before.
 - The tank tethers in Meteorain are tank busters at 5:09, 5:19 and 5:29.
 - Crown of Arcadia, a raidwide, comes five times.
 - Arena Split follows Hector No Buddies (wtfdig `#hector:hector:fixed`), the owner's choice in
