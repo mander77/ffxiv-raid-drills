@@ -137,11 +137,13 @@ function scytheSpot(P: Point, spot: Point): Zone {
   return {fn, label:spot, show:rayArea(P, degs, part).map(poly => ({poly}))};
 }
 
-/* Assault Evolved: three weapons. The boss faces the first, then goes clockwise.
+/* Assault Evolved: three weapons. The boss faces the first, then goes clockwise. The weapons face
+   his jumps, as in the second set (cactbot reads both sets' order from their facing), but here
+   the tell is the boss's facing.
    `order` forces the weapon types in the order he takes them (the fight pattern picks); without it,
    the order is random. */
 export function buildAssault(s: Slot, order?: WeaponType[]): JumpSet {
-  return buildJumpSet(s, assaultWeapons(order));
+  return buildJumpSet(s, faceApproach(noJumpAcross(assaultWeapons(order))));
 }
 
 /** Three weapons at least 90 degrees apart, in the order he takes them: the first, then clockwise. */
@@ -172,9 +174,9 @@ export function faceApproach(W: Weapon[]): Weapon[] {
   });
 }
 
-/** No jump straight across the middle. A weapon he reaches that way would face the middle too,
-    as square as the first one. cactbot's "R11S Trophy Weapons" trigger (r11s.ts) finds the first
-    weapon as the one facing the middle, so the game never has two. Where the spots would give a
+/** No jump straight across the middle, in either set. A weapon he reaches that way would face
+    the middle too, as square as the first one. cactbot's "R11S Trophy Weapons" trigger (r11s.ts)
+    finds the first weapon as the one facing the middle, so the game never has two. Where the spots would give a
     180-degree jump, that jump's weapon moves 45 degrees back toward the weapon before it (the
     owner's choice): 180/90 becomes 135/135, and 90/180 becomes 90/135. No random call is added,
     so a fight code still builds every other part the same way. */
