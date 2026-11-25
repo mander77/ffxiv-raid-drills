@@ -1289,5 +1289,1488 @@
         }
       ]
     }
-  ]
+  ],
+  "states": {
+    "file": "https://github.com/awgil/ffxiv_bossmod/blob/3004b0a7b5edd9ea8afaea69e71263c76668fff6/BossMod.Modules/Dawntrail/Savage/RM11STheTyrant/RM11STheTyrantStates.cs",
+    "phases": [
+      {
+        "call": "DeathPhase",
+        "id": "0x0",
+        "method": "SinglePhase",
+        "states": [
+          {
+            "group": "TrophyWeapons",
+            "id": "0x0",
+            "from": 0,
+            "delay": 5.2,
+            "states": [
+              {
+                "id": "0x0",
+                "call": "Cast",
+                "aid": "CrownOfArcadia",
+                "delay": 5.2,
+                "cast": 5,
+                "name": "Raidwide",
+                "start": 5.2,
+                "at": 10.2,
+                "activate": [
+                  "CrownOfArcadia"
+                ],
+                "deactivate": [
+                  "CrownOfArcadia"
+                ]
+              },
+              {
+                "group": "RawSteelTrophy",
+                "id": "0x10",
+                "from": 10.2,
+                "delay": 5.2,
+                "states": [
+                  {
+                    "id": "0x10",
+                    "call": "CastMulti",
+                    "aids": [
+                      "RawSteelTrophyAxe",
+                      "RawSteelTrophyScythe"
+                    ],
+                    "delay": 5.2,
+                    "cast": 2,
+                    "start": 15.4,
+                    "at": 17.4,
+                    "activate": [
+                      "RawSteelTrophyAxe",
+                      "RawSteelTrophyScythe",
+                      "RawSteelTrophyCounter"
+                    ]
+                  },
+                  {
+                    "id": "0x12",
+                    "call": "ComponentCondition",
+                    "component": "RawSteelTrophyCounter",
+                    "delay": 7.5,
+                    "name": "Tankbuster + stack/spread",
+                    "condition": "c => c.NumCasts > 0",
+                    "at": 24.9,
+                    "deactivate": [
+                      "RawSteelTrophyAxe",
+                      "RawSteelTrophyScythe",
+                      "RawSteelTrophyCounter"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "0x100",
+                "call": "Cast",
+                "aid": "TrophyWeapons",
+                "delay": 10.5,
+                "cast": 3,
+                "start": 35.4,
+                "at": 38.4,
+                "activate": [
+                  "TrophyWeaponsAOE",
+                  "TrophyWeaponsBait",
+                  "TrophyWeaponsHints if _config.WeaponHints"
+                ]
+              },
+              {
+                "id": "0x110",
+                "call": "Cast",
+                "aid": "AssaultEvolvedLongCast",
+                "delay": 3.4,
+                "cast": 6,
+                "start": 41.8,
+                "at": 47.8
+              },
+              {
+                "id": "0x112",
+                "call": "ComponentCondition",
+                "component": "TrophyWeaponsAOE",
+                "delay": 2.2,
+                "name": "Weapon 1",
+                "condition": "t => t.NumCasts > 0",
+                "at": 50
+              },
+              {
+                "id": "0x113",
+                "call": "ComponentCondition",
+                "component": "TrophyWeaponsAOE",
+                "delay": 5.2,
+                "name": "Weapon 2",
+                "condition": "t => t.NumCasts > 1",
+                "at": 55.2
+              },
+              {
+                "id": "0x114",
+                "call": "ComponentCondition",
+                "component": "TrophyWeaponsAOE",
+                "delay": 5.2,
+                "name": "Weapon 3",
+                "condition": "t => t.NumCasts > 2",
+                "at": 60.4,
+                "deactivate": [
+                  "TrophyWeaponsAOE",
+                  "TrophyWeaponsBait",
+                  "TrophyWeaponsHints if _config.WeaponHints"
+                ]
+              },
+              {
+                "id": "0x200",
+                "call": "Cast",
+                "aid": "TrophyWeapons",
+                "delay": 9.2,
+                "cast": 3,
+                "start": 69.6,
+                "at": 72.6,
+                "activate": [
+                  "TrophyWeaponsAOE",
+                  "TrophyWeaponsBait",
+                  "TrophyWeaponsHints if _config.WeaponHints"
+                ],
+                "exec": [
+                  {
+                    "component": "TrophyWeaponsAOE",
+                    "when": "enter",
+                    "code": "t => t.Risky = false"
+                  },
+                  {
+                    "component": "TrophyWeaponsBait",
+                    "when": "enter",
+                    "code": "t => t.EnableHints = false"
+                  }
+                ]
+              },
+              {
+                "id": "0x210",
+                "call": "Cast",
+                "aid": "VoidStardust",
+                "delay": 3.1,
+                "cast": 4,
+                "start": 75.7,
+                "at": 79.7,
+                "activate": [
+                  "VoidStardustBait",
+                  "Cometite",
+                  "Comets"
+                ]
+              },
+              {
+                "id": "0x212",
+                "call": "ComponentCondition",
+                "component": "Cometite",
+                "delay": 1.2,
+                "name": "Puddles start",
+                "condition": "c => c.ActiveCasters.Any()",
+                "at": 80.9
+              },
+              {
+                "id": "0x214",
+                "call": "ComponentCondition",
+                "component": "Comets",
+                "delay": 8.9,
+                "name": "Stack/spread",
+                "condition": "c => c.NumFinishedSpreads + c.NumFinishedStacks > 0",
+                "at": 89.8,
+                "deactivate": [
+                  "VoidStardustBait",
+                  "Cometite",
+                  "Comets"
+                ],
+                "exec": [
+                  {
+                    "component": "TrophyWeaponsAOE",
+                    "when": "exit",
+                    "code": "t => t.Risky = true"
+                  },
+                  {
+                    "component": "TrophyWeaponsBait",
+                    "when": "exit",
+                    "code": "t => t.EnableHints = true"
+                  }
+                ]
+              },
+              {
+                "id": "0x220",
+                "call": "ComponentCondition",
+                "component": "TrophyWeaponsAOE",
+                "delay": 5.1,
+                "name": "Weapon 1",
+                "condition": "t => t.NumCasts > 0",
+                "at": 94.9
+              },
+              {
+                "id": "0x221",
+                "call": "ComponentCondition",
+                "component": "TrophyWeaponsAOE",
+                "delay": 5.2,
+                "name": "Weapon 2",
+                "condition": "t => t.NumCasts > 1",
+                "at": 100.1
+              },
+              {
+                "id": "0x222",
+                "call": "ComponentCondition",
+                "component": "TrophyWeaponsAOE",
+                "delay": 5.2,
+                "name": "Weapon 3",
+                "condition": "t => t.NumCasts > 2",
+                "at": 105.3,
+                "deactivate": [
+                  "TrophyWeaponsAOE",
+                  "TrophyWeaponsBait",
+                  "TrophyWeaponsHints if _config.WeaponHints"
+                ]
+              },
+              {
+                "id": "0x230",
+                "call": "ComponentCondition",
+                "component": "Comets",
+                "delay": 11.2,
+                "name": "Stack/spread",
+                "condition": "c => c.NumFinishedSpreads + c.NumFinishedStacks > 0",
+                "at": 116.5,
+                "activate": [
+                  "VoidStardustBait",
+                  "Cometite",
+                  "Comets"
+                ],
+                "deactivate": [
+                  "VoidStardustBait",
+                  "Cometite",
+                  "Comets"
+                ]
+              },
+              {
+                "id": "0x240",
+                "call": "Cast",
+                "aid": "CrownOfArcadia",
+                "delay": 1,
+                "cast": 5,
+                "name": "Raidwide",
+                "start": 117.5,
+                "at": 122.5,
+                "activate": [
+                  "CrownOfArcadia"
+                ],
+                "deactivate": [
+                  "CrownOfArcadia"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "DanceOfDomination",
+            "id": "0x10000",
+            "from": 122.5,
+            "delay": 10.5,
+            "states": [
+              {
+                "id": "0x10000",
+                "call": "Cast",
+                "aid": "DanceOfDominationTrophy",
+                "delay": 10.5,
+                "cast": 2,
+                "start": 133,
+                "at": 135,
+                "activate": [
+                  "DanceOfDomination1",
+                  "DanceOfDomination2",
+                  "HurricaneExplosion",
+                  "EyeOfTheHurricane"
+                ]
+              },
+              {
+                "id": "0x10010",
+                "call": "ComponentCondition",
+                "component": "DanceOfDomination1",
+                "delay": 6.6,
+                "name": "Raidwide 1",
+                "condition": "d => d.NumCasts > 0",
+                "at": 141.6,
+                "deactivate": [
+                  "DanceOfDomination1"
+                ]
+              },
+              {
+                "id": "0x10011",
+                "call": "ComponentCondition",
+                "component": "DanceOfDomination2",
+                "delay": 4.1,
+                "name": "Raidwide 7",
+                "condition": "d => d.NumCasts > 0",
+                "at": 145.7,
+                "deactivate": [
+                  "DanceOfDomination2"
+                ]
+              },
+              {
+                "id": "0x10020",
+                "call": "ComponentCondition",
+                "component": "EyeOfTheHurricane",
+                "delay": 4.9,
+                "name": "Stacks",
+                "condition": "e => e.NumFinishedStacks > 0",
+                "at": 150.6,
+                "deactivate": [
+                  "EyeOfTheHurricane",
+                  "HurricaneExplosion"
+                ]
+              },
+              {
+                "group": "RawSteelTrophy",
+                "id": "0x10100",
+                "from": 150.6,
+                "delay": 4.2,
+                "states": [
+                  {
+                    "id": "0x10100",
+                    "call": "CastMulti",
+                    "aids": [
+                      "RawSteelTrophyAxe",
+                      "RawSteelTrophyScythe"
+                    ],
+                    "delay": 4.2,
+                    "cast": 2,
+                    "start": 154.8,
+                    "at": 156.8,
+                    "activate": [
+                      "RawSteelTrophyAxe",
+                      "RawSteelTrophyScythe",
+                      "RawSteelTrophyCounter"
+                    ]
+                  },
+                  {
+                    "id": "0x10102",
+                    "call": "ComponentCondition",
+                    "component": "RawSteelTrophyCounter",
+                    "delay": 7.5,
+                    "name": "Tankbuster + stack/spread",
+                    "condition": "c => c.NumCasts > 0",
+                    "at": 164.3,
+                    "deactivate": [
+                      "RawSteelTrophyAxe",
+                      "RawSteelTrophyScythe",
+                      "RawSteelTrophyCounter"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "group": "UltimateTrophyWeapons",
+            "id": "0x20000",
+            "from": 164.3,
+            "delay": 10.3,
+            "states": [
+              {
+                "id": "0x20000",
+                "call": "Cast",
+                "aid": "Charybdistopia",
+                "delay": 10.3,
+                "cast": 5,
+                "name": "1 HP",
+                "start": 174.6,
+                "at": 179.6
+              },
+              {
+                "id": "0x20010",
+                "call": "Cast",
+                "aid": "UltimateTrophyWeapons",
+                "delay": 2.6,
+                "cast": 3,
+                "start": 182.2,
+                "at": 185.2,
+                "activate": [
+                  "Maelstrom",
+                  "UltimateTrophyWeaponsAOE",
+                  "UltimateTrophyWeaponsBait",
+                  "UltimateTrophyWeaponsHints if _config.WeaponHints"
+                ]
+              },
+              {
+                "id": "0x20020",
+                "call": "ComponentCondition",
+                "component": "UltimateTrophyWeaponsAOE",
+                "delay": 10,
+                "name": "Weapon 1",
+                "condition": "t => t.NumCasts > 0",
+                "at": 195.2
+              },
+              {
+                "id": "0x20021",
+                "call": "ComponentCondition",
+                "component": "UltimateTrophyWeaponsAOE",
+                "delay": 5.2,
+                "name": "Weapon 2",
+                "condition": "t => t.NumCasts > 1",
+                "at": 200.4
+              },
+              {
+                "id": "0x20022",
+                "call": "ComponentCondition",
+                "component": "UltimateTrophyWeaponsAOE",
+                "delay": 5.2,
+                "name": "Weapon 3",
+                "condition": "t => t.NumCasts > 2",
+                "at": 205.6
+              },
+              {
+                "id": "0x20023",
+                "call": "ComponentCondition",
+                "component": "UltimateTrophyWeaponsAOE",
+                "delay": 5.2,
+                "name": "Weapon 4",
+                "condition": "t => t.NumCasts > 3",
+                "at": 210.8
+              },
+              {
+                "id": "0x20024",
+                "call": "ComponentCondition",
+                "component": "UltimateTrophyWeaponsAOE",
+                "delay": 5.2,
+                "name": "Weapon 5",
+                "condition": "t => t.NumCasts > 4",
+                "at": 216
+              },
+              {
+                "id": "0x20025",
+                "call": "ComponentCondition",
+                "component": "UltimateTrophyWeaponsAOE",
+                "delay": 5.2,
+                "name": "Weapon 6",
+                "condition": "t => t.NumCasts > 5",
+                "at": 221.2,
+                "deactivate": [
+                  "UltimateTrophyWeaponsAOE",
+                  "UltimateTrophyWeaponsBait",
+                  "UltimateTrophyWeaponsHints if _config.WeaponHints"
+                ]
+              },
+              {
+                "id": "0x20030",
+                "call": "ComponentCondition",
+                "component": "PowerfulGust",
+                "delay": 6.3,
+                "name": "Tornado baits",
+                "condition": "p => p.NumCasts > 0",
+                "at": 227.5,
+                "activate": [
+                  "PowerfulGust"
+                ],
+                "deactivate": [
+                  "PowerfulGust"
+                ]
+              },
+              {
+                "id": "0x20040",
+                "call": "CastEnd",
+                "cast": 1,
+                "at": 228.5,
+                "activate": [
+                  "OneAndOnly"
+                ]
+              },
+              {
+                "id": "0x20100",
+                "call": "Cast",
+                "aid": "OneAndOnlyBoss",
+                "delay": 4.1,
+                "cast": 6,
+                "start": 232.6,
+                "at": 238.6
+              },
+              {
+                "id": "0x20102",
+                "call": "ComponentCondition",
+                "component": "OneAndOnly",
+                "delay": 3,
+                "name": "Raidwide",
+                "condition": "o => o.NumCasts > 0",
+                "at": 241.6,
+                "deactivate": [
+                  "Maelstrom",
+                  "OneAndOnly"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Meteorain",
+            "id": "0x30000",
+            "from": 241.6,
+            "delay": 7.2,
+            "states": [
+              {
+                "id": "0x30000",
+                "call": "Cast",
+                "aid": "GreatWallOfFireCast",
+                "delay": 7.2,
+                "cast": 5,
+                "start": 248.8,
+                "at": 253.8,
+                "activate": [
+                  "Firewall",
+                  "FirewallExplosion"
+                ]
+              },
+              {
+                "id": "0x30010",
+                "call": "ComponentCondition",
+                "component": "Firewall",
+                "delay": 0.3,
+                "name": "Line buster 1",
+                "condition": "f => f.NumCasts > 0",
+                "at": 254.1
+              },
+              {
+                "id": "0x30011",
+                "call": "ComponentCondition",
+                "component": "Firewall",
+                "delay": 3.2,
+                "name": "Line buster 2",
+                "condition": "f => f.NumCasts > 1",
+                "at": 257.3,
+                "deactivate": [
+                  "Firewall"
+                ]
+              },
+              {
+                "group": "OrbitalOmen",
+                "id": "0x30020",
+                "from": 257.3,
+                "delay": 5.1,
+                "states": [
+                  {
+                    "id": "0x30020",
+                    "call": "Cast",
+                    "aid": "OrbitalOmenBoss",
+                    "delay": 5.1,
+                    "cast": 5,
+                    "start": 262.4,
+                    "at": 267.4,
+                    "activate": [
+                      "OrbitalOmen",
+                      "FireAndFury"
+                    ],
+                    "deactivate": [
+                      "FirewallExplosion"
+                    ]
+                  },
+                  {
+                    "id": "0x30022",
+                    "call": "ComponentCondition",
+                    "component": "OrbitalOmen",
+                    "delay": 9.1,
+                    "name": "Orbital start",
+                    "condition": "o => o.NumCasts == 2",
+                    "at": 276.5
+                  },
+                  {
+                    "id": "0x30023",
+                    "call": "ComponentCondition",
+                    "component": "FireAndFury",
+                    "delay": 0.6,
+                    "name": "Sides safe",
+                    "condition": "f => f.NumCasts > 0",
+                    "at": 277.1,
+                    "deactivate": [
+                      "FireAndFury"
+                    ]
+                  },
+                  {
+                    "id": "0x30024",
+                    "call": "ComponentCondition",
+                    "component": "OrbitalOmen",
+                    "delay": 4,
+                    "name": "Orbital end",
+                    "condition": "o => o.NumCasts == 8",
+                    "at": 281.1,
+                    "deactivate": [
+                      "OrbitalOmen"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "0x30030",
+                "call": "Cast",
+                "aid": "MeteorainBoss",
+                "delay": 7.5,
+                "cast": 5,
+                "start": 288.6,
+                "at": 293.6,
+                "activate": [
+                  "Comet",
+                  "CosmicKiss",
+                  "FearsomeFireball1"
+                ]
+              },
+              {
+                "id": "0x30040",
+                "call": "Cast",
+                "aid": "FearsomeFireballBoss",
+                "delay": 2.7,
+                "cast": 5,
+                "start": 296.3,
+                "at": 301.3
+              },
+              {
+                "id": "0x30042",
+                "call": "ComponentCondition",
+                "component": "FearsomeFireball1",
+                "delay": 0.4,
+                "name": "Wild charge",
+                "condition": "f => f.NumCasts > 0",
+                "at": 301.7,
+                "deactivate": [
+                  "FearsomeFireball1"
+                ]
+              },
+              {
+                "id": "0x30043",
+                "call": "ComponentCondition",
+                "component": "CosmicKiss",
+                "delay": 1.2,
+                "name": "Meteors 1",
+                "condition": "c => c.NumCasts > 0",
+                "at": 302.9,
+                "activate": [
+                  "ForegoneFatality",
+                  "FearsomeFireball2",
+                  "CometExplosion"
+                ]
+              },
+              {
+                "id": "0x30044",
+                "call": "ComponentCondition",
+                "component": "ForegoneFatality",
+                "delay": 7.9,
+                "name": "Tethers",
+                "condition": "f => f.NumCasts > 0",
+                "at": 310.8
+              },
+              {
+                "id": "0x30045",
+                "call": "ComponentCondition",
+                "component": "FearsomeFireball2",
+                "delay": 0.8,
+                "name": "Wild charge",
+                "condition": "f => f.NumCasts > 0",
+                "at": 311.6
+              },
+              {
+                "id": "0x30046",
+                "call": "ComponentCondition",
+                "component": "CosmicKiss",
+                "delay": 1.3,
+                "name": "Meteors 2",
+                "condition": "c => c.NumCasts > 2",
+                "at": 312.9
+              },
+              {
+                "id": "0x30047",
+                "call": "ComponentCondition",
+                "component": "ForegoneFatality",
+                "delay": 7.9,
+                "name": "Tethers",
+                "condition": "f => f.NumCasts > 2",
+                "at": 320.8
+              },
+              {
+                "id": "0x30048",
+                "call": "ComponentCondition",
+                "component": "FearsomeFireball2",
+                "delay": 0.8,
+                "name": "Wild charge",
+                "condition": "f => f.NumCasts > 1",
+                "at": 321.6
+              },
+              {
+                "id": "0x30049",
+                "call": "ComponentCondition",
+                "component": "CosmicKiss",
+                "delay": 1.3,
+                "name": "Meteors 3",
+                "condition": "c => c.NumCasts > 4",
+                "at": 322.9,
+                "exec": [
+                  {
+                    "component": "Comet",
+                    "when": "exit",
+                    "code": "c => c.DrawTrigger = false"
+                  }
+                ]
+              },
+              {
+                "id": "0x3004A",
+                "call": "ComponentCondition",
+                "component": "ForegoneFatality",
+                "delay": 7.9,
+                "name": "Tethers",
+                "condition": "f => f.NumCasts > 4",
+                "at": 330.8
+              },
+              {
+                "id": "0x3004B",
+                "call": "ComponentCondition",
+                "component": "FearsomeFireball2",
+                "delay": 0.8,
+                "name": "Wild charge",
+                "condition": "f => f.NumCasts > 2",
+                "at": 331.6,
+                "deactivate": [
+                  "CosmicKiss",
+                  "ForegoneFatality",
+                  "FearsomeFireball2"
+                ]
+              },
+              {
+                "id": "0x30100",
+                "call": "Cast",
+                "aid": "TripleTyrannhilationCast",
+                "delay": 5.6,
+                "cast": 7,
+                "start": 337.2,
+                "at": 344.2,
+                "activate": [
+                  "TripleTyrannhilation",
+                  "ShockwaveCounter"
+                ]
+              },
+              {
+                "id": "0x30102",
+                "call": "ComponentCondition",
+                "component": "ShockwaveCounter",
+                "delay": 1.1,
+                "name": "LoS 1",
+                "condition": "c => c.NumCasts > 0",
+                "at": 345.3
+              },
+              {
+                "id": "0x30103",
+                "call": "ComponentCondition",
+                "component": "ShockwaveCounter",
+                "delay": 3.2,
+                "name": "LoS 3",
+                "condition": "c => c.NumCasts > 2",
+                "at": 348.5,
+                "deactivate": [
+                  "TripleTyrannhilation",
+                  "ShockwaveCounter",
+                  "Comet",
+                  "CometExplosion"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Flatliner",
+            "id": "0x40000",
+            "from": 348.5,
+            "delay": 9.2,
+            "states": [
+              {
+                "id": "0x40000",
+                "call": "Cast",
+                "aid": "FlatlinerBoss",
+                "delay": 9.2,
+                "cast": 4,
+                "start": 357.7,
+                "at": 361.7,
+                "activate": [
+                  "Flatliner",
+                  "FlatlinerArena"
+                ]
+              },
+              {
+                "id": "0x40010",
+                "call": "ComponentCondition",
+                "component": "Flatliner",
+                "delay": 2,
+                "name": "Arena split",
+                "condition": "f => f.NumCasts > 0",
+                "at": 363.7,
+                "deactivate": [
+                  "Flatliner",
+                  "FlatlinerArena"
+                ],
+                "activate": [
+                  "MajesticMeteorain"
+                ]
+              },
+              {
+                "id": "0x40020",
+                "call": "Cast",
+                "aid": "MajesticMeteorBoss",
+                "delay": 9.2,
+                "cast": 5,
+                "start": 372.9,
+                "at": 377.9,
+                "activate": [
+                  "ExplosionKnockback",
+                  "ExplosionTower",
+                  "FireBreathMeteowrath",
+                  "FireBreathMeteowrathHints",
+                  "MajesticMeteor"
+                ]
+              },
+              {
+                "id": "0x40100",
+                "call": "ComponentCondition",
+                "component": "ExplosionTower",
+                "delay": 13.1,
+                "name": "Towers 1",
+                "condition": "t => t.NumCasts > 0",
+                "at": 391,
+                "deactivate": [
+                  "ExplosionTower",
+                  "ExplosionKnockback"
+                ]
+              },
+              {
+                "id": "0x40101",
+                "call": "ComponentCondition",
+                "component": "FireBreathMeteowrath",
+                "delay": 6.1,
+                "name": "Prey assigned",
+                "condition": "m => m.PreyAssigned",
+                "at": 397.1
+              },
+              {
+                "id": "0x40102",
+                "call": "CastStart",
+                "aid": "FireBreathBoss",
+                "delay": 0.1,
+                "at": 397.2
+              },
+              {
+                "id": "0x40103",
+                "call": "ComponentCondition",
+                "component": "MajesticMeteor",
+                "delay": 2,
+                "name": "Puddles 1",
+                "condition": "m => m.ActiveCasters.Any()",
+                "at": 399.2
+              },
+              {
+                "id": "0x40104",
+                "call": "ComponentCondition",
+                "component": "MajesticMeteor",
+                "delay": 4,
+                "name": "Puddles 3",
+                "condition": "m => m.BaitsDone",
+                "at": 403.2,
+                "exec": [
+                  {
+                    "component": "FireBreathMeteowrath",
+                    "when": "exit",
+                    "code": "f => f.EnableHints = true"
+                  },
+                  {
+                    "component": "MajesticMeteorain",
+                    "when": "exit",
+                    "code": "m => m.Risky = true"
+                  },
+                  {
+                    "component": "FireBreathMeteowrathHints",
+                    "when": "exit",
+                    "code": "f => f.Safe = true"
+                  }
+                ]
+              },
+              {
+                "id": "0x40105",
+                "call": "ComponentCondition",
+                "component": "FireBreathMeteowrath",
+                "delay": 2.8,
+                "name": "Baits + line meteors",
+                "condition": "m => m.NumCasts > 0",
+                "at": 406,
+                "deactivate": [
+                  "FireBreathMeteowrath",
+                  "FireBreathMeteowrathHints"
+                ]
+              },
+              {
+                "id": "0x40106",
+                "call": "ComponentCondition",
+                "component": "MajesticMeteor",
+                "delay": 0.2,
+                "condition": "m => !m.ActiveCasters.Any()",
+                "at": 406.2,
+                "deactivate": [
+                  "MajesticMeteor"
+                ]
+              },
+              {
+                "id": "0x40200",
+                "call": "ComponentCondition",
+                "component": "ExplosionTower",
+                "delay": 17,
+                "name": "Towers 2",
+                "condition": "t => t.NumCasts > 0",
+                "at": 423.2,
+                "activate": [
+                  "ExplosionKnockback",
+                  "ExplosionTower",
+                  "FireBreathMeteowrath",
+                  "FireBreathMeteowrathHints",
+                  "MajesticMeteor"
+                ]
+              },
+              {
+                "id": "0x40201",
+                "call": "ComponentCondition",
+                "component": "FireBreathMeteowrath",
+                "delay": 6,
+                "name": "Prey assigned",
+                "condition": "m => m.PreyAssigned",
+                "at": 429.2
+              },
+              {
+                "id": "0x40202",
+                "call": "CastStart",
+                "aid": "FireBreathBoss",
+                "delay": 0,
+                "at": 429.2
+              },
+              {
+                "id": "0x40203",
+                "call": "ComponentCondition",
+                "component": "MajesticMeteor",
+                "delay": 2,
+                "name": "Puddles 1",
+                "condition": "m => m.ActiveCasters.Any()",
+                "at": 431.2
+              },
+              {
+                "id": "0x40204",
+                "call": "ComponentCondition",
+                "component": "MajesticMeteor",
+                "delay": 4,
+                "name": "Puddles 3",
+                "condition": "m => m.BaitsDone",
+                "at": 435.2,
+                "exec": [
+                  {
+                    "component": "FireBreathMeteowrath",
+                    "when": "exit",
+                    "code": "f => f.EnableHints = true"
+                  },
+                  {
+                    "component": "MajesticMeteorain",
+                    "when": "exit",
+                    "code": "m => m.Risky = true"
+                  },
+                  {
+                    "component": "FireBreathMeteowrathHints",
+                    "when": "exit",
+                    "code": "f => f.Safe = true"
+                  }
+                ]
+              },
+              {
+                "id": "0x40205",
+                "call": "ComponentCondition",
+                "component": "FireBreathMeteowrath",
+                "delay": 2.8,
+                "name": "Baits + line meteors",
+                "condition": "m => m.NumCasts > 0",
+                "at": 438,
+                "deactivate": [
+                  "FireBreathMeteowrath",
+                  "FireBreathMeteowrathHints",
+                  "MajesticMeteorain"
+                ]
+              },
+              {
+                "id": "0x40300",
+                "call": "CastStart",
+                "aid": "MassiveMeteorBoss",
+                "delay": 4.4,
+                "at": 442.4,
+                "activate": [
+                  "MassiveMeteor"
+                ],
+                "exec": [
+                  {
+                    "component": "ExplosionTower",
+                    "when": "enter",
+                    "code": "t => t.EnableHints = false"
+                  }
+                ],
+                "deactivate": [
+                  "MajesticMeteor"
+                ]
+              },
+              {
+                "id": "0x40301",
+                "call": "ComponentCondition",
+                "component": "MassiveMeteor",
+                "delay": 6.1,
+                "name": "Stacks 1",
+                "condition": "m => m.NumCasts > 0",
+                "at": 448.5
+              },
+              {
+                "id": "0x40302",
+                "call": "ComponentCondition",
+                "component": "MassiveMeteor",
+                "delay": 5.9,
+                "name": "Stacks 5",
+                "condition": "m => m.NumFinishedStacks > 0",
+                "at": 454.4,
+                "deactivate": [
+                  "MassiveMeteor"
+                ],
+                "exec": [
+                  {
+                    "component": "ExplosionTower",
+                    "when": "exit",
+                    "code": "t => t.EnableHints = true"
+                  }
+                ]
+              },
+              {
+                "id": "0x40310",
+                "call": "CastMulti",
+                "aids": [
+                  "ArcadionAvalancheBoss1",
+                  "ArcadionAvalancheBoss2",
+                  "ArcadionAvalancheBoss3",
+                  "ArcadionAvalancheBoss4"
+                ],
+                "delay": 1.2,
+                "cast": 6,
+                "start": 455.6,
+                "at": 461.6,
+                "activate": [
+                  "ArcadionAvalancheRect",
+                  "ArcadionAvalancheBoss"
+                ],
+                "exec": [
+                  {
+                    "component": "ArcadionAvalancheRect",
+                    "when": "enter",
+                    "code": "a => a.Risky = false"
+                  },
+                  {
+                    "component": "ArcadionAvalancheBoss",
+                    "when": "enter",
+                    "code": "a => a.Risky = false"
+                  },
+                  {
+                    "component": "ArcadionAvalancheRect",
+                    "when": "exit",
+                    "code": "a => a.Risky = true"
+                  }
+                ],
+                "deactivate": [
+                  "ExplosionTower",
+                  "ExplosionKnockback"
+                ]
+              },
+              {
+                "id": "0x40312",
+                "call": "ComponentCondition",
+                "component": "ArcadionAvalancheRect",
+                "delay": 9.5,
+                "name": "Platform AOE",
+                "condition": "r => r.NumCasts > 0",
+                "at": 471.1,
+                "deactivate": [
+                  "ArcadionAvalancheRect",
+                  "ArcadionAvalancheBoss"
+                ]
+              },
+              {
+                "id": "0x40400",
+                "call": "Cast",
+                "aid": "CrownOfArcadia",
+                "delay": 5.7,
+                "cast": 5,
+                "name": "Raidwide + restore arena",
+                "start": 476.8,
+                "at": 481.8,
+                "activate": [
+                  "CrownOfArcadia",
+                  "CrownOfArcadiaArena"
+                ],
+                "deactivate": [
+                  "CrownOfArcadia",
+                  "CrownOfArcadiaArena"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "EclipticStampede",
+            "id": "0x50000",
+            "from": 481.8,
+            "delay": 6.3,
+            "states": [
+              {
+                "id": "0x50000",
+                "call": "Cast",
+                "aid": "GreatWallOfFireCast",
+                "delay": 6.3,
+                "cast": 5,
+                "start": 488.1,
+                "at": 493.1,
+                "activate": [
+                  "Firewall",
+                  "FirewallExplosion",
+                  "CrownOfArcadia"
+                ]
+              },
+              {
+                "id": "0x50010",
+                "call": "ComponentCondition",
+                "component": "Firewall",
+                "delay": 0.3,
+                "name": "Line buster 1",
+                "condition": "f => f.NumCasts > 0",
+                "at": 493.4
+              },
+              {
+                "id": "0x50011",
+                "call": "ComponentCondition",
+                "component": "Firewall",
+                "delay": 3.2,
+                "name": "Line buster 2",
+                "condition": "f => f.NumCasts > 1",
+                "at": 496.6,
+                "deactivate": [
+                  "Firewall"
+                ]
+              },
+              {
+                "group": "OrbitalOmen",
+                "id": "0x50020",
+                "from": 496.6,
+                "delay": 5.1,
+                "states": [
+                  {
+                    "id": "0x50020",
+                    "call": "Cast",
+                    "aid": "OrbitalOmenBoss",
+                    "delay": 5.1,
+                    "cast": 5,
+                    "start": 501.7,
+                    "at": 506.7,
+                    "activate": [
+                      "OrbitalOmen",
+                      "FireAndFury"
+                    ],
+                    "deactivate": [
+                      "FirewallExplosion"
+                    ]
+                  },
+                  {
+                    "id": "0x50022",
+                    "call": "ComponentCondition",
+                    "component": "OrbitalOmen",
+                    "delay": 9.1,
+                    "name": "Orbital start",
+                    "condition": "o => o.NumCasts == 2",
+                    "at": 515.8
+                  },
+                  {
+                    "id": "0x50023",
+                    "call": "ComponentCondition",
+                    "component": "FireAndFury",
+                    "delay": 0.6,
+                    "name": "Sides safe",
+                    "condition": "f => f.NumCasts > 0",
+                    "at": 516.4,
+                    "deactivate": [
+                      "FireAndFury"
+                    ]
+                  },
+                  {
+                    "id": "0x50024",
+                    "call": "ComponentCondition",
+                    "component": "OrbitalOmen",
+                    "delay": 4,
+                    "name": "Orbital end",
+                    "condition": "o => o.NumCasts == 8",
+                    "at": 520.4,
+                    "deactivate": [
+                      "OrbitalOmen"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "0x50030",
+                "call": "Cast",
+                "aid": "CrownOfArcadia",
+                "delay": 0,
+                "cast": 4.2,
+                "name": "Raidwide",
+                "start": 520.4,
+                "at": 524.6,
+                "deactivate": [
+                  "CrownOfArcadia"
+                ]
+              },
+              {
+                "id": "0x50100",
+                "call": "Cast",
+                "aid": "EclipticStampede",
+                "delay": 7.4,
+                "cast": 5,
+                "start": 532,
+                "at": 537,
+                "activate": [
+                  "MammothMeteor",
+                  "StampedeMajesticMeteor",
+                  "AtomicImpactPuddle",
+                  "AtomicImpact"
+                ]
+              },
+              {
+                "id": "0x50110",
+                "call": "ComponentCondition",
+                "component": "MammothMeteor",
+                "delay": 7.1,
+                "name": "Proximity + puddles start",
+                "condition": "m => m.NumCasts > 0",
+                "at": 544.1,
+                "activate": [
+                  "ImpactKiss"
+                ],
+                "deactivate": [
+                  "MammothMeteor"
+                ]
+              },
+              {
+                "id": "0x50120",
+                "call": "ComponentCondition",
+                "component": "ImpactKiss",
+                "delay": 16,
+                "name": "Towers",
+                "condition": "k => k.NumCasts > 0",
+                "at": 560.1,
+                "activate": [
+                  "StampedeMajesticMeteowrath"
+                ],
+                "deactivate": [
+                  "StampedeMajesticMeteor",
+                  "ImpactKiss",
+                  "AtomicImpact"
+                ]
+              },
+              {
+                "id": "0x50130",
+                "call": "CastStartMulti",
+                "aids": [
+                  "TwoWayFireballBoss",
+                  "FourWayFireballBoss"
+                ],
+                "delay": 7,
+                "at": 567.1,
+                "activate": [
+                  "NWayFireball"
+                ],
+                "exec": [
+                  {
+                    "component": "NWayFireball",
+                    "when": "enter",
+                    "code": "n => n.EnableHints = false"
+                  }
+                ]
+              },
+              {
+                "id": "0x50131",
+                "call": "ComponentCondition",
+                "component": "StampedeMajesticMeteowrath",
+                "delay": 2.6,
+                "name": "Tethers",
+                "condition": "t => t.NumCasts > 0",
+                "at": 569.7,
+                "exec": [
+                  {
+                    "component": "NWayFireball",
+                    "when": "exit",
+                    "code": "n => n.EnableHints = true"
+                  }
+                ],
+                "deactivate": [
+                  "StampedeMajesticMeteowrath"
+                ]
+              },
+              {
+                "id": "0x50132",
+                "call": "ComponentCondition",
+                "component": "NWayFireball",
+                "delay": 4.3,
+                "name": "2/4 stack",
+                "condition": "n => n.NumCasts > 0",
+                "at": 574,
+                "deactivate": [
+                  "NWayFireball"
+                ]
+              },
+              {
+                "id": "0x50200",
+                "call": "Cast",
+                "aid": "CrownOfArcadia",
+                "delay": 3.3,
+                "cast": 5,
+                "name": "Raidwide",
+                "start": 577.3,
+                "at": 582.3,
+                "activate": [
+                  "CrownOfArcadia"
+                ],
+                "deactivate": [
+                  "CrownOfArcadia"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Heartbreaker",
+            "id": "0x60000",
+            "from": 582.3,
+            "delay": 8.7,
+            "states": [
+              {
+                "id": "0x60000",
+                "call": "Cast",
+                "aid": "HeartbreakKickBoss",
+                "delay": 8.7,
+                "cast": 5,
+                "start": 591,
+                "at": 596,
+                "activate": [
+                  "HeartbreakKick"
+                ],
+                "exec": [
+                  {
+                    "component": "HeartbreakKick",
+                    "when": "enter",
+                    "code": "k => k.ExpectedHits = 5"
+                  }
+                ]
+              },
+              {
+                "id": "0x60002",
+                "call": "ComponentCondition",
+                "component": "HeartbreakKick",
+                "delay": 1.2,
+                "name": "Tower 1",
+                "condition": "k => k.NumCasts > 0",
+                "at": 597.2
+              },
+              {
+                "id": "0x60003",
+                "call": "ComponentCondition",
+                "component": "HeartbreakKick",
+                "delay": 8,
+                "name": "Tower 5",
+                "condition": "k => k.Towers.Count == 0",
+                "at": 605.2,
+                "deactivate": [
+                  "HeartbreakKick"
+                ]
+              },
+              {
+                "id": "0x60100",
+                "call": "Cast",
+                "aid": "HeartbreakKickBoss",
+                "delay": 5,
+                "cast": 5,
+                "start": 610.2,
+                "at": 615.2,
+                "activate": [
+                  "HeartbreakKick"
+                ],
+                "exec": [
+                  {
+                    "component": "HeartbreakKick",
+                    "when": "enter",
+                    "code": "k => k.ExpectedHits = 6"
+                  }
+                ]
+              },
+              {
+                "id": "0x60102",
+                "call": "ComponentCondition",
+                "component": "HeartbreakKick",
+                "delay": 1.2,
+                "name": "Tower 1",
+                "condition": "k => k.NumCasts > 0",
+                "at": 616.4
+              },
+              {
+                "id": "0x60103",
+                "call": "ComponentCondition",
+                "component": "HeartbreakKick",
+                "delay": 10,
+                "name": "Tower 6",
+                "condition": "k => k.Towers.Count == 0",
+                "at": 626.4,
+                "deactivate": [
+                  "HeartbreakKick"
+                ]
+              },
+              {
+                "id": "0x60200",
+                "call": "Cast",
+                "aid": "HeartbreakKickBoss",
+                "delay": 5,
+                "cast": 5,
+                "start": 631.4,
+                "at": 636.4,
+                "activate": [
+                  "HeartbreakKick"
+                ],
+                "exec": [
+                  {
+                    "component": "HeartbreakKick",
+                    "when": "enter",
+                    "code": "k => k.ExpectedHits = 7"
+                  }
+                ]
+              },
+              {
+                "id": "0x60202",
+                "call": "ComponentCondition",
+                "component": "HeartbreakKick",
+                "delay": 1.2,
+                "name": "Tower 1",
+                "condition": "k => k.NumCasts > 0",
+                "at": 637.6
+              },
+              {
+                "id": "0x60203",
+                "call": "ComponentCondition",
+                "component": "HeartbreakKick",
+                "delay": 12,
+                "name": "Tower 7",
+                "condition": "k => k.Towers.Count == 0",
+                "at": 649.6,
+                "deactivate": [
+                  "HeartbreakKick"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "0x70000",
+            "call": "Cast",
+            "aid": "HeartbreakerCast",
+            "delay": 5,
+            "cast": 8,
+            "name": "Boss disappears (enrage)",
+            "start": 654.6,
+            "at": 662.6
+          }
+        ]
+      }
+    ]
+  }
 }

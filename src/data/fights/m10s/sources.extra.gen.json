@@ -925,5 +925,1408 @@
         }
       ]
     }
-  ]
+  ],
+  "states": {
+    "file": "https://github.com/awgil/ffxiv_bossmod/blob/02a16b4425ceed2b63994468da406adddefcd57b/BossMod.Modules/Dawntrail/Savage/RM10STheXtremes/RM10STheXtremesStates.cs",
+    "phases": [
+      {
+        "call": "DeathPhase",
+        "id": "0x0",
+        "method": "P1",
+        "states": [
+          {
+            "group": "RedP1",
+            "id": "0x0",
+            "from": 0,
+            "delay": 9.2,
+            "states": [
+              {
+                "id": "0x0",
+                "call": "Cast",
+                "aid": "HotImpact1",
+                "delay": 9.2,
+                "cast": 5,
+                "name": "Tankbuster",
+                "start": 9.2,
+                "at": 14.2,
+                "activate": [
+                  "HotImpact"
+                ],
+                "deactivate": [
+                  "HotImpact"
+                ]
+              },
+              {
+                "id": "0x10",
+                "call": "CastStart",
+                "aid": "FlameFloaterCast",
+                "delay": 8.4,
+                "at": 22.6,
+                "activate": [
+                  "FlameFloater",
+                  "FlameFloaterPuddle"
+                ]
+              },
+              {
+                "id": "0x20",
+                "call": "ComponentCondition",
+                "component": "FlameFloater",
+                "delay": 7.3,
+                "name": "Bait 1",
+                "condition": "f => f.NumCasts > 0",
+                "at": 29.9
+              },
+              {
+                "id": "0x21",
+                "call": "ComponentCondition",
+                "component": "FlameFloater",
+                "delay": 9.8,
+                "name": "Bait 4",
+                "condition": "f => f.NumCasts > 3",
+                "at": 39.7,
+                "deactivate": [
+                  "FlameFloater"
+                ]
+              },
+              {
+                "id": "0x100",
+                "call": "Cast",
+                "aid": "AlleyOopInfernoCast",
+                "delay": 8.1,
+                "cast": 4.3,
+                "start": 47.8,
+                "at": 52.1,
+                "activate": [
+                  "AlleyOopInfernoSpread",
+                  "AlleyOopInfernoPuddle"
+                ]
+              },
+              {
+                "id": "0x110",
+                "call": "ComponentCondition",
+                "component": "AlleyOopInfernoSpread",
+                "delay": 0.7,
+                "name": "Spread (puddles)",
+                "condition": "p => p.NumFinishedSpreads > 0",
+                "at": 52.8,
+                "deactivate": [
+                  "AlleyOopInfernoSpread"
+                ]
+              },
+              {
+                "id": "0x200",
+                "call": "Cast",
+                "aid": "CutbackBlazeCast",
+                "delay": 4.5,
+                "cast": 4.3,
+                "start": 57.3,
+                "at": 61.6,
+                "activate": [
+                  "CutbackBlazeBait",
+                  "CutbackBlazePuddle"
+                ]
+              },
+              {
+                "id": "0x210",
+                "call": "ComponentCondition",
+                "component": "CutbackBlazeBait",
+                "delay": 0.9,
+                "name": "Safe cone bait",
+                "condition": "c => c.NumCasts > 0",
+                "at": 62.5,
+                "deactivate": [
+                  "CutbackBlazeBait"
+                ]
+              },
+              {
+                "id": "0x300",
+                "call": "CastStart",
+                "aid": "PyrotationCast",
+                "delay": 1.3,
+                "at": 63.8,
+                "activate": [
+                  "Pyrotation",
+                  "PyrotationPuddle"
+                ]
+              },
+              {
+                "id": "0x301",
+                "call": "ComponentCondition",
+                "component": "Pyrotation",
+                "delay": 5.2,
+                "name": "Stack 1",
+                "condition": "p => p.NumCasts > 0",
+                "at": 69
+              },
+              {
+                "id": "0x302",
+                "call": "ComponentCondition",
+                "component": "Pyrotation",
+                "delay": 4,
+                "name": "Stack 3",
+                "condition": "p => p.NumCasts > 2",
+                "at": 73,
+                "deactivate": [
+                  "Pyrotation"
+                ]
+              },
+              {
+                "id": "0x400",
+                "call": "Cast",
+                "aid": "DiversDareRed",
+                "delay": 4.3,
+                "cast": 5,
+                "name": "Raidwide",
+                "start": 77.3,
+                "at": 82.3,
+                "activate": [
+                  "DiversDare1"
+                ],
+                "deactivate": [
+                  "DiversDare1"
+                ]
+              },
+              {
+                "id": "0x500",
+                "call": "Targetable",
+                "targetable": false,
+                "delay": 6.4,
+                "name": "Red disappears",
+                "at": 88.7,
+                "deactivate": [
+                  "FlameFloaterPuddle",
+                  "AlleyOopInfernoPuddle",
+                  "CutbackBlazePuddle",
+                  "PyrotationPuddle"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "BlueP1",
+            "id": "0x10000",
+            "from": 88.7,
+            "delay": 1.9,
+            "states": [
+              {
+                "id": "0x10000",
+                "call": "ActorTargetable",
+                "actor": "_module.B2",
+                "targetable": true,
+                "delay": 1.9,
+                "name": "Blue appears",
+                "at": 90.6,
+                "hints": [
+                  "+DowntimeEnd"
+                ]
+              },
+              {
+                "id": "0x10010",
+                "call": "ActorCast",
+                "aid": "SickSwellCast",
+                "actor": "_module.B2",
+                "delay": 3.3,
+                "cast": 3,
+                "start": 93.9,
+                "at": 96.9,
+                "activate": [
+                  "AwesomeSplab",
+                  "SickestTakeOff",
+                  "SickSwell"
+                ]
+              },
+              {
+                "id": "0x10020",
+                "call": "ActorCast",
+                "aid": "SickestTakeOffCast",
+                "actor": "_module.B2",
+                "delay": 5.2,
+                "cast": 4,
+                "start": 102.1,
+                "at": 106.1
+              },
+              {
+                "id": "0x10022",
+                "call": "ActorTargetable",
+                "actor": "_module.B2",
+                "targetable": false,
+                "delay": 0,
+                "name": "Blue disappears",
+                "at": 106.1,
+                "hints": [
+                  "+DowntimeStart"
+                ]
+              },
+              {
+                "id": "0x10024",
+                "call": "ComponentCondition",
+                "component": "SickestTakeOff",
+                "delay": 9.1,
+                "name": "Line + knockback",
+                "condition": "s => s.NumCasts > 0",
+                "at": 115.2,
+                "exec": [
+                  {
+                    "component": "AwesomeSplab",
+                    "when": "exit",
+                    "code": "s => s.EnableHints = true"
+                  }
+                ]
+              },
+              {
+                "id": "0x10025",
+                "call": "ActorTargetable",
+                "actor": "_module.B2",
+                "targetable": true,
+                "delay": 2.2,
+                "name": "Blue reappears",
+                "at": 117.4,
+                "hints": [
+                  "+DowntimeEnd"
+                ]
+              },
+              {
+                "id": "0x10026",
+                "call": "ComponentCondition",
+                "component": "AwesomeSplab",
+                "delay": 0.5,
+                "name": "Stack/spread",
+                "condition": "s => s.NumCasts > 0",
+                "at": 117.9,
+                "deactivate": [
+                  "AwesomeSplab",
+                  "SickestTakeOff",
+                  "SickSwell"
+                ]
+              },
+              {
+                "group": "AlleyOop",
+                "id": "0x10030",
+                "from": 117.9,
+                "delay": 2.6,
+                "states": [
+                  {
+                    "id": "0x10030",
+                    "call": "ActorCastMulti",
+                    "aids": [
+                      "AlleyOopDoubleDipCast",
+                      "ReverseAlleyOopCast"
+                    ],
+                    "actor": "_module.B2",
+                    "delay": 2.6,
+                    "cast": 5,
+                    "start": 120.5,
+                    "at": 125.5,
+                    "activate": [
+                      "AlleyOopProteans",
+                      "AlleyOopProteanRepeat"
+                    ]
+                  },
+                  {
+                    "id": "0x10040",
+                    "call": "ComponentCondition",
+                    "component": "AlleyOopProteans",
+                    "delay": 0.6,
+                    "name": "Proteans",
+                    "condition": "p => p.NumCasts > 0",
+                    "at": 126.1,
+                    "deactivate": [
+                      "AlleyOopProteans"
+                    ]
+                  },
+                  {
+                    "id": "0x10041",
+                    "call": "ComponentCondition",
+                    "component": "AlleyOopProteanRepeat",
+                    "delay": 2.6,
+                    "name": "Proteans (repeat)",
+                    "condition": "p => p.NumCasts > 0",
+                    "at": 128.7,
+                    "deactivate": [
+                      "AlleyOopProteanRepeat"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "0x10100",
+                "call": "ActorCast",
+                "aid": "DeepImpactCast",
+                "actor": "_module.B2",
+                "delay": 2.9,
+                "cast": 4.9,
+                "start": 131.6,
+                "at": 136.5,
+                "activate": [
+                  "DeepImpactBait",
+                  "DeepImpactKB"
+                ]
+              },
+              {
+                "id": "0x10102",
+                "call": "ComponentCondition",
+                "component": "DeepImpactBait",
+                "delay": 0.3,
+                "name": "Tankbuster",
+                "condition": "d => d.NumCasts > 0",
+                "at": 136.8,
+                "deactivate": [
+                  "DeepImpactBait",
+                  "DeepImpactKB"
+                ]
+              },
+              {
+                "id": "0x10110",
+                "call": "ActorCast",
+                "aid": "DiversDareBlue",
+                "actor": "_module.B2",
+                "delay": 2.1,
+                "cast": 5,
+                "name": "Raidwide",
+                "start": 138.9,
+                "at": 143.9,
+                "activate": [
+                  "DiversDare2"
+                ],
+                "deactivate": [
+                  "DiversDare2"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "XtremeSpectacular",
+            "id": "0x20000",
+            "from": 143.9,
+            "delay": 8.2,
+            "states": [
+              {
+                "id": "0x20000",
+                "call": "Targetable",
+                "targetable": true,
+                "delay": 8.2,
+                "name": "Red appears",
+                "at": 152.1
+              },
+              {
+                "id": "0x20010",
+                "call": "Cast",
+                "aid": "XtremeSpectacularCastRed",
+                "delay": 5.2,
+                "cast": 4,
+                "start": 157.3,
+                "at": 161.3,
+                "activate": [
+                  "XtremeSpectacularProximity",
+                  "XtremeSpectacularRaidwideFirst",
+                  "XtremeSpectacularRaidwideLast"
+                ]
+              },
+              {
+                "id": "0x20020",
+                "call": "Targetable",
+                "targetable": false,
+                "delay": 0.7,
+                "name": "Bosses disappear",
+                "at": 162
+              },
+              {
+                "id": "0x20030",
+                "call": "ComponentCondition",
+                "component": "XtremeSpectacularRaidwideFirst",
+                "delay": 6.9,
+                "name": "Raidwide 1",
+                "condition": "x => x.NumCasts > 0",
+                "at": 168.9,
+                "deactivate": [
+                  "XtremeSpectacularProximity",
+                  "XtremeSpectacularRaidwideFirst"
+                ]
+              },
+              {
+                "id": "0x20031",
+                "call": "ComponentCondition",
+                "component": "XtremeSpectacularRaidwideLast",
+                "delay": 4.8,
+                "name": "Raidwide 8",
+                "condition": "x => x.NumCasts > 0",
+                "at": 173.7,
+                "deactivate": [
+                  "XtremeSpectacularRaidwideLast"
+                ]
+              },
+              {
+                "id": "0x20100",
+                "call": "Targetable",
+                "targetable": true,
+                "delay": 3.9,
+                "name": "Bosses reappear",
+                "at": 177.6
+              }
+            ]
+          },
+          {
+            "group": "Air1",
+            "id": "0x21000",
+            "from": 177.6,
+            "delay": 11.3,
+            "states": [
+              {
+                "id": "0x21000",
+                "call": "CastStart",
+                "aid": "InsaneAir1RedFirst",
+                "delay": 11.3,
+                "at": 188.9,
+                "activate": [
+                  "AirBaits",
+                  "AirPuddleCone",
+                  "AirPuddleCircle"
+                ]
+              },
+              {
+                "id": "0x21010",
+                "call": "ComponentCondition",
+                "component": "AirBaits",
+                "delay": 8.9,
+                "name": "Baits 1",
+                "condition": "r => r.NumCasts == 2",
+                "at": 197.8
+              },
+              {
+                "id": "0x21011",
+                "call": "ComponentCondition",
+                "component": "AirBaits",
+                "delay": 7.4,
+                "name": "Baits 2",
+                "condition": "r => r.NumCasts == 4",
+                "at": 205.2
+              },
+              {
+                "id": "0x21012",
+                "call": "ComponentCondition",
+                "component": "AirBaits",
+                "delay": 7.4,
+                "name": "Baits 3",
+                "condition": "r => r.NumCasts == 6",
+                "at": 212.6
+              },
+              {
+                "id": "0x21013",
+                "call": "ComponentCondition",
+                "component": "AirBaits",
+                "delay": 7.4,
+                "name": "Baits 4",
+                "condition": "r => r.NumCasts == 8",
+                "at": 220,
+                "deactivate": [
+                  "AirBaits"
+                ]
+              },
+              {
+                "id": "0x21100",
+                "call": "Cast",
+                "aid": "DiversDareRed",
+                "delay": 4.7,
+                "cast": 5,
+                "name": "Raidwide",
+                "start": 224.7,
+                "at": 229.7,
+                "activate": [
+                  "DiversDare1"
+                ],
+                "deactivate": [
+                  "DiversDare1",
+                  "AirPuddleCone",
+                  "AirPuddleCircle"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Snaking",
+            "id": "0x30000",
+            "from": 229.7,
+            "delay": 10.7,
+            "states": [
+              {
+                "id": "0x30000",
+                "call": "Cast",
+                "aid": "Firesnaking",
+                "delay": 10.7,
+                "cast": 5,
+                "name": "Raidwide + assign debuffs",
+                "start": 240.4,
+                "at": 245.4,
+                "activate": [
+                  "FiresnakingRaidwide",
+                  "AlleyOopProteanRepeat",
+                  "AlleyOopProteans",
+                  "AlleyOopInfernoSpread",
+                  "AlleyOopInfernoPuddle",
+                  "SteamBurstPredict",
+                  "SteamBurst",
+                  "DeepVarial",
+                  "DeepVarialPredict",
+                  "DeepVarialSpreadStack"
+                ],
+                "deactivate": [
+                  "FiresnakingRaidwide"
+                ]
+              },
+              {
+                "id": "0x30010",
+                "call": "Cast",
+                "aid": "AlleyOopInfernoCast",
+                "delay": 7.6,
+                "cast": 4.3,
+                "start": 253,
+                "at": 257.3
+              },
+              {
+                "id": "0x30020",
+                "call": "ComponentCondition",
+                "component": "AlleyOopInfernoSpread",
+                "delay": 0.7,
+                "name": "Puddles",
+                "condition": "s => s.NumFinishedSpreads > 0",
+                "at": 258,
+                "deactivate": [
+                  "AlleyOopInfernoSpread"
+                ]
+              },
+              {
+                "id": "0x30021",
+                "call": "ComponentCondition",
+                "component": "AlleyOopProteans",
+                "delay": 0.5,
+                "name": "Proteans",
+                "condition": "s => s.NumCasts > 0",
+                "at": 258.5,
+                "deactivate": [
+                  "AlleyOopProteans"
+                ]
+              },
+              {
+                "id": "0x30022",
+                "call": "ComponentCondition",
+                "component": "AlleyOopProteanRepeat",
+                "delay": 2.6,
+                "name": "Proteans repeat",
+                "condition": "p => p.NumCasts > 0",
+                "at": 261.1,
+                "deactivate": [
+                  "AlleyOopProteanRepeat"
+                ]
+              },
+              {
+                "id": "0x30030",
+                "call": "Cast",
+                "aid": "HotImpact2",
+                "delay": 3.3,
+                "cast": 5,
+                "name": "Tankbuster (red)",
+                "start": 264.4,
+                "at": 269.4,
+                "activate": [
+                  "SnakingHotImpact"
+                ],
+                "deactivate": [
+                  "SnakingHotImpact"
+                ]
+              },
+              {
+                "id": "0x30040",
+                "call": "CastStart",
+                "aid": "AlleyOopInfernoCast",
+                "delay": 6.1,
+                "at": 275.5,
+                "activate": [
+                  "AlleyOopInfernoSpread"
+                ]
+              },
+              {
+                "id": "0x30100",
+                "call": "ComponentCondition",
+                "component": "DeepVarial",
+                "delay": 1.7,
+                "name": "Big cone",
+                "condition": "d => d.NumCasts > 0",
+                "at": 277.2,
+                "deactivate": [
+                  "DeepVarial",
+                  "DeepVarialPredict"
+                ]
+              },
+              {
+                "id": "0x30110",
+                "call": "ComponentCondition",
+                "component": "DeepVarialSpreadStack",
+                "delay": 3.1,
+                "name": "Stack/spread (blue)",
+                "condition": "s => s.NumCasts > 0",
+                "at": 280.3,
+                "deactivate": [
+                  "DeepVarialSpreadStack"
+                ]
+              },
+              {
+                "id": "0x30120",
+                "call": "ComponentCondition",
+                "component": "AlleyOopInfernoSpread",
+                "delay": 0.2,
+                "name": "Spread (red)",
+                "condition": "s => s.NumFinishedSpreads > 0",
+                "at": 280.5,
+                "deactivate": [
+                  "AlleyOopInfernoSpread"
+                ]
+              },
+              {
+                "id": "0x30200",
+                "call": "Cast",
+                "aid": "HotAerialCast",
+                "delay": 3.3,
+                "cast": 5,
+                "start": 283.8,
+                "at": 288.8,
+                "activate": [
+                  "AwesomeSplab",
+                  "HotAerial",
+                  "HotAerialPuddle"
+                ]
+              },
+              {
+                "id": "0x30210",
+                "call": "ComponentCondition",
+                "component": "HotAerial",
+                "delay": 0.4,
+                "name": "Jumps start (red)",
+                "condition": "h => h.NumCasts > 0",
+                "at": 289.2
+              },
+              {
+                "id": "0x30220",
+                "call": "ActorTargetable",
+                "actor": "_module.B2",
+                "targetable": false,
+                "delay": 3.1,
+                "name": "Blue disappears",
+                "at": 292.3,
+                "activate": [
+                  "SickSwell",
+                  "SickestTakeOff"
+                ],
+                "exec": [
+                  {
+                    "component": "SickSwell",
+                    "when": "enter",
+                    "code": "s => s.EnableHints = false"
+                  },
+                  {
+                    "component": "SickestTakeOff",
+                    "when": "enter",
+                    "code": "s => s.Risky = false"
+                  }
+                ]
+              },
+              {
+                "id": "0x30230",
+                "call": "ComponentCondition",
+                "component": "HotAerial",
+                "delay": 3.1,
+                "name": "Jumps end (red)",
+                "condition": "h => h.NumCasts == 4",
+                "at": 295.4,
+                "deactivate": [
+                  "HotAerial"
+                ],
+                "exec": [
+                  {
+                    "component": "SickSwell",
+                    "when": "exit",
+                    "code": "s => s.EnableHints = true"
+                  },
+                  {
+                    "component": "SickestTakeOff",
+                    "when": "exit",
+                    "code": "s => s.Risky = true"
+                  }
+                ]
+              },
+              {
+                "id": "0x30240",
+                "call": "ComponentCondition",
+                "component": "SickSwell",
+                "delay": 6,
+                "name": "Knockback + line AOE",
+                "condition": "s => s.NumCasts > 0",
+                "at": 301.4,
+                "deactivate": [
+                  "SickSwell",
+                  "SickestTakeOff"
+                ],
+                "exec": [
+                  {
+                    "component": "SteamBurst",
+                    "when": "exit",
+                    "code": "s => s.Reset()"
+                  }
+                ]
+              },
+              {
+                "id": "0x30250",
+                "call": "CastStart",
+                "aid": "CutbackBlazeCast",
+                "delay": 1.2,
+                "at": 302.6,
+                "activate": [
+                  "CutbackBlazeBait",
+                  "CutbackBlazePuddle",
+                  "DeepImpactBait",
+                  "DeepImpactKB"
+                ]
+              },
+              {
+                "id": "0x30251",
+                "call": "ComponentCondition",
+                "component": "AwesomeSplab",
+                "delay": 1.4,
+                "name": "Stack/spread (blue)",
+                "condition": "s => s.NumCasts > 0",
+                "at": 304,
+                "deactivate": [
+                  "AwesomeSplab"
+                ]
+              },
+              {
+                "id": "0x30252",
+                "call": "ComponentCondition",
+                "component": "SteamBurst",
+                "delay": 1.7,
+                "name": "Delayed explosions",
+                "condition": "s => s.NumCasts > 0",
+                "at": 305.7
+              },
+              {
+                "id": "0x30253",
+                "call": "ComponentCondition",
+                "component": "CutbackBlazeBait",
+                "delay": 2.2,
+                "name": "Safe cone bait",
+                "condition": "c => c.NumCasts > 0",
+                "at": 307.9,
+                "deactivate": [
+                  "CutbackBlazeBait"
+                ]
+              },
+              {
+                "id": "0x30260",
+                "call": "ComponentCondition",
+                "component": "DeepImpactBait",
+                "delay": 5.9,
+                "name": "Tankbuster (blue)",
+                "condition": "b => b.NumCasts > 0",
+                "at": 313.8,
+                "deactivate": [
+                  "DeepImpactBait",
+                  "DeepImpactKB"
+                ]
+              },
+              {
+                "id": "0x30300",
+                "call": "Cast",
+                "aid": "DiversDareRed",
+                "delay": 2.2,
+                "cast": 5,
+                "name": "Raidwide",
+                "start": 316,
+                "at": 321,
+                "activate": [
+                  "DiversDare1"
+                ],
+                "deactivate": [
+                  "DiversDare1",
+                  "SteamBurst",
+                  "SteamBurstPredict",
+                  "AlleyOopInfernoPuddle",
+                  "HotAerialPuddle",
+                  "CutbackBlazePuddle"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "BubblePhase",
+            "id": "0x40000",
+            "from": 321,
+            "delay": 14.4,
+            "states": [
+              {
+                "id": "0x40000",
+                "call": "ComponentCondition",
+                "component": "DeepAerial",
+                "delay": 14.4,
+                "name": "Tower",
+                "condition": "d => d.NumCasts > 0",
+                "at": 335.4,
+                "activate": [
+                  "DeepAerial",
+                  "WateryGrave",
+                  "BubbleBounds"
+                ],
+                "deactivate": [
+                  "DeepAerial"
+                ]
+              },
+              {
+                "id": "0x40010",
+                "call": "ComponentCondition",
+                "component": "WateryGrave",
+                "delay": 3.2,
+                "name": "Bubble appears",
+                "condition": "w => w.ActiveActors.Any()",
+                "at": 338.6,
+                "activate": [
+                  "BubbleTether",
+                  "ScathingSteam"
+                ]
+              },
+              {
+                "id": "0x40100",
+                "call": "ComponentCondition",
+                "component": "BubbleTether",
+                "delay": 8.1,
+                "name": "Tethers 1",
+                "condition": "b => b.NumCasts > 1",
+                "at": 346.7
+              },
+              {
+                "id": "0x40101",
+                "call": "ComponentCondition",
+                "component": "BubbleTether",
+                "delay": 8.6,
+                "name": "Tethers 2",
+                "condition": "b => b.NumCasts > 3",
+                "at": 355.3
+              },
+              {
+                "id": "0x40102",
+                "call": "ComponentCondition",
+                "component": "BubbleTether",
+                "delay": 8.6,
+                "name": "Tethers 3",
+                "condition": "b => b.NumCasts > 5",
+                "at": 363.9
+              },
+              {
+                "id": "0x40103",
+                "call": "ComponentCondition",
+                "component": "BubbleTether",
+                "delay": 8.6,
+                "name": "Tethers 4",
+                "condition": "b => b.NumCasts > 7",
+                "at": 372.5
+              },
+              {
+                "id": "0x40104",
+                "call": "ComponentCondition",
+                "component": "BubbleTether",
+                "delay": 8.6,
+                "name": "Tethers 5",
+                "condition": "b => b.NumCasts > 9",
+                "at": 381.1
+              },
+              {
+                "id": "0x40105",
+                "call": "ComponentCondition",
+                "component": "BubbleTether",
+                "delay": 8.6,
+                "name": "Tethers 6",
+                "condition": "b => b.NumCasts > 11",
+                "at": 389.7,
+                "deactivate": [
+                  "BubbleTether"
+                ]
+              },
+              {
+                "id": "0x40200",
+                "call": "Targetable",
+                "targetable": true,
+                "delay": 2,
+                "name": "Bosses reappear",
+                "at": 391.7
+              },
+              {
+                "id": "0x40300",
+                "call": "Cast",
+                "aid": "DiversDareRed",
+                "delay": 3.2,
+                "cast": 5,
+                "name": "Raidwide",
+                "start": 394.9,
+                "at": 399.9,
+                "activate": [
+                  "DiversDare1"
+                ],
+                "deactivate": [
+                  "DiversDare1",
+                  "WateryGrave",
+                  "ScathingSteam"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "SplitPhase",
+            "id": "0x50000",
+            "from": 399.9,
+            "delay": 10.7,
+            "states": [
+              {
+                "id": "0x50000",
+                "call": "CastStart",
+                "aid": "FlameFloaterSplitCast",
+                "delay": 10.7,
+                "at": 410.6,
+                "activate": [
+                  "FlameFloaterSplit",
+                  "SplitPuddle",
+                  "SteamBurst"
+                ]
+              },
+              {
+                "id": "0x50010",
+                "call": "ComponentCondition",
+                "component": "SplitPuddle",
+                "delay": 6.3,
+                "name": "Voidzone appears",
+                "condition": "s => s.NumActors > 0",
+                "at": 416.9,
+                "deactivate": [
+                  "FlameFloaterSplit"
+                ]
+              },
+              {
+                "id": "0x50020",
+                "call": "Cast",
+                "aid": "AlleyOopInfernoCast",
+                "delay": 3,
+                "cast": 4.3,
+                "start": 419.9,
+                "at": 424.2,
+                "activate": [
+                  "AlleyOopInfernoPuddle",
+                  "AlleyOopInfernoSpread",
+                  "AlleyOopProteans",
+                  "AlleyOopProteanRepeat"
+                ],
+                "exec": [
+                  {
+                    "component": "AlleyOopProteans",
+                    "when": "enter",
+                    "code": "p => p.EnableHints = false"
+                  }
+                ]
+              },
+              {
+                "id": "0x50030",
+                "call": "ComponentCondition",
+                "component": "AlleyOopInfernoSpread",
+                "delay": 0.7,
+                "name": "Puddles",
+                "condition": "s => s.NumFinishedSpreads > 0",
+                "at": 424.9,
+                "deactivate": [
+                  "AlleyOopInfernoSpread"
+                ],
+                "exec": [
+                  {
+                    "component": "AlleyOopProteans",
+                    "when": "exit",
+                    "code": "p => p.EnableHints = true"
+                  }
+                ]
+              },
+              {
+                "id": "0x50031",
+                "call": "ComponentCondition",
+                "component": "AlleyOopProteans",
+                "delay": 5.4,
+                "name": "Proteans",
+                "condition": "p => p.NumCasts > 0",
+                "at": 430.3
+              },
+              {
+                "id": "0x50032",
+                "call": "ComponentCondition",
+                "component": "AlleyOopProteanRepeat",
+                "delay": 2.6,
+                "name": "Proteans (repeat)",
+                "condition": "p => p.NumCasts > 0",
+                "at": 432.9,
+                "activate": [
+                  "FreakyPyrotation",
+                  "FreakyPyrotationPuddle",
+                  "SickestTakeOff",
+                  "SickSwell"
+                ],
+                "deactivate": [
+                  "AlleyOopProteans",
+                  "AlleyOopProteanRepeat"
+                ]
+              },
+              {
+                "id": "0x50040",
+                "call": "ActorTargetable",
+                "actor": "_module.B2",
+                "targetable": false,
+                "delay": 4,
+                "name": "Blue disappears",
+                "at": 436.9
+              },
+              {
+                "id": "0x50050",
+                "call": "ComponentCondition",
+                "component": "FreakyPyrotation",
+                "delay": 1,
+                "name": "Stacks",
+                "condition": "p => p.NumFinishedStacks > 0",
+                "at": 437.9,
+                "deactivate": [
+                  "FreakyPyrotation"
+                ]
+              },
+              {
+                "id": "0x50060",
+                "call": "ComponentCondition",
+                "component": "SickestTakeOff",
+                "delay": 8,
+                "name": "Knockback + line AOE",
+                "condition": "s => s.NumCasts > 0",
+                "at": 445.9,
+                "activate": [
+                  "AwesomeSplab"
+                ],
+                "deactivate": [
+                  "SickestTakeOff",
+                  "SickSwell"
+                ],
+                "exec": [
+                  {
+                    "component": "AwesomeSplab",
+                    "when": "exit",
+                    "code": "s => s.EnableHints = true"
+                  }
+                ]
+              },
+              {
+                "id": "0x50061",
+                "call": "ComponentCondition",
+                "component": "AwesomeSplab",
+                "delay": 2.5,
+                "name": "Party stacks",
+                "condition": "s => s.NumCasts > 0",
+                "at": 448.4,
+                "deactivate": [
+                  "AwesomeSplab"
+                ]
+              },
+              {
+                "id": "0x50100",
+                "call": "Cast",
+                "aid": "DiversDareRed",
+                "delay": 0,
+                "cast": 4.7,
+                "name": "Raidwide",
+                "start": 448.4,
+                "at": 453.1,
+                "activate": [
+                  "DiversDare1"
+                ],
+                "deactivate": [
+                  "DiversDare1",
+                  "BubbleBounds",
+                  "SplitPuddle",
+                  "SteamBurst",
+                  "AlleyOopInfernoPuddle",
+                  "FreakyPyrotationPuddle"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Air2",
+            "id": "0x60000",
+            "from": 453.1,
+            "delay": 10.8,
+            "states": [
+              {
+                "id": "0x60000",
+                "call": "Cast",
+                "aid": "XtremeFiresnaking",
+                "delay": 10.8,
+                "cast": 5,
+                "name": "Raidwide + assign debuffs",
+                "start": 463.9,
+                "at": 468.9,
+                "activate": [
+                  "XtremeFiresnakingRaidwide",
+                  "Air2Assignments",
+                  "Air2Baits",
+                  "AirPuddleCircle",
+                  "AirPuddleCone",
+                  "Bailout"
+                ],
+                "deactivate": [
+                  "XtremeFiresnakingRaidwide"
+                ]
+              },
+              {
+                "id": "0x60010",
+                "call": "ComponentCondition",
+                "component": "Air2Baits",
+                "delay": 17.9,
+                "name": "Baits 1",
+                "condition": "r => r.NumCasts == 2",
+                "at": 486.8
+              },
+              {
+                "id": "0x60011",
+                "call": "ComponentCondition",
+                "component": "Bailout",
+                "delay": 1.6,
+                "name": "Stacks 1",
+                "condition": "b => b.NumCasts == 2",
+                "at": 488.4
+              },
+              {
+                "id": "0x60012",
+                "call": "ComponentCondition",
+                "component": "Air2Baits",
+                "delay": 8.6,
+                "name": "Baits 2",
+                "condition": "r => r.NumCasts == 4",
+                "at": 497
+              },
+              {
+                "id": "0x60013",
+                "call": "ComponentCondition",
+                "component": "Bailout",
+                "delay": 1.6,
+                "name": "Stacks 2",
+                "condition": "b => b.NumCasts == 4",
+                "at": 498.6
+              },
+              {
+                "id": "0x60014",
+                "call": "ComponentCondition",
+                "component": "Air2Baits",
+                "delay": 8.6,
+                "name": "Baits 3",
+                "condition": "r => r.NumCasts == 6",
+                "at": 507.2
+              },
+              {
+                "id": "0x60015",
+                "call": "ComponentCondition",
+                "component": "Bailout",
+                "delay": 1.6,
+                "name": "Stacks 3",
+                "condition": "b => b.NumCasts == 6",
+                "at": 508.8
+              },
+              {
+                "id": "0x60016",
+                "call": "ComponentCondition",
+                "component": "Air2Baits",
+                "delay": 8.6,
+                "name": "Baits 4",
+                "condition": "r => r.NumCasts == 8",
+                "at": 517.4
+              },
+              {
+                "id": "0x60017",
+                "call": "ComponentCondition",
+                "component": "Bailout",
+                "delay": 1.6,
+                "name": "Stacks 4",
+                "condition": "b => b.NumCasts == 8",
+                "at": 519,
+                "deactivate": [
+                  "Air2Assignments",
+                  "Air2Baits",
+                  "Bailout"
+                ]
+              },
+              {
+                "id": "0x60100",
+                "call": "Cast",
+                "aid": "DiversDareRed",
+                "delay": 2.9,
+                "cast": 5,
+                "name": "Raidwide",
+                "start": 521.9,
+                "at": 526.9,
+                "activate": [
+                  "DiversDare1"
+                ],
+                "deactivate": [
+                  "DiversDare1",
+                  "AirPuddleCircle",
+                  "AirPuddleCone"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "PreEnrage",
+            "id": "0x70000",
+            "from": 526.9,
+            "delay": 10.8,
+            "states": [
+              {
+                "id": "0x70000",
+                "call": "ActorCastStartMulti",
+                "aids": [
+                  "AlleyOopDoubleDipCast",
+                  "ReverseAlleyOopCast"
+                ],
+                "actor": "_module.B2",
+                "delay": 10.8,
+                "at": 537.7,
+                "activate": [
+                  "AlleyOopProteans",
+                  "AlleyOopProteanRepeat"
+                ]
+              },
+              {
+                "id": "0x70001",
+                "call": "CastStart",
+                "aid": "AlleyOopInfernoCast",
+                "delay": 2.8,
+                "at": 540.5,
+                "activate": [
+                  "AlleyOopInfernoSpread",
+                  "AlleyOopInfernoPuddle"
+                ]
+              },
+              {
+                "id": "0x70002",
+                "call": "ComponentCondition",
+                "component": "AlleyOopProteans",
+                "delay": 2.7,
+                "name": "Proteans",
+                "condition": "p => p.NumCasts > 0",
+                "at": 543.2,
+                "deactivate": [
+                  "AlleyOopProteans"
+                ]
+              },
+              {
+                "id": "0x70003",
+                "call": "ComponentCondition",
+                "component": "AlleyOopInfernoSpread",
+                "delay": 2.2,
+                "name": "Puddles",
+                "condition": "p => p.NumFinishedSpreads > 0",
+                "at": 545.4,
+                "deactivate": [
+                  "AlleyOopInfernoSpread"
+                ]
+              },
+              {
+                "id": "0x70004",
+                "call": "ComponentCondition",
+                "component": "AlleyOopProteanRepeat",
+                "delay": 0.4,
+                "name": "Proteans (repeat)",
+                "condition": "p => p.NumCasts > 0",
+                "at": 545.8,
+                "deactivate": [
+                  "AlleyOopProteanRepeat"
+                ],
+                "activate": [
+                  "Pyrotation",
+                  "PyrotationPuddle",
+                  "DeepImpactBait",
+                  "DeepImpactKB"
+                ]
+              },
+              {
+                "id": "0x70010",
+                "call": "ComponentCondition",
+                "component": "Pyrotation",
+                "delay": 8.6,
+                "name": "Stack start",
+                "condition": "p => p.NumCasts > 0",
+                "at": 554.4
+              },
+              {
+                "id": "0x70011",
+                "call": "ComponentCondition",
+                "component": "DeepImpactBait",
+                "delay": 0.3,
+                "name": "Tankbuster",
+                "condition": "d => d.NumCasts > 0",
+                "at": 554.7,
+                "deactivate": [
+                  "DeepImpactBait",
+                  "DeepImpactKB"
+                ]
+              },
+              {
+                "id": "0x70012",
+                "call": "ComponentCondition",
+                "component": "Pyrotation",
+                "delay": 3.8,
+                "name": "Stack finish",
+                "condition": "p => p.NumCasts == 3",
+                "at": 558.5,
+                "deactivate": [
+                  "Pyrotation"
+                ]
+              },
+              {
+                "id": "0x70100",
+                "call": "Cast",
+                "aid": "DiversDareRed",
+                "delay": 4.3,
+                "cast": 5,
+                "name": "Raidwide",
+                "start": 562.8,
+                "at": 567.8,
+                "activate": [
+                  "DiversDare1"
+                ],
+                "deactivate": [
+                  "AlleyOopInfernoPuddle",
+                  "PyrotationPuddle"
+                ]
+              },
+              {
+                "id": "0x70110",
+                "call": "Cast",
+                "aid": "DiversDareRed",
+                "delay": 4.2,
+                "cast": 5,
+                "name": "Raidwide",
+                "start": 572,
+                "at": 577
+              }
+            ]
+          },
+          {
+            "id": "0x80000",
+            "call": "Cast",
+            "aid": "OverTheFallsRed",
+            "delay": 12.5,
+            "cast": 9,
+            "name": "Enrage",
+            "start": 589.5,
+            "at": 598.5
+          }
+        ]
+      }
+    ]
+  }
 }
