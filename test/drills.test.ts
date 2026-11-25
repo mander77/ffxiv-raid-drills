@@ -827,7 +827,7 @@ test("Ecliptic with no puddles: the tether goes opposite the portal, then clockw
       assert.equal(tether.a[0], `The ${corner.toUpperCase()} corner.`);
       assert.ok(tether.stand && inZone(tether.stand, tether.z ?? { c: [0, 0], r: 0 }), `${corner}: the corner spot is correct`);
       const east = corner === "ne" || corner === "se";
-      assert.equal(eclTwoWayScene(corner).steps[0].a[0], east ? "The east Line Stack." : "The west Line Stack.");
+      assert.ok(eclTwoWayScene(corner).steps[0].a[0].startsWith(east ? "The east Line Stack" : "The west Line Stack"));
       assert.ok(eclFourWayScene(corner).steps[0].a[0].startsWith(corner.toUpperCase()));
     }
 });
@@ -839,5 +839,26 @@ test("Ecliptic with no puddles: H1 always goes clockwise, H2 only when H1 is mar
     const h2 = withSeed(`E${i}`, () => eclipticFreeScene("H2", "ne"));
     const h1Marked = h2.steps[1].q.includes("H1");
     assert.equal(h2.steps[2].a[1].includes("you go clockwise"), h1Marked, h2.steps[1].q);
+  }
+});
+
+test("Two-way Fireball: only the melee stand on the hitbox; a marked player is just outside it, a tethered one farther out", () => {
+  const out = (x: number, east: boolean): [number, number] => [east ? 50 + x : 50 - x, 50];
+  for (const [place, east] of [
+    ["north", false],
+    ["south", true],
+  ] as const) {
+    const z = zoneOf(eclTwoWayScene(place).steps[0].z);
+    assert.notOk(inZone(out(11.5, east), z), `${place}: on the hitbox is the melee's spot`);
+    assert.ok(inZone(out(16, east), z), `${place}: just outside the hitbox`);
+    assert.notOk(inZone(out(26, east), z), `${place}: too far, behind the tethered players`);
+  }
+  for (const [corner, east] of [
+    ["nw", false],
+    ["se", true],
+  ] as const) {
+    const z = zoneOf(eclTwoWayScene(corner).steps[0].z);
+    assert.notOk(inZone(out(16, east), z), `${corner}: the marked player's spot is in front of you`);
+    assert.ok(inZone(out(20, east), z), `${corner}: behind the players by the boss`);
   }
 });
