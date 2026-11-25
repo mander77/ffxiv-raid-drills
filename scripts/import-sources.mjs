@@ -21,8 +21,13 @@
 //   (for the draft too). A fight's "extras" read
 //   more from one file: M11S's "arenaSplit" reads the Arena Split from its Flatliner file.
 //
+// - BossMod's state list for the fight (<module>States.cs): the boss's states in fight order,
+//   grouped by phase block, with their delays and the components they turn on and off (for the
+//   draft; cactbot stays the source of every time, and test/importSources.test.ts checks the two
+//   against each other).
+//
 // Each fight gets two generated files in its folder: source.gen.ts (what the site reads) and
-// sources.extra.gen.json (the triggers and the mechanic files, for the draft). Never edit them by
+// sources.extra.gen.json (the triggers, the mechanic files and the state list, for the draft). Never edit them by
 // hand: change sources.json and run the import again.
 //
 // Downloads come only from the two official GitHub repositories, at the pinned commits, into
@@ -334,6 +339,286 @@ export function fillShapes(abilities, mechanics) {
   return abilities;
 }
 
+// The boss's state list, from BossMod's <module>States.cs. It is C# code: a class whose
+// constructor names the phases ("DeathPhase(0, SinglePhase)"), and methods that call
+// StateMachineBuilder (BossMod/BossModule/StateMachineBuilder.cs) once per state, in fight order:
+//
+//   Cast(id + 0x10, AID.CrownOfArcadia, 5.2f, 5, "Raidwide")
+//       .ActivateOnEnter<CrownOfArcadia>()
+//       .DeactivateOnExit<CrownOfArcadia>();
+//   ComponentCondition<TrophyWeaponsAOE>(id + 0x112, 2.2f, t => t.NumCasts > 0, "Weapon 1");
+//   TrophyWeapons(id + 0x100, 5.2f);        a phase block: a method of the same class
+//
+// Each state waits its delay after the state before it. A cast waits its delay to start, then its
+// cast time to end. The parser reads only the calls below, and stops on any other, so a new kind
+// of call is never skipped without a person seeing it.
+
+/** The StateMachineBuilder calls the parser knows, with their parameters in order (as
+    StateMachineBuilder.cs names them). "delay" and "castTime" add to the time; a call with both
+    is a cast that starts after its delay and ends after its cast time. */
+const STATE_CALLS = {
+  Cast: ["id", "aid", "delay", "castTime", "name", "interruptible"],
+  CastMulti: ["id", "aids", "delay", "castTime", "name", "interruptible"],
+  CastStart: ["id", "aid", "delay", "name"],
+  CastStartMulti: ["id", "aids", "delay", "name"],
+  CastEnd: ["id", "castTime", "name", "interruptible"],
+  ActorCast: ["id", "actor", "aid", "delay", "castTime", "isBoss", "name", "interruptible"],
+  ActorCastMulti: ["id", "actor", "aids", "delay", "castTime", "isBoss", "name", "interruptible"],
+  ActorCastStart: ["id", "actor", "aid", "delay", "isBoss", "name"],
+  ActorCastStartMulti: ["id", "actor", "aids", "delay", "isBoss", "name"],
+  ActorCastEnd: ["id", "actor", "castTime", "isBoss", "name", "interruptible"],
+  ComponentCondition: ["id", "delay", "condition", "name", "maxOverdue", "checkDelay"],
+  Condition: ["id", "delay", "condition", "name", "maxOverdue", "checkDelay"],
+  Timeout: ["id", "delay", "name"],
+  SimpleState: ["id", "delay", "name"],
+  Targetable: ["id", "targetable", "delay", "name", "checkDelay"],
+  ActorTargetable: ["id", "actor", "targetable", "delay", "name", "checkDelay"],
+};
+
+/** The calls that start a phase, in the constructor, with their parameters in order. */
+const PHASE_CALLS = {
+  DeathPhase: ["id", "method"],
+  SimplePhase: ["id", "method", "name", "duration"],
+};
+
+/** The calls chained after a state or a phase: what it turns on and off. */
+const CHAIN_CALLS = new Set([
+  "ActivateOnEnter",
+  "DeactivateOnEnter",
+  "DeactivateOnExit",
+  "ExecOnEnter",
+  "ExecOnExit",
+  "SetHint",
+  "ClearHint",
+]);
+
+/** The index of the bracket that closes the one at `open`, past strings and other brackets. */
+function closing(text, open) {
+  const pairs = { "(": ")", "[": "]", "{": "}" };
+  const stack = [];
+  for (let i = open; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') {
+      while (text[++i] !== '"') if (text[i] === "\\") i++;
+    } else if (pairs[c]) stack.push(pairs[c]);
+    else if (c === stack[stack.length - 1] && stack.pop() && stack.length === 0) return i;
+  }
+  throw new Error(`bossmod states: no closing bracket for "${text.slice(open, open + 40)}"`);
+}
+
+/** Text split at `sep` where it is outside strings and brackets. */
+function splitTop(text, sep) {
+  const out = [];
+  let depth = 0;
+  let from = 0;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') {
+      while (text[++i] !== '"') if (text[i] === "\\") i++;
+    } else if ("([{".includes(c)) depth++;
+    else if (")]}".includes(c)) depth--;
+    else if (c === sep && depth === 0) {
+      out.push(text.slice(from, i).trim());
+      from = i + 1;
+    }
+  }
+  out.push(text.slice(from).trim());
+  return out.filter(Boolean);
+}
+
+/** C# text without its comments ("// ..." to the end of a line, "/* ... *\/"), strings kept. */
+function withoutComments(text) {
+  let out = "";
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === '"') {
+      const from = i;
+      while (text[++i] !== '"') if (text[i] === "\\") i++;
+      out += text.slice(from, i + 1);
+    } else if (text.startsWith("//", i)) while (i < text.length && text[i] !== "\n") i++;
+    else if (text.startsWith("/*", i)) i = text.indexOf("*/", i) + 1;
+    else out += text[i];
+  }
+  return `${out}\n`;
+}
+
+/** One argument's value: a number ("5.2f", "0x10"), a sum with the method's parameters ("id +
+    0x10"), true or false, a string, an ability ("AID.X", as its name), a list of abilities, or
+    its text (a lambda, an actor). `env` holds the method's parameters. */
+function stateValue(text, env) {
+  const t = text.trim();
+  if (/^"(?:[^"\\]|\\.)*"$/.test(t)) return JSON.parse(t);
+  if (t === "true" || t === "false") return t === "true";
+  const aid = /^AID\.(\w+)$/.exec(t);
+  if (aid) return aid[1];
+  if (t.startsWith("[") && t.endsWith("]")) return splitTop(t.slice(1, -1), ",").map((x) => stateValue(x, env));
+  if (/^[\w.]+(?:\s*[+-]\s*[\w.]+)*$/.test(t)) {
+    const parts = t.split(/\s*([+-])\s*/);
+    let sum = 0;
+    let sign = 1;
+    for (const p of parts) {
+      if (p === "+" || p === "-") {
+        sign = p === "+" ? 1 : -1;
+        continue;
+      }
+      let n;
+      if (/^0x[0-9A-Fa-f]+$/.test(p)) n = Number.parseInt(p, 16);
+      else if (/^\d+(?:\.\d+)?f?$/.test(p)) n = Number(p.replace(/f$/, ""));
+      else if (p in env) n = env[p];
+      else return t;
+      if (typeof n !== "number") return t;
+      sum += sign * n;
+    }
+    return sum;
+  }
+  return t;
+}
+
+/** A call's arguments bound to its parameter names, positional first, then "name: value". */
+function bindArgs(args, params, env, where) {
+  const out = {};
+  args.forEach((a, i) => {
+    const named = /^(\w+):\s*([\s\S]*)$/.exec(a);
+    const key = named ? named[1] : params[i];
+    if (!key || !params.includes(key)) throw new Error(`bossmod states: ${where}: an argument "${a}" the parser does not know`);
+    out[key] = stateValue(named ? named[2] : a, env);
+  });
+  return out;
+}
+
+/** One statement as a call: its name, its type argument ("ComponentCondition<T>"), its
+    arguments, and the calls chained after it. Null for an assignment ("_module = ..."). */
+function parseCall(statement, where) {
+  if (/^[\w.]+\s*=[^=>]/.test(statement)) return null;
+  const head = /^(\w+)(?:<(\w+)>)?\(/.exec(statement);
+  if (!head) throw new Error(`bossmod states: ${where}: a statement the parser does not know: "${statement.slice(0, 80)}"`);
+  const end = closing(statement, head[0].length - 1);
+  const call = { name: head[1], type: head[2], args: splitTop(statement.slice(head[0].length, end), ","), chain: [] };
+  let rest = statement.slice(end + 1).trim();
+  while (rest) {
+    const m = /^\.(\w+)(?:<(\w+)>)?\(/.exec(rest);
+    if (!m) throw new Error(`bossmod states: ${where}: text after a call the parser does not know: "${rest.slice(0, 80)}"`);
+    const close = closing(rest, m[0].length - 1);
+    call.chain.push({ name: m[1], type: m[2], args: splitTop(rest.slice(m[0].length, close), ",") });
+    rest = rest.slice(close + 1).trim();
+  }
+  return call;
+}
+
+/** What the calls chained after a state or a phase turn on and off. A component that BossMod
+    turns on only under a setting gets " if <the setting>". */
+function chainEffects(chain, where) {
+  const out = {};
+  const add = (key, v) => {
+    out[key] ??= [];
+    out[key].push(v);
+  };
+  for (const c of chain) {
+    if (!CHAIN_CALLS.has(c.name)) throw new Error(`bossmod states: ${where}: a chained call the parser does not know: .${c.name}`);
+    if (c.name === "SetHint" || c.name === "ClearHint") {
+      add("hints", `${c.name === "SetHint" ? "+" : "-"}${c.args[0].replace(/^StateMachine\.\w+Hint\./, "")}`);
+      continue;
+    }
+    if (!c.type) throw new Error(`bossmod states: ${where}: .${c.name} with no component`);
+    if (c.name.startsWith("Exec")) {
+      add("exec", { component: c.type, when: c.name === "ExecOnEnter" ? "enter" : "exit", code: c.args[0] });
+      continue;
+    }
+    const key = { ActivateOnEnter: "activate", DeactivateOnEnter: "deactivateOnEnter", DeactivateOnExit: "deactivate" }[c.name];
+    add(key, c.args[0] && c.args[0] !== "true" ? `${c.type} if ${c.args[0]}` : c.type);
+  }
+  return out;
+}
+
+/** The methods of the states class: each one's parameter names and its statements. */
+function stateMethods(text) {
+  const methods = {};
+  for (const m of text.matchAll(/^\s*(?:(?:private|public|protected|internal|static)\s+)*void (\w+)\(([^)]*)\)\s*\{/gm)) {
+    const open = m.index + m[0].length - 1;
+    const params = m[2] ? m[2].split(",").map((p) => p.trim().split(/\s+/).pop()) : [];
+    methods[m[1]] = { params, body: splitTop(text.slice(open + 1, closing(text, open)), ";") };
+  }
+  return methods;
+}
+
+/** BossMod's state list for a fight, from its <module>States.cs: each phase with its states in
+    fight order. Each state has its id, its call, the ability it casts (or the component it
+    waits on), its delay after the state before it, its cast time, its name, and its time into the
+    phase ("at", where a cast ends; "start", where it starts), as BossMod expects them. A phase
+    block (a method of the class) is a group with its own states inside. */
+export function parseStates(raw) {
+  const text = withoutComments(raw);
+  const cls = /class (\w+)States\s*:\s*StateMachineBuilder/.exec(text);
+  if (!cls) throw new Error("bossmod states: no class that builds a StateMachineBuilder");
+  const ctor = new RegExp(`public ${cls[1]}States\\(BossModule module\\)\\s*:\\s*base\\(module\\)\\s*\\{`).exec(text);
+  if (!ctor) throw new Error(`bossmod states: no constructor ${cls[1]}States(BossModule module)`);
+  const ctorOpen = ctor.index + ctor[0].length - 1;
+  const methods = stateMethods(text);
+  const hex = (n) => `0x${n.toString(16).toUpperCase()}`;
+
+  /** The states of one method, from time `t`, with its parameters in `env`. */
+  function run(method, env, clock, stack) {
+    const def = methods[method];
+    if (stack.includes(method)) throw new Error(`bossmod states: ${method} calls itself`);
+    const out = [];
+    for (const statement of def.body) {
+      const where = `${method}: "${statement.split("\n")[0].trim().slice(0, 60)}"`;
+      const call = parseCall(statement, where);
+      if (!call) throw new Error(`bossmod states: ${where}: an assignment in a phase method`);
+      if (STATE_CALLS[call.name]) {
+        const a = bindArgs(call.args, STATE_CALLS[call.name], env, where);
+        for (const k of ["id", "delay", "castTime"])
+          if (k in a && typeof a[k] !== "number") throw new Error(`bossmod states: ${where}: ${k} "${a[k]}" is not a number`);
+        const state = { id: hex(a.id), call: call.name };
+        if (call.type) state.component = call.type;
+        if (a.aid) state.aid = a.aid;
+        if (a.aids) state.aids = a.aids;
+        if (a.actor) state.actor = a.actor;
+        if (typeof a.targetable === "boolean") state.targetable = a.targetable;
+        if ("delay" in a) state.delay = a.delay;
+        if ("castTime" in a) state.cast = a.castTime;
+        if (a.name) state.name = a.name;
+        if (a.condition) state.condition = a.condition;
+        clock.t += a.delay ?? 0;
+        if ("castTime" in a && "delay" in a) state.start = tenth(clock.t);
+        clock.t += a.castTime ?? 0;
+        state.at = tenth(clock.t);
+        out.push({ ...state, ...chainEffects(call.chain, where) });
+      } else if (methods[call.name]) {
+        const params = methods[call.name].params;
+        if (call.args.length !== params.length) throw new Error(`bossmod states: ${where}: ${call.name} takes ${params.length} arguments`);
+        const inner = Object.fromEntries(params.map((p, i) => [p, stateValue(call.args[i], env)]));
+        if (call.chain.length) throw new Error(`bossmod states: ${where}: a call chained after a phase block`);
+        const group = { group: call.name, id: hex(inner.id), from: tenth(clock.t) };
+        if (typeof inner.delay === "number") group.delay = inner.delay;
+        group.states = run(call.name, inner, clock, [...stack, method]);
+        out.push(group);
+      } else throw new Error(`bossmod states: ${where}: a call the parser does not know: ${call.name}`);
+    }
+    return out;
+  }
+
+  const phases = [];
+  for (const statement of splitTop(text.slice(ctorOpen + 1, closing(text, ctorOpen)), ";")) {
+    const where = `constructor: "${statement.slice(0, 60)}"`;
+    const call = parseCall(statement, where);
+    if (!call) continue;
+    if (!PHASE_CALLS[call.name]) throw new Error(`bossmod states: ${where}: a call the parser does not know: ${call.name}`);
+    const a = bindArgs(call.args, PHASE_CALLS[call.name], {}, where);
+    if (!methods[a.method]) throw new Error(`bossmod states: ${where}: no method ${a.method} in the class`);
+    phases.push({
+      call: call.name,
+      id: hex(a.id),
+      method: a.method,
+      ...(a.name ? { name: a.name } : {}),
+      ...(typeof a.duration === "number" ? { duration: a.duration } : {}),
+      ...chainEffects(call.chain, where),
+      states: run(a.method, { id: a.id }, { t: 0 }, []),
+    });
+  }
+  if (phases.length === 0) throw new Error("bossmod states: the constructor starts no phase");
+  return phases;
+}
+
 /** The extras a fight can ask for: each reads one more file of the BossMod module folder and
     adds a value to source.gen.ts. */
 const EXTRAS = {
@@ -392,14 +677,16 @@ export function generate(sources, lines, bossmod, extras) {
   return out.join("\n");
 }
 
-/** The second generated file's text: the triggers and the mechanic files, for the draft. */
-export function generateExtra(sources, triggers, mechanics) {
+/** The second generated file's text: the triggers, the mechanic files and the state list, for
+    the draft. */
+export function generateExtra(sources, triggers, mechanics, states) {
   const { cactbot, bossmod } = sources;
   const extra = {
     _generated: "By npm run import:sources (scripts/import-sources.mjs). Do not edit it by hand.",
     pins: { cactbot: cactbot.commit, bossmod: bossmod.commit },
     triggers: { file: `https://github.com/${cactbot.repo}/blob/${cactbot.commit}/${cactbot.triggers}`, list: triggers },
     mechanics,
+    states: { file: `https://github.com/${bossmod.repo}/blob/${bossmod.commit}/${states.path}`, phases: states.phases },
   };
   return `${JSON.stringify(extra, null, 2)}\n`;
 }
@@ -441,12 +728,14 @@ export async function importFight(fight, s = readSources(fight)) {
   const mechanics = [];
   for (const file of files) mechanics.push({ file, classes: parseMechanics(await get(s.bossmod.repo, `${folder}/${file}`)) });
   fillShapes(bossmod.abilities, mechanics);
+  const statesPath = `${folder}/${name}States.cs`;
+  const states = { path: statesPath, phases: parseStates(await get(s.bossmod.repo, statesPath)) };
   const extras = {};
   for (const [extra, file] of Object.entries(s.extras ?? {}))
     extras[extra] = EXTRAS[extra].parse(await get(s.bossmod.repo, `${folder}/${file}`));
   return {
     [join(FIGHTS, fight, "source.gen.ts")]: generate(s, lines, bossmod, extras),
-    [join(FIGHTS, fight, "sources.extra.gen.json")]: generateExtra(s, triggers, mechanics),
+    [join(FIGHTS, fight, "sources.extra.gen.json")]: generateExtra(s, triggers, mechanics, states),
   };
 }
 

@@ -1109,6 +1109,18 @@ static wins.
     a second part that starts when the first boss is defeated, so jumps reach that label from
     different times; it has two BossMod module folders (`RM12S1TheLindwurm`,
     `RM12S2TheLindwurm`); and their arenas are a rectangle and a circle, not a square.
+- Issue #99, the state list (November 25): the import also reads BossMod's `<module>States.cs`
+  into `sources.extra.gen.json` (`states`), for the draft. It is C# code, read as plain text in
+  Node.js: each phase in the constructor, each state call of `StateMachineBuilder` with its id,
+  ability or component, delay, cast time, name and time into the phase, and what its chained
+  calls turn on and off. A method of the class is a phase block, kept as a group. The import
+  stops on any call it does not know (a fork, an `if`, `.OnEnter`), so a person sees each new
+  kind. A Roslyn tool waits until the plain text gets fragile, and only with the owner's yes.
+  - cactbot stays the source of every time. `test/importSources.test.ts` checks that each named
+    state has a cactbot line within 1 second, counted from the line of the named state before it
+    (BossMod's own delays drift: its summed delays reach the enrage 3.0 s after cactbot in M11S
+    and 2.1 s in M10S). It prefers a line of one of the state's abilities, else any line at that
+    time. The states with no line are in `STATE_MISMATCHES`, questions for the owner.
 - Issue #14 (November 23): `npm run import:sources` imports both sources at pinned commits into
   `src/data/fights/m11s/source.gen.ts`, and the data files read every time and size from it. The owner chose
   a generated file over a check alone. The downloads stay in `.cache/sources/`, never committed.
