@@ -998,8 +998,12 @@ static wins.
       install is on purpose: YouTube breaks old ones.
     - YouTube now needs a JavaScript runtime for yt-dlp; the script gives it the Node.js that
       runs it (`--js-runtimes node:<path>`).
-    - npm 11 warns that their install scripts are not in `allowScripts`, as it does for esbuild
-      and workerd. Today npm still runs them.
+    - Install scripts: npm 11 blocks a dependency's install script unless `package.json`
+      lists it in `allowScripts`. The list has the four the site needs: esbuild and workerd
+      (the build), ffmpeg-static and ytdlp-nodejs (these downloads). The entries are names, not
+      versions (`npm install-scripts approve --no-allow-scripts-pin`): Dependabot updates the
+      versions each week but not this list, so a pinned entry would block the next version.
+      A new package with an install script needs an entry; `npm install-scripts ls` lists them.
   - naurffxiv's guide (https://naurffxiv.com/savage/m11s) is already a link on the Cheat Sheet's
     sources, for people. The draft job does not read it (owner's choice): the site's robots.txt
     blocks AI crawlers by name, Anthropic's among them, and allows no AI input
