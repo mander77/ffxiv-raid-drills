@@ -1297,9 +1297,14 @@ export const DRILLS: readonly Drill[] = [
       steps:[{q:"Where do you stand for the first Line Stack?", z:{c:[36,37],r:8}, a:["NW, in the Line Stack.", "The tanks stand in front for this first one."]}],
       rule:METEOR_ORDER_RULE})},
   {id:"m-meteor-2", order:16.1, phase:P2, time:"5:03", title:"Meteorain: Your Meteor", kind:"bait",
-    build:s=>({setup:["Healers bait the second set. You have a meteor marker.", "Two rocks are already down in max melee: one NE and one SW."],
+    build:s=>({setup:["Healers bait the second set of meteors.", "The markers go on the two players closest to the boss.", "Two rocks are already down in max melee: one NE and one SW."],
       boss:BOSS, overlays:[rock(METEOR_ROCKS.ne), rock(METEOR_ROCKS.sw)],
-      steps:[{q:"Where do you drop your meteor?",
+      steps:[
+        // The markers come at cactbot's "--Meteor Markers 2--": the healers must be the two closest
+        // then (Hector's guide video, 9:43 to 9:59; wtfdig: "Bait meteor close").
+        {q:"Healers bait the next meteors. Where do you go?", z:{c:CENTER, r:HITBOX},
+          a:["Under the boss.", "Be one of the two closest players, so the marker goes to you."]},
+        {q:"You have a meteor marker. Where do you drop it?",
         // S<Zone>: the H1 answer is a rule zone and the H2 answer is a circle, so name the shared type.
         z:bySlot<Zone>(s, {H1:H1_METEOR, H2:{c:METEOR_ROCKS.sw2, r:8}}),
         a:bySlot(s, {H1:["NW, in max melee."], H2:["SW, in a row with the first SW rock.", "About halfway to the edge."]})}],

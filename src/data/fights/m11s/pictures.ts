@@ -206,7 +206,7 @@ function yourSpot(os: Overlay[], s: Slot): Point {
   return [m.x, m.y];
 }
 /* Meteorain: where H1 and H2 drop their meteors (the second set), from the drill. */
-const HEALER_METEORS: Point[] = (["H1", "H2"] as const).map(h => zoneCenter(fromDrill("m-meteor-2", h).zone));
+const HEALER_METEORS: Point[] = (["H1", "H2"] as const).map(h => zoneCenter(fromDrill("m-meteor-2", h, null, 1).zone));
 /** Where the party stacks behind the NE rock to break it (the second and fourth Line Stacks). */
 const NE_STACK: Point = polar(45, BEHIND_ROCK);
 /** The targets in a list of pieces. */
@@ -386,7 +386,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     };
     return {overlays:SETS.flat().map(target), boss:BOSS, after:[...order([M, H, R]).pieces, say("MELEE > HEALERS > RANGED", 8)],
       answer:[circle(bySlot(s, {H1:HEALER_METEORS[0], H2:HEALER_METEORS[1]}), 6)], options:[order([M, H, R]), order([H, R, M]), order([TANKS, TANKS, TANKS], "TANKS ONLY"), order([R, M, H])]}; },
-  "k-meteor-drop": s => { const d = fromDrill("m-meteor-2", s), d2 = fromDrill("m-meteor-2", other(s)), stack = cluster(NE_STACK, NO_HEALERS.concat([[s, "H"]]));
+  "k-meteor-drop": s => { const d = fromDrill("m-meteor-2", s, null, 1), d2 = fromDrill("m-meteor-2", other(s), null, 1), stack = cluster(NE_STACK, NO_HEALERS.concat([[s, "H"]]));
     const meteor = (z: Zone): Overlay => meteorHit(zoneCenter(z)), byRock = polar(70, 20);
     return {...d, options:[hit(youIn(s, d.zone), [meteor(d.zone)]), hit(youIn(s, d2.zone), [meteor(d2.zone)]),
       hit(youAt(s, byRock), [meteorHit(byRock)]), show([stackHit(stack), meteorHit(NE_STACK), ...stack], [circle(NE_STACK, 10)])]}; },

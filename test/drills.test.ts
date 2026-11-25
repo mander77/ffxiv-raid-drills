@@ -348,11 +348,21 @@ test("Orbital Omen: Hector's dodge is safe for every pattern", () => {
   }
 });
 
+test("Meteorain: both healers go under the boss for the markers first", () => {
+  const drill = DRILLS.find((m) => m.id === "m-meteor-2");
+  if (!drill) throw new Error("missing drill m-meteor-2");
+  for (const s of ["H1", "H2"] as const) {
+    const z = zoneOf(drill.build(s, null).steps[0].z);
+    assert.ok(inZone([50, 50], z), `${s}: under the boss`);
+    assert.notOk(inZone(METEOR_ROCKS.nw, z), `${s}: max melee is too far out`);
+  }
+});
+
 test("Meteorain: H1 drops NW in max melee, H2 farther out on the SW line", () => {
   const drill = DRILLS.find((m) => m.id === "m-meteor-2");
   if (!drill) throw new Error("missing drill m-meteor-2");
-  const h1 = zoneOf(drill.build("H1", null).steps[0].z),
-    h2 = zoneOf(drill.build("H2", null).steps[0].z);
+  const h1 = zoneOf(drill.build("H1", null).steps[1].z),
+    h2 = zoneOf(drill.build("H2", null).steps[1].z);
   assert.ok(inZone(METEOR_ROCKS.nw, h1));
   assert.notOk(inZone([44, 44], h1), "under the boss");
   assert.notOk(inZone([30, 30], h1), "past max melee");
