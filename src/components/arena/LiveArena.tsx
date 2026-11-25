@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { rotOverlay, rotZone, round2, stepZone, unit } from "../../geometry";
+import { rotOverlay, rotZone, round2, stepZone, unit, zoneCenter } from "../../geometry";
 import { bossFor } from "../../lib/practice";
 import { cn } from "../../lib/utils";
 import type { Boss, Overlay, Point, Scene, StepResult, Zone } from "../../types";
@@ -116,7 +116,13 @@ export function LiveArena({
   // What the last answer revealed (the attack) goes under the weapons, so their icons stay sharp.
   const last = showLast ? results[n - 1] : undefined;
   const lastStep = last ? sc.steps[n - 1] : undefined;
-  const reveal = pieceLayers(lastStep?.reveal?.map((o) => rotOverlay(o, k)) ?? []);
+  // An attack that follows the party (revealAt) goes where the party went: your click when it
+  // was correct, else the correct spot. A result is already turned by k, so it is not turned again.
+  const partyAt: Point | undefined = last && (last.ok ? last.p : zoneCenter(last.z));
+  const reveal = pieceLayers([
+    ...(lastStep?.reveal?.map((o) => rotOverlay(o, k)) ?? []),
+    ...(lastStep?.revealAt && partyAt ? lastStep.revealAt(partyAt) : []),
+  ]);
 
   // Your tether, from its portal to where you stand: your last click, or your mark before the first.
   const mine = runner === undefined ? sc.tether : undefined;

@@ -105,6 +105,9 @@ export const raidwide = (): Overlay => ATTACK.raidwide();
 /** Every spread and stack: Raw Steel, Comet, Crushing Comet, Eye of the Hurricane and Massive
     Meteor ("range 6 circle"), on the player at p. */
 export const spreadHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("CometSpread").range);
+/** Crushing Comet, the Party Stack that can end Void Stardust ("range 6 circle"), on the stack
+    spot p. */
+export const crushingComet = (p: Point): Overlay => ATTACK.circle(p, bossmod("CrushingCometStack").range);
 /** A tower going off: the Arena Split towers (Explosion), the Ecliptic Stampede towers and
     Heartbreak Kick ("range 4 circle"). */
 export const towerHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("ExplosionTower").range);
