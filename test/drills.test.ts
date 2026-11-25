@@ -1,6 +1,6 @@
 import { assert, test } from "vitest";
 import { WAYMARKS } from "../src/components/arena/Arena";
-import { isStretched, PLATFORM_X, PORTAL_LINE_X, TOWER_KNOCKBACK, TOWER_R } from "../src/data/fights/m11s/attacks";
+import { HITBOX, isStretched, MELEE_R, PLATFORM_X, PORTAL_LINE_X, TOWER_KNOCKBACK, TOWER_R } from "../src/data/fights/m11s/attacks";
 import {
   assaultScene,
   avalancheScene,
@@ -19,6 +19,7 @@ import {
   firstTowersScene,
   GUST_CONES,
   type JumpSet,
+  METEOR_ROCKS,
   nextPuddle,
   portalAt,
   SPLIT_TOWER,
@@ -347,15 +348,34 @@ test("Orbital Omen: Hector's dodge is safe for every pattern", () => {
   }
 });
 
-test("Meteorain: H1 drops inside the boss hitbox, H2 farther out on the SW line", () => {
+test("Meteorain: H1 drops NW in max melee, H2 farther out on the SW line", () => {
   const drill = DRILLS.find((m) => m.id === "m-meteor-2");
   if (!drill) throw new Error("missing drill m-meteor-2");
   const h1 = zoneOf(drill.build("H1", null).steps[0].z),
     h2 = zoneOf(drill.build("H2", null).steps[0].z);
-  assert.ok(inZone([44, 44], h1));
-  assert.notOk(inZone([37.5, 38], h1), "just outside the hitbox");
+  assert.ok(inZone(METEOR_ROCKS.nw, h1));
+  assert.notOk(inZone([44, 44], h1), "under the boss");
+  assert.notOk(inZone([30, 30], h1), "past max melee");
   assert.ok(inZone([26, 74], h2));
-  assert.notOk(inZone([43, 57], h2), "on top of the first SW rock");
+  assert.notOk(inZone(METEOR_ROCKS.sw, h2), "on top of the first SW rock");
+});
+
+test("Meteorain: the rocks near the boss are in max melee, and each stack spot is behind its rock", () => {
+  for (const p of [METEOR_ROCKS.ne, METEOR_ROCKS.sw, METEOR_ROCKS.nw, METEOR_ROCKS.ne2]) {
+    const r = Math.hypot(p[0] - 50, p[1] - 50);
+    assert.ok(r > HITBOX && r <= MELEE_R, `${p} is in max melee`);
+  }
+  // The third and fourth Line Stacks: the whole stack spot is farther out than the rock it breaks.
+  for (const [id, rock] of [
+    ["m-meteor-3", METEOR_ROCKS.nw],
+    ["m-meteor-4", METEOR_ROCKS.ne2],
+  ] as const) {
+    const drill = DRILLS.find((m) => m.id === id);
+    if (!drill) throw new Error(`missing drill ${id}`);
+    const z = zoneOf(drill.build("H1", null).steps[0].z);
+    if (!("c" in z)) throw new Error("expected a circle");
+    assert.ok(Math.hypot(z.c[0] - 50, z.c[1] - 50) - z.r > Math.hypot(rock[0] - 50, rock[1] - 50), `${id}: behind the rock`);
+  }
 });
 
 test("Void Stardust into the weapons: the puddles are gone when the weapons start", () => {

@@ -902,8 +902,16 @@ static wins.
   from each tornado toward its bait (`aim`, the app's choice) shows which way each cone goes.
 - Orbital Omen (Hector's dodge): stay against the boss hitbox, at his side, where the #2 lines
   cross. After #1, cross through him to the other side. After #2, cross back.
-- Meteorain, your meteor: H1 drops it NW, inside the boss hitbox. H2 drops it SW, in line with the
-  first SW rock, farther out. Icy Veins swaps H1 and H2 here. The site follows wtfdig.
+- Meteorain, your meteor: H1 drops it NW, in max melee. H2 drops it SW, in line with the first SW
+  rock, farther out. Icy Veins swaps H1 and H2 here. The site follows wtfdig.
+- Meteorain rocks (owner, November 25, after a fight review): the rocks near the boss land in his
+  max melee, not under him. Before this the app had them inside his hitbox, about 4 yalms out,
+  and the stacks "behind" them only about 8 yalms out, level with the real rocks. The spots
+  (`METEOR_ROCKS`) are the app's choice, on the intercard lines, at the distances measured in
+  Hector's guide video (9:02 to 12:04; the arena is 666 px for 40 yalms): M1's NE rock 20 units
+  (video 20.2), M2's SW rock 15.5 (15.4), H1's NW drop anywhere NW in max melee, best at 20
+  (22.6; wtfdig's picture 19.5), R2's NE rock 18 (18.2). H2's and R1's rocks stay (34 and 57).
+  The party stacks 30 units out behind a rock (`BEHIND_ROCK`; video 28 to 32).
 - The tank tethers in Meteorain are tank busters at 5:09, 5:19 and 5:29.
 - Crown of Arcadia, a raidwide, comes five times.
 - Arena Split follows Hector No Buddies (wtfdig `#hector:hector:fixed`), the owner's choice in

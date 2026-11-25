@@ -8,7 +8,7 @@
 import { bySlot, withSeed } from "../../../util";
 import { markRole, partyOf } from "../../../party";
 import { angOf, dist, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, type Weapon, type WeaponType } from "./drills";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, type Weapon, type WeaponType } from "./drills";
 import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, meteorHit, pairTower, proteanCone, proximityDot, raidwide, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, wallOfFire } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Scene, Slot, StepResult, Zone, ZoneShape } from "../../../types";
 
@@ -207,6 +207,8 @@ function yourSpot(os: Overlay[], s: Slot): Point {
 }
 /* Meteorain: where H1 and H2 drop their meteors (the second set), from the drill. */
 const HEALER_METEORS: Point[] = (["H1", "H2"] as const).map(h => zoneCenter(fromDrill("m-meteor-2", h).zone));
+/** Where the party stacks behind the NE rock to break it (the second and fourth Line Stacks). */
+const NE_STACK: Point = polar(45, BEHIND_ROCK);
 /** The targets in a list of pieces. */
 const targetsIn = (os: Overlay[]): Point[] => os.flatMap((o): Point[] => o.t === "target" ? [[o.x, o.y]] : []);
 
@@ -371,9 +373,10 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       note:"One pattern. Start where the #2 lines cross. After #1, cross under the boss. After #2, cross back.", options:[
         show([...first, ...route], [a, b]), hit(youAt(s, [50, 96]), [fakeCircle(CENTER, FAKE.circle)]), youAt(s, [50, 36]), youAt(s, [50, 64])]}; },
   "k-meteor-order": s => {
-    // The melee's set and the healers' set, from their drills. No drill asks the ranged set, so
-    // their spots are the app's: R1 drops the far SW rock, and R2's NE spot sits clear of M1's mark.
-    const SETS: Point[][] = [targetsIn(fromDrill("m-meteor-1", s).overlays), HEALER_METEORS, [[10, 90], [62, 38]]];
+    // The melee's set and the healers' set, from their drills. No drill asks the ranged set: R1
+    // drops the far SW rock, and R2 drops NE. In the game R2's rock lands about where M1's was;
+    // here R2 stands a little to the north, so the two marks do not cover each other (the app's choice).
+    const SETS: Point[][] = [targetsIn(fromDrill("m-meteor-1", s).overlays), HEALER_METEORS, [METEOR_ROCKS.sw3, polar(25, 19)]];
     const M: Who[] = [["M1", "D"], ["M2", "D"]], H: Who[] = [["H1", "H"], ["H2", "H"]], R: Who[] = [["R1", "D"], ["R2", "D"]];
     /** The marks when the groups bait the three sets in this order, a meteor under each, and your spot circled. */
     const order = (groups: Who[][], text?: string): Preview => {
@@ -383,14 +386,14 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     };
     return {overlays:SETS.flat().map(target), boss:BOSS, after:[...order([M, H, R]).pieces, say("MELEE > HEALERS > RANGED", 8)],
       answer:[circle(bySlot(s, {H1:HEALER_METEORS[0], H2:HEALER_METEORS[1]}), 6)], options:[order([M, H, R]), order([H, R, M]), order([TANKS, TANKS, TANKS], "TANKS ONLY"), order([R, M, H])]}; },
-  "k-meteor-drop": s => { const d = fromDrill("m-meteor-2", s), d2 = fromDrill("m-meteor-2", other(s)), stack = cluster([65, 35], NO_HEALERS.concat([[s, "H"]]));
-    const meteor = (z: Zone): Overlay => meteorHit(zoneCenter(z));
+  "k-meteor-drop": s => { const d = fromDrill("m-meteor-2", s), d2 = fromDrill("m-meteor-2", other(s)), stack = cluster(NE_STACK, NO_HEALERS.concat([[s, "H"]]));
+    const meteor = (z: Zone): Overlay => meteorHit(zoneCenter(z)), byRock = polar(70, 20);
     return {...d, options:[hit(youIn(s, d.zone), [meteor(d.zone)]), hit(youIn(s, d2.zone), [meteor(d2.zone)]),
-      hit(youAt(s, [64, 36]), [meteorHit([64, 36])]), show([stackHit(stack), meteorHit([65, 35]), ...stack], [circle([65, 35], 10)])]}; },
-  "k-meteor-stack": () => { const ne = cluster([67, 33], NO_HEALERS, 3), sw = cluster([33, 67], NO_HEALERS, 3), under = ring(NO_HEALERS, 9, 0, 60), spread = ring(NO_HEALERS, 36, 30, 60);
+      hit(youAt(s, byRock), [meteorHit(byRock)]), show([stackHit(stack), meteorHit(NE_STACK), ...stack], [circle(NE_STACK, 10)])]}; },
+  "k-meteor-stack": () => { const ne = cluster(NE_STACK, NO_HEALERS, 3), sw = cluster([33, 67], NO_HEALERS, 3), under = ring(NO_HEALERS, 9, 0, 60), spread = ring(NO_HEALERS, 36, 30, 60);
     return {overlays:[...fromDrill("m-meteor-2", "H1").overlays, ...HEALER_METEORS.map(target)], boss:BOSS,
-      after:[lineStack(CENTER, [65, 35])], answer:[circle([65, 35], 7)], options:[
-        show([lineStack(CENTER, [67, 33]), ...ne], [circle([67, 33], 9)]),
+      after:[lineStack(CENTER, NE_STACK)], answer:[circle(NE_STACK, 7)], options:[
+        show([lineStack(CENTER, NE_STACK), ...ne], [circle(NE_STACK, 9)]),
         show([lineStack(CENTER, [33, 67]), ...sw], [circle([33, 67], 9)]),
         show([stackHit(under), ...under], [circle(CENTER, 9)]),
         show([...spreadHits(spread), ...spread])]}; },
