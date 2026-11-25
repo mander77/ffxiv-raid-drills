@@ -2,7 +2,7 @@
 import { bySlot, shuffle } from "../../../util";
 import { P1, P2, P3, P4, type Phase, TIMELINE } from "./timeline";
 import { tlAbilities } from "./abilities";
-import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
+import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import type { Question, QuizItem, Slot, TimelineEvent } from "../../../types";
 
 /* ---------- mechanic questions ---------- */
@@ -58,10 +58,14 @@ export const LEARN_CARDS: QuizItem[] = [
     options:[{t:"The one with its flat side square to the boss. Then clockwise.", ok:true},{t:"The one he faced for the first set. Then clockwise."},{t:"The north one. Then counterclockwise."},{t:"The one closest to you."}],
     why:["He does not face a weapon before the cast, so read the weapons themselves.", "The one whose flat side faces him squarely goes first.", "The rest go clockwise, the same as the first set."],
     rule:["Second set: flat side square to the boss goes first.", "Then clockwise."]})),
+  mq("k-void-2-start", 5.9, P1, "1:50", s=>({prompt:"The third weapon of the second set went off. Void Stardust starts again. Where do you drop the first puddle?",
+    options:[{t:"Directly behind the boss, in max melee, where he stands now.", ok:true},{t:"North of the boss, as in the first Void Stardust."},{t:"North of the middle of the arena, where the first one started."},{t:"Directly in front of the boss, in max melee."}],
+    why:["The boss stays on the third weapon. He does not go back to the middle.", "The first puddle drops just after that weapon hit.", "Start directly behind the boss, then go clockwise around him."],
+    rule:VOID_2_START_RULE})),
   mq("k-void-2", 6, P1, "1:56", s=>({prompt:"The first Void Stardust ended with a STACK. How does the second one end?",
     options:[{t:"Spread.", ok:true},{t:"Stack again."},{t:"Pair Stacks."},{t:"A Tank Buster only."}],
-    why:["The ending is always the opposite of the first Void Stardust."],
-    rule:["The second Void Stardust is always the opposite of the first."]})),
+    why:["The ending is always the opposite of the first Void Stardust.", "Tanks and melee take the first spread's spots, turned with the boss."],
+    rule:["The second Void Stardust is always the opposite of the first.", ...VOID_2_SPREAD_RULE]})),
   mq("k-dance", 8, P1, "2:15", s=>({prompt:"Dance of Domination Trophy: what does it do to the party?",
     options:[{t:"Seven raidwide hits, and the last one is the biggest. Then Pair Stacks.", ok:true},{t:"One big Tank Buster."},{t:"It sets every player to 1 HP."},{t:"Nothing. It only draws lines."}],
     why:["The hits land from 2:21 to 2:26.", "It is also a burst window for your DPS, so mitigation and heals matter here."],
@@ -253,7 +257,7 @@ TIMELINE.slice(0, -1).forEach((ev, i) => {
 export const LEARN_GROUPS: Array<{name: string; ids: string[]}> = [
   {name:"Raw Steel", ids:["k-raw-first", "k-raw-second"]},
   {name:"Weapons", ids:["k-first-weapon", "k-sword", "k-axe", "k-scythe", "k-assault-2"]},
-  {name:"Void Stardust", ids:["k-void", "k-void-target", "k-void-spread", "k-void-sprint", "k-void-2"]},
+  {name:"Void Stardust", ids:["k-void", "k-void-target", "k-void-spread", "k-void-sprint", "k-void-2-start", "k-void-2"]},
   {name:"Dance", ids:["k-dance", "k-dance-north", "k-dance-pair"]},
   {name:"Charybdistopia", ids:["k-charyb"]},
   {name:"Ultimate", ids:["k-ult-spawn", "k-ult-tornado", "k-ult-touch"]},

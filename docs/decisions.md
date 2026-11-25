@@ -870,6 +870,15 @@ static wins.
   scholar's Expedient.
 - The second Void Stardust: the boss stays on the third weapon. The group starts at his butt,
   directly behind him, and goes clockwise around him.
+- The second Comet spread turns the fixed spots with the boss (owner, 2026-11-25, issue #125):
+  his front is relative north, so MT is front left, OT front right, M1 back left, M2 back
+  right. In the first one he counts as facing north. A turned spot that reaches past the wall
+  (a fraction of a unit) stays on the edge.
+- Every tab teaches the second Void Stardust's start spot (issue #125): the Timeline row, the
+  Learn card `k-void-2-start`, the Practice drill `m-void-2` (owner's choice over a link to
+  Pressure) and the Cheat Sheet. The drill builds a random second weapon set and starts where
+  it leaves the boss. The Learn pictures put him on the NE weapon, facing east (he jumped from
+  NW), where the puddles' numbers stay clear of the waymarks.
 
 ### Later mechanics
 

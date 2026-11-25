@@ -119,11 +119,11 @@ async function answerOff(steps: number): Promise<void> {
   }
 }
 const VOID = DRILLS.find((m) => m.id === "m-void");
-const DANCE = DRILLS.find((m) => m.id === "m-dance");
+const SHORTER = DRILLS.find((m) => m.id === "m-void-2");
 
-test("Void Stardust has more steps than Dance of Domination after it, which the next tests rely on", () => {
-  if (!VOID || !DANCE) throw new Error("no m-void or m-dance");
-  assert.isAbove(buildPattern(VOID, "H1", CODE).scene.steps.length, buildPattern(DANCE, "H1", CODE).scene.steps.length);
+test("Void Stardust has more steps than its second time after it, which the next tests rely on", () => {
+  if (!VOID || !SHORTER) throw new Error("no m-void or m-void-2");
+  assert.isAbove(buildPattern(VOID, "H1", CODE).scene.steps.length, buildPattern(SHORTER, "H1", CODE).scene.steps.length);
 });
 
 for (const [how, go] of [
@@ -131,24 +131,24 @@ for (const [how, go] of [
   ["Enter", () => userEvent.setup().keyboard("{Enter}")],
 ] as const) {
   test(`${how} after a mechanic with many steps opens a shorter one at its first step`, async () => {
-    if (!VOID || !DANCE) throw new Error("no m-void or m-dance");
+    if (!VOID || !SHORTER) throw new Error("no m-void or m-void-2");
     open(`/practice/${VOID.id}/${CODE}`);
     await answerOff(buildPattern(VOID, "H1", CODE).scene.steps.length);
     assert.ok(screen.getByRole("button", { name: "Next Mechanic" }), "the mechanic is done");
     await go();
-    assert.match(where() ?? "", new RegExp(`^/practice/${DANCE.id}/`));
-    assert.ok(screen.getByRole("heading", { name: DANCE.title }));
+    assert.match(where() ?? "", new RegExp(`^/practice/${SHORTER.id}/`));
+    assert.ok(screen.getByRole("heading", { name: SHORTER.title }));
     assert.ok(screen.getByRole("button", { name: "Show Me" }), "the new mechanic asks its first step");
   });
 }
 
 test("a click in the list on a mechanic with fewer steps than you answered opens it at its first step", async () => {
-  if (!VOID || !DANCE) throw new Error("no m-void or m-dance");
+  if (!VOID || !SHORTER) throw new Error("no m-void or m-void-2");
   open(`/practice/${VOID.id}/${CODE}`);
   await answerOff(3);
-  await userEvent.setup().click(screen.getAllByRole("link", { name: new RegExp(`${DANCE.title}$`) })[0]);
-  assert.match(where() ?? "", new RegExp(`^/practice/${DANCE.id}/`));
-  assert.ok(screen.getByRole("heading", { name: DANCE.title }));
+  await userEvent.setup().click(screen.getAllByRole("link", { name: (name) => name.endsWith(SHORTER.title) })[0]);
+  assert.match(where() ?? "", new RegExp(`^/practice/${SHORTER.id}/`));
+  assert.ok(screen.getByRole("heading", { name: SHORTER.title }));
   assert.ok(screen.getByRole("button", { name: "Show Me" }), "the new mechanic asks its first step");
 });
 

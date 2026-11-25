@@ -3,7 +3,7 @@ import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
 import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
-import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE } from "./rules";
+import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
 import type { Boss, CircleZone, Drill, Lines, Overlay, Point, RectZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../../../types";
@@ -340,17 +340,29 @@ function firstPuddle(start: Point, c: Point): Zone {
 
 /* Comet, the spread that can end Void Stardust. Only the tanks and melee have fixed spots,
    at the intercardinals just outside the hitbox. Healers and ranged take any open spot.
+   The spots go by the boss's facing f (degrees clockwise from north): MT front left, OT front
+   right, M1 back left, M2 back right. In the first Void Stardust he counts as facing north, so
+   that is MT NW, OT NE, M1 SW, M2 SE. In the second the spots turn with him (owner, 2026-11-25).
    Each puddle goes off VOID_PUDDLE.life (3) seconds after it drops (BossMod: Cometite, 3.0 s
    cast) and then it is gone. The last one goes off 2 seconds before Comet, so by the spread
    every puddle is gone: the spread does not check them, and the map fades them (puddlesOff). */
 const FIXED_SPREAD: {l: string; r: "T" | "D"; off: Point}[] = [
   {l:"MT", r:"T", off:[-15, -15]}, {l:"OT", r:"T", off:[15, -15]}, {l:"M1", r:"D", off:[-15, 15]}, {l:"M2", r:"D", off:[15, 15]}];
-/** The tank and melee spread spots around a boss at c. */
-const fixedAround = (c: Point): Array<{l: string; r: "T" | "D"; p: Point}> => FIXED_SPREAD.map(m => ({...m, p:addVec(c, m.off)}));
-const spreadMarks = (c: Point = CENTER): Overlay[] => fixedAround(c).map((m): Overlay => ({t:"mark", x:m.p[0], y:m.p[1], l:m.l, r:m.r}));
+/** The offset o, turned f degrees clockwise. */
+const turned = (o: Point, f: number): Point => {
+  const a = f * DEG;
+  return [o[0] * Math.cos(a) - o[1] * Math.sin(a), o[0] * Math.sin(a) + o[1] * Math.cos(a)];
+};
+/** p, moved onto the arena edge if it is past it. A turned spread spot can reach past the wall
+    by a fraction of a unit; it stays on the edge, since nobody stands past the wall. */
+const onArena = (p: Point): Point => [Math.min(100, Math.max(0, p[0])), Math.min(100, Math.max(0, p[1]))];
+/** The tank and melee spread spots around a boss at c, facing f. */
+const fixedAround = (c: Point, f = 0): Array<{l: string; r: "T" | "D"; p: Point}> => FIXED_SPREAD.map(m => ({...m, p:onArena(addVec(c, turned(m.off, f)))}));
+/** The tank and melee marks on their spread spots around a boss at c, facing f. */
+export const spreadMarks = (c: Point = CENTER, f = 0): Overlay[] => fixedAround(c, f).map((m): Overlay => ({t:"mark", x:m.p[0], y:m.p[1], l:m.l, r:m.r}));
 export const FIXED_SPREAD_MARKS = spreadMarks();
-/** The open ground north, east, south and west of a boss at c, between the fixed spots. */
-const gapsAround = (c: Point): Point[] => ([[0, -33], [33, 0], [0, 33], [-33, 0]] as Point[]).map(o => addVec(c, o));
+/** The open ground in front of, right of, behind and left of a boss at c facing f, between the fixed spots. */
+const gapsAround = (c: Point, f = 0): Point[] => ([[0, -33], [33, 0], [0, 33], [-33, 0]] as Point[]).map(o => addVec(c, turned(o, f)));
 const far = (p: Point, q: Point, d: number): boolean => dist(p, q) >= d;
 /** The spot `deg` degrees clockwise from north and r units out from the arena center. */
 const POINT_AT = (deg: number, r: number): Point => polar(deg, r);
@@ -358,14 +370,15 @@ const POINT_AT = (deg: number, r: number): Point => polar(deg, r);
 /* The healers and ranged spread anywhere open: out of the hitbox and not on a tank or melee
    spot. A spread is 6 yalms (15 units), so a spot closer than that to a tank or
    melee spot hits them. The map draws the open ground as four slices, one for each side of the
-   boss (north, east, south and west, between the fixed spots), out to the arena edge. The shown
-   spot, where the moving marker runs, is H1's west gap or H2's east gap. */
-export function cometSpread(s: Slot, c: Point = CENTER): (results: StepResult[]) => Zone {
-  const fixed = fixedAround(c), gaps = gapsAround(c);
+   boss (front, right, back and left, between the fixed spots), out to the arena edge. The shown
+   spot, where the moving marker runs, is H1's gap on his left or H2's on his right: west and
+   east when he faces north. */
+export function cometSpread(s: Slot, c: Point = CENTER, f = 0): (results: StepResult[]) => Zone {
+  const fixed = fixedAround(c, f), gaps = gapsAround(c, f);
   const fn = (p: Point): boolean => inArena(p) && far(p, c, HITBOX + 2.5) && fixed.every(m => far(p, m.p, SPREAD_R));
   const holes = fixed.map(m => ({q:m.p, r:SPREAD_R}));
   const part = (deg: number): Stretch | null => cutOut([[HITBOX + 2.5, toEdge(c, deg)]], c, deg, holes)[0] ?? null;
-  const slices = [0, 90, 180, 270].flatMap(a => rayArea(c, Array.from({length:91}, (_x, i) => a - 45 + i), part));
+  const slices = [0, 90, 180, 270].flatMap(a => rayArea(c, Array.from({length:91}, (_x, i) => f + a - 45 + i), part));
   // Next to a wall a gap can be off the arena.
   const pref = bySlot(s, {H1:[3, 1, 0, 2], H2:[1, 3, 0, 2]}).map(i => gaps[i]);
   const label = pref.find(fn) ?? nearestTo(pref[0], fn) ?? pref[0];
@@ -423,9 +436,10 @@ export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
 /* Void Stardust: three puddles, then the spread (Comet) or the stack (Crushing Comet). Every
    puddle and the stack go around the boss in his max melee range. The stack takes the next
    spot clockwise, where a fourth puddle would go, so it is clear of the third puddle. `c` is
-   where the boss stands, and `start` is the first puddle spot with its answer. */
+   where the boss stands, `start` is the first puddle spot with its answer, and `f` is his
+   facing, which turns the spread spots. `spreadMore` adds lines to the spread answer. */
 const NORTH_START = {p:FIRST_PUDDLE, a:["North of the boss, in max melee."]};
-function voidSteps(s: Slot, spread: boolean, c: Point = CENTER, start = NORTH_START): Step[] {
+function voidSteps(s: Slot, spread: boolean, c: Point = CENTER, start = NORTH_START, f = 0, spreadMore: Lines = []): Step[] {
   const next = puddleAfter(c);
   return [
     {q:"Where do you drop the first puddle?", z:firstPuddle(start.p, c), a:start.a, drop:VOID_PUDDLE},
@@ -433,8 +447,8 @@ function voidSteps(s: Slot, spread: boolean, c: Point = CENTER, start = NORTH_ST
     {q:"Third puddle?", zf:next, a:["Just outside the second puddle, clockwise again.", "Stay in max melee."], drop:VOID_PUDDLE},
     spread
       ? {q:"Puddles done. Comet: every player spreads. Tanks and melee go to fixed spots. Where do you go?",
-          zf:cometSpread(s, c), cue:spreadMarks(c), puddlesOff:true,
-          a:["Any open spot. Healers and ranged have no fixed spread spot.", "Keep away from the tank and melee spots."]}
+          zf:cometSpread(s, c, f), cue:spreadMarks(c, f), puddlesOff:true,
+          a:["Any open spot. Healers and ranged have no fixed spread spot.", "Keep away from the tank and melee spots.", ...spreadMore]}
       : {q:"Puddles done. Where does the party stack?", zf:next,
           a:["Stack one more step clockwise, just past the third puddle.", "Stay in max melee."]}];
 }
@@ -478,7 +492,8 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: JumpSet): Scene {
    stays on the third weapon of the second set: he does not jump to the middle until Dance of
    Domination (cactbot's "--middle--"). The first puddle drops 2.3 seconds after the third weapon,
    so the group stands at his butt, directly behind him, and drops it there. The puddles then go
-   clockwise around him. */
+   clockwise around him. A spread uses the same tank and melee spots as the first time, turned
+   with him: his front is relative north (owner, 2026-11-25). */
 /** The spot directly behind the boss, at his butt, just outside his hitbox. */
 export function behind(boss: Boss): Point {
   const f = (boss.f ?? 0) * DEG;
@@ -490,12 +505,13 @@ export function voidAgain(s: Slot, spread: boolean, boss: Boss): Scene {
     setup:["Void Stardust (Second Time). The boss stays on the third weapon.",
       "The party stands directly behind the boss.",
       "Drop the first puddle there. Then two more.",
-      (spread ? "Then a spread (Comet)." : "Then a Party Stack on a healer (Crushing Comet).") + " It is always the opposite of the first."],
+      spread ? "Then a spread (Comet)." : "Then a Party Stack on a healer (Crushing Comet).",
+      "It is always the opposite of the first."],
     ordered:true,
-    boss, overlays:[], steps:voidSteps(s, spread, c, {p:butt, a:["Directly behind the boss, in max melee."]}),
-    rule:["The boss stays on the third weapon.",
-      "Puddles start directly behind the boss.",
+    boss, overlays:[], steps:voidSteps(s, spread, c, {p:butt, a:["Directly behind the boss, in max melee."]}, boss.f ?? 0, VOID_2_SPREAD_RULE),
+    rule:[...VOID_2_START_RULE,
       "Each one just outside the last, clockwise around him.",
+      ...(spread ? VOID_2_SPREAD_RULE : ["Stack one more step clockwise, just past the third puddle."]),
       "The second Void Stardust is always the opposite of the first."]};
 }
 
@@ -1217,6 +1233,10 @@ export const DRILLS: readonly Drill[] = [
   // takes the same three weapons. A separate drill for the weapons would show a different set.
   {id:"m-void", order:4, random:true, variants:["stack","spread"], follows:{variant:"void", pick:"set2"}, phase:P1, time:"1:13 to 1:45", title:"Void Stardust into the Second Weapons", kind:"puddles",
     build:(s, v, pick)=>voidIntoWeapons(s, v === "spread", buildAssault2(s, orderFrom(pick)))},
+  // The boss stands where the second set left him. Its variant is how this one ends, the
+  // opposite of the first Void Stardust, so it follows only the weapon order.
+  {id:"m-void-2", order:6, random:true, variants:["stack","spread"], follows:{pick:"set2"}, phase:P1, time:"1:50 to 1:56", title:"Void Stardust (Second Time)", kind:"puddles",
+    build:(s, v, pick)=>{ const A = buildAssault2(s, orderFrom(pick)); return voidAgain(s, v === "spread", A.states[A.states.length - 1]); }},
   {id:"m-dance", order:8.1, rotate:true, phase:P1, time:"2:31", title:"Dance of Domination: Pairs", kind:"pairStack",
     build:s=>({setup:["The seven hits are over. The lines are on the floor.", "Find the side with no outer line.", "That open side is new south."], ordered:true,
       boss:{x:50, y:50, f:null}, overlays:DANCE_LINES.map((l): Overlay => ({t:"lineaoe", ...l})),
