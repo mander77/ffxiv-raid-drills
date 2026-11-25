@@ -76,18 +76,6 @@ if (lsp.status !== 0) {
   );
 }
 
-// yt-dlp and ffmpeg: only for npm run import:video, which reads a fight's guide videos.
-for (const [tool, args] of [
-  ["yt-dlp", ["--version"]],
-  ["ffmpeg", ["-version"]],
-]) {
-  if (output(tool, args) === null) {
-    hints.push(
-      `${tool} is not installed. You need it only for npm run import:video: https://github.com/yt-dlp/yt-dlp/wiki/Installation and https://ffmpeg.org/download.html`,
-    );
-  }
-}
-
 step("Install the packages", "npm ci");
 step("Install the browsers for the browser tests", "npx playwright install");
 if (process.platform === "linux") {
