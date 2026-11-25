@@ -185,6 +185,10 @@ export interface Step {
   knock?: { from: Point; dist: number };
   /** Drawn after this step is answered. */
   reveal?: Overlay[];
+  /** Drawn after this step is answered, at the spot the party went: your click when it was
+      correct, else the correct spot. For an attack that follows the party, such as a stack whose
+      spot depends on your earlier answers. */
+  revealAt?: (spot: Point) => Overlay[];
   /** The attacks of this step that the correct spot must stay out of, when they are not all of
       `reveal`: `reveal` can also show an attack the player takes on purpose, such as a stack, a
       bait or their own protean cone. Without it, every attack in `reveal` counts. Only

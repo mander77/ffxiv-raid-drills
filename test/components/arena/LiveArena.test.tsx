@@ -2,8 +2,9 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, assert, test } from "vitest";
 import { LiveArena } from "../../../src/components/arena/LiveArena";
+import { crushingComet } from "../../../src/data/fights/m11s/attacks";
 import { DRILLS, splitRound } from "../../../src/data/fights/m11s/drills";
-import { stepZone, zoneCenter } from "../../../src/geometry";
+import { round2, stepZone, zoneCenter } from "../../../src/geometry";
 import { buildPattern } from "../../../src/lib/practice";
 import type { StepResult } from "../../../src/types";
 
@@ -114,6 +115,39 @@ test("Void Stardust: every puddle fades when Comet is asked, but stays for the s
     assert.equal(drops.length, 3, `${name}: three puddles`);
     assert.equal(drops[2].classList.contains("fading"), lastFades, `${name}: the last puddle`);
     unmount();
+  }
+});
+
+test("both Void Stardusts: the stack step shows Crushing Comet where the party stacks", () => {
+  const r = crushingComet([0, 0]);
+  if (r.t !== "aoe") throw new Error("Crushing Comet is not a circle");
+  for (const id of ["m-void", "m-void-2"]) {
+    const drill = DRILLS.find((d) => d.id === id);
+    if (!drill) throw new Error(`no ${id}`);
+    const scene = drill.build("H1", "stack"),
+      stack = scene.steps.map((st) => Boolean(st.drop)).lastIndexOf(true) + 1,
+      results: StepResult[] = [];
+    for (const st of scene.steps.slice(0, stack + 1)) {
+      const z = stepZone(st, results);
+      if (!z) throw new Error("no zone");
+      results.push({ p: zoneCenter(z), ok: true, z, drop: st.drop ? zoneCenter(z) : null });
+    }
+    const spot = results[stack].p;
+    // Correct: on your click. Incorrect: on the correct spot, not on your click.
+    for (const [ok, p] of [
+      [true, spot],
+      [false, [5, 5]],
+    ] as const) {
+      results[stack] = { ...results[stack], ok, p: [...p] };
+      const { container, unmount } = render(<LiveArena scene={scene} k={0} results={results} showLast hint={false} />);
+      const at = [...container.querySelectorAll("circle.aoe")].map((c) => [
+        c.getAttribute("cx"),
+        c.getAttribute("cy"),
+        c.getAttribute("r"),
+      ]);
+      assert.deepInclude(at, [String(round2(spot[0])), String(round2(spot[1])), String(r.r)], `${id}, ${ok ? "correct" : "incorrect"}`);
+      unmount();
+    }
   }
 });
 

@@ -865,6 +865,10 @@ static wins.
   puddles. The stack step and its pictures still show the puddles, as a guide to the stack spot.
 - Crushing Comet stack: one more step clockwise, just past the third puddle, where a fourth
   puddle would go. The same for both Void Stardusts. It is clear of the third puddle by its place.
+- After the stack step is answered, Practice and Pressure draw Crushing Comet (BossMod's
+  CrushingCometStack, "range 6 circle") where the party stacked: your click when it was correct,
+  else the correct spot (`Step.revealAt`). The spot follows your own puddles, so a fixed `reveal`
+  cannot draw it.
 - Crushing Comet's Party Stack is always on a healer (owner, 2026-11-25, issue #128). cactbot
   (`stackMarkerOn`), BossMod (`CastStackSpread`) and wtfdig name no role, so the owner is the
   source. The Learn card `k-void-target` keeps "A random DPS" as an incorrect answer.
