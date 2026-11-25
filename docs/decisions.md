@@ -876,7 +876,8 @@ static wins.
 - Dance of Domination: seven hits. The lines on the floor show just after the 7th hit.
 - Ultimate Trophy Weapons: the first spawn is south. Slightly west means clockwise, slightly east
   means counterclockwise. The second is NW or NE, then the cardinals. He resolves them in spawn
-  order. No source supports "the last one is always north", so the site does not ask it.
+  order. The last one is always north (Hector's video; the owner confirmed it, November 25), so
+  the Learn card and the drill's rule say so.
 - Ultimate Trophy Weapons, the tornadoes (issue #79, the owner's answer, November 24): every
   tornado has two baits. Facing in from the tornado, the support stands on its left and the DPS
   on its right, at its edge, 45 degrees off the line to the middle (`TORNADO_BAITS`). After the

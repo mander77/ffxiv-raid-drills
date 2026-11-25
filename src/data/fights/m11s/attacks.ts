@@ -28,6 +28,8 @@ export const HITBOX = yalms(BOSSMOD_ACTORS.Boss.radius);
 export const MELEE_R = yalms(8.5);
 /** Half the width of each arm of the sword cross ("range 40 width 10 cross"). */
 export const SWORD_HALF = yalms(bossmod("AssaultEvolvedSwordAOE").width / 2);
+/** The width of one Orbital Omen lane ("range 60 width 10 rect"). Four lanes span the arena. */
+export const ORBITAL_LANE = yalms(bossmod("OrbitalOmenRect").width);
 /** Every spread and stack: Raw Steel, Comet, Crushing Comet, Eye of the Hurricane and Massive
     Meteor ("range 6 circle"). */
 export const SPREAD_R = yalms(bossmod("CometSpread").range);
