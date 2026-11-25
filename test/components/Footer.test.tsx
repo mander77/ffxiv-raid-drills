@@ -16,3 +16,14 @@ test("the footer links to the styles page", () => {
   const nav = screen.getByRole("navigation", { name: "More pages" });
   assert.equal(within(nav).getByRole("link", { name: "Styles" }).getAttribute("href"), "/styles");
 });
+
+test("the footer says what the site is for and that it is not official", () => {
+  render(
+    <MemoryRouter>
+      <Footer />
+    </MemoryRouter>,
+  );
+  const footer = screen.getByRole("contentinfo");
+  assert.ok(within(footer).getByText("Practice fights you already studied, without being in the game."));
+  assert.ok(within(footer).getByText("A fan site. Not affiliated with Square Enix."));
+});

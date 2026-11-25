@@ -726,6 +726,13 @@ Do not propose these again unless the owner brings them up.
 - Home: "Start Here" cards in learning order. The top picture is the answer picture of the Learn
   card `k-raw-first` (on a phone, a 110 px strip from the boss to the party stack). The owner's
   character picture is in About Me with a wide crop of the face, the card and both arms.
+- Home's purpose lines (owner, 2026-11-25, issue #140): the site is for practicing fights you
+  already studied in guides and videos, without being in the game. It does not introduce a fight,
+  and the purpose names no fight, since the site covers more than one. Under the heading: the
+  purpose, "read the guide and watch a video first", and that spots follow the wtfdig strat named
+  at the top, with the roles that have drills ("Healers only for now", from the role switch). The
+  footer on every page repeats the purpose, since a shared link often opens a tab, and says "A fan
+  site. Not affiliated with Square Enix."
 - Cheat Sheet: first every mechanic in fight order, by phase, as cards: its time, a Learn answer
   picture for your slot, its Learn cards' rules and a link to Learn. One card per row (owner's
   choice, after four, three and two per row): from tablet width the text sits beside a big
