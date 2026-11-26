@@ -1355,6 +1355,20 @@ const H2_METEOR: Zone = {
     const q = polar(i * 10, H2_METEOR_R, METEOR_ROCKS.sw2);
     return clearOfSwRock(q) ? q : addVec(METEOR_ROCKS.sw, unit([q[0] - METEOR_ROCKS.sw[0], q[1] - METEOR_ROCKS.sw[1]]), ROCK_GAP);
   })}]};
+/** Foregone Fatality's tethers: two portals on random cardinals, each tethered to one of the two
+    newest rocks. The MT picks up the tether to the northern rock and the OT the southern one
+    (Hector's guide video, 9:51 to 11:40). Each tank stands halfway along its tether: the app's
+    choice. The hits do not cleave, so the tanks' spots do not matter to the party. */
+function fatality(north: Point, south: Point): Overlay[] {
+  const [a, b] = shuffle<Wall>(["north", "east", "south", "west"]);
+  return ([[a, north, "MT"], [b, south, "OT"]] as const).flatMap(([w, rockAt, l]): Overlay[] => {
+    const p = ECL_PORTAL[w], tank = addVec(p, [rockAt[0] - p[0], rockAt[1] - p[1]], 0.5);
+    return [{t:"portal", x:p[0], y:p[1], vert:w === "north" || w === "south"}, {t:"tether", x:p[0], y:p[1], x2:tank[0], y2:tank[1], fixed:true},
+      {t:"mark", x:tank[0], y:tank[1], l, r:"T"}];
+  });
+}
+/** The tanks in front of the party for the first Line Stack, out of the way of each other. The app's choice. */
+const FIRST_STACK_TANKS = ([[303, "MT"], [327, "OT"]] as const).map(([a, l]): Overlay => { const [x, y] = polar(a, 14); return {t:"mark", x, y, l, r:"T"}; });
 /** The two healers' meteors, for the one who is not you. */
 const otherHealerRock = (s: Slot): Point => bySlot(s, {H1:METEOR_ROCKS.sw2, H2:METEOR_ROCKS.nw});
 /** Where the party stands for a Line Stack behind the rock at angle `deg`, and the line through it. */
@@ -1411,13 +1425,13 @@ export const DRILLS: readonly Drill[] = [
   {id:"m-meteor-1", order:16, phase:P2, time:"5:00", title:"Meteorain: First Line Stack", kind:"wildCharge",
     build:s=>({setup:["The melee bait the first two meteors.", "They drop them in max melee, NE and SW.", "The first Line Stack goes off next."], ordered:true,
       boss:BOSS, overlays:[{t:"target",x:METEOR_ROCKS.ne[0],y:METEOR_ROCKS.ne[1]},{t:"target",x:METEOR_ROCKS.sw[0],y:METEOR_ROCKS.sw[1]},
-        {t:"mark",x:METEOR_ROCKS.ne[0],y:METEOR_ROCKS.ne[1],l:"M1",r:"D"},{t:"mark",x:METEOR_ROCKS.sw[0],y:METEOR_ROCKS.sw[1],l:"M2",r:"D"}],
+        {t:"mark",x:METEOR_ROCKS.ne[0],y:METEOR_ROCKS.ne[1],l:"M1",r:"D"},{t:"mark",x:METEOR_ROCKS.sw[0],y:METEOR_ROCKS.sw[1],l:"M2",r:"D"}, ...FIRST_STACK_TANKS],
       // The tanks take this first hit in front, at his hitbox, so the party stands past them, out of
       // the hitbox. The healers stay close: they bait the next meteors 3 seconds later.
       steps:[{q:"Where do you stand for the first Line Stack?", z:{c:polar(315, MELEE_R), r:7}, a:["NW, in the Line Stack, behind the tanks.", "The tanks stand in front for this first one."],
         reveal:[lineThrough(315), meteorHit(METEOR_ROCKS.ne), meteorHit(METEOR_ROCKS.sw)], hits:[]}],
       rule:METEOR_ORDER_RULE})},
-  {id:"m-meteor-2", order:16.1, phase:P2, time:"5:03", title:"Meteorain: Your Meteor", kind:"bait",
+  {id:"m-meteor-2", order:16.1, random:true, phase:P2, time:"5:03", title:"Meteorain: Your Meteor", kind:"bait",
     build:s=>({setup:["Healers bait the second set of meteors.", "The markers go on the two players closest to the boss.", "Two rocks are already down in max melee: one NE and one SW."],
       boss:BOSS, overlays:[rock(METEOR_ROCKS.ne), rock(METEOR_ROCKS.sw)],
       steps:[
@@ -1425,7 +1439,8 @@ export const DRILLS: readonly Drill[] = [
         // then (Hector's guide video, 9:43 to 9:59; wtfdig: "Bait meteor close").
         {q:"Healers bait the next meteors. Where do you go?", z:{c:CENTER, r:HITBOX},
           a:["Under the boss.", "Be one of the two closest players, so the marker goes to you."],
-          revealAt:p => [{t:"target", x:p[0], y:p[1]}]},
+          // The tethers come just after the markers, to M1's and M2's rocks.
+          revealAt:p => [{t:"target", x:p[0], y:p[1]}], reveal:fatality(METEOR_ROCKS.ne, METEOR_ROCKS.sw)},
         {q:"You have a meteor marker. Where do you drop it?",
         z:bySlot(s, {H1:H1_METEOR, H2:H2_METEOR}),
         a:bySlot(s, {H1:["NW, in max melee."], H2:["SW, in a row with the first SW rock.", "About halfway to the edge."]}),
@@ -1438,17 +1453,17 @@ export const DRILLS: readonly Drill[] = [
       rule:[...bySlot(s, {H1:["H1 drops NW, in max melee."],
           H2:["H2 drops SW, in a row with the first rock.", "That rock is in max melee.", "Two rocks too close together explode, so yours goes farther out."]}),
         "Icy Veins swaps H1 and H2 here, so do not mix guides."]})},
-  {id:"m-meteor-3", order:16.2, phase:P2, time:"5:20", title:"Meteorain: Third Line Stack", kind:"wildCharge",
+  {id:"m-meteor-3", order:16.2, random:true, phase:P2, time:"5:20", title:"Meteorain: Third Line Stack", kind:"wildCharge",
     build:s=>({setup:["The ranged bait the third set.", "Rocks: NW (from H1), and a row of two SW.", "Each stack breaks the rock in front of it."],
-      boss:BOSS, overlays:[rock(METEOR_ROCKS.nw), rock(METEOR_ROCKS.sw), rock(METEOR_ROCKS.sw2)],
+      boss:BOSS, overlays:[rock(METEOR_ROCKS.nw), rock(METEOR_ROCKS.sw), rock(METEOR_ROCKS.sw2), ...fatality(METEOR_ROCKS.nw, METEOR_ROCKS.sw2)],
       // The stack breaks the NW rock, which explodes 3 seconds later. The ranged's meteors land
       // SW and NE as it does.
       steps:[{q:"Where do you stand for this Line Stack?", z:{c:stackBehind(315),r:7}, a:["NW, behind the NW rock.", "Farther from the boss than the rock."],
         reveal:[lineThrough(315), rockExplosion(METEOR_ROCKS.nw), meteorHit(METEOR_ROCKS.sw3), meteorHit(METEOR_ROCKS.ne2)], hits:[]}],
       rule:["Stack behind a rock to break it.", "The broken rock explodes: walk out.", "Keep the SW row of rocks whole."]})},
-  {id:"m-meteor-4", order:16.3, phase:P2, time:"5:30 to 5:43", title:"Meteorain: Last Line Stack", kind:"wildCharge",
+  {id:"m-meteor-4", order:16.3, random:true, phase:P2, time:"5:30 to 5:43", title:"Meteorain: Last Line Stack", kind:"wildCharge",
     build:s=>({setup:["The last stack has no meteor baits.", "Rocks: NE (from R2), and a row of three SW."],
-      boss:BOSS, overlays:[rock(METEOR_ROCKS.ne2), rock(METEOR_ROCKS.sw), rock(METEOR_ROCKS.sw2), rock(METEOR_ROCKS.sw3)],
+      boss:BOSS, overlays:[rock(METEOR_ROCKS.ne2), rock(METEOR_ROCKS.sw), rock(METEOR_ROCKS.sw2), rock(METEOR_ROCKS.sw3), ...fatality(METEOR_ROCKS.ne2, METEOR_ROCKS.sw3)],
       steps:[
         // The broken NE rock explodes while you run SW.
         {q:"Where do you stand for the fourth Line Stack?", z:{c:stackBehind(45),r:7}, a:["Behind the NE rock, to break it."],
