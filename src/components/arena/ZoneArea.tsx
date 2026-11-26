@@ -1,5 +1,8 @@
 import { round2 } from "../../geometry";
-import type { ZoneLook, ZoneShape } from "../../types";
+import type { Point, ZoneLook, ZoneShape } from "../../types";
+
+/** A closed outline as SVG path data. */
+const outline = (pts: readonly Point[]): string => `M${pts.map((p) => `${round2(p[0])},${round2(p[1])}`).join("L")}Z`;
 
 export interface ZoneAreaProps {
   zone: ZoneShape;
@@ -20,6 +23,8 @@ export function ZoneArea({ zone: z, look }: ZoneAreaProps) {
       </>
     );
   const className = `zone ${look}`;
+  // A ring: the outer edge and the hole in one path. The even-odd rule leaves the hole empty.
+  if ("poly" in z && z.hole) return <path className={className} d={`${outline(z.poly)} ${outline(z.hole)}`} fillRule="evenodd" />;
   if ("poly" in z) return <polygon className={className} points={z.poly.map((p) => `${round2(p[0])},${round2(p[1])}`).join(" ")} />;
   if ("c" in z) return <circle className={className} cx={round2(z.c[0])} cy={round2(z.c[1])} r={z.r} />;
   return (

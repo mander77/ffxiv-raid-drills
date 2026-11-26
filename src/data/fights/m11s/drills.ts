@@ -6,7 +6,7 @@ import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, 
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
-import type { Boss, CircleZone, Drill, Lines, Overlay, Point, RectZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../../../types";
+import type { Boss, CircleZone, Drill, Lines, Overlay, Point, PolyShape, RectZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../../../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
 /** One weapon in a jump set. `a` is its direction from the arena center, in degrees clockwise from north.
@@ -134,7 +134,7 @@ function scytheSpot(P: Point, spot: Point): Zone {
   };
   const edge = Math.ceil(SCYTHE_CLEAR_DEG) - 1;
   const degs = Array.from({length:2 * edge + 1}, (_x, k) => mine - edge + k);
-  return {fn, label:spot, show:rayArea(P, degs, part).map(poly => ({poly}))};
+  return {fn, label:spot, show:rayArea(P, degs, part)};
 }
 
 /* Assault Evolved: three weapons. The boss faces the first, then goes clockwise. The weapons face
@@ -309,16 +309,20 @@ function cutOut(parts: Stretch[], c: Point, deg: number, holes: Array<{q: Point;
   }, longest(parts));
 }
 /** The outline of an area seen from c over the rays at `degs`, one degree apart. `part` gives the
-    area's stretch of each ray; a ray without one splits the area into pieces. */
-function rayArea(c: Point, degs: number[], part: (deg: number) => Stretch | null): Point[][] {
-  const pieces: Point[][] = [];
-  let inner: Point[] = [], outer: Point[] = [];
-  const flush = (): void => { if(inner.length > 1) pieces.push([...inner, ...outer.reverse()]); inner = []; outer = []; };
+    area's stretch of each ray; a ray without one splits the area into pieces. An area all the
+    way round with no ray left out is a ring: its outer edge, with the inner edge as a hole. Drawn
+    as one polygon, it would show a line where the two edges join. */
+function rayArea(c: Point, degs: number[], part: (deg: number) => Stretch | null): PolyShape[] {
+  const pieces: PolyShape[] = [];
+  let inner: Point[] = [], outer: Point[] = [], split = false;
+  const flush = (): void => { if(inner.length > 1) pieces.push({poly:[...inner, ...outer.reverse()]}); inner = []; outer = []; };
   for(const d of degs){
     const f = part(d);
-    if(!f){ flush(); continue; }
+    if(!f){ split = true; flush(); continue; }
     inner.push(polar(d, f[0], c)); outer.push(polar(d, f[1], c));
   }
+  if(!split && degs.length > 1 && degs[degs.length - 1] - degs[0] >= 360)
+    return [{poly:outer, ...(inner.some(p => dist(p, c) > 0) ? {hole:inner} : {})}];
   flush();
   return pieces;
 }
@@ -335,7 +339,7 @@ function firstPuddle(start: Point, c: Point): Zone {
   const degs = Array.from({length:361}, (_x, d) => d);
   // Start from a ray that misses, so the area is drawn as one piece.
   const from = degs.find(d => !part(d)) ?? 0;
-  return {fn, label:start, show:rayArea(c, degs.map(d => d + from), part).map(poly => ({poly}))};
+  return {fn, label:start, show:rayArea(c, degs.map(d => d + from), part)};
 }
 
 /* Comet, the spread that can end Void Stardust. Only the tanks and melee have fixed spots,
@@ -382,7 +386,7 @@ export function cometSpread(s: Slot, c: Point = CENTER, f = 0): (results: StepRe
   // Next to a wall a gap can be off the arena.
   const pref = bySlot(s, {H1:[3, 1, 0, 2], H2:[1, 3, 0, 2]}).map(i => gaps[i]);
   const label = pref.find(fn) ?? nearestTo(pref[0], fn) ?? pref[0];
-  const zone: Zone = {fn, label, show:slices.map(poly => ({poly}))};
+  const zone: Zone = {fn, label, show:slices};
   return () => zone;
 }
 
@@ -622,7 +626,7 @@ function innerPuddle(wall: EclWall, best: Point): (results: StepResult[]) => Zon
     const mid = north ? 0 : 180;
     const degs = Array.from({length:101}, (_x, i) => mid - 50 + i);
     const label = fn(best) ? best : nearestTo(best, fn) ?? best;
-    return {fn, label, show:rayArea(CENTER, degs, part).map(poly => ({poly}))};
+    return {fn, label, show:rayArea(CENTER, degs, part)};
   };
 }
 
@@ -634,7 +638,7 @@ function kickScene(way: "party" | "tanks"): Scene {
   const tower = kickTower(CENTER), hit = towerHit(CENTER);
   const outside = (deg: number): Stretch | null => [TOWER_R, toEdge(CENTER, deg)];
   const out: Zone = {fn:p => inArena(p) && dist(p, CENTER) > TOWER_R, label:[50, 72],
-    show:rayArea(CENTER, Array.from({length:361}, (_x, d) => d), outside).map(poly => ({poly}))};
+    show:rayArea(CENTER, Array.from({length:361}, (_x, d) => d), outside)};
   const where: Zone = way === "party" ? {c:CENTER, r:TOWER_R} : out;
   const steps = [5, 6, 7].map((n): Step => ({
     q:`Heartbreak Kick: ${n} hits. Where do you stand?`, z:where,
@@ -815,7 +819,7 @@ function fourWayNear(deg: number, {c, r}: CircleZone): Zone {
     return x[1] - lo > 0.3 ? [lo, x[1]] : null;
   };
   return {fn:p => dist(p, c) <= r && out(p) >= LINE_STACK_HALF, label:c,
-    show:rayArea(CENTER, Array.from({length:81}, (_x, i) => deg - 40 + i), part).map(poly => ({poly}))};
+    show:rayArea(CENTER, Array.from({length:81}, (_x, i) => deg - 40 + i), part)};
 }
 
 /** A tethered player's Four-way Fireball spot, out on the intercard: the circle, with the fire
@@ -827,7 +831,7 @@ function fourWayOut(deg: number, {c, r}: CircleZone): Zone {
     return x ? cutOut([x], CENTER, d, holes)[0] ?? null : null;
   };
   return {fn:p => dist(p, c) <= r && holes.every(h => dist(p, h.q) > h.r), label:c,
-    show:rayArea(CENTER, Array.from({length:41}, (_x, i) => deg - 20 + i), part).map(poly => ({poly}))};
+    show:rayArea(CENTER, Array.from({length:41}, (_x, i) => deg - 20 + i), part)};
 }
 
 /** Ecliptic Stampede's Four-way Fireball: Pair Stacks on the four closest players. A marked player
@@ -1021,7 +1025,7 @@ function outOfLastPuddle(base: Zone, c: Point, reach: (deg: number) => number, b
     // Start from a ray that misses, so the area is drawn as one piece.
     const from = degs.find(d => !part(d)) ?? 0;
     const label = fn(best) ? best : nearestTo(best, fn) ?? best;
-    return {fn, label, show:rayArea(c, degs.map(d => d + from), part).map(poly => ({poly}))};
+    return {fn, label, show:rayArea(c, degs.map(d => d + from), part)};
   };
 }
 /** How far a ray from the middle of a rectangle runs before it leaves it. */
@@ -1225,7 +1229,7 @@ function buildTowerHalf(side: SplitSide, end: SplitEnd, knock: Knock): Zone {
   };
   const degs = Array.from({length:360}, (_x, i) => i), from = degs.find(g => !part(g)) ?? 0;
   const best = addVec(c, d, TOWER_R / 2);
-  return {fn, label:fn(best) ? best : nearestTo(best, fn) ?? best, show:rayArea(c, degs.map(g => g + from), part).map(poly => ({poly}))};
+  return {fn, label:fn(best) ? best : nearestTo(best, fn) ?? best, show:rayArea(c, degs.map(g => g + from), part)};
 }
 /** Where a tower at c knocks a player standing at p: TOWER_KNOCKBACK straight away from c. */
 export const knockedFrom = (c: Point, p: Point): Point => thrownTo(c, TOWER_KNOCKBACK, p);

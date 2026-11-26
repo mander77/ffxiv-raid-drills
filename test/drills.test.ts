@@ -52,7 +52,7 @@ import { bossmod } from "../src/data/fights/m11s/sources";
 import { angOf, inZone, stepZone, zoneCenter } from "../src/geometry";
 import { changes } from "../src/lib/practice";
 import { facingNext, jumpsNext } from "../src/lib/scene";
-import type { Point, ScytheOverlay, Slot, SlotName, StepResult, Zone } from "../src/types";
+import type { Point, PolyShape, ScytheOverlay, Slot, SlotName, StepResult, Zone } from "../src/types";
 import { withSeed } from "../src/util";
 import { assertLines } from "./lines";
 
@@ -477,14 +477,17 @@ test("weapon runs: before each jump, the boss turns to face the weapon he jumps 
 /** Away from the edge of the drawn area, a point is inside it exactly when the drill accepts it. */
 function drawnMatchesRule(z: Zone): void {
   if (!("fn" in z)) throw new Error("a rule zone");
-  const polys = z.show.flatMap((sh) => ("poly" in sh ? [sh.poly] : []));
+  const polys = z.show.flatMap((sh) => ("poly" in sh ? [sh] : []));
   assert.isAbove(polys.length, 0, "the area is drawn");
+  // A ring's hole is not part of its area.
+  const near = (pt: Point, sh: PolyShape): boolean => nearEdge(pt, sh.poly, 0.8) || Boolean(sh.hole && nearEdge(pt, sh.hole, 0.8));
+  const inside = (pt: Point, sh: PolyShape): boolean => inPoly(pt, sh.poly) && !(sh.hole && inPoly(pt, sh.hole));
   for (let x = 0; x <= 100; x++)
     for (let y = 0; y <= 100; y++) {
       const pt: Point = [x, y];
-      if (polys.some((pl) => nearEdge(pt, pl, 0.8))) continue;
+      if (polys.some((sh) => near(pt, sh))) continue;
       assert.equal(
-        polys.some((pl) => inPoly(pt, pl)),
+        polys.some((sh) => inside(pt, sh)),
         inZone(pt, z),
         `drawn area and rule disagree at ${pt}`,
       );
@@ -987,4 +990,15 @@ test("Two-way Fireball: only the melee stand on the hitbox; a marked player is j
     assert.notOk(inZone(out(16, east), z), `${corner}: the marked player's spot is in front of you`);
     assert.ok(inZone(out(20, east), z), `${corner}: behind the players by the boss`);
   }
+});
+
+test("Heartbreak Kick with the tanks: out of the tower is one ring with the tower as its hole", () => {
+  const drill = DRILLS.find((d) => d.id === "m-hb");
+  if (!drill) throw new Error("missing m-hb");
+  const z = zoneOf(drill.build("H1", "tanks").steps[0].z);
+  if (!("fn" in z)) throw new Error("a rule zone");
+  assert.equal(z.show.length, 1, "one shape");
+  const ring = z.show[0];
+  assert.ok("poly" in ring && ring.hole, "the tower is a hole, so no line joins the two edges");
+  drawnMatchesRule(z);
 });
