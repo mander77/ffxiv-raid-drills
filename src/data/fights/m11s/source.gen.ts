@@ -360,3 +360,8 @@ export const BOSSMOD_SPLIT = {platformCenter:16, platformHalfWidth:10, platformH
 /** BossMod's Triple Tyrannhilation, in yalms: the radius of each comet that blocks the
     Shockwaves (BossMod: "guessing"). */
 export const BOSSMOD_LOS = {cometRadius:2} as const;
+
+/** cactbot's call for each weapon of Ultimate Trophy Weapons (trigger "R11S Ultimate Trophy
+    Weapons"), in spawn order: how long after the weapon spawns the call comes (delay), and
+    how long the call counts down to the weapon's hit (duration), in seconds. */
+export const CACTBOT_ULTIMATE_CALLS = [{delay:0, duration:8.7}, {delay:4.7, duration:5.1}, {delay:5.8, duration:5.1}, {delay:6.9, duration:5.1}, {delay:8, duration:5.1}, {delay:9.1, duration:5.1}] as const;

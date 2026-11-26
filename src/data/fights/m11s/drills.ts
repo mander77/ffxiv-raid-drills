@@ -260,11 +260,13 @@ export function assaultScene(A: JumpSet, s: Slot): Scene {
       "Scythe: " + bySlot(s, {H1:"H1 at the butt", H2:"H2 at the point"}) + ", close in.",
       "Axe: Party Stack in the middle.", "Not like Raw Steel Trophy's axe, where the party spreads."]};
 }
-export function ultimateScene(U: JumpSet): Scene {
+/** onClock: the full fight, where each weapon shows at its own spawn time. Practice shows three,
+    then one more with each hit. */
+export function ultimateScene(U: JumpSet, onClock = false): Scene {
   return {
     setup:["The party is at 1 HP after Charybdistopia.",
       "Six weapons spawn one after another. The boss resolves them in spawn order.",
-      "Three show now. Each hit brings in the next one.",
+      ...(onClock ? [] : ["Three show now. Each hit brings in the next one."]),
       "Look Ahead: where does the first one spawn?", "South and slightly west = clockwise.",
       "South and slightly east = counterclockwise."],
     spawnPlay:true, spawnAhead:3, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,

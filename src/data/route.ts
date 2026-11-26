@@ -48,9 +48,12 @@ const knockOf = (k: {from: Point; dist: number} | undefined, turn: number): Pick
 
 
 /** When step j of a mechanic appears for the player: when the mechanic does, but a weapon only
-    once the boss turns to the first one. Before that, nobody can know where to go. */
-export const showOf = (g: FightSeg, j: number): number =>
-  g.turn && j >= g.scene.steps.length - g.turn.weapons ? Math.max(g.from, g.turn.at) : g.from;
+    once the boss turns to the first one, or once it spawns. Before that, nobody can know where
+    to go. */
+export const showOf = (g: FightSeg, j: number): number => {
+  const turn = g.turn && j >= g.scene.steps.length - g.turn.weapons ? g.turn.at : g.from;
+  return Math.max(g.from, turn, g.spawns?.[j] ?? g.from);
+};
 
 /** The middle of the spot to stand on in zone z, coming from `from`. Mostly the middle of the
     zone (a circle or a box) or its shown point (an area with a rule), because standing on the edge

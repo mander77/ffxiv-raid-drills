@@ -5,7 +5,9 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { assert, test } from "vitest";
 // @ts-expect-error: a plain Node.js script with no type declarations.
-import { fillShapes, parseBossmod, parseMechanics, parseStates, parseTriggers, parseVoidzones, REPOS } from "../scripts/import-sources.mjs";
+import * as importer from "../scripts/import-sources.mjs";
+
+const { fillShapes, parseBossmod, parseMechanics, parseStates, parseTriggers, parseVoidzones, parseWeaponCalls, REPOS } = importer;
 
 const FIGHTS = join(import.meta.dirname, "..", "src", "data", "fights");
 const lists = readdirSync(FIGHTS).filter((d) => existsSync(join(FIGHTS, d, "sources.json")));
@@ -63,6 +65,29 @@ test("a trigger: its id (with an escaped quote and a comment after it), ability 
       notes: ["Tanks first."],
     },
   ]);
+});
+
+test("a weapon call table: each weapon's delay and duration, in spawn order, without the empty slots", () => {
+  const text = [
+    "const weaponsMap: (WeaponInfo | undefined)[] = [",
+    "  undefined,",
+    "  {",
+    "    delay: 0,",
+    "    duration: 8.7,",
+    "  },",
+    "  {",
+    "    delay: 4.7,",
+    "    duration: 5.1,",
+    "  },",
+    "];",
+  ].join("\n");
+  assert.deepEqual(parseWeaponCalls(text, "weaponsMap"), [
+    { delay: 0, duration: 8.7 },
+    { delay: 4.7, duration: 5.1 },
+  ]);
+  assert.throws(() => parseWeaponCalls(text, "otherMap"), /no otherMap/);
+  const odd = text.replace("delay: 4.7,", "delay: (data) => 4.7,");
+  assert.throws(() => parseWeaponCalls(odd, "weaponsMap"), /does not read/);
 });
 
 test("a mechanic file: each class with its base, abilities, shapes (as BossMod writes them) and positions", () => {

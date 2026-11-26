@@ -313,3 +313,27 @@ test("Watch the Correct Moves shows Massive Meteor's stack from its first hit un
     expect(v.showAnswer).toBe(true);
   }
 });
+
+test("Ultimate Trophy Weapons: each weapon shows on the arena from its spawn, one at a time", () => {
+  for (const mode of ["run", "watch"] as const) {
+    const s = newFightState(mode, fight(), { paused: true });
+    const si = s.fight.segs.findIndex((g) => g.title === "Ultimate Trophy Weapons");
+    const spawns = s.fight.segs[si].spawns;
+    if (!spawns) throw new Error("Ultimate Trophy Weapons has no spawn times");
+    const at = (t: number) => {
+      seek(s, t);
+      tickFight(s, 0, 1);
+      return viewOf(s);
+    };
+    expect(at(s.fight.segs[si].from + 0.05).spawned).toBe(0);
+    spawns.forEach((t, i) => {
+      expect(at(t - 0.05).spawned, `just before weapon ${i + 1}`).toBe(i);
+      const v = at(t + 0.05);
+      expect(v.si).toBe(si);
+      expect(v.spawned, `weapon ${i + 1}`).toBe(i + 1);
+    });
+  }
+  // Other mechanics show their weapons by their own rule.
+  const s = newFightState("run", fight(), { paused: true });
+  expect(viewOf(s).spawned).toBeUndefined();
+});

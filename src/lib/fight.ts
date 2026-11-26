@@ -340,6 +340,8 @@ export interface FightView {
   wentOff: boolean[];
   /** The correct area of the marker's next spot (watch), in blue. */
   target: Zone | null;
+  /** How many weapons have spawned, for a mechanic that spawns them on the clock (FightSeg.spawns). */
+  spawned?: number;
   paused: boolean;
   look: boolean;
 }
@@ -375,8 +377,10 @@ export function viewOf(s: FightState): FightView {
   if (boss && facing && !jumped) boss = facingNext(sc, res.length, boss);
   // The marker's next spot, in blue on the player, once the answers before it are in.
   const target = s.mode === "watch" ? targetZone(s) : null;
-  const key = [where, res.length, turned, facing, jumped, showAnswer, s.paused, s.look, gone, target ? "t" : ""].join(":");
-  return { key, si, scene: sc, k, results: [...res], showAnswer, boss, wentOff, target, paused: s.paused, look: s.look };
+  // The weapons that have spawned, when the mechanic spawns them on the clock.
+  const spawned = g?.spawns ? g.spawns.filter((at) => s.t >= at).length : undefined;
+  const key = [where, res.length, turned, facing, jumped, showAnswer, s.paused, s.look, gone, target ? "t" : "", spawned].join(":");
+  return { key, si, scene: sc, k, results: [...res], showAnswer, boss, wentOff, target, spawned, paused: s.paused, look: s.look };
 }
 
 /** The correct area of the marker's next spot, when the answers before it are in. */

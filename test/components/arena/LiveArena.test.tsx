@@ -229,3 +229,21 @@ test("Massive Meteor: the stack marker shows on its player, then the stack goes 
   assert.ok(after.container.querySelector(`circle.aoe[cx="${at[1]}"][cy="${at[2]}"]`), "the stack's circle, on the marker");
   assert.equal(after.container.querySelectorAll(".stackmk").length, 1, "one marker");
 });
+
+test("Ultimate Trophy Weapons: Practice shows three weapons, the fight clock shows the ones that spawned", () => {
+  const drill = DRILLS.find((d) => d.id === "m-ultimate");
+  if (!drill) throw new Error("no m-ultimate");
+  const { scene, k } = buildPattern(drill, "H1", "K7Q2");
+  const shown = (container: HTMLElement) => container.querySelectorAll(".spawn:not(.later)");
+  const practice = render(<LiveArena scene={scene} k={k} results={[]} showLast={false} hint={false} />);
+  assert.lengthOf(shown(practice.container), 3, "Practice: three show before the first hit");
+  cleanup();
+  for (const spawned of [0, 1, 2, 6]) {
+    const { container } = render(<LiveArena scene={scene} k={k} results={[]} showLast={false} hint={false} spawned={spawned} />);
+    const weapons = [...shown(container)];
+    assert.lengthOf(weapons, spawned, `${spawned} spawned`);
+    // Each one comes in as it spawns, with no wait of its own.
+    for (const w of weapons) assert.equal((w as SVGElement).style.animationDelay, "", "no animation delay");
+    cleanup();
+  }
+});

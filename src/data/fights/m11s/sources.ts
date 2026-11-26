@@ -2,8 +2,8 @@
 // from the BossMod module, and positions from the group's guide on wtfdig. The data files read
 // each fight time and size from source.gen.ts (`npm run import:sources` writes it) through
 // `cactbot` and `bossmod` below, so a time or a size is never typed by hand.
-import { BOSSMOD_ABILITIES, CACTBOT_LINES } from "./source.gen";
-import { sourceLookups } from "../../sourceLookups";
+import { BOSSMOD_ABILITIES, CACTBOT_LINES, CACTBOT_ULTIMATE_CALLS } from "./source.gen";
+import { sourceLookups, tenth } from "../../sourceLookups";
 export { tenth } from "../../sourceLookups";
 
 // TS note: `(typeof CACTBOT_LINES)[number]["name"]` is the union of every line name in the
@@ -14,6 +14,18 @@ export type LineName = (typeof CACTBOT_LINES)[number]["name"];
 /** `cactbot(name, n)`: when a line comes. `bossmod(ability)`: its cast and shape. `castStart`
     and `numberedAfter`: see data/sourceLookups.ts. */
 export const { cactbot, bossmod, castStart, lineEnd, numberedAfter } = sourceLookups(CACTBOT_LINES, BOSSMOD_ABILITIES);
+
+/** When each weapon of Ultimate Trophy Weapons spawns, in spawn order, in seconds into the
+    fight. cactbot's trigger waits `delay` after a spawn, then counts down `duration` to that
+    weapon's hit ("Weapon 1" to "Weapon 6" after the cast), so the spawn is the hit minus both. */
+export function ultimateSpawns(): number[] {
+  const cast = cactbot("Ultimate Trophy Weapons");
+  return CACTBOT_ULTIMATE_CALLS.map(({ delay, duration }, i) => {
+    const hit = CACTBOT_LINES.find((l) => l.name === `Weapon ${i + 1}` && l.t > cast);
+    if (!hit) throw new Error(`cactbot has no "Weapon ${i + 1}" after Ultimate Trophy Weapons`);
+    return tenth(hit.t - delay - duration);
+  });
+}
 
 /** The group's guide on wtfdig, opened with its strats picked: Hector (Toxic), Hector No Buddies, Fixed (3CJ). */
 export const WTFDIG = "https://wtfdig.info/74/m11s#hector:hector:fixed";

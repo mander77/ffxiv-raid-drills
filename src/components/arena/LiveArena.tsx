@@ -40,6 +40,9 @@ export interface LiveArenaProps {
   pickSpot?: boolean;
   /** The correct area of your marker's next spot, in blue (Watch the correct moves). */
   target?: Zone | null;
+  /** How many weapons have spawned on the fight clock. Each one shows as it spawns. Left out,
+      the scene's spawnAhead rule shows them. */
+  spawned?: number;
   /** What the fight draws over the arena: the flash of a hit, the countdown ring, a tank buster. */
   effects?: ReactNode;
   /** Your moving marker, on top of everything. It draws your tether too, so the arena leaves it out. */
@@ -62,6 +65,7 @@ export function LiveArena({
   correctLabel = true,
   pickSpot = true,
   target,
+  spawned,
   effects,
   runner,
 }: LiveArenaProps) {
@@ -76,10 +80,10 @@ export function LiveArena({
     groups[o.spawn] ??= [];
     groups[o.spawn].push(o);
   }
-  // Weapons that resolved fade; the one just answered stays until the next step. With
-  // spawnAhead, each answered step brings in one more weapon.
+  // Weapons that resolved fade; the one just answered stays until the next step. On the fight
+  // clock each weapon shows as it spawns; with spawnAhead, each answered step brings in one more.
   const gone = showLast ? n - 1 : n;
-  const visible = sc.spawnAhead != null ? sc.spawnAhead + n : Number.POSITIVE_INFINITY;
+  const visible = spawned ?? (sc.spawnAhead != null ? sc.spawnAhead + n : Number.POSITIVE_INFINITY);
   const boss = placed === undefined ? bossFor(sc, k, n, showLast) : placed;
   const bossAt: Point | null = boss ? [boss.x, boss.y] : null;
   const weapons = groups.map((g, i) => {
@@ -93,7 +97,8 @@ export function LiveArena({
         // biome-ignore lint/suspicious/noArrayIndexKey: a weapon's spawn index is its identity.
         key={i}
         className={cn("spawn", i < gone && "gone", i >= visible && "later")}
-        style={sc.spawnPlay ? { animationDelay: `${0.3 + i}s` } : undefined}
+        // Practice plays the spawns one second apart. On the clock each comes in at its own time.
+        style={sc.spawnPlay && spawned == null ? { animationDelay: `${0.3 + i}s` } : undefined}
       >
         {pieces.map((o, j) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: the pieces of a weapon never change order.

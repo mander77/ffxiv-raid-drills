@@ -7,7 +7,7 @@ import { ABILITIES, ENRAGE, FIGHT_END } from "./abilities";
 import { newCode, random, withSeed } from "../../../util";
 import { nearClock } from "../../../time";
 import { zoneCenter } from "../../../geometry";
-import { bossmod, cactbot, castStart, lineEnd, numberedAfter, tenth, type LineName } from "./sources";
+import { bossmod, cactbot, castStart, lineEnd, numberedAfter, tenth, type LineName, ultimateSpawns } from "./sources";
 import type { FightSeg, Hit, Scene, Slot, TLEvent } from "../../../types";
 
 /** `code` rebuilds the same fight: the same weapons, the same stack or spread, and so on.
@@ -139,7 +139,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   // Ultimate Trophy Weapons is built here, after the Dance of Domination turn, as it always was.
   const U = buildUltimate(s, c.ult === "random" ? undefined : c.ult === "cw");
   segs.push(
-    {title:"Ultimate Trophy Weapons", drills:["m-ultimate"], scene:ultimateScene(U), k:0, from:cactbot("Ultimate Trophy Weapons"), due:ULTIMATE},
+    {title:"Ultimate Trophy Weapons", drills:["m-ultimate"], scene:ultimateScene(U, true), k:0, from:cactbot("Ultimate Trophy Weapons"), due:ULTIMATE, spawns:ultimateSpawns()},
     {title:"Tornadoes", drills:["m-tornado"], scene:drill("m-tornado", s), k:0, from:cactbot("--middle--", 5), due:[cactbot("Powerful Gust")]}
   );
   /* Phases 2 to 4. They are built after Phase 1 on purpose, so a fight code made before they
