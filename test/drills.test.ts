@@ -2,6 +2,7 @@ import { assert, test } from "vitest";
 import { WAYMARKS } from "../src/components/arena/Arena";
 import {
   ATTACK,
+  fireBreath,
   HITBOX,
   isStretched,
   MELEE_R,
@@ -10,6 +11,7 @@ import {
   TORNADO_R,
   TOWER_KNOCKBACK,
   TOWER_R,
+  wrathLine,
 } from "../src/data/fights/m11s/attacks";
 import {
   assaultScene,
@@ -823,9 +825,65 @@ test("Arena Split: when the tethers go off, a line runs from each portal through
       lines = (lineup.reveal ?? []).filter((o) => o.t === "band");
     assert.equal(lines.length, 4, "every tether's line");
     for (const l of lines) assert.equal(l.t === "band" && l.w, 25, "10 yalms wide (BossMod)");
-    // With a tether, your own line goes through you; the others' lines are the ones to miss.
-    assert.equal(lineup.hits?.length ?? lines.length, tether ? 3 : 4);
+    // With a tether, your own line goes through you; the others' lines and the four markers'
+    // Fire Breath are the ones to miss.
+    const hits = (lineup.hits ?? lines).filter((o) => o.t === "band");
+    assert.equal(hits.filter((o) => o.w === 25).length, tether ? 3 : 4);
+    assert.equal(
+      hits.filter((o) => o.w === 15 && o.x === 50 && o.y === 50).length,
+      tether ? 4 : 0,
+      "Fire Breath: 6 yalms wide, from the boss (BossMod)",
+    );
   }
+});
+
+test("Arena Split: no correct tether spot stands in Fire Breath or sends your line through a player", () => {
+  const inBand = (p: Point, b: { x: number; y: number; x2: number; y2: number; w: number }): boolean => {
+    const L = Math.hypot(b.x2 - b.x, b.y2 - b.y),
+      u: Point = [(b.x2 - b.x) / L, (b.y2 - b.y) / L];
+    const t = (p[0] - b.x) * u[0] + (p[1] - b.y) * u[1],
+      s = -(p[0] - b.x) * u[1] + (p[1] - b.y) * u[0];
+    return t > 0 && t < L && Math.abs(s) < b.w / 2;
+  };
+  for (const side of ["west", "east"] as const)
+    for (const end of ["north", "south"] as const)
+      for (const covered of ["inner", "outer"] as const)
+        for (const endsSide of ["west", "east"] as const) {
+          const others = OTHERS.filter((o) => o !== "H1").slice(0, 3),
+            lineup = splitRound("H1", { tether: true, side, end, covered, endsSide, others }).steps[3];
+          const zone = lineup.zf?.([]),
+            portal = portalAt(side === "west" ? "east" : "west", end === "north" ? "south" : "north", endsSide);
+          assert.ok(zone && "fn" in zone);
+          // The four markers, each at the best spot of its own drill in this pattern, each with
+          // its Fire Breath.
+          const markers = (["west", "east"] as const).flatMap((sd) =>
+            (["north", "south"] as const).map((e) => {
+              const half: SplitHalf = sd === side ? covered : covered === "inner" ? "outer" : "inner";
+              const tethered = OTHERS.filter((o) => o !== "H1").slice(0, 4);
+              const own = splitRound("H1", { tether: false, side: sd, end: e, covered: half, endsSide, others: tethered });
+              const z = own.steps[3].zf?.([]);
+              assert.ok(z);
+              return zoneCenter(z);
+            }),
+          );
+          const hits = [...(lineup.hits ?? []).flatMap((o) => (o.t === "band" ? [o] : [])), ...markers.map((m) => fireBreath([50, 50], m))];
+          const players = [...(lineup.reveal ?? []).flatMap((o): Point[] => (o.t === "mark" ? [[o.x, o.y]] : [])), ...markers];
+          const pattern = `${side} ${end}, portal lines ${covered}, ends ${endsSide}`;
+          for (let x = 0; x <= 100; x += 1)
+            for (let y = 0; y <= 100; y += 0.5) {
+              const p: Point = [x, y];
+              if (!zone.fn(p)) continue;
+              assert.notOk(
+                hits.some((b) => inBand(p, b)),
+                `${pattern}: (${x}, ${y}) stands in a line`,
+              );
+              const own = wrathLine(portal, p);
+              assert.notOk(
+                players.some((q) => inBand(q, own)),
+                `${pattern}: from (${x}, ${y}) your line hits a player`,
+              );
+            }
+        }
 });
 
 test("each Arena Split tower shows how many players soak it, as its drill says", () => {

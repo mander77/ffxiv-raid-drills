@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, crushingComet, eyeOfTheHurricane, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, crushingComet, eyeOfTheHurricane, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -960,24 +960,39 @@ function splitPuddleAfter(side: SplitSide, end: SplitEnd): (results: StepResult[
   };
 }
 type Band = Extract<Overlay, {t: "band"}>;
-/** What a zone leaves out: a circle, or a band (a line attack) across it. */
-type Hole = {q: Point; r: number} | {band: Band};
-/** A unit vector across a band, square to its middle line. */
-const across = (b: Band): Point => { const d = unit([b.x2 - b.x, b.y2 - b.y]); return [-d[1], d[0]]; };
-/** True when p is clear of the hole. A band counts across its whole width, as it crosses the platforms. */
-const clearOf = (p: Point, h: Hole): boolean => {
-  if ("q" in h) return dist(p, h.q) >= h.r;
-  const n = across(h.band);
-  return Math.abs((p[0] - h.band.x) * n[0] + (p[1] - h.band.y) * n[1]) >= h.band.w / 2;
+/** One side of a convex shape: the points p with n·p < d are inside it. */
+interface Side { n: Point; d: number }
+/** What a zone leaves out: a circle, or a convex shape (a band, a wedge) given by its sides. */
+type Hole = {q: Point; r: number} | {sides: readonly Side[]};
+const dot = (a: Point, b: Point): number => a[0] * b[0] + a[1] * b[1];
+/** A band (a line attack) as a hole: its rectangle, from where it starts to where it ends. */
+const bandHole = (b: Band): Hole => {
+  const a: Point = [b.x, b.y], e: Point = [b.x2, b.y2], u = unit([e[0] - a[0], e[1] - a[1]]), n: Point = [-u[1], u[0]];
+  return {sides:[{n, d:dot(n, a) + b.w / 2}, {n:[-n[0], -n[1]], d:-dot(n, a) + b.w / 2}, {n:u, d:dot(u, e)}, {n:[-u[0], -u[1]], d:-dot(u, a)}]};
 };
+/** The spots where a line `w` wide, from `from` through you, would hit a player at `at`: a wedge
+    from `from` around the way to `at`. */
+const lineWouldHit = (from: Point, at: Point, w: number): Hole => {
+  const v: Point = [at[0] - from[0], at[1] - from[1]], k = Math.hypot(v[0], v[1]);
+  const a = Math.asin(Math.min(1, w / 2 / k)), b = Math.atan2(v[1], v[0]);
+  // Each edge of the wedge, with its normal pointing out of the wedge.
+  const edge = (deg: number, out: number): Side => { const n: Point = [-Math.sin(deg) * out, Math.cos(deg) * out]; return {n, d:dot(n, from)}; };
+  return {sides:[edge(b + a, 1), edge(b - a, -1)]};
+};
+/** True when p is clear of the hole. */
+const clearOf = (p: Point, h: Hole): boolean => "q" in h ? dist(p, h.q) >= h.r : h.sides.some(s => dot(s.n, p) >= s.d);
 /** Where the ray from c at `deg` is inside the hole, or null if it misses. */
 function crossHole(c: Point, deg: number, h: Hole): Stretch | null {
   if ("q" in h) return crossCircle(c, deg, h.q, h.r);
-  const n = across(h.band), u = ray(deg), half = h.band.w / 2;
-  const s0 = (c[0] - h.band.x) * n[0] + (c[1] - h.band.y) * n[1], s1 = u[0] * n[0] + u[1] * n[1];
-  if (Math.abs(s1) < 1e-9) return Math.abs(s0) < half ? [-Infinity, Infinity] : null;
-  const t1 = (-half - s0) / s1, t2 = (half - s0) / s1;
-  return [Math.min(t1, t2), Math.max(t1, t2)];
+  const u = ray(deg);
+  let lo = -Infinity, hi = Infinity;
+  for (const s of h.sides) {
+    const s0 = dot(s.n, c), s1 = dot(s.n, u);
+    if (Math.abs(s1) < 1e-9) { if (s0 >= s.d) return null; continue; }
+    const t = (s.d - s0) / s1;
+    if (s1 > 0) hi = Math.min(hi, t); else lo = Math.max(lo, t);
+  }
+  return lo < hi ? [lo, hi] : null;
 }
 /** The longest stretch of the ray from c at `deg`, up to `to`, outside every hole. */
 function clearStretch(c: Point, deg: number, to: number, holes: readonly Hole[]): Stretch | null {
@@ -1023,20 +1038,35 @@ function tetherBest(side: SplitSide, end: SplitEnd, covered: SplitHalf): Point {
   return [x0 === m ? m + WALL_STRIP : m - WALL_STRIP, end === "north" ? WALL_STRIP / 2 : 100 - WALL_STRIP / 2];
 }
 /** Where a tether stretches: the north or south wall at your end, in the half of the platform
-    the portal lines leave safe, far enough from the portal to be stretched. */
-function tetherSpot(side: SplitSide, end: SplitEnd, covered: SplitHalf, portal: Point, lines: readonly Band[]): (results: StepResult[]) => Zone {
+    the portal lines leave safe, far enough from the portal to be stretched. It leaves out the
+    lines that go off then (`lines`), and the spots from which your own line, from the portal
+    through you, would hit another player at the lineup (`players`). */
+function tetherSpot(side: SplitSide, end: SplitEnd, covered: SplitHalf, portal: Point, lines: readonly Band[], players: readonly Point[]): (results: StepResult[]) => Zone {
   const [x0, x1] = halfX(side, otherHalf(covered));
   const [y0, y1] = end === "north" ? [0, WALL_STRIP] : [100 - WALL_STRIP, 100];
-  return rectOutOfLastPuddle([x0, y0, x1, y1], tetherBest(side, end, covered), [{q:portal, r:TETHER_STRETCH}, ...lines.map(band => ({band}))]);
+  const best = tetherBest(side, end, covered), own = wrathLine(portal, best).w;
+  return rectOutOfLastPuddle([x0, y0, x1, y1], best,
+    [{q:portal, r:TETHER_STRETCH}, ...lines.map(bandHole), ...players.map(p => lineWouldHit(portal, p, own))]);
 }
 /** Where a Fire Breath marker stands: the corner of the number waymark at your end that is
     nearest the wall, on the side of the waymark the portal lines leave safe (Hector's video). The
     other tethers' lines pass just by it, so the area leaves them out (the owner's choice). */
 function markerSpot(side: SplitSide, end: SplitEnd, covered: SplitHalf, lines: readonly Band[]): (results: StepResult[]) => Zone {
+  return rectOutOfLastPuddle(markerRect(side, end, covered), markerCorner(side, end, covered), lines.map(bandHole));
+}
+/** The box around the waymark's corner where a Fire Breath marker may stand. */
+function markerRect(side: SplitSide, end: SplitEnd, covered: SplitHalf): RectZone["rect"] {
   const {p} = WAYMARK[side][end], [h0, h1] = halfX(side, otherHalf(covered));
   const x0 = Math.max(h0, p[0] - WAYMARK_REACH), x1 = Math.min(h1, p[0] + WAYMARK_REACH);
   const [y0, y1] = end === "north" ? [p[1] - WAYMARK_REACH, p[1]] : [p[1], p[1] + WAYMARK_REACH];
-  return rectOutOfLastPuddle([x0, y0, x1, y1], markerCorner(side, end, covered), lines.map(band => ({band})));
+  return [x0, y0, x1, y1];
+}
+/** The best spot of a marker's area, before any puddle drops: the corner, or the nearest spot to
+    it that the lines miss. */
+function markerBest(side: SplitSide, end: SplitEnd, covered: SplitHalf, lines: readonly Band[]): Point {
+  const rect = markerRect(side, end, covered), corner = markerCorner(side, end, covered), holes = lines.map(bandHole);
+  const fn = (p: Point): boolean => inZone(p, {rect}) && holes.every(h => clearOf(p, h));
+  return fn(corner) ? corner : nearestTo(corner, fn) ?? corner;
 }
 /** The corner of the number waymark at one end of a platform where a Fire Breath marker stands:
     toward the wall, on the side of the waymark the portal lines leave safe. It sits just off the
@@ -1082,6 +1112,25 @@ function othersAtLineup(r: SplitRound): {who: SlotName; p: Point; portal: Point}
 /** The other players' tethers going off (Majestic Meteowrath): a line from each portal through
     its player. They must miss you. */
 const otherWraths = (r: SplitRound): Band[] => othersAtLineup(r).map(({p, portal}) => wrathLine(portal, p));
+/** Every tether's line at the lineup, yours too when you have one, with each player at the best
+    spot. */
+const allWraths = (r: SplitRound): Band[] =>
+  [...(r.tether ? [wrathLine(portalAt(otherSide(r.side), otherEnd(r.end), r.endsSide), tetherBest(r.side, r.end, r.covered))] : []), ...otherWraths(r)];
+/** Where each Fire Breath marker other than you stands at the lineup: the best spot by the
+    number waymark at its end, clear of the tethers' lines. With a tether you have no marker, so
+    all four stand there. */
+function markersAtLineup(r: SplitRound): Point[] {
+  // A round is built often and the spots take a while to find, so each pattern is found once.
+  const key = [r.tether, r.side, r.end, r.covered, r.endsSide, r.others.length].join(), known = MARKER_SPOTS.get(key);
+  if (known) return known;
+  const spots = SIDES.flatMap(sd => ENDS.filter(e => r.tether || sd !== r.side || e !== r.end)
+    .map(e => markerBest(sd, e, sd === r.side ? r.covered : otherHalf(r.covered), allWraths(r))));
+  MARKER_SPOTS.set(key, spots);
+  return spots;
+}
+const MARKER_SPOTS = new Map<string, Point[]>();
+/** The markers' Fire Breath: a line from the boss through each marked player. */
+const otherBreaths = (r: SplitRound): Band[] => markersAtLineup(r).map(p => fireBreath(CENTER, p));
 
 /** One round of tethers and Fire Breath markers, on your platform, ending at your end. Without a
     tether you bait Fire Breath and get a marker. */
@@ -1105,9 +1154,9 @@ export function splitRound(s: Slot, r: SplitRound): Scene {
       {q:"Third puddle?", zf:next, drop:MAJESTIC_PUDDLE,
         a:["Just outside the second puddle, toward the " + end + " end again.", "Stay tight against the inner edge."]},
       tether
-        ? {q:"The portal lines cover half of each platform. Where do you stretch your tether?", zf:tetherSpot(side, end, covered, portal, otherWraths(r)),
-          // Your own line goes through you, as it should; the others' lines must miss you.
-          cue:portalLines(side, covered), reveal:[wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r)], hits:otherWraths(r),
+        ? {q:"The portal lines cover half of each platform. Where do you stretch your tether?", zf:tetherSpot(side, end, covered, portal, [...otherWraths(r), ...otherBreaths(r)], [...othersAtLineup(r).map(o => o.p), ...markersAtLineup(r)]),
+          // Your own line goes through you, as it should; the others' lines and Fire Breath must miss you.
+          cue:portalLines(side, covered), reveal:[wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r)], hits:[...otherWraths(r), ...otherBreaths(r)],
           a:["The " + end + " wall, just outside the portal lines.", "That end is away from your portal.", "Stay out of the third puddle."]}
         : {q:"The portal lines cover half of each platform. You have a marker. Where do you stand?", zf:markerSpot(side, end, covered, otherWraths(r)),
           cue:portalLines(side, covered), reveal:[...otherWraths(r), ...otherTethers(r)],

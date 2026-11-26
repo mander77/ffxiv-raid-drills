@@ -1033,6 +1033,11 @@ static wins.
     markers; with the app's approximate spots a line can still clip the waymark's corner by up to
     0.6 yalms, so the marker's and the tether's correct areas leave those lines out (the owner's
     choice): the best spot shifts a little off the corner when it has to.
+  - With a tether, the correct area at the wall also leaves out (issue #167): each marker's Fire
+    Breath (BossMod `FireBreathRect`, a line 6 yalms wide from the boss through the marker), and
+    the spots from which your own line, from your portal through you, would hit another player.
+    The other players stand at their best spots. Hector's video: the lines "just barely avoid"
+    the markers. The best spot does not move.
   - The second and third towers: the tower in the quadrant where your last tether or marker was.
   - Massive Meteor: the four on a platform stack at the middle of its inner edge, next to the boss,
     so the melee can hit him. Learn's Massive Meteor picture shows it there too.
