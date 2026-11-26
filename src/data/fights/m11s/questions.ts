@@ -119,7 +119,7 @@ export const LEARN_CARDS: QuizItem[] = [
       {t:bySlot(s, {H1:"Drop it SW, in a row with the first SW rock.", H2:"Drop it NW, in max melee."})},
       {t:"Drop it NE, next to the first rock."},{t:"Drop it on the Party Stack."}],
     why:["Two rocks too close together explode.", "The first SW rock is already down, in max melee.", "So the SW drop goes farther out along the same row.", "This site uses wtfdig. Icy Veins swaps H1 and H2 here, so do not mix guides."],
-    rule:["H1: NW, under the boss.", "H2: SW, in the row, farther out."]})),
+    rule:["H1: NW, in max melee.", "H2: SW, in the row, farther out."]})),
   mq("k-meteor-stack", 16.2, P2, "5:10", s=>({prompt:"Meteorain, second set (healers baiting). Where does the rest of the party stack?",
     options:[{t:"Behind the NE rock, to break it.", ok:true},{t:"Behind the SW rocks."},{t:"Under the boss."},{t:"They spread."}],
     why:["The Line Stack breaks the first rock it hits.", "The party breaks the NE and NW rocks and keeps the SW row of rocks."],
