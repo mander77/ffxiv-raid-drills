@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit, ROCK_GAP, meteorHit, rockExplosion } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit, ROCK_GAP, meteorHit, rockExplosion } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -852,9 +852,8 @@ export function eclFourWayScene(p: EclPlace): Scene {
    Two platforms, west and east, from Flatliner to the Crown of Arcadia, drawn from BossMod
    (PLATFORM_X). Light party 1 (H1) starts west, light party 2 (H2) east (Hector No Buddies).
    Each tower knocks you back: with a tether to the other platform, without one to the same
-   platform. You have a tether in one of the two rounds and not in the other. So H1 is on the
-   east platform after the second round, and H2 on the west, whichever round had the tether
-   (the owner's rule, from wtfdig). */
+   platform. You have a tether in one of the two rounds and not in the other. Where your portals
+   are decides which platform you end on, so after the second round it is not fixed. */
 export type SplitSide = "west" | "east";
 /** An end of a platform: north or south. */
 export type SplitEnd = "north" | "south";
@@ -1281,11 +1280,15 @@ export function splitTowers(s: Slot, side: SplitSide, end: SplitEnd, tether: {po
     rule:["Towers: the quadrant you ended the last tethers and markers in.", ...TOWER_RULE]};
 }
 
-/** Massive Meteor: the four players on a platform stack in close, at the middle of its inner edge. */
+/** Massive Meteor: the four players on a platform stack in close, at the middle of its inner edge.
+    The stack goes on one player of each platform and hits five times. */
 export function massiveScene(side: SplitSide): Scene {
-  return {setup:["Massive Meteor: a five-hit stack on each platform.", "You are on the " + side + " platform."],
+  return {setup:["Massive Meteor: a five-hit stack on one player of each platform.", "You are on the " + side + " platform."],
     split:true, boss:BOSS, overlays:[],
-    steps:[{q:"Where do you stack?", z:SPLIT_INNER[side], a:["In close, at the middle of the platform's inner edge.", "All four on the platform stack, so the melee can hit the boss."]}],
+    steps:[{q:"Where do you stack?", z:SPLIT_INNER[side],
+      a:["In close, at the middle of the platform's inner edge.", "All four on the platform stack, so the melee can hit the boss.", "Both healers may end on one platform: stay near the middle."],
+      // You take the stack on purpose, so it is not an attack you must miss.
+      revealAt:p => [massiveMeteor(p), {t:"target", x:p[0], y:p[1]}, {t:"tag", x:p[0], y:p[1] + 9, s:"5 HITS"}], hits:[]}],
     rule:["All four on a platform stack.", "Mitigate and heal between the hits."]};
 }
 
@@ -1503,10 +1506,12 @@ export const DRILLS: readonly Drill[] = [
   {id:"m-split-towers2", order:19.2, variants:["tether", "marker"], random:true, phase:P3, time:"7:01", title:"Arena Split: Second Towers", kind:"towerKnockback", soak:SPLIT_SOAK,
     build:(s, v)=>{ const side = randomSide(), end = randomEnd();
       return splitTowers(s, side, end, v === "tether" ? {portal:portalAt(randomSide(), randomEnd(), randomEndsSide())} : null); }},
-  {id:"m-massive", order:20, phase:P3, time:"7:25", title:"Massive Meteor", kind:"lightPartyStack",
-    build:s=>massiveScene(otherSide(homeSide(s)))},
+  {id:"m-massive", order:20, phase:P3, time:"7:25", title:"Massive Meteor", kind:"platformStack", random:true,
+    build:()=>massiveScene(randomSide())},
   {id:"m-avalanche", order:21, random:true, phase:P3, time:"7:39", title:"Arcadion Avalanche", kind:"towerKnockback", soak:SPLIT_SOAK,
-    build:s=>avalancheScene(s, otherSide(homeSide(s)), randomEnd(), randomSide(), randomEnd())},
+    // Your platform is random, as it is after the two rounds of tethers. It is drawn last, so the
+    // codes from before keep their tower end, facing and turn.
+    build:s=>{ const end = randomEnd(), face = randomSide(), swing = randomEnd(); return avalancheScene(s, randomSide(), end, face, swing); }},
   // The variants are your puddles' wall, or "none": no puddles, with your tether in a random corner.
   {id:"m-ecl-start", order:26, variants:["south", "north", "none"], follows:{variant:"wall"}, phase:P4, time:"8:54 to 9:27", title:"Ecliptic Stampede: Puddles", kind:"puddles",
     build:(s, v)=>v === "none" ? eclipticFreeScene(s, randomCorner()) : eclipticScene(s, v === "north" ? "north" : "south")},

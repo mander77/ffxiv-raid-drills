@@ -53,7 +53,12 @@ test("the hit rules in the ability list make the fight's hits", () => {
   const kicks = hits.filter((h) => h.name.startsWith("Heartbreak Kick "));
   assert.equal(kicks.length, 5 + 6 + 7, "one hit per kick line: 5, 6, then 7");
   assert.ok(kicks.every((h) => h.kind === "shared"));
-  assert.equal(hits.find((h) => h.name === "Massive Meteor")?.kind, "shared");
+  const massive = hits.filter((h) => h.name.startsWith("Massive Meteor"));
+  assert.deepEqual(
+    massive.map((h) => [h.kind, h.t]),
+    [["shared", 446.4]],
+    "one shared hit, at cactbot's first",
+  );
   assert.equal(hits[hits.length - 1].kind, "enrage");
   hits.forEach((h, i) => {
     if (i) assert.isAtLeast(h.t, hits[i - 1].t, "hits run in time order");

@@ -58,7 +58,7 @@ const CATEGORY_MEANING: Record<Category, string> = {
 /** The kinds of mechanic in groups, so related icons sit side by side. Every kind is in one group
     (a test checks the page names each kind once). */
 const KIND_GROUPS: readonly { title: string; kinds: readonly DrillKind[] }[] = [
-  { title: "Spread and Stacks", kinds: ["spread", "stack", "pairStack", "lightPartyStack", "roleStack"] },
+  { title: "Spread and Stacks", kinds: ["spread", "stack", "pairStack", "lightPartyStack", "platformStack", "roleStack"] },
   { title: "Lines From the Boss", kinds: ["lineStack", "wildCharge"] },
   { title: "Towers", kinds: ["tower", "towerKnockback", "tankTower"] },
   { title: "Tethers", kinds: ["chains", "pairTether"] },

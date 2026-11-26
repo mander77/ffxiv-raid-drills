@@ -228,7 +228,7 @@ export interface Scene {
 }
 
 /** What you do in a Practice mechanic: spread out, stack (the whole party, in pairs, in light
-    parties, or by role), stack in a line from the boss, bait an attack (bring it to where it should
+    parties, with the four on your platform, or by role), stack in a line from the boss, bait an attack (bring it to where it should
     go), drop puddles in order, take your clock spot for proteans, dodge a set order of attacks, soak a tower (one that knocks
     you back, or one for a tank), line up behind a blocker for a wild charge, act on what the boss showed earlier
     (look ahead), get knocked back to your spot, stretch a tether, stay close to the player
@@ -238,6 +238,7 @@ export type DrillKind =
   | "stack"
   | "pairStack"
   | "lightPartyStack"
+  | "platformStack"
   | "roleStack"
   | "lineStack"
   | "bait"

@@ -150,7 +150,7 @@ export const PHASES: readonly {name: Phase; rows: Ability[]}[] = [
     [cactbot("Explosion", 7), "Meteor towers", ["spot"], N.towers],
     [cactbot("Majestic Meteor 1", 2), "Meteor baits x3", [], N.meteorBaits],
     [cactbot("Majestic Meteowrath/Majestic Meteorain/Fire Breath", 2), "Majestic Meteowrath + Fire Breath", ["target", "spot"], N.wrath],
-    [cactbot("Massive Meteor (castbar)"), "Massive Meteor", ["target"], N.massive, {shared:true}],
+    [cactbot("Massive Meteor x5"), "Massive Meteor x5", ["target"], N.massive, {shared:true}],
     [cactbot("Explosion", 8), "Meteor towers", ["spot"], N.towers],
     [cactbot("Arcadion Avalanche"), "Arcadion Avalanche", ["dodge"], N.avalanche]
   ])},
