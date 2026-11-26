@@ -525,16 +525,21 @@ export function hitsGoneOff(marks: readonly CastMark[], was: number, t: number):
 /** Where each cast sits in a list `height` pixels tall, from its top: the now line is at `nowY`,
     and CASTS_AHEAD seconds away is the bottom, so the gaps show the time between casts. Casts to
     come that come close are pushed down to stay `rowH` apart, so their names never overlap. A cast
-    that went off pushes nothing: it fades out past the now line, and if it pushed the next one, that
-    one would jump back up as it left. */
-export function castPositions(marks: readonly CastMark[], height: number, nowY: number, rowH: number): number[] {
+    that went off keeps its room and gives it up as it fades (`castFade`, over `past` seconds), so
+    no cast jumps: the next one does not land on it as it crosses the now line, and slides into its
+    own place by the time it is gone. */
+export function castPositions(marks: readonly CastMark[], height: number, nowY: number, rowH: number, past = CASTS_PAST): number[] {
   const perSecond = (height - nowY) / CASTS_AHEAD;
   let prev = Number.NEGATIVE_INFINITY;
+  let room = rowH;
   return marks.map((m) => {
     const at = nowY + m.left * perSecond;
-    if (m.left < 0) return at;
-    const y = Math.max(at, prev + rowH);
+    const y = Math.max(at, prev + room);
     prev = y;
+    room = rowH * castFade(m.left, past);
     return y;
   });
 }
+
+/** How much of a cast still shows: 1 until it goes off, then down to 0 `past` seconds after. */
+export const castFade = (left: number, past = CASTS_PAST): number => (left < 0 ? Math.max(0, 1 + left / past) : 1);
