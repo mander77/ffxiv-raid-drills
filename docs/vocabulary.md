@@ -109,6 +109,7 @@ The kind of a mechanic is what you do in it. Each kind has one name and one icon
 | Party Stack | The party stacks on one spot. | stack, full party stack, group stack, everyone stack, 8-man stack |
 | Pair Stack | Stack in twos. | pairs, partner stack, 2-man stack, two-player stack, buddy stack |
 | Light Party Stack | Stack with your light party of four. | light party stack, LP stack, group stack (4), 4-man stack |
+| Platform Stack | Stack with the four players on your platform. | platform stack, stack on your platform |
 | Role Stack | Stack by role: the roles decide who stacks. | role stack, support/DPS stack |
 | Line Stack | Stand in the line from the boss to the marked player. | line stack, wild charge (only when nobody needs to stand in front), linear stack |
 | Bait | You are the target: bring the hit to where it should go. | bait, drop, place |
@@ -129,6 +130,7 @@ The kind of a mechanic is what you do in it. Each kind has one name and one icon
 Fixed choices for this fight:
 
 - The sword's stack is a Light Party Stack.
+- Massive Meteor is a Platform Stack: after the Arena Split tethers, the four on a platform are mixed.
 - Four-way Fireball is a Pair Stack. The step asks "Which Pair Stack do you take?"
 - Two-way Fireball is a Line Stack.
 
@@ -344,6 +346,7 @@ These pairs look alike but mean different things. Never merge them.
 | the party | every player | The group as one, and each player on their own. |
 | Tank Buster | Shared Tank Buster | One tank, and two tanks. |
 | Party Stack | Light Party Stack | Eight players, and four players. |
+| Light Party Stack | Platform Stack | Your light party, and the four on your platform. |
 | middle | dead center | The arena's middle, and a tower's middle. |
 | Froze | Too slow | Cards, and the run. Same meaning, kept apart on purpose. |
 | second time | second set | A repeat of a mechanic, and the second group of weapons. |

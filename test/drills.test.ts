@@ -88,7 +88,7 @@ test("drills with no random parts build the same pattern every time", () => {
       for (let i = 0; i < 20; i++)
         assert.equal(JSON.stringify(m.build(s, null)), first, `${m.id} changed between builds, so mark it random`);
     }
-  assert.equal(DRILLS.filter((x) => !changes(x)).length, 6, "6 fixed drills");
+  assert.equal(DRILLS.filter((x) => !changes(x)).length, 5, "5 fixed drills");
 });
 
 test("Assault Evolved: the faced weapon goes first, then clockwise", () => {

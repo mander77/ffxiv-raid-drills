@@ -1,6 +1,7 @@
 // The fight's times and sizes against its sources: the cactbot timeline and the BossMod module,
 // as `npm run import:sources` wrote them into src/data/fights/m11s/source.gen.ts. Every time the app uses
-// must be a cactbot line, or the start of a cast that ends on one. Every size must be BossMod's.
+// must be a cactbot line, the start of a cast that ends on one, or the end of a line that gives
+// its duration. Every size must be BossMod's.
 // A value that matches no source is listed below with the question for the owner, and the test
 // checks that it still matches none, so the list stays true.
 import { assert, test } from "vitest";
@@ -21,6 +22,8 @@ const SAME = 0.05;
 
 /** A cactbot line at t. */
 const isLine = (t: number): boolean => CACTBOT_LINES.some((l) => Math.abs(l.t - t) < SAME);
+/** The end of a cactbot line that gives its duration ("Massive Meteor x5": its last hit). */
+const isLineEnd = (t: number): boolean => CACTBOT_LINES.some((l) => "duration" in l && Math.abs(l.t + l.duration - t) < SAME);
 /** The start of a BossMod cast that ends on a cactbot line of the same ability, at t. */
 const isCastStart = (t: number): boolean =>
   CACTBOT_LINES.some((l) =>
@@ -59,16 +62,27 @@ test("every ability in the ability list is at a cactbot line", () => {
   for (const a of ABILITIES) assert.ok(isLine(a.t), `${a.name} at ${a.t}`);
 });
 
-test("every timeline line, hit and turn of the full fight is at a cactbot line or a cast start", () => {
+test("every timeline line, hit and turn of the full fight is at a cactbot line, a cast start or a line's end", () => {
   for (const f of everyFight()) {
-    for (const e of f.events) assert.ok(isLine(e.t) || isCastStart(e.t), `${e.name} at ${e.t}`);
+    for (const e of f.events) assert.ok(isLine(e.t) || isCastStart(e.t) || isLineEnd(e.t), `${e.name} at ${e.t}`);
     for (const g of f.segs) {
-      for (const d of g.due) assert.ok(isLine(d) || isCastStart(d), `${g.title}: a hit at ${d}`);
+      for (const d of g.due) assert.ok(isLine(d) || isCastStart(d) || isLineEnd(d), `${g.title}: a hit at ${d}`);
       if (g.turn) assert.ok(isCastStart(g.turn.at), `${g.title}: the turn at ${g.turn.at}`);
-      const known = isLine(g.from) || isCastStart(g.from);
+      const known = isLine(g.from) || isCastStart(g.from) || isLineEnd(g.from);
       assert.ok(known || SCENE_STARTS.includes(g.from), `${g.title}: appears at ${g.from}`);
     }
     assert.ok(isLine(f.split[0]) && isLine(f.split[1]), "the arena split starts and ends at cactbot lines");
+  }
+});
+
+test("Massive Meteor appears when its cast starts, not when the cast ends", () => {
+  const cast = BOSSMOD_ABILITIES.MassiveMeteorBoss;
+  const end = CACTBOT_LINES.find((l) => l.name === "Massive Meteor (castbar)");
+  assert.ok(end, "cactbot has the cast's end");
+  for (const f of everyFight()) {
+    const g = f.segs.find((s) => s.title === "Massive Meteor");
+    assert.ok(g, "the full fight has Massive Meteor");
+    assert.closeTo(g.from, end.t - cast.cast, SAME);
   }
 });
 

@@ -7,7 +7,7 @@ import { ABILITIES, ENRAGE, FIGHT_END } from "./abilities";
 import { newCode, random, withSeed } from "../../../util";
 import { nearClock } from "../../../time";
 import { zoneCenter } from "../../../geometry";
-import { bossmod, cactbot, castStart, numberedAfter, tenth, type LineName } from "./sources";
+import { bossmod, cactbot, castStart, lineEnd, numberedAfter, tenth, type LineName } from "./sources";
 import type { FightSeg, Hit, Scene, Slot, TLEvent } from "../../../types";
 
 /** `code` rebuilds the same fight: the same weapons, the same stack or spread, and so on.
@@ -215,10 +215,10 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, {tether:t1, side:side1, end:end1, covered:cover1, endsSide:ends1, others:others1}), k:0, from:cactbot("Explosion", 6), due:round(1, t1)},
     {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, side1, end1, t1 ? null : {portal:portalAt(portalSide2, otherEnd(end2), ends2)}), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
     {title:"Arena Split: Fire Breath (Second Time)", drills:["m-split-fire"], scene:splitRound(s, {tether:!t1, side:side2, end:end2, covered:cover2, endsSide:ends2, others:others2}), k:0, from:cactbot("Explosion", 7), due:round(2, !t1)},
-    {title:"Massive Meteor", drills:["m-massive"], scene:massiveScene(side2), k:0, from:cactbot("Massive Meteor (castbar)"), due:[cactbot("Massive Meteor x5")],
-      // The cast gives about a second, so the party waits in close, where the stack goes.
+    {title:"Massive Meteor", drills:["m-massive"], scene:massiveScene(side2), k:0, from:castStart("MassiveMeteorBoss", "Massive Meteor (castbar)"), due:[lineEnd("Massive Meteor x5")],
+      // The party waits where the stack goes, and holds it until the fifth hit.
       pre:zoneCenter(SPLIT_INNER[side2])},
-    {title:"Arcadion Avalanche", drills:["m-avalanche"], scene:avalancheScene(s, side2, end2, face, swing), k:0, from:cactbot("Massive Meteor x5"), due:[cactbot("Explosion", 8), cactbot("Arcadion Avalanche")]}
+    {title:"Arcadion Avalanche", drills:["m-avalanche"], scene:avalancheScene(s, side2, end2, face, swing), k:0, from:lineEnd("Massive Meteor x5"), due:[cactbot("Explosion", 8), cactbot("Arcadion Avalanche")]}
   );
   /* Heartbreak Kick, last so the random parts above keep their codes. Its tower is hit 5, then 6,
      then 7 times; each set is due at its first hit. Either the party soaks it, or the tanks do
@@ -289,7 +289,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     L("--meteor 1--", 1, "Majestic Meteor 1 drops"), L("--meteor 2--", 1, "Majestic Meteor 2 drops"), L("Majestic Meteor 1"), L("--meteor 3--", 1, "Majestic Meteor 3 drops"), L("Majestic Meteor 2"), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath"), L("Majestic Meteor 3"),
     L("--tethers--", 4, "Tethers"), L("Explosion", 7), L("--Fire Breath Markers--", 2, "Fire Breath markers"),
     L("--meteor 1--", 2, "Majestic Meteor 1 drops"), L("--meteor 2--", 2, "Majestic Meteor 2 drops"), L("Majestic Meteor 1", 2), L("--meteor 3--", 2, "Majestic Meteor 3 drops"), L("Majestic Meteor 2", 2), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath", 2), L("Majestic Meteor 3", 2),
-    L("Massive Meteor (castbar)", 1, "Massive Meteor"), L("Massive Meteor x5"), L("Explosion", 8), L("Arcadion Avalanche"),
+    L("Massive Meteor (castbar)", 1, "Massive Meteor"), L("Massive Meteor x5"), [lineEnd("Massive Meteor x5"), "Massive Meteor last hit"], L("Explosion", 8), L("Arcadion Avalanche"),
     L("Crown of Arcadia", 3),
     L("Great Wall of Fire 1", 2), L("Great Wall of Fire 2", 2), L("Explosion 1", 2), L("Explosion 2", 2),
     L("Orbital Omen (castbar)", 2, "Orbital Omen"), L("Orbital Omen 1", 2), L("Fire and Fury", 2), L("Orbital Omen 2", 2), L("Orbital Omen 3", 2), L("Orbital Omen 4", 2),

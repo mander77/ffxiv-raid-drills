@@ -13,7 +13,7 @@ export type LineName = (typeof CACTBOT_LINES)[number]["name"];
 
 /** `cactbot(name, n)`: when a line comes. `bossmod(ability)`: its cast and shape. `castStart`
     and `numberedAfter`: see data/sourceLookups.ts. */
-export const { cactbot, bossmod, castStart, numberedAfter } = sourceLookups(CACTBOT_LINES, BOSSMOD_ABILITIES);
+export const { cactbot, bossmod, castStart, lineEnd, numberedAfter } = sourceLookups(CACTBOT_LINES, BOSSMOD_ABILITIES);
 
 /** The group's guide on wtfdig, opened with its strats picked: Hector (Toxic), Hector No Buddies, Fixed (3CJ). */
 export const WTFDIG = "https://wtfdig.info/74/m11s#hector:hector:fixed";

@@ -467,8 +467,9 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
         // The "?" sits toward the platform middle, clear of the number marker next to each tower.
         show([TOWER_NW, TOWER_NE, TOWER_SW, TOWER_SE].map(p => tag(p[0], p[1] + (p[1] < 50 ? 6.5 : -6.5), "?")))]}; },
   "k-massive": () => {
-    // Spread down the platform, between the number markers at its two ends. After the two rounds of
-    // tethers, light party 1 is on the east platform and light party 2 on the west; each stacks in close.
+    // Spread down the platform, between the number markers at its two ends. Which four end on each
+    // platform depends on the portals; the picture shows light party 1 east and light party 2 west.
+    // Each four stacks in close.
     const ROWS = [30, 43, 57, 70], spread = (g: Who[], x: number): Overlay[] => g.map(([l, r], i) => mark(x, ROWS[i], l, r));
     // Stacked just north of waymark B or D, so no mark hides it.
     const stacked = (g: Who[], x: number): Overlay[] => g.map(([l, r], i) => mark(x + (i % 2) * 7, 37 + Math.floor(i / 2) * 7, l, r));

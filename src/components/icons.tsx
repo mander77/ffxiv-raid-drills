@@ -28,7 +28,7 @@
 // 7. A shield is a tank: a tank buster, or a tank tower (a tower shaped like the shield).
 // 8. A clock is timing: something you see now and act on later (look ahead).
 // 9. Every stack has arrows from the corners into the middle. The middle says how many: 2 (pairs),
-//    4 (light parties), R (the roles decide). The whole party's stack has no number, so its arrows
+//    4 (light parties, or the four on a platform), R (the roles decide). The whole party's stack has no number, so its arrows
 //    meet close in the middle: the inverse of spread. A shared
 //    tank buster's shield takes a number the same way, and so does a tower's column: how many
 //    players soak it (Drill.soak). The number is in the body font, bold, in the highlight colour

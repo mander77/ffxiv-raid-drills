@@ -40,7 +40,7 @@ export interface KindInfo {
 }
 
 /** Each kind of mechanic. A stack also has the number of its players, in the middle of its icon: 2
-    for pairs, 4 for light parties, R when the roles decide; a stack of the whole party has none. A
+    for pairs, 4 for light parties and platforms, R when the roles decide; a stack of the whole party has none. A
     shared tank buster has the number of tanks who share it, smaller, since the middle of its
     shield is narrower than the stack's. */
 export const KINDS: Record<DrillKind, KindInfo> = {
@@ -50,6 +50,12 @@ export const KINDS: Record<DrillKind, KindInfo> = {
   lightPartyStack: {
     name: "Light Party Stack",
     meaning: "Stack with your light party of four.",
+    icon: StackIcon,
+    count: "4",
+  },
+  platformStack: {
+    name: "Platform Stack",
+    meaning: "Stack with the four players on your platform.",
     icon: StackIcon,
     count: "4",
   },

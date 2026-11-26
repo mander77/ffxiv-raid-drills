@@ -34,7 +34,7 @@ export const SWORD_HALF = yalms(bossmod("AssaultEvolvedSwordAOE").width / 2);
 /** The width of one Orbital Omen lane ("range 60 width 10 rect"). Four lanes span the arena. */
 export const ORBITAL_LANE = yalms(bossmod("OrbitalOmenRect").width);
 /** Every spread and stack: Raw Steel, Comet, Crushing Comet, Eye of the Hurricane and Massive
-    Meteor ("range 6 circle"). */
+    Meteor ("range 6 circle": CometSpread, the same size as the others). */
 export const SPREAD_R = yalms(bossmod("CometSpread").range);
 /** A Void Stardust puddle (Cometite, "range 6 circle"). */
 export const PUDDLE_R = yalms(bossmod("Cometite").range);
@@ -124,9 +124,12 @@ export const rockShadow = (from: Point, rock: Point): Point[] => ATTACK.shadow(f
     the shadow behind `rock`, the nearest rock still standing. The rocks stand in one line from the
     boss, so the nearest one's shadow holds the shadows of the rocks behind it. */
 export const shockwave = (from: Point, rock: Point): Overlay => ATTACK.lineOfSight(from, rock, BOSSMOD_LOS.cometRadius);
-/** Every spread and stack: Raw Steel, Comet, Crushing Comet, Eye of the Hurricane and Massive
-    Meteor ("range 6 circle"), on the player at p. */
+/** Every spread and stack: Raw Steel, Comet, Crushing Comet and Eye of the Hurricane ("range 6
+    circle"), on the player at p. */
 export const spreadHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("CometSpread").range);
+/** Massive Meteor, the stack on one player of each platform, hit five times ("range 6 circle"),
+    on the stack spot p. */
+export const massiveMeteor = (p: Point): Overlay => ATTACK.circle(p, bossmod("MassiveMeteorStack").range);
 /** Crushing Comet, the Party Stack that can end Void Stardust ("range 6 circle"), on the stack
     spot p. */
 export const crushingComet = (p: Point): Overlay => ATTACK.circle(p, bossmod("CrushingCometStack").range);
