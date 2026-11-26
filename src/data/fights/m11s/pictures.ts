@@ -8,7 +8,7 @@
 import { bySlot, withSeed } from "../../../util";
 import { markRole, partyOf } from "../../../party";
 import { angOf, dist, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, type Weapon, type WeaponType } from "./drills";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, ECL_PORTAL, ECL_TOWER_AT, CORNER_STAND, type Weapon, type WeaponType } from "./drills";
 import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, meteorHit, pairTower, proteanCone, proximityDot, raidwide, rawSteelBuster, rawSteelImpact, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, WALL_SECOND_FACING, wallOfFire } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Scene, Slot, StepResult, Zone, ZoneShape } from "../../../types";
 
@@ -532,14 +532,19 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     return {overlays:[pairTower(c), mark(...m1, "M1", "D")], boss:BOSS, after:[tether(c), you(s, c)], answer:[circle(c, 3.5)], options:[
       hit(youAt(s, c, 3.5), [tether(c)]), hit(youAt(s, inside, 3.5), [tether(inside)]),
       hit(youAt(s, at(225, TOWER_R * 1.45, c), 3.5), [tether(m1)]), hit(youAt(s, at(225, TOWER_R, c), 3.5), [tether(m1)])]}; },
-  "k-ecl-tether": s => { const tower: Point = [50, 13], wall: Point = [50, 94];
-    return {overlays:[pairTower(tower)], boss:BOSS, before:[you(s, tower)],
-      after:[guide(tower, wall), guide(wall, [6, 94]), you(s, [6, 94])], answer:[circle([6, 94], 6)],
-      note:"Example: your tower is north. Take the tether to the south wall, then clockwise into the SW corner.", options:[
-        show([guide(tower, wall), guide(wall, [6, 94]), you(s, [6, 94])], [circle([6, 94], 6)]),
+  // The drill's no-puddle pattern: a portal in the middle of each wall, your tower on an
+  // intercard. Your tether comes from the north portal, so you go to the south wall, then
+  // clockwise into the SW corner. Going by your tower (NW) would send you to SE instead.
+  "k-ecl-tether": s => { const tower = ECL_TOWER_AT.nw, portal = ECL_PORTAL.north, wall: Point = [tower[0], CORNER_STAND.sw[1]];
+    const portals = Object.entries(ECL_PORTAL).map(([w, [x, y]]): Overlay => ({t:"portal", x, y, vert:w === "north" || w === "south"}));
+    const sw = rect(0, 85, 15, 100), se = rect(85, 85, 100, 100), walk = (to: Point): Overlay[] => [guide(tower, wall), guide(wall, to), you(s, to)];
+    return {overlays:[...portals, pairTower(tower)], boss:BOSS, before:[tether(portal, tower), you(s, tower)],
+      after:walk(CORNER_STAND.sw), answer:[sw],
+      note:"Example: your tower is NW, your tether from the north portal. South wall, then clockwise to SW.", options:[
+        show(walk(CORNER_STAND.sw), [sw]),
         youAt(s, tower, 6),
         show([guide(tower, CENTER), you(s, [50, 60])], [circle(CENTER, 10)]),
-        show([guide(tower, wall), guide(wall, [94, 94]), you(s, [94, 94])], [circle([94, 94], 6)])]}; },
+        show(walk(CORNER_STAND.se), [se])]}; },
   // Two-way Fireball is two line stacks from the boss, east and west. Four-way is four line stacks
   // of two players each, NW, NE, SW and SE. Both are 6 yalms wide (BossMod).
   // A fireball drill rolls where the proximity AoEs left the puddles; the seed keeps each picture the same.
