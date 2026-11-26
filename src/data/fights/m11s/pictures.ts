@@ -9,7 +9,7 @@ import { bySlot, withSeed } from "../../../util";
 import { markRole, partyOf } from "../../../party";
 import { angOf, dist, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
 import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, type Weapon, type WeaponType } from "./drills";
-import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, meteorHit, pairTower, proteanCone, proximityDot, raidwide, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, wallOfFire } from "./attacks";
+import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, meteorHit, pairTower, proteanCone, proximityDot, raidwide, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, TRAIL_DELAY, voidPuddle, WALL_SECOND_FACING, wallOfFire } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Scene, Slot, StepResult, Zone, ZoneShape } from "../../../types";
 
 type Who = [string, MarkRole];
@@ -352,11 +352,11 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     return {overlays:[...d.overlays, you(s, me), guide(me, into)], boss:d.boss, after:[...gustsFrom(into), ...near("KNOCKBACK", "DAMAGE DOWN")], answer:d.answer,
       note:"The green spot is where you bait: at the edge of your tornado, not in it.", options:[
         show(near("KNOCKBACK", "DAMAGE DOWN")), show(near("NOTHING HAPPENS")), show(near("YOU DIE")), show(near("YOU GET HEALED"))]}; },
-  "k-gwof": () => { const line: Overlay = wallOfFire(CENTER, 0), tanks: Point = [50, 33], stack = cluster([30, 66], NONTANK, 3);
+  "k-gwof": () => { const lines: Overlay[] = [wallOfFire(CENTER, 0), wallOfFire(CENTER, WALL_SECOND_FACING)], tanks: Point = [50, 33], stack = cluster([30, 66], NONTANK, 3);
     const spread = ring(NONTANK, 26, 60, 48), tankMarks = [mark(47, 33, "MT", "T"), mark(53, 33, "OT", "T")];
-    return {overlays:tankMarks, boss:BOSS, after:[line, say("2 TANK BUSTERS", 8)], answer:[circle(tanks, 7)],
-      note:"Heal the tanks (green). The fire trail stays on the floor, so keep out of it.", options:[
-        show([line, say("2 TANK BUSTERS", 8)], [circle(tanks, 7)]),
+    return {overlays:tankMarks, boss:BOSS, after:[...lines, say("2 TANK BUSTERS", 8)], answer:[circle(tanks, 7)],
+      note:`Heal the tanks (green). Each fire trail goes off about ${TRAIL_DELAY} seconds later.`, options:[
+        show([...lines, say("2 TANK BUSTERS", 8)], [circle(tanks, 7)]),
         show([RAIDWIDE, say("RAIDWIDE", 8)]),
         show([stackHit(stack), ...stack, target([30, 66]), say("STACK ON A HEALER", 94)]),
         show([...proteans(CENTER, [...tankMarks, ...spread]), ...spread])]}; },

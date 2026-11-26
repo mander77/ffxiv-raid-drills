@@ -3,7 +3,18 @@
 import type { Choices, Fight, Slot } from "../../../types";
 import type { FightData } from "../types";
 import { ABILITIES, categoriesAt, ENRAGE, PHASES, timelineCategories } from "./abilities";
-import { busterPieces, HITBOX, PLATFORM_X, PORTAL_OUT, SCYTHE_SAFE, SPLIT_HALF_W, TETHER_STRETCH, TORNADO_R, TOWER_R } from "./attacks";
+import {
+  busterPieces,
+  floorAttacks,
+  HITBOX,
+  PLATFORM_X,
+  PORTAL_OUT,
+  SCYTHE_SAFE,
+  SPLIT_HALF_W,
+  TETHER_STRETCH,
+  TORNADO_R,
+  TOWER_R,
+} from "./attacks";
 import { DRILLS } from "./drills";
 import { buildFight, buildHits, CHOICE_ROWS, cleanChoices, RANDOM } from "./fight";
 import { FIGHT_INFO } from "./fightInfo";
@@ -68,5 +79,6 @@ export const M11S: FightData = {
     clean: cleanChoices,
     build,
     busterPieces,
+    floorAttacks,
   },
 };

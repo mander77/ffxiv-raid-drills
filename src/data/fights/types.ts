@@ -80,6 +80,9 @@ export interface FightClock {
   build: (s: Slot, code: string, choices: Choices) => Fight;
   /** The tanks and the hit on them, for a tank buster's name, with the boss at `boss`. */
   busterPieces: (name: string, boss: Point) => Overlay[];
+  /** The attacks on the floor at fight time t, with the boss at `boss`, that no mechanic draws:
+      such as a fire trail while it casts. */
+  floorAttacks: (t: number, boss: Point) => Overlay[];
 }
 
 /** One fight of the site. */
