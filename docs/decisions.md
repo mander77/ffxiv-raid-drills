@@ -900,6 +900,12 @@ static wins.
 ### Later mechanics
 
 - Dance of Domination: seven hits. The lines on the floor show just after the 7th hit.
+- Dance of Domination, the lines (issue #155, the owner's answer, November 25): six lines, as
+  in Hector's video (w1uuwzhyf5A, 4:06). With the open side south: one along the north edge, one
+  along each of the west and east edges (12% in), one down the middle and both diagonals
+  (`DANCE_LINES`). cactbot's Safe Spots trigger counts only the four straight lines; no pinned
+  source gives the diagonals or how far in the edge lines are, so they come from the video. The
+  pair spots there match `DANCE_PAIRS`.
 - Ultimate Trophy Weapons: the first spawn is south. Slightly west means clockwise, slightly east
   means counterclockwise. The second is NW or NE, then the cardinals. He resolves them in spawn
   order. The last one is always north (Hector's video; the owner confirmed it, November 25), so
