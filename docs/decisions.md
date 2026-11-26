@@ -1339,9 +1339,25 @@ static wins.
   GitHub has no path filter for a single job, only for a whole workflow, and a skipped workflow
   leaves its checks pending, so the preview is a workflow of its own and CI has no filter. The
   job waits for the owner's approval, then runs `npx wrangler preview --name <branch>` (with "/"
-  as "-"), at `<branch>.ffxiv-raid-drills.app`. It does not wait for CI, so look at CI
-  before you approve. Pushes to `main`, pull requests and Dependabot get no preview. A pull
-  request from a fork never gets the token.
+  as "-"), at `<branch>.ffxiv-raid-drills.app`. It does not wait for CI. Pushes to `main`,
+  pull requests and Dependabot get no preview. A pull request from a fork never gets the token.
+- `npm run publish` approves the Preview run of the commit it pushed (owner's choice, November
+  26, issue 188): with several sessions publishing at once, approving every preview by hand was
+  many clicks. After the push it finds the commit's Preview run (`gh api
+  .../actions/runs?head_sha=<sha>`), waits up to a minute for it, and approves its pending
+  deployment (`POST .../actions/runs/<id>/pending_deployments`, `state=approved`) as the
+  signed-in account. It checks nothing else: GitHub refuses the approval to anyone who is not a
+  reviewer of "preview", so only the owner's own publishes skip the click, and a push by anyone
+  else still waits for the owner. This needs "Prevent self-review" off on "preview" (today). A
+  push with only docs, tests or tooling has no run: the script says so after a minute. When it
+  cannot approve, it prints the run's link and the publish goes on.
+- Not chosen (November 26): a second environment, "preview-auto", with no reviewer, picked by a
+  first job that checked who pushed and who wrote each commit. Whoever can push can edit the
+  workflow on their branch to name that environment, so the check held only while the owner
+  was the only person with write access. It also meant two copies of the token. The approval
+  by `npm run publish` keeps one environment, and the reviewer list stays the check. Also not
+  chosen: waiting for CI before the preview (a broken branch only gets a broken preview, and
+  the publish steps wait for CI before anyone tests it), and signed commits.
 - The GitHub environment "preview" holds the token and asks for the owner's approval on each
   run (required reviewer: the owner; admins cannot skip it). Secret `CLOUDFLARE_API_TOKEN`: a
   Cloudflare account API token (Manage Account > API Tokens), only for this account, with

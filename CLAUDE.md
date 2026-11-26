@@ -22,6 +22,7 @@ tokens or account details.
   `main` deploys the live site only when it changes the app, not for only docs, tests or tooling
   (build watch paths). Branch previews come from GitHub Actions (`preview.yml`): when a branch
   push changes the app, the Preview workflow waits for the owner's approval, then makes the preview.
+  `npm run publish` approves it as the owner.
   See `docs/decisions.md` for the hosting details.
 - CI: GitHub Actions (`.github/workflows/ci.yml`) runs lint, the type check, the unit tests, the
   build and the browser tests on pull requests to `main` and on pushes to `main`, not on a
@@ -283,9 +284,10 @@ rebase, run CI or approve a preview again when `main` moves.
 1. Run `npm run build` and note the bundle name, `dist/assets/index-<hash>.js`.
 2. From the branch checkout, run `npm run publish` (any shell, PowerShell too). The script runs
    the type check, the tests and the lint, pushes the branch as `mander77` and opens its pull
-   request, if it has none yet. The pull request starts CI on GitHub.
-3. If the branch changed the app, wait for CI to pass, then ask the owner to approve the
-   waiting Preview run on GitHub. Then run
+   request, if it has none yet. The pull request starts CI on GitHub. If the push changed the
+   app, the script then approves its waiting Preview run as `mander77` and prints the run's
+   link. If it says it could not, ask the owner to approve the run on GitHub.
+3. If the branch changed the app, wait for CI to pass. Then run
    `npm run wait-deploy -- https://<branch>.ffxiv-raid-drills.app index-<hash>.js` and
    test the preview in a browser. A branch with only docs, tests or tooling gets no preview: skip
    this step.
