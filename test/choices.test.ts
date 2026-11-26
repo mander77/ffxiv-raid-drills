@@ -40,7 +40,7 @@ const SHOWS: { [K in keyof Picks]: (f: Fight, v: string) => boolean } = {
   tether: (f, v) =>
     f.segs
       .filter((g) => g.drills[0] === "m-split-fire")
-      .map((g) => /tether/.test(g.scene.steps[3].q))
+      .map((g) => /tether/.test(g.scene.steps[g.scene.steps.length - 1].q))
       .join() === (v === "first" ? "true,false" : "false,true"),
   fireball: (f, v) => {
     const g = f.segs.find((x) => x.drills[0] === "m-ecl-two" || x.drills[0] === "m-ecl-four");

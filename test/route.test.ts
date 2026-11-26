@@ -275,8 +275,9 @@ test("after each tower's throw, the next round's puddles go toward where you lan
           setup = rounds[r].scene.setup.join(" "),
           side = setup.match(/on the (west|east) platform/)?.[1],
           // The round's puddles run toward its end: the second puddle's spot shows which way.
-          first = route.find((x) => x.si === f.segs.indexOf(rounds[r]) && x.j === 0),
-          second = route.find((x) => x.si === f.segs.indexOf(rounds[r]) && x.j === 1);
+          k = rounds[r].scene.steps.findIndex((st) => st.drop),
+          first = route.find((x) => x.si === f.segs.indexOf(rounds[r]) && x.j === k),
+          second = route.find((x) => x.si === f.segs.indexOf(rounds[r]) && x.j === k + 1);
         if (!first || !second) throw new Error("no puddles");
         assert.equal(at[0] < 50 ? "west" : "east", side, `${s} round ${r + 1}: thrown onto the round's platform`);
         const landedNorth = at[1] < 50,

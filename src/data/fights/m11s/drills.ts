@@ -877,6 +877,11 @@ export const platformZone = (side: SplitSide): RectZone => ({rect:[PLATFORM_X[si
     Massive Meteor. The same zone as Learn's Fire Breath card. Its width is the app's choice. */
 export const SPLIT_INNER: Record<SplitSide, RectZone> = {
   west:{rect:[PLATFORM_X.west[1] - 10.5, 38, PLATFORM_X.west[1], 62]}, east:{rect:[PLATFORM_X.east[0], 38, PLATFORM_X.east[0] + 10.5, 62]}};
+/** Where a tether waits for the Fire Breath markers: a step back from SPLIT_INNER, so every
+    spot in it is further from the boss than every spot there, as Fire Breath marks the four
+    closest players. Its size and the gap are the app's choice. */
+export const SPLIT_BACK: Record<SplitSide, RectZone> = {
+  west:{rect:[SPLIT_INNER.west.rect[0] - 11, 38, SPLIT_INNER.west.rect[0] - 5, 62]}, east:{rect:[SPLIT_INNER.east.rect[2] + 5, 38, SPLIT_INNER.east.rect[2] + 11, 62]}};
 /** The four towers, one in each quadrant (as in the first towers). */
 export const SPLIT_TOWER: Record<SplitSide, Record<SplitEnd, Point>> = {west:{north:[11, 23], south:[11, 77]}, east:{north:[89, 23], south:[89, 77]}};
 /** How many players soak each Arena Split tower (the drills of the split and Arcadion Avalanche). */
@@ -933,7 +938,8 @@ export function portalLines(side: SplitSide, covered: SplitHalf): Overlay[] {
   return [band(side, covered), band(otherSide(side), otherHalf(covered)), {t:"tag", x:(x0 + x1) / 2, y:33, s:"PORTAL LINES"}];
 }
 
-const SPLIT_ROUND_RULE: Lines = ["No tether: go in close to bait Fire Breath.", "Everyone baits the first puddle in close.",
+const SPLIT_ROUND_RULE: Lines = ["No tether: go in close to bait Fire Breath.", "Tether: wait a step back until the markers are out.",
+  "Everyone baits the first puddle in close.",
   "Then each puddle just outside the last, toward your end.",
   "Tether: your end is away from your portal.", "No tether: your end is where you got knocked.",
   "Then a tether goes to the wall, a marker to the waymark's wall-side corner.",
@@ -1116,21 +1122,38 @@ const otherWraths = (r: SplitRound): Band[] => othersAtLineup(r).map(({p, portal
     spot. */
 const allWraths = (r: SplitRound): Band[] =>
   [...(r.tether ? [wrathLine(portalAt(otherSide(r.side), otherEnd(r.end), r.endsSide), tetherBest(r.side, r.end, r.covered))] : []), ...otherWraths(r)];
-/** Where each Fire Breath marker other than you stands at the lineup: the best spot by the
-    number waymark at its end, clear of the tethers' lines. With a tether you have no marker, so
-    all four stand there. */
-function markersAtLineup(r: SplitRound): Point[] {
+/** Where each Fire Breath marker stands at the lineup, you too without a tether: the best spot
+    by the number waymark at its end, clear of the tethers' lines. In the order of SIDES, then
+    ENDS. */
+function markerSpots(r: SplitRound): {sd: SplitSide; e: SplitEnd; p: Point}[] {
   // A round is built often and the spots take a while to find, so each pattern is found once.
   const key = [r.tether, r.side, r.end, r.covered, r.endsSide, r.others.length].join(), known = MARKER_SPOTS.get(key);
   if (known) return known;
-  const spots = SIDES.flatMap(sd => ENDS.filter(e => r.tether || sd !== r.side || e !== r.end)
-    .map(e => markerBest(sd, e, sd === r.side ? r.covered : otherHalf(r.covered), allWraths(r))));
+  const spots = SIDES.flatMap(sd => ENDS.map(e => ({sd, e, p:markerBest(sd, e, sd === r.side ? r.covered : otherHalf(r.covered), allWraths(r))})));
   MARKER_SPOTS.set(key, spots);
   return spots;
 }
-const MARKER_SPOTS = new Map<string, Point[]>();
+const MARKER_SPOTS = new Map<string, {sd: SplitSide; e: SplitEnd; p: Point}[]>();
+/** Where each Fire Breath marker other than you stands at the lineup. With a tether you have no
+    marker, so all four stand there. */
+const markersAtLineup = (r: SplitRound): Point[] =>
+  markerSpots(r).filter(({sd, e}) => r.tether || sd !== r.side || e !== r.end).map(({p}) => p);
 /** The markers' Fire Breath: a line from the boss through each marked player. */
 const otherBreaths = (r: SplitRound): Band[] => markersAtLineup(r).map(p => fireBreath(CENTER, p));
+/** The other markers at the lineup: the players with no tether, other than you, each with its
+    Fire Breath. */
+function otherMarkers(s: Slot, r: SplitRound): Overlay[] {
+  const names = SLOT_NAMES.filter(x => x !== s && !r.others.includes(x));
+  return markersAtLineup(r).flatMap((p, i): Overlay[] => {
+    const who = names[i];
+    return who ? [fireBreath(CENTER, p), {t:"mark", x:p[0], y:p[1], l:who, r:markRole(partyOf(who).role)}] : [];
+  });
+}
+/** Your own Fire Breath, without a tether: through your best spot. */
+const yourBreath = (r: SplitRound): Band => {
+  const mine = markerSpots(r).find(({sd, e}) => sd === r.side && e === r.end);
+  return fireBreath(CENTER, mine ? mine.p : markerCorner(r.side, r.end, r.covered));
+};
 
 /** One round of tethers and Fire Breath markers, on your platform, ending at your end. Without a
     tether you bait Fire Breath and get a marker. */
@@ -1144,11 +1167,13 @@ export function splitRound(s: Slot, r: SplitRound): Scene {
       "Three puddles drop on the party, one after another."], ordered:true,
     split:true, boss:BOSS, overlays:portalsOf(r.endsSide), ...(tether ? {tether:{portal, you}} : {}),
     steps:[
-      tether
-        ? {q:"Where do you bait the first puddle?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE,
-          a:["In close, at the middle of the platform's inner edge.", "Bait the puddles with the party."]}
-        : {q:"No tether. Where do you go?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE,
-          a:["In close, at the middle of the platform's inner edge.", "Bait Fire Breath and the first puddle there."]},
+      ...(tether
+        ? [{q:"Where do you wait for the Fire Breath markers?", z:SPLIT_BACK[side],
+          a:["A step back from the middle of the platform's inner edge.", "Fire Breath marks the four players closest to the boss."]},
+          {q:"Where do you bait the first puddle?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE,
+            a:["In close, at the middle of the platform's inner edge.", "Bait the puddles with the party."]}]
+        : [{q:"No tether. Where do you go?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE,
+          a:["In close, at the middle of the platform's inner edge.", "Bait Fire Breath and the first puddle there."]}]),
       {q:"Second puddle?", zf:next, drop:MAJESTIC_PUDDLE,
         a:["Just outside the first puddle, toward the " + end + " end.", "Stay tight against the inner edge."]},
       {q:"Third puddle?", zf:next, drop:MAJESTIC_PUDDLE,
@@ -1156,10 +1181,11 @@ export function splitRound(s: Slot, r: SplitRound): Scene {
       tether
         ? {q:"The portal lines cover half of each platform. Where do you stretch your tether?", zf:tetherSpot(side, end, covered, portal, [...otherWraths(r), ...otherBreaths(r)], [...othersAtLineup(r).map(o => o.p), ...markersAtLineup(r)]),
           // Your own line goes through you, as it should; the others' lines and Fire Breath must miss you.
-          cue:portalLines(side, covered), reveal:[wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r)], hits:[...otherWraths(r), ...otherBreaths(r)],
+          cue:portalLines(side, covered), reveal:[wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
           a:["The " + end + " wall, just outside the portal lines.", "That end is away from your portal.", "Stay out of the third puddle."]}
-        : {q:"The portal lines cover half of each platform. You have a marker. Where do you stand?", zf:markerSpot(side, end, covered, otherWraths(r)),
-          cue:portalLines(side, covered), reveal:[...otherWraths(r), ...otherTethers(r)],
+        : {q:"The portal lines cover half of each platform. You have a marker. Where do you stand?", zf:markerSpot(side, end, covered, [...otherWraths(r), ...otherBreaths(r)]),
+          // Your own Fire Breath goes through you, as it should; the others' lines must miss you.
+          cue:portalLines(side, covered), reveal:[yourBreath(r), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
           a:["The wall-side corner of waymark " + wm.n + ", out of the portal lines.", "Stay out of the third puddle."]}],
     rule:SPLIT_ROUND_RULE};
 }
