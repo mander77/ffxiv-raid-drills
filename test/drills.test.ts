@@ -325,6 +325,23 @@ test("Void Stardust spread: any open spot, drawn as four slices around the boss"
   assert.isAbove(zoneCenter(cometSpread("H2")(VOID_RESULTS))[0], 50, "H2's shown spot is east");
 });
 
+test("Raw Steel Trophy axe: the spread area stays a spread away from the other spread spots", () => {
+  const drill = DRILLS.find((m) => m.id === "m-raw-axe");
+  if (!drill) throw new Error("missing drill m-raw-axe");
+  for (const s of SLOTS) {
+    const z = zoneOf(stepZone(drill.build(s, null).steps[0], []));
+    if (!("fn" in z)) throw new Error("the axe spread zone is a rule zone");
+    assert.ok(inZone(z.label, z), `${s}: the shown spot`);
+    drawnMatchesRule(z);
+  }
+  const h1 = zoneOf(stepZone(drill.build("H1", null).steps[0], []));
+  // M1's spot is (37.5, 62.5). A spread is 6 yalms (15 units).
+  assert.notOk(inZone([30.25, 75.25], h1), "H1: 5.8 yalms from M1");
+  assert.ok(inZone([30, 88], h1), "H1: farther out, clear of M1");
+  const h2 = zoneOf(stepZone(drill.build("H2", null).steps[0], []));
+  assert.notOk(inZone([69.75, 75.25], h2), "H2: 5.8 yalms from M2");
+});
+
 test("Void Stardust into the second weapons: every correct spot is inside its zone", () => {
   const drill = DRILLS.find((m) => m.id === "m-void");
   if (!drill) throw new Error("missing drill m-void");

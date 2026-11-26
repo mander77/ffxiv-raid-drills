@@ -547,6 +547,17 @@ export const DANCE_PAIRS: Record<string, Point> = {MT:[27.5, 50], OT:[72.5, 50],
     BossMod's preset. The tanks are front and back, and the healers are on his sides. */
 export const CLOCK: Record<string, number> = {MT:0, R2:45, H2:90, M2:135, OT:180, M1:225, H1:270, R1:315};
 export const AXE_SPREAD_SPOTS: Record<string, Point> = {M1:[37.5, 62.5], M2:[62.5, 62.5], R1:[9, 68.5], R2:[91, 68.5], H1:[34, 84.5], H2:[66, 84.5]};
+/** How far from your axe spread spot a click still counts: the app's choice. */
+const AXE_SPOT_REACH = 10;
+/* Your axe spread area: near your spot, but a spread (6 yalms) away from the other five spread
+   spots, so your AoE misses them and theirs misses you. */
+function axeSpread(s: Slot): Zone {
+  const c = AXE_SPREAD_SPOTS[s];
+  const holes = Object.entries(AXE_SPREAD_SPOTS).filter(([l]) => l !== s).map(([, q]) => ({q, r:SPREAD_R}));
+  const fn = (p: Point): boolean => dist(p, c) <= AXE_SPOT_REACH && holes.every(h => far(p, h.q, h.r));
+  const part = (deg: number): Stretch | null => cutOut([[0, AXE_SPOT_REACH]], c, deg, holes)[0] ?? null;
+  return {fn, label:c, show:rayArea(c, Array.from({length:361}, (_x, d) => d), part)};
+}
 /* Raw Steel Trophy, scythe: three cleaves. A 90-degree cone on each tank (MT at 317 degrees, OT
    at 43), and a 45-degree cone behind him that the rest of the party shares. The party's spot is
    inside that shared cone, outside his hitbox. */
@@ -1504,7 +1515,7 @@ export const DRILLS: readonly Drill[] = [
   {id:"m-raw-axe", order:2, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: Axe", kind:"spread",
     build:s=>({setup:["The boss pulls out an axe.", "The two tanks stack for a Shared Tank Buster.", "The other six players each get an AoE, so they spread."],
       boss:BOSS, overlays:[...heldWeapon("axe"),{t:"mark",x:AXE_TANKS[0] - 3,y:AXE_TANKS[1],l:"MT",r:"T"},{t:"mark",x:AXE_TANKS[0] + 3,y:AXE_TANKS[1],l:"OT",r:"T"}],
-      steps:[{q:"Click your spread spot.", z:{c:AXE_SPREAD_SPOTS[s], r:10}, a:bySlot(s, {H1:["SSW, far out."], H2:["SSE, far out."]})}],
+      steps:[{q:"Click your spread spot.", z:axeSpread(s), a:bySlot(s, {H1:["SSW, far out."], H2:["SSE, far out."]})}],
       rule:RAW_STEEL_RULE})},
   {id:"m-raw-scythe", order:2.1, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: Scythe", kind:"roleStack",
     build:s=>({setup:["The boss pulls out a scythe.", "He cleaves three times.", "One cone on each tank, and one cone the rest of the party shares.", "So the tanks spread, and the rest of the party stacks."],
