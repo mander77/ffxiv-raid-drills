@@ -3,6 +3,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, assert, test } from "vitest";
 import { FightArena } from "../../src/components/pressure/FightArena";
+import { TOWER_R } from "../../src/data/fights/m11s/attacks";
 import { type FightMode, newFightState, seek, viewOf } from "../../src/lib/fight";
 import { newCode } from "../../src/util";
 import { buildFight } from "../m11s";
@@ -59,4 +60,24 @@ test("Massive Meteor: the stack marker is on its player until the stack, on your
     unmount();
   }
   assert.equal(seen.size, 2, "the marker goes on you in some fights and on someone else in others");
+});
+
+test("a Heartbreak Kick hit flashes only its tower, not the whole floor", () => {
+  const fight = buildFight("H1", "K7Q2");
+  const kick = fight.hits.find((h) => h.name === "Heartbreak Kick 1");
+  assert.ok(kick);
+  const { container } = render(
+    <FightArena
+      view={firstMechanic("run")}
+      slot="H1"
+      correctLabel
+      pickSpot
+      hit={{ n: 1, hit: kick, at: [50, 50] }}
+      replay={0}
+      onPointClick={() => {}}
+    />,
+  );
+  const flash = container.querySelector(".hitfx");
+  assert.equal(flash?.tagName.toLowerCase(), "circle");
+  assert.deepEqual([flash?.getAttribute("cx"), flash?.getAttribute("cy"), flash?.getAttribute("r")], ["50", "50", String(TOWER_R)]);
 });

@@ -95,6 +95,7 @@ function HitEffect({ hit, at, split }: HitEffectProps) {
       </g>
     );
   if (hit.kind === "aoe") return null;
+  if (hit.area) return <circle className={cn("hitfx", hit.kind, hit.cat)} cx={hit.area.c[0]} cy={hit.area.c[1]} r={hit.area.r} />;
   const [x, width] = split && halfWidth ? [50 - halfWidth, halfWidth * 2] : [0, 100];
   return <rect className={cn("hitfx", hit.kind, hit.cat)} x={x} y="0" width={width} height="100" />;
 }

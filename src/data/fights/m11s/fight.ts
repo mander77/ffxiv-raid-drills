@@ -221,11 +221,15 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Arcadion Avalanche", drills:["m-avalanche"], scene:avalancheScene(s, side2, end2, face, swing), k:0, from:lineEnd("Massive Meteor x5"), due:[cactbot("Explosion", 8), cactbot("Arcadion Avalanche")]}
   );
   /* Heartbreak Kick, last so the random parts above keep their codes. Its tower is hit 5, then 6,
-     then 7 times; each set is due at its first hit. Either the party soaks it, or the tanks do
-     with invulns (your pick). */
+     then 7 times. Each set asks twice, at its first hit and at its last, so you hold your spot
+     for the whole set, and the tower stays until the last hit. Either the party soaks it, or the
+     tanks do with invulns (your pick). */
   const kick = choose(c.kick, random() < 0.5 ? "party" : "tanks");
-  segs.push({title:"Heartbreak Kick", drills:["m-hb"], scene:drill("m-hb", s, kick), k:0, from:cactbot("Heartbreak Kick"),
-    due:[cactbot("Heartbreak Kick 1"), cactbot("Heartbreak Kick 1", 2), cactbot("Heartbreak Kick 1", 3)]});
+  const kickDrill = drill("m-hb", s, kick);
+  const kickScene: Scene = {...kickDrill, steps:kickDrill.steps.flatMap(st => [st, {...st, q:"Heartbreak Kick: the last hit of this set. Where do you stand?"}])};
+  segs.push({title:"Heartbreak Kick", drills:["m-hb"], scene:kickScene, k:0, from:cactbot("Heartbreak Kick"),
+    due:[cactbot("Heartbreak Kick 1"), cactbot("Heartbreak Kick 5"), cactbot("Heartbreak Kick 1", 2), cactbot("Heartbreak Kick 6"),
+      cactbot("Heartbreak Kick 1", 3), cactbot("Heartbreak Kick 7")]});
   /* Ecliptic Stampede with no puddles rolls its own random parts (the tank towers, the other player
      in the middle), so its scene is built last: the parts above keep their codes whatever your pick. */
   const eclSeg = segs.find(g => g.drills[0] === "m-ecl-start");
@@ -325,7 +329,7 @@ export function buildHits(f: Fight): Hit[] {
     if(rule.lines){
       const prefix = rule.lines + " ", isHit = (name: string): boolean => name.startsWith(prefix) && /^\d+$/.test(name.slice(prefix.length));
       for(const e of f.events) if(e.t >= a.t && e.t < next && isHit(e.name))
-        hits.push({t:e.t, name:e.name, kind:rule.shared ? "shared" : a.cats.includes("raid") ? "raid" : "aoe", cat:a.cats[0] ?? "spot"});
+        hits.push({t:e.t, name:e.name, kind:rule.shared ? "shared" : a.cats.includes("raid") ? "raid" : "aoe", cat:a.cats[0] ?? "spot", ...(rule.area ? {area:rule.area} : {})});
     }
     else if(a.cats.includes("enrage")) hits.push({t:a.t, name:a.name, kind:"enrage", cat:"enrage"});
     else if(rule.times){

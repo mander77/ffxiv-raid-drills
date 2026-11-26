@@ -138,3 +138,10 @@ test("the Heartbreak Kick tower shows 8 dots: the party can soak it", () => {
   const tower = LEARN_PICTURES["k-hb"]?.("H1").overlays.find((o) => o.t === "tower");
   assert.equal(tower?.t === "tower" ? tower.soak : undefined, 8);
 });
+
+test("the Heartbreak Kick tower is under the boss, in the middle (BossMod)", () => {
+  const pic = LEARN_PICTURES["k-hb"]?.("H1");
+  const tower = pic?.overlays.find((o) => o.t === "tower");
+  assert.deepEqual(tower?.t === "tower" ? [tower.x, tower.y] : undefined, [50, 50]);
+  assert.deepEqual(pic?.boss ? [pic.boss.x, pic.boss.y] : undefined, [50, 50]);
+});

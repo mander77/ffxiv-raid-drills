@@ -9,6 +9,7 @@
 import { P1, P2, P3, P4, type Phase, TIMELINE } from "./timeline";
 import { sec } from "../../../time";
 import { cactbot } from "./sources";
+import { TOWER_R } from "./attacks";
 import { CATEGORIES } from "../../categories";
 import type { Ability, Category, HitRule } from "../../../types";
 
@@ -64,7 +65,7 @@ const N = {
   eclTowers: "Two Tank Towers, and two towers that need two players each.",
   wrath4: "Line AoEs on the players tethered to the portals.",
   wayFireball: "Two-way Fireball: Line Stacks on the two closest players. Four-way Fireball: Pair Stacks on the four closest players.",
-  kick: "A tower that the party shares, hit many times. Each set has one more hit than the last: 5, 6, then 7.",
+  kick: "A tower in the middle, hit many times: the party soaks it, or the tanks with invulns. Each set has one more hit than the last: 5, 6, then 7.",
   enrage: "The enrage. The boss must be dead before this."
 };
 
@@ -80,8 +81,9 @@ const DANCE_HITS = ["Dance of Domination 1", "Dance of Domination 2", "Dance of 
 const DANCE: HitRule = {times:DANCE_HITS.map((name) => ({t:cactbot(name), name}))};
 /** Triple Tyrannhilation: its three Shockwaves, each its own cactbot line. */
 const TRIPLE: HitRule = {lines:"Shockwave"};
-/** Heartbreak Kick: each hit on the shared tower is its own cactbot line. */
-const KICK: HitRule = {shared:true, lines:"Heartbreak Kick"};
+/** Heartbreak Kick: each hit on the tower is its own cactbot line. Only the tower flashes: in the
+    middle (BossMod), its size from BossMod. */
+const KICK: HitRule = {shared:true, lines:"Heartbreak Kick", area:{c:[50, 50], r:TOWER_R}};
 
 /** The ability list, one entry per phase. The phases use this app's names. */
 export const PHASES: readonly {name: Phase; rows: Ability[]}[] = [
