@@ -127,6 +127,12 @@ export const shockwave = (from: Point, rock: Point): Overlay => ATTACK.lineOfSig
 /** Every spread and stack: Raw Steel, Comet, Crushing Comet and Eye of the Hurricane ("range 6
     circle"), on the player at p. */
 export const spreadHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("CometSpread").range);
+/** Raw Steel Trophy, axe: the spread on each of the six who are not tanks (RawSteelAxeImpact,
+    "range 6 circle"), on the player at p. */
+export const rawSteelImpact = (p: Point): Overlay => ATTACK.circle(p, bossmod("RawSteelAxeImpact").range);
+/** Raw Steel Trophy, axe: the Shared Tank Buster the two tanks stack for (RawSteelAxeBuster,
+    "range 6 circle"), on the tanks at p. */
+export const rawSteelBuster = (p: Point): Overlay => ATTACK.circle(p, bossmod("RawSteelAxeBuster").range);
 /** Massive Meteor, the stack on one player of each platform, hit five times ("range 6 circle"),
     on the stack spot p. */
 export const massiveMeteor = (p: Point): Overlay => ATTACK.circle(p, bossmod("MassiveMeteorStack").range);

@@ -342,6 +342,22 @@ test("Raw Steel Trophy axe: the spread area stays a spread away from the other s
   assert.notOk(inZone([69.75, 75.25], h2), "H2: 5.8 yalms from M2");
 });
 
+test("Raw Steel Trophy axe: it draws the tank stack and six spreads, at BossMod's size", () => {
+  const drill = DRILLS.find((m) => m.id === "m-raw-axe");
+  if (!drill) throw new Error("missing drill m-raw-axe");
+  const st = drill.build("H1", null).steps[0];
+  const circles = (st.reveal ?? []).filter((o) => o.t === "aoe");
+  assert.equal(circles.length, 7, "one Shared Tank Buster and six spreads");
+  assert.equal(st.hits?.length, 6, "every hit but your own spread must miss you");
+  const r = ATTACK.yalms(bossmod("RawSteelAxeImpact").range);
+  for (const c of circles) if (c.t === "aoe") assert.closeTo(c.r, r, 1e-9);
+  const marks = (st.reveal ?? []).filter((o) => o.t === "mark");
+  assert.sameMembers(
+    marks.map((o) => (o.t === "mark" ? o.l : "")),
+    ["H2", "M1", "M2", "R1", "R2"],
+  );
+});
+
 test("Void Stardust into the second weapons: every correct spot is inside its zone", () => {
   const drill = DRILLS.find((m) => m.id === "m-void");
   if (!drill) throw new Error("missing drill m-void");

@@ -90,7 +90,7 @@ export const PHASES: readonly {name: Phase; rows: Ability[]}[] = [
   {name:P1, rows:rows([
     [cactbot("Crown of Arcadia"), "Crown of Arcadia", ["raid"], N.crown],
     [cactbot("Raw Steel Trophy (Scythe/Axe)"), "Raw Steel Trophy", ["mech"], N.rawTrophy],
-    [cactbot("Heavy Hitter (Scythe)/Impact x6 (Axe)"), "Raw Steel", ["spot"], N.rawSteel],
+    [cactbot("Heavy Hitter (Scythe)/Impact x6 (Axe)"), "Raw Steel", ["spot", "tank"], N.rawSteel],
     [cactbot("Trophy Weapons"), "Trophy Weapons", ["mech"], N.trophy],
     [cactbot("Assault Evolved"), "Assault Evolved", ["mech"], N.assaultCast],
     [cactbot("Assault Evolved 1"), "Assault Evolved #1", ["mech"], N.assault],
@@ -111,7 +111,7 @@ export const PHASES: readonly {name: Phase; rows: Ability[]}[] = [
     [cactbot("Dance of Domination 1"), "Dance of Domination hits", ["raid"], N.danceHits, DANCE],
     [cactbot("Eye of the Hurricane"), "Explosion + Eye of the Hurricane", ["dodge", "target"], N.eye],
     [cactbot("Raw Steel Trophy Axe", 2), "Raw Steel Trophy", ["mech"], N.rawTrophy],
-    [cactbot("Heavy Hitter (Scythe)", 2), "Raw Steel", ["spot"], N.rawSteel],
+    [cactbot("Heavy Hitter (Scythe)", 2), "Raw Steel", ["spot", "tank"], N.rawSteel],
     [cactbot("Charybdistopia"), "Charybdistopia", ["raid"], N.charyb],
     [cactbot("Ultimate Trophy Weapons"), "Ultimate Trophy Weapons", ["mech"], N.ultimate],
     [cactbot("Assault Apex"), "Assault Apex", ["mech"], N.apex],

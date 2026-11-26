@@ -9,7 +9,7 @@ import { bySlot, withSeed } from "../../../util";
 import { markRole, partyOf } from "../../../party";
 import { angOf, dist, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
 import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, type Weapon, type WeaponType } from "./drills";
-import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, meteorHit, pairTower, proteanCone, proximityDot, raidwide, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, WALL_SECOND_FACING, wallOfFire } from "./attacks";
+import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, meteorHit, pairTower, proteanCone, proximityDot, raidwide, rawSteelBuster, rawSteelImpact, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, WALL_SECOND_FACING, wallOfFire } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Scene, Slot, StepResult, Zone, ZoneShape } from "../../../types";
 
 type Who = [string, MarkRole];
@@ -232,6 +232,13 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...AXE_HITS, ...TANKS_TOGETHER, ...AXE_SPREAD]),
       show([...proteans(CENTER, all), ...all]),
       show([tankCone(CENTER, 317), tankCone(CENTER, 43), sharedCone(CENTER, 0), ...TANKS_APART, ...north])]}; },
+  "k-raw-axe": s => { const d = fromDrill("m-raw-axe", s), co = AXE_SPREAD_SPOTS[other(s)];
+    // On the other healer's spot, a step to their side: their spread and yours both hit you both.
+    const onThem = [...AXE_SPREAD.filter(o => !(o.t === "mark" && o.l === s)), you(s, [co[0] - 7, co[1]])];
+    const south = cluster([50, 66], NONTANK, 3), front = cluster([50, 14], NONTANK, 3);
+    return {...d, options:[
+      hit(youIn(s, d.zone), d.hits), show([rawSteelBuster(AXE_TANKS), ...spreadHits(onThem, rawSteelImpact), ...onThem]),
+      show([...spreadHits(south), ...south]), show([...spreadHits(front), ...front])]}; },
   "k-raw-second": s => { const d = fromDrill("m-raw-scythe", s);
     return {overlays:[tag(50, 8, "0:18 WAS AXE")], boss:d.boss, before:[tag(...HELD_TAG, "?")], after:[...d.overlays, ...d.hits, ...cluster([50, 66], NONTANK, 3)], answer:d.answer, options:[
       show([...SCYTHE_CLEAVES, ...heldWeapon("scythe"), ...TANKS_APART]),

@@ -7,7 +7,13 @@ import type { ReferenceEntry } from "../../../types";
 /** Every mechanic in fight order. The tests check that each Learn card is in exactly one entry,
     and each drill in at least one. */
 export const REFERENCE: readonly ReferenceEntry[] = [
-  { name: "Raw Steel Trophy", picture: "k-raw-first", cards: ["k-raw-first"], drills: ["m-raw-axe", "m-raw-scythe"], timeline: "n-0" },
+  {
+    name: "Raw Steel Trophy",
+    picture: "k-raw-first",
+    cards: ["k-raw-first", "k-raw-axe"],
+    drills: ["m-raw-axe", "m-raw-scythe"],
+    timeline: "n-0",
+  },
   { name: "Trophy Weapons", picture: "k-first-weapon", cards: ["k-first-weapon"], drills: ["m-assault"], timeline: "n-1" },
   { name: "Sword", picture: "k-sword", cards: ["k-sword"], drills: ["m-assault"] },
   { name: "Axe", picture: "k-axe", cards: ["k-axe"], drills: ["m-assault"] },

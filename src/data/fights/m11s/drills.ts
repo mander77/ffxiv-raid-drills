@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit, ROCK_GAP, meteorHit, rockExplosion } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit, ROCK_GAP, meteorHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -557,6 +557,15 @@ function axeSpread(s: Slot): Zone {
   const fn = (p: Point): boolean => dist(p, c) <= AXE_SPOT_REACH && holes.every(h => far(p, h.q, h.r));
   const part = (deg: number): Stretch | null => cutOut([[0, AXE_SPOT_REACH]], c, deg, holes)[0] ?? null;
   return {fn, label:c, show:rayArea(c, Array.from({length:361}, (_x, d) => d), part)};
+}
+/** The axe going off, as you (s) see it: the Shared Tank Buster on the tanks, and a spread on
+    each of the other six on their spots, with the other five's marks. `hits` leaves out your own
+    spread: you take it, and only the others must miss you. */
+function axeHits(s: Slot): {reveal: Overlay[]; hits: Overlay[]} {
+  const others = Object.entries(AXE_SPREAD_SPOTS).filter(([l]) => l !== s);
+  const hits = [rawSteelBuster(AXE_TANKS), ...others.map(([, p]) => rawSteelImpact(p))];
+  const marks = others.map(([l, p]): Overlay => ({t:"mark", x:p[0], y:p[1], l, r:l[0] === "H" ? "H" : "D"}));
+  return {reveal:[...hits, rawSteelImpact(AXE_SPREAD_SPOTS[s]), ...marks], hits};
 }
 /* Raw Steel Trophy, scythe: three cleaves. A 90-degree cone on each tank (MT at 317 degrees, OT
    at 43), and a 45-degree cone behind him that the rest of the party shares. The party's spot is
@@ -1515,7 +1524,7 @@ export const DRILLS: readonly Drill[] = [
   {id:"m-raw-axe", order:2, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: Axe", kind:"spread",
     build:s=>({setup:["The boss pulls out an axe.", "The two tanks stack for a Shared Tank Buster.", "The other six players each get an AoE, so they spread."],
       boss:BOSS, overlays:[...heldWeapon("axe"),{t:"mark",x:AXE_TANKS[0] - 3,y:AXE_TANKS[1],l:"MT",r:"T"},{t:"mark",x:AXE_TANKS[0] + 3,y:AXE_TANKS[1],l:"OT",r:"T"}],
-      steps:[{q:"Click your spread spot.", z:axeSpread(s), a:bySlot(s, {H1:["SSW, far out."], H2:["SSE, far out."]})}],
+      steps:[{q:"Click your spread spot.", z:axeSpread(s), a:bySlot(s, {H1:["SSW, far out."], H2:["SSE, far out."]}), ...axeHits(s)}],
       rule:RAW_STEEL_RULE})},
   {id:"m-raw-scythe", order:2.1, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: Scythe", kind:"roleStack",
     build:s=>({setup:["The boss pulls out a scythe.", "He cleaves three times.", "One cone on each tank, and one cone the rest of the party shares.", "So the tanks spread, and the rest of the party stacks."],
