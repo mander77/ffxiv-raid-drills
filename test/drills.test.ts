@@ -633,11 +633,11 @@ test("Arena Split: a round puts you in close, then at your end, out of the porta
                 assert.ok(inZone(zoneCenter(z4), z4), `${what}: a clear spot is left`);
               }
               for (const st of sc.steps) assertLines(st.a, sc.setup.join(" "));
-              // Your tether: red where you start, blue at the lineup spot.
+              // Your tether: red in close, blue at the lineup spot. Where you start, in the middle
+              // of the platform, a portal near the far end can already stretch it.
               if (tether) {
                 const t = sc.tether;
                 if (!t) throw new Error(`${what}: no tether`);
-                assert.isFalse(isStretched(t.portal, [t.you.x, t.you.y]), `${what}: not stretched at the start`);
                 assert.isFalse(isStretched(t.portal, p1), `${what}: not stretched in close`);
                 assert.ok(isStretched(t.portal, lineup), `${what}: stretched at the lineup`);
                 // The portal is on the other platform's side, in the half away from your end.

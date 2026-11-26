@@ -157,7 +157,8 @@ test("Arena Split: your tether follows you, red until it is stretched, and the o
       side: "east",
       end: "south",
       covered: "inner",
-      endsSide: "west",
+      // The west portals near the middle: from the middle of the east platform, yours is short.
+      endsSide: "east",
       others: ["MT", "M2", "R1"],
     }),
     results: StepResult[] = [];

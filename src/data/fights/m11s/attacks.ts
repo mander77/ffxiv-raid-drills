@@ -86,10 +86,12 @@ export const TETHER_STRETCH = yalms(SPLIT.stretch);
 export const TOWER_KNOCKBACK = yalms(SPLIT.towerKnockback);
 /** True when a tether from its portal to p is stretched. */
 export const isStretched = (portal: Point, p: Point): boolean => dist(portal, p) >= TETHER_STRETCH;
-/** How far outside a platform's outer wall the tether portals stand: 3 yalms. BossMod has no
-    portal spots (it reads them from the game), so this comes from Hector's guide video, drawn to
-    scale (the owner's choice). */
-export const PORTAL_OUT = yalms(3);
+/** How far the tether portals stand from the arena's middle, west and east, in yalms: cactbot's
+    trigger "R11S Arena Split Majestic Meteowrath Tether Collect" lists them at x 69 and 131, with
+    the middle at 100. BossMod has no portal spots (it reads them from the game). */
+const PORTAL_FROM_MIDDLE = 31;
+/** How far outside a platform's outer wall the tether portals stand. */
+export const PORTAL_OUT = yalms(PORTAL_FROM_MIDDLE - SPLIT.platformCenter - SPLIT.platformHalfWidth);
 /** The side portal lines (Majestic Meteorain, "range 60 width 10 rect"): each one runs the whole
     length of a platform and covers this west to east range, half the platform's width. */
 export const PORTAL_LINE_X: readonly (readonly [number, number])[] = SPLIT.lines.map((x) => {

@@ -1002,12 +1002,13 @@ static wins.
     owner, November 2026). In the second round the tethers swap: the four untethered players of
     round 1 get them.
   - The tethers on the arena (issue #85, owner's answers, November 2026):
-    - The other end of each tether is a portal. The four portals stand 3 yalms outside the outer
+    - The other end of each tether is a portal. The four portals stand 5 yalms outside the outer
       walls (`PORTAL_OUT`), two on each side: one side's pair near the ends (5 and 35 yalms from
       the north wall), the other's near the middle (15 and 25), random each round. BossMod has no
-      portal spots, so they come from Hector's video (13:36), drawn to scale. The owner first
-      asked for the wall line, then chose these spots, because on the wall line a correct tether
-      spot measured under 48 yalms and stayed red.
+      portal spots, so they come from cactbot's "Tether Collect" trigger: x 69 and 131, 31 yalms
+      from the middle (the owner, issue #167; before, 3 yalms, from Hector's video, 13:36). The
+      owner first asked for the wall line, then chose these spots, because on the wall line a
+      correct tether spot measured under 48 yalms and stayed red.
     - Red when short, blue when stretched. Stretched means at least 48 yalms from the portal
       (BossMod's `StretchDistance`, `TETHER_STRETCH`), which BossMod calls an estimate. The correct
       tether spot must be stretched too, so the part of the wall next to the gap can be incorrect.
