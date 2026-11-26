@@ -73,10 +73,10 @@ const N = {
 type Row = [t: number, name: string, cats: Category[], note: string, hit?: HitRule];
 const rows = (list: Row[]): Ability[] => list.map(([t, name, cats, note, hit]) => ({t, name, cats, note, ...(hit ? {hit} : {})}));
 
-/** Dance of Domination: seven raidwide hits, evenly apart from cactbot's first to its seventh
-    (0.7 seconds, to one decimal as cactbot writes its times). */
-const DANCE_GAP = Math.round((cactbot("Dance of Domination 7") - cactbot("Dance of Domination 1")) / 6 * 10) / 10;
-const DANCE: HitRule = {times:{n:7, gap:DANCE_GAP, name:"Dance of Domination"}};
+/** Dance of Domination: seven raidwide hits, each at its own cactbot line (the gaps are not even). */
+const DANCE_HITS = ["Dance of Domination 1", "Dance of Domination 2", "Dance of Domination 3", "Dance of Domination 4",
+  "Dance of Domination 5", "Dance of Domination 6", "Dance of Domination 7"] as const;
+const DANCE: HitRule = {times:DANCE_HITS.map((name) => ({t:cactbot(name), name}))};
 /** Heartbreak Kick: each hit on the shared tower is its own cactbot line. */
 const KICK: HitRule = {shared:true, lines:"Heartbreak Kick"};
 
@@ -102,7 +102,7 @@ export const PHASES: readonly {name: Phase; rows: Ability[]}[] = [
     [cactbot("Cometite 1", 2), "Void Stardust baits x3", ["dodge"], N.voidBaits],
     [cactbot("Comet", 2), "Void Stardust spread or stack", ["target"], N.voidEnd],
     [cactbot("Crown of Arcadia", 2), "Crown of Arcadia", ["raid"], N.crown],
-    [cactbot("Dance of Domination Trophy"), "Dance of Domination Trophy", ["raid"], N.danceTrophy],
+    [cactbot("Dance of Domination Trophy"), "Dance of Domination Trophy", ["mech"], N.danceTrophy],
     [cactbot("Dance of Domination 1"), "Dance of Domination hits", ["raid"], N.danceHits, DANCE],
     [cactbot("Eye of the Hurricane"), "Explosion + Eye of the Hurricane", ["dodge", "target"], N.eye],
     [cactbot("Raw Steel Trophy Axe", 2), "Raw Steel Trophy", ["mech"], N.rawTrophy],
