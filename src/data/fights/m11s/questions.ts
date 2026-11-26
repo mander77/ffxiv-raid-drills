@@ -2,6 +2,7 @@
 import { bySlot, shuffle } from "../../../util";
 import { P1, P2, P3, P4, type Phase, TIMELINE } from "./timeline";
 import { tlAbilities } from "./abilities";
+import { TRAIL_DELAY } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import type { Question, QuizItem, Slot, TimelineEvent } from "../../../types";
 
@@ -100,7 +101,7 @@ export const LEARN_CARDS: QuizItem[] = [
     rule:["Never stand in a tornado."]})),
   mq("k-gwof", 14, P2, "4:13", s=>({prompt:"Great Wall of Fire: what is it, and what is your job?",
     options:[{t:"Two Shared Tank Busters. Shield and heal the tanks, and stay out of the fire trail it leaves.", ok:true},{t:"A raidwide. Mitigate it."},{t:"A Party Stack on a healer."},{t:"Proteans on every player."}],
-    why:["The tanks share two hits, or one tank uses an invuln.", "The fire trail it leaves explodes a few seconds later.", "Stay out of it."],
+    why:["The tanks share two hits, or one tank uses an invuln.", `Each fire trail goes off about ${TRAIL_DELAY} seconds later.`, "Stay out of it."],
     rule:["Great Wall of Fire = two Shared Tank Busters.", "Heal the tanks."]})),
   mq("k-orbital", 15, P2, "4:26", s=>({prompt:"Orbital Omen with Fire and Fury. Where are you safe from Fire and Fury?",
     options:[{t:"At the boss's sides. It hits his front and back.", ok:true},{t:"Directly behind the boss."},{t:"Directly in front of the boss."},{t:"Anywhere far away."}],
