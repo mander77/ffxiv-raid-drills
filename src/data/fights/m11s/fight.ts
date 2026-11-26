@@ -141,7 +141,9 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   /* Phases 2 to 4. They are built after Phase 1 on purpose, so a fight code made before they
      existed still replays the same Phase 1. At 9:31 the boss casts Two-way or Four-way Fireball,
      and your Ecliptic Stampede puddles went down along the north or the south wall.
-     Orbital Omen checks you before the #1 lines (with Fire and Fury), the #2 lines and the #3 line.
+     Orbital Omen checks you as the #1 lines, the #2 lines and the #4 lines go off. The cross after
+     #1 runs through the boss's middle, out of both Fire and Fury cones, so it can start before Fire
+     and Fury. The last spot must stay safe through #4, so it is due then.
      The meteor you bait in Meteorain is due when it lands (Cosmic Kiss). */
   const four = choose(c.fireball, random() < 0.5 ? "four" : "two") === "four", wallRoll = random();
   // Two of the four healers and ranged are marked, so you have puddles half the time, along either wall.
@@ -150,7 +152,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   const corner = ECL_CORNERS[Math.floor(random() * ECL_CORNERS.length)], place = wall === "none" ? corner : wall;
   const fireball = four ? "Four-way Fireball" : "Two-way Fireball", ecl = four ? "m-ecl-four" : "m-ecl-two";
   segs.push(
-    {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)"), due:[cactbot("Orbital Omen 1"), cactbot("Orbital Omen 2"), cactbot("Orbital Omen 3")]},
+    {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)"), due:[cactbot("Orbital Omen 1"), cactbot("Orbital Omen 2"), cactbot("Orbital Omen 4")]},
     {title:"Meteorain: First Line Stack", drills:["m-meteor-1"], scene:drill("m-meteor-1", s), k:0, from:cactbot("Meteorain"), due:[cactbot("Fearsome Fireball")]},
     {title:"Meteorain: Your Meteor", drills:["m-meteor-2"], scene:drill("m-meteor-2", s), k:0, from:cactbot("Cosmic Kiss"), due:[cactbot("--Meteor Markers 2--"), cactbot("Cosmic Kiss", 2)]},
     {title:"Meteorain: Third Line Stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:cactbot("--tethers--", 2), due:[cactbot("Fearsome Fireball", 3)]},
@@ -158,7 +160,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Arena Split: Lineup", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:cactbot("Flatliner (split)"), due:[cactbot("Majestic Meteor")]},
     // Its scene comes with the rest of Arena Split below, once the tether round is known.
     {title:"Arena Split: First Towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:cactbot("--tethers--", 3), due:[cactbot("Explosion", 6)]},
-    {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)", 2), due:[cactbot("Orbital Omen 1", 2), cactbot("Orbital Omen 2", 2), cactbot("Orbital Omen 3", 2)]},
+    {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)", 2), due:[cactbot("Orbital Omen 1", 2), cactbot("Orbital Omen 2", 2), cactbot("Orbital Omen 4", 2)]},
     {title:"Ecliptic Stampede: Puddles", drills:["m-ecl-start"], scene:drill("m-ecl-start", s, wall === "none" ? "north" : wall), k:0, from:cactbot("--middle--", 7),
       // Its scene is built again at the end, with no puddles, once every other random part is rolled.
       // Your start spot as the markers come (with the Mammoth Meteor cast). Marked: one drop at each
