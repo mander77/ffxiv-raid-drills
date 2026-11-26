@@ -216,7 +216,7 @@ The header switch is "Light Party", with the buttons 1 and 2.
 | stretched | A tether that is long enough. Arena Split: 48 yalms from its portal. | long enough, pulled |
 | cone | A hit shaped like a slice. Use as a noun. | (do not use "cones" as a verb in new text) |
 | AoE | An area hit. Use with a name: "the axe AoE", "proximity AoE". | |
-| portal | Orbital Omen's line sources, numbered #1 to #4. In the Arena Split, where each tether starts. | |
+| portal | Orbital Omen's line sources, numbered #1 to #4. In the Arena Split and Ecliptic Stampede, where each tether starts. | |
 | portal lines | Arena Split: the side lines (Majestic Meteorain) over half of each platform's width. | |
 | wall-side corner | The corner of a number waymark nearest the north or south wall. | outer corner, inner corner |
 | weapon | The boss's sword, axe or scythe. | |

@@ -785,11 +785,11 @@ export const ECL_CORNERS: readonly EclCorner[] = ["ne", "se", "sw", "nw"];
 /** A corner's direction from the boss, in degrees clockwise from north. */
 const CORNER_DEG: Record<EclCorner, number> = {ne:45, se:135, sw:225, nw:315};
 /** The Ecliptic tower on each intercard (the same spots as ECL_TOWERS, by name). */
-const ECL_TOWER_AT: Record<EclCorner, Point> = {ne:[72, 28], se:[72, 72], sw:[28, 72], nw:[28, 28]};
+export const ECL_TOWER_AT: Record<EclCorner, Point> = {ne:[72, 28], se:[72, 72], sw:[28, 72], nw:[28, 28]};
 type Wall = "north" | "east" | "south" | "west";
 /** The Ecliptic tether portals: one just inside the middle of each wall (Hector's Fixed Stampede
     mini-guide, 1:46). Drawn inside the edge, as Orbital Omen's portals are; the app's choice. */
-const ECL_PORTAL: Record<Wall, Point> = {north:[50, 2.6], east:[97.4, 50], south:[50, 97.4], west:[2.6, 50]};
+export const ECL_PORTAL: Record<Wall, Point> = {north:[50, 2.6], east:[97.4, 50], south:[50, 97.4], west:[2.6, 50]};
 /** Where your tether comes from when you stretch it to each corner: go to the wall opposite your
     portal, then clockwise to the corner (the mini-guide, 2:15). A north portal sends you SW. */
 const PORTAL_FOR: Record<EclCorner, Wall> = {sw:"north", nw:"east", ne:"south", se:"west"};
@@ -797,7 +797,7 @@ const OPPOSITE: Record<Wall, Wall> = {north:"south", east:"west", south:"north",
 /** Where a tether is stretched: a box in the corner, 15 units each way, and the spot the moving
     marker goes to. The app's choice. */
 const CORNER_BOX: Record<EclCorner, RectZone> = {ne:{rect:[85, 0, 100, 15]}, se:{rect:[85, 85, 100, 100]}, sw:{rect:[0, 85, 15, 100]}, nw:{rect:[0, 0, 15, 15]}};
-const CORNER_STAND: Record<EclCorner, Point> = {ne:[95, 5], se:[95, 95], sw:[5, 95], nw:[5, 5]};
+export const CORNER_STAND: Record<EclCorner, Point> = {ne:[95, 5], se:[95, 95], sw:[5, 95], nw:[5, 5]};
 /** A corner at random, for a Practice try with no puddles. */
 const randomCorner = (): EclCorner => ECL_CORNERS[Math.floor(random() * ECL_CORNERS.length)];
 /** Where your Ecliptic Stampede ends: your puddles' wall, or the corner your tether ends in. */
