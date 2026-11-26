@@ -92,7 +92,8 @@ type OverlayShape =
   | ({ t: "band"; w: number } & Line)
   | ({ t: "guide" } & Line)
   // A tether: from its portal (x, y) to the player (x2, y2). It shows stretched when it is long enough.
-  | ({ t: "tether" } & Line)
+  // `fixed` is a tether that is never stretched (Foregone Fatality's, which a tank picks up).
+  | ({ t: "tether"; fixed?: boolean } & Line)
   // Where a cone points: an arrow from its source (x, y) out to (x2, y2).
   | ({ t: "aim" } & Line)
   /** The boss turning: an arrow along an arc of radius `r` around (x, y), from the facing `from`

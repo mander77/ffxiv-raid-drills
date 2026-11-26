@@ -954,6 +954,15 @@ static wins.
 - Meteorain, the first Line Stack (owner, November 25): the tanks take it in front, so the party's
   spot starts outside the boss's hitbox: a 7-unit circle at max melee on the NW line, inside the
   line. Farther out, a healer cannot get back under the boss in time for the second markers.
+- Meteorain, Foregone Fatality (owner, November 25, from Hector's guide video, 9:51 to 11:40): two
+  portals appear on random cardinals, and each tethers to one of the two newest rocks. The MT picks
+  up the tether to the northern rock, the OT the southern one. The drills draw the portals, the
+  tethers and the tanks, halfway along each tether (the app's choice), from the pattern code, so
+  "Your Meteor", "Third Line Stack" and "Last Line Stack" have New Pattern. These tethers never
+  stretch: they draw red and are named only "Tether". In the first Line Stack, MT and OT stand in
+  front of the party. Fight codes made before this build other patterns after Meteorain.
+- Meteorain, your rock in "Third Line Stack" (owner, November 25): it stays at the best NW spot, not
+  where you dropped it. No mechanic carries a drop into the next one.
 - Meteorain, the gap between rocks (owner, November 25): a healer's drop spot keeps 6 yalms from
   every rock already down (`ROCK_GAP`). No source gives the distance at which two rocks explode;
   6 yalms is twice BossMod's trigger radius, which BossMod calls a guess. H1's NW wedge now starts at

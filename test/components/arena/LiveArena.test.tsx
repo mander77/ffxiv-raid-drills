@@ -177,3 +177,14 @@ test("Arena Split: your tether follows you, red until it is stretched, and the o
   assert.isNull(screen.queryByLabelText("Tether, not stretched"));
   assert.ok(screen.getByText("M2"), "on the other tethered players");
 });
+
+test("Meteorain: the tanks pick up Foregone Fatality's tethers, which never stretch", () => {
+  const drill = DRILLS.find((m) => m.id === "m-meteor-3");
+  if (!drill) throw new Error("missing drill m-meteor-3");
+  const scene = drill.build("H1", null);
+  render(<LiveArena scene={scene} k={0} results={[]} showLast={false} hint={false} />);
+  assert.equal(screen.getAllByLabelText("Tether").length, 2);
+  assert.isNull(screen.queryByLabelText("Tether, stretched"));
+  assert.ok(screen.getByText("MT"));
+  assert.ok(screen.getByText("OT"));
+});

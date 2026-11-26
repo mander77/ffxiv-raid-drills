@@ -122,7 +122,7 @@ export function Shape({ overlay: o }: ShapeProps) {
     case "guide":
       return <line className="guide" x1={round2(o.x)} y1={round2(o.y)} x2={round2(o.x2)} y2={round2(o.y2)} />;
     case "tether":
-      return <Tether portal={[o.x, o.y]} to={[o.x2, o.y2]} />;
+      return <Tether portal={[o.x, o.y]} to={[o.x2, o.y2]} fixed={o.fixed} />;
     case "portal":
       return (
         <g className="portal" transform={`translate(${round2(o.x)} ${round2(o.y)})`}>
@@ -138,15 +138,17 @@ interface TetherProps {
   to: Point;
   /** Whether the tether is stretched. By default, from its length and the fight's stretch distance. */
   stretched?: boolean;
+  /** A tether that is never stretched: always red, named only "Tether". */
+  fixed?: boolean;
 }
 
 /** A tether from its portal to a player: a solid cord on a light outline, red until it is long
     enough, then blue. Its name says which, for a screen reader, and its title shows on hover. */
-export function Tether({ portal, to, stretched }: TetherProps) {
+export function Tether({ portal, to, stretched, fixed = false }: TetherProps) {
   const reach = useArenaSizes().split?.tetherStretch ?? Number.POSITIVE_INFINITY;
-  const isStretched = stretched ?? dist(portal, to) >= reach;
+  const isStretched = !fixed && (stretched ?? dist(portal, to) >= reach);
   const ends = { x1: round2(portal[0]), y1: round2(portal[1]), x2: round2(to[0]), y2: round2(to[1]) };
-  const name = isStretched ? "Tether, stretched" : "Tether, not stretched";
+  const name = fixed ? "Tether" : isStretched ? "Tether, stretched" : "Tether, not stretched";
   return (
     <g className={cn("tether", isStretched && "stretched")} aria-label={name}>
       <title>{name}</title>
