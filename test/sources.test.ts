@@ -10,8 +10,14 @@ import * as ATTACKS from "../src/data/fights/m11s/attacks";
 import { DRILLS } from "../src/data/fights/m11s/drills";
 import { buildFight, cleanChoices } from "../src/data/fights/m11s/fight";
 import { LEARN_CARDS, TIMELINE_CARDS } from "../src/data/fights/m11s/questions";
-import { BOSSMOD_ABILITIES, BOSSMOD_ACTORS, BOSSMOD_ARENA_HALF, CACTBOT_LINES } from "../src/data/fights/m11s/source.gen";
-import { bossmod } from "../src/data/fights/m11s/sources";
+import {
+  BOSSMOD_ABILITIES,
+  BOSSMOD_ACTORS,
+  BOSSMOD_ARENA_HALF,
+  CACTBOT_LINES,
+  CACTBOT_ULTIMATE_CALLS,
+} from "../src/data/fights/m11s/source.gen";
+import { bossmod, cactbot, type LineName, ultimateSpawns } from "../src/data/fights/m11s/sources";
 import { TIMELINE } from "../src/data/fights/m11s/timeline";
 import { nearClock } from "../src/time";
 import type { Slot } from "../src/types";
@@ -73,6 +79,26 @@ test("every timeline line, hit and turn of the full fight is at a cactbot line, 
       assert.ok(known || SCENE_STARTS.includes(g.from), `${g.title}: appears at ${g.from}`);
     }
     assert.ok(isLine(f.split[0]) && isLine(f.split[1]), "the arena split starts and ends at cactbot lines");
+  }
+});
+
+test("Ultimate Trophy Weapons: each weapon spawns its cactbot call before its hit, one at a time", () => {
+  const spawns = ultimateSpawns();
+  assert.lengthOf(spawns, 6);
+  // cactbot's trigger: the call comes "delay" after the spawn and counts down "duration" to the hit.
+  spawns.forEach((t, i) => {
+    const { delay, duration } = CACTBOT_ULTIMATE_CALLS[i];
+    assert.closeTo(t + delay + duration, cactbot(`Weapon ${i + 1}` as LineName, i < 3 ? 3 : 1), SAME, `weapon ${i + 1}`);
+  });
+  // Worked out by hand from the pinned trigger and timeline: one spawn every 4 seconds.
+  assert.deepEqual(spawns, [185.8, 189.8, 193.8, 197.8, 201.8, 205.8]);
+  assert.isAbove(spawns[0], cactbot("Ultimate Trophy Weapons"), "after the cast");
+  for (const f of everyFight()) {
+    const g = f.segs.find((x) => x.title === "Ultimate Trophy Weapons");
+    assert.deepEqual(g?.spawns, spawns, "the full fight spawns them at these times");
+    g?.due.forEach((d, i) => {
+      assert.isBelow(spawns[i], d, `weapon ${i + 1} spawns before its hit`);
+    });
   }
 });
 

@@ -226,7 +226,8 @@ export interface Scene {
   bossAt?: (n: number) => Boss;
   split?: boolean;
   spawnPlay?: boolean;
-  /** How many weapons show before the first hit. Each answered step shows one more. */
+  /** How many weapons show before the first hit. Each answered step shows one more. The full
+      fight shows them at their spawn times instead (FightSeg.spawns). */
   spawnAhead?: number;
   /** Your tether: it runs from its portal to where you stand, from the first step. Before your
       first answer you stand at your mark `you`. */
@@ -402,6 +403,10 @@ export interface FightSeg {
       `weapons` steps are the weapons: before he turns, the player cannot know where to go for
       them, so the watched run shows no spot for them until then. */
   turn?: { at: number; f: number; weapons: number };
+  /** When each weapon spawns, in seconds into the fight, for a scene whose weapons come in one
+      at a time (Ultimate Trophy Weapons). A weapon shows from its time, and nobody can know its
+      spot before then. Left out, the scene's spawnAhead rule shows them. */
+  spawns?: readonly number[];
   /** Where to pre-position before this stretch, when the first move is known in advance (the
       first Void Stardust puddle is always north, the second one is at the boss's butt). The
       player goes there just after the last hit before it. Without it, the player waits up close

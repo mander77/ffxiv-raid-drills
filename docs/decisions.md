@@ -950,6 +950,14 @@ static wins.
   the weapon spot, so it does not move when the baits start. No source gives the distance. A
   later sword pocket leaves out the 4-yalm voidzone of each tornado already on the floor: a click
   there counts as incorrect, as in the Tornadoes drill.
+- Ultimate Trophy Weapons, the spawns (issue #158, the owner's choice, November 26): the weapons
+  spawn one at a time, so a player reads the direction from the first two. Pressure shows each
+  weapon from its spawn time (`FightSeg.spawns`, `ultimateSpawns()`): the weapon's cactbot hit
+  ("Weapon 1" to "Weapon 6") minus the delay and duration of its call in cactbot's trigger
+  "R11S Ultimate Trophy Weapons" (`ultimateTrophyWeaponsMap`, imported as the extra
+  `ultimateCalls`). That gives one spawn every 4 seconds from 3:05.8. BossMod puts the first one
+  8.6 seconds before Weapon 1, a tenth of a second later. Practice keeps its own pace: three
+  show at once, then one more with each answer.
 - Ultimate Trophy Weapons, the tornadoes (issue #79, the owner's answer, November 24): every
   tornado has two baits. Facing in from the tornado, the support stands on its left and the DPS
   on its right, at its edge, 45 degrees off the line to the middle (`TORNADO_BAITS`). After the
@@ -1241,6 +1249,8 @@ static wins.
     after #94. M11S moves onto it too.
   - M11S's Arena Split is an "extra" in its list (`"arenaSplit": "Flatliner.cs"`), read by the
     import's own parser. M11S's generated data stayed the same; only its header comment changed.
+  - An extra can read cactbot's triggers file too: M11S's `"ultimateCalls":
+    "ultimateTrophyWeaponsMap"` names the call table it reads there (issue #158).
   - M10S is imported (owner's choice, November 24) at the newest commits, for the draft. It has
     only its list and generated files, and is not one of the site's fights.
   - M12S waits (owner's choice). It will need more than the import has today: its timeline has

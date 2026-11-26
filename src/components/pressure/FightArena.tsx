@@ -53,6 +53,7 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
       correctLabel={correctLabel}
       pickSpot={pickSpot}
       target={v.target}
+      spawned={v.spawned}
       onPointClick={onPointClick}
       className={cn("cursor-pointer", className)}
       effects={

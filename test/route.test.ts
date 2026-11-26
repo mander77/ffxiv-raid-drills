@@ -286,3 +286,16 @@ test("after each tower's throw, the next round's puddles go toward where you lan
       });
     }
 });
+
+test("the watched run shows no Ultimate Trophy Weapons spot before its weapon spawns", () => {
+  for (const s of SLOTS) {
+    const f = buildFight(s, newCode(), RANDOM),
+      route = correctRoute(f);
+    const si = f.segs.findIndex((g) => g.title === "Ultimate Trophy Weapons");
+    const spawns = f.segs[si].spawns ?? [];
+    assert.lengthOf(spawns, 6);
+    for (const st of route.filter((x) => x.si === si)) assert.isAtLeast(st.show, spawns[st.j], `weapon ${st.j + 1}`);
+    const before = runnerAt(route, spawns[0] - 0.05).target;
+    assert.isFalse(before?.si === si, "the first weapon's spot shows before it spawns");
+  }
+});

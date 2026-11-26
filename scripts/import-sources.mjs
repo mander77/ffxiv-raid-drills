@@ -19,7 +19,8 @@
 // - BossMod's module folder for the fight: every attack's size and shape, the boss's hitbox and
 //   the arena, from the enums and module files. Its mechanic files hold positions and safe spots
 //   (for the draft too). A fight's "extras" read
-//   more from one file: M11S's "arenaSplit" reads the Arena Split from its Flatliner file.
+//   more from one file: M11S's "arenaSplit" reads the Arena Split from its Flatliner file, and
+//   "ultimateCalls" reads a call table (named in sources.json) from cactbot's triggers file.
 //
 // - BossMod's state list for the fight (<module>States.cs): the boss's states in fight order,
 //   grouped by phase block, with their delays and the components they turn on and off (for the
@@ -197,6 +198,27 @@ export function parseLineOfSight(meteorain) {
   const radius = /class TripleTyrannhilation[\s\S]*?CometRadius = (\d+(?:\.\d+)?)f;/.exec(meteorain);
   if (!radius) throw new Error("bossmod: no Triple Tyrannhilation comet radius in the Meteorain file");
   return { cometRadius: Number(radius[1]) };
+}
+
+/** A cactbot call table for weapons that spawn one after another (M11S's
+    ultimateTrophyWeaponsMap, named in sources.json): for each weapon, in spawn order, how long
+    after its spawn the call comes ("delay") and how long the call counts down to its hit
+    ("duration"), in seconds. The table's empty slots ("undefined", for the weapons of earlier
+    sets) are left out. */
+export function parseWeaponCalls(triggers, name) {
+  if (!/^\w+$/.test(name)) throw new Error(`cactbot: "${name}" is not a name`);
+  const table = new RegExp(`^const ${name}\\b[^=]*= \\[([\\s\\S]*?)^\\];`, "m").exec(triggers);
+  if (!table) throw new Error(`cactbot: no ${name} in the triggers file`);
+  const entries = table[1].split(/(?<=\}|undefined),/).filter((x) => x.trim());
+  const calls = entries
+    .filter((x) => x.trim() !== "undefined")
+    .map((x) => {
+      const m = /^\s*\{\s*delay: (\d+(?:\.\d+)?),\s*duration: (\d+(?:\.\d+)?),?\s*\}\s*$/.exec(x);
+      if (!m) throw new Error(`cactbot: an entry of ${name} the import does not read: ${x.trim()}`);
+      return { delay: Number(m[1]), duration: Number(m[2]) };
+    });
+  if (calls.length === 0) throw new Error(`cactbot: ${name} has no calls`);
+  return calls;
 }
 
 /** A value as TypeScript text, on one line. */
@@ -640,8 +662,9 @@ export function parseStates(raw) {
   return phases;
 }
 
-/** The extras a fight can ask for: each reads one more file of the BossMod module folder and
-    adds a value to source.gen.ts. */
+/** The extras a fight can ask for: each reads one more file of the BossMod module folder (the
+    file sources.json names), or with `cactbot`, cactbot's triggers file (sources.json names
+    what it reads there), and adds a value to source.gen.ts. */
 const EXTRAS = {
   arenaSplit: {
     parse: parseSplit,
@@ -660,6 +683,17 @@ const EXTRAS = {
       "/** BossMod's Triple Tyrannhilation, in yalms: the radius of each comet that blocks the",
       '    Shockwaves (BossMod: "guessing"). */',
       `export const BOSSMOD_LOS = ${ts(v)} as const;`,
+      "",
+    ],
+  },
+  ultimateCalls: {
+    cactbot: true,
+    parse: parseWeaponCalls,
+    out: (v) => [
+      "/** cactbot's call for each weapon of Ultimate Trophy Weapons (trigger \"R11S Ultimate Trophy",
+      '    Weapons"), in spawn order: how long after the weapon spawns the call comes (delay), and',
+      "    how long the call counts down to the weapon's hit (duration), in seconds. */",
+      `export const CACTBOT_ULTIMATE_CALLS = ${ts(v)} as const;`,
       "",
     ],
   },
@@ -752,7 +786,8 @@ export const fightsWithSources = () =>
 export async function importFight(fight, s = readSources(fight)) {
   const get = (repo, path) => download(repo, s.cactbot.repo === repo ? s.cactbot.commit : s.bossmod.commit, path);
   const lines = parseCactbot(await get(s.cactbot.repo, s.cactbot.timeline));
-  const triggers = parseTriggers(await get(s.cactbot.repo, s.cactbot.triggers));
+  const triggersText = await get(s.cactbot.repo, s.cactbot.triggers);
+  const triggers = parseTriggers(triggersText);
   const { folder, mechanics: files = [] } = s.bossmod.module;
   const name = moduleName(folder);
   const moduleText = await get(s.bossmod.repo, `${folder}/${name}.cs`);
@@ -772,8 +807,10 @@ export async function importFight(fight, s = readSources(fight)) {
   const statesPath = `${folder}/${name}States.cs`;
   const states = { path: statesPath, phases: parseStates(await get(s.bossmod.repo, statesPath)) };
   const extras = {};
-  for (const [extra, file] of Object.entries(s.extras ?? {}))
-    extras[extra] = EXTRAS[extra].parse(await get(s.bossmod.repo, `${folder}/${file}`));
+  for (const [extra, value] of Object.entries(s.extras ?? {}))
+    extras[extra] = EXTRAS[extra].cactbot
+      ? EXTRAS[extra].parse(triggersText, value)
+      : EXTRAS[extra].parse(await get(s.bossmod.repo, `${folder}/${value}`));
   return {
     [join(FIGHTS, fight, "source.gen.ts")]: generate(s, lines, bossmod, extras),
     [join(FIGHTS, fight, "sources.extra.gen.json")]: generateExtra(s, triggers, mechanics, states),

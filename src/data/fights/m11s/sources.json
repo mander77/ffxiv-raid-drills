@@ -25,6 +25,7 @@
   },
   "extras": {
     "arenaSplit": "Flatliner.cs",
-    "lineOfSight": "Meteorain.cs"
+    "lineOfSight": "Meteorain.cs",
+    "ultimateCalls": "ultimateTrophyWeaponsMap"
   }
 }
