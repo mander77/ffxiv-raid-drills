@@ -50,8 +50,11 @@ export interface RectZone {
   rect: RectBox;
   look?: ZoneLook;
 }
-interface PolyShape {
+/** A polygon. A ring (the arena out of a tower) has its inner edge as a `hole`, so no line joins
+    the two edges. */
+export interface PolyShape {
   poly: Point[];
+  hole?: Point[];
   look?: ZoneLook;
 }
 /** A zone decided by a rule. `show` is what the map draws after an answer. */
