@@ -9,6 +9,11 @@ import type { Point, Slot, StepResult } from "../src/types";
 
 const REPEATS = 200;
 const SLOTS: Slot[] = ["H1", "H2"];
+/** The time limit of the Watch the Correct Moves test, in milliseconds. It takes about 2 seconds
+    on a fast computer, most of it in the Arena Split steps, which work out each safe area to draw.
+    A slower CI runner, or a build running beside it, went over Vitest's default 5 seconds, so it
+    gets more room. Fewer repeats would check fewer Arena Split patterns. */
+const WATCH_TIMEOUT = 20_000;
 
 test("clock and sec turn fight times both ways", () => {
   assert.equal(sec("1:24"), 84);
@@ -123,7 +128,7 @@ test("the second Raw Steel Trophy and the second Void Stardust go the other way"
   }
 });
 
-test("Watch the Correct Moves: the spot it clicks is correct for every step", () => {
+test("Watch the Correct Moves: the spot it clicks is correct for every step", { timeout: WATCH_TIMEOUT }, () => {
   for (let i = 0; i < REPEATS; i++)
     for (const s of SLOTS) {
       for (const g of buildFight(s).segs) {
