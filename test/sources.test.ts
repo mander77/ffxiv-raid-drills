@@ -68,6 +68,7 @@ test("every timeline line, hit and turn of the full fight is at a cactbot line, 
     for (const g of f.segs) {
       for (const d of g.due) assert.ok(isLine(d) || isCastStart(d) || isLineEnd(d), `${g.title}: a hit at ${d}`);
       if (g.turn) assert.ok(isCastStart(g.turn.at), `${g.title}: the turn at ${g.turn.at}`);
+      if (g.firstHit != null) assert.ok(isLine(g.firstHit), `${g.title}: the first hit at ${g.firstHit}`);
       const known = isLine(g.from) || isCastStart(g.from) || isLineEnd(g.from);
       assert.ok(known || SCENE_STARTS.includes(g.from), `${g.title}: appears at ${g.from}`);
     }

@@ -61,8 +61,9 @@ test("the styles page shows the tether beside the guide, short and stretched", (
   assert.ok(lines);
   assert.deepEqual(
     [...lines.querySelectorAll("h3")].map((h) => h.textContent),
-    ["Guide", "Boss Turn", "Tether", "Stretched Tether", "Portal"],
+    ["Guide", "Boss Turn", "Tether", "Stretched Tether", "Portal", "Stack Marker"],
   );
+  assert.ok(lines.querySelector(".stackmk"), "a stack marker");
   assert.ok(lines.querySelector(".turnarrow"), "the boss turn arrow");
   assert.ok(lines.querySelector(".tether:not(.stretched)"), "a red tether");
   assert.ok(lines.querySelector(".tether.stretched"), "a blue tether");

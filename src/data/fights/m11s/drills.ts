@@ -1280,15 +1280,39 @@ export function splitTowers(s: Slot, side: SplitSide, end: SplitEnd, tether: {po
     rule:["Towers: the quadrant you ended the last tethers and markers in.", ...TOWER_RULE]};
 }
 
+/** How many times Massive Meteor hits: cactbot's "Massive Meteor x5". */
+const MASSIVE_HITS = 5;
+/** How far north of you another player stands in a stack, so their mark and yours both show. The
+    app's choice. */
+const BESIDE = 5;
+/** Who has Massive Meteor's stack marker on your platform, and at which end they stand. */
+export interface StackWearer { who: SlotName; end: SplitEnd }
+/** The stack marker goes on one of the four players of each platform: on you one time in four.
+    After the swaps any of the others can be on your platform with you. Random. */
+export function randomStackWearer(s: Slot): StackWearer {
+  const you = random() < 0.25, other = randomOthers(s, 1)[0], end = randomEnd();
+  return {who:you ? s : other, end};
+}
+
 /** Massive Meteor: the four players on a platform stack in close, at the middle of its inner edge.
-    The stack goes on one player of each platform and hits five times. */
-export function massiveScene(side: SplitSide): Scene {
-  return {setup:["Massive Meteor: a five-hit stack on one player of each platform.", "You are on the " + side + " platform."],
-    split:true, boss:BOSS, overlays:[],
+    The stack goes on one player of each platform and hits five times. Before it, the player with
+    the marker stands near the outer corner of one end, where the last towers left them, with
+    room for the marker's arrows: the app's choice. */
+export function massiveScene(s: Slot, side: SplitSide, w: StackWearer): Scene {
+  const you = w.who === s, IN = 8;
+  const on: Extract<Overlay, {t: "mark"}> = {t:"mark", x:side === "west" ? PLATFORM_X.west[0] + IN : PLATFORM_X.east[1] - IN, y:w.end === "north" ? IN : 100 - IN,
+    l:w.who, r:markRole(partyOf(w.who).role)};
+  return {setup:["Massive Meteor: a five-hit stack on one player of each platform.", "You are on the " + side + " platform.",
+      you ? "You have the stack marker." : w.who + " has the stack marker."],
+    split:true, boss:BOSS, overlays:[], headMark:{on, you, n:MASSIVE_HITS},
     steps:[{q:"Where do you stack?", z:SPLIT_INNER[side],
       a:["In close, at the middle of the platform's inner edge.", "All four on the platform stack, so the melee can hit the boss.", "Both healers may end on one platform: stay near the middle."],
-      // You take the stack on purpose, so it is not an attack you must miss.
-      revealAt:p => [massiveMeteor(p), {t:"target", x:p[0], y:p[1]}, {t:"tag", x:p[0], y:p[1] + 9, s:"5 HITS"}], hits:[]}],
+      // You take the stack on purpose, so it is not an attack you must miss. The player with the
+      // marker came to the stack too, just north of you (the app's choice), and it goes off on them.
+      revealAt:p => {
+        const [x, y] = you ? p : [p[0], p[1] - BESIDE];
+        return [massiveMeteor([x, y]), ...(you ? [] : [{...on, x, y}]), {t:"stackMark", x, y, n:MASSIVE_HITS}];
+      }, hits:[]}],
     rule:["All four on a platform stack.", "Mitigate and heal between the hits."]};
 }
 
@@ -1507,7 +1531,7 @@ export const DRILLS: readonly Drill[] = [
     build:(s, v)=>{ const side = randomSide(), end = randomEnd();
       return splitTowers(s, side, end, v === "tether" ? {portal:portalAt(randomSide(), randomEnd(), randomEndsSide())} : null); }},
   {id:"m-massive", order:20, phase:P3, time:"7:25", title:"Massive Meteor", kind:"platformStack", random:true,
-    build:()=>massiveScene(randomSide())},
+    build:s=>{ const side = randomSide(); return massiveScene(s, side, randomStackWearer(s)); }},
   {id:"m-avalanche", order:21, random:true, phase:P3, time:"7:39", title:"Arcadion Avalanche", kind:"towerKnockback", soak:SPLIT_SOAK,
     // Your platform is random, as it is after the two rounds of tethers. It is drawn last, so the
     // codes from before keep their tower end, facing and turn.

@@ -145,8 +145,13 @@ export function askAt(g: FightSeg, j: number): number {
 }
 
 /** The player: when it gives the correct move of step j. At its hit, or a look-ahead step
-    LOOK_SHOW seconds before it. */
-export const watchAt = (g: FightSeg, j: number): number => (g.scene.steps[j].lookAhead ? Math.max(g.from, g.due[j] - LOOK_SHOW) : g.due[j]);
+    LOOK_SHOW seconds before it, or the last step of an attack that hits several times at its
+    first hit (FightSeg.firstHit). */
+export function watchAt(g: FightSeg, j: number): number {
+  if (g.scene.steps[j].lookAhead) return Math.max(g.from, g.due[j] - LOOK_SHOW);
+  if (g.firstHit != null && j === g.due.length - 1) return g.firstHit;
+  return g.due[j];
+}
 
 /** The player: where a click on step chip j goes. CAST_GO_LEAD seconds before its correct move,
     as for a cast coming up, but not before the step is asked, and never past its move, so you
@@ -205,7 +210,9 @@ export function seek(s: FightState, to: number): void {
   if (t < s.t)
     s.fight.segs.forEach((g, si) => {
       const res = s.results[si];
-      while (res.length && g.due[res.length - 1] > t) res.pop();
+      // An answer goes when the time is before it: its hit, or on the player, when it gave it.
+      const at = (j: number): number => (s.mode === "watch" ? watchAt(g, j) : g.due[j]);
+      while (res.length && at(res.length - 1) > t) res.pop();
     });
   jump(s, t);
 }

@@ -1076,6 +1076,11 @@ static wins.
   - The second and third towers: the tower in the quadrant where your last tether or marker was.
   - Massive Meteor: the four on a platform stack at the middle of its inner edge, next to the boss,
     so the melee can hit him. Learn's Massive Meteor picture shows it there too.
+  - Massive Meteor's stack marker (BossMod `StackWithIcon`, no target filter): the owner chose
+    "you or a platform-mate". It is on you one time in four, else on any other player, who waits
+    near an outer corner of your platform (the app's choice). It shows four arrows in at the player
+    and a 5 for the hits. After the answer the marked player stands just north of you and the
+    stack's circle is on them. Watch the Correct Moves shows it from the first hit to the fifth.
   - Arcadion Avalanche: he faces one platform and grabs it. The towers knock you to the other one.
     Then go to its far end, by the number waymark, away from the side he turns from. The drill
     shows his turn as a dashed arrow around him (the app's choice).

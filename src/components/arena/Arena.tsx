@@ -198,13 +198,22 @@ export function pieceLayers(
   return {
     ground: draw(
       hitsFirst(
-        os.filter((o) => o.t !== "tag" && o.t !== "mark" && o.t !== "portal" && o.t !== "tether" && o.t !== "knockback" && !isWeapon(o)),
+        os.filter(
+          (o) =>
+            o.t !== "tag" &&
+            o.t !== "mark" &&
+            o.t !== "stackMark" &&
+            o.t !== "portal" &&
+            o.t !== "tether" &&
+            o.t !== "knockback" &&
+            !isWeapon(o),
+        ),
       ),
     ),
     drops: draw(os.filter((o) => o.t === "tether")),
     weapons: draw(os.filter(isWeapon)),
     pushes: draw(os.filter((o) => o.t === "knockback")),
     labels: draw(os.filter((o) => o.t === "tag" || o.t === "portal")),
-    marks: draw(os.filter((o) => o.t === "mark")),
+    marks: draw(os.filter((o) => o.t === "mark" || o.t === "stackMark")),
   };
 }

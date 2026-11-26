@@ -96,6 +96,8 @@ export function Shape({ overlay: o }: ShapeProps) {
       );
     case "target":
       return <circle className="target" cx={round2(o.x)} cy={round2(o.y)} r="4.2" />;
+    case "stackMark":
+      return <StackMark x={o.x} y={o.y} n={o.n} />;
     case "puddle":
       return <circle className="puddle" cx={round2(o.x)} cy={round2(o.y)} r={o.r} />;
     case "tag": {
@@ -332,3 +334,38 @@ export const isHit = (o: Overlay): boolean =>
 /** Overlays with the attacks first, then the rest (safe rings, towers) on top, so an attack never
     covers them. */
 export const hitsFirst = (os: readonly Overlay[]): Overlay[] => [...os.filter(isHit), ...os.filter((o) => !isHit(o))];
+
+/** How far from the player a stack marker's arrows start and end, in arena units, along each
+    diagonal. The player's mark is 4.8 across. The app's choice. */
+const STACK_ARROW = { from: 7, to: 3.9 };
+/** The four diagonals a stack marker's arrows come in along. */
+const STACK_CORNERS = [
+  [-1, -1],
+  [1, -1],
+  [-1, 1],
+  [1, 1],
+] as const;
+
+interface StackMarkProps {
+  x: number;
+  y: number;
+  /** How many times the stack hits, shown under the player. */
+  n?: number;
+}
+
+/** A stack marker: four arrows from the corners pointing in at the player, as on the Stack icon. */
+function StackMark({ x, y, n }: StackMarkProps) {
+  const { from, to } = STACK_ARROW;
+  return (
+    <g className="stackmk" transform={`translate(${round2(x)} ${round2(y)})`} aria-label="Stack marker">
+      <title>Stack marker</title>
+      {STACK_CORNERS.map(([dx, dy]) => (
+        <g key={`${dx},${dy}`}>
+          <line x1={dx * from} y1={dy * from} x2={dx * to} y2={dy * to} />
+          <path d={`M${dx * to} ${dy * (to + 1.6)}V${dy * to}H${dx * (to + 1.6)}`} />
+        </g>
+      ))}
+      {n != null && <text y={from + 0.4}>{n}</text>}
+    </g>
+  );
+}

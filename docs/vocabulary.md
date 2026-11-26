@@ -200,7 +200,7 @@ The header switch is "Light Party", with the buttons 1 and 2.
 |-----|---------|-----------|
 | waymark | A marker on the floor (A, B, C, D, 1, 2, 3, 4). | marker (for the floor), floor marker, number marker |
 | number waymark | One of the waymarks 1 to 4. | number marker |
-| marker | A marker on a player (spread, meteor, Fire Breath). | icon, head marker, debuff marker |
+| marker | A marker on a player (spread, stack, meteor, Fire Breath). | icon, head marker, debuff marker |
 | meteor | A meteor while a player carries it. | rock (before it lands) |
 | rock | A meteor after it lands on the floor. | meteor (after it lands), comet |
 | row of rocks | Rocks in a line on the floor. | line of rocks, SW line |

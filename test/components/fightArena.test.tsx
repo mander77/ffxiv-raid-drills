@@ -4,6 +4,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, assert, test } from "vitest";
 import { FightArena } from "../../src/components/pressure/FightArena";
 import { type FightMode, newFightState, seek, viewOf } from "../../src/lib/fight";
+import { newCode } from "../../src/util";
 import { buildFight } from "../m11s";
 
 afterEach(cleanup);
@@ -33,4 +34,29 @@ test("on the player, a click pauses, so the arena's name does not ask for one", 
     />,
   );
   assert.ok(screen.getByRole("img", { name: "Arena map." }));
+});
+
+test("Massive Meteor: the stack marker is on its player until the stack, on your marker when it is yours", () => {
+  const seen = new Set<boolean>();
+  for (let i = 0; i < 200 && seen.size < 2; i++) {
+    const s = newFightState("watch", buildFight("H1", newCode()), { paused: true });
+    const g = s.fight.segs.find((x) => x.title === "Massive Meteor");
+    const head = g?.scene.headMark;
+    if (!g || !head) throw new Error("Massive Meteor has no stack marker");
+    seek(s, g.from + 0.1);
+    const { container, unmount } = render(
+      <FightArena view={viewOf(s)} slot="H1" correctLabel={false} pickSpot={false} hit={null} replay={0} onPointClick={() => {}} />,
+    );
+    const marks = [...container.querySelectorAll(".stackmk")];
+    assert.equal(marks.length, 1, "one stack marker");
+    assert.equal(Boolean(marks[0].closest(".runner")), head.you, head.you ? "on your marker" : "on the other player");
+    if (!head.you)
+      assert.ok(
+        [...container.querySelectorAll(".mk text")].some((t) => t.textContent === head.on.l),
+        `${head.on.l} is drawn`,
+      );
+    seen.add(head.you);
+    unmount();
+  }
+  assert.equal(seen.size, 2, "the marker goes on you in some fights and on someone else in others");
 });

@@ -232,3 +232,22 @@ describe("the HUD", () => {
     expect(castPositions([mark(-1), mark(0.5)], 330, 30, 20)).toEqual([20, 35]);
   });
 });
+
+test("Watch the Correct Moves shows Massive Meteor's stack from its first hit until its fifth", () => {
+  const s = newFightState("watch", fight(), { paused: true });
+  const si = s.fight.segs.findIndex((g) => g.title === "Massive Meteor");
+  const g = s.fight.segs[si];
+  if (g.firstHit == null) throw new Error("Massive Meteor has no first hit");
+  expect(g.firstHit).toBeLessThan(g.due[0]);
+  // A paused frame fills in the correct moves up to now.
+  seek(s, g.firstHit - 0.2);
+  tickFight(s, 0, 1);
+  expect(viewOf(s).showAnswer).toBe(false);
+  for (const t of [g.firstHit + 0.1, g.due[0] - 0.1]) {
+    seek(s, t);
+    tickFight(s, 0, 1);
+    const v = viewOf(s);
+    expect(v.si).toBe(si);
+    expect(v.showAnswer).toBe(true);
+  }
+});

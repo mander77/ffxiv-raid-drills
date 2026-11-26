@@ -135,6 +135,10 @@ export function LiveArena({
   const mine = runner === undefined ? sc.tether : undefined;
   const lastSpot = [...results].reverse().find((r) => !r.missed)?.p;
   const tetherTo: Point | undefined = mine && (lastSpot ?? [mine.you.x, mine.you.y]);
+  // A stack marker, on its player until the step is answered. Yours rides on your moving marker
+  // in the full fight, so it is not drawn here then.
+  const head = sc.headMark;
+  const headOn = head && results.length === 0 && !(head.you && runner !== undefined) ? rotOverlay(head.on, k) : undefined;
 
   // After a correct answer the next question is already asked; after an incorrect one it waits
   // for Next step.
@@ -239,6 +243,12 @@ export function LiveArena({
             {reveal.marks}
             {shapes(cues.filter((o) => o.t === "mark"))}
             {mine && results.length === 0 && <Shape overlay={mine.you} />}
+            {headOn && head && (
+              <>
+                <Shape overlay={headOn} />
+                <Shape overlay={{ t: "stackMark", x: headOn.x, y: headOn.y, n: head.n }} />
+              </>
+            )}
           </>
         ),
         effects,
