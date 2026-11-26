@@ -30,7 +30,9 @@ export function StepChips({ count, results, at, onPick }: StepChipsProps) {
     list.current?.querySelectorAll("button")[j]?.focus();
   }
   return (
-    <ol ref={list} aria-label="Steps" className="flex flex-wrap gap-1.5">
+    // The padding holds the ring (2 px and its 2 px offset) of a chip at the edge, so a parent
+    // that clips, such as a scroll area, does not cut it off.
+    <ol ref={list} aria-label="Steps" className="flex flex-wrap gap-1.5 p-1">
       {/* TS note: Array.from({length: n}, fn) makes an array of n items from fn(_, index), like
           Enumerable.Range(0, n).Select(...) in C#. */}
       {Array.from({ length: count }, (_x, i) => {

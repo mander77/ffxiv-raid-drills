@@ -267,6 +267,28 @@ test("Pressure: a shared link opens the player paused at its moment, and Space p
   await expect(page).toHaveURL(/\/pressure\/K7Q2$/);
 });
 
+test("Pressure: in the player on a wide screen, the step chips' ring fits inside the scrolling panel", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/pressure/2FFV?t=73.7");
+  const chips = page.getByRole("list", { name: "Steps" }).getByRole("button");
+  await expect(chips.first()).toHaveAttribute("aria-current", "step");
+  // Every chip, since any can get the ring: the ring (2 px and its 2 px offset) is 4 px around the chip,
+  // and no parent that clips sideways may cut it off.
+  const cut = await chips.evaluateAll((buttons) =>
+    buttons.flatMap((b) => {
+      const r = b.getBoundingClientRect();
+      const out: string[] = [];
+      for (let e = b.parentElement; e; e = e.parentElement) {
+        if (getComputedStyle(e).overflowX === "visible") continue;
+        const box = e.getBoundingClientRect();
+        if (r.left - 4 < box.left || r.right + 4 > box.right) out.push(b.textContent ?? "");
+      }
+      return out;
+    }),
+  );
+  expect(cut).toEqual([]);
+});
+
 test("Pressure: in the player, a click on a cast coming up pauses 3 seconds before it", async ({ page }) => {
   await page.goto("/pressure/K7Q2?t=25");
   await page.getByRole("region", { name: "Casts coming up" }).getByRole("button", { name: "Go to Assault Evolved 1" }).click();
