@@ -202,3 +202,30 @@ test("Meteorain: the tank tethers stay on the arena after you drop your meteor",
   render(<LiveArena scene={scene} k={0} results={results} showLast hint={false} />);
   assert.equal(screen.getAllByLabelText("Tether").length, 2);
 });
+
+test("Massive Meteor: the stack marker shows on its player, then the stack goes where the party went", () => {
+  const drill = DRILLS.find((d) => d.id === "m-massive");
+  if (!drill) throw new Error("no m-massive");
+  const scene = buildPattern(drill, "H1", "AB12").scene,
+    head = scene.headMark,
+    st = scene.steps[0];
+  if (!head) throw new Error("no stack marker");
+  const before = render(<LiveArena scene={scene} k={0} results={[]} showLast={false} hint={false} />);
+  const mark = before.container.querySelector(".stackmk");
+  assert.ok(mark, "the marker shows before you answer");
+  assert.equal(mark.getAttribute("transform"), `translate(${round2(head.on.x)} ${round2(head.on.y)})`);
+  before.unmount();
+  const z = stepZone(st, []);
+  if (!z) throw new Error("no zone");
+  const p = zoneCenter(z);
+  const after = render(<LiveArena scene={scene} k={0} results={[{ p, ok: true, z, drop: null }]} showLast hint={false} />);
+  // The player with the marker stands with you, or it is you.
+  const at = after.container
+    .querySelector(".stackmk")
+    ?.getAttribute("transform")
+    ?.match(/translate\(([\d.]+) ([\d.]+)\)/);
+  assert.ok(at, "the marker moves to the stack");
+  assert.isBelow(Math.hypot(Number(at[1]) - p[0], Number(at[2]) - p[1]), 6, "the stack is where you went");
+  assert.ok(after.container.querySelector(`circle.aoe[cx="${at[1]}"][cy="${at[2]}"]`), "the stack's circle, on the marker");
+  assert.equal(after.container.querySelectorAll(".stackmk").length, 1, "one marker");
+});

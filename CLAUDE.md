@@ -409,6 +409,9 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Overlay**: a piece drawn on the arena (an attack, a weapon, a tag, a player mark); `Shape`
   draws one.
 - **Mark**: a player's mark on the arena, or the boss (`BossMark`).
+- **Stack marker**: the marker on the player a stack goes on (`{t:"stackMark"}`). A scene's
+  `headMark` is on its player until the step is answered; when it is yours, the full fight puts it
+  on your moving marker.
 - **Tether**: a line from a portal to a player (`{t:"tether"}`, `Tether` in `Shape.tsx`), red until
   it is **stretched** (`TETHER_STRETCH`), then blue. A scene's `tether` is your own: it follows
   you. A **guide** is a move, not a tether.

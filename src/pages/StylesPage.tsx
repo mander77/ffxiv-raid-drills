@@ -128,7 +128,7 @@ const WEAPONS: readonly { overlay: ComponentProps<typeof Weapon>["overlay"]; nam
 ];
 
 /** Lines and pieces on the arena that look alike at a glance, each on a small piece of floor. A
-    guide is a move; a tether ties a player to a portal. The tether runs from a portal at the left
+    guide is a move; a tether ties a player to a portal; a stack marker sits on a player. The tether runs from a portal at the left
     to the right, short or long enough to be stretched (TETHER_STRETCH is 120 units). */
 const ARENA_LINES: readonly { name: string; meaning: string; piece: ReactNode }[] = [
   {
@@ -155,6 +155,16 @@ const ARENA_LINES: readonly { name: string; meaning: string; piece: ReactNode }[
     name: "Portal",
     meaning: "Where a tether starts, outside a platform's wall. Orbital Omen's portals carry a number.",
     piece: <Shape overlay={{ t: "portal", x: 30, y: 10, vert: false }} />,
+  },
+  {
+    name: "Stack Marker",
+    meaning: "The stack goes on this player: stack with them. The number is how many times it hits.",
+    piece: (
+      <>
+        <Shape overlay={{ t: "mark", x: 30, y: 9, l: "H1", r: "H" }} />
+        <Shape overlay={{ t: "stackMark", x: 30, y: 9, n: 5 }} />
+      </>
+    ),
   },
 ];
 

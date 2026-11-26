@@ -110,6 +110,9 @@ type OverlayShape =
       only tanks soak: a "T" in place of each dot. */
   | ({ t: "tower"; r?: number; soak?: number; tank?: boolean } & At)
   | ({ t: "target" } & At)
+  /** A stack marker on the player at (x, y): four arrows pointing in at them. `n` is how many
+      times the stack hits, shown under the player. */
+  | ({ t: "stackMark"; n?: number } & At)
   /** ux, uy turn the weapon: its long side on the floor, from the handle end to the tip. `held`
       is a weapon in the boss's hand, drawn without the cut in the floor. */
   | ({ t: "axe"; ux?: number; uy?: number; held?: boolean } & At)
@@ -225,6 +228,10 @@ export interface Scene {
   /** Your tether: it runs from its portal to where you stand, from the first step. Before your
       first answer you stand at your mark `you`. */
   tether?: { portal: Point; you: Extract<Overlay, { t: "mark" }> };
+  /** A stack marker on one player (Massive Meteor's), from the start until the step is answered:
+      then the stack is where the party went. `on` is the player who has it, where they stand.
+      `you` says it is yours: the full fight puts it on your moving marker. `n` is its hits. */
+  headMark?: { on: Extract<Overlay, { t: "mark" }>; you: boolean; n: number };
 }
 
 /** What you do in a Practice mechanic: spread out, stack (the whole party, in pairs, in light
@@ -395,6 +402,9 @@ export interface FightSeg {
       player goes there just after the last hit before it. Without it, the player waits up close
       to the boss in a quiet stretch (see data/route.ts). */
   pre?: Point;
+  /** The first hit of an attack that hits several times until the last due (Massive Meteor's
+      five): Watch the Correct Moves shows the last answer from then, while the attack goes off. */
+  firstHit?: number;
 }
 
 /** How the full fight shows a hit: a raidwide flashes the arena floor, a tank buster draws the

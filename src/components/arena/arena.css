@@ -201,6 +201,23 @@
     stroke: var(--arena-aoe);
     stroke-width: 0.7;
   }
+  /* A stack marker: arrows pointing in at the player, in the colour of an attack. */
+  .arena .stackmk {
+    fill: none;
+    stroke: var(--arena-aoe);
+    stroke-width: 0.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .arena .stackmk text {
+    fill: var(--arena-aoe);
+    stroke: none;
+    font-family: var(--arena-mono);
+    font-size: 2.6px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
   .arena .puddle {
     fill: oklch(0.544 0.179 28.857 / 0.38);
     stroke: var(--arena-ring);

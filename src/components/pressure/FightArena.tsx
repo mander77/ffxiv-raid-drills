@@ -62,7 +62,13 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
           <CountdownRing at={bossAt} />
         </>
       }
-      runner={<Runner slot={slot} portal={v.scene.tether?.portal} />}
+      runner={
+        <Runner
+          slot={slot}
+          portal={v.scene.tether?.portal}
+          stack={v.scene.headMark?.you && v.results.length === 0 ? v.scene.headMark.n : undefined}
+        />
+      }
     />
   );
 }
@@ -157,12 +163,14 @@ interface RunnerProps {
   slot: Slot;
   /** Your tether's portal, when you have a tether: the tether runs from it to your marker. */
   portal?: Point;
+  /** You have a stack marker: it hits this many times. */
+  stack?: number;
 }
 
 /** Your marker: it runs the correct spots on the player, and to your clicks in the run. It waits on
     each spot until the hit lands, then runs to the next one. While it has to get there, a dotted
     line goes to the spot, and a ring marks it. With a tether, the tether follows it. */
-function Runner({ slot, portal }: RunnerProps) {
+function Runner({ slot, portal, stack }: RunnerProps) {
   const me = useRef<SVGGElement>(null);
   const path = useRef<SVGLineElement>(null);
   const next = useRef<SVGCircleElement>(null);
@@ -224,6 +232,7 @@ function Runner({ slot, portal }: RunnerProps) {
       <g ref={me}>
         <circle className="runhalo" r="4.2" />
         <Shape overlay={{ t: "mark", x: 0, y: 0, l: slot, r: markRole(partyOf(slot).role) }} />
+        {stack != null && <Shape overlay={{ t: "stackMark", x: 0, y: 0, n: stack }} />}
       </g>
     </g>
   );

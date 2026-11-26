@@ -2,7 +2,7 @@
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6, `ENRAGE`).
-import { DRILLS, ECL_CORNERS, eclFourWayScene, eclTwoWayScene, eclipticFreeScene, SPLIT_INNER, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, massiveScene, otherEnd, otherSide, portalAt, randomEndsSide, randomHalf, randomOthers, splitRound, splitTowers, swappedOthers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
+import { DRILLS, ECL_CORNERS, eclFourWayScene, eclTwoWayScene, eclipticFreeScene, SPLIT_INNER, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, massiveScene, randomStackWearer, otherEnd, otherSide, portalAt, randomEndsSide, randomHalf, randomOthers, splitRound, splitTowers, swappedOthers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
 import { ABILITIES, ENRAGE, FIGHT_END } from "./abilities";
 import { newCode, random, withSeed } from "../../../util";
 import { nearClock } from "../../../time";
@@ -215,9 +215,9 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, {tether:t1, side:side1, end:end1, covered:cover1, endsSide:ends1, others:others1}), k:0, from:cactbot("Explosion", 6), due:round(1, t1)},
     {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, side1, end1, t1 ? null : {portal:portalAt(portalSide2, otherEnd(end2), ends2)}), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
     {title:"Arena Split: Fire Breath (Second Time)", drills:["m-split-fire"], scene:splitRound(s, {tether:!t1, side:side2, end:end2, covered:cover2, endsSide:ends2, others:others2}), k:0, from:cactbot("Explosion", 7), due:round(2, !t1)},
-    {title:"Massive Meteor", drills:["m-massive"], scene:massiveScene(side2), k:0, from:castStart("MassiveMeteorBoss", "Massive Meteor (castbar)"), due:[lineEnd("Massive Meteor x5")],
-      // The party waits where the stack goes, and holds it until the fifth hit.
-      pre:zoneCenter(SPLIT_INNER[side2])},
+    {title:"Massive Meteor", drills:["m-massive"], scene:massiveScene(s, side2, {who:s, end:end2}), k:0, from:castStart("MassiveMeteorBoss", "Massive Meteor (castbar)"), due:[lineEnd("Massive Meteor x5")],
+      // The party waits where the stack goes, and holds it from the first hit until the fifth.
+      pre:zoneCenter(SPLIT_INNER[side2]), firstHit:cactbot("Massive Meteor x5")},
     {title:"Arcadion Avalanche", drills:["m-avalanche"], scene:avalancheScene(s, side2, end2, face, swing), k:0, from:lineEnd("Massive Meteor x5"), due:[cactbot("Explosion", 8), cactbot("Arcadion Avalanche")]}
   );
   /* Heartbreak Kick, last so the random parts above keep their codes. Its tower is hit 5, then 6,
@@ -230,6 +230,9 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
      in the middle), so its scene is built last: the parts above keep their codes whatever your pick. */
   const eclSeg = segs.find(g => g.drills[0] === "m-ecl-start");
   if (eclSeg && wall === "none") eclSeg.scene = eclipticFreeScene(s, corner);
+  // Who has Massive Meteor's stack marker is random too, so it is drawn after them all.
+  const massive = segs.find(g => g.drills[0] === "m-massive");
+  if (massive) massive.scene = massiveScene(s, side2, randomStackWearer(s));
   // TS note: sort with a compare function, like List.Sort(Comparison) in C#. It keeps equal items in order.
   segs.sort((a, b) => a.from - b.from);
   /* A Practice scene can mark where you stand (Arena Split's towers mark where you ended the
