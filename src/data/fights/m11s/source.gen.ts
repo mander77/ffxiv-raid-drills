@@ -343,6 +343,11 @@ export const BOSSMOD_ABILITIES = {
   Unk1:{id:"B460", from:"Boss->self", cast:0, shape:"single-target"},
 } as const;
 
+/** BossMod's voidzones: the actor each one sits on, and its radius in yalms. */
+export const BOSSMOD_VOIDZONES = {
+  Maelstrom:{actor:"Maelstrom", radius:4},
+} as const;
+
 /** Half the width of BossMod's square arena, in yalms. */
 export const BOSSMOD_ARENA_HALF = 20;
 

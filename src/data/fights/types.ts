@@ -43,6 +43,8 @@ export interface ArenaSizes {
   tower: number;
   /** The safe square under a scythe weapon (half its side). */
   scytheSafe: number;
+  /** A tornado's radius: the voidzone it puts on the floor. */
+  tornado: number;
   /** When the arena splits in two: each platform's left and right edge, the half width of the
       drawing that shows both, how far outside the outer walls the tether portals stand, and how
       long a tether is before it counts as stretched. */

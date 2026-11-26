@@ -1,6 +1,16 @@
 import { assert, test } from "vitest";
 import { WAYMARKS } from "../src/components/arena/Arena";
-import { ATTACK, HITBOX, isStretched, MELEE_R, PLATFORM_X, PORTAL_LINE_X, TOWER_KNOCKBACK, TOWER_R } from "../src/data/fights/m11s/attacks";
+import {
+  ATTACK,
+  HITBOX,
+  isStretched,
+  MELEE_R,
+  PLATFORM_X,
+  PORTAL_LINE_X,
+  TORNADO_R,
+  TOWER_KNOCKBACK,
+  TOWER_R,
+} from "../src/data/fights/m11s/attacks";
 import {
   assaultScene,
   avalancheScene,
@@ -763,6 +773,7 @@ test("Powerful Gust: each tornado cones its two baits, support on its left and D
     const side = (p: Point): number => inward[0] * (p[1] - t[1]) - inward[1] * (p[0] - t[0]);
     assert.isBelow(side(support), 0, `the support at ${t} is on its left`);
     assert.isAbove(side(dps), 0, `the DPS at ${t} is on its right`);
+    for (const p of [support, dps]) assert.isAbove(dist(p, t), TORNADO_R, `the bait at ${p} stands outside the tornado at ${t}`);
   }
   const cones = GUST_CONES.flatMap((o) => (o.t === "poly" ? [o.pts] : []));
   assert.equal(cones.length, 8, "eight cones");
@@ -785,6 +796,13 @@ test("Powerful Gust: each tornado cones its two baits, support on its left and D
       TORNADO_BAITS.some((b) => b.support[0] === me[0] && b.support[1] === me[1]),
       `${s} baits as a support`,
     );
+    const into = TORNADO_BAITS.find((b) => b.support === me)?.tornado ?? [50, 50];
+    const toward = (k: number): Point => [me[0] + (into[0] - me[0]) * k, me[1] + (into[1] - me[1]) * k];
+    const z = zoneOf(step?.z);
+    assert.isTrue(inZone(me, z), `${s}'s bait spot counts`);
+    assert.isFalse(inZone(toward(0.3), z), `${s}: a click inside the tornado does not count`);
+    assert.isAtLeast(dist(toward(0.1), into), TORNADO_R, `${s}: just short of the tornado's edge…`);
+    assert.isTrue(inZone(toward(0.1), z), "…still counts");
   }
 });
 

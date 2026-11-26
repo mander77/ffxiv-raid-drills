@@ -153,6 +153,16 @@ export function parseBossmod(enums, module) {
   return { actors, abilities, arenaHalf: Number(square[1]) };
 }
 
+/** The voidzones in a BossMod file: each class that is a plain voidzone around an actor, by class
+    name, with that actor and its radius in yalms ("class Maelstrom(BossModule module) :
+    Components.Voidzone(module, 4, OID.Maelstrom);"). */
+export function parseVoidzones(text) {
+  const out = {};
+  for (const m of text.matchAll(/class (\w+)\(BossModule module\) : Components\.Voidzone\(module, (\d+(?:\.\d+)?)f?, OID\.(\w+)\)/g))
+    out[m[1]] = { actor: m[3], radius: Number(m[2]) };
+  return out;
+}
+
 /** The Arena Split in BossMod's Flatliner file, in yalms from the arena's center: each platform's
     center ("p + new WDir(16, 0)"), its half width and half length ("CurveApprox.Rect(new WDir(0,
     20), new WDir(10, 0))"), the x of each side portal line ("0x16 => -21"), and how far from its
@@ -669,6 +679,11 @@ export function generate(sources, lines, bossmod, extras) {
     ...Object.entries(bossmod.abilities).map(([k, v]) => `  ${k}:${ts(v)},`),
     "} as const;",
     "",
+    "/** BossMod's voidzones: the actor each one sits on, and its radius in yalms. */",
+    "export const BOSSMOD_VOIDZONES = {",
+    ...Object.entries(bossmod.voidzones).map(([k, v]) => `  ${k}:${ts(v)},`),
+    "} as const;",
+    "",
     "/** Half the width of BossMod's square arena, in yalms. */",
     `export const BOSSMOD_ARENA_HALF = ${bossmod.arenaHalf};`,
     "",
@@ -720,13 +735,19 @@ export async function importFight(fight, s = readSources(fight)) {
   const triggers = parseTriggers(await get(s.cactbot.repo, s.cactbot.triggers));
   const { folder, mechanics: files = [] } = s.bossmod.module;
   const name = moduleName(folder);
+  const moduleText = await get(s.bossmod.repo, `${folder}/${name}.cs`);
   const bossmod = {
     name,
     folder,
-    ...parseBossmod(await get(s.bossmod.repo, `${folder}/${name}Enums.cs`), await get(s.bossmod.repo, `${folder}/${name}.cs`)),
+    ...parseBossmod(await get(s.bossmod.repo, `${folder}/${name}Enums.cs`), moduleText),
+    voidzones: parseVoidzones(moduleText),
   };
   const mechanics = [];
-  for (const file of files) mechanics.push({ file, classes: parseMechanics(await get(s.bossmod.repo, `${folder}/${file}`)) });
+  for (const file of files) {
+    const text = await get(s.bossmod.repo, `${folder}/${file}`);
+    mechanics.push({ file, classes: parseMechanics(text) });
+    Object.assign(bossmod.voidzones, parseVoidzones(text));
+  }
   fillShapes(bossmod.abilities, mechanics);
   const statesPath = `${folder}/${name}States.cs`;
   const states = { path: statesPath, phases: parseStates(await get(s.bossmod.repo, statesPath)) };
