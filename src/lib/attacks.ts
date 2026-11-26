@@ -4,7 +4,7 @@
 // (`standardAttacks(BOSSMOD_ARENA_HALF)`), so the same yalms draw to scale in every fight.
 //
 // Directions are degrees clockwise from north, as in geometry.ts. The arena is 100 units across.
-import { addVec, leftOf, polar, unit } from "../geometry";
+import { addVec, angOf, DEG, dist, leftOf, polar, unit } from "../geometry";
 import type { Overlay, Point } from "../types";
 
 /** An ability's shape, as a fight's source.gen.ts lists it (from BossMod), in yalms. A cone's
@@ -48,6 +48,10 @@ const HALF: Record<ArenaSide, [number, number, number, number]> = {
   west: [0, 0, 50, 100],
 };
 
+/** How far from its source a shadow is drawn, in arena units: past the corners of the 100-unit
+    arena, so the arena's edge ends it. The app's choice, for the drawing only. */
+const SHADOW_FAR = 150;
+
 /** The standard attacks for an arena `arenaHalf` yalms from its center to its edge (BossMod's
     `ArenaBoundsSquare`), drawn 100 units across. */
 export function standardAttacks(arenaHalf: number) {
@@ -57,6 +61,25 @@ export function standardAttacks(arenaHalf: number) {
   /** The whole arena: the floor in the attack's tint, with a glow inside its edge. It has no
       size: it covers whatever floor the arena has. */
   const raidwide = (): Overlay => ({ t: "raidwide" });
+
+  /** The ground a rock of `radius` yalms at `rock` hides from `from`: a polygon from the rock's
+      two edges, as seen from `from`, out past the arena's corners (SHADOW_FAR). */
+  const shadow = (from: Point, rock: Point, radius: number): Point[] => {
+    const r = yalms(radius),
+      d = dist(from, rock),
+      toward = angOf([rock[0] - from[0], rock[1] - from[1]]);
+    const half = Math.asin(r / d) / DEG,
+      edge = Math.sqrt(d * d - r * r);
+    return [
+      polar(toward - half, edge, from),
+      polar(toward - half, SHADOW_FAR, from),
+      polar(toward + half, SHADOW_FAR, from),
+      polar(toward + half, edge, from),
+    ];
+  };
+  /** A raidwide sent out from `from` that a rock blocks (line of sight): the whole arena but the
+      shadow behind the rock of `radius` yalms at `rock`. */
+  const lineOfSight = (from: Point, rock: Point, radius: number): Overlay => ({ t: "raidwide", cover: shadow(from, rock, radius) });
 
   /** A circle that hits everything inside `radius`. */
   const circle = (at: Point, radius: number): Overlay => ({ t: "aoe", x: at[0], y: at[1], r: yalms(radius) });
@@ -172,7 +195,25 @@ export function standardAttacks(arenaHalf: number) {
     }
   }
 
-  return { yalms, raidwide, circle, donut, cone, proteans, line, cross, halfArena, knockback, thrown, puddle, tower, unknown, fromBossmod };
+  return {
+    yalms,
+    raidwide,
+    shadow,
+    lineOfSight,
+    circle,
+    donut,
+    cone,
+    proteans,
+    line,
+    cross,
+    halfArena,
+    knockback,
+    thrown,
+    puddle,
+    tower,
+    unknown,
+    fromBossmod,
+  };
 }
 
 /** The set of standard attacks of one arena. */

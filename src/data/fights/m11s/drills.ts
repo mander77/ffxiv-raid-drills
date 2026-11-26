@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, crushingComet, eyeOfTheHurricane, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit, ROCK_GAP, meteorHit, rockExplosion } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit, ROCK_GAP, meteorHit, rockExplosion } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -1336,6 +1336,19 @@ export const METEOR_ROCKS = {
 export const BEHIND_ROCK = 30;
 /** A rock on the arena. */
 const rock = ([x, y]: Point): Overlay => ({t:"rock", x, y});
+/** Where you hide from Triple Tyrannhilation: in the shadow of the last rock of the SW row. Each
+    Shockwave breaks the nearest rock, so only the last one still blocks the third. */
+const TRIPLE_HIDE: Zone = {
+  fn:p => inArena(p) && behindRock(CENTER, METEOR_ROCKS.sw3, p),
+  label:[5, 96],
+  show:[{poly:rockShadow(CENTER, METEOR_ROCKS.sw3)}]};
+/** The SW row's rocks, nearest the boss first: the order the Shockwaves break them. */
+const SW_ROW = [METEOR_ROCKS.sw, METEOR_ROCKS.sw2, METEOR_ROCKS.sw3] as const;
+/** Shockwave n (from 1): it hits all but the shadow of the nearest rock still standing, then
+    cracks that rock: it blocks no more hits. A rock cracked by the Shockwave before is gone, and so
+    is the NE rock, which the fourth Line Stack broke and which exploded. */
+const tripleHit = (n: number): Overlay[] => [shockwave(CENTER, SW_ROW[n - 1]), {t:"rock", x:METEOR_ROCKS.ne2[0], y:METEOR_ROCKS.ne2[1], state:"gone"},
+  ...SW_ROW.slice(0, n).map(([x, y], i): Overlay => ({t:"rock", x, y, state:i === n - 1 ? "broken" : "gone"}))];
 /** True when a meteor dropped at p lands far enough from M2's SW rock (ROCK_GAP). */
 const clearOfSwRock = (p: Point): boolean => dist(p, METEOR_ROCKS.sw) >= ROCK_GAP;
 /** H1's meteor: anywhere NW of the boss in his max melee, from 290 to 345 degrees. Closer to west
@@ -1468,8 +1481,11 @@ export const DRILLS: readonly Drill[] = [
         // The broken NE rock explodes while you run SW.
         {q:"Where do you stand for the fourth Line Stack?", z:{c:stackBehind(45),r:7}, a:["Behind the NE rock, to break it."],
           reveal:[lineThrough(45), rockExplosion(METEOR_ROCKS.ne2)], hits:[]},
-        {q:"Triple Tyrannhilation is next. Where do you hide?", z:{c:[5,96],r:6.5}, a:["SW, behind the row of three rocks."]}],
-      rule:["After the fourth Line Stack: run SW.", "Hide behind the row of three rocks."]})},
+        // Three Shockwaves, one step each: each breaks the nearest rock of the SW row.
+        {q:"Triple Tyrannhilation is next. Where do you hide?", z:TRIPLE_HIDE, a:["SW, behind the row of three rocks.", "Stay until the third hit."], reveal:tripleHit(1)},
+        {q:"The first Shockwave broke the nearest rock. Where now?", z:TRIPLE_HIDE, a:["Stay behind the row of rocks.", "Each Shockwave breaks the nearest rock."], reveal:tripleHit(2)},
+        {q:"Only the last rock is left. Where now?", z:TRIPLE_HIDE, a:["Stay behind the last rock.", "It blocks the third and last Shockwave."], reveal:tripleHit(3)}],
+      rule:["After the fourth Line Stack: run SW.", "Hide behind the row of three rocks.", "Stay until the third hit."]})},
   {id:"m-split-line", order:18, phase:P3, time:"6:02", title:"Arena Split: Lineup", kind:"knockback",
     build:s=>({setup:["Flatliner knocks the party back.", "It splits the arena into two platforms."], ordered:true,
       split:true, boss:BOSS, overlays:[],

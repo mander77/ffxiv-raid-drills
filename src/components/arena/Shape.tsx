@@ -33,7 +33,11 @@ export function Shape({ overlay: o }: ShapeProps) {
     case "raidwide":
       return (
         <g className="raidwide">
-          <rect className="tint" x="-60" y="0" width="220" height="100" />
+          {o.cover ? (
+            <path className="tint" fillRule="evenodd" d={`M-60,0 H160 V100 H-60 Z M${o.cover.map(pt).join(" L")} Z`} />
+          ) : (
+            <rect className="tint" x="-60" y="0" width="220" height="100" />
+          )}
           <rect className="glow" x="0" y="0" width="100" height="100" />
         </g>
       );
@@ -49,7 +53,29 @@ export function Shape({ overlay: o }: ShapeProps) {
         </g>
       );
     case "rock":
-      return (
+      if (o.state === "gone") return null;
+      return o.state === "broken" ? (
+        /* The rock cracked by a hit: still in one place, split by jagged cracks into four pieces that
+           have shifted only a hair apart. Every cracked rock looks the same. It is gone at the next hit. */
+        <g className="rock broken" transform={`translate(${round2(o.x)} ${round2(o.y)})`}>
+          <path
+            transform="translate(-0.25 -0.2) rotate(-3)"
+            d="M-2.6,-0.5 L-2.2,-2 L-0.7,-2.5 L-0.4,-1.7 L-0.1,-1.1 L-0.3,-0.4 L0.2,0.1 L-0.6,0.2 L-1.2,0.5 L-1.9,0 Z"
+          />
+          <path
+            transform="translate(0.2 -0.25) rotate(2)"
+            d="M-0.7,-2.5 L0.8,-3 L3,-1.2 L2.8,0.4 L2.1,-0.1 L1.4,-0.4 L0.8,-0.1 L0.2,0.1 L-0.3,-0.4 L-0.1,-1.1 L-0.4,-1.7 Z"
+          />
+          <path
+            transform="translate(0.25 0.2) rotate(-2)"
+            d="M2.8,0.4 L2.6,2 L1,2.5 L1.2,1.8 L0.9,1.2 L0.5,0.7 L0.2,0.1 L0.8,-0.1 L1.4,-0.4 L2.1,-0.1 Z"
+          />
+          <path
+            transform="translate(-0.2 0.25) rotate(3)"
+            d="M1,2.5 L-0.6,3 L-3,1 L-2.6,-0.5 L-1.9,0 L-1.2,0.5 L-0.6,0.2 L0.2,0.1 L0.5,0.7 L0.9,1.2 L1.2,1.8 Z"
+          />
+        </g>
+      ) : (
         <path className="rock" transform={`translate(${round2(o.x)} ${round2(o.y)})`} d="M-3,1 L-2.2,-2 L0.8,-3 L3,-1.2 L2.6,2 L-0.6,3 Z" />
       );
     case "tower":

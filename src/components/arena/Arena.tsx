@@ -179,6 +179,11 @@ function toArena(e: MouseEvent<SVGSVGElement>, world: SVGGElement | null): Point
   return [q.x, q.y];
 }
 
+/** The pieces of `os` without the whole rocks that `shown` changes (breaks or removes) at the same
+    spot, so a broken rock replaces its rock and a gone one leaves the arena. */
+export const withoutChangedRocks = (os: readonly Overlay[], shown: readonly Overlay[]): Overlay[] =>
+  os.filter((o) => o.t !== "rock" || o.state || !shown.some((b) => b.t === "rock" && b.state && b.x === o.x && b.y === o.y));
+
 /** Overlays sorted into their layers: name tags and portals are labels, tethers are drops,
     knockback arrows are pushes, role marks are marks, the boss's weapons are weapons, and the rest
     is ground, with the attacks under the other pieces. Portals, tethers and knockback arrows stay

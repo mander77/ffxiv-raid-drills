@@ -69,6 +69,18 @@ test("the styles page shows the tether beside the guide, short and stretched", (
   assert.ok(lines.querySelector(".guide"), "a guide");
 });
 
+test("the styles page shows a rock's three stages: whole, cracked and gone", () => {
+  render(<StylesPage />);
+  const rocks = screen.getByRole("heading", { level: 2, name: "Rocks" }).closest("section");
+  assert.ok(rocks);
+  assert.deepEqual(
+    [...rocks.querySelectorAll("h3")].map((h) => h.textContent),
+    ["Rock", "Cracked Rock", "Gone"],
+  );
+  assert.equal(rocks.querySelectorAll("path.rock").length, 1);
+  assert.equal(rocks.querySelectorAll("g.rock.broken").length, 1);
+});
+
 test("the styles page draws each standard attack, and the mark of an unknown size", () => {
   render(<StylesPage />);
   const attacks = screen.getByRole("heading", { level: 2, name: "Standard Attacks" }).closest("section");
@@ -77,6 +89,7 @@ test("the styles page draws each standard attack, and the mark of an unknown siz
     [...attacks.querySelectorAll("h3")].map((h) => h.textContent),
     [
       "Raidwide",
+      "Line of Sight",
       "Circle",
       "Donut",
       "Cone",

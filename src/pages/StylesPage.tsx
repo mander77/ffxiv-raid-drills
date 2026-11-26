@@ -175,8 +175,31 @@ interface AttackSample {
   view?: string;
 }
 
+/** A rock's three stages, close up: whole, cracked by a hit, and gone after the next hit. */
+const ROCK_VIEW = "42 42 16 16";
+const ROCKS: readonly AttackSample[] = [
+  {
+    name: "Rock",
+    meaning: "A meteor on the floor. It blocks a hit: hide behind it.",
+    overlays: [{ t: "rock", x: 50, y: 50 }],
+    view: ROCK_VIEW,
+  },
+  {
+    name: "Cracked Rock",
+    meaning: "A hit cracked it. It blocks nothing more.",
+    overlays: [{ t: "rock", x: 50, y: 50, state: "broken" }],
+    view: ROCK_VIEW,
+  },
+  { name: "Gone", meaning: "The next hit clears a cracked rock: nothing is left.", overlays: [], view: ROCK_VIEW },
+];
+
 const ATTACKS: readonly AttackSample[] = [
   { name: "Raidwide", meaning: "Hits the whole arena: the party takes it.", overlays: [EXAMPLE.raidwide()] },
+  {
+    name: "Line of Sight",
+    meaning: "Hits the whole arena but the shadow behind a rock: hide there. A cracked rock blocks nothing.",
+    overlays: [EXAMPLE.lineOfSight(MID, [50, 80], 2), { t: "rock", x: 50, y: 64, state: "broken" }, { t: "rock", x: 50, y: 80 }],
+  },
   { name: "Circle", meaning: "Hits everything inside the circle.", overlays: [EXAMPLE.circle(MID, 8)] },
   { name: "Donut", meaning: "Hits everything outside its inner ring: stand inside it.", overlays: [EXAMPLE.donut(MID, 5, 60)] },
   { name: "Cone", meaning: "Hits a wedge out from its source.", overlays: [EXAMPLE.cone([50, 55], 0, 60, 20)] },
@@ -379,6 +402,21 @@ export function StylesPage() {
                 zoomed={<ArenaPiece className="h-24 w-72">{l.piece}</ArenaPiece>}
                 name={l.name}
                 meaning={l.meaning}
+              />
+            ))}
+          </ul>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="font-display text-2xl font-bold">Rocks</h2>
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {ROCKS.map((r) => (
+              <IconItem
+                key={r.name}
+                picture={<ArenaSquare className="size-16" sample={r} />}
+                zoomed={<ArenaSquare className="size-56" sample={r} />}
+                name={r.name}
+                meaning={r.meaning}
               />
             ))}
           </ul>

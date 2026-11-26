@@ -175,7 +175,7 @@ src/lib/fight.ts     the fight clock's rules as plain functions: newFightState, 
                      answerFightStep, viewOf, promptOf, castOf, castsAhead, castPositions
 src/lib/pressure.ts  the quick round's rules (weighted cards, the timer) and playerLink
 src/lib/attacks.ts   the standard attacks for every fight: standardAttacks(arenaHalf) gives raidwide,
-                     circle, donut, cone, proteans, line, cross, halfArena, knockback, thrown, puddle, tower, unknown
+                     shadow and lineOfSight (a raidwide that a rock blocks), circle, donut, cone, proteans, line, cross, halfArena, knockback, thrown, puddle, tower, unknown
                      (the "size unknown" mark) and fromBossmod (a BossMod ability as its attack).
                      Sizes in yalms, drawn to the fight's arena
 src/components/quiz/ the question cards: QuizDeck (Back, Next, chips, the round), QuestionCard

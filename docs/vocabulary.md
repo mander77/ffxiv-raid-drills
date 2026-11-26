@@ -229,7 +229,7 @@ The header switch is "Light Party", with the buttons 1 and 2.
 | get knocked to | A knockback moves you. | knock to, be pushed, get KB'd |
 | bait | Bring a hit to a place. | |
 | drop | Leave a puddle or a meteor at a spot. | place |
-| break | Destroy a rock with a Line Stack. | blow up, pop, explode (as the player's action) |
+| break | Destroy a rock with a Line Stack. A Shockwave breaks the nearest rock too. | blow up, pop, explode (as the player's action) |
 | explode | What a rock does after a Line Stack breaks it, and what two rocks do when they are too close. Not the player's action. | |
 | stack | Go together for a stack (as a verb, lower case). | |
 | spread | Move apart (as a verb, lower case). | |
@@ -242,6 +242,7 @@ The header switch is "Light Party", with the buttons 1 and 2.
 | Use | Never use |
 |-----|-----------|
 | raidwide, raidwide hits | raid damage (on screen), AoE (for a raidwide) |
+| hide behind (a rock), Line of Sight (the attack) | LoS, block with a rock |
 | Shared Tank Buster | shared buster, tank share |
 | Tank Buster | buster, TB |
 | Mitigate it. | Stack mitigation on it., Use party mitigation., mit it |

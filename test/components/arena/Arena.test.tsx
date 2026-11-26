@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, assert, expect, test } from "vitest";
-import { Arena, LAYERS, pieceLayers } from "../../../src/components/arena/Arena";
+import { Arena, LAYERS, pieceLayers, withoutChangedRocks } from "../../../src/components/arena/Arena";
 import { ArenaLabel } from "../../../src/components/arena/ArenaLabel";
 import { BossMark } from "../../../src/components/arena/BossMark";
 import { LearnPicture } from "../../../src/components/arena/LearnPicture";
@@ -126,4 +126,20 @@ test("a zone label on the boss moves straight out of his ring", () => {
   const y = Number(svg.match(/<rect x="[\d.-]+" y="([\d.-]+)"/)?.[1]);
   assert.isAtLeast(y, 50 + 14.5, "the box's top is past his ring and its ticks");
   assert.include(svg, 'x="41.5"', "straight below him");
+});
+
+test("a rock shown broken or gone replaces the whole rock at its spot, and no other", () => {
+  const rocks: Overlay[] = [
+    { t: "rock", x: 10, y: 90 },
+    { t: "rock", x: 26, y: 74 },
+    { t: "rock", x: 39, y: 61 },
+  ];
+  const changed: Overlay[] = [
+    { t: "rock", x: 10, y: 90, state: "broken" },
+    { t: "rock", x: 26, y: 74, state: "gone" },
+  ];
+  assert.deepEqual(withoutChangedRocks(rocks, changed), [{ t: "rock", x: 39, y: 61 }]);
+  const html = renderToStaticMarkup(<LearnPicture fig={{ overlays: rocks, after: changed }} answered={true} label="rocks" />);
+  assert.equal(html.match(/class="rock"/g)?.length, 1);
+  assert.equal(html.match(/class="rock broken"/g)?.length, 1);
 });
