@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { M11S } from "../../src/data/fights/m11s";
 import { cactbot } from "../../src/data/fights/m11s/sources";
 import {
   activeSeg,
@@ -7,6 +8,8 @@ import {
   askFrom,
   CAST_GO_LEAD,
   CASTS_AHEAD,
+  CASTS_PAST,
+  castFade,
   castOf,
   castPositions,
   castsAhead,
@@ -244,8 +247,51 @@ describe("the HUD", () => {
     // 330 pixels for 30 seconds after the now line at 30: 10 pixels a second.
     expect(castPositions([mark(0), mark(15), mark(30)], 330, 30, 20)).toEqual([30, 180, 330]);
     expect(castPositions([mark(5), mark(5.5)], 330, 30, 20)).toEqual([80, 100]);
-    // A cast that went off a second ago pushes nothing: the next one stays at its time.
-    expect(castPositions([mark(-1), mark(0.5)], 330, 30, 20)).toEqual([20, 35]);
+  });
+
+  test("a cast that went off keeps its room and gives it up as it fades", () => {
+    const mark = (left: number) => ({ i: 0, name: "", t: 0, cats: [], raidwide: false, cast: false, left });
+    // Just gone off: all its room, so the next one stays where it was pushed.
+    expect(castPositions([mark(-0.001), mark(0.5)], 330, 30, 20)[1]).toBeCloseTo(50, 1);
+    // Half a second into its 2-second fade: three quarters of its room.
+    expect(castPositions([mark(-0.5), mark(0.5)], 330, 30, 20)).toEqual([25, 40]);
+    // Gone: the next one is at its own time.
+    expect(castPositions([mark(-2), mark(0.5)], 330, 30, 20)).toEqual([10, 35]);
+    expect(castFade(1)).toBe(1);
+    expect(castFade(-0.5)).toBe(0.75);
+    expect(castFade(-3)).toBe(0);
+  });
+
+  test("on a phone, no cast jumps onto one that went off, for every pick", () => {
+    // The sideways strip at 375 px: CastList's "x" sizes in a 304-pixel box, and a cast's name
+    // 72 pixels wide (w-18). A gone cast hides its name there, so only the names to come can meet.
+    const box = 304;
+    const { now, end, gap } = { now: 56, end: 12, gap: 76 };
+    const nameWidth = 72;
+    const step = 0.05;
+    // A cast slides as the room of gone casts runs out, faster when several fade at once, but
+    // well under this in one step. A jump onto a gone cast was 27 pixels or more.
+    const maxMove = 12;
+    // Every value of every pick, the others random from the code.
+    const picks = M11S.clock.rows.flatMap((row) => row.options.map(([value]) => ({ ...M11S.clock.random, [row.key]: value })));
+    for (const choices of picks) {
+      const s = newFightState("watch", buildFight("H1", "K7Q2", choices));
+      let was = new Map<number, number>();
+      for (let t = 0; t < s.lines[s.lines.length - 1].t + CASTS_PAST; t += step) {
+        s.t = t;
+        const marks = castsAhead(s);
+        const places = castPositions(marks, box - end, now, gap);
+        const at = new Map(marks.map((m, k) => [m.i, places[k]]));
+        marks.forEach((m, k) => {
+          const moved = Math.abs((was.get(m.i) ?? places[k]) - places[k]);
+          if (moved > maxMove) expect.fail(`${m.name} jumps ${moved.toFixed(0)} px at ${t.toFixed(1)} s (${JSON.stringify(choices)})`);
+          const next = marks[k + 1];
+          if (next && m.left >= 0 && places[k + 1] - places[k] < nameWidth)
+            expect.fail(`${m.name} and ${next.name} overlap at ${t.toFixed(1)} s (${JSON.stringify(choices)})`);
+        });
+        was = at;
+      }
+    }
   });
 });
 

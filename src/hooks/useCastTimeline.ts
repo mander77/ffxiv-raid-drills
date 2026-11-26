@@ -1,6 +1,6 @@
 import { type RefCallback, type RefObject, useEffect, useEffectEvent, useRef, useState } from "react";
 import { prefersLessMotion } from "../lib/dom";
-import { CASTS_AHEAD, CASTS_PAST, CASTS_SOON, type CastMark, castPositions, castsAhead, hitsGoneOff } from "../lib/fight";
+import { CASTS_AHEAD, CASTS_PAST, CASTS_SOON, type CastMark, castFade, castPositions, castsAhead, hitsGoneOff } from "../lib/fight";
 import { useFightFrame } from "./useFightFrame";
 import { type DragHandlers, useLineDrag } from "./useLineDrag";
 
@@ -69,7 +69,7 @@ export function useCastTimeline({ axis, nowAt, end, gap }: CastTimelineLayout, c
     const now = castsAhead(s, past);
     // Draw again only when the casts in view change.
     setMarks((was) => (was.length === now.length && was.every((m, k) => m.i === now[k].i) ? was : now));
-    const places = castPositions(now, size - end, nowAt, gap);
+    const places = castPositions(now, size - end, nowAt, gap, past);
     const move = axis === "y" ? "translateY" : "translateX";
     now.forEach((m, k) => {
       const item = items.current.get(m.i);
@@ -78,7 +78,7 @@ export function useCastTimeline({ axis, nowAt, end, gap }: CastTimelineLayout, c
       item.dataset.when = m.left < 0 ? "past" : m.left <= CASTS_SOON ? "soon" : "later";
       // A cast that went off fades out as it moves past the now mark, from full colour to nothing,
       // so it does not jump as it crosses.
-      item.style.opacity = m.left < 0 ? String(Math.max(0, 1 + m.left / past)) : "";
+      item.style.opacity = m.left < 0 ? String(castFade(m.left, past)) : "";
       const secs = item.querySelector<HTMLElement>("[data-secs]");
       const text = m.left > 0 ? String(Math.ceil(m.left)) : "";
       if (secs && secs.textContent !== text) secs.textContent = text;

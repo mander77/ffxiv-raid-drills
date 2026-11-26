@@ -434,6 +434,10 @@ make sure that each one still matches the code before you start it.
     and the mechanic over the arena, then the play bar and the casts coming up, sideways
     (`CastStrip`), under it. The sideways line is CastList lying down: the casts slide left to a
     now mark, their names wrapped under their squares, so a phone keeps the casts coming up.
+    Close casts on the strip (owner's choice, issue 184): a cast that went off keeps its room
+    and gives it up as it fades, so the next one slides in and never jumps onto it, and it hides
+    its name, leaving only its fading square on the now mark. The Cast and Hit key sits under the
+    strip, where it covers no tick.
     `ArenaFrame`'s `over` and `under` line the column up with the floor's sides. In one column the
     arena keeps its full size (`fill`: up to 720 px, or the screen's width) and the page scrolls, as
     on a phone (owner's choice): it does not shrink to make room for the mechanic and the bars. The owner turned down the mix (the

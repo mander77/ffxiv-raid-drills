@@ -25,7 +25,7 @@ const TICKS = [5, 10, 20] as const;
 
 /** The classes of each part, down the box and across it. Complete class names, so Tailwind finds
     them. In the player a drag along the line moves the clock; a swipe the other way stays the
-    browser's. */
+    browser's. Sideways a cast that went off hides its name, as the next name slides into its room. */
 const LOOK = {
   y: {
     section: "flex min-h-0 flex-col",
@@ -38,7 +38,6 @@ const LOOK = {
     item: "top-0 right-2 left-3.5",
     button: "flex w-full items-center gap-2.5 text-sm",
     name: "min-w-0 truncate px-1",
-    key: "right-2 bottom-1.5",
   },
   x: {
     section: "",
@@ -50,8 +49,7 @@ const LOOK = {
     list: "inset-y-0 left-0",
     item: "top-1.5 left-0 w-18",
     button: "flex w-full flex-col items-center gap-1 text-xs",
-    name: "line-clamp-2 px-0.5 text-center leading-tight",
-    key: "right-2 bottom-0.5",
+    name: "line-clamp-2 px-0.5 text-center leading-tight group-data-[when=past]:invisible",
   },
 } as const;
 
@@ -125,8 +123,11 @@ export function CastList({ axis, controls, className }: CastListProps) {
             </li>
           ))}
         </ol>
-        <CastKey className={cn("absolute rounded bg-card/90 px-1", look.key)} />
+        {/* Down the box the key sits in its bottom corner. Sideways the box has no free corner (the
+            ticks run along its bottom), so the key goes under it. */}
+        {axis === "y" && <CastKey className="absolute right-2 bottom-1.5 rounded bg-card/90 px-1" />}
       </div>
+      {axis === "x" && <CastKey className="justify-end px-2 pt-1" />}
     </section>
   );
 }
