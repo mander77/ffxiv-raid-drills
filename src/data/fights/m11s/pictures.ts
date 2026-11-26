@@ -335,8 +335,8 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const own = zoneCenter(d.zone), oth = zoneCenter(d2.zone), all = ring(ALL, 9, 0, 45);
     return {...d, options:[pair(own, d.zone), pair(oth, d2.zone), pair([62, 50], circle([62, 50], 6), ["MT", "T"]), show([stackHit(all), ...all], [circle(CENTER, 13)])]}; },
   "k-charyb": () => { const mt = at(22.5, 20);
-    return {overlays:ring(ALL, 20, 22.5, 45), boss:BOSS, after:[RAIDWIDE, say("EVERYONE AT 1 HP", 8)], options:[
-      show([RAIDWIDE, say("EVERYONE AT 1 HP", 8)]), show([fakeCircle(mt, FAKE.buster), target(mt), say("THE TANK DIES", 8)]),
+    return {overlays:ring(ALL, 20, 22.5, 45), boss:BOSS, after:[say("EVERYONE AT 1 HP", 8)], options:[
+      show([say("EVERYONE AT 1 HP", 8)]), show([fakeCircle(mt, FAKE.buster), target(mt), say("THE TANK DIES", 8)]),
       show([fakeCircle(mt, FAKE.buster), target(mt), say("TANK BUSTER", 8)]), show([say("NOTHING HAPPENS", 8)])]}; },
   "k-ult-spawn": s => { const R = ultSet(s), cw: Array<[number, string]> = [[315, "2"], [90, "3"], [180, "4"], [270, "5"], [0, "6"]];
     return {overlays:ultPart(s, i => i === 0), boss:STILL, after:ultPart(s, i => i > 0), answer:[circle(R.W[1].p, 9)], options:[
