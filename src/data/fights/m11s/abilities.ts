@@ -112,7 +112,7 @@ export const PHASES: readonly {name: Phase; rows: Ability[]}[] = [
     [cactbot("Eye of the Hurricane"), "Explosion + Eye of the Hurricane", ["dodge", "target"], N.eye],
     [cactbot("Raw Steel Trophy Axe", 2), "Raw Steel Trophy", ["mech"], N.rawTrophy],
     [cactbot("Heavy Hitter (Scythe)", 2), "Raw Steel", ["spot", "tank"], N.rawSteel],
-    [cactbot("Charybdistopia"), "Charybdistopia", ["raid"], N.charyb],
+    [cactbot("Charybdistopia"), "Charybdistopia", ["mech"], N.charyb],
     [cactbot("Ultimate Trophy Weapons"), "Ultimate Trophy Weapons", ["mech"], N.ultimate],
     [cactbot("Assault Apex"), "Assault Apex", ["mech"], N.apex],
     [cactbot("Assault Evolved 1", 3), "Assault Evolved #1", ["mech"], N.assault],
