@@ -899,8 +899,8 @@ export const randomHalf = (): SplitHalf => random() < 0.5 ? "inner" : "outer";
 
 /* The tether portals: two just outside each platform's outer wall, PORTAL_OUT out. One side has
    its pair near the ends (5 and 35 yalms from the north wall), the other near the middle (15 and
-   25). Which side is random each round. BossMod has no portal spots, so they come from Hector's
-   guide video, drawn to scale (the owner's choice). */
+   25). Which side is random each round. BossMod has no portal spots, so they come from cactbot's
+   trigger "R11S Arena Split Majestic Meteowrath Tether Collect" (z 85, 95, 105, 115). */
 const PORTAL_Y = {ends:[12.5, 87.5], middle:[37.5, 62.5]} as const;
 /** The portal on `side`'s outer wall, in its north or south half. `endsSide` is the side whose
     portals are near the ends. */
