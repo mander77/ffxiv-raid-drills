@@ -479,7 +479,7 @@
 
   /* The full fight. Damage going out: a flash over the floor in the category's colour, and for a
      tank buster the tanks and the hit on them, which then fade. The flashes stay under three a
-     second: Dance of Domination, the fastest, hits every 0.7 seconds. */
+     second: Dance of Domination, the fastest, hits 0.6 to 1.1 seconds apart. */
   .arena .hitfx {
     fill: none;
     pointer-events: none;

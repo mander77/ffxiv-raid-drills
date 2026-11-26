@@ -323,8 +323,8 @@ export function buildHits(f: Fight): Hit[] {
     }
     else if(a.cats.includes("enrage")) hits.push({t:a.t, name:a.name, kind:"enrage", cat:"enrage"});
     else if(rule.times){
-      const {n, gap, name} = rule.times, cat = a.cats[0] ?? "raid";
-      for(let k = 0; k < n; k++) hits.push({t:a.t + k * gap, name:name + " " + (k + 1), kind:cat === "raid" ? "raid" : "aoe", cat});
+      const cat = a.cats[0] ?? "raid";
+      for(const {t, name} of rule.times) hits.push({t, name, kind:cat === "raid" ? "raid" : "aoe", cat});
     }
     else if(a.cats.includes("raid")) hits.push({t:a.t, name:a.name, kind:"raid", cat:"raid"});
     else if(a.cats.includes("tank")) hits.push({t:a.t, name:a.name, kind:"tank", cat:"tank"});

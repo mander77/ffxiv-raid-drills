@@ -2,6 +2,8 @@ import { assert, test } from "vitest";
 import { ABILITIES, ENRAGE, FIGHT_END } from "../src/data/fights/m11s/abilities";
 import { DRILLS } from "../src/data/fights/m11s/drills";
 import { buildFight, buildHits } from "../src/data/fights/m11s/fight";
+import { CACTBOT_LINES } from "../src/data/fights/m11s/source.gen";
+import { cactbot, type LineName } from "../src/data/fights/m11s/sources";
 
 test("the ability list runs in time order, and every row says what it does", () => {
   ABILITIES.forEach((a, i) => {
@@ -43,6 +45,11 @@ test("the hit rules in the ability list make the fight's hits", () => {
     [1, 2, 3, 4, 5, 6, 7].map((n) => `Dance of Domination ${n}`),
   );
   assert.ok(dance.every((h) => h.kind === "raid"));
+  for (const h of dance) assert.equal(h.t, cactbot(h.name as LineName), `${h.name} is at its cactbot line`);
+  assert.notOk(
+    hits.some((h) => h.name === "Dance of Domination Trophy"),
+    "the Trophy cast does no damage: the first hit is Dance of Domination 1",
+  );
   const kicks = hits.filter((h) => h.name.startsWith("Heartbreak Kick "));
   assert.equal(kicks.length, 5 + 6 + 7, "one hit per kick line: 5, 6, then 7");
   assert.ok(kicks.every((h) => h.kind === "shared"));
@@ -51,4 +58,9 @@ test("the hit rules in the ability list make the fight's hits", () => {
   hits.forEach((h, i) => {
     if (i) assert.isAtLeast(h.t, hits[i - 1].t, "hits run in time order");
   });
+});
+
+test("every hit of the full fight is at a cactbot line", () => {
+  const times = new Set<number>(CACTBOT_LINES.map((l) => l.t));
+  for (const h of buildHits(buildFight("H1"))) assert.ok(times.has(h.t), `${h.name} at ${h.t} is not a cactbot line`);
 });

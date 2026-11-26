@@ -108,6 +108,9 @@ export const spreadHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("CometS
 /** Crushing Comet, the Party Stack that can end Void Stardust ("range 6 circle"), on the stack
     spot p. */
 export const crushingComet = (p: Point): Overlay => ATTACK.circle(p, bossmod("CrushingCometStack").range);
+/** Eye of the Hurricane, the Pair Stack that ends Dance of Domination ("range 6 circle", two
+    players), on the pair spot p. */
+export const eyeOfTheHurricane = (p: Point): Overlay => ATTACK.circle(p, bossmod("EyeOfTheHurricane").range);
 /** A tower going off: the Arena Split towers (Explosion), the Ecliptic Stampede towers and
     Heartbreak Kick ("range 4 circle"). */
 export const towerHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("ExplosionTower").range);

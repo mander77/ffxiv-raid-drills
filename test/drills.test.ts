@@ -1,6 +1,6 @@
 import { assert, test } from "vitest";
 import { WAYMARKS } from "../src/components/arena/Arena";
-import { HITBOX, isStretched, MELEE_R, PLATFORM_X, PORTAL_LINE_X, TOWER_KNOCKBACK, TOWER_R } from "../src/data/fights/m11s/attacks";
+import { ATTACK, HITBOX, isStretched, MELEE_R, PLATFORM_X, PORTAL_LINE_X, TOWER_KNOCKBACK, TOWER_R } from "../src/data/fights/m11s/attacks";
 import {
   assaultScene,
   avalancheScene,
@@ -32,6 +32,7 @@ import {
   ultimateScene,
   voidAgain,
 } from "../src/data/fights/m11s/drills";
+import { bossmod } from "../src/data/fights/m11s/sources";
 import { angOf, inZone, stepZone, zoneCenter } from "../src/geometry";
 import { changes } from "../src/lib/practice";
 import { facingNext, jumpsNext } from "../src/lib/scene";
@@ -522,6 +523,10 @@ test("Dance of Domination: every pair spot is clear of the 10-yalm Hurricane Exp
   const drill = DRILLS.find((m) => m.id === "m-dance");
   if (!drill) throw new Error("missing drill m-dance");
   for (const s of SLOTS) assert.deepEqual(zoneOf(drill.build(s, null).steps[0].z), { c: DANCE_PAIRS[s], r: 5 });
+  // The pair shares the 6-yalm Eye of the Hurricane stack where it stands.
+  const at: Point = [30, 90];
+  for (const s of SLOTS)
+    assert.deepEqual(drill.build(s, null).steps[0].revealAt?.(at), [ATTACK.circle(at, bossmod("EyeOfTheHurricane").range)]);
 });
 
 /** True when p is on the west (or east) platform, or at its north (or south) end. */

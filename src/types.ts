@@ -341,11 +341,11 @@ export type Category = "raid" | "tank" | "spot" | "dodge" | "target" | "mech" | 
 
 /** How the full fight shows an ability's hits, where its categories alone do not say it.
     `shared`: the party shares the hit (a stack or a tower), so it flashes softer.
-    `times`: it hits `n` times, `gap` seconds apart, named `name` 1, `name` 2 and so on.
+    `times`: its hits, each with its own time (a timeline line) and name.
     `lines`: each timeline line named `lines` and a number, up to the next ability, is one hit. */
 export interface HitRule {
   shared?: boolean;
-  times?: { n: number; gap: number; name: string };
+  times?: readonly { t: number; name: string }[];
   lines?: string;
 }
 
