@@ -1,11 +1,11 @@
 import { assert, test } from "vitest";
-import { MAJESTIC_PUDDLE, PLATFORM_X } from "../src/data/fights/m11s/attacks";
+import { busterPieces, MAJESTIC_PUDDLE, PLATFORM_X } from "../src/data/fights/m11s/attacks";
 import { DRILLS } from "../src/data/fights/m11s/drills";
 import { buildFight } from "../src/data/fights/m11s/fight";
 import { cactbot, type LineName } from "../src/data/fights/m11s/sources";
-import { inZone, rotZone, stepZone, zoneCenter } from "../src/geometry";
+import { angOf, dist, inZone, rotZone, stepZone, zoneCenter } from "../src/geometry";
 import { clock, sec } from "../src/time";
-import type { Slot, StepResult } from "../src/types";
+import type { Point, Slot, StepResult } from "../src/types";
 
 const REPEATS = 200;
 const SLOTS: Slot[] = ["H1", "H2"];
@@ -258,4 +258,22 @@ test("no two mechanics run at once: each one's last click is due before the next
         assert.isAtMost(Math.max(...prev.due), g.from, `${prev.title} runs into ${g.title}`);
       });
     }
+});
+
+test("the second Great Wall of Fire goes 45 degrees clockwise, with the OT in front", () => {
+  const boss: Point = [50, 50];
+  const cases: Array<[string, number, string]> = [
+    ["Great Wall of Fire #1", 0, "MT"],
+    ["Great Wall of Fire #2 + line dodge", 45, "OT"],
+  ];
+  for (const [name, facing, front] of cases) {
+    const pieces = busterPieces(name, boss);
+    const line = pieces.find((o) => o.t === "band");
+    if (line?.t !== "band") throw new Error(`${name} has no line`);
+    assert.closeTo(angOf([line.x2 - line.x, line.y2 - line.y]), facing, 0.01, name);
+    // Both tanks stand on the line, the front one closer to the boss.
+    const tanks = pieces.flatMap((o) => (o.t === "mark" ? [o] : [])).sort((a, b) => dist([a.x, a.y], boss) - dist([b.x, b.y], boss));
+    for (const t of tanks) assert.closeTo(angOf([t.x - boss[0], t.y - boss[1]]), facing, 0.01, `${t.l} in ${name}`);
+    assert.equal(tanks[0]?.l, front, name);
+  }
 });
