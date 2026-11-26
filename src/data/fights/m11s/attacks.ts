@@ -5,7 +5,7 @@
 // come from BossMod's M11S module (awgil/ffxiv_bossmod, RM11STheTyrant), which lists each
 // ability's shape in yalms. Each size is read from source.gen.ts (`npm run import:sources`), by
 // the BossMod ability it belongs to. The arena is 40 yalms across and 100 units in this app.
-import { addVec, angOf, dist, unit } from "../../../geometry";
+import { addVec, angOf, dist, polar, unit } from "../../../geometry";
 import { type Band, standardAttacks } from "../../../lib/attacks";
 import { BOSSMOD_ACTORS, BOSSMOD_ARENA_HALF, BOSSMOD_SPLIT, BOSSMOD_VOIDZONES } from "./source.gen";
 import { bossmod } from "./sources";
@@ -246,16 +246,26 @@ export function swordCross(c: Point, d: Point): Overlay[] {
   return ATTACK.cross(c, angOf(d), s.range, s.width);
 }
 
+/** How far from the boss the Great Wall of Fire tanks stand, in arena units: the front tank, and
+    the one behind it on the same line. The app's choice, for the picture: clear of the ring
+    around the boss and of each other. */
+const WALL_FRONT = 19;
+const WALL_BACK = 28;
+/** Where the second Great Wall of Fire goes: the tanks rotate 45 degrees clockwise after the first
+    (the static's strat). Degrees clockwise from north. */
+const WALL_SECOND_FACING = 45;
+
 /** The tanks for a buster, and what hits them. Great Wall of Fire is a line buster the two tanks
-    share: they stand together in front of the boss (he faces north), and the line runs from him
-    through them. Foregone Fatality hits each tethered tank alone (single-target, no AoE): the MT
-    on the NE tether, the OT on the SW tether, away from the party stack. */
+    share, one behind the other on the line from the boss. The first hit goes north, with the MT
+    in front. The second goes 45 degrees clockwise, with the OT in front. Foregone Fatality hits
+    each tethered tank alone (single-target, no AoE): the MT on the NE tether, the OT on the SW
+    tether, away from the party stack. */
 export function busterPieces(name: string, boss: Point): Overlay[] {
   const tank = (p: Point, l: string): Overlay[] => [{t:"target", x:p[0], y:p[1]}, {t:"mark", x:p[0], y:p[1], l, r:"T"}];
   if(name.startsWith("Great Wall of Fire")){
-    const front: Point = [boss[0], boss[1] - 17];
-    return [wallOfFire(boss, 0),
-      ...tank([front[0] - 3, front[1]], "MT"), ...tank([front[0] + 3, front[1]], "OT")];
+    const second = name.includes("#2"), facing = second ? WALL_SECOND_FACING : 0;
+    const [front, back] = second ? ["OT", "MT"] : ["MT", "OT"];
+    return [wallOfFire(boss, facing), ...tank(polar(facing, WALL_FRONT, boss), front), ...tank(polar(facing, WALL_BACK, boss), back)];
   }
   const mt: Point = [boss[0] + 14, boss[1] - 14], ot: Point = [boss[0] - 14, boss[1] + 14];
   return [...tank(mt, "MT"), ...tank(ot, "OT")];
