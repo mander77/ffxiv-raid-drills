@@ -165,7 +165,7 @@ export const LEARN_CARDS: QuizItem[] = [
       {t:"Under the boss with the melee."},{t:"North, with the ranged."}],
     why:["Healers and ranged stay out. Tanks and melee go in.", "Two of the four outside players get marked for puddles."],
     rule:["Healers south, ranged north.", "Tanks and melee under the boss."]})),
-  mq("k-ecl-adjust", 26.1, P4, "9:01", s=>({prompt:"Ecliptic Stampede: both healers get marked on the south side. Who moves?",
+  mq("k-ecl-adjust", 26.1, P4, "8:54", s=>({prompt:"Ecliptic Stampede: both healers get marked on the south side. Who moves?",
     options:[{t:"The one closer to the proximity AoE moves to the other side.", ok:true},{t:"H1 always moves."},{t:"Nobody moves."},{t:"Both move north."}],
     why:["Each wall needs one puddle dropper.", "The fixed adjust rule stops two people from moving immediately."],
     rule:["Same side? The one closer to the proximity AoE adjusts."]})),
