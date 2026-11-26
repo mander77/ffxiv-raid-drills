@@ -492,15 +492,20 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
         show([west, you(s, [90, 40])], [EAST]), show([east, you(s, [10, 40])], [WEST]),
         hit(youAt(s, [50, 62], 10), [west, east]), show([east, you(s, [10, 40]), thrown([90, 40], [10, 40])], [WEST])]}; },
   // The markers go on the players outside, so each answer draws a marker on you where you stand.
-  "k-ecl-start": s => { const d = fromDrill("m-ecl-start", s), d2 = fromDrill("m-ecl-start", other(s)), marked = (z: Zone): Overlay => target(zoneCenter(z));
+  // The drill's first step reveals the markers that come next, and it draws your
+  // co-healer at their spot; this card leaves them out, as an answer puts you there.
+  "k-ecl-start": s => { const base = fromDrill("m-ecl-start", s);
+    const d = {...base, overlays:base.overlays.filter(o => !(o.t === "mark" && o.l === other(s))), after:base.after?.slice(base.hits.length), hits:[]}, d2 = fromDrill("m-ecl-start", other(s)), marked = (z: Zone): Overlay => target(zoneCenter(z));
     const under = ring([["MT", "T"], ["OT", "T"], ["M1", "D"], ["M2", "D"]], 9, 45, 90);
     return {...d, options:[hit(youIn(s, d.zone), [marked(d.zone)]), hit(youIn(s, d2.zone), [marked(d2.zone)]),
       show([stackHit([...under, you(s, [50, 59])]), ...under, you(s, [50, 59])], [circle(CENTER, 12)]),
       hit(youAt(s, [38, 22]), [target([38, 22]), target([25, 25]), target([75, 25])])]}; },
-  "k-ecl-adjust": () => { const up = (x: number): Overlay => guide([x, 74], [x, 36]);
+  // The proximity AoEs land in two opposite corners, here NW and SE. The one who moves goes up to
+  // the north wall: from SE, in line with B. The dots' spots are the app's choice.
+  "k-ecl-adjust": () => { const up = (x: number): Overlay => guide([x, 74], [x, 6]);
     return {overlays:[mark(25, 25, "R1", "D"), mark(75, 25, "R2", "D"), target([25, 74]), target([75, 74]), mark(25, 74, "H1", "H"), mark(75, 74, "H2", "H"),
-      proximityDot([66, 93]), tag(66, 85, "PROXIMITY")], boss:BOSS, after:[up(75)], answer:[circle([75, 74], 7)],
-      note:"Example: the proximity AoE is closer to H2, so H2 moves north.", options:[
+      proximityDot([12, 12]), tag(18, 5, "PROXIMITY"), proximityDot([88, 88]), tag(82, 95, "PROXIMITY")], boss:BOSS, after:[up(75)], answer:[circle([75, 74], 7)],
+      note:"Example: proximity AoEs NW and SE. H2 is closer to one, so H2 moves north.", options:[
         show([up(75)], [circle([75, 74], 7)]), show([up(25)], [circle([25, 74], 7)]), show([say("NOBODY MOVES", 8)]), show([up(25), up(75)], [circle([25, 74], 7), circle([75, 74], 7)])]}; },
   // Hector's Fixed Stampede example: tank towers NE and SE, two-player towers NW and SW, and R1 and
   // R2 marked for the puddles. The tower spots are the app's example; they change from pull to pull.
@@ -531,13 +536,14 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
         show([guide(tower, wall), guide(wall, [94, 94]), you(s, [94, 94])], [circle([94, 94], 6)])]}; },
   // Two-way Fireball is two line stacks from the boss, east and west. Four-way is four line stacks
   // of two players each, NW, NE, SW and SE. Both are 6 yalms wide (BossMod).
-  "k-ecl-two": s => { const d = fromDrill("m-ecl-two", s, "north");
+  // A fireball drill rolls where the proximity AoEs left the puddles; the seed keeps each picture the same.
+  "k-ecl-two": s => { const d = withSeed("k-ecl-two", () => fromDrill("m-ecl-two", s, "north"));
     // The east Line Stack, mirrored from your spot in the west one.
     const me = zoneCenter(d.zone), mirror: Point = [100 - me[0], me[1]];
     return {...d, after:[...d.hits, you(s, me)], options:[
       show([lineStack(CENTER, [0, 50]), you(s, me)], [d.zone]), show([lineStack(CENTER, [100, 50]), you(s, mirror)], [circle(mirror, 5)]),
       hit(youAt(s, [43, 43], 5.5), [lineStack(CENTER, [43, 43])]), show([fakeCircle(CENTER, FAKE.smallCircle), you(s, [50, 58])], [circle(CENTER, 9)])]}; },
-  "k-ecl-four": s => { const d = fromDrill("m-ecl-four", s, "south");
+  "k-ecl-four": s => { const d = withSeed("k-ecl-four", () => fromDrill("m-ecl-four", s, "south"));
     return {...d, options:[
       hit(youIn(s, d.zone), [lineStack(CENTER, zoneCenter(d.zone))]), hit(youAt(s, [43, 43], 5.5), [lineStack(CENTER, [43, 43])]),
       show([lineStack(CENTER, [100, 50]), you(s, [68, 50])], [rect(60, 43, 84, 57)]), hit(youAt(s, [6, 94], 6), [lineStack(CENTER, [6, 94])])]}; },

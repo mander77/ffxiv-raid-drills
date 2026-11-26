@@ -29,7 +29,10 @@ import {
   ECL_CORNERS,
   eclFourWayScene,
   eclipticFreeScene,
+  eclipticScene,
+  eclStarts,
   eclTwoWayScene,
+  eclWallOf,
   firstTowersScene,
   GUST_CONES,
   type JumpSet,
@@ -947,22 +950,71 @@ test("Ecliptic with no puddles: the tether goes opposite the portal, then clockw
   const PORTAL = { sw: "north", nw: "east", ne: "south", se: "west" } as const;
   for (const corner of ECL_CORNERS)
     for (const s of ["H1", "H2"] as const) {
-      const sc = withSeed("ECL1", () => eclipticFreeScene(s, corner));
+      const sc = withSeed("ECL1", () => eclipticFreeScene(s, corner, "nw-se"));
       const tether = sc.steps[3];
       assert.include(tether.q, `the ${PORTAL[corner]} portal`, `${s} ${corner}: the portal`);
       assert.equal(tether.a[0], `The ${corner.toUpperCase()} corner.`);
       assert.ok(tether.stand && inZone(tether.stand, tether.z ?? { c: [0, 0], r: 0 }), `${corner}: the corner spot is correct`);
       const east = corner === "ne" || corner === "se";
-      assert.ok(eclTwoWayScene(corner).steps[0].a[0].startsWith(east ? "The east Line Stack" : "The west Line Stack"));
-      assert.ok(eclFourWayScene(corner).steps[0].a[0].startsWith(corner.toUpperCase()));
+      assert.ok(eclTwoWayScene(corner, "nw-se").steps[0].a[0].startsWith(east ? "The east Line Stack" : "The west Line Stack"));
+      assert.ok(eclFourWayScene(corner, "nw-se").steps[0].a[0].startsWith(corner.toUpperCase()));
     }
+});
+
+// Ecliptic Stampede's start (wtfdig, Hector's guide): each marked player takes the safe corner on
+// their side; with both on one side, the one closer to the proximity AoE crosses.
+test("Ecliptic: a healer marked with a ranged goes south; with both healers, the one by the proximity AoE goes north", () => {
+  const WALL = {
+    "nw-se": { H1: { H2: "south", R1: "south", R2: "south" }, H2: { H1: "north", R1: "south", R2: "south" } },
+    "ne-sw": { H1: { H2: "north", R1: "south", R2: "south" }, H2: { H1: "south", R1: "south", R2: "south" } },
+  } as const;
+  for (const s of ["H1", "H2"] as const) {
+    const starts = eclStarts(s);
+    assert.equal(starts.length, 12);
+    assert.equal(starts.filter((e) => eclWallOf(s, e) === "none").length, 6, `${s}: marked in half the starts`);
+    for (const e of starts)
+      if (e.partner) {
+        const want: unknown = Reflect.get(WALL[e.meteors][s], e.partner);
+        assert.equal(eclWallOf(s, e), want, `${s} with ${e.partner}, proximity AoEs ${e.meteors}`);
+      }
+  }
+});
+
+test("Ecliptic: the puddles start at the safe corner's end of the wall and walk away from it", () => {
+  for (const [meteors, partner, s, line, west] of [
+    ["nw-se", "H1", "H2", "The north wall, in line with B.", true],
+    ["nw-se", "R1", "H1", "The south wall, in line with D.", false],
+    ["ne-sw", "H2", "H1", "The north wall, in line with D.", false],
+    ["ne-sw", "R2", "H2", "The south wall, in line with B.", true],
+  ] as const) {
+    const sc = eclipticScene(s, { meteors, partner });
+    const first = sc.steps[1];
+    assert.equal(first.a[0], line, `${s} with ${partner}, ${meteors}`);
+    assert.include(first.q, meteors === "nw-se" ? "NW and SE" : "NE and SW");
+    const xs = sc.steps.slice(1, 5).map((st) => st.stand?.[0] ?? Number.NaN);
+    for (let i = 1; i < xs.length; i++) assert.ok(west ? xs[i] < xs[i - 1] : xs[i] > xs[i - 1], `${line}: walks ${west ? "west" : "east"}`);
+    // The proximity AoEs land in the two named corners as the markers come, one in each.
+    const dots = (sc.steps[1].cue ?? []).flatMap((o) => (o.t === "aoe" ? [[o.x < 50, o.y < 50]] : []));
+    assert.sameDeepMembers(
+      dots,
+      meteors === "nw-se"
+        ? [
+            [true, true],
+            [false, false],
+          ]
+        : [
+            [false, true],
+            [true, false],
+          ],
+    );
+  }
 });
 
 test("Ecliptic with no puddles: H1 always goes clockwise, H2 only when H1 is marked", () => {
   for (let i = 0; i < 40; i++) {
-    const h1 = withSeed(`E${i}`, () => eclipticFreeScene("H1", "ne"));
+    const h1 = withSeed(`E${i}`, () => eclipticFreeScene("H1", "ne", "nw-se"));
     assert.equal(h1.steps[2].a[1], "H1 always takes the first two-player tower clockwise from A.");
-    const h2 = withSeed(`E${i}`, () => eclipticFreeScene("H2", "ne"));
+    const h2 = withSeed(`E${i}`, () => eclipticFreeScene("H2", "ne", "nw-se"));
     const h1Marked = h2.steps[1].q.includes("H1");
     assert.equal(h2.steps[2].a[1].includes("you go clockwise"), h1Marked, h2.steps[1].q);
   }
@@ -974,7 +1026,7 @@ test("Two-way Fireball: only the melee stand on the hitbox; a marked player is j
     ["north", false],
     ["south", true],
   ] as const) {
-    const z = zoneOf(eclTwoWayScene(place).steps[0].z);
+    const z = zoneOf(eclTwoWayScene(place, "nw-se").steps[0].z);
     assert.notOk(inZone(out(11.5, east), z), `${place}: on the hitbox is the melee's spot`);
     assert.ok(inZone(out(16, east), z), `${place}: just outside the hitbox`);
     assert.notOk(inZone(out(26, east), z), `${place}: too far, behind the tethered players`);
@@ -983,7 +1035,7 @@ test("Two-way Fireball: only the melee stand on the hitbox; a marked player is j
     ["nw", false],
     ["se", true],
   ] as const) {
-    const z = zoneOf(eclTwoWayScene(corner).steps[0].z);
+    const z = zoneOf(eclTwoWayScene(corner, "nw-se").steps[0].z);
     assert.notOk(inZone(out(16, east), z), `${corner}: the marked player's spot is in front of you`);
     assert.ok(inZone(out(20, east), z), `${corner}: behind the players by the boss`);
   }

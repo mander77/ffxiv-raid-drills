@@ -155,6 +155,24 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
     the wall does not spill past it.
   - The wait step is due at Majestic Meteowrath x4, the cactbot line where the fireball segment
     starts. The puddle steps are due at Atomic Impact 1 to 6.
+- Ecliptic Stampede's start, both patterns (November 26, owner's choices, issue 170): the two
+  Mammoth Meteor proximity AoEs land NW and SE, or NE and SW (cactbot's "R11S Mammoth Meteor").
+  Each marked player takes the safe corner on their own side; two on one side, the one closer to
+  the proximity AoE crosses (wtfdig). So a healer marked with a ranged always goes south, and a
+  healer goes north only when both healers are marked and they start by a proximity AoE: H2 with
+  NW and SE, H1 with NE and SW. Before, H1 could get the north wall with NW and SE, a run across
+  the arena that the strat never asks for.
+  - NW and SE is the video's pull: north in line with B, walk west; south in line with D, walk
+    east. NE and SW is its mirror, east to west: north in line with D, walk east; south in line
+    with B, walk west. No source shows that pull; the owner chose the mirror. The wait spots stay
+    NW (north wall) and NE (south wall): the raidplan says ALWAYS.
+  - The drill's question names who is marked with you and where the proximity AoEs land, and you
+    work out your wall. Both markers show as they come (the first step's reveal). The proximity
+    AoEs show from that question to the end (a cue), at spots that are the app's choice
+    (`METEOR_AT`), so a wrong first answer does not hide them.
+  - Pressure: a new pick, "Ecliptic proximity AoEs". Every start (where the AoEs land, and who is
+    marked with you) is as likely, so you have puddles half the time and the north wall one time
+    in twelve. A north wall pick wins over a proximity AoE pick that cannot give it.
 - Ecliptic Stampede with no puddles (November 24, the owner asked for it to follow Hector's Fixed
   Stampede mini-guide, https://www.youtube.com/watch?v=p8cL88OKEWE, read in a browser, 1:20 to
   2:45): the Settings pick "Your Ecliptic puddles" has a third value, "No puddles", and the drills
