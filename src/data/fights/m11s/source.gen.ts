@@ -8,7 +8,7 @@
 export const PINS = {cactbot:"96abb89fd22293744a9cdef58066a5b37520eda6", bossmod:"3004b0a7b5edd9ea8afaea69e71263c76668fff6"} as const;
 
 /** cactbot's timeline: each line's time in seconds into the fight (branch offsets removed),
-    its name, and its ability ids. */
+    its name, its ability ids, and how long it lasts, when the line says. */
 export const CACTBOT_LINES = [
   {t:10.6, name:"Crown of Arcadia", ids:["B406"]},
   {t:17.7, name:"Raw Steel Trophy (Scythe/Axe)", ids:["B423", "B422"]},
@@ -161,7 +161,7 @@ export const CACTBOT_LINES = [
   {t:436, name:"Majestic Meteowrath/Majestic Meteorain/Fire Breath", ids:["B442", "B443", "B447"]},
   {t:436.1, name:"Majestic Meteor 3", ids:["B441"]},
   {t:445.3, name:"Massive Meteor (castbar)", ids:["B448"]},
-  {t:446.4, name:"Massive Meteor x5", ids:["B449"]},
+  {t:446.4, name:"Massive Meteor x5", ids:["B449"], duration:5.6},
   {t:458.8, name:"Explosion", ids:["B444"]},
   {t:459.1, name:"Arcadion Avalanche (castbar)", ids:["B44A", "B44C", "B44E", "B450"]},
   {t:468.7, name:"Arcadion Avalanche", ids:["B44B", "B44D", "B44F", "B451"]},

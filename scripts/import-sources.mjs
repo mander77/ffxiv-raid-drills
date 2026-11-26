@@ -94,12 +94,15 @@ export function parseCactbot(text) {
     }
     if (name === "--sync--" || name === "--Reset--") continue;
     const ids = [...(/\bid:\s*(\[[^\]]*\]|"[^"]*")/.exec(rest)?.[1] ?? "").matchAll(/"([0-9A-F]+)"/g)].map((x) => x[1]);
+    // How long the line lasts, as written: for a line of several hits, from its first to its last.
+    // Read like the ids, also when the line's sync is commented out.
+    const duration = /\bduration\s+(\d+(?:\.\d+)?)/.exec(rest)?.[1];
     const at = tenth(t - offset);
     const key = `${at}|${name}`;
     const known = seen.get(key);
     if (known) {
       for (const id of ids) if (!known.ids.includes(id)) known.ids.push(id);
-    } else seen.set(key, { t: at, name, ids });
+    } else seen.set(key, { t: at, name, ids, ...(duration ? { duration: Number(duration) } : {}) });
   }
   return [...seen.values()].sort((a, b) => a.t - b.t || a.name.localeCompare(b.name));
 }
@@ -679,7 +682,7 @@ export function generate(sources, lines, bossmod, extras) {
     `export const PINS = ${ts({ cactbot: cactbot.commit, bossmod: sources.bossmod.commit })} as const;`,
     "",
     "/** cactbot's timeline: each line's time in seconds into the fight (branch offsets removed),",
-    "    its name, and its ability ids. */",
+    "    its name, its ability ids, and how long it lasts, when the line says. */",
     "export const CACTBOT_LINES = [",
     ...lines.map((l) => `  ${ts(l)},`),
     "] as const;",
