@@ -1,5 +1,5 @@
 import type { Picture, Preview } from "../../types";
-import { Arena, pieceLayers } from "./Arena";
+import { Arena, pieceLayers, withoutChangedRocks } from "./Arena";
 import { BossMark } from "./BossMark";
 import { ZoneArea } from "./ZoneArea";
 
@@ -19,6 +19,7 @@ export interface LearnPictureProps {
     correct spot in green. */
 export function LearnPicture({ fig: f, answered, label, preview, className }: LearnPictureProps) {
   const extra = answered ? (f.after ?? []) : preview ? preview.pieces : (f.before ?? []);
+  const pieces = [...f.overlays, ...extra];
   const zones = answered
     ? // biome-ignore lint/suspicious/noArrayIndexKey: the zones of a picture never change order.
       (f.answer ?? []).map((z, i) => <ZoneArea key={i} zone={z} look="ok" />)
@@ -29,7 +30,7 @@ export function LearnPicture({ fig: f, answered, label, preview, className }: Le
       label={label}
       split={f.split}
       className={className}
-      layers={{ ...pieceLayers([...f.overlays, ...extra]), zones, boss: f.boss ? <BossMark boss={f.boss} /> : null }}
+      layers={{ ...pieceLayers(withoutChangedRocks(pieces, pieces)), zones, boss: f.boss ? <BossMark boss={f.boss} /> : null }}
     />
   );
 }

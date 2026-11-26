@@ -85,8 +85,9 @@ interface Line extends At {
 // hierarchy and pattern matching. The `&` joins two types into one (an intersection).
 type OverlayShape =
   | ({ t: "aoe"; r: number } & At)
-  // A raidwide: the whole floor is hit. A tint over the floor, with a glow inside its edge.
-  | { t: "raidwide" }
+  /* A raidwide: the whole floor is hit. A tint over the floor, with a glow inside its edge.
+     `cover` is ground the attack does not reach, such as the shadow behind a rock. */
+  | { t: "raidwide"; cover?: Point[] }
   | ({ t: "donut"; r1: number; r2: number } & At)
   | ({ t: "lineaoe"; w?: number } & Line)
   | ({ t: "band"; w: number } & Line)
@@ -102,7 +103,9 @@ type OverlayShape =
   // Where a knockback pushes you: a bold dark arrow from (x, y) out to (x2, y2).
   | ({ t: "knockback" } & Line)
   | ({ t: "tornado" } & At)
-  | ({ t: "rock" } & At)
+  /* A rock: a meteor on the floor. `state` changes the rock at the same spot: "broken" draws it
+     cracked, as a hit breaks it; "gone" leaves it off the arena, after the next hit. */
+  | ({ t: "rock"; state?: "broken" | "gone" } & At)
   /** `soak` is how many players the tower needs: one dot on its ring for each. `tank` is a tower
       only tanks soak: a "T" in place of each dot. */
   | ({ t: "tower"; r?: number; soak?: number; tank?: boolean } & At)

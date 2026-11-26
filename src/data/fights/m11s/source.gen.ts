@@ -356,3 +356,7 @@ export const BOSSMOD_ARENA_HALF = 20;
     Meteorain), how far from its portal a tether counts as stretched (BossMod's estimate), and
     how far a tower knocks the players in it. */
 export const BOSSMOD_SPLIT = {platformCenter:16, platformHalfWidth:10, platformHalfLength:20, lines:[-21, -11, 11, 21], stretch:48, towerKnockback:23} as const;
+
+/** BossMod's Triple Tyrannhilation, in yalms: the radius of each comet that blocks the
+    Shockwaves (BossMod: "guessing"). */
+export const BOSSMOD_LOS = {cometRadius:2} as const;

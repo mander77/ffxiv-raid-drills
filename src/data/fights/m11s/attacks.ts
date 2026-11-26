@@ -7,7 +7,7 @@
 // the BossMod ability it belongs to. The arena is 40 yalms across and 100 units in this app.
 import { addVec, angOf, dist, polar, unit } from "../../../geometry";
 import { type Band, standardAttacks } from "../../../lib/attacks";
-import { BOSSMOD_ACTORS, BOSSMOD_ARENA_HALF, BOSSMOD_SPLIT, BOSSMOD_VOIDZONES } from "./source.gen";
+import { BOSSMOD_ACTORS, BOSSMOD_ARENA_HALF, BOSSMOD_LOS, BOSSMOD_SPLIT, BOSSMOD_VOIDZONES } from "./source.gen";
 import { bossmod, cactbot, castStart } from "./sources";
 import type { Overlay, Point, Puddle } from "../../../types";
 
@@ -107,6 +107,23 @@ export const safeRing = (c: Point, r: number): Overlay => ({t:"safe", x:c[0], y:
 
 /** The whole arena. */
 export const raidwide = (): Overlay => ATTACK.raidwide();
+
+/** A Meteorain rock as it blocks Triple Tyrannhilation's Shockwaves (BossMod's comet radius,
+    which BossMod marks as a guess). */
+export const COMET_R = yalms(BOSSMOD_LOS.cometRadius);
+/** True when the rock at `rock` hides p from an attack sent out from `from` (BossMod's line of
+    sight): the straight line from `from` to p passes through the rock. */
+export function behindRock(from: Point, rock: Point, p: Point): boolean {
+  const v: Point = [p[0] - from[0], p[1] - from[1]], len2 = v[0] * v[0] + v[1] * v[1];
+  const k = len2 === 0 ? 0 : Math.max(0, Math.min(1, ((rock[0] - from[0]) * v[0] + (rock[1] - from[1]) * v[1]) / len2));
+  return dist(addVec(from, v, k), rock) < COMET_R;
+}
+/** The shadow behind a Meteorain rock, as seen from `from`. */
+export const rockShadow = (from: Point, rock: Point): Point[] => ATTACK.shadow(from, rock, BOSSMOD_LOS.cometRadius);
+/** One Shockwave of Triple Tyrannhilation ("range 60 circle", from the boss): the whole arena but
+    the shadow behind `rock`, the nearest rock still standing. The rocks stand in one line from the
+    boss, so the nearest one's shadow holds the shadows of the rocks behind it. */
+export const shockwave = (from: Point, rock: Point): Overlay => ATTACK.lineOfSight(from, rock, BOSSMOD_LOS.cometRadius);
 /** Every spread and stack: Raw Steel, Comet, Crushing Comet, Eye of the Hurricane and Massive
     Meteor ("range 6 circle"), on the player at p. */
 export const spreadHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("CometSpread").range);

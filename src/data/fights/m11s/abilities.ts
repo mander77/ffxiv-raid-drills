@@ -49,7 +49,7 @@ const N = {
   fatality: "Tethers from the portals. A tether can be passed. Each tethered player takes a Tank Buster.",
   fireball: "The last Line Stack, with no meteors.",
   rockExplodes: "The rock the Line Stack broke explodes around itself. Walk out.",
-  triple: "Three hits of very heavy raid damage. Hide behind the rocks to block them.",
+  triple: "Three Shockwaves of very heavy raid damage. Hide behind the rocks to block them. Each one breaks the nearest rock.",
   flatliner: "A line splits the arena into two platforms and knocks the party away from it.",
   majestic: "Majestic Meteor starts the two-platform part: towers, meteor baits and tethers.",
   towers: "Towers to soak. A player in a tower gets knocked away from it.",
@@ -78,6 +78,8 @@ const rows = (list: Row[]): Ability[] => list.map(([t, name, cats, note, hit]) =
 const DANCE_HITS = ["Dance of Domination 1", "Dance of Domination 2", "Dance of Domination 3", "Dance of Domination 4",
   "Dance of Domination 5", "Dance of Domination 6", "Dance of Domination 7"] as const;
 const DANCE: HitRule = {times:DANCE_HITS.map((name) => ({t:cactbot(name), name}))};
+/** Triple Tyrannhilation: its three Shockwaves, each its own cactbot line. */
+const TRIPLE: HitRule = {lines:"Shockwave"};
 /** Heartbreak Kick: each hit on the shared tower is its own cactbot line. */
 const KICK: HitRule = {shared:true, lines:"Heartbreak Kick"};
 
@@ -137,7 +139,7 @@ export const PHASES: readonly {name: Phase; rows: Ability[]}[] = [
     [cactbot("Foregone Fatality", 3), "Foregone Fatality #3", ["tank"], N.fatality],
     [cactbot("Fearsome Fireball", 4), "Fearsome Fireball", ["target"], N.fireball],
     [cactbot("Explosion", 5), "Rock explodes", ["dodge"], N.rockExplodes],
-    [cactbot("Triple Tyrannhilation"), "Triple Tyrannhilation", ["raid", "spot"], N.triple]
+    [cactbot("Triple Tyrannhilation"), "Triple Tyrannhilation", ["raid", "spot"], N.triple, TRIPLE]
   ])},
   {name:P3, rows:rows([
     [cactbot("Flatliner (split)"), "Flatliner", ["raid", "spot"], N.flatliner],

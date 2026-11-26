@@ -24,6 +24,7 @@
     }
   },
   "extras": {
-    "arenaSplit": "Flatliner.cs"
+    "arenaSplit": "Flatliner.cs",
+    "lineOfSight": "Meteorain.cs"
   }
 }

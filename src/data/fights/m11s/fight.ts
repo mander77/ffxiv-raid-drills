@@ -144,8 +144,8 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
      Orbital Omen checks you as the #1 lines, the #2 lines and the #4 lines go off. The cross after
      #1 runs through the boss's middle, out of both Fire and Fury cones, so it can start before Fire
      and Fury. The last spot must stay safe through #4, so it is due then.
-     The meteor you bait in Meteorain is due when it lands (Cosmic Kiss). The hiding spot for Triple
-     Tyrannhilation must stay safe through its three Shockwaves, so it is due at the third. */
+     The meteor you bait in Meteorain is due when it lands (Cosmic Kiss). Triple Tyrannhilation's
+     three steps are due at its three Shockwaves, so the hiding spot must stay safe through all three. */
   const four = choose(c.fireball, random() < 0.5 ? "four" : "two") === "four", wallRoll = random();
   // Two of the four healers and ranged are marked, so you have puddles half the time, along either wall.
   const wall = choose(c.wall, wallRoll < 0.25 ? "north" : wallRoll < 0.5 ? "south" : "none");
@@ -157,7 +157,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Meteorain: First Line Stack", drills:["m-meteor-1"], scene:drill("m-meteor-1", s), k:0, from:cactbot("Meteorain"), due:[cactbot("Fearsome Fireball")]},
     {title:"Meteorain: Your Meteor", drills:["m-meteor-2"], scene:drill("m-meteor-2", s), k:0, from:cactbot("Cosmic Kiss"), due:[cactbot("--Meteor Markers 2--"), cactbot("Cosmic Kiss", 2)]},
     {title:"Meteorain: Third Line Stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:cactbot("--tethers--", 2), due:[cactbot("Fearsome Fireball", 3)]},
-    {title:"Meteorain: Last Line Stack", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:cactbot("Cosmic Kiss", 3), due:[cactbot("Fearsome Fireball", 4), cactbot("Shockwave", 3)]},
+    {title:"Meteorain: Last Line Stack", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:cactbot("Cosmic Kiss", 3), due:[cactbot("Fearsome Fireball", 4), cactbot("Shockwave"), cactbot("Shockwave", 2), cactbot("Shockwave", 3)]},
     {title:"Arena Split: Lineup", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:cactbot("Flatliner (split)"), due:[cactbot("Majestic Meteor")]},
     // Its scene comes with the rest of Arena Split below, once the tether round is known.
     {title:"Arena Split: First Towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:cactbot("--tethers--", 3), due:[cactbot("Explosion", 6)]},
@@ -253,7 +253,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   // The same line name, each time it comes: L("Crown of Arcadia", 2) is the second Crown of Arcadia.
   const L = (name: LineName, n = 1, shown: string = name): [number, string] => [cactbot(name, n), shown];
   const RAIDWIDE = new Set(["Crown of Arcadia", "Dance of Domination 1", "Dance of Domination 7", "One and Only",
-    "Triple Tyrannhilation", "Flatliner", "Mammoth Meteor x2", "Heartbreaker (Enrage)"]);
+    "Triple Tyrannhilation", "Shockwave 1", "Shockwave 2", "Shockwave 3", "Flatliner", "Mammoth Meteor x2", "Heartbreaker (Enrage)"]);
   /* The boss's own casts: the lines whose ability BossMod lists as "Boss->self, N s cast,
      single-target" (AID in RM11STheTyrantEnums.cs), matched by the ability id on cactbot's line.
      They do no damage: the boss's cast bar ends and a mechanic starts. Orbital Omen and Massive
@@ -283,7 +283,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     L("Foregone Fatality"), L("Fearsome Fireball", 2), L("Cosmic Kiss", 2), L("Explosion", 3),
     L("Foregone Fatality", 2), L("Fearsome Fireball", 3), L("Cosmic Kiss", 3), L("Explosion", 4),
     L("Foregone Fatality", 3), L("Fearsome Fireball", 4), L("Explosion", 5),
-    L("Triple Tyrannhilation"),
+    L("Triple Tyrannhilation"), L("Shockwave", 1, "Shockwave 1"), L("Shockwave", 2, "Shockwave 2"), L("Shockwave", 3, "Shockwave 3"),
     L("Flatliner (split)", 1, "Flatliner"), L("Majestic Meteor"), L("--tethers--", 3, "Tethers"), L("Explosion", 6), L("--Fire Breath Markers--", 1, "Fire Breath markers"),
     // A Majestic Meteor puddle "drops" when its cast starts (cactbot's "--meteor 1--"), as a Cometite puddle does. So do the second and third.
     L("--meteor 1--", 1, "Majestic Meteor 1 drops"), L("--meteor 2--", 1, "Majestic Meteor 2 drops"), L("Majestic Meteor 1"), L("--meteor 3--", 1, "Majestic Meteor 3 drops"), L("Majestic Meteor 2"), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath"), L("Majestic Meteor 3"),
@@ -321,7 +321,8 @@ export function buildHits(f: Fight): Hit[] {
     const rule = a.hit ?? {}, next = ABILITIES[i + 1]?.t ?? Infinity;
     if(rule.lines){
       const prefix = rule.lines + " ", isHit = (name: string): boolean => name.startsWith(prefix) && /^\d+$/.test(name.slice(prefix.length));
-      for(const e of f.events) if(e.t >= a.t && e.t < next && isHit(e.name)) hits.push({t:e.t, name:e.name, kind:"shared", cat:a.cats[0] ?? "spot"});
+      for(const e of f.events) if(e.t >= a.t && e.t < next && isHit(e.name))
+        hits.push({t:e.t, name:e.name, kind:rule.shared ? "shared" : a.cats.includes("raid") ? "raid" : "aoe", cat:a.cats[0] ?? "spot"});
     }
     else if(a.cats.includes("enrage")) hits.push({t:a.t, name:a.name, kind:"enrage", cat:"enrage"});
     else if(rule.times){

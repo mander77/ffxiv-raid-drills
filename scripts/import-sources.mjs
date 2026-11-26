@@ -188,6 +188,14 @@ export function parseSplit(flatliner) {
   };
 }
 
+/** Triple Tyrannhilation's line of sight, in yalms: the radius of each comet (rock) that blocks the
+    Shockwaves. BossMod marks it as a guess. */
+export function parseLineOfSight(meteorain) {
+  const radius = /class TripleTyrannhilation[\s\S]*?CometRadius = (\d+(?:\.\d+)?)f;/.exec(meteorain);
+  if (!radius) throw new Error("bossmod: no Triple Tyrannhilation comet radius in the Meteorain file");
+  return { cometRadius: Number(radius[1]) };
+}
+
 /** A value as TypeScript text, on one line. */
 const ts = (v) =>
   typeof v === "string"
@@ -640,6 +648,15 @@ const EXTRAS = {
       "    Meteorain), how far from its portal a tether counts as stretched (BossMod's estimate), and",
       "    how far a tower knocks the players in it. */",
       `export const BOSSMOD_SPLIT = ${ts(v)} as const;`,
+      "",
+    ],
+  },
+  lineOfSight: {
+    parse: parseLineOfSight,
+    out: (v) => [
+      "/** BossMod's Triple Tyrannhilation, in yalms: the radius of each comet that blocks the",
+      '    Shockwaves (BossMod: "guessing"). */',
+      `export const BOSSMOD_LOS = ${ts(v)} as const;`,
       "",
     ],
   },

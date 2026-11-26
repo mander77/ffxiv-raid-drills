@@ -250,6 +250,9 @@
     stroke: oklch(0.499 0.014 264.444);
     stroke-width: 0.4;
   }
+  .arena .rock.broken path {
+    stroke-linejoin: miter;
+  }
   .arena .tower circle.out {
     fill: oklch(1 0 0 / 0.35);
     stroke: var(--arena-text);

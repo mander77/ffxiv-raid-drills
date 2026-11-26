@@ -397,9 +397,9 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
         show([lineStack(CENTER, [33, 67]), ...sw], [circle([33, 67], 9)]),
         show([stackHit(under), ...under], [circle(CENTER, 9)]),
         show([...spreadHits(spread), ...spread])]}; },
-  // Only the rocks: the tank tethers come from random portals, and a Learn picture never changes.
+  // The correct answer draws no attack: the rocks block every Shockwave there.
   "k-triple": s => { const d = fromDrill("m-meteor-4", s, null, 1), spread = ring(ALL, 44, 22.5, 45);
-    return {...d, overlays:d.overlays.filter(o => o.t === "rock"), options:[hit(youAt(s, [6, 94], 6), [fakeLine([6, 94])]), hit(youAt(s, [50, 58], 9), [fakeDonut(CENTER, FAKE.tripleDonut)]),
+    return {...d, overlays:d.overlays.filter(o => o.t === "rock"), options:[youAt(s, [6, 94], 6), hit(youAt(s, [50, 58], 9), [fakeDonut(CENTER, FAKE.tripleDonut)]),
       hit(youAt(s, [67, 33], 6), [fakeLine([67, 33])]), show([fakeCircle(CENTER, FAKE.bigCircle), ...spread])]}; },
   // Flatliner knocks everyone back from the boss before the split, so each spot gets a knockback arrow.
   // No source gives its distance: the arrow ends at the lineup spot (the app's choice).

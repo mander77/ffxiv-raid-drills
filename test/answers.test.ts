@@ -39,6 +39,7 @@ const isAttack = (o: Overlay): boolean =>
   o.t === "band" ||
   o.t === "puddle" ||
   o.t === "poly" ||
+  (o.t === "raidwide" && o.cover !== undefined) ||
   (o.t === "lane" && !o.soft);
 
 /** True when p is inside the rectangle along the line from a to b, w units wide. Its ends are
@@ -79,6 +80,8 @@ function hits(o: Overlay, p: Point): boolean {
       return inLine(p, [o.x, o.y], [o.x2, o.y2], o.w);
     case "poly":
       return inPoly(p, o.pts);
+    case "raidwide":
+      return !o.cover || !inPoly(p, o.cover);
     case "lane":
       return p[0] > o.rect[0] && p[0] < o.rect[2] && p[1] > o.rect[1] && p[1] < o.rect[3];
     default:
