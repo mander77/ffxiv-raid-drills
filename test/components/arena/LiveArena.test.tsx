@@ -188,3 +188,17 @@ test("Meteorain: the tanks pick up Foregone Fatality's tethers, which never stre
   assert.ok(screen.getByText("MT"));
   assert.ok(screen.getByText("OT"));
 });
+
+test("Meteorain: the tank tethers stay on the arena after you drop your meteor", () => {
+  const drill = DRILLS.find((m) => m.id === "m-meteor-2");
+  if (!drill) throw new Error("missing drill m-meteor-2");
+  const scene = drill.build("H1", null),
+    results: StepResult[] = [];
+  for (const st of scene.steps) {
+    const z = stepZone(st, results);
+    if (!z) throw new Error("no zone");
+    results.push({ p: zoneCenter(z), ok: true, z, drop: null });
+  }
+  render(<LiveArena scene={scene} k={0} results={results} showLast hint={false} />);
+  assert.equal(screen.getAllByLabelText("Tether").length, 2);
+});

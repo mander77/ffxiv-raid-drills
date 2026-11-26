@@ -1439,14 +1439,14 @@ export const DRILLS: readonly Drill[] = [
         // then (Hector's guide video, 9:43 to 9:59; wtfdig: "Bait meteor close").
         {q:"Healers bait the next meteors. Where do you go?", z:{c:CENTER, r:HITBOX},
           a:["Under the boss.", "Be one of the two closest players, so the marker goes to you."],
-          // The tethers come just after the markers, to M1's and M2's rocks.
-          revealAt:p => [{t:"target", x:p[0], y:p[1]}], reveal:fatality(METEOR_ROCKS.ne, METEOR_ROCKS.sw)},
+          revealAt:p => [{t:"target", x:p[0], y:p[1]}]},
         {q:"You have a meteor marker. Where do you drop it?",
         z:bySlot(s, {H1:H1_METEOR, H2:H2_METEOR}),
         a:bySlot(s, {H1:["NW, in max melee."], H2:["SW, in a row with the first SW rock.", "About halfway to the edge."]}),
         // The second Line Stack goes off NE, through the party, just before the meteors land.
-        // The NE rock it breaks explodes 3 seconds later, once you have dropped yours.
-        cue:[lineThrough(45)],
+        // The NE rock it breaks explodes 3 seconds later, once you have dropped yours. The tank
+        // tethers to M1's and M2's rocks come just after the markers.
+        cue:[lineThrough(45), ...fatality(METEOR_ROCKS.ne, METEOR_ROCKS.sw)],
         revealAt:p => [meteorHit(p), rock(p)],
         reveal:[meteorHit(otherHealerRock(s)), rock(otherHealerRock(s)), rockExplosion(METEOR_ROCKS.ne)],
         hits:[lineThrough(45), meteorHit(otherHealerRock(s))]}],
