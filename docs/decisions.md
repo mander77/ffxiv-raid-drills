@@ -949,9 +949,13 @@ static wins.
   tornado counts as incorrect (the owner's answer, November 25).
 - Orbital Omen (Hector's dodge): stay against the boss hitbox, at his side, where the #2 lines
   cross. After #1, cross through him to the other side. After #2, cross back.
-- Orbital Omen in the full fight (owner, November 25, after a fight review): the last step
-  ("stay there") is checked when the #4 lines go off, not #3, so the run checks that you stay
-  through #4. The first step stays due at the #1 lines, not at Fire and Fury 0.6 seconds later.
+- Orbital Omen patterns (owner, November 26, issue #162): the #2 lines always cross at a corner
+  of the boss's hitbox, in a middle square (the owner; Hector's video, 470 to 476 s, shows one).
+  Each column and each row fires once. The other three sets come in any order: the video shows
+  east #1 in an outer row and east #4 in an inner row. The dodge works for every such order.
+- Orbital Omen in the full fight (owner, November 25, after a fight review): the last spot
+  ("stay there") is checked when the #3 lines go off and again at #4 (owner, November 26: each
+  set of lines shows at its own cactbot time), so the run checks that you stay through #4. The first step stays due at the #1 lines, not at Fire and Fury 0.6 seconds later.
   Fire and Fury is two 90-degree cones, front and back. The cross from your side spot to the
   opposite middle square is a straight line through the boss's middle, 63 degrees off his facing,
   so it stays out of both cones. Waiting for Fire and Fury leaves 1 second for the cross: too

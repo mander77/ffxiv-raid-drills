@@ -84,8 +84,6 @@ function stackHit(os: Overlay[], pad = 4.5): Overlay {
 }
 /** Proteans: a cone from `from` toward every player. */
 const proteans = (from: Point, os: Overlay[]): Overlay[] => spotsOf(os).map(p => proteanCone(from, angOf([p[0] - from[0], p[1] - from[1]])));
-/** One half of the arena, as a cleave: front is "north" for a boss facing north. */
-const half = (side: "north" | "south"): Overlay => ATTACK.halfArena(side)[0];
 
 /** Powerful Gust from one tornado: its cones on its two baits. */
 function gustsFrom(t: Point): Overlay[] {
@@ -370,7 +368,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-orbital": s => { const sides = [{poly:[[50, 50], [0, 0], [0, 100]] as Point[]}, {poly:[[50, 50], [100, 0], [100, 100]] as Point[]}];
     return {overlays:[], boss:BOSS, after:[...FIRE_AND_FURY, you(s, bySlot<Point>(s, {H1:[36, 52], H2:[64, 52]}))], answer:sides, options:[
       show([...FIRE_AND_FURY, you(s, bySlot<Point>(s, {H1:[36, 52], H2:[64, 52]}))], sides),
-      hit(youAt(s, [50, 64]), [half("north")]), hit(youAt(s, [50, 36]), [half("south")]), hit(youAt(s, [50, 94]), [fakeCircle(CENTER, FAKE.circle)])]}; },
+      hit(youAt(s, [50, 64]), FIRE_AND_FURY), hit(youAt(s, [50, 36]), FIRE_AND_FURY), hit(youAt(s, [50, 94]), FIRE_AND_FURY)]}; },
   "k-orbital-move": s => {
     const O = withSeed("HECT", buildOrbital), [a, b] = O.steps.map(st => st.z);
     if(!a || !b || !("fn" in a) || !("fn" in b)) throw new Error("the Orbital Omen zones are rule zones");

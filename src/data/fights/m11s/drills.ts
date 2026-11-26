@@ -393,13 +393,13 @@ export function cometSpread(s: Slot, c: Point = CENTER, f = 0): (results: StepRe
 /** Fire and Fury: the boss, facing north, cleaves his front and back. */
 export const FIRE_AND_FURY: Overlay[] = fireAndFury([50, 50], 0);
 
-/* Orbital Omen, simplified to 4 lanes each way. Each set fires one north lane and one east lane.
-   Set 2 always crosses in one of the four middle squares. */
+/* Orbital Omen, simplified to 4 lanes each way. Each set fires one north lane and one east lane,
+   and each lane fires once. The #2 lines always cross in one of the four middle squares, at a
+   corner of the boss's hitbox (the owner; Hector's video shows it). The other sets come in any order. */
 export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
   // V[i] is the column (0-3) the #(i+1) north portal fires down. H[i] is the row the #(i+1) east portal fires across.
-  const outer = shuffle([0, 3]), inner = shuffle([1, 2]);
-  const V = [outer[0], inner[0]].concat(shuffle([outer[1], inner[1]]));
-  const H = shuffle([1, 2]).concat(shuffle([0, 3]));
+  const order = (): number[] => { const n = shuffle([1, 2])[0], rest = shuffle([0, 1, 2, 3].filter(x => x !== n)); return [rest[0], n, rest[1], rest[2]]; };
+  const V = order(), H = order();
   // Four lanes each way span the arena, so a lane is a quarter of it (BossMod OrbitalOmenRect).
   const W = ORBITAL_LANE;
   const lane = (n: number, vert: boolean): RectZone => vert ? {rect:[n * W, 0, (n + 1) * W, 100]} : {rect:[0, n * W, 100, (n + 1) * W]};
@@ -412,27 +412,34 @@ export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
   const misses = (p: Point, sets: number[]): boolean => sets.every(i => !inV(p, V[i]) && !inH(p, H[i]));
   const cellRect = (c: number, r: number): RectZone => ({rect:[c * W, r * W, (c + 1) * W, (r + 1) * W]});
   const spot = (c: number, r: number): Point => [c === 1 ? 38 : 62, r === 1 ? 44 : 56];
-  const c2 = V[1], r2 = H[1], cOpp = 3 - V[1], r1 = H[0];
+  const c2 = V[1], r2 = H[1];
+  /** The middle squares that the lines of these sets miss. */
+  const safeSquares = (sets: number[]): RectZone[] =>
+    [1, 2].flatMap(c => [1, 2].filter(r => sets.every(i => V[i] !== c && H[i] !== r)).map(r => cellRect(c, r)));
   const overlays: Overlay[] = [];
   V.forEach((n, i) => overlays.push({t:"guide", x:n * W + W / 2, y:0, x2:n * W + W / 2, y2:100}, {t:"portal", x:n * W + W / 2, y:2.6, vert:true, n:i + 1}));
   H.forEach((n, i) => overlays.push({t:"guide", x:0, y:n * W + W / 2, x2:100, y2:n * W + W / 2}, {t:"portal", x:97.4, y:n * W + W / 2, vert:false, n:i + 1}));
-  const lanes = (sets: number[], soft = false): Overlay[] =>
-    sets.flatMap((i): Overlay[] => [{t:"lane", rect:lane(V[i], true).rect, soft}, {t:"lane", rect:lane(H[i], false).rect, soft}]);
+  const lanes = (sets: number[]): Overlay[] =>
+    sets.flatMap((i): Overlay[] => [{t:"lane", rect:lane(V[i], true).rect}, {t:"lane", rect:lane(H[i], false).rect}]);
+  // The last spot: back where the #2 lines crossed. The #3 and #4 lines both miss it.
+  const last: Zone = {fn:p => mid(p) && misses(p, [2, 3]), label:spot(c2, r2), show:safeSquares([2, 3])};
   return {
     overlays,
     steps:[
       {q:"Before the #1 lines and Fire and Fury: where do you stand?",
-        z:{fn:p => mid(p) && side(p) && misses(p, [0]), label:spot(c2, r2), show:[cellRect(1, r2), cellRect(2, r2)]},
+        z:{fn:p => mid(p) && side(p) && misses(p, [0]), label:spot(c2, r2), show:safeSquares([0])},
         a:["At his side, in max melee.", "Pick a middle square the #1 lines miss.", "Best start: the square where the #2 lines cross."],
         reveal:[...FIRE_AND_FURY, ...lanes([0])]},
       {q:"The #1 lines and Fire and Fury went off. The #2 lines are next. Where do you go?",
-        z:{fn:p => mid(p) && misses(p, [1]), label:spot(cOpp, r1), show:[cellRect(cOpp, r1)]},
+        z:{fn:p => mid(p) && misses(p, [1]), label:spot(3 - c2, 3 - r2), show:safeSquares([1])},
         a:["Cross under the boss to the opposite middle square.", "The #2 lines miss it."],
         reveal:lanes([1])},
-      {q:"The #2 lines went off. Where do you go now?",
-        z:{fn:p => mid(p) && misses(p, [2, 3]), label:spot(c2, r2), show:[{rect:[c2 * W, W, (c2 + 1) * W, 3 * W]}]},
-        a:["Cross back into the column the #2 line already hit.", "The #3 and #4 lines miss it, so stay there."],
-        reveal:lanes([2, 3], true)}
+      {q:"The #2 lines went off. Where do you go now?", z:last,
+        a:["Cross back to where the #2 lines crossed.", "The #3 and #4 lines miss it, so stay there."],
+        reveal:lanes([2])},
+      {q:"The #3 lines went off. The #4 lines are next. Where now?", z:last,
+        a:["Stay there.", "The #4 lines miss it too."],
+        reveal:lanes([3])}
     ]
   };
 }

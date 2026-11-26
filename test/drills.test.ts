@@ -393,12 +393,21 @@ test("Orbital Omen: Hector's dodge is safe for every pattern", () => {
       H: number[] = [];
     for (const o of O.overlays) if (o.t === "portal" && o.n != null) (o.vert ? V : H)[o.n - 1] = Math.floor((o.vert ? o.x : o.y) / 25);
     assert.ok([1, 2].includes(V[1]) && [1, 2].includes(H[1]), "the #2 lines cross in a middle square");
-    const path = [spot(V[1], H[1]), spot(3 - V[1], H[0]), spot(V[1], H[1])];
+    assert.sameMembers(V, [0, 1, 2, 3], "each column fires once");
+    assert.sameMembers(H, [0, 1, 2, 3], "each row fires once");
+    const path = [spot(V[1], H[1]), spot(3 - V[1], 3 - H[1]), spot(V[1], H[1]), spot(V[1], H[1])];
     O.steps.forEach((st, k) => {
       assert.ok(inZone(path[k], zoneOf(st.z)), `step ${k + 1}`);
     });
     assert.notOk(inZone(path[0], zoneOf(O.steps[1].z)), "staying put gets hit by the #2 lines");
   }
+});
+
+test("Orbital Omen: the sets other than #2 come in any order, as in Hector's video (east #1 an outer row)", () => {
+  const firstRows = new Set<number>();
+  for (let i = 0; i < REPEATS; i++)
+    for (const o of buildOrbital().overlays) if (o.t === "portal" && !o.vert && o.n === 1) firstRows.add(Math.floor(o.y / 25));
+  assert.sameMembers([...firstRows], [0, 1, 2, 3]);
 });
 
 test("Meteorain: both healers go under the boss for the markers first", () => {

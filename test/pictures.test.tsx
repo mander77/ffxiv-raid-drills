@@ -4,6 +4,7 @@ import { WAYMARKS } from "../src/components/arena/Arena";
 import { DOT_R } from "../src/components/arena/BossMark";
 import { LearnPicture } from "../src/components/arena/LearnPicture";
 import { SPLIT_HALF_W } from "../src/data/fights/m11s/attacks";
+import { FIRE_AND_FURY } from "../src/data/fights/m11s/drills";
 import { LEARN_PICTURES } from "../src/data/fights/m11s/pictures";
 import { LEARN_CARDS } from "../src/data/fights/m11s/questions";
 import type { Overlay, Picture, Preview, Slot } from "../src/types";
@@ -144,4 +145,14 @@ test("the Heartbreak Kick tower is under the boss, in the middle (BossMod)", () 
   const tower = pic?.overlays.find((o) => o.t === "tower");
   assert.deepEqual(tower?.t === "tower" ? [tower.x, tower.y] : undefined, [50, 50]);
   assert.deepEqual(pic?.boss ? [pic.boss.x, pic.boss.y] : undefined, [50, 50]);
+});
+
+test("Orbital Omen: the incorrect previews (behind, in front, far away) draw the real Fire and Fury cones", () => {
+  for (const s of SLOTS) {
+    const options = LEARN_PICTURES["k-orbital"]?.(s).options;
+    for (const k of [1, 2, 3]) {
+      const cones = options?.[k]?.pieces.filter((o) => o.t !== "mark");
+      assert.deepEqual(cones, FIRE_AND_FURY, `answer ${k + 1} ${s}`);
+    }
+  }
 });
