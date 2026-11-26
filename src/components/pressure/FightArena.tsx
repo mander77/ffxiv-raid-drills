@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { runnerAt } from "../../data/route";
 import { dist } from "../../geometry";
@@ -7,7 +7,7 @@ import { useFightFrame } from "../../hooks/useFightFrame";
 import type { FightView } from "../../lib/fight";
 import { promptOf } from "../../lib/fight";
 import { markRole, partyOf } from "../../party";
-import type { Hit, Point, Slot } from "../../types";
+import type { Hit, Overlay, Point, Slot } from "../../types";
 import { LiveArena } from "../arena/LiveArena";
 import { Shape, Tether } from "../arena/Shape";
 
@@ -57,6 +57,7 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
       className={cn("cursor-pointer", className)}
       effects={
         <>
+          <FloorAttacks at={bossAt} />
           {hit && <HitEffect key={hit.n} hit={hit.hit} at={hit.at} split={v.scene.split ?? false} />}
           <CountdownRing at={bossAt} />
         </>
@@ -90,6 +91,32 @@ function HitEffect({ hit, at, split }: HitEffectProps) {
   if (hit.kind === "aoe") return null;
   const [x, width] = split && halfWidth ? [50 - halfWidth, halfWidth * 2] : [0, 100];
   return <rect className={cn("hitfx", hit.kind, hit.cat)} x={x} y="0" width={width} height="100" />;
+}
+
+interface FloorAttacksProps {
+  /** The middle of the boss. */
+  at: Point;
+}
+
+/** The attacks on the floor that no mechanic draws, such as a fire trail while it casts. They
+    come and go with the fight clock. */
+function FloorAttacks({ at }: FloorAttacksProps) {
+  const { floorAttacks } = useFight().clock;
+  const [shown, setShown] = useState<{ key: string; overlays: Overlay[] }>({ key: "[]", overlays: [] });
+  useFightFrame((s) => {
+    const overlays = floorAttacks(s.t, at);
+    const key = JSON.stringify(overlays);
+    // A state setter draws again only when the value changes, so this draws only when one comes or goes.
+    setShown((was) => (was.key === key ? was : { key, overlays }));
+  });
+  return (
+    <g className="pointer-events-none">
+      {shown.overlays.map((o, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: the attacks at one time never change order.
+        <Shape key={i} overlay={o} />
+      ))}
+    </g>
+  );
 }
 
 interface CountdownRingProps {

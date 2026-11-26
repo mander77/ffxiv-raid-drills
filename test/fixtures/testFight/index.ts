@@ -91,5 +91,13 @@ export const TEST_FIGHT: FightData = {
   ],
   timelineCategories: (row) => (row === 0 ? ["spot"] : ["enrage"]),
   enrage: 30,
-  clock: { random: {}, rows: [], help: "The test fight has no picks.", clean: () => ({}), build, busterPieces: () => [] },
+  clock: {
+    random: {},
+    rows: [],
+    help: "The test fight has no picks.",
+    clean: () => ({}),
+    build,
+    busterPieces: () => [],
+    floorAttacks: () => [],
+  },
 };

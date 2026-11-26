@@ -1,8 +1,8 @@
 import { assert, test } from "vitest";
-import { busterPieces, MAJESTIC_PUDDLE, PLATFORM_X } from "../src/data/fights/m11s/attacks";
+import { ATTACK, busterPieces, floorAttacks, MAJESTIC_PUDDLE, PLATFORM_X } from "../src/data/fights/m11s/attacks";
 import { DRILLS } from "../src/data/fights/m11s/drills";
 import { buildFight } from "../src/data/fights/m11s/fight";
-import { cactbot, type LineName } from "../src/data/fights/m11s/sources";
+import { bossmod, cactbot, castStart, type LineName } from "../src/data/fights/m11s/sources";
 import { angOf, dist, inZone, rotZone, stepZone, zoneCenter } from "../src/geometry";
 import { clock, sec } from "../src/time";
 import type { Point, Slot, StepResult } from "../src/types";
@@ -275,5 +275,34 @@ test("the second Great Wall of Fire goes 45 degrees clockwise, with the OT in fr
     const tanks = pieces.flatMap((o) => (o.t === "mark" ? [o] : [])).sort((a, b) => dist([a.x, a.y], boss) - dist([b.x, b.y], boss));
     for (const t of tanks) assert.closeTo(angOf([t.x - boss[0], t.y - boss[1]]), facing, 0.01, `${t.l} in ${name}`);
     assert.equal(tanks[0]?.l, front, name);
+  }
+});
+
+test("each Great Wall of Fire fire trail is on the floor while it casts, on the line its wall hit", () => {
+  const boss: Point = [50, 50];
+  const trail = bossmod("WallExplosion");
+  for (const n of [1, 2]) {
+    const cases: Array<[LineName, number]> = [
+      ["Explosion 1", 0],
+      ["Explosion 2", 45],
+    ];
+    for (const [line, facing] of cases) {
+      const from = castStart("WallExplosion", line, n),
+        to = cactbot(line, n);
+      assert.isEmpty(
+        floorAttacks(from - 0.1, boss).filter((o) => o.t === "band" && Math.abs(angOf([o.x2 - o.x, o.y2 - o.y]) - facing) < 0.01),
+        `${line} ${n} before its cast`,
+      );
+      const on = floorAttacks((from + to) / 2, boss);
+      assert.lengthOf(on, 1, `${line} ${n} while it casts`);
+      const band = on[0];
+      if (band?.t !== "band") throw new Error("not a line");
+      assert.closeTo(angOf([band.x2 - band.x, band.y2 - band.y]), facing, 0.01);
+      assert.closeTo(band.w, ATTACK.yalms(trail.width), 0.01);
+      assert.isEmpty(
+        floorAttacks(to, boss).filter((o) => o.t === "band" && Math.abs(angOf([o.x2 - o.x, o.y2 - o.y]) - facing) < 0.01),
+        `${line} ${n} after it goes off`,
+      );
+    }
   }
 });

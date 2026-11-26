@@ -8,7 +8,7 @@
 import { addVec, angOf, dist, polar, unit } from "../../../geometry";
 import { type Band, standardAttacks } from "../../../lib/attacks";
 import { BOSSMOD_ACTORS, BOSSMOD_ARENA_HALF, BOSSMOD_SPLIT, BOSSMOD_VOIDZONES } from "./source.gen";
-import { bossmod } from "./sources";
+import { bossmod, cactbot, castStart } from "./sources";
 import type { Overlay, Point, Puddle } from "../../../types";
 
 /** The standard attacks, drawn to M11S's arena. Sizes in yalms. */
@@ -253,7 +253,7 @@ const WALL_FRONT = 19;
 const WALL_BACK = 28;
 /** Where the second Great Wall of Fire goes: the tanks rotate 45 degrees clockwise after the first
     (the static's strat). Degrees clockwise from north. */
-const WALL_SECOND_FACING = 45;
+export const WALL_SECOND_FACING = 45;
 
 /** The tanks for a buster, and what hits them. Great Wall of Fire is a line buster the two tanks
     share, one behind the other on the line from the boss. The first hit goes north, with the MT
@@ -269,4 +269,20 @@ export function busterPieces(name: string, boss: Point): Overlay[] {
   }
   const mt: Point = [boss[0] + 14, boss[1] - 14], ot: Point = [boss[0] - 14, boss[1] + 14];
   return [...tank(mt, "MT"), ...tank(ot, "OT")];
+}
+
+/** The Great Wall of Fire fire trails: each one goes off ("Explosion 1" and "Explosion 2" in
+    cactbot) on the line its Great Wall of Fire hit, after a cast of its own (WallExplosion,
+    "range 60 width 6 rect"). Both times the fight casts Great Wall of Fire. */
+const WALL_TRAILS = [1, 2].flatMap(n => (["Explosion 1", "Explosion 2"] as const).map((line, k) => ({
+  from:castStart("WallExplosion", line, n), to:cactbot(line, n), facing:k === 0 ? 0 : WALL_SECOND_FACING,
+})));
+/** How long after its Great Wall of Fire a fire trail goes off, in whole seconds, for the text. */
+export const TRAIL_DELAY = Math.round(cactbot("Explosion 1") - cactbot("Great Wall of Fire 1"));
+
+/** The attacks on the floor at fight time t, with the boss at `boss`: a fire trail while it casts,
+    until it goes off. */
+export function floorAttacks(t: number, boss: Point): Overlay[] {
+  const s = bossmod("WallExplosion");
+  return WALL_TRAILS.filter(w => t >= w.from && t < w.to).map(w => ATTACK.line(boss, w.facing, s.range, s.width));
 }

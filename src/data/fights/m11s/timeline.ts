@@ -2,6 +2,7 @@
 import { bySlot } from "../../../util";
 import { nearClock } from "../../../time";
 import { cactbot, type LineName } from "./sources";
+import { TRAIL_DELAY } from "./attacks";
 import type { TimelineEvent } from "../../../types";
 
 /** The phases of the fight in order, by this app's names. Drills, cards and the ability list
@@ -30,7 +31,7 @@ export const TIMELINE: readonly TimelineEvent[] = [
   {t:at("Ultimate Trophy Weapons"), n:"Ultimate Trophy Weapons", job:s=>[`Six weapons from ${at("Assault Evolved 1", 3)} to ${at("Assault Evolved 6")}.`, "Use strong heals here.", "A dead player must be up by the third weapon."]},
   {t:at("Powerful Gust"), n:"Powerful Gust (Tornadoes)", job:s=>["Bait your tornado: " + bySlot(s, {H1:"west tornado, north side", H2:"east tornado, south side"}) + "."]},
   {t:at("One and Only"), n:"One and Only", job:s=>["Heavy physical raidwide.", "Mitigate it."]},
-  {t:at("Great Wall of Fire (castbar)"), n:"Great Wall of Fire", job:s=>["Two Shared Tank Busters.", "Shield and heal the tanks.", "Stay out of the fire trail it leaves."]},
+  {t:at("Great Wall of Fire (castbar)"), n:"Great Wall of Fire", job:s=>["Two Shared Tank Busters.", "Shield and heal the tanks.", "Stay out of each fire trail.", `It goes off about ${TRAIL_DELAY} seconds later.`]},
   {t:at("Orbital Omen (castbar)"), n:"Orbital Omen and Fire and Fury", job:s=>["The boss faces north.", "Hector's dodge: stay in max melee, at his side.", "Cross under the boss to the middle square the next lines miss."]},
   {t:at("Meteorain"), n:"Meteorain", job:s=>[`Line Stacks at ${at("Fearsome Fireball")}, ${at("Fearsome Fireball", 2)}, ${at("Fearsome Fireball", 3)} and ${at("Fearsome Fireball", 4)}.`, "Healers bait the second meteors.", bySlot(s, {H1:"Drop yours NW, in max melee.", H2:"Drop yours SW, in a row with the first rock, farther out."})]},
   {t:at("Triple Tyrannhilation"), n:"Triple Tyrannhilation", job:s=>["Three hits.", "Hide SW behind the row of three rocks."]},
