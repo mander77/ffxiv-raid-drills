@@ -928,6 +928,10 @@ static wins.
   opposite middle square is a straight line through the boss's middle, 63 degrees off his facing,
   so it stays out of both cones. Waiting for Fire and Fury leaves 1 second for the cross: too
   little. Hector's video says Fire and Fury comes "at the same time" as #1; cactbot decides.
+- Triple Tyrannhilation in the full fight (after a fight review, November 25): the hiding step
+  is checked at the third Shockwave (cactbot "Shockwave" 3), not at the cast, so the run checks
+  that you stay behind the rocks through all three hits, and Watch the Correct Moves holds the
+  spot until then. Each Shockwave breaks the nearest rock, so leaving early takes the rest.
 - Meteorain, your meteor: H1 drops it NW, in max melee. H2 drops it SW, in line with the first SW
   rock, farther out. Icy Veins swaps H1 and H2 here. The site follows wtfdig.
 - Meteorain rocks (owner, November 25, after a fight review): the rocks near the boss land in his
