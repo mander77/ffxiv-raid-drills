@@ -5,9 +5,11 @@ import {
   fireBreath,
   HITBOX,
   isStretched,
+  LINE_STACK_HALF,
   MELEE_R,
   PLATFORM_X,
   PORTAL_LINE_X,
+  ROCK_GAP,
   TORNADO_R,
   TOWER_KNOCKBACK,
   TOWER_R,
@@ -383,6 +385,30 @@ test("Meteorain: H1 drops NW in max melee, H2 farther out on the SW line", () =>
   assert.notOk(inZone([30, 30], h1), "past max melee");
   assert.ok(inZone([26, 74], h2));
   assert.notOk(inZone(METEOR_ROCKS.sw, h2), "on top of the first SW rock");
+});
+
+test("Meteorain: no healer's drop spot is too close to a rock already down", () => {
+  const drill = DRILLS.find((m) => m.id === "m-meteor-2");
+  if (!drill) throw new Error("missing drill m-meteor-2");
+  for (const s of ["H1", "H2"] as const) {
+    const z = zoneOf(drill.build(s, null).steps[1].z);
+    // Every accepted spot on a fine grid over the arena.
+    for (let x = 0; x <= 100; x += 0.5)
+      for (let y = 0; y <= 100; y += 0.5) {
+        if (!inZone([x, y], z)) continue;
+        for (const rock of [METEOR_ROCKS.ne, METEOR_ROCKS.sw])
+          assert.ok(Math.hypot(x - rock[0], y - rock[1]) >= ROCK_GAP, `${s}: ${x},${y} is too close to ${rock}`);
+      }
+  }
+});
+
+test("Meteorain: the first Line Stack spot is outside the boss's hitbox, inside the line", () => {
+  const drill = DRILLS.find((m) => m.id === "m-meteor-1");
+  if (!drill) throw new Error("missing drill m-meteor-1");
+  const z = zoneOf(drill.build("H1", null).steps[0].z);
+  if (!("c" in z)) throw new Error("expected a circle");
+  assert.ok(Math.hypot(z.c[0] - 50, z.c[1] - 50) - z.r > HITBOX, "past the tanks at his hitbox");
+  assert.ok(z.r <= LINE_STACK_HALF, "inside the line");
 });
 
 test("Meteorain: the rocks near the boss are in max melee, and each stack spot is behind its rock", () => {

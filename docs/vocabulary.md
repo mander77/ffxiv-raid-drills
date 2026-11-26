@@ -230,7 +230,7 @@ The header switch is "Light Party", with the buttons 1 and 2.
 | bait | Bring a hit to a place. | |
 | drop | Leave a puddle or a meteor at a spot. | place |
 | break | Destroy a rock with a Line Stack. | blow up, pop, explode (as the player's action) |
-| explode | What two rocks do when they are too close. Not the player's action. | |
+| explode | What a rock does after a Line Stack breaks it, and what two rocks do when they are too close. Not the player's action. | |
 | stack | Go together for a stack (as a verb, lower case). | |
 | spread | Move apart (as a verb, lower case). | |
 | cross | Move to the other side: "cross under the boss". | |

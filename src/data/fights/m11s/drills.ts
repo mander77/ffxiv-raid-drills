@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, crushingComet, eyeOfTheHurricane, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, crushingComet, eyeOfTheHurricane, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit, ROCK_GAP, meteorHit, rockExplosion } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -1336,11 +1336,30 @@ export const METEOR_ROCKS = {
 export const BEHIND_ROCK = 30;
 /** A rock on the arena. */
 const rock = ([x, y]: Point): Overlay => ({t:"rock", x, y});
-/** H1's meteor: anywhere NW of the boss in his max melee. */
+/** True when a meteor dropped at p lands far enough from M2's SW rock (ROCK_GAP). */
+const clearOfSwRock = (p: Point): boolean => dist(p, METEOR_ROCKS.sw) >= ROCK_GAP;
+/** H1's meteor: anywhere NW of the boss in his max melee, from 290 to 345 degrees. Closer to west
+    than 290, the spot under his hitbox's edge is too close to M2's SW rock. */
 const H1_METEOR: Zone = {
-  fn:p => { const r = dist(p, CENTER), a = angOf([p[0] - 50, p[1] - 50]); return r >= HITBOX && r <= MELEE_R && a >= 285 && a <= 345; },
+  fn:p => { const r = dist(p, CENTER), a = angOf([p[0] - 50, p[1] - 50]); return r >= HITBOX && r <= MELEE_R && a >= 290 && a <= 345 && clearOfSwRock(p); },
   label:METEOR_ROCKS.nw,
-  show:[{poly:[...[285, 300, 315, 330, 345].map((a): Point => polar(a, HITBOX)), ...[345, 330, 315, 300, 285].map((a): Point => polar(a, MELEE_R))]}]};
+  show:[{poly:[...[290, 300, 315, 330, 345].map((a): Point => polar(a, HITBOX)), ...[345, 330, 315, 300, 290].map((a): Point => polar(a, MELEE_R))]}]};
+/** The size of H2's drop spot around METEOR_ROCKS.sw2. The app's choice. */
+const H2_METEOR_R = 8;
+/** H2's meteor: SW, around METEOR_ROCKS.sw2, but never too close to M2's SW rock. Its picture is
+    the circle with the part too close to the rock cut off along the gap. */
+const H2_METEOR: Zone = {
+  fn:p => dist(p, METEOR_ROCKS.sw2) <= H2_METEOR_R && clearOfSwRock(p),
+  label:METEOR_ROCKS.sw2,
+  show:[{poly:Array.from({length:36}, (_, i): Point => {
+    const q = polar(i * 10, H2_METEOR_R, METEOR_ROCKS.sw2);
+    return clearOfSwRock(q) ? q : addVec(METEOR_ROCKS.sw, unit([q[0] - METEOR_ROCKS.sw[0], q[1] - METEOR_ROCKS.sw[1]]), ROCK_GAP);
+  })}]};
+/** The two healers' meteors, for the one who is not you. */
+const otherHealerRock = (s: Slot): Point => bySlot(s, {H1:METEOR_ROCKS.sw2, H2:METEOR_ROCKS.nw});
+/** Where the party stands for a Line Stack behind the rock at angle `deg`, and the line through it. */
+const stackBehind = (deg: number): Point => polar(deg, BEHIND_ROCK);
+const lineThrough = (deg: number): Overlay => lineStack(CENTER, stackBehind(deg));
 
 export const DRILLS: readonly Drill[] = [
   {id:"m-raw-axe", order:2, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: Axe", kind:"spread",
@@ -1393,7 +1412,10 @@ export const DRILLS: readonly Drill[] = [
     build:s=>({setup:["The melee bait the first two meteors.", "They drop them in max melee, NE and SW.", "The first Line Stack goes off next."], ordered:true,
       boss:BOSS, overlays:[{t:"target",x:METEOR_ROCKS.ne[0],y:METEOR_ROCKS.ne[1]},{t:"target",x:METEOR_ROCKS.sw[0],y:METEOR_ROCKS.sw[1]},
         {t:"mark",x:METEOR_ROCKS.ne[0],y:METEOR_ROCKS.ne[1],l:"M1",r:"D"},{t:"mark",x:METEOR_ROCKS.sw[0],y:METEOR_ROCKS.sw[1],l:"M2",r:"D"}],
-      steps:[{q:"Where do you stand for the first Line Stack?", z:{c:[36,37],r:8}, a:["NW, in the Line Stack.", "The tanks stand in front for this first one."]}],
+      // The tanks take this first hit in front, at his hitbox, so the party stands past them, out of
+      // the hitbox. The healers stay close: they bait the next meteors 3 seconds later.
+      steps:[{q:"Where do you stand for the first Line Stack?", z:{c:polar(315, MELEE_R), r:7}, a:["NW, in the Line Stack, behind the tanks.", "The tanks stand in front for this first one."],
+        reveal:[lineThrough(315), meteorHit(METEOR_ROCKS.ne), meteorHit(METEOR_ROCKS.sw)], hits:[]}],
       rule:METEOR_ORDER_RULE})},
   {id:"m-meteor-2", order:16.1, phase:P2, time:"5:03", title:"Meteorain: Your Meteor", kind:"bait",
     build:s=>({setup:["Healers bait the second set of meteors.", "The markers go on the two players closest to the boss.", "Two rocks are already down in max melee: one NE and one SW."],
@@ -1402,24 +1424,35 @@ export const DRILLS: readonly Drill[] = [
         // The markers come at cactbot's "--Meteor Markers 2--": the healers must be the two closest
         // then (Hector's guide video, 9:43 to 9:59; wtfdig: "Bait meteor close").
         {q:"Healers bait the next meteors. Where do you go?", z:{c:CENTER, r:HITBOX},
-          a:["Under the boss.", "Be one of the two closest players, so the marker goes to you."]},
+          a:["Under the boss.", "Be one of the two closest players, so the marker goes to you."],
+          revealAt:p => [{t:"target", x:p[0], y:p[1]}]},
         {q:"You have a meteor marker. Where do you drop it?",
-        // S<Zone>: the H1 answer is a rule zone and the H2 answer is a circle, so name the shared type.
-        z:bySlot<Zone>(s, {H1:H1_METEOR, H2:{c:METEOR_ROCKS.sw2, r:8}}),
-        a:bySlot(s, {H1:["NW, in max melee."], H2:["SW, in a row with the first SW rock.", "About halfway to the edge."]})}],
+        z:bySlot(s, {H1:H1_METEOR, H2:H2_METEOR}),
+        a:bySlot(s, {H1:["NW, in max melee."], H2:["SW, in a row with the first SW rock.", "About halfway to the edge."]}),
+        // The second Line Stack goes off NE, through the party, just before the meteors land.
+        // The NE rock it breaks explodes 3 seconds later, once you have dropped yours.
+        cue:[lineThrough(45)],
+        revealAt:p => [meteorHit(p), rock(p)],
+        reveal:[meteorHit(otherHealerRock(s)), rock(otherHealerRock(s)), rockExplosion(METEOR_ROCKS.ne)],
+        hits:[lineThrough(45), meteorHit(otherHealerRock(s))]}],
       rule:[...bySlot(s, {H1:["H1 drops NW, in max melee."],
           H2:["H2 drops SW, in a row with the first rock.", "That rock is in max melee.", "Two rocks too close together explode, so yours goes farther out."]}),
         "Icy Veins swaps H1 and H2 here, so do not mix guides."]})},
   {id:"m-meteor-3", order:16.2, phase:P2, time:"5:20", title:"Meteorain: Third Line Stack", kind:"wildCharge",
     build:s=>({setup:["The ranged bait the third set.", "Rocks: NW (from H1), and a row of two SW.", "Each stack breaks the rock in front of it."],
       boss:BOSS, overlays:[rock(METEOR_ROCKS.nw), rock(METEOR_ROCKS.sw), rock(METEOR_ROCKS.sw2)],
-      steps:[{q:"Where do you stand for this Line Stack?", z:{c:polar(315, BEHIND_ROCK),r:7}, a:["NW, behind the NW rock.", "Farther from the boss than the rock."]}],
-      rule:["Stack behind a rock to break it.", "Keep the SW row of rocks whole."]})},
+      // The stack breaks the NW rock, which explodes 3 seconds later. The ranged's meteors land
+      // SW and NE as it does.
+      steps:[{q:"Where do you stand for this Line Stack?", z:{c:stackBehind(315),r:7}, a:["NW, behind the NW rock.", "Farther from the boss than the rock."],
+        reveal:[lineThrough(315), rockExplosion(METEOR_ROCKS.nw), meteorHit(METEOR_ROCKS.sw3), meteorHit(METEOR_ROCKS.ne2)], hits:[]}],
+      rule:["Stack behind a rock to break it.", "The broken rock explodes: walk out.", "Keep the SW row of rocks whole."]})},
   {id:"m-meteor-4", order:16.3, phase:P2, time:"5:30 to 5:43", title:"Meteorain: Last Line Stack", kind:"wildCharge",
     build:s=>({setup:["The last stack has no meteor baits.", "Rocks: NE (from R2), and a row of three SW."],
       boss:BOSS, overlays:[rock(METEOR_ROCKS.ne2), rock(METEOR_ROCKS.sw), rock(METEOR_ROCKS.sw2), rock(METEOR_ROCKS.sw3)],
       steps:[
-        {q:"Where do you stand for the fourth Line Stack?", z:{c:polar(45, BEHIND_ROCK),r:7}, a:["Behind the NE rock, to break it."]},
+        // The broken NE rock explodes while you run SW.
+        {q:"Where do you stand for the fourth Line Stack?", z:{c:stackBehind(45),r:7}, a:["Behind the NE rock, to break it."],
+          reveal:[lineThrough(45), rockExplosion(METEOR_ROCKS.ne2)], hits:[]},
         {q:"Triple Tyrannhilation is next. Where do you hide?", z:{c:[5,96],r:6.5}, a:["SW, behind the row of three rocks."]}],
       rule:["After the fourth Line Stack: run SW.", "Hide behind the row of three rocks."]})},
   {id:"m-split-line", order:18, phase:P3, time:"6:02", title:"Arena Split: Lineup", kind:"knockback",

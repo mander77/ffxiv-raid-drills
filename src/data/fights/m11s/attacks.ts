@@ -132,6 +132,12 @@ export const pairTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("Weighty
 export const kickTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("HeartbreakKickTower").range, 8);
 /** A baited Meteorain meteor (Cosmic Kiss, "range 4 circle"). */
 export const meteorHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("CosmicKiss").range);
+/** A Meteorain rock that a Line Stack broke, exploding (ExplosionComet, "range 8 circle", 3.0 s cast). */
+export const rockExplosion = (p: Point): Overlay => ATTACK.circle(p, bossmod("ExplosionComet").range);
+/** How far a new meteor must land from a rock already down: 6 yalms. Two rocks too close together
+    explode (Unmitigated Explosion), at a distance no source gives. BossMod warns a meteor holder
+    inside twice its trigger radius, which it calls a guess. The owner chose that 6 yalms. */
+export const ROCK_GAP = yalms(6);
 /** Where the Mammoth Meteor proximity AoE lands (PROXIMITY_DOT). */
 export const proximityDot = (p: Point): Overlay => ATTACK.circle(p, PROXIMITY_DOT);
 /** The axe hit: a circle around the boss at c ("range 8 circle"). */
