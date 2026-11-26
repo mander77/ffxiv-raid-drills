@@ -978,8 +978,11 @@ static wins.
     (https://youtu.be/w1uuwzhyf5A, 12:31 and 14:44) and wtfdig's Kindred No Buddies pictures,
     checked by the owner in November 2026. Before #89 the app had them over a north or south end.
   - Each round: everyone goes in close, to the middle of the platform's inner edge, to bait the
-    puddles; without a tether you bait Fire Breath there first. Then each player goes to their
-    end of the platform (owner's answers, November 2026):
+    puddles; without a tether you bait Fire Breath there first. With a tether you first wait a
+    step back (`SPLIT_BACK`, the app's size) until the Fire Breath markers are out, because they
+    go on the four players closest to the boss (the owner, issue #167). Pressure judges that wait
+    at cactbot's "--Fire Breath Markers--". Then each player goes to their end of the platform
+    (owner's answers, November 2026):
     - Your end is where the tower threw you, and you bait the puddles toward it (the owner,
       November 2026): across, you land at your tower's end; staying, at the other end. In the
       full fight your portal is then in the other half.
@@ -1039,7 +1042,10 @@ static wins.
   - Arcadion Avalanche: he faces one platform and grabs it. The towers knock you to the other one.
     Then go to its far end, by the number waymark, away from the side he turns from. The drill
     shows his turn as a dashed arrow around him (the app's choice).
-  - The drills draw no Fire Breath cone or slam size: neither is in `attacks.ts` yet. The portal
+  - The lineup step draws, after you answer, every marker at its spot with its Fire Breath line
+    (yours too without a tether), and every tether's line (issue #167). Pressure's casts coming
+    up show "Tethers" and "Fire Breath markers" (cactbot's "--tethers--" and "--Fire Breath
+    Markers--"). The drills draw no slam size. The portal
     lines show as a soft area over the half they cover (`PORTAL_LINE_X`), with the lineup
     question (the app's choice: in the game they show from the start of the round).
 

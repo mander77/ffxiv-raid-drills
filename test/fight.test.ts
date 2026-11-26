@@ -146,7 +146,11 @@ test("Arena Split: one round with a tether, and you stack for Massive Meteor whe
       const f = buildFight(s),
         rounds = f.segs.filter((g) => g.drills[0] === "m-split-fire");
       assert.equal(rounds.length, 2);
-      assert.deepEqual(rounds.map((g) => /tether/.test(g.scene.steps[3].q)).sort(), [false, true], "a tether in one round only");
+      assert.deepEqual(
+        rounds.map((g) => /tether/.test(g.scene.steps[g.scene.steps.length - 1].q)).sort(),
+        [false, true],
+        "a tether in one round only",
+      );
       const massive = f.segs.find((g) => g.title === "Massive Meteor");
       const p = zoneCenter(massive?.scene.steps[0].z ?? { c: [50, 50], r: 0 }),
         side2 = platformOf(rounds[1]);
@@ -159,10 +163,13 @@ test("Arena Split: the tethers swap in the second round", () => {
     for (let i = 0; i < REPEATS; i++) {
       const f = buildFight(s),
         rounds = f.segs.filter((g) => g.drills[0] === "m-split-fire"),
-        tethered = rounds.map((g) => [
-          ...(g.scene.tether ? [s] : []),
-          ...(g.scene.steps[3].reveal ?? []).flatMap((o) => (o.t === "mark" ? [o.l] : [])),
-        ]);
+        tethered = rounds.map((g) => {
+          const reveal = g.scene.steps[g.scene.steps.length - 1].reveal ?? [],
+            cords = reveal.flatMap((o) => (o.t === "tether" ? [o] : []));
+          // A tethered player stands at the end of a tether; the others are the markers.
+          const onCord = reveal.flatMap((o) => (o.t === "mark" && cords.some((c) => c.x2 === o.x && c.y2 === o.y) ? [o.l] : []));
+          return [...(g.scene.tether ? [s] : []), ...onCord];
+        });
       for (const t of tethered) assert.equal(t.length, 4, `${s}: four tethered players each round`);
       assert.deepEqual([...tethered[0], ...tethered[1]].sort(), ["H1", "H2", "M1", "M2", "MT", "OT", "R1", "R2"], `${s}: everyone once`);
       // A tether at the second towers is the second round's tether: the same portal.
@@ -214,11 +221,17 @@ test("Arena Split: each Majestic Meteor puddle goes off at its cactbot hit", () 
   const rounds = buildFight("H1").segs.filter((g) => g.drills[0] === "m-split-fire");
   rounds.forEach((g, i) => {
     const hits = [1, 2, 3].map((n) => cactbot(`Majestic Meteor ${n}` as LineName, i + 1));
-    g.scene.steps.slice(0, 3).forEach((st, j) => {
+    // With a tether, the first step is the wait for the Fire Breath markers, at their line.
+    const k = g.scene.tether ? 1 : 0;
+    if (k) {
+      assert.isUndefined(g.scene.steps[0].drop, `${g.title}: no puddle while you wait`);
+      assert.equal(g.due[0], cactbot("--Fire Breath Markers--", i + 1), `${g.title}: wait until the markers`);
+    }
+    g.scene.steps.slice(k, k + 3).forEach((st, j) => {
       assert.equal(st.drop, MAJESTIC_PUDDLE, `${g.title}: puddle ${j + 1}`);
-      assert.closeTo(g.due[j] + MAJESTIC_PUDDLE.life, hits[j], 0.05, `${g.title}: puddle ${j + 1} goes off`);
+      assert.closeTo(g.due[k + j] + MAJESTIC_PUDDLE.life, hits[j], 0.05, `${g.title}: puddle ${j + 1} goes off`);
     });
-    assert.isUndefined(g.scene.steps[3].drop);
+    assert.isUndefined(g.scene.steps[k + 3].drop);
   });
 });
 

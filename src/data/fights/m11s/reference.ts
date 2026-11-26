@@ -52,14 +52,14 @@ export const REFERENCE: readonly ReferenceEntry[] = [
   {
     name: "Knockback Tower",
     picture: "k-split-kb",
-    cards: ["k-split-kb", "k-split-fb"],
+    cards: ["k-split-kb"],
     drills: ["m-split-tower", "m-split-fire"],
     timeline: "n-17",
   },
   {
     name: "Markers and Tethers",
     picture: "k-split-corner",
-    cards: ["k-split-corner", "k-split-towers23"],
+    cards: ["k-split-fb", "k-split-corner", "k-split-towers23"],
     drills: ["m-split-fire", "m-split-towers2"],
   },
   { name: "Massive Meteor", picture: "k-massive", cards: ["k-massive"], drills: ["m-massive"], timeline: "n-18" },

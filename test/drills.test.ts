@@ -34,6 +34,8 @@ import {
   METEOR_ROCKS,
   nextPuddle,
   portalAt,
+  SPLIT_BACK,
+  SPLIT_INNER,
   SPLIT_TOWER,
   type SplitEnd,
   type SplitHalf,
@@ -587,7 +589,20 @@ test("Arena Split: a round puts you in close, then at your end, out of the porta
                 assert.ok(inZone(p, z), `${what}: ${st.q}`);
                 results.push({ p, ok: true, z, drop: st.drop ? p : null });
               }
-              const [p1, p2, p3, lineup] = results.map((r) => r.p);
+              // With a tether, you first wait a step back until the Fire Breath markers are out:
+              // further from the boss than anywhere in the bait spot, as they go on the four closest.
+              const k = tether ? 1 : 0;
+              if (tether) {
+                const clamp = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
+                // The nearest spot of a box to the boss, and its furthest (a corner).
+                const [b0, c0, b1, c1] = SPLIT_BACK[side].rect,
+                  [i0, j0, i1, j1] = SPLIT_INNER[side].rect;
+                const nearest = Math.hypot(clamp(50, b0, b1) - 50, clamp(50, c0, c1) - 50),
+                  furthest = Math.max(...[i0, i1].flatMap((x) => [j0, j1].map((y) => Math.hypot(x - 50, y - 50))));
+                assert.isAbove(nearest - furthest, 2, `${what}: wait further from the boss than any bait spot`);
+                assert.ok(onSide(results[0].p, side), `${what}: wait on your platform`);
+              }
+              const [p1, p2, p3, lineup] = results.slice(k).map((r) => r.p);
               assert.ok(onSide(p1, side) && Math.abs(p1[1] - 50) < 1, "in close, at the middle of the inner edge");
               assert.ok(inHalf(p1, side, "inner"), "the first puddle is in the inner half");
               // Each puddle goes just outside the last, toward your end, tight against the inner edge.
@@ -602,7 +617,7 @@ test("Arena Split: a round puts you in close, then at your end, out of the porta
               }
               assert.deepEqual(
                 results.map((r) => r.drop !== null),
-                [true, true, true, false],
+                [...(tether ? [false] : []), true, true, true, false],
                 "three puddles",
               );
               assert.ok(onSide(lineup, side) && atEnd(lineup, end), `${what}: the ${end} end`);
@@ -610,7 +625,7 @@ test("Arena Split: a round puts you in close, then at your end, out of the porta
               assert.ok(Math.hypot(lineup[0] - p3[0], lineup[1] - p3[1]) >= 15, "out of the third puddle");
               // The portal lines show with the lineup question.
               assert.ok(
-                sc.steps[3].cue?.some((o) => o.t === "lane"),
+                sc.steps[k + 3].cue?.some((o) => o.t === "lane"),
                 "the portal lines",
               );
               // A tether stretches at the wall; a marker goes to the wall-side corner of the number waymark.
@@ -624,12 +639,12 @@ test("Arena Split: a round puts you in close, then at your end, out of the porta
               for (const x of side === "west"
                 ? [PLATFORM_X.west[1] - 6.5, PLATFORM_X.west[1]]
                 : [PLATFORM_X.east[0], PLATFORM_X.east[0] + 6.5]) {
-                const third = zoneOf(sc.steps[2].zf?.(results.slice(0, 2))),
+                const third = zoneOf(sc.steps[k + 2].zf?.(results.slice(0, k + 2))),
                   dir = end === "north" ? -1 : 1,
                   far = Array.from({ length: 13 }, (_x, i): Point => [x, p2[1] + dir * (21 - i * 0.5)]).find((q) => inZone(q, third));
                 if (!far) continue;
-                const worst = [...results.slice(0, 2), { ...results[2], p: far, drop: far }],
-                  z4 = zoneOf(sc.steps[3].zf?.(worst));
+                const worst = [...results.slice(0, k + 2), { ...results[k + 2], p: far, drop: far }],
+                  z4 = zoneOf(sc.steps[k + 3].zf?.(worst));
                 assert.ok(inZone(zoneCenter(z4), z4), `${what}: a clear spot is left`);
               }
               for (const st of sc.steps) assertLines(st.a, sc.setup.join(" "));
@@ -648,12 +663,13 @@ test("Arena Split: a round puts you in close, then at your end, out of the porta
                 assert.ok(atEnd(t.portal, end === "north" ? "south" : "north"), `${what}: the portal's half`);
               } else assert.isUndefined(sc.tether, what);
               // At the lineup, every other tether shows, stretched: two on each platform, one at each end.
-              const reveal = sc.steps[3].reveal ?? [],
+              const reveal = sc.steps[k + 3].reveal ?? [],
                 cords = reveal.flatMap((o) => (o.t === "tether" ? [o] : [])),
-                marks = reveal.flatMap((o) => (o.t === "mark" ? [o] : []));
+                marks = reveal.flatMap((o) => (o.t === "mark" ? [o] : [])),
+                onCord = marks.filter((m) => cords.some((c) => c.x2 === m.x && c.y2 === m.y));
               assert.equal(cords.length, tether ? 3 : 4, `${what}: the other tethers`);
               assert.deepEqual(
-                marks.map((m) => m.l),
+                onCord.map((m) => m.l),
                 others,
                 `${what}: on the other tethered players`,
               );
@@ -821,19 +837,22 @@ test("Arena Split: when the tethers go off, a line runs from each portal through
   for (const tether of [true, false]) {
     const others = OTHERS.filter((o) => o !== "H1").slice(0, tether ? 3 : 4),
       sc = splitRound("H1", { tether, side: "west", end: "south", covered: "inner", endsSide: "east", others }),
-      lineup = sc.steps[3],
-      lines = (lineup.reveal ?? []).filter((o) => o.t === "band");
-    assert.equal(lines.length, 4, "every tether's line");
-    for (const l of lines) assert.equal(l.t === "band" && l.w, 25, "10 yalms wide (BossMod)");
-    // With a tether, your own line goes through you; the others' lines and the four markers'
+      lineup = sc.steps[sc.steps.length - 1],
+      reveal = lineup.reveal ?? [],
+      lines = reveal.flatMap((o) => (o.t === "band" && o.w === 25 ? [o] : [])),
+      breaths = reveal.flatMap((o) => (o.t === "band" && o.w === 15 && o.x === 50 && o.y === 50 ? [o] : []));
+    assert.equal(lines.length, 4, "every tether's line, 10 yalms wide (BossMod)");
+    assert.equal(breaths.length, 4, "every marker's Fire Breath, 6 yalms wide from the boss (BossMod)");
+    assert.equal(reveal.filter((o) => o.t === "band").length, 8, "no other lines");
+    // The markers other than you show at the lineup.
+    const cords = reveal.flatMap((o) => (o.t === "tether" ? [o] : [])),
+      markers = reveal.filter((o) => o.t === "mark" && !cords.some((c) => c.x2 === o.x && c.y2 === o.y));
+    assert.equal(markers.length, tether ? 4 : 3, "the other markers");
+    // Your own line (or Fire Breath) goes through you; the others' lines and the other markers'
     // Fire Breath are the ones to miss.
-    const hits = (lineup.hits ?? lines).filter((o) => o.t === "band");
+    const hits = (lineup.hits ?? []).filter((o) => o.t === "band");
     assert.equal(hits.filter((o) => o.w === 25).length, tether ? 3 : 4);
-    assert.equal(
-      hits.filter((o) => o.w === 15 && o.x === 50 && o.y === 50).length,
-      tether ? 4 : 0,
-      "Fire Breath: 6 yalms wide, from the boss (BossMod)",
-    );
+    assert.equal(hits.filter((o) => o.w === 15).length, tether ? 4 : 3);
   }
 });
 
@@ -850,7 +869,7 @@ test("Arena Split: no correct tether spot stands in Fire Breath or sends your li
       for (const covered of ["inner", "outer"] as const)
         for (const endsSide of ["west", "east"] as const) {
           const others = OTHERS.filter((o) => o !== "H1").slice(0, 3),
-            lineup = splitRound("H1", { tether: true, side, end, covered, endsSide, others }).steps[3];
+            lineup = splitRound("H1", { tether: true, side, end, covered, endsSide, others }).steps[4];
           const zone = lineup.zf?.([]),
             portal = portalAt(side === "west" ? "east" : "west", end === "north" ? "south" : "north", endsSide);
           assert.ok(zone && "fn" in zone);
