@@ -6,6 +6,8 @@
 interface Line {
   t: number;
   name: string;
+  /** How long the line lasts, when cactbot gives it: for several hits, from the first to the last. */
+  duration?: number;
 }
 /** One BossMod ability, as source.gen.ts lists it: its cast in seconds, and its shape. */
 interface Cast {
@@ -49,5 +51,14 @@ export function sourceLookups<const L extends readonly Line[], A extends Record<
     return lines.filter((l) => l.t > from && l.t < to && numbered(l.name)).map((l): [number, string] => [l.t, l.name]);
   }
 
-  return { cactbot, bossmod, castStart, numberedAfter };
+  /** When the `n`th cactbot line `name` ends: its time plus its duration. For a line of several
+      hits ("Massive Meteor x5"), the last hit. */
+  function lineEnd(name: LineName, n = 1): number {
+    const t = cactbot(name, n),
+      duration = lines.find((l) => l.name === name && l.t === t)?.duration;
+    if (duration === undefined) throw new Error(`cactbot gives "${name}" no duration`);
+    return tenth(t + duration);
+  }
+
+  return { cactbot, bossmod, castStart, lineEnd, numberedAfter };
 }

@@ -8,7 +8,7 @@
 export const PINS = {cactbot:"33896d3e20a0e0e69d5ab3d5b8bc0129a13615bd", bossmod:"02a16b4425ceed2b63994468da406adddefcd57b"} as const;
 
 /** cactbot's timeline: each line's time in seconds into the fight (branch offsets removed),
-    its name, and its ability ids. */
+    its name, its ability ids, and how long it lasts, when the line says. */
 export const CACTBOT_LINES = [
   {t:14.6, name:"Hot Impact", ids:["B5B6"]},
   {t:20.7, name:"--intercardinal--", ids:["B578"]},
@@ -20,7 +20,7 @@ export const CACTBOT_LINES = [
   {t:53.1, name:"Alley-oop Inferno", ids:["B5C1"]},
   {t:61.9, name:"Cutback Blaze", ids:["B5C9"]},
   {t:62.8, name:"Cutback Blaze", ids:["B5CA"]},
-  {t:68.4, name:"Pyrotation x3", ids:["B5C2"]},
+  {t:68.4, name:"Pyrotation x3", ids:["B5C2"], duration:4.9},
   {t:82.5, name:"Divers' Dare", ids:["B5B8"]},
   {t:86.6, name:"--north--", ids:["B578"]},
   {t:88.8, name:"--untargetable--", ids:[]},
@@ -42,7 +42,7 @@ export const CACTBOT_LINES = [
   {t:160.9, name:"Xtreme Spectacular", ids:["B5D9"]},
   {t:161.7, name:"--untargetable--", ids:[]},
   {t:168.7, name:"Xtreme Spectacular (line)", ids:["B5A4"]},
-  {t:169.7, name:"Xtreme Spectacular x6", ids:["B5DC"]},
+  {t:169.7, name:"Xtreme Spectacular x6", ids:["B5DC"], duration:3.5},
   {t:173.6, name:"Xtreme Spectacular (big)", ids:["B7CA"]},
   {t:177.4, name:"--targetable--", ids:[]},
   {t:178.8, name:"Epic Brotherhood x2", ids:["B57A"]},
@@ -93,8 +93,8 @@ export const CACTBOT_LINES = [
   {t:313.5, name:"Deep Impact (damage)", ids:["ADC6"]},
   {t:320.5, name:"Divers' Dare x2", ids:["B5B8"]},
   {t:326.7, name:"Epic Brotherhood x2", ids:["B57A"]},
-  {t:328.8, name:"Deep Aerial (tower)", ids:["B5E3"]},
-  {t:334.8, name:"Deep Aerial (damage + stun)", ids:["B5E4"]},
+  {t:328.8, name:"Deep Aerial (tower)", ids:["B5E3"], duration:5},
+  {t:334.8, name:"Deep Aerial (damage + stun)", ids:["B5E4"], duration:2},
   {t:337.3, name:"--add-targetable--", ids:[]},
   {t:337.9, name:"--untargetable--", ids:[]},
   {t:345.7, name:"Xtreme Wave 1", ids:["B5C5"]},
@@ -153,7 +153,7 @@ export const CACTBOT_LINES = [
   {t:542.1, name:"Reverse Alley-oop/Alley-oop Double-dip", ids:[]},
   {t:544.3, name:"Alley-oop Inferno", ids:["B5C1"]},
   {t:544.7, name:"Reverse Alley-oop/Alley-oop Double-dip", ids:[]},
-  {t:552.3, name:"Pyrotation x3", ids:["B5C2"]},
+  {t:552.3, name:"Pyrotation x3", ids:["B5C2"], duration:4.9},
   {t:553.2, name:"Deep Impact (bait)", ids:["B5B7"]},
   {t:553.4, name:"Deep Impact (damage)", ids:["ADC6"]},
   {t:566.5, name:"Divers' Dare x2", ids:["B5B8"]},
