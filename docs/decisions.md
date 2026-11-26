@@ -938,6 +938,18 @@ static wins.
   means counterclockwise. The second is NW or NE, then the cardinals. He resolves them in spawn
   order. The last one is always north (Hector's video; the owner confirmed it, November 25), so
   the Learn card and the drill's rule say so.
+- Ultimate Trophy Weapons, the weapon types (issue #158, the owner's answer, November 26): the
+  first three weapons are an axe, a sword and a scythe in some order, and so are the last three
+  (`buildUltimate`: two shuffles of three). No pinned source says so; Hector's video does.
+- Ultimate Trophy Weapons, the weapons' own stacks (issue #158, BossMod `WeaponsBait`): the axe's
+  Party Stack (Heavy Weight, 6 yalms, on the party in the middle) and the sword's two Light Party
+  line stacks (Sharp Taste, 60 by 6 yalms, from him through each healer) show after the answer,
+  in Assault Evolved too.
+- Ultimate Trophy Weapons, the tornadoes on the floor (issue #158, the owner's answer, November
+  26): a weapon's tornado shows at its `TORNADO_BAITS` spot from the moment it appears, not at
+  the weapon spot, so it does not move when the baits start. No source gives the distance. A
+  later sword pocket leaves out the 4-yalm voidzone of each tornado already on the floor: a click
+  there counts as incorrect, as in the Tornadoes drill.
 - Ultimate Trophy Weapons, the tornadoes (issue #79, the owner's answer, November 24): every
   tornado has two baits. Facing in from the tornado, the support stands on its left and the DPS
   on its right, at its edge, 45 degrees off the line to the middle (`TORNADO_BAITS`). After the

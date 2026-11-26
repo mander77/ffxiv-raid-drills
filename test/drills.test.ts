@@ -217,11 +217,14 @@ test("weapon runs: the sword's best spot is 2 yalms clear of both arms of the cr
           const d = Math.hypot(st.stand[0] - boss.x, st.stand[1] - boss.y);
           assert.ok(d > 24.5 && d < 25, `${name}: ${d.toFixed(1)} units from him, not 2 yalms clear of the arms`);
           // The whole pocket is safe, also far from him: one more step out along the diagonal, or to
-          // the arena edge, is still correct (the arms reach past the arena).
+          // the arena edge, is still correct (the arms reach past the arena), but for a tornado
+          // already on the floor.
           const diag: Point = [(st.stand[0] - boss.x) / d, (st.stand[1] - boss.y) / d];
+          const floor = R.steps.slice(0, k).flatMap((x): Point[] => (x.leave?.t === "tornado" ? [[x.leave.x, x.leave.y]] : []));
           for (const k of [20, 40]) {
             const far: Point = [st.stand[0] + diag[0] * k, st.stand[1] + diag[1] * k];
-            if (far[0] >= 0 && far[0] <= 100 && far[1] >= 0 && far[1] <= 100)
+            const inTornado = floor.some((t) => Math.hypot(far[0] - t[0], far[1] - t[1]) < TORNADO_R);
+            if (far[0] >= 0 && far[0] <= 100 && far[1] >= 0 && far[1] <= 100 && !inTornado)
               assert.ok(inZone(far, zoneOf(st.z)), `${name}: ${k} units farther out is still in the pocket`);
           }
           // Not on the corner: a circle of 4.5 units around the spot is all inside the pocket, so it is
@@ -258,8 +261,52 @@ test("Ultimate Trophy Weapons: the first spawn sets the direction, and the last 
       [false, false, true, true, true, true],
       "the last four leave tornadoes",
     );
+    assert.deepEqual(
+      U.steps.flatMap((st) => (st.leave?.t === "tornado" ? [[st.leave.x, st.leave.y]] : [])),
+      U.W.slice(2).map((w) => TORNADO_BAITS.find((b) => Math.hypot(b.tornado[0] - w.p[0], b.tornado[1] - w.p[1]) < 10)?.tornado ?? []),
+      "each tornado shows where the Tornadoes drill has it",
+    );
     assert.isNull(U.states[0].f, "the boss does not point at the first weapon");
   }
+});
+
+test("Ultimate Trophy Weapons: no correct spot is in a tornado already on the floor", () => {
+  // Every weapon order comes up: two shuffles of three, and both directions.
+  for (const s of SLOTS)
+    for (let i = 0; i < 200; i++) {
+      const U = buildUltimate(s);
+      const floor: Point[] = [];
+      U.steps.forEach((st, k) => {
+        const z = zoneOf(st.z);
+        for (const t of floor)
+          for (let r = 0; r < TORNADO_R; r += 1)
+            for (let a = 0; a < 360; a += 15) {
+              const p: Point = [t[0] + r * Math.sin((a * Math.PI) / 180), t[1] - r * Math.cos((a * Math.PI) / 180)];
+              assert.notOk(inZone(p, z), `${s}, ${U.cw ? "cw" : "ccw"}, step ${k + 1} (${U.W[k].type}): (${p}) is in a tornado`);
+            }
+        if (st.leave?.t === "tornado") floor.push([st.leave.x, st.leave.y]);
+      });
+    }
+});
+
+test("Ultimate Trophy Weapons: a sword pocket with a tornado in it draws the tornado as a hole", () => {
+  // Clockwise, H2: the fifth weapon (west) has the third one's tornado (east) in its pocket.
+  for (let i = 0; i < REPEATS; i++) {
+    const U = buildUltimate("H2", true);
+    if (U.W[4].type !== "sword") continue;
+    const shown = zoneOf(U.steps[4].z);
+    const show = "show" in shown ? (shown.show[0] as PolyShape) : undefined;
+    const hole = show?.hole;
+    if (!hole) throw new Error("the pocket has no hole");
+    const c = hole.reduce((m, p) => [m[0] + p[0] / hole.length, m[1] + p[1] / hole.length], [0, 0]);
+    const t = U.steps[2].leave;
+    assert.equal(t?.t, "tornado");
+    if (t?.t !== "tornado") return;
+    assert.approximately(c[0], t.x, 0.01);
+    assert.approximately(c[1], t.y, 0.01);
+    return;
+  }
+  assert.fail("no clockwise set had a sword fifth");
 });
 
 test("Void Stardust: the next puddle goes just outside the last one, clockwise", () => {

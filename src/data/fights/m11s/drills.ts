@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit, ROCK_GAP, meteorHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, ROCK_GAP, meteorHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -71,14 +71,20 @@ export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
     }
   });
   const HW = SWORD_HALF, side = bySlot(s, {H1:1, H2:-1}), own = bySlot(s, {H1:"left", H2:"right"});
+  // The tornadoes the weapons before this one left on the floor. Walking into one sends you
+  // flying, so no later correct area takes in its voidzone (BossMod's Maelstrom).
+  const tornadoes: Point[] = [];
   const steps = W.map((w, i): Step => {
     const st = states[i + 1], P: Point = [st.x, st.y], d = dirs[i], L = leftOf(d), sv: Point = [L[0] * side, L[1] * side];
     const where = w.where || WHERE[Math.round(w.a / 45) % 8];
     let z: Zone, a: Lines, reveal: Overlay[], stand: Point | undefined, hits: Overlay[] | undefined;
     if(w.type === "axe"){
-      z = {c:addVec(P, unit([50 - P[0], 50 - P[1]]), 28), r:7};
+      const middle = addVec(P, unit([50 - P[0], 50 - P[1]]), 28);
+      z = {c:middle, r:7};
       a = ["Axe, " + where + ": Party Stack in the middle.", "Stay outside the axe AoE."];
-      reveal = [axeHit(P)];
+      // The axe's hit around him, and the Party Stack the party takes in the middle.
+      reveal = [axeHit(P), axeStack(middle)];
+      hits = [axeHit(P)];
     } else if(w.type === "scythe"){
       // H1 at the butt end, H2 at the point end, as the scythe is drawn: the spot, close in.
       z = scytheSpot(P, addVec(P, scytheAxis(w, i), -9.5 * side));
@@ -95,19 +101,35 @@ export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
       hits = [scytheDonut(P), ...cones.filter((_c, k) => k !== mine)];
     } else {
       // Safe pocket: behind him (f < -HW) and on your side (sd > HW), outside both arms of the
-      // cross. Anywhere in it inside the arena is correct, and the drawn pocket is the same area.
-      const fn = (p: Point): boolean => { const v: Point = [p[0] - P[0], p[1] - P[1]], f = v[0] * d[0] + v[1] * d[1], sd = v[0] * sv[0] + v[1] * sv[1]; return inArena(p) && f < -HW && sd > HW; };
+      // cross. Anywhere in it inside the arena is correct, except in a tornado already on the
+      // floor, and the drawn pocket is the same area.
+      const inPocket = (p: Point): boolean => { const v: Point = [p[0] - P[0], p[1] - P[1]], f = v[0] * d[0] + v[1] * d[1], sd = v[0] * sv[0] + v[1] * sv[1]; return inArena(p) && f < -HW && sd > HW; };
+      const floor = [...tornadoes];   // a copy: the list grows after this weapon
+      const fn = (p: Point): boolean => inPocket(p) && floor.every(t => dist(p, t) >= TORNADO_R);
+      // A tornado in the pocket sits well inside it, far from both arms and the wall, so the
+      // drawing cuts it out as a hole. A pocket holds one at most.
+      const inside = floor.filter(inPocket);
+      if(inside.length > 1) throw new Error("a sword pocket holds more than one tornado");
+      const hole = inside.map(t => Array.from({length:48}, (_x, k) => polar(k * 7.5, TORNADO_R, t)))[0];
       const poly = swordPocket(P, d, sv);
       // Where to stand: on the pocket's diagonal, 2 yalms (5 units) clear of each arm, so in the
       // moment you can see that you are safe. That is about 25 units (9.9 yalms) from him. The
       // sword's stack is a line from him through you, so the melee can stand closer in that line.
       const CLEAR = 5;
       stand = addVec(addVec(P, d, -(HW + CLEAR)), sv, HW + CLEAR);
-      z = {fn, show:[{poly}], label:addVec(P, unit(addVec([-d[0], -d[1]], sv)), (HW + CLEAR) * Math.SQRT2 + 4)};
+      z = {fn, show:[hole ? {poly, hole} : {poly}], label:addVec(P, unit(addVec([-d[0], -d[1]], sv)), (HW + CLEAR) * Math.SQRT2 + 4)};
       a = ["Sword, " + where + ": the pocket behind him, on his " + own + ".", "It is on the side he jumped from.", "Stand a few steps in from its inner corner.", bySlot(s, {H1:"Light party 1", H2:"Light party 2"}) + " stacks on you."];
-      reveal = swordCross(P, d);
+      // The cross, and a Light Party line stack from him through each healer: yours, and the
+      // other healer's in the pocket on his other side.
+      const other = addVec(addVec(P, d, -(HW + CLEAR)), sv, -(HW + CLEAR));
+      reveal = [...swordCross(P, d), swordLine(P, stand), swordLine(P, other)];
+      hits = [...swordCross(P, d), swordLine(P, other)];
     }
-    const leave: Overlay | null = w.tornado ? {t:"tornado", x:P[0], y:P[1]} : null;
+    // The tornado shows where the Tornadoes drill has it (the owner's choice), so it does not
+    // move when the fight reaches the baits.
+    const tornado = w.tornado ? tornadoNear(P) : null;
+    const leave: Overlay | null = tornado ? {t:"tornado", x:tornado[0], y:tornado[1]} : null;
+    if(tornado) tornadoes.push(tornado);
     return {q:ORDINALS[i] + " weapon: click where you go.", z, a, reveal, leave, stand, ...(hits ? {hits} : {})};
   });
   return {W, states, steps, overlays};
@@ -585,6 +607,12 @@ export const TORNADO_BAITS: readonly {tornado: Point; support: Point; dps: Point
   {tornado:[80, 50], support:[88, 58], dps:[88, 42]},
   {tornado:[50, 84], support:[42, 92], dps:[58, 92]},
   {tornado:[20, 50], support:[12, 42], dps:[12, 58]}];
+/** The tornado a weapon at p leaves: the one of TORNADO_BAITS on its cardinal. */
+function tornadoNear(p: Point): Point {
+  const near = TORNADO_BAITS.find(b => dist(b.tornado, p) < 10);
+  if(!near) throw new Error("no tornado spot near the weapon at " + p.join(","));
+  return near.tornado;
+}
 /** Powerful Gust: each tornado cones its two baits. */
 export const GUST_CONES: Overlay[] = TORNADO_BAITS.flatMap(({tornado, support, dps}) => [...gust(tornado, support), ...gust(tornado, dps)]);
 /** How far from its middle a click on a tornado bait spot still counts. The app's choice. */

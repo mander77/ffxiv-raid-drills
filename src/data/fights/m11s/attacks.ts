@@ -168,6 +168,14 @@ export const ROCK_GAP = yalms(6);
 export const proximityDot = (p: Point): Overlay => ATTACK.circle(p, PROXIMITY_DOT);
 /** The axe hit: a circle around the boss at c ("range 8 circle"). */
 export const axeHit = (c: Point): Overlay => ATTACK.circle(c, bossmod("AssaultEvolvedAxeAOE").range);
+/** The axe's Party Stack (Heavy Weight), on the stack spot p ("range 6 circle", for six players). */
+export const axeStack = (p: Point): Overlay => ATTACK.circle(p, bossmod("HeavyWeight").range);
+/** One of the sword's two Light Party line stacks (Sharp Taste), from the weapon at `from`
+    through the healer at `to` ("range 60 width 6 rect", for four players). */
+export const swordLine = (from: Point, to: Point): Band => {
+  const s = bossmod("SharpTaste");
+  return ATTACK.line(from, toward(from, to), s.range, s.width);
+};
 /** The weapon scythe's donut around the boss at c: safe only within 5 yalms of him ("range 5-60
     donut"). */
 export const scytheDonut = (c: Point): Overlay => {

@@ -255,7 +255,8 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-axe": s => { const j = jump(s, "axe", 90), mid = cluster(zoneCenter(j.zone)), spread = clockRing(14, j.at, j.b.f ?? 0);
     const lp = [cluster([62, 30], G1, 2), cluster([62, 70], G2, 2)], close = cluster([66, 50], ALL, 2);
     return {...j.fig, options:[
-      show([...j.hits, stackHit(mid), ...mid], [j.zone]), show([...spreadHits(spread), ...spread]),
+      // The drill's own hits: the axe's circle and its Party Stack in the middle.
+      show([...j.hits, ...mid], [j.zone]), show([...spreadHits(spread), ...spread]),
       show([...lp.map(g => stackHit(g)), ...lp.flat()]), show([fakeDonut(j.at, FAKE.axeDonut), stackHit(close), ...close])]}; },
   "k-scythe": s => { const j = jump(s, "scythe", 180), lp = cluster([30, 66], bySlot(s, {H1:G1, H2:G2}), 2);
     return {...j.fig, options:[hit(youIn(s, j.zone), j.hits), hit(youIn(s, j.zoneOther), j.hits),
