@@ -257,7 +257,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   // The nth Raw Steel Trophy with weapon w: its cast and its hits.
   const raw = (w: string, n: number): Array<[number, string]> => w === "axe"
     ? [[cactbot("Raw Steel Trophy Axe", n), "Raw Steel Trophy Axe"], [cactbot("Raw Steel (Axe)", n), "Raw Steel (Axe)"], [cactbot("Impact x6 (Axe)", n), "Impact x6 (Axe)"]]
-    : [[cactbot("Raw Steel Trophy Scythe", n), "Raw Steel Trophy Scythe"], [cactbot("Heavy Hitter (Scythe)", n), "Heavy Hitter (Scythe)"]];
+    : [[cactbot("Raw Steel Trophy Scythe", n), "Raw Steel Trophy Scythe"], [cactbot("Raw Steel x2 (Scythe)", n), "Raw Steel x2 (Scythe)"], [cactbot("Heavy Hitter (Scythe)", n), "Heavy Hitter (Scythe)"]];
   const assault = (times: number[]): Array<[number, string]> => times.map((t, i) => [t, "Assault Evolved " + (i + 1)]);
   // Each Cometite puddle drops when its cast starts (BossMod) and goes off at cactbot's line.
   const comets = (n: number): Array<[number, string]> => {

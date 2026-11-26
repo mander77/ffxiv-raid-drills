@@ -1,7 +1,7 @@
 import { assert, test } from "vitest";
 import { ATTACK, busterPieces, floorAttacks, MAJESTIC_PUDDLE, PLATFORM_X } from "../src/data/fights/m11s/attacks";
 import { DRILLS } from "../src/data/fights/m11s/drills";
-import { buildFight } from "../src/data/fights/m11s/fight";
+import { buildFight, buildHits, RANDOM } from "../src/data/fights/m11s/fight";
 import { bossmod, cactbot, castStart, type LineName } from "../src/data/fights/m11s/sources";
 import { angOf, dist, inZone, rotZone, stepZone, zoneCenter } from "../src/geometry";
 import { clock, sec } from "../src/time";
@@ -125,6 +125,18 @@ test("the second Raw Steel Trophy and the second Void Stardust go the other way"
     const first = f.segs.find((g) => g.title.startsWith("Void Stardust into"))?.scene.steps[4].q ?? "";
     const again = f.segs.find((g) => g.title === "Void Stardust (Second Time)")?.scene.steps[3].q ?? "";
     assert.notEqual(/Comet/.test(first), /Comet/.test(again), "one spread and one stack");
+  }
+});
+
+test("Raw Steel Trophy: the casts list each weapon's tank hit, and the hits mark it as Tank Damage", () => {
+  for (const raw of ["axe", "scythe"] as const) {
+    const f = buildFight("H1", undefined, { ...RANDOM, raw });
+    const names = f.events.map((e) => e.name);
+    assert.include(names, "Raw Steel (Axe)");
+    assert.include(names, "Raw Steel x2 (Scythe)");
+    const tank = buildHits(f).filter((h) => h.name === "Raw Steel");
+    assert.lengthOf(tank, 2, `${raw} first: both Raw Steel rows`);
+    for (const h of tank) assert.equal(h.cat, "tank");
   }
 });
 

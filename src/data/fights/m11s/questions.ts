@@ -15,6 +15,11 @@ export const LEARN_CARDS: QuizItem[] = [
     options:[{t:"Tanks spread, and the party stacks south behind the boss.", ok:true},{t:"Tanks stack, and the party spreads."},{t:"Every player takes a clock spot."},{t:"The party stacks north, in front of the boss."}],
     why:["The scythe cleaves three times.", "One cone on each tank, and one cone the rest of the party shares behind him.", "The axe is the opposite: a Shared Tank Buster and six spread hits."],
     rule:RAW_STEEL_RULE})),
+  mq("k-raw-axe", 1.1, P1, "0:18", s=>({prompt:"Raw Steel Trophy: the boss pulls out an axe. Where do you go?",
+    options:[{t:bySlot(s, {H1:"Spread SSW, far out.", H2:"Spread SSE, far out."}), ok:true},{t:bySlot(s, {H1:"Spread SSE, far out.", H2:"Spread SSW, far out."})},
+      {t:"Stack south behind the boss with the party."},{t:"Stack with the tanks in front of the boss."}],
+    why:["The two tanks stack in front for a Shared Tank Buster.", "The other six each get an AoE, so they spread.", "The healers take the far south spots: H1 SSW, H2 SSE."],
+    rule:[bySlot(s, {H1:"Axe: your spread spot is SSW, far out.", H2:"Axe: your spread spot is SSE, far out."})]})),
   mq("k-raw-second", 9, P1, "2:36", s=>({prompt:"The first Raw Steel Trophy was an axe. What is the second one, at 2:36?",
     options:[{t:"A scythe. It is always the opposite of the first.", ok:true},{t:"An axe again."},{t:"It is random."},{t:"A sword."}],
     why:["The second Raw Steel Trophy always uses the weapon you did not see first."],
@@ -256,7 +261,7 @@ TIMELINE.slice(0, -1).forEach((ev, i) => {
 /** The Learn cards by mechanic, for the chips over a card: a chip jumps to the first card of its
     mechanic. The tests check that every Learn card is in exactly one. */
 export const LEARN_GROUPS: Array<{name: string; ids: string[]}> = [
-  {name:"Raw Steel", ids:["k-raw-first", "k-raw-second"]},
+  {name:"Raw Steel", ids:["k-raw-first", "k-raw-axe", "k-raw-second"]},
   {name:"Weapons", ids:["k-first-weapon", "k-sword", "k-axe", "k-scythe", "k-assault-2"]},
   {name:"Void Stardust", ids:["k-void", "k-void-target", "k-void-spread", "k-void-sprint", "k-void-2-start", "k-void-2"]},
   {name:"Dance", ids:["k-dance", "k-dance-north", "k-dance-pair"]},
