@@ -354,11 +354,13 @@ export type Category = "raid" | "tank" | "spot" | "dodge" | "target" | "mech" | 
 /** How the full fight shows an ability's hits, where its categories alone do not say it.
     `shared`: the party shares the hit (a stack or a tower), so it flashes softer.
     `times`: its hits, each with its own time (a timeline line) and name.
-    `lines`: each timeline line named `lines` and a number, up to the next ability, is one hit. */
+    `lines`: each timeline line named `lines` and a number, up to the next ability, is one hit.
+    `area`: the circle it hits, when that is not the whole floor (a tower), so only it flashes. */
 export interface HitRule {
   shared?: boolean;
   times?: readonly { t: number; name: string }[];
   lines?: string;
+  area?: CircleZone;
 }
 
 /** One row of the ability list. `t` is when it hits, in seconds into the fight. */
@@ -409,13 +411,15 @@ export interface FightSeg {
 
 /** How the full fight shows a hit: a raidwide flashes the arena floor, a tank buster draws the
     tanks and the hit on them, a shared hit (a stack or a tower the party shares) flashes softer,
-    the enrage flashes long and dark, and any other AoE only shows its name. */
+    the enrage flashes long and dark, and any other AoE only shows its name. A hit with an `area`
+    flashes only that circle. */
 export type HitKind = "raid" | "tank" | "shared" | "enrage" | "aoe";
 export interface Hit {
   t: number;
   name: string;
   kind: HitKind;
   cat: Category;
+  area?: CircleZone;
 }
 
 /** Your pattern picks for the full fight: each pick's key and its value, or "random". The

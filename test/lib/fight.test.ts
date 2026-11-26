@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { cactbot } from "../../src/data/fights/m11s/sources";
 import {
   activeSeg,
   answerFightStep,
@@ -47,6 +48,21 @@ describe("where the fight is", () => {
     expect(activeSeg(f, g.from - 0.1)).toBe(-1);
     expect(activeSeg(f, g.from)).toBe(0);
     expect(activeSeg(f, last + 3)).toBe(0);
+  });
+
+  test("Heartbreak Kick asks at each set's first and last hit, and its tower stays until hit 7", () => {
+    const f = fight();
+    const si = f.segs.findIndex((g) => g.title === "Heartbreak Kick");
+    expect(f.segs[si].due).toEqual([
+      cactbot("Heartbreak Kick 1"),
+      cactbot("Heartbreak Kick 5"),
+      cactbot("Heartbreak Kick 1", 2),
+      cactbot("Heartbreak Kick 6"),
+      cactbot("Heartbreak Kick 1", 3),
+      cactbot("Heartbreak Kick 7"),
+    ]);
+    expect(activeSeg(f, cactbot("Heartbreak Kick 3", 3) + 0.3)).toBe(si);
+    expect(activeSeg(f, cactbot("Heartbreak Kick 7") + 3)).toBe(si);
   });
 
   test("a step is asked before its hit, and a weapon waits for the boss's turn", () => {

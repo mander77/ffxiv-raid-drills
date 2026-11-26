@@ -541,11 +541,14 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     return {...d, options:[
       hit(youIn(s, d.zone), [lineStack(CENTER, zoneCenter(d.zone))]), hit(youAt(s, [43, 43], 5.5), [lineStack(CENTER, [43, 43])]),
       show([lineStack(CENTER, [100, 50]), you(s, [68, 50])], [rect(60, 43, 84, 57)]), hit(youAt(s, [6, 94], 6), [lineStack(CENTER, [6, 94])])]}; },
-  "k-hb": s => { const tanks = [mark(47, 31, "MT", "T"), mark(53, 31, "OT", "T")], tower: Point = [50, 31];
-    return {overlays:[kickTower(tower)], boss:BOSS, before:tanks, after:[towerHit(tower), ...tanks, say("5, THEN 6, THEN 7 HITS", 8)], answer:[circle(tower, TOWER_R)],
-      note:"Example: the tanks soak it with invulns. Or the party soaks it.", options:[
-        show([towerHit(tower), ...tanks, say("5, THEN 6, THEN 7 HITS", 8)], [circle(tower, TOWER_R)]),
-        show([towerHit(tower), you(s, tower), say("YOU SOAK IT ALONE", 8)], [circle(tower, TOWER_R)]),
+  /* The tower is under the boss, in the middle of the arena (BossMod). The tanks stand in it, south
+     of his center. In this example the tanks soak it, so your green area is out of the tower,
+     the drill's "tanks" way. */
+  "k-hb": s => { const tanks = [mark(46, 58.5, "MT", "T"), mark(54, 58.5, "OT", "T")], tower = CENTER, out = fromDrill("m-hb", s, "tanks").zone;
+    return {overlays:[kickTower(tower)], boss:BOSS, before:tanks, after:[towerHit(tower), ...tanks, say("5, THEN 6, THEN 7 HITS", 8)], answer:[out],
+      note:"Example: the tanks soak it with invulns, and you stay out. Or the party soaks it.", options:[
+        show([towerHit(tower), ...tanks, say("5, THEN 6, THEN 7 HITS", 8)], [out]),
+        show([towerHit(tower), you(s, [50, 58.5]), say("YOU SOAK IT ALONE", 8)], [circle(tower, TOWER_R)]),
         show([...tanks, say("RAISE THE PARTY", 8)]),
         show([RAIDWIDE, ...tanks, say("IT IS THE ENRAGE", 8)])]}; }
 };

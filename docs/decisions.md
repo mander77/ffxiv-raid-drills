@@ -186,7 +186,13 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
   not white dashes, so it shows on the dark floor between the platforms and on the sand (owner).
 - Heartbreak Kick in Practice and Pressure: the drill `m-hb` has two variants, from a new
   Settings pick, "Heartbreak Kick": "Party soaks" (stand in the tower) or "Tanks invuln" (stand
-  anywhere out of it). Each of the three hits is one step, due at its cactbot line.
+  anywhere out of it). In Practice each of the three sets is one step, due at its first hit. In
+  Pressure each set asks twice, at its first hit and at its last (owner's choice, November 26),
+  so you hold your spot for the whole set and the tower stays until hit 7. Each hit flashes only
+  the tower, not the whole floor.
+- Heartbreak Kick's Learn picture (`k-hb`): the tower is under the boss, in the middle, as in
+  BossMod and the drill. Its example is the tanks' way, so your green area is out of the tower
+  (owner's choice, November 26).
 - M11S's knockbacks are standard knockback arrows, not guides (owner's choice, November 24). A
   guide is a move you make; a knockback throws you, so it gets the wide, hollow arrow of the
   knockback icons. The guides stayed at first because the standard knockback (arrows out from a
