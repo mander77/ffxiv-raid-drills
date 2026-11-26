@@ -48,6 +48,7 @@ const N = {
   fireballKiss: "A Line Stack (Fearsome Fireball). Meteors land on the marked players (Cosmic Kiss).",
   fatality: "Tethers from the portals. A tether can be passed. Each tethered player takes a Tank Buster.",
   fireball: "The last Line Stack, with no meteors.",
+  rockExplodes: "The rock the Line Stack broke explodes around itself. Walk out.",
   triple: "Three hits of very heavy raid damage. Hide behind the rocks to block them.",
   flatliner: "A line splits the arena into two platforms and knocks the party away from it.",
   majestic: "Majestic Meteor starts the two-platform part: towers, meteor baits and tethers.",
@@ -129,10 +130,13 @@ export const PHASES: readonly {name: Phase; rows: Ability[]}[] = [
     [cactbot("Fearsome Fireball"), "Fearsome Fireball + Cosmic Kiss #1", ["target"], N.fireballKiss],
     [cactbot("Foregone Fatality"), "Foregone Fatality #1", ["tank"], N.fatality],
     [cactbot("Fearsome Fireball", 2), "Fearsome Fireball + Cosmic Kiss #2", ["target"], N.fireballKiss],
+    [cactbot("Explosion", 3), "Rock explodes", ["dodge"], N.rockExplodes],
     [cactbot("Foregone Fatality", 2), "Foregone Fatality #2", ["tank"], N.fatality],
     [cactbot("Fearsome Fireball", 3), "Fearsome Fireball + Cosmic Kiss #3", ["target"], N.fireballKiss],
+    [cactbot("Explosion", 4), "Rock explodes", ["dodge"], N.rockExplodes],
     [cactbot("Foregone Fatality", 3), "Foregone Fatality #3", ["tank"], N.fatality],
     [cactbot("Fearsome Fireball", 4), "Fearsome Fireball", ["target"], N.fireball],
+    [cactbot("Explosion", 5), "Rock explodes", ["dodge"], N.rockExplodes],
     [cactbot("Triple Tyrannhilation"), "Triple Tyrannhilation", ["raid", "spot"], N.triple]
   ])},
   {name:P3, rows:rows([

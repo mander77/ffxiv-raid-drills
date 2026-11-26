@@ -944,6 +944,20 @@ static wins.
   the full fight). Hector's guide video (9:43 to 9:59) and wtfdig ("Bait meteor close") both say
   so. Anywhere inside his hitbox is correct. Then the drop, as before.
 - The tank tethers in Meteorain are tank busters at 5:09, 5:19 and 5:29.
+- Meteorain, what the arena draws (owner, November 25, after a fight review): each Line Stack
+  (Fearsome Fireball, BossMod 6 yalms wide) shows after its step. In "Your Meteor" the second Line
+  Stack, NE, shows as a cue while you drop, and the healers' drops stay out of it. The marker shows
+  on you after the first step, then both healers' meteors land (Cosmic Kiss, 4 yalms) and leave
+  rocks. A rock that a Line Stack broke explodes 3 seconds later (ExplosionComet, 8 yalms;
+  cactbot's "Explosion" at 5:14, 5:24 and 5:34): the ability list has a "Rock explodes" row for
+  each, the arena draws it, and "Third Line Stack" says "The broken rock explodes: walk out."
+- Meteorain, the first Line Stack (owner, November 25): the tanks take it in front, so the party's
+  spot starts outside the boss's hitbox: a 7-unit circle at max melee on the NW line, inside the
+  line. Farther out, a healer cannot get back under the boss in time for the second markers.
+- Meteorain, the gap between rocks (owner, November 25): a healer's drop spot keeps 6 yalms from
+  every rock already down (`ROCK_GAP`). No source gives the distance at which two rocks explode;
+  6 yalms is twice BossMod's trigger radius, which BossMod calls a guess. H1's NW wedge now starts at
+  290 degrees, not 285, and H2's SW circle loses the part too close to M2's rock.
 - Crown of Arcadia, a raidwide, comes five times.
 - Arena Split follows Hector No Buddies (wtfdig `#hector:hector:fixed`), the owner's choice in
   November 2026; before that the app followed Kindred No Buddies. The two differ in the conga:
