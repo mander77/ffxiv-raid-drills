@@ -912,6 +912,13 @@ static wins.
   from each tornado toward its bait (`aim`, the app's choice) shows which way each cone goes.
 - Orbital Omen (Hector's dodge): stay against the boss hitbox, at his side, where the #2 lines
   cross. After #1, cross through him to the other side. After #2, cross back.
+- Orbital Omen in the full fight (owner, November 25, after a fight review): the last step
+  ("stay there") is checked when the #4 lines go off, not #3, so the run checks that you stay
+  through #4. The first step stays due at the #1 lines, not at Fire and Fury 0.6 seconds later.
+  Fire and Fury is two 90-degree cones, front and back. The cross from your side spot to the
+  opposite middle square is a straight line through the boss's middle, 63 degrees off his facing,
+  so it stays out of both cones. Waiting for Fire and Fury leaves 1 second for the cross: too
+  little. Hector's video says Fire and Fury comes "at the same time" as #1; cactbot decides.
 - Meteorain, your meteor: H1 drops it NW, in max melee. H2 drops it SW, in line with the first SW
   rock, farther out. Icy Veins swaps H1 and H2 here. The site follows wtfdig.
 - Meteorain rocks (owner, November 25, after a fight review): the rocks near the boss land in his
