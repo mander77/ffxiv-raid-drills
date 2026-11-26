@@ -50,6 +50,13 @@ const SHOWS: { [K in keyof Picks]: (f: Fight, v: string) => boolean } = {
     const g = f.segs.find((x) => x.drills[0] === "m-ecl-two" || x.drills[0] === "m-ecl-four");
     return Boolean(g && g.drills[0] === `m-ecl-${v}` && g.title.endsWith(v === "four" ? "Four-way Fireball" : "Two-way Fireball"));
   },
+  // The proximity AoEs land in the two corners the pick names, as the markers come.
+  meteors: (f, v) => {
+    const dots = (seg(f, "Ecliptic Stampede: Puddles").scene.steps[1].cue ?? []).flatMap((o) =>
+      o.t === "aoe" ? [o.x < 50 === o.y < 50] : [],
+    );
+    return dots.length === 2 && dots.every((nwOrSe) => nwOrSe === (v === "nw-se"));
+  },
   // The fireball says which wall you dropped your puddles on, and the puddle drops walk along it.
   // With no puddles, you go under the boss, and the fireball says where your tether ended.
   wall: (f, v) =>
@@ -91,6 +98,10 @@ test("Random still gives every pattern", () => {
   }
 });
 
+// Your Ecliptic wall follows from where the proximity AoEs land and who is marked with you, so
+// these two picks can change each other.
+const COUPLED = new Set(["meteors", "wall"]);
+
 test("a choice changes only its own part: the rest still comes from the fight code", () => {
   for (let i = 0; i < 20; i++) {
     const code = newCode(),
@@ -99,7 +110,7 @@ test("a choice changes only its own part: the rest still comes from the fight co
       for (const [v] of row.options) {
         const f = buildFight("H1", code, { ...RANDOM, [row.key]: v });
         for (const other of CHOICE_ROWS)
-          if (other.key !== row.key)
+          if (other.key !== row.key && !(COUPLED.has(other.key) && COUPLED.has(row.key)))
             assert.equal(f.picks[other.key], plain.picks[other.key], `${code}: choosing ${row.key} changed ${other.key}`);
         // The same code and choice always build the same fight.
         assert.deepEqual(buildFight("H1", code, { ...RANDOM, [row.key]: v }).picks, f.picks);
@@ -142,6 +153,15 @@ test("Step by step drills follow the picks that fit them", () => {
           `${m.id}: its variants are the pick's values`,
         );
     }
+});
+
+test("Ecliptic: a healer gets the north wall only in the pattern that sends them there", () => {
+  for (let i = 0; i < 20; i++) {
+    assert.equal(buildFight("H1", newCode(), { ...RANDOM, wall: "north" }).picks.meteors, "ne-sw");
+    assert.equal(buildFight("H2", newCode(), { ...RANDOM, wall: "north" }).picks.meteors, "nw-se");
+    // A proximity AoE pick that cannot give the north wall gives way to the wall pick.
+    assert.equal(buildFight("H1", newCode(), { ...RANDOM, wall: "north", meteors: "nw-se" }).picks.wall, "north");
+  }
 });
 
 test("a fight link carries the choices", () => {
