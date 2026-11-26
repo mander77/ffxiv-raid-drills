@@ -8,7 +8,9 @@
 // branch (a conflict): rebase it on origin/main yourself, then run it again.
 // CI runs on pull requests and on main, not on a branch push alone. Cloudflare builds main as
 // the live site, and skips the build when only docs, tests or tooling changed. For another
-// branch, GitHub Actions makes a preview when the push changed the app and the owner approved it.
+// branch, GitHub Actions makes a preview when the push changed the app. Its run waits for a
+// reviewer of the "preview" environment: this script approves it as the owner, so the owner's
+// own pushes need no click. It does not wait for CI.
 // GitHub deletes the branch on GitHub when its pull request merges (the repository setting
 // "Automatically delete head branches").
 // Pushes as the repository owner. Ignores any GH_TOKEN or GITHUB_TOKEN in the
@@ -72,6 +74,63 @@ async function waitForCi(sha) {
   }
 }
 
+/**
+ * Approves the Preview run of a commit, as the signed-in account. GitHub refuses the approval
+ * to anyone who is not a reviewer of the "preview" environment. A push that changes only docs,
+ * tests or tooling has no Preview run: after a minute with none, it says so. A run that is
+ * already approved or running is left alone. Never stops the
+ * publish: when it cannot approve, it says to approve on GitHub.
+ */
+async function approvePreview(sha) {
+  console.log("Looking for the Preview run of this commit (up to a minute)...");
+  const runQuery = '[.workflow_runs[] | select(.name == "Preview")] | sort_by(.created_at) | last | "\\(.id) \\(.status)"';
+  for (let i = 0; i < 40; i++) {
+    const found = output("gh", ["api", `repos/${REPO}/actions/runs?head_sha=${sha}&event=push`, "--jq", runQuery]);
+    const [id, status] = found.split(" ");
+    if (id !== "null") {
+      if (status === "waiting") {
+        const pending = output("gh", ["api", `repos/${REPO}/actions/runs/${id}/pending_deployments`, "--jq", ".[].environment.id"]);
+        const environments = pending.split("\n").filter(Boolean);
+        if (environments.length > 0) {
+          const ids = environments.flatMap((env) => ["-F", `environment_ids[]=${env}`]);
+          const approved = spawnSync(
+            "gh",
+            [
+              "api",
+              "-X",
+              "POST",
+              `repos/${REPO}/actions/runs/${id}/pending_deployments`,
+              ...ids,
+              "-f",
+              "state=approved",
+              "-f",
+              "comment=Approved by npm run publish.",
+              "--silent",
+            ],
+            { encoding: "utf8" },
+          );
+          if (approved.status === 0) {
+            console.log(`Approved the Preview run: https://github.com/${REPO}/actions/runs/${id}`);
+          } else {
+            console.log(
+              `Could not approve the Preview run; approve it on GitHub: https://github.com/${REPO}/actions/runs/${id}\n${approved.stderr}`,
+            );
+          }
+          return;
+        }
+      } else if (status === "in_progress" || status === "completed") {
+        console.log(`The Preview run of this commit needs no approval (${status}): https://github.com/${REPO}/actions/runs/${id}`);
+        return;
+      }
+    } else if (i >= 12) {
+      console.log("No Preview run: this push changed only docs, tests or tooling.");
+      return;
+    }
+    await sleep(5_000);
+  }
+  console.log(`The Preview run did not reach its approval in time; approve it on GitHub: gh run list --commit ${sha}`);
+}
+
 /** Returns the number of the branch's open pull request to main, and opens one if it has none. */
 function pullRequestOf(branch) {
   const query = ["--head", branch, "--base", "main", "--state", "open", "--json", "number", "--jq", ".[0].number // empty"];
@@ -104,12 +163,16 @@ async function publish() {
     gitgh(["push", "--force-with-lease", "--force-if-includes", "-u", "origin", branch]);
     const number = pullRequestOf(branch);
     console.log(`Pushed ${branch}, pull request #${number}. CI runs on GitHub: gh pr checks ${number}`);
+    const sha = output("git", ["rev-parse", "HEAD"]);
     if (!toMain) {
-      console.log("If the app changed, approve its Preview run on GitHub once CI passed.");
+      try {
+        await approvePreview(sha);
+      } catch (error) {
+        console.log(`Could not approve the Preview run; approve it on GitHub: gh run list --commit ${sha}\n${error.message}`);
+      }
       return;
     }
 
-    const sha = output("git", ["rev-parse", "HEAD"]);
     await waitForCi(sha);
     // --match-head-commit: merge only the commit that CI checked, never a newer push.
     const merged = spawnSync("gh", ["pr", "merge", number, "--repo", REPO, "--rebase", "--match-head-commit", sha], { stdio: "inherit" });

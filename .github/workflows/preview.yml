@@ -2,8 +2,9 @@
 # It runs only when a push changes the app: GitHub's path filter skips the workflow when every
 # changed file is in the list below. The list must match the exclude paths of Cloudflare's build
 # watch paths for main (docs/decisions.md, "Hosting").
-# The job waits for the owner's approval (the "preview" environment holds the token). It does
-# not wait for CI: check that CI passed before you approve.
+# The job waits for the owner's approval (the "preview" environment holds the token).
+# npm run publish gives that approval as the owner right after its push, so the owner's own
+# pushes need no click; any other push waits for the owner. It does not wait for CI.
 name: Preview
 
 on:
