@@ -910,6 +910,9 @@ static wins.
   answer, Practice, Pressure and Learn show all eight Powerful Gust cones. A 90-degree cone that
   points 45 degrees off a cardinal runs along the grid, so the arena clips it to a box. An arrow
   from each tornado toward its bait (`aim`, the app's choice) shows which way each cone goes.
+  Each tornado is drawn at its BossMod voidzone, 4 yalms (`Maelstrom`, `TORNADO_R`; issue
+  #159). BossMod gives no bait spot, so the spot stays at its edge, and a click inside the
+  tornado counts as incorrect (the owner's answer, November 25).
 - Orbital Omen (Hector's dodge): stay against the boss hitbox, at his side, where the #2 lines
   cross. After #1, cross through him to the other side. After #2, cross back.
 - Orbital Omen in the full fight (owner, November 25, after a fight review): the last step

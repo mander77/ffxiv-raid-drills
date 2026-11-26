@@ -5,7 +5,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { assert, test } from "vitest";
 // @ts-expect-error: a plain Node.js script with no type declarations.
-import { fillShapes, parseBossmod, parseMechanics, parseStates, parseTriggers, REPOS } from "../scripts/import-sources.mjs";
+import { fillShapes, parseBossmod, parseMechanics, parseStates, parseTriggers, parseVoidzones, REPOS } from "../scripts/import-sources.mjs";
 
 const FIGHTS = join(import.meta.dirname, "..", "src", "data", "fights");
 const lists = readdirSync(FIGHTS).filter((d) => existsSync(join(FIGHTS, d, "sources.json")));
@@ -143,6 +143,18 @@ test("an ability with no shape BossMod states keeps its text", () => {
   assert.deepEqual(out.abilities.Hit, { id: "B5B6", from: "Boss->self", cast: 5, shape: "circle", range: 8 });
   assert.deepEqual(out.abilities.Odd, { id: "B5B7", from: "Helper->self", cast: 0, shape: "unknown", text: "range 60 ?-degree cone" });
   assert.equal(out.arenaHalf, 20);
+});
+
+test("a voidzone: its class, the actor it sits on and its radius", () => {
+  const text = [
+    "class Maelstrom(BossModule module) : Components.Voidzone(module, 4, OID.Maelstrom);",
+    "class Pool(BossModule module) : Components.Voidzone(module, 6.5f, OID.Water);",
+    "class Puddle(BossModule module) : Components.VoidzoneAtCastTarget(module, 5, AID.Drop, m => m.Enemies(OID.Puddle), 1);",
+  ].join("\n");
+  assert.deepEqual(parseVoidzones(text), {
+    Maelstrom: { actor: "Maelstrom", radius: 4 },
+    Pool: { actor: "Water", radius: 6.5 },
+  });
 });
 
 test("a state list: casts, waits and phase blocks in fight order, with their times and components", () => {

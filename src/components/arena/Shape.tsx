@@ -44,7 +44,7 @@ export function Shape({ overlay: o }: ShapeProps) {
     case "tornado":
       return (
         <g className="tornado" transform={`translate(${round2(o.x)} ${round2(o.y)})`}>
-          <circle r="5.5" />
+          <circle r={sizes.tornado} />
           <path d="M-3.4,-2.6 h6.8 M-2.7,-0.9 h5.4 M-2,0.8 h4 M-1.3,2.5 h2.6" />
         </g>
       );

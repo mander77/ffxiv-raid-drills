@@ -278,5 +278,9 @@ export const BOSSMOD_ABILITIES = {
   OverTheFallsBlue:{id:"B5FD", from:"DeepBlue->self", cast:9, shape:"circle", range:60},
 } as const;
 
+/** BossMod's voidzones: the actor each one sits on, and its radius in yalms. */
+export const BOSSMOD_VOIDZONES = {
+} as const;
+
 /** Half the width of BossMod's square arena, in yalms. */
 export const BOSSMOD_ARENA_HALF = 20;

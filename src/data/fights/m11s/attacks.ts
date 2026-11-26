@@ -7,7 +7,7 @@
 // the BossMod ability it belongs to. The arena is 40 yalms across and 100 units in this app.
 import { addVec, angOf, dist, unit } from "../../../geometry";
 import { type Band, standardAttacks } from "../../../lib/attacks";
-import { BOSSMOD_ACTORS, BOSSMOD_ARENA_HALF, BOSSMOD_SPLIT } from "./source.gen";
+import { BOSSMOD_ACTORS, BOSSMOD_ARENA_HALF, BOSSMOD_SPLIT, BOSSMOD_VOIDZONES } from "./source.gen";
 import { bossmod } from "./sources";
 import type { Overlay, Point, Puddle } from "../../../types";
 
@@ -23,6 +23,9 @@ const toward = (a: Point, b: Point): number => angOf([b[0] - a[0], b[1] - a[1]])
 
 /** The boss's hitbox radius, drawn as his target ring (BossMod: R5.000). */
 export const HITBOX = yalms(BOSSMOD_ACTORS.Boss.radius);
+/** A tornado in Ultimate Trophy Weapons: the voidzone around it (BossMod's Maelstrom, 4 yalms).
+    Standing in it knocks you back and gives you Damage Down. */
+export const TORNADO_R = yalms(BOSSMOD_VOIDZONES.Maelstrom.radius);
 /** Melee range, from the boss's center: his hitbox, 3 yalms of melee reach and the player's own
     0.5 (BossMod's melee hint is 8.5 yalms). */
 export const MELEE_R = yalms(8.5);

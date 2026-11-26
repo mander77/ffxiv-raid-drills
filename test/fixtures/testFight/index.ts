@@ -63,7 +63,7 @@ export const TEST_FIGHT: FightData = {
   info: { short: "TEST", full: "The Test Boss (Savage)", strats: ["Test Strat"] },
   links: { guide: "https://example.com/guide", cactbot: "https://example.com/cactbot", bossmod: "https://example.com/bossmod" },
   sources: [{ href: "https://example.com/guide", label: "Test guide" }],
-  arena: { hitbox: 10, tower: 8, scytheSafe: 12 },
+  arena: { hitbox: 10, tower: 8, scytheSafe: 12, tornado: 10 },
   drills: [DRILL],
   learnCards: [LEARN],
   learnGroups: [{ name: "Test", ids: [LEARN.id] }],

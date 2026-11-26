@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, crushingComet, eyeOfTheHurricane, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, crushingComet, eyeOfTheHurricane, fireAndFury, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, sharedCone, soakTower, soloTower, swordCross, swordPocket, tankCone, towerHit } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -556,6 +556,15 @@ export const TORNADO_BAITS: readonly {tornado: Point; support: Point; dps: Point
   {tornado:[20, 50], support:[12, 42], dps:[12, 58]}];
 /** Powerful Gust: each tornado cones its two baits. */
 export const GUST_CONES: Overlay[] = TORNADO_BAITS.flatMap(({tornado, support, dps}) => [...gust(tornado, support), ...gust(tornado, dps)]);
+/** How far from its middle a click on a tornado bait spot still counts. The app's choice. */
+const TORNADO_BAIT_R = 6.5;
+/** Your tornado bait spot: around `bait`, but never inside the tornado, where you would be knocked
+    back. After the answer it shows as the circle with the tornado cut out of it. */
+function tornadoBait(bait: Point, tornado: Point): Zone {
+  const outline = Array.from({length:48}, (_, i) => polar(i * 7.5, TORNADO_BAIT_R, bait)).map(p =>
+    dist(p, tornado) < TORNADO_R ? addVec(tornado, unit([p[0] - tornado[0], p[1] - tornado[1]]), TORNADO_R) : p);
+  return {fn:p => dist(p, bait) <= TORNADO_BAIT_R && dist(p, tornado) >= TORNADO_R, label:bait, show:[{poly:outline}]};
+}
 /** The Powerful Gust cones on every bait spot but `bait`: the cones that must miss you there. */
 const gustsBut = (bait: Point): Overlay[] =>
   TORNADO_BAITS.flatMap(({tornado, support, dps}) => [support, dps].filter(p => p !== bait).flatMap(p => gust(tornado, p)));
@@ -1293,7 +1302,7 @@ export const DRILLS: readonly Drill[] = [
   {id:"m-tornado", order:12, phase:P1, time:"3:46", title:"Ultimate Trophy Weapons: Tornadoes", kind:"bait",
     build:s=>({setup:["The sixth weapon resolved.", "Four tornadoes sit on the cardinals.", "Each one cones its two closest players."],
       boss:BOSS, overlays:TORNADO_BAITS.map(({tornado:[x, y]}): Overlay => ({t:"tornado", x, y})),
-      steps:[{q:"Click your tornado bait spot.", z:bySlot(s, {H1:{c:[12,42],r:6.5}, H2:{c:[88,58],r:6.5}}), a:bySlot(s, {H1:["West tornado, on its north side."], H2:["East tornado, on its south side."]}),
+      steps:[{q:"Click your tornado bait spot.", z:bySlot(s, {H1:tornadoBait(TORNADO_BAITS[3].support, TORNADO_BAITS[3].tornado), H2:tornadoBait(TORNADO_BAITS[1].support, TORNADO_BAITS[1].tornado)}), a:bySlot(s, {H1:["West tornado, on its north side."], H2:["East tornado, on its south side."]}),
         // You bait the cone of your own tornado; the other seven must miss you.
         reveal:GUST_CONES, hits:gustsBut(bySlot(s, {H1:TORNADO_BAITS[3].support, H2:TORNADO_BAITS[1].support}))}],
       rule:["Face in from your tornado.", "Supports (tanks and healers) stand on the left, DPS on the right."]})},
