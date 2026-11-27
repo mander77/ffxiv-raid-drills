@@ -108,6 +108,9 @@ const youAt = (s: Slot, p: Point, r = 5, more: Overlay[] = []): Preview => show(
 /** You in zone z: at `p` when the zone has a best spot (see Step.stand), else at its shown spot. */
 const youIn = (s: Slot, z: Zone, p?: Point): Preview => show([you(s, p ?? zoneCenter(z))], [z]);
 
+/** The drills whose pictures still draw the players the drill drew before (see fromDrill). */
+const LEGACY_MARKS = ["m-raw-axe", "m-raw-scythe"];
+
 /** One step of a map drill as a picture: its floor, boss and pieces, then what it hits and its
     answer zone, with you on your spot (on top of the boss's ring, which can cover a close spot). */
 function fromDrill(id: string, s: Slot, v: string | null = null, k = 0): Picture & {zone: Zone; hits: Overlay[]} {
@@ -117,10 +120,12 @@ function fromDrill(id: string, s: Slot, v: string | null = null, k = 0): Picture
   if(!st.z) throw new Error(id + " step " + k + " has no fixed zone");
   // `hits` is what the step hits, without you, for previews that draw their own players.
   const hits = st.reveal ?? [];
-  // The players with a start spot show from the start, and the players with a fixed spot of
-  // their own (not with you) show after the answer.
-  const start = Object.entries(sc.party?.start ?? {}).map(([l, p]) => mark(p[0], p[1], l, markRole(partyOf(l as SlotName).role)));
-  const placed = Object.entries(st.party ?? {}).flatMap(([l, p]) => p === "you" || l in (sc.party?.start ?? {}) ? [] : [mark(p[0], p[1], l, markRole(partyOf(l as SlotName).role))]);
+  // Raw Steel Trophy's pictures keep the players its drill drew before the whole party came in:
+  // the players with a start spot from the start, and those with a spot of their own after the
+  // answer. The other pictures draw their own players.
+  const legacy = LEGACY_MARKS.includes(id);
+  const start = !legacy ? [] : Object.entries(sc.party?.start ?? {}).map(([l, p]) => mark(p[0], p[1], l, markRole(partyOf(l as SlotName).role)));
+  const placed = !legacy ? [] : Object.entries(st.party ?? {}).flatMap(([l, p]) => p === "you" || l in (sc.party?.start ?? {}) ? [] : [mark(p[0], p[1], l, markRole(partyOf(l as SlotName).role))]);
   return {overlays:[...sc.overlays, ...start], boss:sc.boss ?? sc.bossAt?.(k), split:sc.split, after:[...hits, ...placed, you(s, st.stand ?? zoneCenter(st.z))], answer:[st.z], zone:st.z, hits};
 }
 

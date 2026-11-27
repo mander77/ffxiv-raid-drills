@@ -138,6 +138,10 @@ export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
   return {W, states, steps, overlays, slot:s};
 }
 
+/** Every other player, each at the spot `at` gives them. */
+export const partyBy = (s: Slot, at: (x: SlotName) => PartySpot): PartySpots =>
+  Object.fromEntries(SLOT_NAMES.filter(x => x !== s).map((x): [SlotName, PartySpot] => [x, at(x)]));
+
 /** How far from the boss the party takes its clock spots for the scythe: the healers' spot, 9.5
     units out (the app's choice). */
 const SCYTHE_CLOCK_R = 9.5;
@@ -1724,23 +1728,48 @@ const H2_METEOR: Zone = {
   })}]};
 /** Foregone Fatality's tethers: two portals on random cardinals, each tethered to one of the two
     newest rocks. The MT picks up the tether to the northern rock and the OT the southern one
-    (Hector's guide video, 9:51 to 11:40). Each tank stands halfway along its tether: the app's
-    choice. The hits do not cleave, so the tanks' spots do not matter to the party. */
-function fatality(north: Point, south: Point): Overlay[] {
+    (Hector's guide video, 9:51 to 11:40). Each tank stands TANK_ALONG of the way from the portal
+    to the rock: the app's choice, clear of the rocks and of the party. The hits do not cleave, so the tanks' spots do not matter to the party. */
+const TANK_ALONG = 0.7;
+function fatality(north: Point, south: Point): {overlays: Overlay[]; tanks: Record<"MT" | "OT", Point>} {
   const [a, b] = shuffle<Wall>(["north", "east", "south", "west"]);
-  return ([[a, north, "MT"], [b, south, "OT"]] as const).flatMap(([w, rockAt, l]): Overlay[] => {
-    const p = ECL_PORTAL[w], tank = addVec(p, [rockAt[0] - p[0], rockAt[1] - p[1]], 0.5);
-    return [{t:"portal", x:p[0], y:p[1], vert:w === "north" || w === "south"}, {t:"tether", x:p[0], y:p[1], x2:tank[0], y2:tank[1], fixed:true},
-      {t:"mark", x:tank[0], y:tank[1], l, r:"T"}];
+  const tanks = {} as Record<"MT" | "OT", Point>;
+  const overlays = ([[a, north, "MT"], [b, south, "OT"]] as const).flatMap(([w, rockAt, l]): Overlay[] => {
+    const p = ECL_PORTAL[w], tank = addVec(p, [rockAt[0] - p[0], rockAt[1] - p[1]], TANK_ALONG);
+    tanks[l] = tank;
+    return [{t:"portal", x:p[0], y:p[1], vert:w === "north" || w === "south"}, {t:"tether", x:p[0], y:p[1], x2:tank[0], y2:tank[1], fixed:true}];
   });
+  return {overlays, tanks};
 }
-/** The tanks in front of the party for the first Line Stack, out of the way of each other. The app's choice. */
-const FIRST_STACK_TANKS = ([[303, "MT"], [327, "OT"]] as const).map(([a, l]): Overlay => { const [x, y] = polar(a, 14); return {t:"mark", x, y, l, r:"T"}; });
+/** The tanks in front of the party for the first Line Stack, under the boss, so they are the
+    first hit and clear of the party behind them (wtfdig puts them inside his hitbox). The spots
+    are the app's choice. */
+const FIRST_STACK_TANKS: Record<"MT" | "OT", Point> = {MT:polar(300, 9), OT:polar(330, 9)};
+/** Where the melee and ranged stand in the second set's Line Stack, behind the NE rock (wtfdig;
+    Hector's video, 10:41: "everyone else is going to take the line stack in the northeast"). */
+const NE_STACK_AT = (x: SlotName): Point => stackedAt(x, stackBehind(45));
 /** The two healers' meteors, for the one who is not you. */
 const otherHealerRock = (s: Slot): Point => bySlot(s, {H1:METEOR_ROCKS.sw2, H2:METEOR_ROCKS.nw});
 /** Where the party stands for a Line Stack behind the rock at angle `deg`, and the line through it. */
 const stackBehind = (deg: number): Point => polar(deg, BEHIND_ROCK);
 const lineThrough = (deg: number): Overlay => lineStack(CENTER, stackBehind(deg));
+
+/** Each player's Dance of Domination pair spot: the four pairs of wtfdig, the support on its
+    spot and the DPS beside them (MT with M1, OT with M2, H1 with R1, H2 with R2). Your partner
+    stands with you. */
+function danceParty(s: Slot): PartySpots {
+  const partner: Record<SlotName, SlotName> = {MT:"M1", M1:"MT", OT:"M2", M2:"OT", H1:"R1", R1:"H1", H2:"R2", R2:"H2"};
+  return partyBy(s, x => {
+    if (partner[x] === s) return "you";
+    const support = partyOf(x).role === "Tank" || partyOf(x).role === "Healer" ? x : partner[x];
+    return support === x ? DANCE_PAIRS[x] : stackedAt(x, DANCE_PAIRS[support]);
+  });
+}
+/** Each player's tornado bait (Hector's video, 6:25): north MT and R1, east H2 and R2, south OT
+    and M2, west H1 and M1. The support stands on the left facing in, the DPS on the right. */
+const TORNADO_BAIT_OF: Record<SlotName, Point> = {
+  MT:TORNADO_BAITS[0].support, R1:TORNADO_BAITS[0].dps, H2:TORNADO_BAITS[1].support, R2:TORNADO_BAITS[1].dps,
+  OT:TORNADO_BAITS[2].support, M2:TORNADO_BAITS[2].dps, H1:TORNADO_BAITS[3].support, M1:TORNADO_BAITS[3].dps};
 
 export const DRILLS: readonly Drill[] = [
   {id:"m-raw-axe", order:2, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: Axe", kind:"spread",
@@ -1770,8 +1799,8 @@ export const DRILLS: readonly Drill[] = [
     build:(s, v, pick)=>{ const A = buildAssault2(s, orderFrom(pick)); return voidAgain(s, v === "spread", A.states[A.states.length - 1], randomStackHealer(s)); }},
   {id:"m-dance", order:8.1, rotate:true, phase:P1, time:"2:31", title:"Dance of Domination: Pairs", kind:"pairStack",
     build:s=>({setup:["The seven hits are over. The lines are on the floor.", "Find the side with no outer line.", "That open side is new south."], ordered:true,
-      boss:{x:50, y:50, f:null}, overlays:DANCE_LINES.map((l): Overlay => ({t:"lineaoe", ...l})),
-      steps:[{q:"Click your pair spot.", z:{c:DANCE_PAIRS[s], r:5}, a:bySlot(s, {H1:["Relative SW, the outer spot, with R1."], H2:["Relative SE, the outer spot, with R2."]}),
+      boss:{x:50, y:50, f:null}, overlays:DANCE_LINES.map((l): Overlay => ({t:"lineaoe", ...l})), party:{slot:s},
+      steps:[{q:"Click your pair spot.", z:{c:DANCE_PAIRS[s], r:5}, party:danceParty(s), a:bySlot(s, {H1:["Relative SW, the outer spot, with R1."], H2:["Relative SE, the outer spot, with R2."]}),
         // The lines explode as the pairs land (Hurricane Explosion, 10 yalms wide), and the pair
         // shares its stack where it stands.
         reveal:DANCE_LINES.map(l => hurricaneLine([l.x, l.y], [l.x2, l.y2])), revealAt:p => [eyeOfTheHurricane(p)]}],
@@ -1780,8 +1809,8 @@ export const DRILLS: readonly Drill[] = [
     build:(s, _v, pick)=>ultimateScene(buildUltimate(s, pick ? pick === "cw" : undefined))},
   {id:"m-tornado", order:12, phase:P1, time:"3:46", title:"Ultimate Trophy Weapons: Tornadoes", kind:"bait",
     build:s=>({setup:["The sixth weapon resolved.", "Four tornadoes sit on the cardinals.", "Each one cones its two closest players."],
-      boss:BOSS, overlays:TORNADO_BAITS.map(({tornado:[x, y]}): Overlay => ({t:"tornado", x, y})),
-      steps:[{q:"Click your tornado bait spot.", z:bySlot(s, {H1:tornadoBait(TORNADO_BAITS[3].support, TORNADO_BAITS[3].tornado), H2:tornadoBait(TORNADO_BAITS[1].support, TORNADO_BAITS[1].tornado)}), a:bySlot(s, {H1:["West tornado, on its north side."], H2:["East tornado, on its south side."]}),
+      boss:BOSS, overlays:TORNADO_BAITS.map(({tornado:[x, y]}): Overlay => ({t:"tornado", x, y})), party:{slot:s},
+      steps:[{q:"Click your tornado bait spot.", party:partyBy(s, x => TORNADO_BAIT_OF[x]), z:bySlot(s, {H1:tornadoBait(TORNADO_BAITS[3].support, TORNADO_BAITS[3].tornado), H2:tornadoBait(TORNADO_BAITS[1].support, TORNADO_BAITS[1].tornado)}), a:bySlot(s, {H1:["West tornado, on its north side."], H2:["East tornado, on its south side."]}),
         // You bait the cone of your own tornado; the other seven must miss you.
         reveal:GUST_CONES, hits:gustsBut(bySlot(s, {H1:TORNADO_BAITS[3].support, H2:TORNADO_BAITS[1].support}))}],
       rule:["Face in from your tornado.", "Supports (tanks and healers) stand on the left, DPS on the right."]})},
@@ -1791,59 +1820,86 @@ export const DRILLS: readonly Drill[] = [
         "Portals on the north and east edges fire lines across the arena.", "They fire in the order shown, 1 to 4.",
         "Fire and Fury cleaves his front and back just after the #1 lines.",
         "Hector's dodge: stay in max melee.", "Cross under the boss to the middle square the next lines miss."],
-      boss:BOSS, overlays:O.overlays, steps:O.steps,
+      // The whole party does the dodge together (Hector's video, 8:00: "everyone's going to go into the same quadrant").
+      boss:BOSS, overlays:O.overlays, steps:O.steps.map(st => ({...st, party:partyBy(s, () => "you")})), party:{slot:s},
       rule:ORBITAL_RULE}; }},
   {id:"m-meteor-1", order:16, phase:P2, time:"5:00", title:"Meteorain: First Line Stack", kind:"wildCharge",
     build:s=>({setup:["The melee bait the first two meteors.", "They drop them in max melee, NE and SW.", "The first Line Stack goes off next."], ordered:true,
       boss:BOSS, overlays:[{t:"target",x:METEOR_ROCKS.ne[0],y:METEOR_ROCKS.ne[1]},{t:"target",x:METEOR_ROCKS.sw[0],y:METEOR_ROCKS.sw[1]},
-        {t:"mark",x:METEOR_ROCKS.ne[0],y:METEOR_ROCKS.ne[1],l:"M1",r:"D"},{t:"mark",x:METEOR_ROCKS.sw[0],y:METEOR_ROCKS.sw[1],l:"M2",r:"D"}, ...FIRST_STACK_TANKS],
+],
+      // The tanks stand in front and the melee on their meteors from the start (wtfdig).
+      party:{slot:s, start:{...FIRST_STACK_TANKS, M1:METEOR_ROCKS.ne, M2:METEOR_ROCKS.sw}},
       // The tanks take this first hit in front, at his hitbox, so the party stands past them, out of
       // the hitbox. The healers stay close: they bait the next meteors 3 seconds later.
-      steps:[{q:"Where do you stand for the first Line Stack?", z:{c:polar(315, MELEE_R), r:7}, a:["NW, in the Line Stack, behind the tanks.", "The tanks stand in front for this first one."],
+      steps:[{q:"Where do you stand for the first Line Stack?", z:{c:polar(315, MELEE_R), r:7},
+        party:partyBy(s, x => x === "MT" || x === "OT" ? FIRST_STACK_TANKS[x] : x === "M1" ? METEOR_ROCKS.ne : x === "M2" ? METEOR_ROCKS.sw : "you"), a:["NW, in the Line Stack, behind the tanks.", "The tanks stand in front for this first one."],
         reveal:[lineThrough(315), meteorHit(METEOR_ROCKS.ne), meteorHit(METEOR_ROCKS.sw)], hits:[]}],
       rule:METEOR_ORDER_RULE})},
   {id:"m-meteor-2", order:16.1, random:true, phase:P2, time:"5:03", title:"Meteorain: Your Meteor", kind:"bait",
-    build:s=>({setup:["Healers bait the second set of meteors.", "The markers go on the two players closest to the boss.", "Two rocks are already down in max melee: one NE and one SW."],
+    build:s=>{ const tethers = fatality(METEOR_ROCKS.ne, METEOR_ROCKS.sw);
+      // The tanks still stand where they took the first Line Stack, and the melee by their rocks.
+      return {setup:["Healers bait the second set of meteors.", "The markers go on the two players closest to the boss.", "Two rocks are already down in max melee: one NE and one SW."],
       boss:BOSS, overlays:[rock(METEOR_ROCKS.ne), rock(METEOR_ROCKS.sw)],
+      party:{slot:s, start:{...FIRST_STACK_TANKS, M1:METEOR_ROCKS.ne, M2:METEOR_ROCKS.sw}},
       steps:[
         // The markers come at cactbot's "--Meteor Markers 2--": the healers must be the two closest
         // then (Hector's guide video, 9:43 to 9:59; wtfdig: "Bait meteor close").
         {q:"Healers bait the next meteors. Where do you go?", z:{c:CENTER, r:HITBOX},
           a:["Under the boss.", "Be one of the two closest players, so the marker goes to you."],
-          revealAt:p => [{t:"target", x:p[0], y:p[1]}]},
+          revealAt:p => [{t:"target", x:p[0], y:p[1]}],
+          // Both healers go in (Hector's video, 9:43). The melee and ranged get ready behind the NE
+          // rock for the Line Stack; the tanks wait for the tethers.
+          party:partyBy(s, x => x === "MT" || x === "OT" ? FIRST_STACK_TANKS[x] : partyOf(x).role === "Healer" ? "you" : NE_STACK_AT(x))},
         {q:"You have a meteor marker. Where do you drop it?",
         z:bySlot(s, {H1:H1_METEOR, H2:H2_METEOR}),
         a:bySlot(s, {H1:["NW, in max melee."], H2:["SW, in a row with the first SW rock.", "About halfway to the edge."]}),
         // The second Line Stack goes off NE, through the party, just before the meteors land.
         // The NE rock it breaks explodes 3 seconds later, once you have dropped yours. The tank
         // tethers to M1's and M2's rocks come just after the markers.
-        cue:[lineThrough(45), ...fatality(METEOR_ROCKS.ne, METEOR_ROCKS.sw)],
+        cue:[lineThrough(45), ...tethers.overlays],
+        // The other healer drops theirs; MT takes the tether to the northern rock, OT the southern (Hector's video, 10:12).
+        party:partyBy(s, x => x === "MT" || x === "OT" ? tethers.tanks[x] : partyOf(x).role === "Healer" ? otherHealerRock(s) : NE_STACK_AT(x)),
         revealAt:p => [meteorHit(p), rock(p)],
         reveal:[meteorHit(otherHealerRock(s)), rock(otherHealerRock(s)), rockExplosion(METEOR_ROCKS.ne)],
         hits:[lineThrough(45), meteorHit(otherHealerRock(s))]}],
       rule:[...bySlot(s, {H1:["H1 drops NW, in max melee."],
           H2:["H2 drops SW, in a row with the first rock.", "That rock is in max melee.", "Two rocks too close together explode, so yours goes farther out."]}),
-        "Icy Veins swaps H1 and H2 here, so do not mix guides."]})},
+        "Icy Veins swaps H1 and H2 here, so do not mix guides."]}; }},
   {id:"m-meteor-3", order:16.2, random:true, phase:P2, time:"5:20", title:"Meteorain: Third Line Stack", kind:"wildCharge",
-    build:s=>({setup:["The ranged bait the third set.", "Rocks: NW (from H1), and a row of two SW.", "Each stack breaks the rock in front of it."],
-      boss:BOSS, overlays:[rock(METEOR_ROCKS.nw), rock(METEOR_ROCKS.sw), rock(METEOR_ROCKS.sw2), ...fatality(METEOR_ROCKS.nw, METEOR_ROCKS.sw2)],
+    build:s=>{ const tethers = fatality(METEOR_ROCKS.nw, METEOR_ROCKS.sw2);
+      return {setup:["The ranged bait the third set.", "Rocks: NW (from H1), and a row of two SW.", "Each stack breaks the rock in front of it."],
+      boss:BOSS, overlays:[rock(METEOR_ROCKS.nw), rock(METEOR_ROCKS.sw), rock(METEOR_ROCKS.sw2), ...tethers.overlays],
+      // The tanks are on their tethers, and the ranged in close for the meteor markers (Hector's
+      // video, 11:02). The others are still where the second set left them: the other healer by
+      // their rock, the melee behind the NE rock.
+      party:{slot:s, start:{...tethers.tanks, R1:stackedAt("R1", CENTER), R2:stackedAt("R2", CENTER),
+        [s === "H1" ? "H2" : "H1"]:otherHealerRock(s), M1:NE_STACK_AT("M1"), M2:NE_STACK_AT("M2")}},
       // The stack breaks the NW rock, which explodes 3 seconds later. The ranged's meteors land
       // SW and NE as it does.
       steps:[{q:"Where do you stand for this Line Stack?", z:{c:stackBehind(315),r:7}, a:["NW, behind the NW rock.", "Farther from the boss than the rock."],
+        // R1 drops far SW, R2 NE in max melee (Hector's video, 11:15; wtfdig).
+        party:partyBy(s, x => x === "MT" || x === "OT" ? tethers.tanks[x] : x === "R1" ? METEOR_ROCKS.sw3 : x === "R2" ? METEOR_ROCKS.ne2 : "you"),
         reveal:[lineThrough(315), rockExplosion(METEOR_ROCKS.nw), meteorHit(METEOR_ROCKS.sw3), meteorHit(METEOR_ROCKS.ne2)], hits:[]}],
-      rule:["Stack behind a rock to break it.", "The broken rock explodes: walk out.", "Keep the SW row of rocks whole."]})},
+      rule:["Stack behind a rock to break it.", "The broken rock explodes: walk out.", "Keep the SW row of rocks whole."]}; }},
   {id:"m-meteor-4", order:16.3, random:true, phase:P2, time:"5:30 to 5:43", title:"Meteorain: Last Line Stack", kind:"wildCharge",
-    build:s=>({setup:["The last stack has no meteor baits.", "Rocks: NE (from R2), and a row of three SW."],
-      boss:BOSS, overlays:[rock(METEOR_ROCKS.ne2), rock(METEOR_ROCKS.sw), rock(METEOR_ROCKS.sw2), rock(METEOR_ROCKS.sw3), ...fatality(METEOR_ROCKS.ne2, METEOR_ROCKS.sw3)],
+    build:s=>{ const tethers = fatality(METEOR_ROCKS.ne2, METEOR_ROCKS.sw3);
+      // The tanks take the last tethers; the rest stack behind the NE rock. Then everybody hides
+      // behind the SW row (Hector's video, 11:35 to 12:02).
+      const hide = partyBy(s, () => "you");
+      return {setup:["The last stack has no meteor baits.", "Rocks: NE (from R2), and a row of three SW."],
+      boss:BOSS, overlays:[rock(METEOR_ROCKS.ne2), rock(METEOR_ROCKS.sw), rock(METEOR_ROCKS.sw2), rock(METEOR_ROCKS.sw3), ...tethers.overlays],
+      // The ranged are on the rocks they dropped, the others where the third Line Stack was.
+      party:{slot:s, start:{...partyBy(s, x => stackedAt(x, stackBehind(315))) as Record<SlotName, Point>, R1:METEOR_ROCKS.sw3, R2:METEOR_ROCKS.ne2, ...tethers.tanks}},
       steps:[
         // The broken NE rock explodes while you run SW.
         {q:"Where do you stand for the fourth Line Stack?", z:{c:stackBehind(45),r:7}, a:["Behind the NE rock, to break it."],
+          party:partyBy(s, x => x === "MT" || x === "OT" ? tethers.tanks[x] : "you"),
           reveal:[lineThrough(45), rockExplosion(METEOR_ROCKS.ne2)], hits:[]},
         // Three Shockwaves, one step each: each breaks the nearest rock of the SW row.
-        {q:"Triple Tyrannhilation is next. Where do you hide?", z:TRIPLE_HIDE, a:["SW, behind the row of three rocks.", "Stay until the third hit."], reveal:tripleHit(1)},
-        {q:"The first Shockwave broke the nearest rock. Where now?", z:TRIPLE_HIDE, a:["Stay behind the row of rocks.", "Each Shockwave breaks the nearest rock."], reveal:tripleHit(2)},
-        {q:"Only the last rock is left. Where now?", z:TRIPLE_HIDE, a:["Stay behind the last rock.", "It blocks the third and last Shockwave."], reveal:tripleHit(3)}],
-      rule:["After the fourth Line Stack: run SW.", "Hide behind the row of three rocks.", "Stay until the third hit."]})},
+        {q:"Triple Tyrannhilation is next. Where do you hide?", z:TRIPLE_HIDE, a:["SW, behind the row of three rocks.", "Stay until the third hit."], reveal:tripleHit(1), party:hide},
+        {q:"The first Shockwave broke the nearest rock. Where now?", z:TRIPLE_HIDE, a:["Stay behind the row of rocks.", "Each Shockwave breaks the nearest rock."], reveal:tripleHit(2), party:hide},
+        {q:"Only the last rock is left. Where now?", z:TRIPLE_HIDE, a:["Stay behind the last rock.", "It blocks the third and last Shockwave."], reveal:tripleHit(3), party:hide}],
+      rule:["After the fourth Line Stack: run SW.", "Hide behind the row of three rocks.", "Stay until the third hit."]}; }},
   {id:"m-split-line", order:18, phase:P3, time:"6:02", title:"Arena Split: Lineup", kind:"knockback",
     build:s=>{ const home = homeSide(s);
       return {setup:["Flatliner knocks the party back from the middle.", "It splits the arena into two platforms."], ordered:true,

@@ -13,7 +13,21 @@ const SLOTS: Slot[] = ["H1", "H2"];
 const CODES = ["K7Q2", "AB12", "ZZ99", "HECT", "M11S", "PQ34", "X1Y2", "LMNO"];
 
 /** The drills that draw the whole party so far. Each slice of issue #217 adds its mechanics. */
-const WITH_PARTY = ["m-raw-axe", "m-raw-scythe", "m-assault", "m-void", "m-void-2", "m-ultimate"];
+const WITH_PARTY = [
+  "m-raw-axe",
+  "m-raw-scythe",
+  "m-assault",
+  "m-void",
+  "m-void-2",
+  "m-ultimate",
+  "m-dance",
+  "m-tornado",
+  "m-orbital",
+  "m-meteor-1",
+  "m-meteor-2",
+  "m-meteor-3",
+  "m-meteor-4",
+];
 
 /** Every scene a drill builds for these codes and both slots. */
 function scenesOf(d: Drill): Array<{ sc: Scene; k: number; s: Slot; code: string }> {
@@ -138,7 +152,11 @@ test("Pressure: nobody takes a mechanic's start spot before the mechanic appears
     f.segs.forEach((g) => {
       for (const [l, p] of Object.entries(g.scene.party?.start ?? {})) {
         const who = l as SlotName;
-        const at = runnerAt(routes.get(who) ?? [], g.from - 0.01, restSpot(who)).at;
+        const route = routes.get(who) ?? [];
+        // A player who is there already from the mechanic before gives nothing away.
+        const before = route.filter((x) => x.hit < g.from).at(-1);
+        if (before && near(before.p, p)) continue;
+        const at = runnerAt(route, g.from - 0.01, restSpot(who)).at;
         assert.isFalse(near(at, p), `${code} ${g.title}: ${who} waits for the mechanic`);
       }
     });

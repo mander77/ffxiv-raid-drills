@@ -119,5 +119,5 @@ test("the other players show in a mechanic that draws the party, and not in one 
     return names;
   };
   assert.sameMembers(party("Raw Steel Trophy"), ["MT", "OT", "H2", "M1", "M2", "R1", "R2"], "every player but you");
-  assert.isEmpty(party("Orbital Omen"), "not yet in Orbital Omen");
+  assert.isEmpty(party("Arena Split: Lineup"), "not yet in the Arena Split");
 });
