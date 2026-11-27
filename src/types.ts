@@ -217,7 +217,21 @@ export interface Step {
   /** Drawn from the moment this step's question shows until the drill ends. */
   cue?: Overlay[];
   leave?: Overlay | null;
+  /** Where the other players go once this step is answered. A player left out stays where they
+      were. While the step is asked, they still stand where they were for the step before, so
+      their marks never give the answer away. */
+  party?: PartySpots;
+  /** The players of `party` who go to their spot as soon as the step is asked, because their spot
+      gives nothing away (the tanks' and melee's fixed Comet spots). */
+  early?: readonly SlotName[];
 }
+
+/** Where another player stands: a spot in the scene's own units, or "you": with you, where the
+    party went (a stack you share). */
+export type PartySpot = Point | "you";
+// TS note: Partial<Record<K, V>> is an object that may have any of the keys K, each with a V,
+// like a Dictionary<SlotName, PartySpot> that does not need every key.
+export type PartySpots = Partial<Record<SlotName, PartySpot>>;
 
 /** Text in short lines, one step or fact each. A screen shows it as a list.
     TS note: `readonly string[]` is an array that the code may read but not change, like
@@ -253,8 +267,21 @@ export interface Scene {
       answered: then the stack is where the party went. `on` is the player who has it, where they
       stand. With `follow`, they stand with the party instead: on your last spot, just north of
       you when it is not yours. `you` says it is yours: the full fight puts it on your moving
-      marker. `n` is its hits. With `spread`, it is a spread marker (a target circle) instead. */
-  headMark?: { on: Extract<Overlay, { t: "mark" }>; you: boolean; n: number; at?: number; follow?: boolean; spread?: boolean };
+      marker. `n` is its hits. With `spread`, it is a spread marker (a target circle) instead.
+      With `all`, every player has one (Comet): each other player too, where they stand. */
+  headMark?: {
+    on: Extract<Overlay, { t: "mark" }>;
+    you: boolean;
+    n: number;
+    at?: number;
+    follow?: boolean;
+    spread?: boolean;
+    all?: boolean;
+  };
+  /** The whole party: the scene draws the other players at their spots (Step.party). `slot` is
+      the player the scene is built for, who is not drawn as one of them. `start` is where they
+      stand before the first step; a player it leaves out stands in the rest formation. */
+  party?: { slot: Slot; start?: Partial<Record<SlotName, Point>> };
 }
 
 /** What you do in a Practice mechanic: spread out, stack (the whole party, in pairs, in light

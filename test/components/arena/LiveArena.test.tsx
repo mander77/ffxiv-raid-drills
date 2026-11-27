@@ -3,7 +3,16 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, assert, test } from "vitest";
 import { LiveArena } from "../../../src/components/arena/LiveArena";
 import { crushingComet } from "../../../src/data/fights/m11s/attacks";
-import { avalancheScene, DRILLS, splitRound, voidAgain } from "../../../src/data/fights/m11s/drills";
+import {
+  avalancheScene,
+  buildAssault2,
+  DRILLS,
+  splitRound,
+  spreadMarks,
+  voidAgain,
+  voidIntoWeapons,
+} from "../../../src/data/fights/m11s/drills";
+import { stackedAt } from "../../../src/data/partyRoute";
 import { round2, stepZone, zoneCenter } from "../../../src/geometry";
 import { buildPattern } from "../../../src/lib/practice";
 import type { StepResult } from "../../../src/types";
@@ -232,7 +241,7 @@ test("Massive Meteor: the stack marker shows on its player, then the stack goes 
   assert.equal(after.container.querySelectorAll(".stackmk").length, 1, "one marker");
 });
 
-test("Crushing Comet: the stack marker shows on the other healer, beside you, once the puddles are done", () => {
+test("Crushing Comet: the stack marker shows on the other healer, who stands with you, once the puddles are done", () => {
   const scene = voidAgain("H1", false, { x: 50, y: 50, f: 0 }, "H2");
   const results: StepResult[] = [];
   const markerAfter = (n: number) => {
@@ -252,7 +261,8 @@ test("Crushing Comet: the stack marker shows on the other healer, beside you, on
   const at = markerAfter(3);
   const third = results[2].p;
   assert.notDeepEqual(third, last);
-  assert.equal(at, `translate(${round2(third[0])} ${round2(third[1] - 5)})`, "just north of your last spot");
+  const h2 = stackedAt("H2", third);
+  assert.equal(at, `translate(${round2(h2[0])} ${round2(h2[1])})`, "on H2, beside your last spot");
   assert.isUndefined(markerAfter(4), "gone once the party stacks");
 });
 
@@ -349,7 +359,7 @@ test("an attack the fight draws on the floor is clipped to the arena, as the gro
   assert.match(ground?.getAttribute("clip-path") ?? "", /^url\(#/);
 });
 
-test("Comet: a spread marker shows on you and on the tank and melee spots once the puddles are done", () => {
+test("Comet: a spread marker shows on every player once the puddles are done, and goes once you spread", () => {
   const scene = voidAgain("H1", true, { x: 50, y: 50, f: 0 });
   const results: StepResult[] = [];
   const markersAfter = (n: number) => {
@@ -367,7 +377,46 @@ test("Comet: a spread marker shows on you and on the tank and melee spots once t
   assert.lengthOf(markersAfter(2), 0, "no markers during the puddles");
   const spots = markersAfter(3);
   const third = results[2].p;
-  assert.lengthOf(spots, 5, "four tank and melee spots, and you");
+  assert.lengthOf(spots, 8, "on every player");
   assert.deepInclude(spots, [String(round2(third[0])), String(round2(third[1]))], "yours on your last spot");
-  assert.lengthOf(markersAfter(4), 4, "yours goes once you spread; the cue keeps the others");
+  assert.lengthOf(markersAfter(4), 0, "they go once you spread");
+});
+
+/** Where each player's mark stands on the arena, by its name. */
+function marksOn(container: HTMLElement): Map<string, [number, number]> {
+  return new Map(
+    [...container.querySelectorAll(".mk text")].map((t) => [
+      t.textContent ?? "",
+      [Number(t.getAttribute("x")), Number(t.getAttribute("y"))],
+    ]),
+  );
+}
+
+test("Void Stardust into the weapons: after Comet, no tank or melee mark stays on its spread spot", () => {
+  const scene = voidIntoWeapons("H1", true, buildAssault2("H1"));
+  const results: StepResult[] = [];
+  const marksAfter = (n: number) => {
+    while (results.length < n) {
+      const z = stepZone(scene.steps[results.length], results);
+      if (!z) throw new Error("no zone");
+      const p = zoneCenter(z);
+      results.push({ p, ok: true, z, drop: scene.steps[results.length].drop ? p : null });
+    }
+    const view = render(<LiveArena scene={scene} k={0} results={[...results]} showLast hint={false} />);
+    const marks = marksOn(view.container);
+    view.unmount();
+    return marks;
+  };
+  const fixed = spreadMarks().flatMap((o) => (o.t === "mark" ? [[o.l, [round2(o.x), round2(o.y)]] as const] : []));
+  // Comet is asked (step 4): the tanks and melee are already on their spots.
+  const asked = marksAfter(4);
+  for (const [l, p] of fixed) assert.deepEqual(asked.get(l), p, `${l} on its spread spot while Comet is asked`);
+  // Comet and the first weapon are answered: they have moved on to the weapon.
+  const later = marksAfter(6);
+  for (const [l, p] of fixed) assert.notDeepEqual(later.get(l), p, `${l} left its spread spot`);
+  assert.lengthOf(
+    [...later.keys()].filter((l) => l !== "H1"),
+    7,
+    "every other player shows",
+  );
 });

@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
+import { partyNow } from "../../data/partyRoute";
 import { rotOverlay, rotZone, round2, stepZone, unit, zoneCenter } from "../../geometry";
 import { bossFor } from "../../lib/practice";
 import { cn } from "../../lib/utils";
-import type { Boss, Overlay, Point, Scene, StepResult, Zone } from "../../types";
+import { markRole, partyOf } from "../../party";
+import type { Boss, Overlay, Point, Scene, SlotName, StepResult, Zone } from "../../types";
 import { Arena, pieceLayers, withoutChangedRocks } from "./Arena";
 import { Shape, Tether } from "./Shape";
 import { TurningBoss } from "./TurningBoss";
@@ -53,6 +55,9 @@ export interface LiveArenaProps {
   effects?: ReactNode;
   /** Your moving marker, on top of everything. It draws your tether too, so the arena leaves it out. */
   runner?: ReactNode;
+  /** The other players moving on the fight clock, under your marker. With a runner, the arena does
+      not draw the party itself. */
+  party?: ReactNode;
 }
 
 /** The arena of a Practice mechanic: its pattern, your answers, the puddles you dropped and the
@@ -75,6 +80,7 @@ export function LiveArena({
   floor,
   effects,
   runner,
+  party,
 }: LiveArenaProps) {
   const n = results.length;
   const done = n >= sc.steps.length;
@@ -151,12 +157,20 @@ export function LiveArena({
   // A stack or spread marker, on its player until the step is answered. Yours rides on your moving marker
   // in the full fight, so it is not drawn here then.
   const head = sc.headMark;
+  // The other players, where they stand now (Practice). On the fight clock they move by themselves.
+  const others = runner === undefined ? partyNow(sc, k, results) : new Map<SlotName, Point>();
+  // A marker on another player of the party rides on that player, so it is not drawn here.
+  const onParty = Boolean(head && sc.party && !head.you);
   const headOn =
-    head && results.length === (head.at ?? 0) && !(head.you && runner !== undefined)
+    head && results.length === (head.at ?? 0) && !(head.you && runner !== undefined) && !onParty
       ? head.follow && lastSpot
         ? { ...head.on, x: lastSpot[0], y: lastSpot[1] - (head.you ? 0 : HEAD_BESIDE) }
         : rotOverlay(head.on, k)
       : undefined;
+  // The markers on the other players while the head mark's step is asked: on the one who has it,
+  // or with `all` on every one of them.
+  const headAsked = head && results.length === (head.at ?? 0);
+  const marked = headAsked ? [...others].filter(([who]) => head.all || (onParty && who === head.on.l)) : [];
 
   // After a correct answer the next question is already asked; after an incorrect one it waits
   // for Next step.
@@ -251,6 +265,17 @@ export function LiveArena({
           </>
         ),
         boss: boss && <TurningBoss boss={boss} />,
+        party: (
+          <>
+            {[...others].map(([who, [x, y]]) => (
+              <Shape key={who} overlay={{ t: "mark", x, y, l: who, r: markRole(partyOf(who).role) }} />
+            ))}
+            {marked.map(([who, [x, y]]) => (
+              <Shape key={`marker-${who}`} overlay={head?.spread ? { t: "target", x, y } : { t: "stackMark", x, y, n: head?.n }} />
+            ))}
+            {party}
+          </>
+        ),
         labels: (
           <>
             {base.labels}

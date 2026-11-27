@@ -1277,6 +1277,30 @@ static wins.
 - A weapon step shows only from the boss's turn (`showOf`). Before he turns, nobody can know the
   spot.
 
+### The whole party (data/partyRoute.ts, issue #217)
+
+- The arena shows every player where they belong, not only you (owner, November 27). The plan,
+  the spot of every slot at every step with its source, and the owner's answers are in
+  `docs/party-plan.md`. It is built one slice at a time; a drill draws the party once its scene
+  has `party`.
+- While a step is asked, the others stand where they were for the step before. They go to the
+  step's spot once you answer it, so a mark never gives the answer away. A step's `early` players
+  go as soon as it is asked, when their spot gives nothing away (Comet's tanks and melee).
+- Before a mechanic, and in Pressure's quiet stretches, they stand in one rest formation around the
+  boss (the app's choice, the owner to check): the tanks just in front of his hitbox, the melee in
+  max melee behind him, the healers and ranged about 12 yalms out behind him, light party 1 on his
+  left. A mechanic's own start spots (the tanks' Raw Steel spots) are taken once it appears.
+- Players who stack with you stand on a ring 6 units around your spot, each slot at its own angle,
+  so every mark shows (the app's choice).
+- In Pressure each player runs a route like yours. On the player they move with the clock. In the
+  run they go to a step's spot only once you answered it.
+- The party draws in its own layer, under the labels and over the boss and weapons. Your own mark
+  stays on top.
+- Void Stardust: the whole party drops the puddles together and stacks together (owner). For
+  Comet, R1 takes the gap in front of the boss and R2 the gap behind him (owner). Every player has
+  a spread marker while Comet is asked, and the markers go once you spread. This fixed the tank
+  and melee marks that stayed into the weapons (#218).
+
 ### Scale and sizes
 
 - The arena is 40 by 40 yalms. One arena unit is 0.4 yalm. No guide states the size. It follows

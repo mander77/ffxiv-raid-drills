@@ -1,13 +1,14 @@
 import { useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { runnerAt } from "../../data/route";
+import { partyRoutes, partyWent, restSpot } from "../../data/partyRoute";
+import { correctRoute, runnerAt, type Stop } from "../../data/route";
 import { dist } from "../../geometry";
 import { useArenaSizes, useFight } from "../../hooks/useFight";
 import { useFightFrame } from "../../hooks/useFightFrame";
-import type { FightView } from "../../lib/fight";
+import type { FightState, FightView } from "../../lib/fight";
 import { promptOf } from "../../lib/fight";
-import { markRole, partyOf } from "../../party";
-import type { Hit, Overlay, Point, Slot } from "../../types";
+import { markRole, partyOf, SLOT_NAMES } from "../../party";
+import type { Hit, Overlay, Point, Slot, SlotName, StepResult } from "../../types";
 import { LiveArena } from "../arena/LiveArena";
 import { Shape, Tether } from "../arena/Shape";
 
@@ -45,6 +46,11 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
   const myMarker = head?.you && v.results.length === (head.at ?? 0) ? head : undefined;
   // A bait circle rides on your moving marker while its step is asked.
   const bait = v.scene.steps[v.results.length]?.bait;
+  // The other players' markers while their step is asked: on the one who has it, or on everyone.
+  const headAsked = head && v.results.length === (head.at ?? 0) ? head : undefined;
+  const marked = headAsked
+    ? { on: headAsked.all ? null : headAsked.you ? undefined : headAsked.on.l, spread: headAsked.spread ?? false, n: headAsked.n }
+    : undefined;
   return (
     <LiveArena
       // A new mechanic draws a new arena, so its weapons spawn in again.
@@ -79,7 +85,77 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
           bait={bait}
         />
       }
+      party={
+        // A mechanic that does not draw the party yet leaves them off the arena.
+        (g < 0 || v.scene.party) && <PartyRunners slot={slot} marker={marked} />
+      }
     />
+  );
+}
+
+interface PartyRunnersProps {
+  /** Your slot: every other slot gets a runner. */
+  slot: Slot;
+  /** A stack or spread marker on another player while its step is asked: `on` is the player who
+      has it, or null when every player has one. */
+  marker?: { on: string | null | undefined; spread: boolean; n: number };
+}
+
+/** The other players. Each runs their own route: on the player, to their correct spots with the
+    clock; in the run, to each spot only once you have answered its step. */
+function PartyRunners({ slot, marker }: PartyRunnersProps) {
+  const others = SLOT_NAMES.filter((who) => who !== slot);
+  const marks = useRef(new Map<SlotName, SVGGElement>());
+  // The routes change only when an answer comes in, so they are built again only then.
+  const cache = useRef<{ key: string; routes: Map<SlotName, Stop[]> } | null>(null);
+  useFightFrame((s) => {
+    const key = s.mode + s.results.map((r) => r.length).join();
+    if (cache.current?.key !== key) cache.current = { key, routes: routesOf(s) };
+    for (const who of others) {
+      const at = runnerAt(cache.current.routes.get(who) ?? [], s.t, restSpot(who)).at;
+      marks.current.get(who)?.setAttribute("transform", `translate(${at[0].toFixed(2)} ${at[1].toFixed(2)})`);
+    }
+  });
+  return (
+    <g className="party">
+      {others.map((who) => (
+        <g
+          key={who}
+          // A ref callback per player (react.dev: "manage a list of refs"); its cleanup forgets them.
+          ref={(el) => {
+            if (el) marks.current.set(who, el);
+            return () => {
+              marks.current.delete(who);
+            };
+          }}
+        >
+          <Shape overlay={{ t: "mark", x: 0, y: 0, l: who, r: markRole(partyOf(who).role) }} />
+          {marker && (marker.on === null || marker.on === who) && (
+            <Shape overlay={marker.spread ? { t: "target", x: 0, y: 0 } : { t: "stackMark", x: 0, y: 0, n: marker.n }} />
+          )}
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/** The other players' routes: on the player, the correct spots; in the run, the spots of the steps
+    you answered, where the party went, each from when you answered it. */
+function routesOf(s: FightState): Map<SlotName, Stop[]> {
+  const correct = s.mode === "watch" ? s.route : correctRoute(s.fight);
+  const correctAt = (si: number, j: number): Point | null => correct.find((x) => x.si === si && x.j === j)?.p ?? null;
+  if (s.mode === "watch") return partyRoutes(s.fight, correctAt);
+  const answered = (si: number, j: number): StepResult | undefined => s.results[si]?.[j];
+  return partyRoutes(
+    s.fight,
+    (si, j) => {
+      const r = answered(si, j);
+      return r ? partyWent(r) : correctAt(si, j);
+    },
+    (si, j) => {
+      if (!answered(si, j)) return undefined;
+      return s.clicks.find((c) => c.si === si && c.j === j)?.t ?? s.fight.segs[si].due[j];
+    },
   );
 }
 

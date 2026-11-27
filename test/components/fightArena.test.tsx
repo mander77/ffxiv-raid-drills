@@ -104,3 +104,20 @@ test("Void Stardust: a puddle-sized bait circle is on your marker until the firs
     assert.equal(baitAt(g.due[i] + 0.1).length, 0, `${g.title}: it goes when the first puddle drops`);
   }
 });
+
+test("the other players show in a mechanic that draws the party, and not in one that does not yet", () => {
+  const s = newFightState("watch", buildFight("H1", "K7Q2"), { paused: true });
+  const party = (title: string): string[] => {
+    const g = s.fight.segs.find((x) => x.title.startsWith(title));
+    if (!g) throw new Error(`no ${title}`);
+    seek(s, g.from + 0.1);
+    const { container, unmount } = render(
+      <FightArena view={viewOf(s)} slot="H1" correctLabel={false} pickSpot={false} hit={null} replay={0} onPointClick={() => {}} />,
+    );
+    const names = [...container.querySelectorAll(".party .mk text")].map((t) => t.textContent ?? "");
+    unmount();
+    return names;
+  };
+  assert.sameMembers(party("Raw Steel Trophy"), ["MT", "OT", "H2", "M1", "M2", "R1", "R2"], "every player but you");
+  assert.isEmpty(party("Orbital Omen"), "not yet in Orbital Omen");
+});

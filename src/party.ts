@@ -32,6 +32,9 @@ const PARTS = Object.fromEntries(
   ROLES.flatMap(({ role }) => ([1, 2] as const).map((lp): [SlotName, PartySlot] => [slotName({ lp, role }), { lp, role }])),
 ) as Record<SlotName, PartySlot>;
 
+/** Every slot, in party list order. */
+export const SLOT_NAMES: readonly SlotName[] = Object.keys(PARTS) as SlotName[];
+
 /** The two parts of a slot: "H2" is Healer in light party 2. */
 export const partyOf = (s: SlotName): PartySlot => PARTS[s];
 
