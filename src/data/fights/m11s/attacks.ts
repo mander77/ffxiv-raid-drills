@@ -76,6 +76,13 @@ export const PLATFORM_X = {
   west: [50 - yalms(SPLIT.platformCenter + SPLIT.platformHalfWidth), 50 - yalms(SPLIT.platformCenter - SPLIT.platformHalfWidth)],
   east: [50 + yalms(SPLIT.platformCenter - SPLIT.platformHalfWidth), 50 + yalms(SPLIT.platformCenter + SPLIT.platformHalfWidth)],
 } as const satisfies Record<"west" | "east", readonly [number, number]>;
+/** What Crown of Arcadia hits as it joins the arena again: the outer strip of each platform,
+    past the square (BossMod's CrownOfArcadiaArena: a 6 x 40 yalm rect on each side, from the
+    cast start until it goes off). The platforms' own size gives the strips. */
+export const CROWN_STRIPS: Overlay[] = [
+  { t: "lane", rect: [PLATFORM_X.west[0], 0, 0, 100] },
+  { t: "lane", rect: [100, 0, PLATFORM_X.east[1], 100] },
+];
 /** Half the split arena's width, from the boss to the outer edge of a platform. */
 export const SPLIT_HALF_W = yalms(SPLIT.platformCenter + SPLIT.platformHalfWidth);
 /** A tether counts as stretched this far from its portal (BossMod's StretchDistance, which it

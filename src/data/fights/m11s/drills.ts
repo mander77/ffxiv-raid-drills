@@ -1569,24 +1569,41 @@ export function massiveScene(s: Slot, side: SplitSide, w: StackWearer): Scene {
 /** Arcadion Avalanche: the boss faces one platform and grabs it. The towers knock you to the
     other platform, behind him. He turns to it over the north or the south side and slams the
     platform down on most of it; the far end, away from his turn, is safe (wtfdig). */
+/* The slam (cactbot names its four casts by the safe corner: "NE Safe", "SW Safe"...). BossMod
+   gives a 40 x 40 yalm rect with no origin or angle, so the shape is the app's choice, from the
+   telegraph in FFXIVSiggy's video (https://youtu.be/TWoeJotgc3U, 8:07) as the owner read it: its
+   edge runs from the platform's far corner closest to the boss to the outer wall, AVALANCHE_CUT
+   in from the far end (10 yalms, about 27 degrees). The far outer corner is safe. */
+const AVALANCHE_CUT = 25;
+
 export function avalancheScene(s: Slot, side: SplitSide, end: SplitEnd, face: SplitSide, swing: SplitEnd): Scene {
   const back = otherSide(face), safe = otherEnd(swing), wm = WAYMARK[back][safe];
   const f = face === "west" ? 270 : 90, dir = (f === 270) === (swing === "north") ? 1 : -1;
   // His turn: half a circle around him, 17 units out, with an arrowhead at its end. The app's choice.
   const turn: Overlay[] = [{t:"turn", x:50, y:50, r:17, from:f, to:f + dir * 180}];
-  const [y0, y1] = safe === "north" ? [0, 32] : [68, 100], [x0, x1] = PLATFORM_X[back];
+  // Your platform's edges: the inner one by the boss, the outer one at the wall, the far end
+  // away from his turn and the near end.
+  const [x0, x1] = PLATFORM_X[back], inner = back === "west" ? x1 : x0, outer = back === "west" ? x0 : x1;
+  const far = safe === "north" ? 0 : 100, near = 100 - far, cut = safe === "north" ? AVALANCHE_CUT : 100 - AVALANCHE_CUT;
+  const tri: Point[] = [[inner, far], [outer, far], [outer, cut]];
+  const corner: Zone = {fn:p => attackHits({t:"poly", pts:tri}, p), label:[(inner + 2 * outer) / 3, (2 * far + cut) / 3], show:[{poly:tri}]};
+  // The slam: the rest of your platform.
+  const slam: Overlay = {t:"poly", pts:[[inner, far], [outer, cut], [outer, near], [inner, near]]};
   return {setup:["Towers appear, one in each quadrant.", "The boss faces the " + face + " platform: he grabs it.", "Then he turns and slams the platform down."], ordered:true,
-    split:true, boss:{x:50, y:50, f}, overlays:[...SPLIT_TOWERS, lastSpot(s, side, end)],
+    // The towers go off at the first step, and the platform he grabs is gone once he throws it.
+    split:true, gone:{side:face, after:1}, boss:{x:50, y:50, f}, overlays:[...SPLIT_TOWERS.map(o => ({...o, until:0})), lastSpot(s, side, end)],
     steps:[
       {q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, side === back ? "along" : "across"), knock:{from:SPLIT_TOWER[side][end], dist:TOWER_KNOCKBACK}, ...towerReveal(side, end, side === back ? "along" : "across"),
         a:[side === back
           ? "The " + way(knockDir(side, end, "along")) + " side of the " + quadrant(side, end) + " tower: stay on this platform."
           : "The " + way(knockDir(side, end, "across")) + " side of the " + quadrant(side, end) + " tower: get knocked across.",
         "Your tower is in the quadrant you ended in.", "End on the " + back + " platform, behind him."]},
-      {q:"He turns over the " + swing + " side. Where do you go?", z:{rect:[x0, y0, x1, y1]}, cue:turn,
-        a:["The " + safe + " end of the " + back + " platform, by waymark " + wm.n + ".", "He turns from the " + swing + ", so go to the other end."],
-        reveal:[{t:"lane", rect:platformZone(face).rect}, {t:"tag", x:platformMid(face), y:50, s:"GRABBED"}]}],
-    rule:["He grabs the platform he faces.", "Get knocked to the other platform.", "Go to its far end, away from his turn."]};
+      {q:"He turns over the " + swing + " side. Where do you go?", z:corner, cue:turn,
+        a:["The " + (safe === "north" ? "N" : "S") + (back === "west" ? "W" : "E") + " corner of the " + back + " platform, past waymark " + wm.n + ", at the outer wall.",
+          "He turns from the " + swing + ", so go to the other end.",
+          "Then step inside the square before Crown of Arcadia."],
+        reveal:[slam], hits:[slam]}],
+    rule:["He grabs the platform he faces.", "Get knocked to the other platform.", "Go to its far outer corner, away from his turn."]};
 }
 // TS note: the `Drill[]` annotation is what checks every drill below. Each build function
 // must return a Scene, so a missing field or a misspelled one is a compile error.

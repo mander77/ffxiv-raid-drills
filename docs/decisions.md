@@ -1202,12 +1202,32 @@ static wins.
     and a 5 for the hits. After the answer the marked player stands just north of you and the
     stack's circle is on them. Watch the Correct Moves shows it from the first hit to the fifth.
   - Arcadion Avalanche: he faces one platform and grabs it. The towers knock you to the other one.
-    Then go to its far end, by the number waymark, away from the side he turns from. The drill
+    Then go to its far outer corner, past the number waymark, away from the side he turns from. The drill
     shows his turn as a dashed arrow around him (the app's choice).
+  - The slam (issue #169, the owner, November 27): a tilted square that leaves the far outer
+    corner of your platform safe (cactbot names its casts by that corner, "NE Safe"...). BossMod
+    gives a 40 x 40 yalm rect with no origin or angle, so the shape is the app's choice, from the
+    telegraph in FFXIVSiggy's video (https://youtu.be/TWoeJotgc3U, 8:07) as the owner read it: the
+    edge runs from the far corner closest to the boss to the outer wall, 10 yalms in from the far
+    end (`AVALANCHE_CUT`, about 27 degrees). The correct area is that triangle, and the slam over the
+    rest shows after the answer. The number waymark is inside the slam, so the answer says "the NE
+    corner of the east platform, past waymark 2, at the outer wall" (the owner's choice).
+  - After the slam (the owner, November 27): the towers are gone once they go off, and the
+    platform he throws is gone once he slams it down (`Scene.gone`, drawn as void). Pressure keeps
+    it gone until Crown of Arcadia joins the arena again (`Fight.gone`). The GRABBED lane and tag
+    no longer show on it; only the Learn card k-slab still shows which platform he grabs.
+  - The tell (issue #169): in Pressure he faces the platform he grabs from his cast start (7:33.1,
+    `turn`), not as soon as the mechanic shows. The casts coming up list his cast ("Arcadion
+    Avalanche") and the slam ("Arcadion Avalanche slam").
+  - Crown of Arcadia joins the arena (issue #169 and #174, the owner, November 27): the outer
+    6-yalm strip of each platform, past the square, is hit (BossMod `CrownOfArcadiaArena`).
+    Pressure draws both strips from the Crown cast start (7:54.4) until it goes off (`Fight.join`),
+    the Avalanche answer ends "Then step inside the square before Crown of Arcadia.", and the
+    Timeline row says "Stand inside the square: the outer strips are hit."
   - The lineup step draws, after you answer, every marker at its spot with its Fire Breath line
     (yours too without a tether), and every tether's line (issue #167). Pressure's casts coming
     up show "Tethers" and "Fire Breath markers" (cactbot's "--tethers--" and "--Fire Breath
-    Markers--"). The drills draw no slam size.
+    Markers--").
   - The portal lines (the owner, issue #150): the lineup question shows only their portals. Each
     line has one portal, at the north or the south end, random each round (`SplitRound.lineEnd`;
     Hector's video, 12:39: "two more that are either north or south"; the owner, November 27).

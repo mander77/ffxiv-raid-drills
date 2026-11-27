@@ -389,13 +389,19 @@ export function viewOf(s: FightState): FightView {
   // A scene that splits the arena at one of its hits (splitAfter) is whole until that hit, on
   // the clock, whether or not you have answered that step yet.
   const splitAt = g?.scene.splitAfter === undefined ? undefined : g.due[g.scene.splitAfter];
-  const sc = g
+  let sc: Scene = g
     ? splitAt === undefined
       ? g.scene
       : { ...g.scene, split: s.t >= splitAt, splitAfter: undefined }
     : inSplit
       ? IDLE_SPLIT
       : IDLE;
+  // A platform that is gone (Arcadion Avalanche throws it) until the arena joins again.
+  const lost = f.gone && s.t >= f.gone.from && s.t < f.split[1] ? f.gone.side : undefined;
+  if (lost) sc = { ...sc, gone: { side: lost, after: -1 } };
+  // Crown of Arcadia's strips, as the arena joins again.
+  const joining = Boolean(f.join && s.t >= f.join.from && s.t < f.split[1]);
+  if (joining && f.join) sc = { ...sc, overlays: [...sc.overlays, ...f.join.overlays] };
   const k = g ? g.k : 0;
   let boss: Boss | null = stay ? stay.boss : sc.bossAt ? sc.bossAt(res.length + (jumped ? 1 : 0)) : sc.boss ? rotOverlay(sc.boss, k) : null;
   // In the middle, before his cast, he faces no weapon. When the cast starts he turns to the first one.
@@ -419,6 +425,8 @@ export function viewOf(s: FightState): FightView {
     gone,
     target ? "t" : "",
     spawned,
+    joining,
+    lost,
   ].join(":");
   return { key, si, scene: sc, k, results: [...res], showAnswer, boss, wentOff, target, spawned, paused: s.paused, look: s.look };
 }

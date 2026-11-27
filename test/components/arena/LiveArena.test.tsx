@@ -3,7 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, assert, test } from "vitest";
 import { LiveArena } from "../../../src/components/arena/LiveArena";
 import { crushingComet } from "../../../src/data/fights/m11s/attacks";
-import { DRILLS, splitRound, voidAgain } from "../../../src/data/fights/m11s/drills";
+import { avalancheScene, DRILLS, splitRound, voidAgain } from "../../../src/data/fights/m11s/drills";
 import { round2, stepZone, zoneCenter } from "../../../src/geometry";
 import { buildPattern } from "../../../src/lib/practice";
 import type { StepResult } from "../../../src/types";
@@ -318,4 +318,23 @@ test("Arena Split: Lineup: the arena splits only once you answer where you stand
   assert.isNull(container.querySelector(".voidr"), "whole before Flatliner");
   rerender(<LiveArena scene={scene} k={k} results={[{ p: zoneCenter(z), ok: true, z, drop: null }]} showLast hint={false} />);
   assert.isNotNull(container.querySelector(".voidr"), "split once Flatliner went off");
+});
+
+test("Arcadion Avalanche: the towers go once they go off, and the platform he throws once he slams", () => {
+  const scene = avalancheScene("H1", "west", "north", "east", "north");
+  const results: StepResult[] = [];
+  const view = (n: number) => {
+    while (results.length < n) {
+      const z = stepZone(scene.steps[results.length], results);
+      if (!z) throw new Error("no zone");
+      results.push({ p: zoneCenter(z), ok: true, z, drop: null });
+    }
+    const { container, unmount } = render(<LiveArena scene={scene} k={0} results={[...results]} showLast hint={false} />);
+    const seen = { towers: container.querySelectorAll(".tower").length, floors: container.querySelectorAll("rect.floor").length };
+    unmount();
+    return seen;
+  };
+  assert.deepEqual(view(0), { towers: 4, floors: 2 });
+  assert.deepEqual(view(1), { towers: 0, floors: 2 }, "the towers went off");
+  assert.deepEqual(view(2), { towers: 0, floors: 1 }, "the east platform is gone");
 });
