@@ -757,7 +757,8 @@ test("Arena Split: a round puts you in close, then at your end, out of the porta
               // The portal lines' portals show with the lineup question, outside the north and south
               // walls, over the half they hit; the half itself shows only after the answer.
               const linePortals = (sc.steps[k + 3].cue ?? []).filter((o) => o.t === "portal");
-              assert.equal(linePortals.length, 4, "two portals at the ends of each portal line");
+              assert.equal(linePortals.length, 2, "one portal for each portal line");
+              assert.equal(new Set(linePortals.map((o) => o.y)).size, 1, "both at the same end");
               for (const o of linePortals) {
                 assert.ok(o.y < 0 || o.y > 100, "outside the north or south wall");
                 const sd: SplitSide = o.x < 50 ? "west" : "east";

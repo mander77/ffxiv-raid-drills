@@ -154,7 +154,7 @@ const ARENA_LINES: readonly { name: string; meaning: string; piece: ReactNode }[
   {
     name: "Portal",
     meaning:
-      "Where a tether or a portal line starts, outside the wall. A portal line runs between its two portals. Orbital Omen's portals carry a number.",
+      "Where a tether or a portal line starts, outside the wall. A portal line runs from its portal along the whole platform. Orbital Omen's portals carry a number.",
     piece: <Shape overlay={{ t: "portal", x: 30, y: 10, vert: false }} />,
   },
   {
