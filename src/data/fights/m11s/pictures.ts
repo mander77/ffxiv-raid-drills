@@ -9,7 +9,7 @@ import { bySlot, withSeed } from "../../../util";
 import { markRole, partyOf } from "../../../party";
 import { angOf, dist, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
 import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, ECL_PORTAL, ECL_TOWER_AT, CORNER_STAND, type Weapon, type WeaponType } from "./drills";
-import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, meteorHit, pairTower, proteanCone, proximityDot, raidwide, rawSteelBuster, rawSteelImpact, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, WALL_SECOND_FACING, wallOfFire } from "./attacks";
+import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, flatlinerThrow, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, meteorHit, pairTower, proteanCone, proximityDot, raidwide, rawSteelBuster, rawSteelImpact, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, WALL_SECOND_FACING, wallOfFire } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Scene, Slot, StepResult, Zone, ZoneShape } from "../../../types";
 
 type Who = [string, MarkRole];
@@ -413,9 +413,12 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       hit(youAt(s, [67, 33], 6), [fakeLine([67, 33])]), show([fakeCircle(CENTER, FAKE.bigCircle), ...spread])]}; },
   // Flatliner knocks everyone back from the boss before the split, so each spot gets a knockback arrow.
   // No source gives its distance: the arrow ends at the lineup spot (the app's choice).
-  "k-split-side": s => { const d = fromDrill("m-split-line", s);
+  // The drill's second step, the lineup spot. Each answer stands close to the boss, where
+  // Flatliner's knockback throws it out to the middle of its spot.
+  "k-split-side": s => { const d = fromDrill("m-split-line", s, null, 1);
     const WN = platformPart(PLATFORM_X.west, 8, 48), WS = platformPart(PLATFORM_X.west, 52, 92), EN = platformPart(PLATFORM_X.east, 8, 48), ES = platformPart(PLATFORM_X.east, 52, 92);
-    const knocked = (z: RectZone): Preview => hit(youIn(s, z), [thrown(CENTER, zoneCenter(z))]);
+    const knocked = (z: RectZone): Preview => { const to = zoneCenter(z);
+      return hit(youIn(s, z), flatlinerThrow(polar(angOf([to[0] - 50, to[1] - 50]), dist(to, CENTER) - FLATLINER_KNOCKBACK, CENTER))); };
     return {...d, options:[knocked(bySlot(s, {H1:WS, H2:ES})), knocked(bySlot(s, {H1:WN, H2:EN})), knocked(bySlot(s, {H1:ES, H2:WS})), youAt(s, [50, 60], 9)]}; },
   // You stand in your tower, a little toward the platform's middle, so your mark clears the number waymark.
   // The drill's first towers, with your tether's portal on your own side: you stand on the side

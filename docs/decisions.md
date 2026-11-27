@@ -233,8 +233,10 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
   player lands. `thrown(from, to)` is the same arrow for a throw whose distance no source gives.
   - Arena Split towers (`k-split-kb`): `knockback` from the tower, `TOWER_KNOCKBACK` (BossMod).
     It lands on the same spot the guide ended on before.
-  - Flatliner lineup (`k-split-side`): BossMod gives no knockback distance, so `thrown` ends at
-    the lineup spot (the app's choice, as the guide did).
+  - Flatliner lineup (`k-split-side`): `knockback` from the arena's center,
+    `FLATLINER_KNOCKBACK` (BossMod's Flatliner: 15 yalms). Each answer stands close to the boss,
+    where the throw lands it in the middle of its spot. Before November 2026 this said BossMod
+    gave no distance, and `thrown` ran from the center to the lineup spot (about 18 yalms).
   - The made-up wrong answers (`k-split-kb` "same platform", `k-massive` "a knockback only",
     `k-slab` "knocked to the platform he faces") use `thrown` to the spots they used before.
   - The arrows are drawn in their own layer, `pushes`, over the waymarks, the boss and the
@@ -1075,6 +1077,12 @@ static wins.
     12-yalm gap. Together the platforms are wider than the square arena, so the arena draws the
     split smaller about its center to fit the same box (`SPLIT_SCALE` in `Arena.tsx`). Before
     #89 the platforms were drawn half as wide, and the third puddle covered every lineup spot.
+  - Arena Split: Lineup has two steps (the owner, issue #165). First, before Flatliner, you stand
+    close to the boss (up to max melee) on your side, a little south: from there its knockback,
+    15 yalms straight out from the center (BossMod), lands you in your lineup spot. The arena
+    stays whole until that step goes off (`Scene.splitAfter`). Then you click your lineup spot.
+    In Pressure the step comes with the Flatliner cast (`castStart`), and the moving marker
+    stands there, then is thrown out. Before, it waited under the boss and walked across the gap.
   - The side portal lines (Majestic Meteorain, BossMod lines at x -21, -11, 11 and 21, 10 yalms
     wide) cover one half of each platform's width, its whole length: the inner half of one
     platform and the outer half of the other, random each round. Sources: Hector's guide video

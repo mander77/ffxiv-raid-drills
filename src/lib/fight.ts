@@ -368,7 +368,16 @@ export function viewOf(s: FightState): FightView {
     return Boolean(g && r.drop && puddle && s.t >= g.due[i] + puddle.life);
   });
   const gone = wentOff.filter(Boolean).length;
-  const sc = g ? g.scene : where === "split" ? IDLE_SPLIT : IDLE;
+  // A scene that splits the arena at one of its hits (splitAfter) is whole until that hit, on
+  // the clock, whether or not you have answered that step yet.
+  const splitAt = g?.scene.splitAfter === undefined ? undefined : g.due[g.scene.splitAfter];
+  const sc = g
+    ? splitAt === undefined
+      ? g.scene
+      : { ...g.scene, split: s.t >= splitAt, splitAfter: undefined }
+    : where === "split"
+      ? IDLE_SPLIT
+      : IDLE;
   const k = g ? g.k : 0;
   let boss: Boss | null = sc.bossAt ? sc.bossAt(res.length + (jumped ? 1 : 0)) : sc.boss ? rotOverlay(sc.boss, k) : null;
   // In the middle, before his cast, he faces no weapon. When the cast starts he turns to the first one.
@@ -379,7 +388,20 @@ export function viewOf(s: FightState): FightView {
   const target = s.mode === "watch" ? targetZone(s) : null;
   // The weapons that have spawned, when the mechanic spawns them on the clock.
   const spawned = g?.spawns ? g.spawns.filter((at) => s.t >= at).length : undefined;
-  const key = [where, res.length, turned, facing, jumped, showAnswer, s.paused, s.look, gone, target ? "t" : "", spawned].join(":");
+  const key = [
+    where,
+    sc.split ?? false,
+    res.length,
+    turned,
+    facing,
+    jumped,
+    showAnswer,
+    s.paused,
+    s.look,
+    gone,
+    target ? "t" : "",
+    spawned,
+  ].join(":");
   return { key, si, scene: sc, k, results: [...res], showAnswer, boss, wentOff, target, spawned, paused: s.paused, look: s.look };
 }
 

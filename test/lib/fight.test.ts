@@ -337,3 +337,22 @@ test("Ultimate Trophy Weapons: each weapon shows on the arena from its spawn, on
   const s = newFightState("run", fight(), { paused: true });
   expect(viewOf(s).spawned).toBeUndefined();
 });
+
+test("the lineup's arena splits when Flatliner goes off, in the run too", () => {
+  for (const mode of ["watch", "run"] as const) {
+    const s = newFightState(mode, fight(), { paused: true });
+    const si = s.fight.segs.findIndex((g) => g.title === "Arena Split: Lineup");
+    const flatliner = cactbot("Flatliner (split)");
+    expect(s.fight.segs[si].due[0]).toBe(flatliner);
+    for (const [t, split] of [
+      [flatliner - 0.1, false],
+      [flatliner + 0.1, true],
+    ] as const) {
+      seek(s, t);
+      tickFight(s, 0, 1);
+      const v = viewOf(s);
+      expect(v.si).toBe(si);
+      expect(v.scene.split).toBe(split);
+    }
+  }
+});

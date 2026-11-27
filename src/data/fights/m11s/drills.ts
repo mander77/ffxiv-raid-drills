@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, wrathLine, eclipticWrath, eclTowerHit, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, ROCK_GAP, meteorHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, flatlinerThrow, wrathLine, eclipticWrath, eclTowerHit, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, ROCK_GAP, meteorHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -1403,6 +1403,27 @@ function landsWell(side: SplitSide, end: SplitEnd, knock: Knock, q: Point): bool
   if (q[0] < x0 + LAND_MARGIN || q[0] > x1 - LAND_MARGIN || q[1] < LAND_MARGIN || q[1] > 100 - LAND_MARGIN) return false;
   return knock === "across" || (end === "north" ? q[1] > 50 : q[1] < 50);
 }
+/** Your lineup spot after Flatliner: the south end of your platform (healers and melee south). */
+const lineupZone = (side: SplitSide): RectZone => ({rect:[PLATFORM_X[side][0], 52, PLATFORM_X[side][1], 92]});
+/** Before Flatliner: the spots up to max melee from which its knockback, straight out from the
+    arena's center, lands you in your lineup spot. The best one lands you in its middle. */
+function flatlinerSpot(side: SplitSide): Zone {
+  const known = FLATLINER_ZONES.get(side);
+  if (known) return known;
+  const [x0, y0, x1, y1] = lineupZone(side).rect;
+  const lands = (q: Point): boolean => q[0] >= x0 + LAND_MARGIN && q[0] <= x1 - LAND_MARGIN && q[1] >= y0 && q[1] <= y1;
+  const fn = (p: Point): boolean => { const r = dist(p, CENTER); return r > 0.5 && r <= MELEE_R && lands(thrownTo(CENTER, FLATLINER_KNOCKBACK, p)); };
+  const part = (deg: number): Stretch | null => {
+    const ok = Array.from({length:41}, (_x, i) => MELEE_R * i / 40).filter(r => fn(polar(deg, r, CENTER)));
+    return ok.length ? [ok[0], ok[ok.length - 1]] : null;
+  };
+  const degs = Array.from({length:360}, (_x, i) => i), from = degs.find(g => !part(g)) ?? 0;
+  const mid = zoneCenter(lineupZone(side)), best = addVec(CENTER, unit([mid[0] - 50, mid[1] - 50]), dist(mid, CENTER) - FLATLINER_KNOCKBACK);
+  const zone: Zone = {fn, label:fn(best) ? best : nearestTo(best, fn) ?? best, show:rayArea(CENTER, degs.map(g => g + from), part)};
+  FLATLINER_ZONES.set(side, zone);
+  return zone;
+}
+const FLATLINER_ZONES = new Map<SplitSide, Zone>();
 /** "east", "south"...: the way a unit vector points. */
 const way = (d: Point): string => d[0] > 0.5 ? "east" : d[0] < -0.5 ? "west" : d[1] > 0 ? "south" : "north";
 /** The answer for a tower: which side of it, and why. */
@@ -1678,10 +1699,15 @@ export const DRILLS: readonly Drill[] = [
         {q:"Only the last rock is left. Where now?", z:TRIPLE_HIDE, a:["Stay behind the last rock.", "It blocks the third and last Shockwave."], reveal:tripleHit(3)}],
       rule:["After the fourth Line Stack: run SW.", "Hide behind the row of three rocks.", "Stay until the third hit."]})},
   {id:"m-split-line", order:18, phase:P3, time:"6:02", title:"Arena Split: Lineup", kind:"knockback",
-    build:s=>({setup:["Flatliner knocks the party back.", "It splits the arena into two platforms."], ordered:true,
-      split:true, boss:BOSS, overlays:[],
-      steps:[{q:"Click your lineup spot.", z:bySlot(s, {H1:{rect:[PLATFORM_X.west[0],52,PLATFORM_X.west[1],92]}, H2:{rect:[PLATFORM_X.east[0],52,PLATFORM_X.east[1],92]}}), a:bySlot(s, {H1:["West platform (light party 1), south end.", "Healers and melee go south."], H2:["East platform (light party 2), south end.", "Healers and melee go south."]})}],
-      rule:["Light party 1 west, light party 2 east.", "Tanks and ranged north, healers and melee south."]})},
+    build:s=>{ const home = homeSide(s);
+      return {setup:["Flatliner knocks the party back from the middle.", "It splits the arena into two platforms."], ordered:true,
+      split:true, splitAfter:0, boss:BOSS, overlays:[],
+      steps:[
+        {q:"Flatliner is coming. Where do you stand?", z:flatlinerSpot(home), knock:{from:CENTER, dist:FLATLINER_KNOCKBACK}, revealAt:flatlinerThrow,
+          a:bySlot(s, {H1:["Close to the boss, on his west side, a little south.", "You get knocked to the west platform, south end."],
+            H2:["Close to the boss, on his east side, a little south.", "You get knocked to the east platform, south end."]})},
+        {q:"Click your lineup spot.", z:lineupZone(home), a:bySlot(s, {H1:["West platform (light party 1), south end.", "Healers and melee go south."], H2:["East platform (light party 2), south end.", "Healers and melee go south."]})}],
+      rule:["Before Flatliner: stand close to the boss, on your side.", "Light party 1 west, light party 2 east.", "Tanks and ranged north, healers and melee south."]}; }},
   {id:"m-split-tower", order:19, phase:P3, time:"6:29", title:"Arena Split: First Towers", kind:"towerKnockback", soak:SPLIT_SOAK,
     variants:["tether", "marker"], random:true,
     // A tether's portal is on either side, so the tether may need the knockback across or not.

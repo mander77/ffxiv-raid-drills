@@ -168,7 +168,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Meteorain: Your Meteor", drills:["m-meteor-2"], scene:drill("m-meteor-2", s), k:0, from:cactbot("Cosmic Kiss"), due:[cactbot("--Meteor Markers 2--"), cactbot("Cosmic Kiss", 2)]},
     {title:"Meteorain: Third Line Stack", drills:["m-meteor-3"], scene:drill("m-meteor-3", s), k:0, from:cactbot("--tethers--", 2), due:[cactbot("Fearsome Fireball", 3)]},
     {title:"Meteorain: Last Line Stack", drills:["m-meteor-4"], scene:drill("m-meteor-4", s), k:0, from:cactbot("Cosmic Kiss", 3), due:[cactbot("Fearsome Fireball", 4), cactbot("Shockwave"), cactbot("Shockwave", 2), cactbot("Shockwave", 3)]},
-    {title:"Arena Split: Lineup", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:cactbot("Flatliner (split)"), due:[cactbot("Majestic Meteor")]},
+    {title:"Arena Split: Lineup", drills:["m-split-line"], scene:drill("m-split-line", s), k:0, from:castStart("Flatliner", "Flatliner (split)"), due:[cactbot("Flatliner (split)"), cactbot("Majestic Meteor")]},
     // Its scene comes with the rest of Arena Split below, once the tether round is known.
     {title:"Arena Split: First Towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:cactbot("--tethers--", 3), due:[cactbot("Explosion", 6)]},
     {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)", 2), due:[cactbot("Orbital Omen 1", 2), cactbot("Orbital Omen 2", 2), cactbot("Orbital Omen 3", 2), cactbot("Orbital Omen 4", 2)]},
