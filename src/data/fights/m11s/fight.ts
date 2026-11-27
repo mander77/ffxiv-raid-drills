@@ -8,13 +8,14 @@ import { newCode, random, withSeed } from "../../../util";
 import { nearClock } from "../../../time";
 import { zoneCenter } from "../../../geometry";
 import { bossmod, cactbot, castStart, lineEnd, numberedAfter, tenth, type LineName, ultimateSpawns } from "./sources";
-import type { FightSeg, Hit, Scene, Slot, TLEvent } from "../../../types";
+import type { FightSeg, Hit, Overlay, Scene, Slot, TLEvent } from "../../../types";
+import { CROWN_STRIPS } from "./attacks";
 
 /** `code` rebuilds the same fight: the same weapons, the same stack or spread, and so on.
     `split` is when the arena is two platforms, from Flatliner to the Crown of Arcadia that
     joins it again, in seconds. `picks` says how each random part came out; `choices` is what
     the player asked for, so a link can carry it. */
-export interface Fight { segs: FightSeg[]; events: TLEvent[]; end: number; split: [number, number]; summary: string; code: string; picks: Picks; choices: Choices }
+export interface Fight { segs: FightSeg[]; events: TLEvent[]; end: number; split: [number, number]; join?: {from: number; overlays: Overlay[]}; gone?: {side: SplitSide; from: number}; summary: string; code: string; picks: Picks; choices: Choices }
 
 // TS note: a template literal type builds a string type from other types, the way a C#
 // interpolated string builds a value. A WeaponOrder is three weapon names joined by "-",
@@ -230,7 +231,12 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     {title:"Massive Meteor", drills:["m-massive"], scene:massiveScene(s, side2, {who:s, end:end2}), k:0, from:castStart("MassiveMeteorBoss", "Massive Meteor (castbar)"), due:[lineEnd("Massive Meteor x5")],
       // The party waits where the stack goes, and holds it from the first hit until the fifth.
       pre:zoneCenter(SPLIT_INNER[side2]), firstHit:cactbot("Massive Meteor x5")},
-    {title:"Arcadion Avalanche", drills:["m-avalanche"], scene:avalancheScene(s, side2, end2, face, swing), k:0, from:lineEnd("Massive Meteor x5"), due:[cactbot("Explosion", 8), cactbot("Arcadion Avalanche")]}
+    /* The towers' cast starts at 7:28.8, while Massive Meteor still hits, so they show once it ends.
+       The boss turns to the platform he grabs when his own cast starts (7:33.1): before that,
+       nobody can know where to go. */
+    {title:"Arcadion Avalanche", drills:["m-avalanche"], scene:avalancheScene(s, side2, end2, face, swing), k:0, from:lineEnd("Massive Meteor x5"),
+      turn:{at:castStart("ArcadionAvalancheBoss1", "Arcadion Avalanche (castbar)"), f:face === "west" ? 270 : 90, weapons:2},
+      due:[cactbot("Explosion", 8), cactbot("Arcadion Avalanche")]}
   );
   /* Heartbreak Kick, last so the random parts above keep their codes. Its tower is hit 5, then 6,
      then 7 times. Each set asks twice, at its first hit and at its last, so you hold your spot
@@ -284,7 +290,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
      those lines count as casts too. Every other line is a hit. */
   const BOSS_CAST = new Set(["Raw Steel Trophy Axe", "Raw Steel Trophy Scythe", "Trophy Weapons", "Assault Evolved",
     "Void Stardust", "Dance of Domination Trophy", "Ultimate Trophy Weapons", "Assault Apex", "Immortal Reign",
-    "Orbital Omen", "Meteorain", "Triple Tyrannhilation", "Majestic Meteor", "Massive Meteor", "Ecliptic Stampede",
+    "Orbital Omen", "Meteorain", "Triple Tyrannhilation", "Majestic Meteor", "Massive Meteor", "Arcadion Avalanche", "Ecliptic Stampede",
     "Heartbreak Kick"]);
   const lines: Array<[number, string]> = [
     L("Crown of Arcadia"),
@@ -312,7 +318,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     L("--meteor 1--", 1, "Majestic Meteor 1 drops"), L("--meteor 2--", 1, "Majestic Meteor 2 drops"), L("Majestic Meteor 1"), L("--meteor 3--", 1, "Majestic Meteor 3 drops"), L("Majestic Meteor 2"), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath"), L("Majestic Meteor 3"),
     L("--tethers--", 4, "Tethers"), L("Explosion", 7), L("--Fire Breath Markers--", 2, "Fire Breath markers"),
     L("--meteor 1--", 2, "Majestic Meteor 1 drops"), L("--meteor 2--", 2, "Majestic Meteor 2 drops"), L("Majestic Meteor 1", 2), L("--meteor 3--", 2, "Majestic Meteor 3 drops"), L("Majestic Meteor 2", 2), L("Majestic Meteowrath/Majestic Meteorain/Fire Breath", 2), L("Majestic Meteor 3", 2),
-    L("Massive Meteor (castbar)", 1, "Massive Meteor"), L("Massive Meteor x5"), [lineEnd("Massive Meteor x5"), "Massive Meteor last hit"], L("Explosion", 8), L("Arcadion Avalanche"),
+    L("Massive Meteor (castbar)", 1, "Massive Meteor"), L("Massive Meteor x5"), [lineEnd("Massive Meteor x5"), "Massive Meteor last hit"], L("Explosion", 8), L("Arcadion Avalanche (castbar)", 1, "Arcadion Avalanche"), L("Arcadion Avalanche", 1, "Arcadion Avalanche slam"),
     L("Crown of Arcadia", 3),
     L("Great Wall of Fire 1", 2), L("Great Wall of Fire 2", 2), L("Explosion 1", 2), L("Explosion 2", 2),
     L("Orbital Omen (castbar)", 2, "Orbital Omen"), L("Orbital Omen 1", 2), L("Fire and Fury", 2), L("Orbital Omen 2", 2), L("Orbital Omen 3", 2), L("Orbital Omen 4", 2),
@@ -333,7 +339,12 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     " Arena Split: your tether in the " + (t1 ? "first" : "second") + " round." +
     " Ecliptic Stampede: " + fireball + ", proximity AoEs " + meteors.toUpperCase().replace("-", " and ") + (wall === "none" ? ", with no puddles: your tether to the " + corner.toUpperCase() + " corner." : ", with your puddles along the " + wall + " wall.") +
     " Heartbreak Kick: " + (kick === "party" ? "the party soaks it." : "the tanks soak it with invulns.");
-  return {segs, events, end:FIGHT_END, split:[cactbot("Flatliner (split)"), cactbot("Crown of Arcadia", 3)], summary, code, picks, choices:c};
+  // The platform Arcadion Avalanche throws is gone from the slam until Crown of Arcadia.
+  const avalanche = segs.find(g => g.drills[0] === "m-avalanche"), gone = avalanche?.scene.gone ? {side:avalanche.scene.gone.side, from:cactbot("Arcadion Avalanche")} : undefined;
+  // Crown of Arcadia's outer strips show from its cast start until it joins the arena again: the
+  // one on the platform that stayed (the other platform is gone).
+  const join = {from:castStart("CrownOfArcadia", "Crown of Arcadia", 3), overlays:CROWN_STRIPS.filter((_o, i) => ["west", "east"][i] !== gone?.side)};
+  return {segs, events, end:FIGHT_END, split:[cactbot("Flatliner (split)"), cactbot("Crown of Arcadia", 3)], join, gone, summary, code, picks, choices:c};
 }
 
 /* ---------- damage going out ---------- */

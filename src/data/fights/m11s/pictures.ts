@@ -518,8 +518,8 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-slab": s => {
     // The drill's grab, as it shows after his turn: the platform he faces, and its name tag.
     const scene = (face: SplitSide) => avalancheScene(s, homeSide(s), "north", face, "north");
-    const grab = (face: SplitSide): Overlay => { const g = scene(face).steps[1].reveal?.find(o => o.t === "lane"); if(!g) throw new Error("no grab"); return g; };
-    const sc = scene("west"), west = grab("west"), east = grab("east"), grabbedTag = sc.steps[1].reveal?.filter(o => o.t === "tag") ?? [];
+    const grab = (face: SplitSide): Overlay => ({t:"lane", rect:platformZone(face).rect});
+    const sc = scene("west"), west = grab("west"), east = grab("east"), grabbedTag = [tag((platformZone("west").rect[0] + platformZone("west").rect[2]) / 2, 50, "GRABBED")];
     return {overlays:[], split:sc.split, boss:sc.boss, after:[west, ...grabbedTag, you(s, [90, 40])],
       answer:[EAST], note:"Example: he faces the west platform.", options:[
         show([west, you(s, [90, 40])], [EAST]), show([east, you(s, [10, 40])], [WEST]),

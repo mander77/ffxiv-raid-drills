@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { M11S } from "../../src/data/fights/m11s";
-import { cactbot } from "../../src/data/fights/m11s/sources";
+import { CROWN_STRIPS } from "../../src/data/fights/m11s/attacks";
+import { cactbot, castStart } from "../../src/data/fights/m11s/sources";
 import {
   activeSeg,
   answerFightStep,
@@ -400,4 +401,48 @@ test("the full fight: the Void Stardust that ends in a stack puts its marker on 
     expect(marked, code).toHaveLength(1);
     expect(["H1", "H2"]).toContain(marked[0].scene.headMark?.on.l);
   }
+});
+
+test("Arcadion Avalanche: the boss faces the platform he grabs only from his cast start", () => {
+  const s = newFightState("watch", fight(), { paused: true });
+  const g = s.fight.segs.find((x) => x.title === "Arcadion Avalanche");
+  if (!g?.turn) throw new Error("Arcadion Avalanche has no turn");
+  const at = castStart("ArcadionAvalancheBoss1", "Arcadion Avalanche (castbar)");
+  expect(g.turn.at).toBe(at);
+  seek(s, at - 0.5);
+  expect(viewOf(s).boss?.f ?? null).toBeNull();
+  seek(s, at + 0.1);
+  expect(viewOf(s).boss?.f).toBe(g.turn.f);
+});
+
+test("Crown of Arcadia: its outer strips show from its cast start until the arena is whole", () => {
+  const s = newFightState("watch", fight(), { paused: true });
+  const from = castStart("CrownOfArcadia", "Crown of Arcadia", 3),
+    whole = cactbot("Crown of Arcadia", 3);
+  const strips = (t: number) => {
+    seek(s, t);
+    return (s.fight.join?.overlays ?? []).every((o) => viewOf(s).scene.overlays.includes(o));
+  };
+  // Only the strip on the platform that stayed: the thrown one is gone.
+  expect(s.fight.join?.overlays).toEqual(CROWN_STRIPS.filter((_o, i) => ["west", "east"][i] !== s.fight.gone?.side));
+  expect(s.fight.join?.overlays).toHaveLength(1);
+  expect(strips(from - 0.1)).toBe(false);
+  expect(strips(from + 0.1)).toBe(true);
+  expect(strips(whole - 0.1)).toBe(true);
+  expect(strips(whole + 0.1)).toBe(false);
+});
+
+test("Arcadion Avalanche: the platform he throws is gone from the slam until Crown of Arcadia", () => {
+  const s = newFightState("watch", fight(), { paused: true });
+  const gone = s.fight.gone;
+  if (!gone) throw new Error("no platform goes");
+  expect(gone.from).toBe(cactbot("Arcadion Avalanche"));
+  const at = (t: number) => {
+    seek(s, t);
+    return viewOf(s).scene.gone;
+  };
+  expect(at(gone.from - 0.1)?.after ?? 99).not.toBe(-1);
+  expect(at(gone.from + 0.1)).toEqual({ side: gone.side, after: -1 });
+  expect(at(cactbot("Crown of Arcadia", 3) - 0.1)).toEqual({ side: gone.side, after: -1 });
+  expect(at(cactbot("Crown of Arcadia", 3) + 0.1)).toBeUndefined();
 });

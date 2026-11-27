@@ -134,7 +134,8 @@ type OverlayShape =
   // The inner edge of the scythe's donut, drawn as a green outline.
   | ({ t: "safe"; r: number } & At);
 /** `spawn` groups a weapon's pieces so the map can fade or animate them together. */
-export type Overlay = OverlayShape & { spawn?: number };
+/** `until`: drawn only until step `until` is answered, when it goes off (a tower). */
+export type Overlay = OverlayShape & { spawn?: number; until?: number };
 // TS note: Extract is a built-in helper type. It keeps the union members that match,
 // so ScytheOverlay is only the "scythe" member of Overlay.
 export type ScytheOverlay = Extract<Overlay, { t: "scythe" }>;
@@ -230,6 +231,9 @@ export interface Scene {
   boss?: Boss;
   bossAt?: (n: number) => Boss;
   split?: boolean;
+  /** With `split`: one platform is gone once step `after` is answered (Arcadion Avalanche
+      throws it), so the arena draws only the other. -1: gone from the start. */
+  gone?: { side: "west" | "east"; after: number };
   /** With `split`: the arena stays whole until step `splitAfter` goes off, then splits (Flatliner
       splits it as its knockback lands). Practice splits it once that step is answered. */
   splitAfter?: number;
@@ -456,6 +460,11 @@ export interface Fight {
   hits: Hit[];
   end: number;
   split: [number, number];
+  /** The arena joining again at the end of the split: from `from` until split[1], these attacks
+      show on the ground that goes (Crown of Arcadia's outer strips). */
+  join?: { from: number; overlays: Overlay[] };
+  /** A platform that is gone from `from` until the arena joins again at split[1]. */
+  gone?: { side: "west" | "east"; from: number };
   summary: string;
   code: string;
   choices: Choices;

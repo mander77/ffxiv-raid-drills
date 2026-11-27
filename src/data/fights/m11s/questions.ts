@@ -172,7 +172,7 @@ export const LEARN_CARDS: QuizItem[] = [
   mq("k-slab", 21, P3, "7:39", s=>({prompt:"Arcadion Avalanche: the boss faces one platform. What do you do?",
     options:[{t:"Get knocked to the platform he is NOT facing. Then run to the side away from where he swings.", ok:true},{t:"Stay on the platform he faces."},{t:"Stand in the middle."},{t:"Get knocked to the platform he faces."}],
     why:["He grabs the platform he faces and kills every player on it.", "Then he turns and slams it down.", "The safe spot is on the side opposite his swing."],
-    rule:["Get knocked to the platform he does not face.", "Go to its far end, away from his turn."]})),
+    rule:["Get knocked to the platform he does not face.", "Go to its far outer corner, away from his turn."]})),
   mq("k-ecl-start", 26, P4, "8:54", s=>({prompt:"Ecliptic Stampede starts. Where do you go?",
     options:[{t:bySlot(s, {H1:"SW, outside, to bait the markers.", H2:"SE, outside, to bait the markers."}), ok:true},
       {t:bySlot(s, {H1:"SE, outside.", H2:"SW, outside."})},

@@ -135,7 +135,7 @@ export function LiveArena({
   // The scene's other pieces. A rock the reveal breaks or removes is left out.
   const base = pieceLayers(
     withoutChangedRocks(
-      sc.overlays.filter((o) => o.spawn == null).map((o) => rotOverlay(o, k)),
+      sc.overlays.filter((o) => o.spawn == null && (o.until == null || n <= o.until)).map((o) => rotOverlay(o, k)),
       revealed,
     ),
   );
@@ -203,6 +203,7 @@ export function LiveArena({
     <Arena
       label={arenaLabel(done, pickSpot && onPointClick !== undefined)}
       split={sc.split && (sc.splitAfter === undefined || n > sc.splitAfter)}
+      gone={sc.gone && n > sc.gone.after ? sc.gone.side : undefined}
       className={cn("live", done && "locked", sc.spawnPlay && "play", className)}
       onPointClick={done ? undefined : onPointClick}
       layers={{

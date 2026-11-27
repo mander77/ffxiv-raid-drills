@@ -81,16 +81,22 @@ interface FloorProps {
   split: SplitSizes | undefined;
   /** The id of the tile pattern. */
   tiles: string;
+  /** A platform that is gone, drawn as void. */
+  gone?: "west" | "east";
 }
 
 /** The floor: one square, or the two platforms of the Arena Split with the void between them. */
-function Floor({ split, tiles }: FloorProps) {
-  const rects: (readonly [number, number])[] = split ? Object.values(split.platformX) : [[0, 100]];
+function Floor({ split, tiles, gone }: FloorProps) {
+  const rects: (readonly [number, number])[] = split
+    ? (["west", "east"] as const).filter((side) => side !== gone).map((side) => split.platformX[side])
+    : [[0, 100]];
+  const lost = split && gone ? split.platformX[gone] : undefined;
   return (
     <>
       {split && (
         <rect className="voidr" x={split.platformX.west[1]} y="0" width={split.platformX.east[0] - split.platformX.west[1]} height="100" />
       )}
+      {lost && <rect className="voidr" x={lost[0]} y="0" width={lost[1] - lost[0]} height="100" />}
       {rects.map(([x0, x1]) => (
         <Fragment key={x0}>
           <rect className="floor" x={x0} y="0" width={x1 - x0} height="100" />
@@ -126,6 +132,8 @@ export interface ArenaProps {
   layers: Partial<Record<Layer, ReactNode>>;
   /** The Arena Split: two platforms with the void between them, drawn smaller to fit. */
   split?: boolean;
+  /** With `split`: the platform that is gone, drawn as void. */
+  gone?: "west" | "east";
   className?: string;
   /** Called with the spot you click, in arena units (0 to 100 on each side; on a split arena,
       past 0 and 100 on the platforms). */
@@ -134,7 +142,7 @@ export interface ArenaProps {
 
 /** An arena picture: the floor, the compass, the waymarks, then one group per layer in LAYERS order.
     The arena is 100 by 100 units, with a little room around it for the compass. */
-export function Arena({ label, layers, split = false, className, onPointClick }: ArenaProps) {
+export function Arena({ label, layers, split = false, gone, className, onPointClick }: ArenaProps) {
   // Each picture gets its own ids, so two pictures on one page never share a clip or a pattern.
   const id = useId();
   const clip = `${id}-clip`;
@@ -173,7 +181,7 @@ export function Arena({ label, layers, split = false, className, onPointClick }:
         N
       </text>
       <g ref={world} transform={platforms ? splitTransform(platforms) : undefined}>
-        <Floor split={platforms} tiles={tiles} />
+        <Floor split={platforms} tiles={tiles} gone={gone} />
         {LAYERS.map((l) => (
           <g key={l} data-layer={l} clipPath={CLIPPED.has(l) ? `url(#${clip})` : undefined}>
             {all[l]}

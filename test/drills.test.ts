@@ -53,7 +53,7 @@ import {
   voidIntoWeapons,
 } from "../src/data/fights/m11s/drills";
 import { bossmod } from "../src/data/fights/m11s/sources";
-import { angOf, inZone, stepZone, zoneCenter } from "../src/geometry";
+import { angOf, attackHits, inZone, stepZone, zoneCenter } from "../src/geometry";
 import { answerStep, buildPattern, changes } from "../src/lib/practice";
 import { facingNext, jumpsNext } from "../src/lib/scene";
 import type { Point, PolyShape, ScytheOverlay, Slot, SlotName, StepResult, Zone } from "../src/types";
@@ -1269,4 +1269,24 @@ test("Void Stardust into the second weapons: at the first weapon step the boss f
     sc = voidIntoWeapons("H1", true, A);
   assert.isNull(sc.bossAt?.(4).f ?? null, "no facing during the puddles and the spread");
   assert.deepInclude(sc.bossAt?.(5), { x: 50, y: 50, f: A.W[0].a });
+});
+
+test("Arcadion Avalanche: the slam covers your platform but its far outer corner, which is the correct area", () => {
+  for (const swing of ["north", "south"] as const) {
+    // He grabs the east platform, so you are on the west one; the far end is away from his turn.
+    const st = avalancheScene("H1", "west", "north", "east", swing).steps[1];
+    const slam = st.hits?.[0],
+      safe = st.z;
+    if (!slam || !safe) throw new Error("no slam or safe area");
+    const [x0, x1] = PLATFORM_X.west,
+      far = swing === "north" ? 99 : 1;
+    // Every spot on the platform is in the slam or in the safe corner, and none in both.
+    for (let x = x0 + 1; x < x1; x += 4)
+      for (let y = 1; y < 100; y += 4) {
+        const p: Point = [x, y];
+        assert.notEqual(attackHits(slam, p), inZone(p, safe), String(p));
+      }
+    assert.isTrue(inZone([x0 + 1, far], safe), "the far outer corner is safe");
+    assert.isFalse(inZone([x1 - 1, far], safe), "the far corner by the boss is not");
+  }
 });

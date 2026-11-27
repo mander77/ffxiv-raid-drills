@@ -41,6 +41,8 @@ function build(s: Slot, code: string, choices: Choices): Fight {
     hits: buildHits(f),
     end: f.end,
     split: f.split,
+    join: f.join,
+    gone: f.gone,
     summary: f.summary,
     code: f.code,
     choices: f.choices,
