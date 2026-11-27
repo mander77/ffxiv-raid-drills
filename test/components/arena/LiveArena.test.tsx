@@ -13,7 +13,7 @@ import {
   voidAgain,
   voidIntoWeapons,
 } from "../../../src/data/fights/m11s/drills";
-import { stackedAt } from "../../../src/data/partyRoute";
+import { withYouAt } from "../../../src/data/partyRoute";
 import { round2, stepZone, zoneCenter } from "../../../src/geometry";
 import { buildPattern } from "../../../src/lib/practice";
 import type { StepResult } from "../../../src/types";
@@ -264,7 +264,7 @@ test("Crushing Comet: the stack marker shows on the other healer, who stands wit
   const at = markerAfter(3);
   const third = results[2].p;
   assert.notDeepEqual(third, last);
-  const h2 = stackedAt("H2", third);
+  const h2 = withYouAt(scene.steps[2], { p: third, z: results[2].z }).get("H2") ?? [0, 0];
   assert.equal(at, `translate(${round2(h2[0])} ${round2(h2[1])})`, "on H2, beside your last spot");
   assert.isUndefined(markerAfter(4), "gone once the party stacks");
 });
