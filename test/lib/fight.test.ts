@@ -29,7 +29,7 @@ import {
   watchAt,
   watchQuestion,
 } from "../../src/lib/fight";
-import { buildFight } from "../m11s";
+import { buildFight, MANY_FIGHTS_TIMEOUT } from "../m11s";
 
 const fight = () => buildFight("H1", "K7Q2");
 
@@ -263,7 +263,7 @@ describe("the HUD", () => {
     expect(castFade(-3)).toBe(0);
   });
 
-  test("on a phone, no cast jumps onto one that went off, for every pick", () => {
+  test("on a phone, no cast jumps onto one that went off, for every pick", { timeout: MANY_FIGHTS_TIMEOUT }, () => {
     // The sideways strip at 375 px: CastList's "x" sizes in a 304-pixel box, and a cast's name
     // 72 pixels wide (w-18). A gone cast hides its name there, so only the names to come can meet.
     const box = 304;

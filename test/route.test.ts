@@ -16,7 +16,7 @@ import {
 import { inZone, rotZone } from "../src/geometry";
 import type { Point, Slot, StepResult } from "../src/types";
 import { newCode } from "../src/util";
-import { buildFight } from "./m11s";
+import { buildFight, MANY_FIGHTS_TIMEOUT } from "./m11s";
 
 const SLOTS: Slot[] = ["H1", "H2"];
 const dist = (a: Point, b: Point): number => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -249,7 +249,7 @@ test("a tower's knockback throws the runner straight away from the tower, to whe
   assert.ok(near(thrownTo(tower, 57.5, [16, 77]), land));
 });
 
-test("in the full fight, Flatliner and every Arena Split tower throw the runner onto a platform", () => {
+test("in the full fight, Flatliner and every Arena Split tower throw the runner onto a platform", { timeout: MANY_FIGHTS_TIMEOUT }, () => {
   for (const s of SLOTS)
     for (let i = 0; i < 20; i++) {
       const f = buildFight(s, newCode(), RANDOM),

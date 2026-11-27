@@ -6,14 +6,10 @@ import { bossmod, cactbot, castStart, type LineName } from "../src/data/fights/m
 import { angOf, dist, inZone, rotZone, stepZone, zoneCenter } from "../src/geometry";
 import { clock, sec } from "../src/time";
 import type { Point, Slot, StepResult } from "../src/types";
+import { MANY_FIGHTS_TIMEOUT } from "./m11s";
 
 const REPEATS = 200;
 const SLOTS: Slot[] = ["H1", "H2"];
-/** The time limit of the Watch the Correct Moves test, in milliseconds. It takes about 2 seconds
-    on a fast computer, most of it in the Arena Split steps, which work out each safe area to draw.
-    A slower CI runner, or a build running beside it, went over Vitest's default 5 seconds, so it
-    gets more room. Fewer repeats would check fewer Arena Split patterns. */
-const WATCH_TIMEOUT = 20_000;
 
 test("clock and sec turn fight times both ways", () => {
   assert.equal(sec("1:24"), 84);
@@ -24,7 +20,7 @@ test("clock and sec turn fight times both ways", () => {
   assert.equal(clock(659.6), "10:59");
 });
 
-test("every mechanic has one hit time per step, in order, inside the fight", () => {
+test("every mechanic has one hit time per step, in order, inside the fight", { timeout: MANY_FIGHTS_TIMEOUT }, () => {
   for (let i = 0; i < REPEATS; i++)
     for (const s of SLOTS) {
       const f = buildFight(s);
@@ -143,7 +139,7 @@ test("Raw Steel Trophy: the casts list each weapon's tank hit, and the hits mark
   }
 });
 
-test("Watch the Correct Moves: the spot it clicks is correct for every step", { timeout: WATCH_TIMEOUT }, () => {
+test("Watch the Correct Moves: the spot it clicks is correct for every step", { timeout: MANY_FIGHTS_TIMEOUT }, () => {
   for (let i = 0; i < REPEATS; i++)
     for (const s of SLOTS) {
       for (const g of buildFight(s).segs) {

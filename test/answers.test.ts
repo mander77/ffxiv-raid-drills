@@ -11,6 +11,7 @@
 //
 // The arena turn (`k`) is left out: it turns the zones and the attacks together, so it moves no
 // spot into or out of an attack.
+
 import { describe, expect, test } from "vitest";
 import { ATOMIC_PUDDLE } from "../src/data/fights/m11s/attacks";
 import { DRILLS, ECL_SOAK_R, FIRST_PUDDLE } from "../src/data/fights/m11s/drills";
@@ -19,6 +20,7 @@ import { dist, attackHits as hits, inZone, isAttack, stepZone, zoneCenter } from
 import { buildPattern } from "../src/lib/practice";
 import type { Drill, Overlay, Point, Slot, Step, StepResult } from "../src/types";
 import { random, withSeed } from "../src/util";
+import { MANY_FIGHTS_TIMEOUT } from "./m11s";
 
 const SLOTS: Slot[] = ["H1", "H2"];
 /** The pattern codes the test builds: they reach every variant (a test below checks it) and many weapon spots and orders. */
@@ -146,7 +148,7 @@ describe("no correct answer stands in an attack", () => {
     }
   });
 
-  test("each known case still happens, so the list stays true", () => {
+  test("each known case still happens, so the list stays true", { timeout: MANY_FIGHTS_TIMEOUT }, () => {
     const all = DRILLS.flatMap((d) => SLOTS.flatMap((s) => CODES.flatMap((c) => problemsIn(d, s, c))));
     for (const k of KNOWN)
       expect(
