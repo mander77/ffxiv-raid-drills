@@ -932,6 +932,11 @@ static wins.
     when the party stacks (cactbot `stackMarkerOn`). The healer is random, you or the other one,
     and stands with the party: on your last spot, or just north of you (`headMark` with `at` and
     `follow`). The full fight draws that healer after its other random parts.
+  - Comet: when the spread step is asked, a spread marker (the target circle) shows on every
+    player (cactbot head marker 008B): on the four tank and melee spots (a cue, so it stays), and
+    on you, on your last spot, until you spread (`headMark` with `spread`). In the full fight
+    yours rides on your moving marker. The Learn pictures show the spread after it went off, so
+    they draw no markers.
   - Practice `m-void`: at the first weapon step the boss faces the first weapon, as Pressure
     shows him from 1:26.7.
   - Learn has both second endings: `k-void-2` (the first was a stack) and `k-void-2-stack` (the

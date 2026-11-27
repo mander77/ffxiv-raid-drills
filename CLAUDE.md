@@ -414,6 +414,8 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Stack marker**: the marker on the player a stack goes on (`{t:"stackMark"}`). A scene's
   `headMark` is on its player until the step is answered; when it is yours, the full fight puts it
   on your moving marker.
+- **Spread marker**: the marker on every player for a spread, drawn as a target circle
+  (`{t:"target"}`). A scene's `headMark` with `spread` puts yours on you until you spread.
 - **Tether**: a line from a portal to a player (`{t:"tether"}`, `Tether` in `Shape.tsx`), red until
   it is **stretched** (`TETHER_STRETCH`), then blue. A scene's `tether` is your own: it follows
   you. A **guide** is a move, not a tether.

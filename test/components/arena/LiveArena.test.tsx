@@ -348,3 +348,26 @@ test("an attack the fight draws on the floor is clipped to the arena, as the gro
   assert.ok(ground?.querySelector('[data-testid="trail"]'), "in the ground layer");
   assert.match(ground?.getAttribute("clip-path") ?? "", /^url\(#/);
 });
+
+test("Comet: a spread marker shows on you and on the tank and melee spots once the puddles are done", () => {
+  const scene = voidAgain("H1", true, { x: 50, y: 50, f: 0 });
+  const results: StepResult[] = [];
+  const markersAfter = (n: number) => {
+    while (results.length < n) {
+      const z = stepZone(scene.steps[results.length], results);
+      if (!z) throw new Error("no zone");
+      const p = zoneCenter(z);
+      results.push({ p, ok: true, z, drop: p });
+    }
+    const view = render(<LiveArena scene={scene} k={0} results={[...results]} showLast hint={false} />);
+    const spots = [...view.container.querySelectorAll("circle.target")].map((c) => [c.getAttribute("cx"), c.getAttribute("cy")]);
+    view.unmount();
+    return spots;
+  };
+  assert.lengthOf(markersAfter(2), 0, "no markers during the puddles");
+  const spots = markersAfter(3);
+  const third = results[2].p;
+  assert.lengthOf(spots, 5, "four tank and melee spots, and you");
+  assert.deepInclude(spots, [String(round2(third[0])), String(round2(third[1]))], "yours on your last spot");
+  assert.lengthOf(markersAfter(4), 4, "yours goes once you spread; the cue keeps the others");
+});

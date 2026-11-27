@@ -463,14 +463,16 @@ export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
 const NORTH_START = {p:FIRST_PUDDLE, a:["North of the boss, in max melee."]};
 function voidSteps(s: Slot, spread: boolean, c: Point = CENTER, start = NORTH_START, f = 0, spreadMore: Lines = []): Step[] {
   const next = puddleAfter(c);
-  const tankMeleeSpreads = fixedAround(c, f).map(m => spreadHit(m.p));
+  const fixed = fixedAround(c, f), tankMeleeSpreads = fixed.map(m => spreadHit(m.p));
+  // Comet's spread markers on the tanks and melee, at their fixed spots. Yours is the scene's headMark.
+  const tankMeleeMarkers = fixed.map((m): Overlay => ({t:"target", x:m.p[0], y:m.p[1]}));
   return [
     {q:"Where do you drop the first puddle?", z:firstPuddle(start.p, c), a:start.a, drop:VOID_PUDDLE},
     {q:"Second puddle?", zf:next, a:["Just outside your first puddle, one small step clockwise.", "Stay in max melee."], drop:VOID_PUDDLE},
     {q:"Third puddle?", zf:next, a:["Just outside the second puddle, clockwise again.", "Stay in max melee."], drop:VOID_PUDDLE},
     spread
       ? {q:"Puddles done. Comet: every player spreads. Tanks and melee go to fixed spots. Where do you go?",
-          zf:cometSpread(s, c, f), cue:spreadMarks(c, f), puddlesOff:true,
+          zf:cometSpread(s, c, f), cue:[...tankMeleeMarkers, ...spreadMarks(c, f)], puddlesOff:true,
           // Comet's spread circles: yours, and the tanks' and melee's on their fixed spots, which must miss you.
           revealAt:p => [spreadHit(p), ...tankMeleeSpreads], hits:tankMeleeSpreads,
           a:["Any open spot. Healers and ranged have no fixed spread spot.", "Keep away from the tank and melee spots.", ...spreadMore]}
@@ -486,6 +488,12 @@ export const randomStackHealer = (s: Slot): Slot => random() < 0.5 ? s : s === "
     stacks. The party drops its puddles together, so the healer stands with you. */
 function cometMark(s: Slot, on: Slot, at: number): Scene["headMark"] {
   return {on:{t:"mark", x:50, y:50, l:on, r:"H"}, you:on === s, n:1, at, follow:true};
+}
+
+/** Comet's spread marker on you, from the spread step (`at`) until you spread. It shows on your
+    last spot (cactbot's head marker 008B: a spread marker on every player). */
+function spreadMarker(s: Slot, at: number): Scene["headMark"] {
+  return {on:{t:"mark", x:50, y:50, l:s, r:markRole(partyOf(s).role)}, you:true, n:1, at, follow:true, spread:true};
 }
 
 /* The first Void Stardust runs straight into the second weapon set: the weapons are already
@@ -516,7 +524,7 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: JumpSet, stackOn: S
     // The boss stays in the middle for the pick, the puddles and the stack or spread (5 steps).
     // Then his cast starts and he faces the first weapon, as the fight shows from 1:26.7.
     bossAt:n => n === 5 ? {...A.states[0], f:first.a} : A.states[Math.max(0, Math.min(n - 5, A.states.length - 1))],
-    headMark:spread ? undefined : cometMark(s, stackOn, 4),
+    headMark:spread ? spreadMarker(s, 4) : cometMark(s, stackOn, 4),
     steps,
     rule:["Look Ahead: find the first weapon before the puddles.", "Its flat side is square to the boss.",
       "Puddles: start north. Each one just outside the last, clockwise, in max melee.",
@@ -546,7 +554,7 @@ export function voidAgain(s: Slot, spread: boolean, boss: Boss, stackOn: Slot = 
       "It is always the opposite of the first."],
     ordered:true,
     boss, overlays:[], steps:voidSteps(s, spread, c, {p:butt, a:["Directly behind the boss, in max melee."]}, boss.f ?? 0, VOID_2_SPREAD_RULE),
-    headMark:spread ? undefined : cometMark(s, stackOn, 3),
+    headMark:spread ? spreadMarker(s, 3) : cometMark(s, stackOn, 3),
     rule:[...VOID_2_START_RULE,
       "Each one just outside the last, clockwise around him.",
       ...(spread ? VOID_2_SPREAD_RULE : ["Stack one more step clockwise, just past the third puddle."]),
