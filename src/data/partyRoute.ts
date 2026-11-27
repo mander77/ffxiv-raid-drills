@@ -55,14 +55,22 @@ export function packAround(who: readonly SlotName[], spot: Point, inside?: (p: P
   // The plain ring around the stack, when it fits in the area.
   const plain = who.map((x): [SlotName, Point] => [x, stackedAt(x, spot)]);
   if (!inside || plain.every(([, p]) => inside(p))) return new Map(plain);
-  const ring = RINGS.flatMap((r) => Array.from({ length: 360 / ARC }, (_x, i) => polar(i * ARC, r, spot)));
-  const free = ring.filter((p) => !inside || inside(p));
+  // The spots on each ring, nearest ring first; and those of them inside the area.
+  const ring = RINGS.map((r) => Array.from({ length: 360 / ARC }, (_x, i) => polar(i * ARC, r, spot)));
+  const free = ring.map((ps) => ps.filter((p) => inside(p)));
   const taken: Point[] = [spot], out = new Map<SlotName, Point>();
   for (const x of who) {
     // Each slot looks from its own angle first, so the same stack looks the same every time.
     const own = stackedAt(x, spot);
-    const open = (ps: Point[], gap: number): Point | undefined =>
-      ps.filter((p) => taken.every((q) => dist(p, q) >= gap)).sort((a, b) => dist(a, spot) - dist(b, spot) || dist(a, own) - dist(b, own))[0];
+    /** The open spot on the nearest ring that has one, the one nearest this slot's own angle. */
+    const open = (rings: Point[][], gap: number): Point | undefined => {
+      for (const ps of rings) {
+        let best: Point | undefined;
+        for (const p of ps) if (taken.every((q) => dist(p, q) >= gap) && (!best || dist(p, own) < dist(best, own))) best = p;
+        if (best) return best;
+      }
+      return undefined;
+    };
     // Inside the area, closer together if it is tight (a rock's shadow): out of it is where the
     // attack hits. Only an area with no room at all sends a player around it.
     const p = open(free, APART) ?? open(free, TIGHT) ?? open(ring, APART) ?? own;
