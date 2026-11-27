@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, attackHits, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, isStretched, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, flatlinerThrow, wrathLine, eclipticWrath, eclTowerHit, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, towerThrow, ROCK_GAP, meteorHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, isStretched, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, LINE_PORTAL_OUT, flatlinerThrow, wrathLine, eclipticWrath, eclTowerHit, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, towerThrow, ROCK_GAP, meteorHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -1102,21 +1102,20 @@ export function portalLines(side: SplitSide, covered: SplitHalf): Overlay[] {
   // The tag sits north of the middle, clear of waymarks B and D and of the first puddle.
   return [band(side, covered), band(otherSide(side), otherHalf(covered)), {t:"tag", x:(x0 + x1) / 2, y:33, s:"PORTAL LINES"}];
 }
-/** How far outside the north and south walls a portal line's portals are drawn: half a portal's
-    depth, so they touch the wall. The app's choice: no source gives their spot. */
-const LINE_PORTAL_OUT = 2.2;
-/** The portals of the side portal lines, before they go off: one outside the north wall and one
-    outside the south wall at each end of each line. You work out from them which half is hit. */
-export function portalLinePortals(side: SplitSide, covered: SplitHalf): Overlay[] {
-  const ends = (sd: SplitSide, h: SplitHalf): Overlay[] => {
-    const [x0, x1] = halfX(sd, h), x = (x0 + x1) / 2;
-    return [{t:"portal", x, y:-LINE_PORTAL_OUT, vert:true}, {t:"portal", x, y:100 + LINE_PORTAL_OUT, vert:true}];
+/** The portals of the side portal lines, before they go off: one per line, LINE_PORTAL_OUT outside
+    the north or the south wall (`lineEnd`: "either north or south", Hector's video, 12:39). Each
+    line runs from its portal along the whole platform. You work out from them which half is hit. */
+export function portalLinePortals(side: SplitSide, covered: SplitHalf, lineEnd: SplitEnd): Overlay[] {
+  const y = lineEnd === "north" ? -LINE_PORTAL_OUT : 100 + LINE_PORTAL_OUT;
+  const at = (sd: SplitSide, h: SplitHalf): Overlay => {
+    const [x0, x1] = halfX(sd, h);
+    return {t:"portal", x:(x0 + x1) / 2, y, vert:true};
   };
-  return [...ends(side, covered), ...ends(otherSide(side), otherHalf(covered))];
+  return [at(side, covered), at(otherSide(side), otherHalf(covered))];
 }
 
 /** How to read the side portal lines before they go off. */
-const PORTAL_LINES_WHY = "Each portal line runs between its two portals, north to south.";
+const PORTAL_LINES_WHY = "Each portal line runs from its portal along the whole platform.";
 const SPLIT_ROUND_RULE: Lines = ["No tether: go in close to bait Fire Breath.", "Tether: wait a step back until the markers are out.",
   "Everyone baits the first puddle in close.",
   "Then each puddle just outside the last, toward your end.",
@@ -1277,6 +1276,9 @@ export interface SplitRound {
   endsSide: SplitSide;
   /** The other tethered players: three when you have a tether, four when you do not. */
   others: readonly SlotName[];
+  /** The end of the platforms the side portal lines' portals stand at (random each round). North
+      when left out: where BossMod starts the lines. */
+  lineEnd?: SplitEnd;
 }
 
 /** The tethers of the other players at the lineup. Each platform has two tethered players, one
@@ -1391,11 +1393,11 @@ export function splitRound(s: Slot, r: SplitRound): Scene {
       tether
         ? {q:"The portal lines cover half of each platform. Where do you stretch your tether?", zf:tetherSpot(side, end, covered, portal, [...otherWraths(r), ...otherBreaths(r)], [...othersAtLineup(r).map(o => o.p), ...markersAtLineup(r)]),
           // Your own line goes through you, as it should; the others' lines and Fire Breath must miss you.
-          whyNot:lineupWhyNot(s, r, portal), cue:portalLinePortals(side, covered), reveal:[...portalLines(side, covered), wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
+          whyNot:lineupWhyNot(s, r, portal), cue:portalLinePortals(side, covered, r.lineEnd ?? "north"), reveal:[...portalLines(side, covered), wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
           a:["The " + end + " wall, just outside the portal lines.", "That end is away from your portal.", PORTAL_LINES_WHY, "Stay out of the third puddle."]}
         : {q:"The portal lines cover half of each platform. You have a marker. Where do you stand?", zf:markerSpot(side, end, covered, [...otherWraths(r), ...otherBreaths(r)]),
           // Your own Fire Breath goes through you, as it should; the others' lines must miss you.
-          whyNot:lineupWhyNot(s, r, null), cue:portalLinePortals(side, covered), reveal:[...portalLines(side, covered), yourBreath(r), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
+          whyNot:lineupWhyNot(s, r, null), cue:portalLinePortals(side, covered, r.lineEnd ?? "north"), reveal:[...portalLines(side, covered), yourBreath(r), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
           a:["The wall-side corner of waymark " + wm.n + ", out of the portal lines.", PORTAL_LINES_WHY, "Stay out of the third puddle."]}],
     rule:SPLIT_ROUND_RULE};
 }
@@ -1762,7 +1764,7 @@ export const DRILLS: readonly Drill[] = [
   // A round of tethers and markers: a tether ends on either platform, across from its portal.
   {id:"m-split-fire", order:19.1, variants:["tether", "marker"], random:true, phase:P3, time:"6:35", title:"Arena Split: Fire Breath", kind:["bait", "chains"],
     build:(s, v)=>{ const tether = v === "tether", home = homeSide(s);
-      return splitRound(s, {tether, side:tether ? randomSide() : home, end:randomEnd(), covered:randomHalf(), endsSide:randomEndsSide(), others:randomOthers(s, tether ? 3 : 4)}); }},
+      return splitRound(s, {tether, side:tether ? randomSide() : home, end:randomEnd(), covered:randomHalf(), endsSide:randomEndsSide(), others:randomOthers(s, tether ? 3 : 4), lineEnd:randomEnd()}); }},
   // The second towers: you start in the quadrant where the first round ended, on either platform.
   {id:"m-split-towers2", order:19.2, variants:["tether", "marker"], random:true, phase:P3, time:"7:01", title:"Arena Split: Second Towers", kind:"towerKnockback", soak:SPLIT_SOAK,
     build:(s, v)=>{ const side = randomSide(), end = randomEnd();

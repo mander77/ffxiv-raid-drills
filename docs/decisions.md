@@ -1188,10 +1188,12 @@ static wins.
     (yours too without a tether), and every tether's line (issue #167). Pressure's casts coming
     up show "Tethers" and "Fire Breath markers" (cactbot's "--tethers--" and "--Fire Breath
     Markers--"). The drills draw no slam size.
-  - The portal lines (the owner, issue #150): the lineup question shows only their portals, one
-    outside the north wall and one outside the south wall at each line's ends, touching the wall
-    (`portalLinePortals`; the spot is the app's choice). You work out from them which half the
-    line hits. The half itself, a soft area (`PORTAL_LINE_X`), shows only after you answer, in
+  - The portal lines (the owner, issue #150): the lineup question shows only their portals. Each
+    line has one portal, at the north or the south end, random each round (`SplitRound.lineEnd`;
+    Hector's video, 12:39: "two more that are either north or south"; the owner, November 27).
+    It stands 5 yalms outside the wall (`LINE_PORTAL_OUT`): BossMod starts each line at z 75,
+    25 yalms north of the center (`BOSSMOD_SPLIT.lineFrom`). Before, the app drew a portal at
+    both ends of each line, touching the wall. You work out from them which half the line hits. The half itself, a soft area (`PORTAL_LINE_X`), shows only after you answer, in
     the drills and in Learn's lineup card. In the game the portals show from the start of the
     round; the app shows them with the lineup question.
   - Your end (the owner, issue #151): a "YOUR END" tag marks the north or south end of your

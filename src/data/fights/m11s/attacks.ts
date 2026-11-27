@@ -106,6 +106,9 @@ export const PORTAL_LINE_X: readonly (readonly [number, number])[] = SPLIT.lines
   const half = yalms(bossmod("MajesticMeteorainRect").width) / 2;
   return [50 + yalms(x) - half, 50 + yalms(x) + half] as const;
 });
+/** How far outside the north or south wall each side portal line's portal stands: BossMod starts
+    each line 25 yalms north of the center ("new(100 + xpos, 75)"), 5 yalms past the wall. */
+export const LINE_PORTAL_OUT = yalms(SPLIT.lineFrom - SPLIT.platformHalfLength);
 
 /** The edge of the ground an attack does not reach: a green ring of radius r units around c (the
     inside of the scythe's donut, where the proteans still hit each player). Not an attack. */

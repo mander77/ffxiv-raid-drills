@@ -206,6 +206,8 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   const others1 = randomOthers(s, t1 ? 3 : 4), others2 = swappedOthers(s, others1);
   // The side of your tether's portal in each round: you end on the platform across from it.
   const portalSide1 = randomEndsSide(), portalSide2 = randomEndsSide();
+  // The end the side portal lines' portals stand at, in each round.
+  const lineEnd1 = end(), lineEnd2 = end();
   // Where a tower throws you: across (a tether whose portal is on your side) keeps you at the
   // tower's end; staying (no tether, or a portal already across) sends you to the other end.
   // Round 1 starts at your first tower, round 2 at the tower where round 1 ended.
@@ -222,9 +224,9 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   const first = segs.find(g => g.drills[0] === "m-split-tower");
   if (first) first.scene = firstTowersScene(s, t1 ? {portal:portalAt(portalSide1, otherEnd(end1), ends1)} : null);
   segs.push(
-    {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, {tether:t1, side:side1, end:end1, covered:cover1, endsSide:ends1, others:others1}), k:0, from:cactbot("Explosion", 6), due:round(1, t1)},
+    {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, {tether:t1, side:side1, end:end1, covered:cover1, endsSide:ends1, others:others1, lineEnd:lineEnd1}), k:0, from:cactbot("Explosion", 6), due:round(1, t1)},
     {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, side1, end1, t1 ? null : {portal:portalAt(portalSide2, otherEnd(end2), ends2)}), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
-    {title:"Arena Split: Fire Breath (Second Time)", drills:["m-split-fire"], scene:splitRound(s, {tether:!t1, side:side2, end:end2, covered:cover2, endsSide:ends2, others:others2}), k:0, from:cactbot("Explosion", 7), due:round(2, !t1)},
+    {title:"Arena Split: Fire Breath (Second Time)", drills:["m-split-fire"], scene:splitRound(s, {tether:!t1, side:side2, end:end2, covered:cover2, endsSide:ends2, others:others2, lineEnd:lineEnd2}), k:0, from:cactbot("Explosion", 7), due:round(2, !t1)},
     {title:"Massive Meteor", drills:["m-massive"], scene:massiveScene(s, side2, {who:s, end:end2}), k:0, from:castStart("MassiveMeteorBoss", "Massive Meteor (castbar)"), due:[lineEnd("Massive Meteor x5")],
       // The party waits where the stack goes, and holds it from the first hit until the fifth.
       pre:zoneCenter(SPLIT_INNER[side2]), firstHit:cactbot("Massive Meteor x5")},

@@ -78,11 +78,11 @@ test("the next step's cue shows after a correct answer, and waits after an incor
   const last = puddles[2];
   const answer = (ok: boolean): StepResult[] => [...puddles.slice(0, 2), { ...last, ok, p: ok ? last.p : [50, 90] }];
   const { rerender } = render(<LiveArena scene={scene} k={0} results={answer(true)} showLast hint={false} />);
-  assert.equal(portals(), 8, "shown with the next question");
+  assert.equal(portals(), 6, "shown with the next question");
   rerender(<LiveArena scene={scene} k={0} results={answer(false)} showLast hint={false} />);
   assert.equal(portals(), 4, "not before Next step");
   rerender(<LiveArena scene={scene} k={0} results={answer(false)} showLast={false} hint={false} />);
-  assert.equal(portals(), 8, "shown once the next step is asked");
+  assert.equal(portals(), 6, "shown once the next step is asked");
 });
 
 test("Void Stardust: every puddle fades when Comet is asked, but stays for the stack", () => {

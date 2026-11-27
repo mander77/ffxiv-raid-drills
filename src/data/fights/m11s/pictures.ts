@@ -462,7 +462,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     // The tank's tether at the wall, stretched from a portal on the other side, at the other end.
     const tankTether = tether(portalAt(otherSide(side), bySlot(s, {H1:"south", H2:"north"}), "west"), tethered);
     // The portal lines' portals show before the answer; the half they hit only after it.
-    return {overlays:[...portalsOf("west"), ...portalLinePortals(side, covered)], split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[31, 50], H2:[69, 50]}))],
+    return {overlays:[...portalsOf("west"), ...portalLinePortals(side, covered, bySlot<SplitEnd>(s, {H1:"north", H2:"south"}))], split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[31, 50], H2:[69, 50]}))],
       after:[...lines, breath(corner), you(s, corner)], answer:markers.map(p => circle(p, 4.5)),
       note:"Example: read the portal lines from their portals. Tethers go to the north or south wall.", options:[
         show([breath(corner), you(s, corner)], markers.map(p => circle(p, 4.5))),
