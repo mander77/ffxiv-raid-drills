@@ -40,6 +40,9 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
   const g = v.si;
   const bossAt: Point = v.boss ? [v.boss.x, v.boss.y] : [50, 50];
   const tether = v.scene.tether;
+  // Your stack or spread marker rides on your moving marker while its step is asked.
+  const head = v.scene.headMark;
+  const myMarker = head?.you && v.results.length === (head.at ?? 0) ? head : undefined;
   return (
     <LiveArena
       // A new mechanic draws a new arena, so its weapons spawn in again.
@@ -69,7 +72,8 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
           slot={slot}
           portal={tether && v.results.length >= (tether.from ?? 0) ? tether.portal : undefined}
           fixed={tether?.fixed}
-          stack={v.scene.headMark?.you && v.results.length === (v.scene.headMark.at ?? 0) ? v.scene.headMark.n : undefined}
+          stack={myMarker && !myMarker.spread ? myMarker.n : undefined}
+          spread={myMarker?.spread}
         />
       }
     />
@@ -179,12 +183,14 @@ interface RunnerProps {
   fixed?: boolean;
   /** You have a stack marker: it hits this many times. */
   stack?: number;
+  /** You have a spread marker. */
+  spread?: boolean;
 }
 
 /** Your marker: it runs the correct spots on the player, and to your clicks in the run. It waits on
     each spot until the hit lands, then runs to the next one. While it has to get there, a dotted
     line goes to the spot, and a ring marks it. With a tether, the tether follows it. */
-function Runner({ slot, portal, fixed = false, stack }: RunnerProps) {
+function Runner({ slot, portal, fixed = false, stack, spread = false }: RunnerProps) {
   const me = useRef<SVGGElement>(null);
   const path = useRef<SVGLineElement>(null);
   const next = useRef<SVGCircleElement>(null);
@@ -246,6 +252,7 @@ function Runner({ slot, portal, fixed = false, stack }: RunnerProps) {
       <g ref={me}>
         <circle className="runhalo" r="4.2" />
         <Shape overlay={{ t: "mark", x: 0, y: 0, l: slot, r: markRole(partyOf(slot).role) }} />
+        {spread && <Shape overlay={{ t: "target", x: 0, y: 0 }} />}
         {stack != null && <Shape overlay={{ t: "stackMark", x: 0, y: 0, n: stack }} />}
       </g>
     </g>

@@ -1261,7 +1261,13 @@ test("Void Stardust ending in a stack: a healer has the marker from the stack st
   assert.equal(first?.on.l, "H2");
   const second = voidAgain("H1", false, A.states[3], "H1").headMark;
   assert.deepInclude(second, { you: true, at: 3 });
-  assert.isUndefined(voidIntoWeapons("H1", true, A, "H2").headMark, "a spread has no stack marker");
+  assert.deepInclude(
+    voidIntoWeapons("H1", true, A, "H2").headMark,
+    { you: true, at: 4, spread: true },
+    "a spread puts a spread marker on you",
+  );
+  const cue = voidIntoWeapons("H1", true, A).steps[4].cue ?? [];
+  assert.equal(cue.filter((o) => o.t === "target").length, 4, "spread markers on the four tank and melee spots");
 });
 
 test("Void Stardust into the second weapons: at the first weapon step the boss faces it", () => {

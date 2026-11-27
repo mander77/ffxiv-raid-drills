@@ -148,7 +148,7 @@ export function LiveArena({
   const mine = runner === undefined ? sc.tether : undefined;
   const lastSpot = [...results].reverse().find((r) => !r.missed)?.p;
   const tetherTo: Point | undefined = mine && (lastSpot ?? [mine.you.x, mine.you.y]);
-  // A stack marker, on its player until the step is answered. Yours rides on your moving marker
+  // A stack or spread marker, on its player until the step is answered. Yours rides on your moving marker
   // in the full fight, so it is not drawn here then.
   const head = sc.headMark;
   const headOn =
@@ -271,7 +271,11 @@ export function LiveArena({
             {headOn && head && (
               <>
                 <Shape overlay={headOn} />
-                <Shape overlay={{ t: "stackMark", x: headOn.x, y: headOn.y, n: head.n }} />
+                <Shape
+                  overlay={
+                    head.spread ? { t: "target", x: headOn.x, y: headOn.y } : { t: "stackMark", x: headOn.x, y: headOn.y, n: head.n }
+                  }
+                />
               </>
             )}
           </>
