@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { runnerAt } from "../../data/route";
 import { dist } from "../../geometry";
@@ -57,9 +57,9 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
       spawned={v.spawned}
       onPointClick={onPointClick}
       className={cn("cursor-pointer", className)}
+      floor={<FloorAttacks at={bossAt} />}
       effects={
         <>
-          <FloorAttacks at={bossAt} />
           {hit && <HitEffect key={hit.n} hit={hit.hit} at={hit.at} split={v.scene.split ?? false} />}
           <CountdownRing at={bossAt} />
         </>
@@ -88,18 +88,26 @@ interface HitEffectProps {
 function HitEffect({ hit, at, split }: HitEffectProps) {
   const { busterPieces } = useFight().clock;
   const halfWidth = useArenaSizes().split?.halfWidth;
+  const clip = useId();
+  // The floor: one square, or both platforms of the Arena Split.
+  const [x, width] = split && halfWidth ? [50 - halfWidth, halfWidth * 2] : [0, 100];
   if (hit.kind === "tank")
+    // A buster's line (Great Wall of Fire) reaches past the wall, so it is clipped to the floor.
     return (
       <g className="buster">
-        {busterPieces(hit.name, at).map((o, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: a buster's pieces never change order.
-          <Shape key={i} overlay={o} />
-        ))}
+        <clipPath id={clip}>
+          <rect x={x} y="0" width={width} height="100" />
+        </clipPath>
+        <g clipPath={`url(#${clip})`}>
+          {busterPieces(hit.name, at).map((o, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: a buster's pieces never change order.
+            <Shape key={i} overlay={o} />
+          ))}
+        </g>
       </g>
     );
   if (hit.kind === "aoe") return null;
   if (hit.area) return <circle className={cn("hitfx", hit.kind, hit.cat)} cx={hit.area.c[0]} cy={hit.area.c[1]} r={hit.area.r} />;
-  const [x, width] = split && halfWidth ? [50 - halfWidth, halfWidth * 2] : [0, 100];
   return <rect className={cn("hitfx", hit.kind, hit.cat)} x={x} y="0" width={width} height="100" />;
 }
 

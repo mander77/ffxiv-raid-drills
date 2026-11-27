@@ -338,3 +338,13 @@ test("Arcadion Avalanche: the towers go once they go off, and the platform he th
   assert.deepEqual(view(1), { towers: 0, floors: 2 }, "the towers went off");
   assert.deepEqual(view(2), { towers: 0, floors: 1 }, "the east platform is gone");
 });
+
+test("an attack the fight draws on the floor is clipped to the arena, as the ground is", () => {
+  const { scene, k } = afterFirstJump();
+  const { container } = render(
+    <LiveArena scene={scene} k={k} results={[]} showLast={false} hint={false} floor={<g data-testid="trail" />} />,
+  );
+  const ground = container.querySelector('[data-layer="ground"]');
+  assert.ok(ground?.querySelector('[data-testid="trail"]'), "in the ground layer");
+  assert.match(ground?.getAttribute("clip-path") ?? "", /^url\(#/);
+});
