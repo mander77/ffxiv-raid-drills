@@ -43,6 +43,8 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
   // Your stack or spread marker rides on your moving marker while its step is asked.
   const head = v.scene.headMark;
   const myMarker = head?.you && v.results.length === (head.at ?? 0) ? head : undefined;
+  // A bait circle rides on your moving marker while its step is asked.
+  const bait = v.scene.steps[v.results.length]?.bait;
   return (
     <LiveArena
       // A new mechanic draws a new arena, so its weapons spawn in again.
@@ -74,6 +76,7 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
           fixed={tether?.fixed}
           stack={myMarker && !myMarker.spread ? myMarker.n : undefined}
           spread={myMarker?.spread}
+          bait={bait}
         />
       }
     />
@@ -185,12 +188,14 @@ interface RunnerProps {
   stack?: number;
   /** You have a spread marker. */
   spread?: boolean;
+  /** The radius of the attack you bait, drawn as a circle around you. */
+  bait?: number;
 }
 
 /** Your marker: it runs the correct spots on the player, and to your clicks in the run. It waits on
     each spot until the hit lands, then runs to the next one. While it has to get there, a dotted
     line goes to the spot, and a ring marks it. With a tether, the tether follows it. */
-function Runner({ slot, portal, fixed = false, stack, spread = false }: RunnerProps) {
+function Runner({ slot, portal, fixed = false, stack, spread = false, bait }: RunnerProps) {
   const me = useRef<SVGGElement>(null);
   const path = useRef<SVGLineElement>(null);
   const next = useRef<SVGCircleElement>(null);
@@ -250,6 +255,7 @@ function Runner({ slot, portal, fixed = false, stack, spread = false }: RunnerPr
       <line ref={path} className="runpath" style={{ display: "none" }} />
       <circle ref={next} className="runnext" r="2.6" style={{ display: "none" }} />
       <g ref={me}>
+        {bait != null && <circle className="bait" r={bait} />}
         <circle className="runhalo" r="4.2" />
         <Shape overlay={{ t: "mark", x: 0, y: 0, l: slot, r: markRole(partyOf(slot).role) }} />
         {spread && <Shape overlay={{ t: "target", x: 0, y: 0 }} />}

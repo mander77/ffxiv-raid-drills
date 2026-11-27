@@ -180,6 +180,10 @@ export interface Step {
   zf?: (results: StepResult[]) => Zone;
   /** A puddle drops where you click: its size and how long it stays. */
   drop?: Puddle;
+  /** A circle of this radius on you while this step is asked: the attack you bait drops where you
+      stand. The full fight draws it on your moving marker. Practice has no spot for you before
+      your click, so it draws nothing. */
+  bait?: number;
   /** A look-ahead step: you click to show what you have spotted (a weapon, for example), but you
       do not move there. The moving marker in "Watch the Correct Moves" skips it. */
   lookAhead?: boolean;

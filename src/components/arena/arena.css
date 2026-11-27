@@ -539,6 +539,12 @@
   .arena .runner {
     pointer-events: none;
   }
+  /* A bait circle on you: the attack you bait drops where you stand. */
+  .arena .bait {
+    fill: none;
+    stroke: var(--arena-aoe);
+    stroke-width: 0.7;
+  }
   .arena .runhalo {
     fill: oklch(1 0 0);
     opacity: 0.75;
