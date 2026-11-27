@@ -19,6 +19,10 @@ const target = (p: Point): Overlay => ({t:"target", x:p[0], y:p[1]});
 const guide = (a: Point, b: Point): Overlay => ({t:"guide", x:a[0], y:a[1], x2:b[0], y2:b[1]});
 /** A tether from its portal to a player. */
 const tether = (portal: Point, p: Point): Overlay => ({t:"tether", x:portal[0], y:portal[1], x2:p[0], y2:p[1]});
+/** An Ecliptic Stampede tether: no source gives its stretch distance, so it never shows as stretched. */
+const eclTether = (portal: Point, p: Point): Overlay => ({t:"tether", x:portal[0], y:portal[1], x2:p[0], y2:p[1], fixed:true});
+/** The four Ecliptic Stampede tether portals, in the middle of each wall. */
+const eclPortals = (): Overlay[] => Object.entries(ECL_PORTAL).map(([w, [x, y]]): Overlay => ({t:"portal", x, y, vert:w === "north" || w === "south"}));
 const puddle = voidPuddle;
 const circle = (c: Point, r: number): ZoneShape => ({c, r});
 // TS note: the return type is RectZone, not the wider ZoneShape, so a rectangle can also go
@@ -525,20 +529,19 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     return {overlays:[soloTower(NE), soloTower(SE), pairTower(SW), pairTower(NW), say("R1 AND R2 HAVE PUDDLES", 94)], boss:BOSS, after:everyone, answer:[bySlot(s, {H1:cw, H2:ccw})],
       note:"Example: R1 and R2 have puddles. T towers are tank towers; dots are two-player towers.", options:[
         youIn(s, cw, SW), youIn(s, ccw, NW), youIn(s, ring(NE), NE), show([you(s, [50, 94 - 8]), say("YOU STAY OUT", 8)])]}; },
-  // The tether goes to the player in the middle of the tower, so it draws from the boss to whoever the answer puts there.
-  // M1 stands on the tower's edge. The answers put you in the middle, just inside the edge,
-  // outside the tower, and on the edge.
-  "k-ecl-center": s => { const c: Point = [28, 30], m1 = at(135, TOWER_R, c), inside = at(225, TOWER_R * 0.8, c), tether = (p: Point): Overlay => guide(CENTER, p);
-    return {overlays:[pairTower(c), mark(...m1, "M1", "D")], boss:BOSS, after:[tether(c), you(s, c)], answer:[circle(c, 3.5)], options:[
+  // The tether goes to the player in the middle of the tower, so it draws from its portal (here
+  // the north one) to whoever the answer puts there. M1 stands on the tower's edge. The answers put
+  // you in the middle, just inside the edge, outside the tower, and on the edge.
+  "k-ecl-center": s => { const c: Point = [28, 30], m1 = at(135, TOWER_R, c), inside = at(225, TOWER_R * 0.8, c), tether = (p: Point): Overlay => eclTether(ECL_PORTAL.north, p);
+    return {overlays:[...eclPortals(), pairTower(c), mark(...m1, "M1", "D")], boss:BOSS, after:[tether(c), you(s, c)], answer:[circle(c, 3.5)], options:[
       hit(youAt(s, c, 3.5), [tether(c)]), hit(youAt(s, inside, 3.5), [tether(inside)]),
       hit(youAt(s, at(225, TOWER_R * 1.45, c), 3.5), [tether(m1)]), hit(youAt(s, at(225, TOWER_R, c), 3.5), [tether(m1)])]}; },
   // The drill's no-puddle pattern: a portal in the middle of each wall, your tower on an
   // intercard. Your tether comes from the north portal, so you go to the south wall, then
   // clockwise into the SW corner. Going by your tower (NW) would send you to SE instead.
   "k-ecl-tether": s => { const tower = ECL_TOWER_AT.nw, portal = ECL_PORTAL.north, wall: Point = [tower[0], CORNER_STAND.sw[1]];
-    const portals = Object.entries(ECL_PORTAL).map(([w, [x, y]]): Overlay => ({t:"portal", x, y, vert:w === "north" || w === "south"}));
     const sw = rect(0, 85, 15, 100), se = rect(85, 85, 100, 100), walk = (to: Point): Overlay[] => [guide(tower, wall), guide(wall, to), you(s, to)];
-    return {overlays:[...portals, pairTower(tower)], boss:BOSS, before:[tether(portal, tower), you(s, tower)],
+    return {overlays:[...eclPortals(), pairTower(tower)], boss:BOSS, before:[eclTether(portal, tower), you(s, tower)],
       after:walk(CORNER_STAND.sw), answer:[sw],
       note:"Example: your tower is NW, your tether from the north portal. South wall, then clockwise to SW.", options:[
         show(walk(CORNER_STAND.sw), [sw]),

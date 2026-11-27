@@ -109,6 +109,13 @@ function nameOf(o: Overlay): string {
   }
 }
 
+/** A drill by its id. */
+function drillById(id: string): Drill {
+  const d = DRILLS.find((x) => x.id === id);
+  if (!d) throw new Error(`missing drill ${id}`);
+  return d;
+}
+
 /** The attacks that go off when this step resolves. */
 const attacksOf = (step: Step): Overlay[] => (step.hits ?? [...(step.reveal ?? []), ...(step.cue ?? [])]).filter(isAttack);
 
@@ -287,6 +294,36 @@ describe("no correct answer stands in an attack", () => {
         const p = step.stand ?? zoneCenter(zone);
         results.push({ p, ok: true, z: zone, drop: step.drop ? p : null });
       }
+    }
+    expect(checked).toBeGreaterThan(100);
+  });
+
+  test("the whole Ecliptic wait spot and every tether corner are clear of the lines that must miss you", () => {
+    // Every point of the green area counts as correct, not only its center.
+    const steps = [
+      ...(["north", "south"] as const).flatMap((v) => {
+        const sc = withSeed("ECL-WAIT", () => drillById("m-ecl-start").build("H1", v));
+        return [sc.steps[sc.steps.length - 1]];
+      }),
+      ...CODES.slice(0, 8).map((code) => {
+        const sc = withSeed(code, () => drillById("m-ecl-towers").build("H2", null));
+        return sc.steps[sc.steps.length - 1];
+      }),
+    ];
+    let checked = 0;
+    for (const step of steps) {
+      const zone = stepZone(step, []);
+      if (!zone) throw new Error("no zone");
+      const lines = attacksOf(step);
+      expect(lines.length).toBeGreaterThanOrEqual(3);
+      for (let x = 0; x <= 100; x += 0.5)
+        for (let y = 0; y <= 100; y += 0.5) {
+          const q: Point = [x, y];
+          if (!inZone(q, zone)) continue;
+          checked++;
+          const line = lines.find((o) => hits(o, q));
+          expect(line && nameOf(line), `${step.q}: (${x}, ${y}) counts as correct`).toBeUndefined();
+        }
     }
     expect(checked).toBeGreaterThan(100);
   });

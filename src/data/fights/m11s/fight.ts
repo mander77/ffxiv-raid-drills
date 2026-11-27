@@ -172,7 +172,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
     // Its scene comes with the rest of Arena Split below, once the tether round is known.
     {title:"Arena Split: First Towers", drills:["m-split-tower"], scene:drill("m-split-tower", s), k:0, from:cactbot("--tethers--", 3), due:[cactbot("Explosion", 6)]},
     {title:"Orbital Omen", drills:["m-orbital"], scene:drill("m-orbital", s), k:0, from:cactbot("Orbital Omen (castbar)", 2), due:[cactbot("Orbital Omen 1", 2), cactbot("Orbital Omen 2", 2), cactbot("Orbital Omen 3", 2), cactbot("Orbital Omen 4", 2)]},
-    {title:"Ecliptic Stampede: Puddles", drills:["m-ecl-start"], scene:LATER, k:0, from:cactbot("--middle--", 7),
+    {title:wall === "none" ? "Ecliptic Stampede: Towers and Tether" : "Ecliptic Stampede: Puddles", drills:[wall === "none" ? "m-ecl-towers" : "m-ecl-start"], scene:LATER, k:0, from:cactbot("--middle--", 7),
       // Its scene is built at the end, once every other random part is rolled.
       // Your start spot as the markers come (with the Mammoth Meteor cast). Marked: one drop at each
       // Atomic Impact, then your wait spot as the tether lines go off. Not marked: under the boss by
@@ -242,7 +242,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
       cactbot("Heartbreak Kick 1", 3), cactbot("Heartbreak Kick 7")]});
   /* Ecliptic Stampede with no puddles rolls its own random parts (the tank towers, the other player
      in the middle), so its scene is built last: the parts above keep their codes whatever your pick. */
-  const eclSeg = segs.find(g => g.drills[0] === "m-ecl-start");
+  const eclSeg = segs.find(g => g.drills[0] === "m-ecl-start" || g.drills[0] === "m-ecl-towers");
   if (eclSeg) eclSeg.scene = start.partner ? eclipticScene(s, start) : eclipticFreeScene(s, corner, meteors);
   // Who has Massive Meteor's stack marker is random too, so it is drawn after them all.
   const massive = segs.find(g => g.drills[0] === "m-massive");

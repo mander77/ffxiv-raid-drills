@@ -137,6 +137,7 @@ export function LiveArena({
   );
 
   // Your tether, from its portal to where you stand: your last click, or your mark before the first.
+  // It shows once its step (`from`) is asked.
   const mine = runner === undefined ? sc.tether : undefined;
   const lastSpot = [...results].reverse().find((r) => !r.missed)?.p;
   const tetherTo: Point | undefined = mine && (lastSpot ?? [mine.you.x, mine.you.y]);
@@ -221,7 +222,7 @@ export function LiveArena({
             {base.drops}
             {reveal.drops}
             {shapes(cues.filter((o) => o.t !== "mark"))}
-            {mine && tetherTo && <Tether portal={mine.portal} to={tetherTo} />}
+            {mine && tetherTo && asked >= (mine.from ?? 0) && <Tether portal={mine.portal} to={tetherTo} fixed={mine.fixed} />}
           </>
         ),
         zones: (
@@ -247,7 +248,7 @@ export function LiveArena({
             {base.marks}
             {reveal.marks}
             {shapes(cues.filter((o) => o.t === "mark"))}
-            {mine && results.length === 0 && <Shape overlay={mine.you} />}
+            {mine && results.length === 0 && !mine.from && <Shape overlay={mine.you} />}
             {headOn && head && (
               <>
                 <Shape overlay={headOn} />

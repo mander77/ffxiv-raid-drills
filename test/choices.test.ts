@@ -52,16 +52,16 @@ const SHOWS: { [K in keyof Picks]: (f: Fight, v: string) => boolean } = {
   },
   // The proximity AoEs land in the two corners the pick names, as the markers come.
   meteors: (f, v) => {
-    const dots = (seg(f, "Ecliptic Stampede: Puddles").scene.steps[1].cue ?? []).flatMap((o) =>
-      o.t === "aoe" ? [o.x < 50 === o.y < 50] : [],
-    );
+    const dots = (
+      seg(f, f.picks.wall === "none" ? "Ecliptic Stampede: Towers and Tether" : "Ecliptic Stampede: Puddles").scene.steps[1].cue ?? []
+    ).flatMap((o) => (o.t === "aoe" ? [o.x < 50 === o.y < 50] : []));
     return dots.length === 2 && dots.every((nwOrSe) => nwOrSe === (v === "nw-se"));
   },
   // The fireball says which wall you dropped your puddles on, and the puddle drops walk along it.
   // With no puddles, you go under the boss, and the fireball says where your tether ended.
   wall: (f, v) =>
     v === "none"
-      ? seg(f, "Ecliptic Stampede: Puddles").scene.steps[1].a[0].startsWith("Under the boss") &&
+      ? seg(f, "Ecliptic Stampede: Towers and Tether").scene.steps[1].a[0].startsWith("Under the boss") &&
         Boolean(
           f.segs.find((g) => /^m-ecl-(two|four)$/.test(g.drills[0]))?.scene.setup.some((line) => line.startsWith("You were not marked")),
         )
