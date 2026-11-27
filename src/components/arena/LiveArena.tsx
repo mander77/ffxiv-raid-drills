@@ -13,6 +13,10 @@ import { ZoneLabel } from "./ZoneLabel";
     of the weapon's name on the outer side. The app's choice. */
 const ORD_IN = 10;
 
+/** How far north of you a stack marker that follows the party stands, when another player has
+    it. The app's choice: close, but clear of your own mark. */
+const HEAD_BESIDE = 5;
+
 export interface LiveArenaProps {
   scene: Scene;
   /** How many quarter turns the arena is turned. */
@@ -144,7 +148,12 @@ export function LiveArena({
   // A stack marker, on its player until the step is answered. Yours rides on your moving marker
   // in the full fight, so it is not drawn here then.
   const head = sc.headMark;
-  const headOn = head && results.length === 0 && !(head.you && runner !== undefined) ? rotOverlay(head.on, k) : undefined;
+  const headOn =
+    head && results.length === (head.at ?? 0) && !(head.you && runner !== undefined)
+      ? head.follow && lastSpot
+        ? { ...head.on, x: lastSpot[0], y: lastSpot[1] - (head.you ? 0 : HEAD_BESIDE) }
+        : rotOverlay(head.on, k)
+      : undefined;
 
   // After a correct answer the next question is already asked; after an incorrect one it waits
   // for Next step.

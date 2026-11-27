@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, attackHits, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, isStretched, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, LINE_PORTAL_OUT, flatlinerThrow, wrathLine, eclipticWrath, eclTowerHit, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, towerThrow, ROCK_GAP, meteorHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, isStretched, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, LINE_PORTAL_OUT, flatlinerThrow, wrathLine, eclipticWrath, eclTowerHit, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, towerThrow, ROCK_GAP, meteorHit, spreadHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -463,6 +463,7 @@ export function buildOrbital(): {overlays: Overlay[]; steps: Step[]} {
 const NORTH_START = {p:FIRST_PUDDLE, a:["North of the boss, in max melee."]};
 function voidSteps(s: Slot, spread: boolean, c: Point = CENTER, start = NORTH_START, f = 0, spreadMore: Lines = []): Step[] {
   const next = puddleAfter(c);
+  const tankMeleeSpreads = fixedAround(c, f).map(m => spreadHit(m.p));
   return [
     {q:"Where do you drop the first puddle?", z:firstPuddle(start.p, c), a:start.a, drop:VOID_PUDDLE},
     {q:"Second puddle?", zf:next, a:["Just outside your first puddle, one small step clockwise.", "Stay in max melee."], drop:VOID_PUDDLE},
@@ -470,16 +471,28 @@ function voidSteps(s: Slot, spread: boolean, c: Point = CENTER, start = NORTH_ST
     spread
       ? {q:"Puddles done. Comet: every player spreads. Tanks and melee go to fixed spots. Where do you go?",
           zf:cometSpread(s, c, f), cue:spreadMarks(c, f), puddlesOff:true,
+          // Comet's spread circles: yours, and the tanks' and melee's on their fixed spots, which must miss you.
+          revealAt:p => [spreadHit(p), ...tankMeleeSpreads], hits:tankMeleeSpreads,
           a:["Any open spot. Healers and ranged have no fixed spread spot.", "Keep away from the tank and melee spots.", ...spreadMore]}
       : {q:"Puddles done. Where does the party stack?", zf:next, revealAt:p => [crushingComet(p)],
           a:["Stack one more step clockwise, just past the third puddle.", "Stay in max melee."]}];
+}
+
+/** Who has Crushing Comet's stack marker: one of the two healers, at random (cactbot's
+    stackMarkerOn; the owner: always a healer). */
+export const randomStackHealer = (s: Slot): Slot => random() < 0.5 ? s : s === "H1" ? "H2" : "H1";
+
+/** Crushing Comet's stack marker on the healer `on`, from the stack step (`at`) until the party
+    stacks. The party drops its puddles together, so the healer stands with you. */
+function cometMark(s: Slot, on: Slot, at: number): Scene["headMark"] {
+  return {on:{t:"mark", x:50, y:50, l:on, r:"H"}, you:on === s, n:1, at, follow:true};
 }
 
 /* The first Void Stardust runs straight into the second weapon set: the weapons are already
    out, so the party finds the first one early, to know how far the run is after the stack or
    spread. Then the scene goes on through all three weapons of this second set, so one drill
    covers the whole stretch. */
-export function voidIntoWeapons(s: Slot, spread: boolean, A: JumpSet): Scene {
+export function voidIntoWeapons(s: Slot, spread: boolean, A: JumpSet, stackOn: Slot = s): Scene {
   const first = A.W[0], where = WHERE[Math.round(first.a / 45) % 8];
   const steps: Step[] = [
     // Look ahead: you spot the first weapon now, so you know where to run when the puddles are
@@ -501,7 +514,9 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: JumpSet): Scene {
     ordered:true,
     overlays:A.overlays.map(o => ({...o, spawn:undefined})),   // no fading: these steps are not one per weapon
     // The boss stays in the middle for the pick, the puddles and the stack or spread (5 steps).
-    bossAt:n => A.states[Math.max(0, Math.min(n - 5, A.states.length - 1))],
+    // Then his cast starts and he faces the first weapon, as the fight shows from 1:26.7.
+    bossAt:n => n === 5 ? {...A.states[0], f:first.a} : A.states[Math.max(0, Math.min(n - 5, A.states.length - 1))],
+    headMark:spread ? undefined : cometMark(s, stackOn, 4),
     steps,
     rule:["Look Ahead: find the first weapon before the puddles.", "Its flat side is square to the boss.",
       "Puddles: start north. Each one just outside the last, clockwise, in max melee.",
@@ -521,7 +536,7 @@ export function behind(boss: Boss): Point {
   const f = (boss.f ?? 0) * DEG;
   return [boss.x - OUTSIDE * Math.sin(f), boss.y + OUTSIDE * Math.cos(f)];
 }
-export function voidAgain(s: Slot, spread: boolean, boss: Boss): Scene {
+export function voidAgain(s: Slot, spread: boolean, boss: Boss, stackOn: Slot = s): Scene {
   const c: Point = [boss.x, boss.y], butt = behind(boss);
   return {
     setup:["Void Stardust (Second Time). The boss stays on the third weapon.",
@@ -531,6 +546,7 @@ export function voidAgain(s: Slot, spread: boolean, boss: Boss): Scene {
       "It is always the opposite of the first."],
     ordered:true,
     boss, overlays:[], steps:voidSteps(s, spread, c, {p:butt, a:["Directly behind the boss, in max melee."]}, boss.f ?? 0, VOID_2_SPREAD_RULE),
+    headMark:spread ? undefined : cometMark(s, stackOn, 3),
     rule:[...VOID_2_START_RULE,
       "Each one just outside the last, clockwise around him.",
       ...(spread ? VOID_2_SPREAD_RULE : ["Stack one more step clockwise, just past the third puddle."]),
@@ -1666,11 +1682,11 @@ export const DRILLS: readonly Drill[] = [
   // One drill for the whole stretch: the weapons spawn at 1:13, Void Stardust runs, then the boss
   // takes the same three weapons. A separate drill for the weapons would show a different set.
   {id:"m-void", order:4, random:true, variants:["stack","spread"], follows:{variant:"void", pick:"set2"}, phase:P1, time:"1:13 to 1:45", title:"Void Stardust into the Second Weapons", kind:"puddles",
-    build:(s, v, pick)=>voidIntoWeapons(s, v === "spread", buildAssault2(s, orderFrom(pick)))},
+    build:(s, v, pick)=>voidIntoWeapons(s, v === "spread", buildAssault2(s, orderFrom(pick)), randomStackHealer(s))},
   // The boss stands where the second set left him. Its variant is how this one ends, the
   // opposite of the first Void Stardust, so it follows only the weapon order.
   {id:"m-void-2", order:6, random:true, variants:["stack","spread"], follows:{pick:"set2"}, phase:P1, time:"1:50 to 1:56", title:"Void Stardust (Second Time)", kind:"puddles",
-    build:(s, v, pick)=>{ const A = buildAssault2(s, orderFrom(pick)); return voidAgain(s, v === "spread", A.states[A.states.length - 1]); }},
+    build:(s, v, pick)=>{ const A = buildAssault2(s, orderFrom(pick)); return voidAgain(s, v === "spread", A.states[A.states.length - 1], randomStackHealer(s)); }},
   {id:"m-dance", order:8.1, rotate:true, phase:P1, time:"2:31", title:"Dance of Domination: Pairs", kind:"pairStack",
     build:s=>({setup:["The seven hits are over. The lines are on the floor.", "Find the side with no outer line.", "That open side is new south."], ordered:true,
       boss:{x:50, y:50, f:null}, overlays:DANCE_LINES.map((l): Overlay => ({t:"lineaoe", ...l})),

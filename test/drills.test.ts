@@ -50,6 +50,7 @@ import {
   TORNADO_BAITS,
   ultimateScene,
   voidAgain,
+  voidIntoWeapons,
 } from "../src/data/fights/m11s/drills";
 import { bossmod } from "../src/data/fights/m11s/sources";
 import { angOf, inZone, stepZone, zoneCenter } from "../src/geometry";
@@ -1242,4 +1243,30 @@ test("Arena Split lineup: a marker off the waymark's corner is told where to sta
   // In the middle of your end, on your platform, clear of the wall and the waymark: not the corner.
   const mid: Point = [(PLATFORM_X[side][0] + PLATFORM_X[side][1]) / 2, end === "north" ? 40 : 60];
   assert.match(lineup?.whyNot?.(mid, []) ?? "", /^Stand at waymark \d's wall-side corner\.$|hits you there\.$/);
+});
+
+test("Void Stardust, Comet: you see a spread circle on you and on each tank and melee spot", () => {
+  const st = voidAgain("H1", true, { x: 50, y: 50, f: 0 }).steps[3];
+  const shown = st.revealAt?.([20, 50]) ?? [];
+  assert.equal(shown.length, 5);
+  assert.equal(st.hits?.length, 4, "only the other players' circles must miss you");
+  const spread = ATTACK.circle([0, 0], bossmod("CometSpread").range);
+  for (const o of shown) assert.equal(o.t === "aoe" ? o.r : null, spread.t === "aoe" ? spread.r : undefined, "each is a Comet spread");
+});
+
+test("Void Stardust ending in a stack: a healer has the marker from the stack step", () => {
+  const A = buildAssault2("H1");
+  const first = voidIntoWeapons("H1", false, A, "H2").headMark;
+  assert.deepInclude(first, { you: false, at: 4, follow: true });
+  assert.equal(first?.on.l, "H2");
+  const second = voidAgain("H1", false, A.states[3], "H1").headMark;
+  assert.deepInclude(second, { you: true, at: 3 });
+  assert.isUndefined(voidIntoWeapons("H1", true, A, "H2").headMark, "a spread has no stack marker");
+});
+
+test("Void Stardust into the second weapons: at the first weapon step the boss faces it", () => {
+  const A = buildAssault2("H1"),
+    sc = voidIntoWeapons("H1", true, A);
+  assert.isNull(sc.bossAt?.(4).f ?? null, "no facing during the puddles and the spread");
+  assert.deepInclude(sc.bossAt?.(5), { x: 50, y: 50, f: A.W[0].a });
 });

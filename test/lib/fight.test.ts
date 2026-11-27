@@ -392,3 +392,12 @@ test("in the run, an incorrect click keeps what was wrong there, for the answer 
   expect(answerFightStep(s, si, [50, 95])?.kind).toBe("bad");
   expect(s.results[si].at(-1)?.why).toBe("That is not your platform.");
 });
+
+test("the full fight: the Void Stardust that ends in a stack puts its marker on a healer", () => {
+  for (const code of ["K7Q2", "2FFV", "AB12", "ZZ99"]) {
+    const voids = buildFight("H1", code).segs.filter((g) => g.drills[0] === "m-void" || g.drills[0] === "m-void-2");
+    const marked = voids.filter((g) => g.scene.headMark);
+    expect(marked, code).toHaveLength(1);
+    expect(["H1", "H2"]).toContain(marked[0].scene.headMark?.on.l);
+  }
+});

@@ -23,7 +23,7 @@ export const REFERENCE: readonly ReferenceEntry[] = [
   {
     name: "Void Stardust (Second Time)",
     picture: "k-void-2-start",
-    cards: ["k-void-2-start", "k-void-2"],
+    cards: ["k-void-2-start", "k-void-2", "k-void-2-stack"],
     drills: ["m-void-2"],
     timeline: "n-4",
   },
