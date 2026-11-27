@@ -744,10 +744,22 @@ test("Arena Split: a round puts you in close, then at your end, out of the porta
               assert.ok(onSide(lineup, side) && atEnd(lineup, end), `${what}: the ${end} end`);
               assert.ok(inHalf(lineup, side, covered === "inner" ? "outer" : "inner"), `${what}: out of the portal lines`);
               assert.ok(Math.hypot(lineup[0] - p3[0], lineup[1] - p3[1]) >= 15, "out of the third puddle");
-              // The portal lines show with the lineup question.
-              assert.ok(
+              // The portal lines' portals show with the lineup question, outside the north and south
+              // walls, over the half they hit; the half itself shows only after the answer.
+              const linePortals = (sc.steps[k + 3].cue ?? []).filter((o) => o.t === "portal");
+              assert.equal(linePortals.length, 4, "two portals at the ends of each portal line");
+              for (const o of linePortals) {
+                assert.ok(o.y < 0 || o.y > 100, "outside the north or south wall");
+                const sd: SplitSide = o.x < 50 ? "west" : "east";
+                assert.ok(inHalf([o.x, 50], sd, sd === side ? covered : covered === "inner" ? "outer" : "inner"), "over the half it hits");
+              }
+              assert.notOk(
                 sc.steps[k + 3].cue?.some((o) => o.t === "lane"),
-                "the portal lines",
+                "the half hit is not given away",
+              );
+              assert.ok(
+                sc.steps[k + 3].reveal?.some((o) => o.t === "lane"),
+                "the half hit shows after the answer",
               );
               // A tether stretches at the wall; a marker goes to the wall-side corner of the number waymark.
               if (tether) assert.ok(end === "north" ? lineup[1] <= 5 : lineup[1] >= 95, `${what}: at the wall`);
@@ -1033,6 +1045,39 @@ test("each Arena Split tower shows how many players soak it, as its drill says",
     const towers = d.build("H1", d.variants?.[0] ?? null).overlays.filter((o) => o.t === "tower");
     assert.isAbove(towers.length, 0, `${id} draws its towers`);
     for (const t of towers) assert.equal(t.soak, d.soak, id);
+  }
+});
+
+test("each Arena Split tower step shows the four towers going off and your knockback after the answer", () => {
+  for (const id of ["m-split-tower", "m-split-towers2", "m-avalanche"]) {
+    const d = DRILLS.find((x) => x.id === id);
+    if (!d) throw new Error(`missing drill ${id}`);
+    for (const v of d.variants ?? [null]) {
+      const step = d.build("H1", v).steps[0],
+        reveal = step.reveal ?? [];
+      assert.equal(reveal.filter((o) => o.t === "aoe").length, 4, `${id} ${v}: the four towers go off`);
+      const push = reveal.filter((o) => o.t === "knockback");
+      assert.equal(push.length, 1, `${id} ${v}: your knockback`);
+      assert.ok(step.knock && push[0].t === "knockback", `${id} ${v}: a knockback step`);
+      const from = step.knock.from;
+      assert.isBelow(Math.hypot(push[0].x - from[0], push[0].y - from[1]), TOWER_R, `${id} ${v}: it starts in your tower`);
+      assert.equal(step.hits?.length, 3, `${id} ${v}: only the other towers must miss you`);
+    }
+  }
+});
+
+test("Practice puts your tether's portal at a tower in the half away from where you land, as the full fight does", () => {
+  for (const id of ["m-split-tower", "m-split-towers2"]) {
+    const d = DRILLS.find((x) => x.id === id);
+    if (!d) throw new Error(`missing drill ${id}`);
+    for (let i = 0; i < 40; i++) {
+      const sc = withSeed(`T${i}`, () => d.build("H1", "tether")),
+        portal = sc.tether?.portal,
+        step = sc.steps[0];
+      if (!portal || !step.knock) throw new Error(`${id}: no tether or knockback`);
+      const to = landing(step.knock.from, zoneCenter(zoneOf(stepZone(step, []))));
+      assert.ok(atEnd(portal, to[1] < 50 ? "south" : "north"), `${id} T${i}: the portal is in the other half`);
+    }
   }
 });
 
