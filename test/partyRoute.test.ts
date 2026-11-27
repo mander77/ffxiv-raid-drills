@@ -32,6 +32,12 @@ const WITH_PARTY = [
   "m-ecl-two",
   "m-ecl-four",
   "m-hb",
+  "m-split-line",
+  "m-split-tower",
+  "m-split-fire",
+  "m-split-towers2",
+  "m-massive",
+  "m-avalanche",
 ];
 
 /** Every scene a drill builds for these codes and both slots. */
@@ -157,6 +163,8 @@ test("Pressure: nobody takes a mechanic's start spot before the mechanic appears
     f.segs.forEach((g) => {
       for (const [l, p] of Object.entries(g.scene.party?.start ?? {})) {
         const who = l as SlotName;
+        // On the split arena they wait in their quadrant, which gives nothing away.
+        if (g.scene.split) continue;
         const route = routes.get(who) ?? [];
         // A player who is there already from the mechanic before gives nothing away.
         const before = route.filter((x) => x.hit <= g.from).at(-1);

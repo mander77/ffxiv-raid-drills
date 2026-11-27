@@ -1256,11 +1256,119 @@ export const portalsOf = (endsSide: SplitSide): Overlay[] =>
   SIDES.flatMap(sd => ENDS.map((h): Overlay => { const [x, y] = portalAt(sd, h, endsSide); return {t:"portal", x, y, vert:false}; }));
 export const randomEndsSide = randomSide;
 const SLOT_NAMES: readonly SlotName[] = ["MT", "OT", "H1", "H2", "M1", "M2", "R1", "R2"];
-/** n players other than you, at random: the other tethered players. The tethers go to random
-    roles (the owner), so any mix can stand on a platform. */
-export const randomOthers = (s: Slot, n: number): SlotName[] => shuffle(SLOT_NAMES.filter(x => x !== s)).slice(0, n);
-/** The tethers swap in the second round: the players other than you who had none in the first. */
-export const swappedOthers = (s: Slot, first: readonly SlotName[]): SlotName[] => SLOT_NAMES.filter(x => x !== s && !first.includes(x));
+/** A quadrant of the split arena: a platform and its end. */
+export interface Quad { side: SplitSide; end: SplitEnd }
+/** Where each player resolves one round of tethers and markers: their quadrant, and whether they
+    have a tether. Every quadrant holds one tethered player and one marker. */
+export type SplitPlan = Record<SlotName, Quad & {tether: boolean}>;
+/** Both rounds. */
+export interface SplitPlans { r1: SplitPlan; r2: SplitPlan }
+/** The first towers (Hector No Buddies): light party 1 west, light party 2 east; tanks and ranged
+    north, healers and melee south. */
+export const firstTower = (x: SlotName): Quad => ({side:partyOf(x).lp === 1 ? "west" : "east", end:partyOf(x).role === "Tank" || partyOf(x).role === "Ranged" ? "north" : "south"});
+/* One round, for everyone (Hector's video, 13:00 to 15:40). Each player starts at their tower.
+   A player with no tether is never knocked across: they stay on their platform, at the end the
+   knockback sends them to, and two on one platform take one end each. A tethered player ends on
+   the platform across from their portal: as many cross from each platform, so each ends with two
+   tethered players, one at each end. `you` is your own quadrant, which the rest fits around. */
+function planRound(towers: Record<SlotName, Quad>, tethered: readonly SlotName[], you: {who: SlotName} & Quad): SplitPlan {
+  const plan = {} as SplitPlan;
+  plan[you.who] = {side:you.side, end:you.end, tether:tethered.includes(you.who)};
+  /** Give each player of `xs` on platform `side` an end, one each, the preferred one when it is free. */
+  const ends = (side: SplitSide, xs: readonly SlotName[], tether: boolean, pref: (x: SlotName) => SplitEnd): void => {
+    const taken = new Set(SLOT_NAMES.filter(x => plan[x] && plan[x].side === side && plan[x].tether === tether).map(x => plan[x].end));
+    for (const x of xs) {
+      const end = taken.has(pref(x)) ? otherEnd(pref(x)) : pref(x);
+      taken.add(end);
+      plan[x] = {side, end, tether};
+    }
+  };
+  for (const side of SIDES) {
+    const markers = SLOT_NAMES.filter(x => x !== you.who && !tethered.includes(x) && towers[x].side === side);
+    ends(side, markers, false, x => otherEnd(towers[x].end));
+  }
+  // How many tethered players cross from each platform: the same on both sides. Yours counts.
+  const from = (side: SplitSide): SlotName[] => tethered.filter(x => towers[x].side === side);
+  const youCross = tethered.includes(you.who) ? you.side !== towers[you.who].side : null;
+  const counts = [0, 1, 2].filter(k => youCross == null || (youCross ? k >= 1 : k <= from(towers[you.who].side).length - 1));
+  const k = counts[Math.floor(random() * counts.length)];
+  const crossers = SIDES.flatMap(side => {
+    const xs = from(side), rest = shuffle(xs.filter(x => x !== you.who));
+    return xs.includes(you.who) && youCross ? [you.who, ...rest.slice(0, k - 1)] : rest.slice(0, k);
+  });
+  for (const side of SIDES) {
+    const xs = tethered.filter(x => x !== you.who && (crossers.includes(x) ? otherSide(towers[x].side) : towers[x].side) === side);
+    ends(side, xs, true, x => crossers.includes(x) ? towers[x].end : otherEnd(towers[x].end));
+  }
+  return plan;
+}
+/** Four tethers for the first round, two in each light party, so each platform keeps two players
+    with no tether. You have one when `yours` is true. */
+function firstTethers(s: Slot, yours: boolean): SlotName[] {
+  const lp = (n: 1 | 2): SlotName[] => SLOT_NAMES.filter(x => partyOf(x).lp === n);
+  return ([1, 2] as const).flatMap(n => {
+    const mates = lp(n).filter(x => x !== s), need = 2 - (yours && partyOf(s).lp === n ? 1 : 0);
+    return [...(yours && partyOf(s).lp === n ? [s] : []), ...shuffle(mates).slice(0, need)];
+  });
+}
+/** Both rounds for everyone, around your own quadrants: `you1` at the end of the first round,
+    `you2` at the end of the second. The tethers swap in the second round. */
+export function splitPlans(s: Slot, t1: boolean, you1: Quad, you2: Quad): SplitPlans {
+  const tethered1 = firstTethers(s, t1);
+  const r1 = planRound(Object.fromEntries(SLOT_NAMES.map(x => [x, firstTower(x)])) as Record<SlotName, Quad>, tethered1, {who:s, ...you1});
+  const r2 = planRound(r1, SLOT_NAMES.filter(x => !tethered1.includes(x)), {who:s, ...you2});
+  return {r1, r2};
+}
+/** Your own path through both rounds, at random, the way the full fight builds it: a tether in one
+    round, and a tower that knocks you across or along. */
+export function randomPath(s: Slot, t1 = random() < 0.5): {t1: boolean; you1: Quad; you2: Quad} {
+  const tower = firstTower(s), across1 = t1 && random() < 0.5, across2 = !t1 && random() < 0.5;
+  const you1: Quad = across1 ? {side:otherSide(tower.side), end:tower.end} : {side:tower.side, end:otherEnd(tower.end)};
+  const you2: Quad = across2 ? {side:otherSide(you1.side), end:you1.end} : {side:you1.side, end:otherEnd(you1.end)};
+  return {t1, you1, you2};
+}
+/** Both rounds at random, for a Practice try. */
+export function randomSplit(s: Slot, t1?: boolean): {t1: boolean; you1: Quad; you2: Quad; plans: SplitPlans} {
+  const path = randomPath(s, t1);
+  return {...path, plans:splitPlans(s, path.t1, path.you1, path.you2)};
+}
+/** A round with you at `you` and the others filling the other places in `order`, one tethered
+    player and one marker in each quadrant: for a picture or a test that needs any valid round. */
+export function lineupPlan(s: Slot, tether: boolean, you: Quad, order: readonly SlotName[] = SLOT_NAMES): SplitPlan {
+  const plan = {} as SplitPlan, free = order.filter(x => x !== s);
+  plan[s] = {...you, tether};
+  for (const side of SIDES) for (const end of ENDS) for (const t of [true, false]) {
+    const who = side === you.side && end === you.end && t === tether ? undefined : free.shift();
+    if (who) plan[who] = {side, end, tether:t};
+  }
+  return plan;
+}
+/** Who stands in a quadrant in a round: its tethered player or its marker. */
+const whoAt = (plan: SplitPlan, q: Quad, tether: boolean): SlotName | undefined =>
+  SLOT_NAMES.find(x => plan[x].side === q.side && plan[x].end === q.end && plan[x].tether === tether);
+/** Where a player waits for the next towers: the outer corner of the quadrant they ended in, the
+    tethered player by the wall and the marker a step in. The app's choice. */
+const quadCorner = (q: Quad, tether: boolean): Point =>
+  [q.side === "west" ? PLATFORM_X.west[0] + 5 : PLATFORM_X.east[1] - 5, q.end === "north" ? (tether ? 5 : 13) : (tether ? 95 : 87)];
+/** Everyone's start for the towers after a round: in the corner of the quadrant they ended in. */
+const cornersAfter = (s: Slot, plan: SplitPlan): Partial<Record<SlotName, Point>> =>
+  Object.fromEntries(SLOT_NAMES.filter(x => x !== s).map(x => [x, quadCorner(plan[x], plan[x].tether)]));
+/** Where each player soaks their tower, on the side that knocks them to `to`: across to the other
+    platform, or along to the other end. Two in one tower with the same knock stand side by side. */
+function towerParty(s: Slot, towers: Record<SlotName, Quad>, to: (x: SlotName) => Quad): {party: PartySpots; from: Partial<Record<SlotName, Point>>} {
+  const party: PartySpots = {}, from: Partial<Record<SlotName, Point>> = {}, used: Point[] = [];
+  const mine = towers[s], myTo = to(s);
+  for (const x of SLOT_NAMES.filter(y => y !== s)) {
+    const t = towers[x], d = to(x), knock: Knock = d.side !== t.side ? "across" : "along";
+    from[x] = SPLIT_TOWER[t.side][t.end];
+    if (t.side === mine.side && t.end === mine.end && d.side === myTo.side && d.end === myTo.end) { party[x] = "you"; continue; }
+    const z = towerHalf(t.side, t.end, knock), at = "fn" in z ? z.label : zoneCenter(z);
+    const p = used.some(q => dist(q, at) < 4) ? stackedAt(x, at) : at;
+    used.push(p);
+    party[x] = p;
+  }
+  return {party, from};
+}
 
 /** The side portal lines (Majestic Meteorain): one line covers a half of each platform's width,
     along its whole length. When it covers the inner half of one platform, it covers the outer
@@ -1446,8 +1554,8 @@ export interface SplitRound {
   covered: SplitHalf;
   /** The side whose tether portals are near the ends; the other side's are near the middle. */
   endsSide: SplitSide;
-  /** The other tethered players: three when you have a tether, four when you do not. */
-  others: readonly SlotName[];
+  /** Where everyone resolves this round. */
+  plan: SplitPlan;
   /** The end of the platforms the side portal lines' portals stand at (random each round). North
       when left out: where BossMod starts the lines. */
   lineEnd?: SplitEnd;
@@ -1456,14 +1564,13 @@ export interface SplitRound {
 /** The tethers of the other players at the lineup. Each platform has two tethered players, one
     at each end, each stretched from a portal on the other side, at the opposite end. */
 function otherTethers(r: SplitRound): Overlay[] {
-  return othersAtLineup(r).flatMap(({who, p, portal}): Overlay[] =>
-    [{t:"tether", x:portal[0], y:portal[1], x2:p[0], y2:p[1]}, {t:"mark", x:p[0], y:p[1], l:who, r:markRole(partyOf(who).role)}]);
+  return othersAtLineup(r).map(({p, portal}): Overlay => ({t:"tether", x:portal[0], y:portal[1], x2:p[0], y2:p[1]}));
 }
 /** Each other tethered player at the lineup: who, where, and their tether's portal. */
 function othersAtLineup(r: SplitRound): {who: SlotName; p: Point; portal: Point}[] {
   const spots = SIDES.flatMap(sd => ENDS.map(e => ({sd, e}))).filter(({sd, e}) => !(r.tether && sd === r.side && e === r.end));
-  return spots.flatMap(({sd, e}, i) => {
-    const who = r.others[i];
+  return spots.flatMap(({sd, e}) => {
+    const who = whoAt(r.plan, {side:sd, end:e}, true);
     if (!who) return [];
     return [{who, p:tetherBest(sd, e, sd === r.side ? r.covered : otherHalf(r.covered)), portal:portalAt(otherSide(sd), otherEnd(e), r.endsSide)}];
   });
@@ -1480,7 +1587,7 @@ const allWraths = (r: SplitRound): Band[] =>
     ENDS. */
 function markerSpots(r: SplitRound): {sd: SplitSide; e: SplitEnd; p: Point}[] {
   // A round is built often and the spots take a while to find, so each pattern is found once.
-  const key = [r.tether, r.side, r.end, r.covered, r.endsSide, r.others.length].join(), known = MARKER_SPOTS.get(key);
+  const key = [r.tether, r.side, r.end, r.covered, r.endsSide].join(), known = MARKER_SPOTS.get(key);
   if (known) return known;
   const spots = SIDES.flatMap(sd => ENDS.map(e => ({sd, e, p:markerBest(sd, e, sd === r.side ? r.covered : otherHalf(r.covered), allWraths(r))})));
   MARKER_SPOTS.set(key, spots);
@@ -1489,18 +1596,16 @@ function markerSpots(r: SplitRound): {sd: SplitSide; e: SplitEnd; p: Point}[] {
 const MARKER_SPOTS = new Map<string, {sd: SplitSide; e: SplitEnd; p: Point}[]>();
 /** Where each Fire Breath marker other than you stands at the lineup. With a tether you have no
     marker, so all four stand there. */
-const markersAtLineup = (r: SplitRound): Point[] =>
-  markerSpots(r).filter(({sd, e}) => r.tether || sd !== r.side || e !== r.end).map(({p}) => p);
+const markersAtLineup = (r: SplitRound): Point[] => markersWho(r).map(({p}) => p);
+/** The other markers at the lineup: who, and where. */
+const markersWho = (r: SplitRound): {who: SlotName | undefined; p: Point}[] =>
+  markerSpots(r).filter(({sd, e}) => r.tether || sd !== r.side || e !== r.end).map(({sd, e, p}) => ({who:whoAt(r.plan, {side:sd, end:e}, false), p}));
 /** The markers' Fire Breath: a line from the boss through each marked player. */
 const otherBreaths = (r: SplitRound): Band[] => markersAtLineup(r).map(p => fireBreath(CENTER, p));
 /** The other markers at the lineup: the players with no tether, other than you, each with its
     Fire Breath. */
-function otherMarkers(s: Slot, r: SplitRound): Overlay[] {
-  const names = SLOT_NAMES.filter(x => x !== s && !r.others.includes(x));
-  return markersAtLineup(r).flatMap((p, i): Overlay[] => {
-    const who = names[i];
-    return who ? [fireBreath(CENTER, p), {t:"mark", x:p[0], y:p[1], l:who, r:markRole(partyOf(who).role)}] : [];
-  });
+function otherMarkers(r: SplitRound): Overlay[] {
+  return markersWho(r).map(({p}) => fireBreath(CENTER, p));
 }
 /** Your own Fire Breath, without a tether: through your best spot. */
 const yourBreath = (r: SplitRound): Band => {
@@ -1520,9 +1625,8 @@ function lineupWhyNot(s: Slot, r: SplitRound, portal: Point | null): (p: Point, 
     const puddle = results.at(-1)?.drop;
     if (puddle && dist(p, puddle) < MAJESTIC_PUDDLE.r) return "The third puddle is still there.";
     if (portalLines(r.side, r.covered).some(o => o.t === "lane" && attackHits(o, p))) return "The portal lines hit you there.";
-    const names = SLOT_NAMES.filter(x => x !== s && !r.others.includes(x));
-    const breath = markersAtLineup(r).findIndex(q => attackHits(fireBreath(CENTER, q), p));
-    if (breath >= 0 && names[breath]) return names[breath] + "'s Fire Breath hits you there.";
+    const breath = markersWho(r).find(m => attackHits(fireBreath(CENTER, m.p), p));
+    if (breath?.who) return breath.who + "'s Fire Breath hits you there.";
     const line = othersAtLineup(r).find(o => attackHits(wrathLine(o.portal, o.p), p));
     if (line) return line.who + "'s tether line hits you there.";
     if (!portal) return inZone(p, {rect:markerRect(r.side, r.end, r.covered)}) ? undefined : "Stand at waymark " + WAYMARK[r.side][r.end].n + "'s wall-side corner.";
@@ -1530,9 +1634,34 @@ function lineupWhyNot(s: Slot, r: SplitRound, portal: Point | null): (p: Point, 
     if (Math.min(p[1], 100 - p[1]) > WALL_STRIP) return "Go right up to the " + r.end + " wall.";
     // Your own line runs from your portal through you: it must miss the other players.
     const own = wrathLine(portal, tetherBest(r.side, r.end, r.covered)).w;
-    const players = [...othersAtLineup(r).map(o => ({who:o.who, p:o.p})), ...markersAtLineup(r).map((q, i) => ({who:names[i], p:q}))];
+    const players = [...othersAtLineup(r).map(o => ({who:o.who, p:o.p})), ...markersWho(r)];
     const hit = players.find(o => o.who && !clearOf(p, lineWouldHit(portal, o.p, own)));
     return hit ? "From there, your tether line hits " + hit.who + "." : undefined;
+  };
+}
+
+/* Where the others stand through a round (Hector's video, 13:35 to 15:15): the tethered ones a
+   step back and the markers in close for Fire Breath; everyone in close for the first puddle; then
+   in pairs toward their end, one tethered and one marker; then each tethered player at the wall
+   and each marker by their waymark. Your pair is the other player of your quadrant. Where in a
+   spot each stands, so every mark shows, is the app's choice. */
+function roundParty(s: Slot, r: SplitRound): {start: Partial<Record<SlotName, Point>>; wait: PartySpots; first: PartySpots; puddle: (k: number) => PartySpots; lineup: PartySpots} {
+  const others = SLOT_NAMES.filter(x => x !== s), mine = r.plan[s];
+  const pair = (x: SlotName): boolean => r.plan[x].side === mine.side && r.plan[x].end === mine.end;
+  const y = (e: SplitEnd): number => e === "north" ? 45 : 55;
+  const by = (at: (x: SlotName) => PartySpot): PartySpots => Object.fromEntries(others.map(x => [x, at(x)]));
+  /** The pair of quadrant q: its tethered player on the spot, its marker beside them. */
+  const inPair = (x: SlotName, p: Point): Point => r.plan[x].tether ? p : stackedAt(x, p);
+  const strip = (sd: SplitSide): number => (INNER_STRIP[sd][0] + INNER_STRIP[sd][1]) / 2;
+  const lineup = new Map<SlotName, Point>([...othersAtLineup(r).map(o => [o.who, o.p] as const),
+    ...markersWho(r).flatMap(m => m.who ? [[m.who, m.p] as const] : [])]);
+  return {
+    // Where the towers threw them: in their quadrant, toward its end.
+    start:Object.fromEntries(others.map(x => [x, inPair(x, [platformMid(r.plan[x].side), r.plan[x].end === "north" ? 20 : 80])])),
+    wait:by(x => [zoneCenter(r.plan[x].tether ? SPLIT_BACK[r.plan[x].side] : SPLIT_INNER[r.plan[x].side])[0], y(r.plan[x].end)]),
+    first:by(x => r.plan[x].side === mine.side ? "you" : stackedAt(x, zoneCenter(SPLIT_INNER[r.plan[x].side]))),
+    puddle:k => by(x => pair(x) ? "you" : inPair(x, [strip(r.plan[x].side), 50 + (r.plan[x].end === "north" ? -1 : 1) * k * (MAJESTIC_PUDDLE.r + 1)])),
+    lineup:by(x => lineup.get(x) ?? zoneCenter(SPLIT_INNER[r.plan[x].side])),
   };
 }
 
@@ -1546,30 +1675,31 @@ export function splitRound(s: Slot, r: SplitRound): Scene {
   const yourEnd: Overlay = {t:"tag", x:platformMid(side), y:end === "north" ? 10 : 90, s:"YOUR END"};
   const whyEnd = tether ? "Your end is away from your portal." : "Your end is where you got knocked.";
   const you: Extract<Overlay, {t: "mark"}> = {t:"mark", x:platformMid(side), y:50, l:s, r:"H"};
+  const party = roundParty(s, r);
   return {setup:[tether ? "You have a tether. You are on the " + side + " platform." : "No tether. You are on the " + side + " platform.",
       tether ? "Your portal is on the " + far + " side, toward the " + toward + "." : "You got knocked to the " + end + " end.",
       "Three puddles drop on the party, one after another."], ordered:true,
-    split:true, boss:BOSS, overlays:portalsOf(r.endsSide), ...(tether ? {tether:{portal, you}} : {}),
+    split:true, boss:BOSS, overlays:portalsOf(r.endsSide), ...(tether ? {tether:{portal, you}} : {}), party:{slot:s, start:party.start},
     steps:[
       ...(tether
-        ? [{q:"Where do you wait for the Fire Breath markers?", z:SPLIT_BACK[side],
+        ? [{q:"Where do you wait for the Fire Breath markers?", z:SPLIT_BACK[side], party:party.wait,
           a:["A step back from the middle of the platform's inner edge.", "Fire Breath marks the four players closest to the boss."]},
-          {q:"Where do you bait the first puddle?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE, cue:[yourEnd],
+          {q:"Where do you bait the first puddle?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE, cue:[yourEnd], party:party.first,
             a:["In close, at the middle of the platform's inner edge.", "Bait the puddles with the party."]}]
-        : [{q:"No tether. Where do you go?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE, cue:[yourEnd],
+        : [{q:"No tether. Where do you go?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE, cue:[yourEnd], party:party.first,
           a:["In close, at the middle of the platform's inner edge.", "Bait Fire Breath and the first puddle there."]}]),
-      {q:"Second puddle?", zf:next, drop:MAJESTIC_PUDDLE,
+      {q:"Second puddle?", zf:next, drop:MAJESTIC_PUDDLE, party:party.puddle(1),
         a:["Just outside the first puddle, toward the " + end + " end.", whyEnd, "Stay tight against the inner edge."]},
-      {q:"Third puddle?", zf:next, drop:MAJESTIC_PUDDLE,
+      {q:"Third puddle?", zf:next, drop:MAJESTIC_PUDDLE, party:party.puddle(2),
         a:["Just outside the second puddle, toward the " + end + " end again.", "Stay tight against the inner edge."]},
       tether
         ? {q:"The portal lines cover half of each platform. Where do you stretch your tether?", zf:tetherSpot(side, end, covered, portal, [...otherWraths(r), ...otherBreaths(r)], [...othersAtLineup(r).map(o => o.p), ...markersAtLineup(r)]),
           // Your own line goes through you, as it should; the others' lines and Fire Breath must miss you.
-          whyNot:lineupWhyNot(s, r, portal), cue:portalLinePortals(side, covered, r.lineEnd ?? "north"), reveal:[...portalLines(side, covered), wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
+          whyNot:lineupWhyNot(s, r, portal), cue:portalLinePortals(side, covered, r.lineEnd ?? "north"), reveal:[...portalLines(side, covered), wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(r)], hits:[...otherWraths(r), ...otherBreaths(r)], party:party.lineup,
           a:["The " + end + " wall, just outside the portal lines.", "That end is away from your portal.", PORTAL_LINES_WHY, "Stay out of the third puddle."]}
         : {q:"The portal lines cover half of each platform. You have a marker. Where do you stand?", zf:markerSpot(side, end, covered, [...otherWraths(r), ...otherBreaths(r)]),
           // Your own Fire Breath goes through you, as it should; the others' lines must miss you.
-          whyNot:lineupWhyNot(s, r, null), cue:portalLinePortals(side, covered, r.lineEnd ?? "north"), reveal:[...portalLines(side, covered), yourBreath(r), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
+          whyNot:lineupWhyNot(s, r, null), cue:portalLinePortals(side, covered, r.lineEnd ?? "north"), reveal:[...portalLines(side, covered), yourBreath(r), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(r)], hits:[...otherWraths(r), ...otherBreaths(r)], party:party.lineup,
           a:["The wall-side corner of waymark " + wm.n + ", out of the portal lines.", PORTAL_LINES_WHY, "Stay out of the third puddle."]}],
     rule:SPLIT_ROUND_RULE};
 }
@@ -1624,14 +1754,27 @@ function landsWell(side: SplitSide, end: SplitEnd, knock: Knock, q: Point): bool
   if (q[0] < x0 + LAND_MARGIN || q[0] > x1 - LAND_MARGIN || q[1] < LAND_MARGIN || q[1] > 100 - LAND_MARGIN) return false;
   return knock === "across" || (end === "north" ? q[1] > 50 : q[1] < 50);
 }
-/** Your lineup spot after Flatliner: the south end of your platform (healers and melee south). */
-const lineupZone = (side: SplitSide): RectZone => ({rect:[PLATFORM_X[side][0], 52, PLATFORM_X[side][1], 92]});
+/** A lineup spot after Flatliner: the south end of a platform (healers and melee), or the north end
+    (tanks and ranged). */
+const lineupZone = (side: SplitSide, end: SplitEnd = "south"): RectZone =>
+  ({rect:end === "south" ? [PLATFORM_X[side][0], 52, PLATFORM_X[side][1], 92] : [PLATFORM_X[side][0], 8, PLATFORM_X[side][1], 48]});
+/** Where a player stands at the lineup: their pair's spot, the support in the middle of it and the
+    DPS beside them (Hector's video, 12:23: "stay roughly in pairs"). */
+const lineupSpot = (x: SlotName): Point => {
+  const q = firstTower(x), c = zoneCenter(lineupZone(q.side, q.end));
+  return partyOf(x).role === "Tank" || partyOf(x).role === "Healer" ? c : stackedAt(x, c);
+};
+/** Where a player stands before Flatliner, so it throws them to their lineup spot. */
+const flatlinerSpotOf = (x: SlotName): Point => {
+  const q = firstTower(x), z = flatlinerSpot(q.side, q.end), c = "fn" in z ? z.label : zoneCenter(z);
+  return partyOf(x).role === "Tank" || partyOf(x).role === "Healer" ? c : stackedAt(x, c);
+};
 /** Before Flatliner: the spots up to max melee from which its knockback, straight out from the
     arena's center, lands you in your lineup spot. The best one lands you in its middle. */
-function flatlinerSpot(side: SplitSide): Zone {
-  const known = FLATLINER_ZONES.get(side);
+function flatlinerSpot(side: SplitSide, end: SplitEnd = "south"): Zone {
+  const known = FLATLINER_ZONES.get(side + end);
   if (known) return known;
-  const [x0, y0, x1, y1] = lineupZone(side).rect;
+  const [x0, y0, x1, y1] = lineupZone(side, end).rect;
   const lands = (q: Point): boolean => q[0] >= x0 + LAND_MARGIN && q[0] <= x1 - LAND_MARGIN && q[1] >= y0 && q[1] <= y1;
   const fn = (p: Point): boolean => { const r = dist(p, CENTER); return r > 0.5 && r <= MELEE_R && lands(thrownTo(CENTER, FLATLINER_KNOCKBACK, p)); };
   const part = (deg: number): Stretch | null => {
@@ -1639,12 +1782,12 @@ function flatlinerSpot(side: SplitSide): Zone {
     return ok.length ? [ok[0], ok[ok.length - 1]] : null;
   };
   const degs = Array.from({length:360}, (_x, i) => i), from = degs.find(g => !part(g)) ?? 0;
-  const mid = zoneCenter(lineupZone(side)), best = addVec(CENTER, unit([mid[0] - 50, mid[1] - 50]), dist(mid, CENTER) - FLATLINER_KNOCKBACK);
+  const mid = zoneCenter(lineupZone(side, end)), best = addVec(CENTER, unit([mid[0] - 50, mid[1] - 50]), dist(mid, CENTER) - FLATLINER_KNOCKBACK);
   const zone: Zone = {fn, label:fn(best) ? best : nearestTo(best, fn) ?? best, show:rayArea(CENTER, degs.map(g => g + from), part)};
-  FLATLINER_ZONES.set(side, zone);
+  FLATLINER_ZONES.set(side + end, zone);
   return zone;
 }
-const FLATLINER_ZONES = new Map<SplitSide, Zone>();
+const FLATLINER_ZONES = new Map<string, Zone>();
 /** "east", "south"...: the way a unit vector points. */
 const way = (d: Point): string => d[0] > 0.5 ? "east" : d[0] < -0.5 ? "west" : d[1] > 0 ? "south" : "north";
 /** The answer for a tower: which side of it, and why. */
@@ -1660,64 +1803,76 @@ const TOWER_RULE: Lines = ["A tower knocks you straight away from its middle.", 
 /** The first towers: your light party's tower, at its south end (Hector No Buddies). With a
     tether, it runs from its portal to you from the start, so you see before the knockback which
     way to go. In the full fight the tethers come with the towers (cactbot's "--tethers--"). */
-export function firstTowersScene(s: Slot, tether: {portal: Point} | null): Scene {
+export function firstTowersScene(s: Slot, tether: {portal: Point} | null, plans?: SplitPlans): Scene {
   const home = homeSide(s), end = firstTowerEnd(s), at = SPLIT_TOWER[home][end], knock = knockFor(home, tether?.portal ?? null);
   const mark: Extract<Overlay, {t: "mark"}> = {t:"mark", x:at[0], y:at[1], l:s, r:"H"};
+  // Everyone soaks their first tower and lands where they resolve the first round.
+  const you1: Quad = knock === "across" ? {side:otherSide(home), end} : {side:home, end:otherEnd(end)};
+  const r1 = (plans ?? splitPlans(s, tether !== null, you1, randomPath(s, tether !== null).you2)).r1;
+  const towers = towerParty(s, Object.fromEntries(SLOT_NAMES.map(x => [x, firstTower(x)])) as Record<SlotName, Quad>, x => x === s ? you1 : r1[x]);
   return {setup:["Four towers appear: two on each platform.", "Every player soaks a tower.", tether ? "You have a tether this time." : "No tether this time."],
     split:true, boss:BOSS, overlays:[...SPLIT_TOWERS, ...(tether ? [{t:"portal", x:tether.portal[0], y:tether.portal[1], vert:false} as const] : [])],
     ...(tether ? {tether:{portal:tether.portal, you:mark}} : {}),
+    // Each player starts at their tower, as the lineup left them (Hector's video, 12:53).
+    party:{slot:s, start:Object.fromEntries(SLOT_NAMES.filter(x => x !== s).map(x => [x, lineupSpot(x)]))},
     steps:[{q:"Where in your tower do you stand?", zf:() => towerHalf(home, end, knock), knock:{from:at, dist:TOWER_KNOCKBACK}, ...towerReveal(home, end, knock),
+      party:towers.party, partyKnock:towers.from,
       a:[...towerAnswer(home, end, knock, tether !== null), bySlot(s, {H1:"Your tower is the SW one, with M1.", H2:"Your tower is the SE one, with M2."})]}],
     rule:TOWER_RULE};
 }
 
 /** The second towers: soak the tower in the quadrant where you ended the first round. With a
     tether, it runs from its portal to your mark. */
-export function splitTowers(s: Slot, side: SplitSide, end: SplitEnd, tether: {portal: Point} | null): Scene {
+export function splitTowers(s: Slot, side: SplitSide, end: SplitEnd, tether: {portal: Point} | null, plans?: SplitPlans): Scene {
   const mark = lastSpot(s, side, end), knock = knockFor(side, tether?.portal ?? null);
   const mine = tether && mark.t === "mark" ? {portal:tether.portal, you:mark} : undefined;
+  // Everyone soaks the tower where they ended the first round, and lands where they resolve the second.
+  const you2: Quad = knock === "across" ? {side:otherSide(side), end} : {side, end:otherEnd(end)};
+  const {r1, r2} = plans ?? splitPlans(s, tether === null, {side, end}, you2);
+  const towers = towerParty(s, r1, x => x === s ? you2 : r2[x]);
   return {setup:["Four towers again, one in each quadrant.", tether ? "You have a tether this time." : "No tether this time."],
     split:true, boss:BOSS,
     // With a tether, your mark is the tether's end, drawn with it.
     overlays:mine ? [...SPLIT_TOWERS, {t:"portal", x:mine.portal[0], y:mine.portal[1], vert:false}] : [...SPLIT_TOWERS, mark],
-    ...(mine ? {tether:mine} : {}),
+    ...(mine ? {tether:mine} : {}), party:{slot:s, start:cornersAfter(s, r1)},
     steps:[{q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, knock), knock:{from:SPLIT_TOWER[side][end], dist:TOWER_KNOCKBACK}, ...towerReveal(side, end, knock),
+      party:towers.party, partyKnock:towers.from,
       a:[...towerAnswer(side, end, knock, tether !== null), "Your tower is in the quadrant you ended in."]}],
     rule:["Towers: the quadrant you ended the last tethers and markers in.", ...TOWER_RULE]};
 }
 
 /** How many times Massive Meteor hits: cactbot's "Massive Meteor x5". */
 const MASSIVE_HITS = 5;
-/** How far north of you another player stands in a stack, so their mark and yours both show. The
-    app's choice. */
-const BESIDE = 5;
 /** Who has Massive Meteor's stack marker on your platform, and at which end they stand. */
 export interface StackWearer { who: SlotName; end: SplitEnd }
 /** The stack marker goes on one of the four players of each platform: on you one time in four.
     After the swaps any of the others can be on your platform with you. Random. */
-export function randomStackWearer(s: Slot): StackWearer {
-  const you = random() < 0.25, other = randomOthers(s, 1)[0], end = randomEnd();
-  return {who:you ? s : other, end};
+export function randomStackWearer(s: Slot, plan: SplitPlan): StackWearer {
+  const mates = SLOT_NAMES.filter(x => plan[x].side === plan[s].side);
+  const who = mates[Math.floor(random() * mates.length)];
+  return {who, end:plan[who].end};
 }
 
 /** Massive Meteor: the four players on a platform stack in close, at the middle of its inner edge.
     The stack goes on one player of each platform and hits five times. Before it, the player with
     the marker stands near the outer corner of one end, where the last towers left them, with
     room for the marker's arrows: the app's choice. */
-export function massiveScene(s: Slot, side: SplitSide, w: StackWearer): Scene {
+export function massiveScene(s: Slot, side: SplitSide, w: StackWearer, plan: SplitPlan): Scene {
   const you = w.who === s, IN = 8;
+  // The four on each platform stack in close at its inner edge (Hector's video, 16:40).
+  const party = partyBy(s, x => plan[x].side === side ? "you" : stackedAt(x, zoneCenter(SPLIT_INNER[plan[x].side])));
   const on: Extract<Overlay, {t: "mark"}> = {t:"mark", x:side === "west" ? PLATFORM_X.west[0] + IN : PLATFORM_X.east[1] - IN, y:w.end === "north" ? IN : 100 - IN,
     l:w.who, r:markRole(partyOf(w.who).role)};
   return {setup:["Massive Meteor: a five-hit stack on one player of each platform.", "You are on the " + side + " platform.",
       you ? "You have the stack marker." : w.who + " has the stack marker."],
-    split:true, boss:BOSS, overlays:[], headMark:{on, you, n:MASSIVE_HITS},
-    steps:[{q:"Where do you stack?", z:SPLIT_INNER[side],
+    split:true, boss:BOSS, overlays:[], headMark:{on, you, n:MASSIVE_HITS}, party:{slot:s, start:cornersAfter(s, plan)},
+    steps:[{q:"Where do you stack?", z:SPLIT_INNER[side], party,
       a:["In close, at the middle of the platform's inner edge.", "All four on the platform stack, so the melee can hit the boss.", "Both healers may end on one platform: stay near the middle."],
       // You take the stack on purpose, so it is not an attack you must miss. The player with the
-      // marker came to the stack too, just north of you (the app's choice), and it goes off on them.
+      // marker came to the stack with the others, and it goes off on them.
       revealAt:p => {
-        const [x, y] = you ? p : [p[0], p[1] - BESIDE];
-        return [massiveMeteor([x, y]), ...(you ? [] : [{...on, x, y}]), {t:"stackMark", x, y, n:MASSIVE_HITS}];
+        const [x, y] = you ? p : stackedAt(w.who, p);
+        return [massiveMeteor([x, y]), {t:"stackMark", x, y, n:MASSIVE_HITS}];
       }, hits:[]}],
     rule:["All four on a platform stack.", "Mitigate and heal between the hits."]};
 }
@@ -1732,8 +1887,12 @@ export function massiveScene(s: Slot, side: SplitSide, w: StackWearer): Scene {
    in from the far end (10 yalms, about 27 degrees). The far outer corner is safe. */
 const AVALANCHE_CUT = 25;
 
-export function avalancheScene(s: Slot, side: SplitSide, end: SplitEnd, face: SplitSide, swing: SplitEnd): Scene {
+export function avalancheScene(s: Slot, side: SplitSide, end: SplitEnd, face: SplitSide, swing: SplitEnd, plan?: SplitPlan): Scene {
   const back = otherSide(face), safe = otherEnd(swing), wm = WAYMARK[back][safe];
+  // Everyone soaks the tower of their quadrant and lands on the back platform (Hector's video, 17:00).
+  const r2 = plan ?? splitPlans(s, random() < 0.5, randomPath(s).you1, {side, end}).r2;
+  const land = (q: Quad): Quad => q.side === back ? {side:back, end:otherEnd(q.end)} : {side:back, end:q.end};
+  const towers = towerParty(s, {...r2, [s]:{side, end, tether:false}}, x => land(x === s ? {side, end} : r2[x]));
   const f = face === "west" ? 270 : 90, dir = (f === 270) === (swing === "north") ? 1 : -1;
   // His turn: half a circle around him, 17 units out, with an arrowhead at its end. The app's choice.
   const turn: Overlay[] = [{t:"turn", x:50, y:50, r:17, from:f, to:f + dir * 180}];
@@ -1748,8 +1907,9 @@ export function avalancheScene(s: Slot, side: SplitSide, end: SplitEnd, face: Sp
   return {setup:["Towers appear, one in each quadrant.", "The boss faces the " + face + " platform: he grabs it.", "Then he turns and slams the platform down."], ordered:true,
     // The towers go off at the first step, and the platform he grabs is gone once he throws it.
     split:true, gone:{side:face, after:1}, boss:{x:50, y:50, f}, overlays:[...SPLIT_TOWERS.map(o => ({...o, until:0})), lastSpot(s, side, end)],
+    party:{slot:s, start:cornersAfter(s, r2)},
     steps:[
-      {q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, side === back ? "along" : "across"), knock:{from:SPLIT_TOWER[side][end], dist:TOWER_KNOCKBACK}, ...towerReveal(side, end, side === back ? "along" : "across"),
+      {q:"Which tower, and which side of it?", party:towers.party, partyKnock:towers.from, zf:() => towerHalf(side, end, side === back ? "along" : "across"), knock:{from:SPLIT_TOWER[side][end], dist:TOWER_KNOCKBACK}, ...towerReveal(side, end, side === back ? "along" : "across"),
         a:[side === back
           ? "The " + way(knockDir(side, end, "along")) + " side of the " + quadrant(side, end) + " tower: stay on this platform."
           : "The " + way(knockDir(side, end, "across")) + " side of the " + quadrant(side, end) + " tower: get knocked across.",
@@ -1758,7 +1918,7 @@ export function avalancheScene(s: Slot, side: SplitSide, end: SplitEnd, face: Sp
         a:["The " + (safe === "north" ? "N" : "S") + (back === "west" ? "W" : "E") + " corner of the " + back + " platform, past waymark " + wm.n + ", at the outer wall.",
           "He turns from the " + swing + ", so go to the other end.",
           "Then step inside the square before Crown of Arcadia."],
-        reveal:[slam], hits:[slam]}],
+        reveal:[slam], hits:[slam], party:partyBy(s, () => "you")}],
     rule:["He grabs the platform he faces.", "Get knocked to the other platform.", "Go to its far outer corner, away from his turn."]};
 }
 // TS note: the `Drill[]` annotation is what checks every drill below. Each build function
@@ -1995,31 +2155,36 @@ export const DRILLS: readonly Drill[] = [
   {id:"m-split-line", order:18, phase:P3, time:"6:02", title:"Arena Split: Lineup", kind:"knockback",
     build:s=>{ const home = homeSide(s);
       return {setup:["Flatliner knocks the party back from the middle.", "It splits the arena into two platforms."], ordered:true,
-      split:true, splitAfter:0, boss:BOSS, overlays:[],
+      split:true, splitAfter:0, boss:BOSS, overlays:[], party:{slot:s},
       steps:[
+        // Light party 1 goes west and light party 2 east; your melee goes with you (Hector's video, 12:05).
         {q:"Flatliner is coming. Where do you stand?", z:flatlinerSpot(home), knock:{from:CENTER, dist:FLATLINER_KNOCKBACK}, revealAt:flatlinerThrow,
+          party:partyBy(s, x => x === bySlot<SlotName>(s, {H1:"M1", H2:"M2"}) ? "you" : flatlinerSpotOf(x)),
           a:bySlot(s, {H1:["Close to the boss, on his west side, a little south.", "You get knocked to the west platform, south end."],
             H2:["Close to the boss, on his east side, a little south.", "You get knocked to the east platform, south end."]})},
-        {q:"Click your lineup spot.", z:lineupZone(home), a:bySlot(s, {H1:["West platform (light party 1), south end.", "Healers and melee go south."], H2:["East platform (light party 2), south end.", "Healers and melee go south."]})}],
+        {q:"Click your lineup spot.", z:lineupZone(home), party:partyBy(s, x => x === bySlot<SlotName>(s, {H1:"M1", H2:"M2"}) ? "you" : lineupSpot(x)), a:bySlot(s, {H1:["West platform (light party 1), south end.", "Healers and melee go south."], H2:["East platform (light party 2), south end.", "Healers and melee go south."]})}],
       rule:["Before Flatliner: stand close to the boss, on your side.", "Light party 1 west, light party 2 east.", "Tanks and ranged north, healers and melee south."]}; }},
   {id:"m-split-tower", order:19, phase:P3, time:"6:29", title:"Arena Split: First Towers", kind:"towerKnockback", soak:SPLIT_SOAK,
     variants:["tether", "marker"], random:true,
     // A tether's portal is on either side, so the tether may need the knockback across or not.
-    build:(s, v)=>firstTowersScene(s, v === "tether" ? {portal:towerPortal(homeSide(s), firstTowerEnd(s), randomSide())} : null)},
+    build:(s, v)=>{ const t = v === "tether", {you1, plans} = randomSplit(s, t), home = homeSide(s);
+      // Your portal: on your side to send you across, across to keep you on your platform.
+      return firstTowersScene(s, t ? {portal:towerPortal(home, firstTowerEnd(s), you1.side === home ? otherSide(home) : home)} : null, plans); }},
   // A round of tethers and markers: a tether ends on either platform, across from its portal.
   {id:"m-split-fire", order:19.1, variants:["tether", "marker"], random:true, phase:P3, time:"6:35", title:"Arena Split: Fire Breath", kind:["bait", "chains"],
-    build:(s, v)=>{ const tether = v === "tether", home = homeSide(s);
-      return splitRound(s, {tether, side:tether ? randomSide() : home, end:randomEnd(), covered:randomHalf(), endsSide:randomEndsSide(), others:randomOthers(s, tether ? 3 : 4), lineEnd:randomEnd()}); }},
+    build:(s, v)=>{ const tether = v === "tether";
+      const {you1, plans} = randomSplit(s, tether);
+      return splitRound(s, {tether, side:you1.side, end:you1.end, covered:randomHalf(), endsSide:randomEndsSide(), plan:plans.r1, lineEnd:randomEnd()}); }},
   // The second towers: you start in the quadrant where the first round ended, on either platform.
   {id:"m-split-towers2", order:19.2, variants:["tether", "marker"], random:true, phase:P3, time:"7:01", title:"Arena Split: Second Towers", kind:"towerKnockback", soak:SPLIT_SOAK,
-    build:(s, v)=>{ const side = randomSide(), end = randomEnd();
-      return splitTowers(s, side, end, v === "tether" ? {portal:towerPortal(side, end, randomSide())} : null); }},
+    build:(s, v)=>{ const t2 = v === "tether", {you1, you2, plans} = randomSplit(s, !t2), {side, end} = you1;
+      return splitTowers(s, side, end, t2 ? {portal:towerPortal(side, end, you2.side !== side ? side : otherSide(side))} : null, plans); }},
   {id:"m-massive", order:20, phase:P3, time:"7:25", title:"Massive Meteor", kind:"platformStack", random:true,
-    build:s=>{ const side = randomSide(); return massiveScene(s, side, randomStackWearer(s)); }},
+    build:s=>{ const {you2, plans} = randomSplit(s); return massiveScene(s, you2.side, randomStackWearer(s, plans.r2), plans.r2); }},
   {id:"m-avalanche", order:21, random:true, phase:P3, time:"7:39", title:"Arcadion Avalanche", kind:"towerKnockback", soak:SPLIT_SOAK,
     // Your platform is random, as it is after the two rounds of tethers. It is drawn last, so the
     // codes from before keep their tower end, facing and turn.
-    build:s=>{ const end = randomEnd(), face = randomSide(), swing = randomEnd(); return avalancheScene(s, randomSide(), end, face, swing); }},
+    build:s=>{ const face = randomSide(), swing = randomEnd(), {you2, plans} = randomSplit(s); return avalancheScene(s, you2.side, you2.end, face, swing, plans.r2); }},
   // The variants are your puddles' wall. With no puddles, it is the next drill.
   {id:"m-ecl-start", order:26, variants:["south", "north"], phase:P4, time:"8:54 to 9:27", title:"Ecliptic Stampede: Puddles", kind:"puddles",
     // With no variant (a Learn picture), the example start: proximity AoEs NW and SE, marked with R2.

@@ -37,6 +37,7 @@ import {
   firstTowersScene,
   GUST_CONES,
   type JumpSet,
+  lineupPlan,
   METEOR_ROCKS,
   nextPuddle,
   portalAt,
@@ -681,8 +682,6 @@ const inHalf = (p: Point, side: SplitSide, half: SplitHalf): boolean => {
     inner = side === "west" ? p[0] >= mid : p[0] <= mid;
   return half === "inner" ? inner : !inner;
 };
-/** The other players, for the tethers of a round. */
-const OTHERS: SlotName[] = ["MT", "OT", "H1", "H2", "M1", "M2", "R1", "R2"];
 const SIDES: SplitSide[] = ["west", "east"],
   ENDS: SplitEnd[] = ["north", "south"],
   HALVES: SplitHalf[] = ["inner", "outer"];
@@ -707,8 +706,7 @@ test("Arena Split: a round puts you in close, then at your end, out of the porta
         for (const covered of HALVES)
           for (const tether of [true, false])
             for (const endsSide of SIDES) {
-              const others = OTHERS.filter((o) => o !== s).slice(0, tether ? 3 : 4),
-                sc = splitRound(s, { tether, side, end, covered, endsSide, others }),
+              const sc = splitRound(s, { tether, side, end, covered, endsSide, plan: lineupPlan(s, tether, { side, end }) }),
                 what = `${s} ${side} ${end} ${covered} ${tether ? "tether" : "marker"} ${endsSide}`;
               // Answer each step at its shown spot, as the moving marker does.
               const results: StepResult[] = [];
@@ -807,13 +805,15 @@ test("Arena Split: a round puts you in close, then at your end, out of the porta
               // At the lineup, every other tether shows, stretched: two on each platform, one at each end.
               const reveal = sc.steps[k + 3].reveal ?? [],
                 cords = reveal.flatMap((o) => (o.t === "tether" ? [o] : [])),
-                marks = reveal.flatMap((o) => (o.t === "mark" ? [o] : [])),
-                onCord = marks.filter((m) => cords.some((c) => c.x2 === m.x && c.y2 === m.y));
+                plan = lineupPlan(s, tether, { side, end }),
+                onCord = Object.entries(sc.steps[k + 3].party ?? {}).flatMap(([l, p]) =>
+                  p !== "you" && cords.some((c) => c.x2 === p[0] && c.y2 === p[1]) ? [l] : [],
+                );
               assert.equal(cords.length, tether ? 3 : 4, `${what}: the other tethers`);
-              assert.deepEqual(
-                onCord.map((m) => m.l),
-                others,
-                `${what}: on the other tethered players`,
+              assert.sameMembers(
+                onCord,
+                Object.keys(plan).filter((l) => l !== s && plan[l as SlotName].tether),
+                `${what}: each ends on a tethered player`,
               );
               const ends = [...cords.map((c): Point => [c.x2, c.y2]), ...(tether ? [lineup] : [])];
               for (const sd of SIDES)
@@ -977,8 +977,14 @@ test("the number waymarks are the Kindred Outside preset, the set Hector's video
 
 test("Arena Split: when the tethers go off, a line runs from each portal through its player", () => {
   for (const tether of [true, false]) {
-    const others = OTHERS.filter((o) => o !== "H1").slice(0, tether ? 3 : 4),
-      sc = splitRound("H1", { tether, side: "west", end: "south", covered: "inner", endsSide: "east", others }),
+    const sc = splitRound("H1", {
+        tether,
+        side: "west",
+        end: "south",
+        covered: "inner",
+        endsSide: "east",
+        plan: lineupPlan("H1", tether, { side: "west", end: "south" }),
+      }),
       lineup = sc.steps[sc.steps.length - 1],
       reveal = lineup.reveal ?? [],
       lines = reveal.flatMap((o) => (o.t === "band" && o.w === 25 ? [o] : [])),
@@ -988,7 +994,7 @@ test("Arena Split: when the tethers go off, a line runs from each portal through
     assert.equal(reveal.filter((o) => o.t === "band").length, 8, "no other lines");
     // The markers other than you show at the lineup.
     const cords = reveal.flatMap((o) => (o.t === "tether" ? [o] : [])),
-      markers = reveal.filter((o) => o.t === "mark" && !cords.some((c) => c.x2 === o.x && c.y2 === o.y));
+      markers = Object.values(lineup.party ?? {}).filter((p) => p !== "you" && !cords.some((c) => c.x2 === p[0] && c.y2 === p[1]));
     assert.equal(markers.length, tether ? 4 : 3, "the other markers");
     // Your own line (or Fire Breath) goes through you; the others' lines and the other markers'
     // Fire Breath are the ones to miss.
@@ -1010,8 +1016,8 @@ test("Arena Split: no correct tether spot stands in Fire Breath or sends your li
     for (const end of ["north", "south"] as const)
       for (const covered of ["inner", "outer"] as const)
         for (const endsSide of ["west", "east"] as const) {
-          const others = OTHERS.filter((o) => o !== "H1").slice(0, 3),
-            lineup = splitRound("H1", { tether: true, side, end, covered, endsSide, others }).steps[4];
+          const lineup = splitRound("H1", { tether: true, side, end, covered, endsSide, plan: lineupPlan("H1", true, { side, end }) })
+            .steps[4];
           const zone = lineup.zf?.([]),
             portal = portalAt(side === "west" ? "east" : "west", end === "north" ? "south" : "north", endsSide);
           assert.ok(zone && "fn" in zone);
@@ -1020,15 +1026,27 @@ test("Arena Split: no correct tether spot stands in Fire Breath or sends your li
           const markers = (["west", "east"] as const).flatMap((sd) =>
             (["north", "south"] as const).map((e) => {
               const half: SplitHalf = sd === side ? covered : covered === "inner" ? "outer" : "inner";
-              const tethered = OTHERS.filter((o) => o !== "H1").slice(0, 4);
-              const own = splitRound("H1", { tether: false, side: sd, end: e, covered: half, endsSide, others: tethered });
+              const own = splitRound("H1", {
+                tether: false,
+                side: sd,
+                end: e,
+                covered: half,
+                endsSide,
+                plan: lineupPlan("H1", false, { side: sd, end: e }),
+              });
               const z = own.steps[3].zf?.([]);
               assert.ok(z);
               return zoneCenter(z);
             }),
           );
           const hits = [...(lineup.hits ?? []).flatMap((o) => (o.t === "band" ? [o] : [])), ...markers.map((m) => fireBreath([50, 50], m))];
-          const players = [...(lineup.reveal ?? []).flatMap((o): Point[] => (o.t === "mark" ? [[o.x, o.y]] : [])), ...markers];
+          // The other tethered players, where they stand at the lineup.
+          const players = [
+            ...Object.entries(lineup.party ?? {}).flatMap(([l, p]): Point[] =>
+              p !== "you" && lineupPlan("H1", true, { side, end })[l as SlotName]?.tether ? [p] : [],
+            ),
+            ...markers,
+          ];
           const pattern = `${side} ${end}, portal lines ${covered}, ends ${endsSide}`;
           for (let x = 0; x <= 100; x += 1)
             for (let y = 0; y <= 100; y += 0.5) {
@@ -1203,11 +1221,16 @@ test("Heartbreak Kick with the tanks: out of the tower is one ring with the towe
 });
 
 test("Arena Split lineup: an incorrect click says what is wrong there", () => {
-  // H1's pattern 7M75: a tether on the west platform, your end south, the portal lines over its
-  // outer half, H2's marker at waymark 4.
-  const d = DRILLS.find((x) => x.id === "m-split-fire");
-  if (!d) throw new Error("missing drill m-split-fire");
-  const sc = buildPattern(d, "H1", "7M75").scene,
+  // The owner's screenshot: a tether on the west platform, your end south, the portal lines over
+  // its outer half, H2's marker at waymark 4.
+  const sc = splitRound("H1", {
+      tether: true,
+      side: "west",
+      end: "south",
+      covered: "outer",
+      endsSide: "east",
+      plan: lineupPlan("H1", true, { side: "west", end: "south" }, ["MT", "OT", "H2", "M1", "M2", "R1", "R2"]),
+    }),
     results: StepResult[] = [];
   for (const st of sc.steps.slice(0, -1)) {
     const p = zoneCenter(zoneOf(stepZone(st, results)));
