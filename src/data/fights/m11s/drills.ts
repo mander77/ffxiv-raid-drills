@@ -726,7 +726,7 @@ const WALL_SPOTS_NW_SE: Record<EclWall, Point[]> = {
 export type EclMeteors = "nw-se" | "ne-sw";
 export const ECL_METEORS: readonly EclMeteors[] = ["nw-se", "ne-sw"];
 /** Your puddles' six spots along your wall, in the order you drop them. */
-const wallSpots = (wall: EclWall, m: EclMeteors): Point[] =>
+export const wallSpots = (wall: EclWall, m: EclMeteors): Point[] =>
   WALL_SPOTS_NW_SE[wall].map(([x, y]): Point => m === "nw-se" ? [x, y] : [100 - x, y]);
 /** Both walls' fire puddles, once every one is down. */
 const allPuddles = (m: EclMeteors): Overlay[] => [...wallSpots("north", m), ...wallSpots("south", m)].map(atomicPuddle);
@@ -1996,7 +1996,7 @@ function fatality(north: Point, south: Point): {overlays: Overlay[]; tanks: Reco
 /** The tanks in front of the party for the first Line Stack, under the boss, so they are the
     first hit and clear of the party behind them (wtfdig puts them inside his hitbox). The spots
     are the app's choice. */
-const FIRST_STACK_TANKS: Record<"MT" | "OT", Point> = {MT:polar(300, 9), OT:polar(330, 9)};
+export const FIRST_STACK_TANKS: Record<"MT" | "OT", Point> = {MT:polar(300, 9), OT:polar(330, 9)};
 /** Where the melee and ranged stand in the second set's Line Stack, behind the NE rock (wtfdig;
     Hector's video, 10:41: "everyone else is going to take the line stack in the northeast"). */
 const NE_STACK_AT = (x: SlotName): Point => stackedAt(x, stackBehind(45));
