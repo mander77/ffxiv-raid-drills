@@ -6,7 +6,7 @@ import { PLATFORM_X, PORTAL_OUT, isStretched, SPLIT_HALF_W, TETHER_STRETCH, TOWE
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
-import { restSpot, stackedAt } from "../../partyRoute";
+import { packAround, restSpot, stackedAt } from "../../partyRoute";
 import type { Boss, CircleZone, Drill, Lines, Overlay, PartySpot, PartySpots, Point, PolyShape, RectZone, RuleZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../../../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
@@ -132,7 +132,10 @@ export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
     const tornado = w.tornado ? tornadoNear(P) : null;
     const leave: Overlay | null = tornado ? {t:"tornado", x:tornado[0], y:tornado[1]} : null;
     if(tornado) tornadoes.push(tornado);
-    const party = weaponParty(s, w.type, P, angOf(scytheAxis(w, i)) - 90, addVec(addVec(P, d, -(HW + 5)), sv, -(HW + 5)));
+    // The other light party's sword pocket, on his other side, out of the cross and the tornadoes.
+    const otherPocket = (p: Point): boolean => { const v: Point = [p[0] - P[0], p[1] - P[1]];
+      return inArena(p) && v[0] * d[0] + v[1] * d[1] < -HW && -(v[0] * sv[0] + v[1] * sv[1]) > HW && tornadoes.every(t => dist(p, t) >= TORNADO_R); };
+    const party = weaponParty(s, w.type, P, angOf(scytheAxis(w, i)) - 90, addVec(addVec(P, d, -(HW + 5)), sv, -(HW + 5)), otherPocket);
     return {q:ORDINALS[i] + " weapon: click where you go.", z, a, reveal, leave, stand, party, ...(hits ? {hits} : {})};
   });
   return {W, states, steps, overlays, slot:s};
@@ -150,10 +153,12 @@ const SCYTHE_CLOCK_R = 9.5;
    other healer in the pocket on his other side (`pocket`), the others around them; the scythe's
    proteans put each player on their clock spot (CLOCK) around him, from his front (`front`,
    degrees clockwise from north). */
-function weaponParty(s: Slot, type: WeaponType, P: Point, front: number, pocket: Point): PartySpots {
+function weaponParty(s: Slot, type: WeaponType, P: Point, front: number, pocket: Point, inPocket: (p: Point) => boolean): PartySpots {
   const mine = partyOf(s).lp;
+  // The other light party stacks on its healer, inside their pocket.
+  const theirs = packAround(SLOT_NAMES.filter(x => partyOf(x).lp !== mine && partyOf(x).role !== "Healer"), pocket, inPocket);
   return Object.fromEntries(SLOT_NAMES.filter(x => x !== s).map((x): [SlotName, PartySpot] => [x,
-    type === "axe" ? "you" : type === "sword" ? (partyOf(x).lp === mine ? "you" : partyOf(x).role === "Healer" ? pocket : stackedAt(x, pocket))
+    type === "axe" ? "you" : type === "sword" ? (partyOf(x).lp === mine ? "you" : theirs.get(x) ?? pocket)
       : polar(front + CLOCK[x], SCYTHE_CLOCK_R, P)]));
 }
 

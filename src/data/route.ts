@@ -34,8 +34,9 @@ export const THROW_TIME = 0.6;
     first move known in advance. A `lookAhead` stop is a look-ahead step: it has an answer (the
     click), but the player does not move there, so the runner skips it. `click` is when you
     clicked the spot, for a route made of your own clicks: the runner goes there only then.
-    `knock` is a knockback at the hit: it throws the runner `dist` units straight away from `from`. */
-export interface Stop { p: Point; hit: number; show: number; si: number; j: number; pre?: Point; lookAhead?: boolean; click?: number; knock?: {from: Point; dist: number} }
+    `knock` is a knockback at the hit: it throws the runner `dist` units straight away from `from`.
+    `z` is the step's correct area, on the correct route: the players who stack with you stay in it. */
+export interface Stop { p: Point; hit: number; show: number; si: number; j: number; pre?: Point; lookAhead?: boolean; click?: number; knock?: {from: Point; dist: number}; z?: Zone }
 
 /** Where a knockback from `from` throws a player standing at p: `d` units straight away from it. */
 export const thrownTo = (from: Point, d: number, p: Point): Point => {
@@ -81,7 +82,7 @@ export function correctRoute(f: Fight): Stop[] {
       const z = rotZone(base, g.k), p = st.stand && !st.lookAhead ? rot(st.stand, g.k) : middleOf(z, from);
       res.push({p, ok:inZone(p, z), z, drop:st.drop ? p : null});
       if(!st.lookAhead) from = p;   // a look-ahead does not move the player
-      return [{p, hit:g.due[j], show:showOf(g, j), si, j, ...(pre ? {pre} : {}), ...(st.lookAhead ? {lookAhead:true} : {}), ...knockOf(st.knock, g.k)}];
+      return [{p, hit:g.due[j], show:showOf(g, j), si, j, z, ...(pre ? {pre} : {}), ...(st.lookAhead ? {lookAhead:true} : {}), ...knockOf(st.knock, g.k)}];
     });
   }).sort((a, b) => a.hit - b.hit);
 }

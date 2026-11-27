@@ -1,8 +1,8 @@
 import { assert, test } from "vitest";
 import { DRILLS } from "../src/data/fights/m11s/drills";
-import { partyNow, partyRoutes, partyStart, partyWent, restSpot, stackedAt } from "../src/data/partyRoute";
+import { partyNow, partyRoutes, partyStart, partyWent, restSpot, withYouAt } from "../src/data/partyRoute";
 import { correctRoute, runnerAt } from "../src/data/route";
-import { dist, rot, stepZone, zoneCenter } from "../src/geometry";
+import { attackHits, dist, inZone, rot, rotOverlay, stepZone, zoneCenter } from "../src/geometry";
 import { buildPattern } from "../src/lib/practice";
 import { SLOT_NAMES } from "../src/party";
 import type { Drill, Point, Scene, Slot, SlotName, StepResult } from "../src/types";
@@ -95,7 +95,8 @@ test("no other player stands on a step's spot before you answer it, unless their
       const placedBefore = (who: SlotName, j: number): Point | undefined => {
         for (let i = j - 1; i >= 0; i--) {
           const spot = sc.steps[i].party?.[who];
-          if (spot != null) return spot === "you" ? stackedAt(who, partyWent(results[i])) : rot(spot, k);
+          if (spot != null)
+            return spot === "you" ? withYouAt(sc.steps[i], { p: partyWent(results[i]), z: results[i].z }).get(who) : rot(spot, k);
         }
         return start.get(who);
       };
@@ -104,7 +105,7 @@ test("no other player stands on a step's spot before you answer it, unless their
           after = partyNow(sc, k, results.slice(0, j + 1));
         for (const [l, spot] of Object.entries(st.party ?? {})) {
           const who = l as SlotName,
-            at = spot === "you" ? stackedAt(who, partyWent(results[j])) : rot(spot, k);
+            at = spot === "you" ? (withYouAt(st, { p: partyWent(results[j]), z: results[j].z }).get(who) ?? [0, 0]) : rot(spot, k);
           const where = `${d.id} ${code} step ${j}: ${who}`;
           // Once you answer, they go there, unless the next step already sends them on early.
           if (!sc.steps[j + 1]?.early?.includes(who)) assert.isTrue(near(after.get(who), at), `${where} goes once you answer`);
@@ -119,7 +120,7 @@ test("no other player stands on a step's spot before you answer it, unless their
 test("Pressure: on the player each other player runs to their spots; in the run they wait for your answer", () => {
   const f = buildFight("H1", "K7Q2");
   const correct = correctRoute(f);
-  const youAt = (si: number, j: number): Point | null => correct.find((x) => x.si === si && x.j === j)?.p ?? null;
+  const youAt = (si: number, j: number) => correct.find((x) => x.si === si && x.j === j) ?? null;
   const watch = partyRoutes(f, youAt);
   const withParty = f.segs.filter((g) => g.scene.party).length;
   assert.isAbove(withParty, 0);
@@ -136,8 +137,9 @@ test("Pressure: on the player each other player runs to their spots; in the run 
   assert.isFalse(near(waiting, first.p), "in the run, they wait for your answer");
 });
 
-/** How close two marks may stand: closer, one hides the other. A mark is 4.8 units across. */
-const APART = 4;
+/** How close two marks may stand: closer, one hides the other. A mark is 4.8 units across; in a
+    tight area (a rock's shadow, a puddle spot) the players stand 2.6 apart, and both marks show. */
+const APART = 2.5;
 
 test("no two players stand on one spot, so every mark shows", () => {
   for (const d of DRILLS.filter((x) => WITH_PARTY.includes(x.id)))
@@ -159,7 +161,7 @@ test("Pressure: nobody takes a mechanic's start spot before the mechanic appears
   for (const code of CODES) {
     const f = buildFight("H1", code);
     const correct = correctRoute(f);
-    const routes = partyRoutes(f, (si, j) => correct.find((x) => x.si === si && x.j === j)?.p ?? null);
+    const routes = partyRoutes(f, (si, j) => correct.find((x) => x.si === si && x.j === j) ?? null);
     f.segs.forEach((g) => {
       for (const [l, p] of Object.entries(g.scene.party?.start ?? {})) {
         const who = l as SlotName;
@@ -174,4 +176,36 @@ test("Pressure: nobody takes a mechanic's start spot before the mechanic appears
       }
     });
   }
+});
+
+test("the players who stack with you stand inside the step's correct area, so they share your answer", () => {
+  for (const d of DRILLS.filter((x) => WITH_PARTY.includes(x.id)))
+    for (const { sc, k, code } of scenesOf(d)) {
+      const results = correctResults(sc);
+      sc.steps.forEach((st, j) => {
+        // A puddle drop, or a stack on a marked player, is one spot the whole party shares: its
+        // area holds no ring of players.
+        const marker = sc.headMark && !sc.headMark.spread && (sc.headMark.at ?? 0) === j;
+        if (st.drop || marker) return;
+        const r = results[j],
+          stack = withYouAt(st, { p: partyWent(r), z: r.z });
+        for (const [who, p] of stack) assert.isTrue(inZone(p, r.z), `${d.id} ${code} step ${j}: ${who} in the area`);
+      });
+      void k;
+    }
+});
+
+test("after each weapon, nobody stands in the sword's cross, the axe's hit or the scythe's donut", () => {
+  for (const d of DRILLS.filter((x) => ["m-assault", "m-void", "m-ultimate"].includes(x.id)))
+    for (const { sc, k, code } of scenesOf(d)) {
+      const results = correctResults(sc);
+      sc.steps.forEach((st, j) => {
+        const reveal = st.reveal ?? [],
+          kind = st.a[0].split(",")[0];
+        // The attacks everyone dodges: the cross (the reveal less its two Line Stacks), or the weapon's first piece.
+        const dodge = kind === "Sword" ? reveal.slice(0, -2) : kind === "Axe" || kind === "Scythe" ? reveal.slice(0, 1) : [];
+        for (const [who, p] of partyNow(sc, k, results.slice(0, j + 1)))
+          for (const o of dodge) assert.isFalse(attackHits(rotOverlay(o, k), p), `${d.id} ${code} step ${j} (${kind}): ${who}`);
+      });
+    }
 });

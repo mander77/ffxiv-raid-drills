@@ -1,6 +1,6 @@
 import { useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { partyRoutes, partyWent, restSpot } from "../../data/partyRoute";
+import { partyRoutes, partyWent, restSpot, type YouAt } from "../../data/partyRoute";
 import { correctRoute, runnerAt, type Stop } from "../../data/route";
 import { dist } from "../../geometry";
 import { useArenaSizes, useFight } from "../../hooks/useFight";
@@ -143,14 +143,14 @@ function PartyRunners({ slot, marker }: PartyRunnersProps) {
     you answered, where the party went, each from when you answered it. */
 function routesOf(s: FightState): Map<SlotName, Stop[]> {
   const correct = s.mode === "watch" ? s.route : correctRoute(s.fight);
-  const correctAt = (si: number, j: number): Point | null => correct.find((x) => x.si === si && x.j === j)?.p ?? null;
+  const correctAt = (si: number, j: number): YouAt | null => correct.find((x) => x.si === si && x.j === j) ?? null;
   if (s.mode === "watch") return partyRoutes(s.fight, correctAt);
   const answered = (si: number, j: number): StepResult | undefined => s.results[si]?.[j];
   return partyRoutes(
     s.fight,
     (si, j) => {
       const r = answered(si, j);
-      return r ? partyWent(r) : correctAt(si, j);
+      return r ? { p: partyWent(r), z: r.z } : correctAt(si, j);
     },
     (si, j) => {
       if (!answered(si, j)) return undefined;

@@ -6,7 +6,7 @@
 // does and the correct spot in green. Where a map drill already draws the same moment, the
 // picture is built from that drill, so the two always agree.
 import { bySlot, withSeed } from "../../../util";
-import { partyNow, restSpot, stackedAt } from "../../partyRoute";
+import { partyNow, restSpot, stackedAt, withYouAt } from "../../partyRoute";
 import { SLOT_NAMES } from "../../../party";
 import { markRole, partyOf } from "../../../party";
 import { angOf, dist, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
@@ -153,7 +153,8 @@ const around = (s: Slot, p: Point): Partial<Record<SlotName, Point>> =>
 /** The other players for one weapon, from the jump set's own step. */
 function jumpParty(s: Slot, type: WeaponType, a: number): Partial<Record<SlotName, Point>> {
   const st = buildJumpSet(s, [{a, p:atAngle(a), type}]).steps[0], me = st.stand ?? (st.z ? zoneCenter(st.z) : CENTER);
-  return Object.fromEntries(Object.entries(st.party ?? {}).map(([x, p]) => [x, p === "you" ? stackedAt(x as SlotName, me) : p]));
+  const stack = withYouAt(st, {p:me, z:st.z});
+  return Object.fromEntries(Object.entries(st.party ?? {}).map(([x, p]) => [x, p === "you" ? stack.get(x as SlotName) ?? me : p]));
 }
 
 /** The boss jumps from the middle to one weapon. `zone` is your spot, `zoneOther` your co-healer's,
