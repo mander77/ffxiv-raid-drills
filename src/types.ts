@@ -241,10 +241,12 @@ export interface Scene {
       when left out). Before your first answer you stand at your mark `you`. A `fixed` tether is
       never shown as stretched (no source gives its stretch distance). */
   tether?: { portal: Point; you: Extract<Overlay, { t: "mark" }>; from?: number; fixed?: boolean };
-  /** A stack marker on one player (Massive Meteor's), from the start until the step is answered:
-      then the stack is where the party went. `on` is the player who has it, where they stand.
-      `you` says it is yours: the full fight puts it on your moving marker. `n` is its hits. */
-  headMark?: { on: Extract<Overlay, { t: "mark" }>; you: boolean; n: number };
+  /** A stack marker on one player, from when step `at` (0 when left out) is asked until it is
+      answered: then the stack is where the party went. `on` is the player who has it, where they
+      stand. With `follow`, they stand with the party instead: on your last spot, just north of
+      you when it is not yours. `you` says it is yours: the full fight puts it on your moving
+      marker. `n` is its hits. */
+  headMark?: { on: Extract<Overlay, { t: "mark" }>; you: boolean; n: number; at?: number; follow?: boolean };
 }
 
 /** What you do in a Practice mechanic: spread out, stack (the whole party, in pairs, in light

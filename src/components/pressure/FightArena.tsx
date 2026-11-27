@@ -69,7 +69,7 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
           slot={slot}
           portal={tether && v.results.length >= (tether.from ?? 0) ? tether.portal : undefined}
           fixed={tether?.fixed}
-          stack={v.scene.headMark?.you && v.results.length === 0 ? v.scene.headMark.n : undefined}
+          stack={v.scene.headMark?.you && v.results.length === (v.scene.headMark.at ?? 0) ? v.scene.headMark.n : undefined}
         />
       }
     />

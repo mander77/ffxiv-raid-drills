@@ -3,7 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, assert, test } from "vitest";
 import { LiveArena } from "../../../src/components/arena/LiveArena";
 import { crushingComet } from "../../../src/data/fights/m11s/attacks";
-import { DRILLS, splitRound } from "../../../src/data/fights/m11s/drills";
+import { DRILLS, splitRound, voidAgain } from "../../../src/data/fights/m11s/drills";
 import { round2, stepZone, zoneCenter } from "../../../src/geometry";
 import { buildPattern } from "../../../src/lib/practice";
 import type { StepResult } from "../../../src/types";
@@ -230,6 +230,30 @@ test("Massive Meteor: the stack marker shows on its player, then the stack goes 
   assert.isBelow(Math.hypot(Number(at[1]) - p[0], Number(at[2]) - p[1]), 6, "the stack is where you went");
   assert.ok(after.container.querySelector(`circle.aoe[cx="${at[1]}"][cy="${at[2]}"]`), "the stack's circle, on the marker");
   assert.equal(after.container.querySelectorAll(".stackmk").length, 1, "one marker");
+});
+
+test("Crushing Comet: the stack marker shows on the other healer, beside you, once the puddles are done", () => {
+  const scene = voidAgain("H1", false, { x: 50, y: 50, f: 0 }, "H2");
+  const results: StepResult[] = [];
+  const markerAfter = (n: number) => {
+    while (results.length < n) {
+      const z = stepZone(scene.steps[results.length], results);
+      if (!z) throw new Error("no zone");
+      const p = zoneCenter(z);
+      results.push({ p, ok: true, z, drop: p });
+    }
+    const view = render(<LiveArena scene={scene} k={0} results={[...results]} showLast hint={false} />);
+    const at = view.container.querySelector(".stackmk")?.getAttribute("transform");
+    view.unmount();
+    return at;
+  };
+  assert.isUndefined(markerAfter(2), "no marker during the puddles");
+  const last = results[1].p;
+  const at = markerAfter(3);
+  const third = results[2].p;
+  assert.notDeepEqual(third, last);
+  assert.equal(at, `translate(${round2(third[0])} ${round2(third[1] - 5)})`, "just north of your last spot");
+  assert.isUndefined(markerAfter(4), "gone once the party stacks");
 });
 
 test("Ultimate Trophy Weapons: Practice shows three weapons, the fight clock shows the ones that spawned", () => {

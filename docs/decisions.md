@@ -923,6 +923,17 @@ static wins.
 
 ### Void Stardust
 
+- The ending on the arena (issue #154, the owner's answers, November 27):
+  - Comet: after the answer, Practice and Pressure draw a 6-yalm spread circle (BossMod
+    `CometSpread`) on you and on the four tank and melee spots.
+  - Crushing Comet: a stack marker shows on a healer when the stack step is asked, and goes
+    when the party stacks (cactbot `stackMarkerOn`). The healer is random, you or the other one,
+    and stands with the party: on your last spot, or just north of you (`headMark` with `at` and
+    `follow`). The full fight draws that healer after its other random parts.
+  - Practice `m-void`: at the first weapon step the boss faces the first weapon, as Pressure
+    shows him from 1:26.7.
+  - Learn has both second endings: `k-void-2` (the first was a stack) and `k-void-2-stack` (the
+    first was a spread).
 - Puddles: start north of the boss. Drop each one just outside the last, a small step clockwise,
   in max melee.
 - A puddle (Cometite in BossMod) has a 3.0-second cast and goes off once. The drops are 2 seconds

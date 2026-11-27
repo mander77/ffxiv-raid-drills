@@ -2,7 +2,7 @@
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6, `ENRAGE`).
-import { DRILLS, ECL_CORNERS, eclFourWayScene, eclTwoWayScene, eclipticFreeScene, eclipticScene, eclStarts, eclWallOf, type EclMeteors, type EclStart, SPLIT_INNER, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, massiveScene, randomStackWearer, otherEnd, otherSide, portalAt, randomEndsSide, randomHalf, randomOthers, splitRound, splitTowers, swappedOthers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
+import { DRILLS, ECL_CORNERS, eclFourWayScene, eclTwoWayScene, eclipticFreeScene, eclipticScene, eclStarts, eclWallOf, type EclMeteors, type EclStart, SPLIT_INNER, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, massiveScene, randomStackWearer, otherEnd, otherSide, portalAt, randomEndsSide, randomHalf, randomOthers, splitRound, splitTowers, swappedOthers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, randomStackHealer, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
 import { ABILITIES, ENRAGE, FIGHT_END } from "./abilities";
 import { newCode, random, withSeed } from "../../../util";
 import { nearClock } from "../../../time";
@@ -249,6 +249,10 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   // Who has Massive Meteor's stack marker is random too, so it is drawn after them all.
   const massive = segs.find(g => g.drills[0] === "m-massive");
   if (massive) massive.scene = massiveScene(s, side2, randomStackWearer(s));
+  // So is the healer with Crushing Comet's stack marker, in the Void Stardust that ends in a stack.
+  const comet = randomStackHealer(s);
+  const voids = segs.filter(g => g.drills[0] === "m-void" || g.drills[0] === "m-void-2");
+  for(const g of voids) g.scene = g.drills[0] === "m-void" ? voidIntoWeapons(s, !stackFirst, A2, comet) : voidAgain(s, stackFirst, lastBoss, comet);
   // TS note: sort with a compare function, like List.Sort(Comparison) in C#. It keeps equal items in order.
   segs.sort((a, b) => a.from - b.from);
   /* A Practice scene can mark where you stand (Arena Split's towers mark where you ended the

@@ -315,6 +315,17 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...ps.map(p => puddle(p)), stackHit(stacked), ...stacked]),
       show([...pairs.map(p => stackHit(p)), ...pairs.flat()]),
       show([fakeCircle(VOID_2_FRONT, FAKE.buster), mark(...VOID_2_FRONT, "MT", "T"), target(VOID_2_FRONT), say("TANK BUSTER", 94)])]}; },
+  // The reverse of k-void-2: the first ended with a spread, so the second ends with the stack.
+  "k-void-2-stack": s => { const sc = voidAgain(s, true, VOID_2_BOSS), spread = sc.steps[3], gaps = stepZone(spread, VOID_RESULTS), marks = spread.cue ?? [];
+    if(!gaps) throw new Error("the spread step has no zone");
+    const stackSc = voidAgain(s, false, VOID_2_BOSS), ps = puddlesOf(stackSc), stackZone = stepZone(stackSc.steps[3], asDrops(ps));
+    if(!stackZone) throw new Error("the stack step has no zone");
+    const stacked = cluster(zoneCenter(stackZone)), pairs = pairsAt(GAPS), me = you(s, zoneCenter(gaps)), stack = [...ps.map(p => puddle(p)), stackHit(stacked), ...stacked];
+    return {overlays:[VOID_2_JUMP, tag(50, 8, "FIRST ENDED: SPREAD")], boss:VOID_2_BOSS, after:[tag(50, 94, "SECOND ENDS: STACK"), ...stack], answer:[stackZone], options:[
+      show(stack, [stackZone]),
+      show([...spreadHits([...marks, me]), ...marks, me]),
+      show([...pairs.map(p => stackHit(p)), ...pairs.flat()]),
+      show([fakeCircle(VOID_2_FRONT, FAKE.buster), mark(...VOID_2_FRONT, "MT", "T"), target(VOID_2_FRONT), say("TANK BUSTER", 94)])]}; },
   // The pairs at their wtfdig spots. The tank and melee pairs stand on waymarks D and B, so they
   // show as their stack only, and the waymarks stay readable.
   "k-dance": s => { const d = fromDrill("m-dance", s), pairs = [cluster(DANCE_PAIRS.H1, PAIRED.slice(4, 6), 2), cluster(DANCE_PAIRS.H2, PAIRED.slice(6, 8), 2)];
