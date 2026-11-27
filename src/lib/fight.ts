@@ -324,6 +324,21 @@ export function tickFight(s: FightState, dt: number, speed: number): Tick {
 const IDLE: Scene = { setup: [], rule: [], steps: [], overlays: [], boss: { x: 50, y: 50, f: null } };
 const IDLE_SPLIT: Scene = { ...IDLE, split: true };
 
+/** Between mechanics the boss stays where the last mechanic left him, until cactbot's next
+    "--middle--" line sends him back to the middle (after Assault Evolved, he stays on the third
+    weapon). Null when he is in the middle. */
+function bossBetween(f: Fight, t: number): { si: number; boss: Boss } | null {
+  let si = f.segs.length - 1;
+  while (si >= 0 && f.segs[si].from > t) si--;
+  if (si < 0) return null;
+  const g = f.segs[si];
+  const end = g.due[g.due.length - 1];
+  if (f.events.some((e) => e.name === "--middle--" && e.t > end && e.t <= t)) return null;
+  const sc = g.scene;
+  const boss = sc.bossAt ? sc.bossAt(g.due.length) : sc.boss ? rotOverlay(sc.boss, g.k) : null;
+  return boss && (boss.x !== 50 || boss.y !== 50) ? { si, boss } : null;
+}
+
 /** What the arena and the panel show at this moment. It changes only now and then, so the screen
     draws again only when `key` changes. */
 export interface FightView {
@@ -352,7 +367,9 @@ export function viewOf(s: FightState): FightView {
   const g = si >= 0 ? f.segs[si] : null;
   const res = g ? s.results[si] : [];
   const turned = Boolean(g?.turn && s.t >= g.turn.at);
-  const where = g ? String(si) : s.t >= f.split[0] && s.t < f.split[1] ? "split" : "idle";
+  const stay = g ? null : bossBetween(f, s.t);
+  const inSplit = s.t >= f.split[0] && s.t < f.split[1];
+  const where = g ? String(si) : stay ? `stay${stay.si}` : inSplit ? "split" : "idle";
   // On the player, the green answer shows for GREEN_FOR seconds after its hit. In the run, it
   // shows with its result for RESULT_SHOW seconds; at the end of a mechanic it stays.
   const lastHit = g && res.length ? g.due[res.length - 1] : Number.NEGATIVE_INFINITY;
@@ -375,11 +392,11 @@ export function viewOf(s: FightState): FightView {
     ? splitAt === undefined
       ? g.scene
       : { ...g.scene, split: s.t >= splitAt, splitAfter: undefined }
-    : where === "split"
+    : inSplit
       ? IDLE_SPLIT
       : IDLE;
   const k = g ? g.k : 0;
-  let boss: Boss | null = sc.bossAt ? sc.bossAt(res.length + (jumped ? 1 : 0)) : sc.boss ? rotOverlay(sc.boss, k) : null;
+  let boss: Boss | null = stay ? stay.boss : sc.bossAt ? sc.bossAt(res.length + (jumped ? 1 : 0)) : sc.boss ? rotOverlay(sc.boss, k) : null;
   // In the middle, before his cast, he faces no weapon. When the cast starts he turns to the first one.
   if (boss && g?.turn && boss.x === 50 && boss.y === 50) boss = { ...boss, f: turned ? g.turn.f : null };
   // Once he has landed, he faces the way he jumped.
