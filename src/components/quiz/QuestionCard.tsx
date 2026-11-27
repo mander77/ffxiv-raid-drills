@@ -255,7 +255,7 @@ export function QuestionCard({ item, slot, previewAnswers = false, top, onAnswer
       {note && <figcaption className="mt-2 text-sm text-muted-foreground">{note}</figcaption>}
     </figure>
   ) : row !== null ? (
-    <TimelinePicture row={row} answered={answered} correctName={correctName} />
+    <TimelinePicture row={row} time={item.time} answered={answered} correctName={correctName} />
   ) : null;
 
   // The card's box holds the whole card, so the prompt bar sticks to the top of the screen until

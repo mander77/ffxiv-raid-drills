@@ -614,6 +614,13 @@ Do not propose these again unless the owner brings them up.
   line "Coming up: the names show after you answer." A strip shows P1 to P4 and where you are.
 - When the next raidwide is the same one again (Crown of Arcadia comes five times), the answer says
   "Crown of Arcadia again".
+- A row is a raidwide when any of its abilities is raid damage, not only its first (issue #199,
+  owner's choices, November 27). Two rows start with the boss's cast and hit later: Dance of
+  Domination Trophy (its hits) and Ecliptic Stampede (Mammoth Meteor x2).
+  - The answer is the row's name; the explanation names the hit ("Its raidwide is the ...").
+  - Just after such a row's cast, its own raidwide is the next one.
+  - A second card, `h-<row>`, asks what comes after that raidwide, at its last hit. Without it,
+    no card asks for the last Crown of Arcadia. The picture counts down from the card's time.
 - The incorrect answers are random rows of the timeline. A row whose name points back to an
   earlier row ("the other weapon", "second set", "second time") is not offered before that
   earlier row has happened, because the name gives it away (`POINTS_BACK` in

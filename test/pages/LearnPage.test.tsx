@@ -100,6 +100,14 @@ test("a Timeline card answers with one click and shows the coming rows", async (
   assert.equal(useProgressStore.getState().rounds.m11s?.timeline.correct, 1);
 });
 
+test("a card just after a raidwide hit counts down from the hit, not from its row", () => {
+  // Mammoth Meteor x2 (9:01) is in the Ecliptic Stampede row (8:54); Crown of Arcadia is at 9:39.
+  open("/timeline/h-25");
+  assert.ok(screen.getByText(/just after the Mammoth Meteor x2 \(9:01\)/));
+  assert.ok(screen.getByText(/^9:01 of /));
+  assert.ok(screen.getByText("in 38 s"));
+});
+
 test("after the last card the round ends with the score, and Go again starts over", async () => {
   const last = TIMELINE[TIMELINE.length - 1];
   open(`/timeline/${last.id}`);

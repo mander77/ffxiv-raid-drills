@@ -1,10 +1,11 @@
 // Quiz questions: the mechanics (Learn), and questions made from the timeline (Timeline).
+import { nearClock } from "../../../time";
 import { bySlot, shuffle } from "../../../util";
 import { P1, P2, P3, P4, type Phase, TIMELINE } from "./timeline";
 import { tlAbilities } from "./abilities";
 import { TRAIL_DELAY } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
-import type { Question, QuizItem, Slot, TimelineEvent } from "../../../types";
+import type { Ability, Question, QuizItem, Slot, TimelineEvent } from "../../../types";
 
 /* ---------- mechanic questions ---------- */
 function mq(id: string, order: number, phase: Phase, time: string, build: (s: Slot) => Question): QuizItem {
@@ -207,8 +208,15 @@ export const LEARN_CARDS: QuizItem[] = [
 ];
 
 /* ---------- generated timeline questions ---------- */
-/** A raidwide row: the mechanic the row is named for (its first ability in the ability list) is raid damage. */
-const isRaidwide = (i: number): boolean => tlAbilities(i)[0]?.cats.includes("raid") ?? false;
+/** A row's raidwide: its first raid damage in the ability list, if it has one. It may come after
+    the boss's cast that starts the row (the Dance of Domination hits, Mammoth Meteor x2). */
+const raidwideOf = (i: number): Ability | undefined => tlAbilities(i).find(a => a.cats.includes("raid"));
+const isRaidwide = (i: number): boolean => raidwideOf(i) !== undefined;
+/** Whether row i's raidwide comes after the row starts, so it is still to come just after it. */
+const raidwideLater = (i: number): boolean => {
+  const hit = raidwideOf(i);
+  return hit !== undefined && hit !== tlAbilities(i)[0];
+};
 // Each raidwide name once. Crown of Arcadia happens six times, so the Set removes the repeats.
 const RAIDWIDE_NAMES = [...new Set(TIMELINE.filter((_e, i) => isRaidwide(i)).map(e => e.n))];
 /** Rows whose names point back to an earlier row (the second time, the second set), with the row
@@ -225,6 +233,26 @@ const canOffer = (e: TimelineEvent, i: number): boolean => {
   const first = POINTS_BACK[e.n];
   return first === undefined || TIMELINE.findIndex(x => x.n === first) <= i;
 };
+/** A next-raidwide card: it is just after `after` (at `time`, during row i), and row j's raidwide
+    comes next. j is i when row i's own raidwide is still to come. */
+function raidwideCard(id: string, order: number, i: number, after: string, time: string, j: number): QuizItem {
+  return {id, order, phase:"Timeline", time, build:s => {
+    const correct = TIMELINE[j], between = TIMELINE.slice(i + 1, j);
+    const others = shuffle(RAIDWIDE_NAMES.filter(n => n !== correct.n)).slice(0, 3);
+    // A row named for the boss's cast: say which hit is the raidwide.
+    const hit = raidwideLater(j) ? ["Its raidwide is the " + raidwideOf(j)?.name + "."] : [];
+    const when = j === i ? [correct.n + " is not over yet: its raidwide comes soon.", ...hit, "Have a mitigation ready for it."]
+      : between.length === 0 ? [correct.n + " is next, and it comes soon.", ...hit, "Have a mitigation ready for it."]
+      : between.length <= 2 ? [correct.n + " is the next raidwide.", ...hit, "First comes " + between.map(e => e.n).join(", then ") + "."]
+      : [correct.n + " is the next raidwide.", ...hit, between.length + " mechanics come first, starting with " + between[0].n + "."];
+    // Crown of Arcadia often comes again. "again" says the same raidwide repeats, so the
+    // answer does not read as the one that just happened.
+    return {prompt:"It is just after " + after + " (" + time + "). Which raidwide comes next, so you can plan a mitigation for it?",
+      options:[{t:correct.n + (j > i && correct.n === after ? " again" : ""), ok:true}, ...others.map(n => ({t:n}))],
+      why:[...when, ...correct.job(s)],
+      rule:["Know the next raidwide and whether it is soon, so your mitigation is ready."]};
+  }};
+}
 export const TIMELINE_CARDS: QuizItem[] = [];
 TIMELINE.slice(0, -1).forEach((ev, i) => {
   TIMELINE_CARDS.push({id:"n-" + i, order:i, phase:"Timeline", time:ev.t, build:s => {
@@ -239,22 +267,15 @@ TIMELINE.slice(0, -1).forEach((ev, i) => {
   }});
   /* The next raidwide, by name only. Knowing which one comes next and whether it is soon is
      enough to plan a mitigation. The exact time is not asked. */
-  const j = TIMELINE.findIndex((_e, x) => x > i && isRaidwide(x));
-  if(j > i){
-    TIMELINE_CARDS.push({id:"r-" + i, order:i + 0.5, phase:"Timeline", time:ev.t, build:s => {
-      const correct = TIMELINE[j], between = TIMELINE.slice(i + 1, j);
-      const others = shuffle(RAIDWIDE_NAMES.filter(n => n !== correct.n)).slice(0, 3);
-      const when = between.length === 0 ? [correct.n + " is next, and it comes soon.", "Have a mitigation ready for it."]
-        : between.length <= 2 ? [correct.n + " is the next raidwide.", "First comes " + between.map(e => e.n).join(", then ") + "."]
-        : [correct.n + " is the next raidwide.", between.length + " mechanics come first, starting with " + between[0].n + "."];
-      // Crown of Arcadia often comes again. "again" says the same raidwide repeats, so the
-      // answer does not read as the one that just happened.
-      return {prompt:"It is just after " + ev.n + " (" + ev.t + "). Which raidwide comes next, so you can plan a mitigation for it?",
-        options:[{t:correct.n + (correct.n === ev.n ? " again" : ""), ok:true}, ...others.map(n => ({t:n}))],
-        why:[...when, ...correct.job(s)],
-        rule:["Know the next raidwide and whether it is soon, so your mitigation is ready."]};
-    }});
-  }
+  const next = TIMELINE.findIndex((_e, x) => x > i && isRaidwide(x));
+  const hit = raidwideOf(i);
+  if(hit !== undefined && raidwideLater(i)){
+    // Just after the boss's cast, the row's own raidwide is still to come. A second card asks
+    // what comes after it, at its last hit.
+    TIMELINE_CARDS.push(raidwideCard("r-" + i, i + 0.5, i, ev.n, ev.t, i));
+    const end = hit.hit?.times?.at(-1)?.t ?? hit.t;
+    if(next > i) TIMELINE_CARDS.push(raidwideCard("h-" + i, i + 0.75, i, "the " + hit.name, nearClock(end), next));
+  }else if(next > i) TIMELINE_CARDS.push(raidwideCard("r-" + i, i + 0.5, i, ev.n, ev.t, next));
 });
 
 /* ---------- the chips over a Learn card ---------- */
