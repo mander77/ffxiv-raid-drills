@@ -886,9 +886,21 @@ static wins.
   the order this way, and it runs for both sets). The first set's weapons used to lie across the
   line to the middle, so all three looked square to him (issue #127; the owner chose to turn them).
   He never jumps straight across the middle: a weapon reached that way would face the middle too,
-  as square as the first. Where the spots would give that jump, its weapon moves 45° back (owner's
-  choice, for both sets), so a later weapon is always at least 22.5° off square. In the first set
-  this moved a weapon in about a third of the pattern codes; the random draws stay the same.
+  as square as the first.
+- Both sets, the layout (issue #153, the owner's answer, November 26): the three weapons stand in
+  a triangle, as in Hector's video ("triangle format"; his frames show NW, NE and S). Two are 90°
+  apart and the third is across from the gap between them, so the gaps are 90°, 135° and 135°.
+  Never two straight across (N, E, S is out), so a later weapon is always at least 22.5° off
+  square. No pinned source names the layouts: cactbot calls a weapon by one of 8 directions, and
+  BossMod reads the weapons' spots from the game. This replaced "any three spots at least 90°
+  apart, with a weapon moved 45° back where he would jump across"; pattern codes made before it
+  build other weapons.
+- Both sets, the distance (issue #153, the owner's answer, November 26): every weapon spot is
+  29 units (11.6 yalms) from the middle (`atAngle`). No source gives it: it is the app's choice,
+  close to the spots in Hector's diagram (about 10 to 14 yalms).
+- Trophy Weapons, the timeline (issue #153, the owner's answer, November 26): the healer line says
+  "Three hits in a row, so keep healing." It said every hit adds a vulnerability; no pinned source
+  says which hits give one.
 - Sword: stand in the pocket behind him, on the side he jumped from. H1 takes his left, H2 his
   right, and the light party stacks on the healer. Stand a few steps in from the inner corner,
   about 2 yalms clear of each arm. The whole pocket inside the arena counts as correct.
@@ -943,6 +955,10 @@ static wins.
 
 ### Later mechanics
 
+- One and Only and Ultimate Trophy Weapons, the timeline (issue #160, the owner's answer, November
+  26): One and Only is a "Heavy raidwide.", with no damage type: BossMod gives none, cactbot
+  calls it a big AoE, and Hector says only to mitigate it. Ultimate Trophy Weapons no longer says
+  a dead player must be up by the third weapon: no source gives a raise deadline.
 - Dance of Domination: seven hits. The lines on the floor show just after the 7th hit.
 - Dance of Domination, the lines (issue #155, the owner's answer, November 25): six lines, as
   in Hector's video (w1uuwzhyf5A, 4:06). With the open side south: one along the north edge, one
