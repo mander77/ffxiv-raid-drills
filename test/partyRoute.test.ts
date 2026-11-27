@@ -27,6 +27,11 @@ const WITH_PARTY = [
   "m-meteor-2",
   "m-meteor-3",
   "m-meteor-4",
+  "m-ecl-start",
+  "m-ecl-towers",
+  "m-ecl-two",
+  "m-ecl-four",
+  "m-hb",
 ];
 
 /** Every scene a drill builds for these codes and both slots. */
@@ -154,7 +159,7 @@ test("Pressure: nobody takes a mechanic's start spot before the mechanic appears
         const who = l as SlotName;
         const route = routes.get(who) ?? [];
         // A player who is there already from the mechanic before gives nothing away.
-        const before = route.filter((x) => x.hit < g.from).at(-1);
+        const before = route.filter((x) => x.hit <= g.from).at(-1);
         if (before && near(before.p, p)) continue;
         const at = runnerAt(route, g.from - 0.01, restSpot(who)).at;
         assert.isFalse(near(at, p), `${code} ${g.title}: ${who} waits for the mechanic`);

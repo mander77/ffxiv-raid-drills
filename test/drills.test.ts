@@ -30,6 +30,7 @@ import {
   eclFourWayScene,
   eclipticFreeScene,
   eclipticScene,
+  eclPlanFor,
   eclStarts,
   eclTwoWayScene,
   eclWallOf,
@@ -1101,8 +1102,12 @@ test("Ecliptic with no puddles: the tether goes opposite the portal, then clockw
       assert.equal(tether.a[0], `The ${corner.toUpperCase()} corner.`);
       assert.ok(tether.stand && inZone(tether.stand, tether.z ?? { c: [0, 0], r: 0 }), `${corner}: the corner spot is correct`);
       const east = corner === "ne" || corner === "se";
-      assert.ok(eclTwoWayScene(corner, "nw-se").steps[0].a[0].startsWith(east ? "The east Line Stack" : "The west Line Stack"));
-      assert.ok(eclFourWayScene(corner, "nw-se").steps[0].a[0].startsWith(corner.toUpperCase()));
+      assert.ok(
+        eclTwoWayScene(corner, "nw-se", eclPlanFor(s, corner, "nw-se")).steps[0].a[0].startsWith(
+          east ? "The east Line Stack" : "The west Line Stack",
+        ),
+      );
+      assert.ok(eclFourWayScene(corner, "nw-se", eclPlanFor(s, corner, "nw-se")).steps[0].a[0].startsWith(corner.toUpperCase()));
     }
 });
 
@@ -1171,7 +1176,7 @@ test("Two-way Fireball: only the melee stand on the hitbox; a marked player is j
     ["north", false],
     ["south", true],
   ] as const) {
-    const z = zoneOf(eclTwoWayScene(place, "nw-se").steps[0].z);
+    const z = zoneOf(eclTwoWayScene(place, "nw-se", eclPlanFor("H1", place, "nw-se")).steps[0].z);
     assert.notOk(inZone(out(11.5, east), z), `${place}: on the hitbox is the melee's spot`);
     assert.ok(inZone(out(16, east), z), `${place}: just outside the hitbox`);
     assert.notOk(inZone(out(26, east), z), `${place}: too far, behind the tethered players`);
@@ -1180,7 +1185,7 @@ test("Two-way Fireball: only the melee stand on the hitbox; a marked player is j
     ["nw", false],
     ["se", true],
   ] as const) {
-    const z = zoneOf(eclTwoWayScene(corner, "nw-se").steps[0].z);
+    const z = zoneOf(eclTwoWayScene(corner, "nw-se", eclPlanFor("H1", corner, "nw-se")).steps[0].z);
     assert.notOk(inZone(out(16, east), z), `${corner}: the marked player's spot is in front of you`);
     assert.ok(inZone(out(20, east), z), `${corner}: behind the players by the boss`);
   }
