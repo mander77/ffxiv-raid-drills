@@ -6,6 +6,8 @@
 // does and the correct spot in green. Where a map drill already draws the same moment, the
 // picture is built from that drill, so the two always agree.
 import { bySlot, withSeed } from "../../../util";
+import { partyNow, restSpot, stackedAt } from "../../partyRoute";
+import { SLOT_NAMES } from "../../../party";
 import { markRole, partyOf } from "../../../party";
 import { angOf, dist, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
 import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, spreadMarks, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLinePortals, portalLines, portalsOf, splitRound, lineupPlan, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, ECL_PORTAL, ECL_TOWER_AT, CORNER_STAND, type Weapon, type WeaponType } from "./drills";
@@ -127,7 +129,31 @@ function fromDrill(id: string, s: Slot, v: string | null = null, k = 0): Picture
   const legacy = LEGACY_MARKS[id];
   const start = !legacy ? [] : Object.entries(sc.party?.start ?? {}).map(([l, p]) => mark(p[0], p[1], l, markRole(partyOf(l as SlotName).role)));
   const placed = !legacy?.after ? [] : Object.entries(st.party ?? {}).flatMap(([l, p]) => p === "you" || l in (sc.party?.start ?? {}) ? [] : [mark(p[0], p[1], l, markRole(partyOf(l as SlotName).role))]);
-  return {overlays:[...sc.overlays, ...start], boss:sc.boss ?? sc.bossAt?.(k), split:sc.split, after:[...hits, ...placed, you(s, st.stand ?? zoneCenter(st.z))], answer:[st.z], zone:st.z, hits};
+  // The other players after the step, from a build of its own with a fixed seed, so the picture is
+  // the same every time. A drill's random parts move only the others.
+  const party = sceneParty(withSeed("picture " + id, () => m.build(s, v)), k);
+  return {overlays:[...sc.overlays, ...start], boss:sc.boss ?? sc.bossAt?.(k), split:sc.split, after:[...hits, ...placed, you(s, st.stand ?? zoneCenter(st.z))], answer:[st.z], zone:st.z, hits, party};
+}
+
+/** Where the other players stand once steps 0 to k of a scene are answered at their correct spots
+    (`youAt` instead for step k, where a picture puts you somewhere else in the zone). */
+function sceneParty(sc: Scene, k: number, youAt?: Point): Partial<Record<SlotName, Point>> {
+  const results: StepResult[] = [];
+  sc.steps.slice(0, k + 1).forEach((st, j) => {
+    const z = stepZone(st, results);
+    if (!z) return;
+    const p = j === k && youAt ? youAt : st.stand ?? zoneCenter(z);
+    results.push({p, ok:true, z, drop:st.drop ? p : null});
+  });
+  return Object.fromEntries(partyNow(sc, 0, results));
+}
+/** Everyone else stacked with you at p. */
+const around = (s: Slot, p: Point): Partial<Record<SlotName, Point>> =>
+  Object.fromEntries(SLOT_NAMES.filter(x => x !== s).map(x => [x, stackedAt(x, p)]));
+/** The other players for one weapon, from the jump set's own step. */
+function jumpParty(s: Slot, type: WeaponType, a: number): Partial<Record<SlotName, Point>> {
+  const st = buildJumpSet(s, [{a, p:atAngle(a), type}]).steps[0], me = st.stand ?? (st.z ? zoneCenter(st.z) : CENTER);
+  return Object.fromEntries(Object.entries(st.party ?? {}).map(([x, p]) => [x, p === "you" ? stackedAt(x as SlotName, me) : p]));
 }
 
 /** The boss jumps from the middle to one weapon. `zone` is your spot, `zoneOther` your co-healer's,
@@ -236,7 +262,7 @@ const AXE_HITS = [rawSteelBuster(AXE_TANKS), ...spreadHits(AXE_SPREAD, rawSteelI
     one, and that `options` has one preview for each of its answers, in the question's order. */
 // TS note: Partial<Record<string, ...>> says any key may be missing, so a lookup returns
 // the function or undefined, and the caller must check before it calls it.
-export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
+const PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   "k-raw-first": s => { const d = fromDrill("m-raw-scythe", s), north = cluster([50, 35], NONTANK, 3), all = clockRing(33);
     // The tanks' spots are part of the answer, so they show only after it.
     return {overlays:heldWeapon("scythe"), boss:d.boss, after:[...d.overlays.filter(o => o.t === "mark"), ...d.hits, ...cluster([50, 66], NONTANK, 3)], answer:d.answer, options:[
@@ -605,3 +631,39 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
         show([...tanks, say("RAISE THE PARTY", 8)]),
         show([RAIDWIDE, ...tanks, say("IT IS THE ENRAGE", 8)])]}; }
 };
+
+/* Where the other players stand on each answer picture, for the pictures that do not get it from
+   their drill step (fromDrill). An empty map: the card draws an example that no pattern of the
+   drill matches, so it keeps only the players it draws itself (the owner to check). */
+const PARTY_OF: Partial<Record<string, (s: Slot) => Partial<Record<SlotName, Point>>>> = {
+  "k-dance": s => fromDrill("m-dance", s).party ?? {},
+  "k-sword": s => jumpParty(s, "sword", 270),
+  "k-axe": s => jumpParty(s, "axe", 90),
+  "k-scythe": s => jumpParty(s, "scythe", 180),
+  "k-void": s => around(s, PUDDLES[2]),
+  "k-void-spread": s => sceneParty(voidAgain(s, true, BOSS), 3),
+  "k-void-sprint": s => sceneParty(voidAgain(s, true, BOSS), 3),
+  "k-void-2": s => sceneParty(voidAgain(s, true, VOID_2_BOSS), 3),
+  "k-void-2-start": s => sceneParty(voidAgain(s, true, VOID_2_BOSS), 0),
+  "k-ult-touch": s => fromDrill("m-tornado", s).party ?? {},
+  "k-orbital": s => around(s, bySlot<Point>(s, {H1:[36, 52], H2:[64, 52]})),
+  "k-orbital-move": s => { const z = withSeed("HECT", buildOrbital).steps[0].z; return z ? around(s, zoneCenter(z)) : {}; },
+  "k-meteor-stack": s => fromDrill("m-meteor-2", s, null, 1).party ?? {},
+  "k-split-kb": s => sceneParty(withSeed("k-split-kb", () => firstTowersScene(s, {portal:portalAt(homeSide(s), "north", "west")})), 0),
+  "k-split-fb": s => sceneParty(splitRound(s, {tether:false, side:homeSide(s), end:"north", covered:"inner", endsSide:"west", plan:lineupPlan(s, false, {side:homeSide(s), end:"north"})}), 0, bySlot<Point>(s, {H1:[29, 42], H2:[71, 58]})),
+  "k-split-towers23": s => sceneParty(withSeed("k-split-towers23", () => splitTowers(s, bySlot<SplitSide>(s, {H1:"west", H2:"east"}), bySlot<SplitEnd>(s, {H1:"south", H2:"north"}), null)), 0),
+  "k-ecl-adjust": s => fromDrill("m-ecl-start", s).party ?? {},
+  "k-ecl-prio": () => ({}), "k-ecl-center": () => ({}), "k-ecl-tether": () => ({}),
+  "k-split-corner": () => ({}), "k-slab": () => ({}), "k-meteor-order": () => ({}),
+};
+
+/** One picture per Mechanics question, by question id, each with the other players on its answer
+    picture: from its drill step, from PARTY_OF, or else in the rest formation around the boss
+    (a card about an order or a time, with no one moment of the drill). */
+// TS note: Object.fromEntries builds the same kind of map back from [id, function] pairs.
+export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = Object.fromEntries(
+  Object.entries(PICTURES).map(([id, fn]) => [id, (s: Slot): Picture => {
+    const f = (fn as (s: Slot) => Picture)(s), own = PARTY_OF[id];
+    const rest = f.split ? {} : Object.fromEntries(SLOT_NAMES.filter(x => x !== s).map(x => [x, restSpot(x, f.boss ?? BOSS)]));
+    return {...f, party:own ? own(s) : f.party ?? rest};
+  }]));
