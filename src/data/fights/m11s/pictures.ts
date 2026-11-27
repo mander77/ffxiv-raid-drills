@@ -9,7 +9,7 @@ import { bySlot, withSeed } from "../../../util";
 import { markRole, partyOf } from "../../../party";
 import { angOf, dist, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
 import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLinePortals, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, ECL_PORTAL, ECL_TOWER_AT, CORNER_STAND, type Weapon, type WeaponType } from "./drills";
-import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, flatlinerThrow, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, meteorHit, pairTower, proteanCone, proximityDot, raidwide, rawSteelBuster, rawSteelImpact, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, WALL_SECOND_FACING, wallOfFire } from "./attacks";
+import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, flatlinerThrow, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, twoWayFireball, fourWayFireball, crushingComet, eyeOfTheHurricane, meteorHit, pairTower, proteanCone, proximityDot, raidwide, rawSteelBuster, rawSteelImpact, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, WALL_SECOND_FACING, wallOfFire } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Scene, Slot, StepResult, Zone, ZoneShape } from "../../../types";
 
 type Who = [string, MarkRole];
@@ -220,7 +220,7 @@ const TANKS_TOGETHER = [mark(AXE_TANKS[0] - 3, AXE_TANKS[1], "MT", "T"), mark(AX
 /** The axe spread: each of the six at their wtfdig spot (see drills.ts). */
 const AXE_SPREAD = NONTANK.map(([l, r]) => mark(...AXE_SPREAD_SPOTS[l], l, r));
 /** The axe: the tanks share one buster, and the other six spread. */
-const AXE_HITS = [stackHit(TANKS_TOGETHER, 4), ...spreadHits(AXE_SPREAD)];
+const AXE_HITS = [rawSteelBuster(AXE_TANKS), ...spreadHits(AXE_SPREAD, rawSteelImpact)];
 
 /** One picture per Mechanics question, by question id. The tests check that every question has
     one, and that `options` has one preview for each of its answers, in the question's order. */
@@ -271,7 +271,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...spreadHits(spread), puddle(edge), ...spread, say("3 PUDDLES ON ONE SPOT", 8)]),
       show([puddle([50, 36]), stackHit(stack), ...stack, say("3 PUDDLES UNDER THE STACK", 94)]),
       show([...([[50, 30], [68, 50], [50, 70]] as Point[]).flatMap((p, i) => [puddle(p), tag(p[0], p[1], String(i + 1))])])]}; },
-  "k-void-target": s => { const me = inStack(s), stackOn = (l: string): Overlay[] => [spreadHit(inStack(l)), target(inStack(l))];
+  "k-void-target": s => { const me = inStack(s), stackOn = (l: string): Overlay[] => [crushingComet(inStack(l)), target(inStack(l))];
     return {overlays:[...PUDDLE_PIECES, ...stackedMarks], boss:BOSS, after:[...stackOn(s), tag(68, 83, "STACK ON A HEALER")], answer:[circle(me, 5)], options:[
       show([...stackOn(s), tag(68, 83, "STACK")]),
       show([...stackOn("MT"), tag(68, 83, "STACK")]),
@@ -329,7 +329,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   // The pairs at their wtfdig spots. The tank and melee pairs stand on waymarks D and B, so they
   // show as their stack only, and the waymarks stay readable.
   "k-dance": s => { const d = fromDrill("m-dance", s), pairs = [cluster(DANCE_PAIRS.H1, PAIRED.slice(4, 6), 2), cluster(DANCE_PAIRS.H2, PAIRED.slice(6, 8), 2)];
-    const tankPairs = [spreadHit(DANCE_PAIRS.MT), spreadHit(DANCE_PAIRS.OT)];
+    const tankPairs = [eyeOfTheHurricane(DANCE_PAIRS.MT), eyeOfTheHurricane(DANCE_PAIRS.OT)];
     return {overlays:[tag(50, 8, "DANCE OF DOMINATION")], boss:d.boss, after:[RAIDWIDE, ...d.overlays, ...bySlot(s, {H1:pairs[0], H2:pairs[1]}), tag(50, 16, "7 HITS, THEN PAIRS")], answer:d.answer, options:[
       show([RAIDWIDE, ...d.hits, ...tankPairs, ...pairs.map(p => stackHit(p)), ...pairs.flat(), tag(50, 16, "7 RAIDWIDES, THEN PAIRS")]),
       show([fakeCircle([50, 36], FAKE.buster), mark(50, 36, "MT", "T"), target([50, 36]), tag(50, 16, "ONE TANK BUSTER")]),
@@ -571,12 +571,12 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     // The east Line Stack, mirrored from your spot in the west one.
     const me = zoneCenter(d.zone), mirror: Point = [100 - me[0], me[1]];
     return {...d, after:[...d.hits, you(s, me)], options:[
-      show([lineStack(CENTER, [0, 50]), you(s, me)], [d.zone]), show([lineStack(CENTER, [100, 50]), you(s, mirror)], [circle(mirror, 5)]),
-      hit(youAt(s, [43, 43], 5.5), [lineStack(CENTER, [43, 43])]), show([fakeCircle(CENTER, FAKE.smallCircle), you(s, [50, 58])], [circle(CENTER, 9)])]}; },
+      show([twoWayFireball(CENTER, [0, 50]), you(s, me)], [d.zone]), show([twoWayFireball(CENTER, [100, 50]), you(s, mirror)], [circle(mirror, 5)]),
+      hit(youAt(s, [43, 43], 5.5), [twoWayFireball(CENTER, [43, 43])]), show([fakeCircle(CENTER, FAKE.smallCircle), you(s, [50, 58])], [circle(CENTER, 9)])]}; },
   "k-ecl-four": s => { const d = withSeed("k-ecl-four", () => fromDrill("m-ecl-four", s, "south"));
     return {...d, options:[
-      hit(youIn(s, d.zone), [lineStack(CENTER, zoneCenter(d.zone))]), hit(youAt(s, [43, 43], 5.5), [lineStack(CENTER, [43, 43])]),
-      show([lineStack(CENTER, [100, 50]), you(s, [68, 50])], [rect(60, 43, 84, 57)]), hit(youAt(s, [6, 94], 6), [lineStack(CENTER, [6, 94])])]}; },
+      hit(youIn(s, d.zone), [fourWayFireball(CENTER, zoneCenter(d.zone))]), hit(youAt(s, [43, 43], 5.5), [fourWayFireball(CENTER, [43, 43])]),
+      show([fourWayFireball(CENTER, [100, 50]), you(s, [68, 50])], [rect(60, 43, 84, 57)]), hit(youAt(s, [6, 94], 6), [fourWayFireball(CENTER, [6, 94])])]}; },
   /* The tower is under the boss, in the middle of the arena (BossMod). The tanks stand in it, south
      of his center. In this example the tanks soak it, so your green area is out of the tower,
      the drill's "tanks" way. */

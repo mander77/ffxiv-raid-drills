@@ -72,6 +72,6 @@ export const REFERENCE: readonly ReferenceEntry[] = [
   { name: "Arcadion Avalanche", picture: "k-slab", cards: ["k-slab"], drills: ["m-avalanche"], timeline: "n-19" },
   { name: "Ecliptic Stampede", picture: "k-ecl-start", cards: ["k-ecl-start", "k-ecl-adjust"], drills: ["m-ecl-start"], timeline: "n-24" },
   { name: "Ecliptic Towers", picture: "k-ecl-center", cards: ["k-ecl-prio", "k-ecl-center", "k-ecl-tether"], drills: ["m-ecl-towers"] },
-  { name: "Ecliptic Puddles", picture: "k-ecl-two", cards: ["k-ecl-two", "k-ecl-four"], drills: ["m-ecl-two", "m-ecl-four"] },
+  { name: "Ecliptic Fireball", picture: "k-ecl-two", cards: ["k-ecl-two", "k-ecl-four"], drills: ["m-ecl-two", "m-ecl-four"] },
   { name: "Heartbreak Kick", picture: "k-hb", cards: ["k-hb"], drills: ["m-hb"], timeline: "n-26" },
 ];
