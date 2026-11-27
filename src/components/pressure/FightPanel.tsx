@@ -80,7 +80,7 @@ function Mechanic({ view: v, fight, g, onGoTo, onGoToStep, onSpawns }: MechanicP
           <LineList lines={g.scene.steps[j].a} />
         </div>
       )}
-      {j > 0 && <LastAnswer ok={res[j - 1].ok} answer={g.scene.steps[j - 1].a} />}
+      {j > 0 && <LastAnswer ok={res[j - 1].ok} answer={g.scene.steps[j - 1].a} why={res[j - 1].why} />}
       {done ? (
         <>
           {g.scene.rule.length > 0 && <RuleBox rule={g.scene.rule} />}

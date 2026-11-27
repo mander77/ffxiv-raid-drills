@@ -158,6 +158,8 @@ export interface StepResult {
   z: Zone;
   drop: Point | null;
   missed?: boolean;
+  /** Why an incorrect click is not correct, when its step can say: what hits you there. */
+  why?: string;
 }
 
 /** A puddle that drops where a player stands: its radius in arena units, and how many seconds it
@@ -204,6 +206,9 @@ export interface Step {
       bait or their own protean cone. Without it, every attack in `reveal` counts. Only
       test/answers.test.ts reads it; nothing draws it. */
   hits?: Overlay[];
+  /** Why a click at p is not correct, as one short sentence ("OT's Fire Breath hits you there."),
+      or undefined when it cannot say. p is in the scene's own units, before the arena turns. */
+  whyNot?: (p: Point, results: StepResult[]) => string | undefined;
   /** Drawn from the moment this step's question shows until the drill ends. */
   cue?: Overlay[];
   leave?: Overlay | null;

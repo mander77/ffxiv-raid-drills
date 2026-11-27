@@ -31,6 +31,12 @@ test("LastAnswer says Correct or Not there, with the correct move as a list", ()
   cleanup();
   render(<LastAnswer ok={false} answer={["North."]} />);
   assert.ok(screen.getByText("Not there"));
+  cleanup();
+  render(<LastAnswer ok={false} answer={["North."]} why="OT's Fire Breath hits you there." />);
+  assert.ok(screen.getByText("OT's Fire Breath hits you there."), "says what hit you");
+  cleanup();
+  render(<LastAnswer ok={true} answer={["North."]} why="Not shown." />);
+  assert.isNull(screen.queryByText("Not shown."), "only after an incorrect answer");
 });
 
 test("StepChips marks each answered step and the step you are on", () => {
