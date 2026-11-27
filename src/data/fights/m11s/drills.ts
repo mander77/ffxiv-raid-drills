@@ -156,7 +156,7 @@ const SCYTHE_CLOCK_R = 9.5;
 function weaponParty(s: Slot, type: WeaponType, P: Point, front: number, pocket: Point, inPocket: (p: Point) => boolean): PartySpots {
   const mine = partyOf(s).lp;
   // The other light party stacks on its healer, inside their pocket.
-  const theirs = packAround(SLOT_NAMES.filter(x => partyOf(x).lp !== mine && partyOf(x).role !== "Healer"), pocket, inPocket);
+  const theirs = type === "sword" ? packAround(SLOT_NAMES.filter(x => partyOf(x).lp !== mine && partyOf(x).role !== "Healer"), pocket, inPocket) : new Map<SlotName, Point>();
   return Object.fromEntries(SLOT_NAMES.filter(x => x !== s).map((x): [SlotName, PartySpot] => [x,
     type === "axe" ? "you" : type === "sword" ? (partyOf(x).lp === mine ? "you" : theirs.get(x) ?? pocket)
       : polar(front + CLOCK[x], SCYTHE_CLOCK_R, P)]));
@@ -424,7 +424,14 @@ const cometOpen = (c: Point, f: number): (p: Point) => boolean => {
     spot nearest it when it is off the arena. */
 function cometGap(c: Point, f: number, i: number): Point {
   const g = gapsAround(c, f)[i], fn = cometOpen(c, f);
-  return fn(g) ? g : nearestTo(g, fn) ?? g;
+  return fn(g) ? g : nearOpen(g, fn) ?? g;
+}
+/** An open spot near t: the first one on rings going out from it, half a unit apart. Quicker than
+    nearestTo, for the other players' spots, which need no exact nearest. */
+function nearOpen(t: Point, fn: (p: Point) => boolean): Point | null {
+  for (let r = 0.5; r <= 60; r += 0.5)
+    for (let a = 0; a < 360; a += 10) { const p = polar(a, r, t); if (fn(p)) return p; }
+  return null;
 }
 /** Where the other players spread for Comet: the tanks and melee on their fixed spots, the other
     healer in their own gap, R1 in the gap in front of him and R2 in the gap behind him (owner,
@@ -436,7 +443,9 @@ function cometParty(s: Slot, c: Point, f: number): PartySpots {
   const fixed = fixedAround(c, f), spots: PartySpots = {R1:cometGap(c, f, 0), R2:cometGap(c, f, 2)};
   for (const m of fixed) spots[m.l as SlotName] = m.p;
   const other: Slot = s === "H1" ? "H2" : "H1";
-  spots[other] = cometSpread(other, c, f)([]).label;
+  // The other healer's gap: on their side, or the next open one, as their own drill picks it.
+  const open = cometOpen(c, f), gaps = gapsAround(c, f), pref = bySlot(other, {H1:[3, 1, 0, 2], H2:[1, 3, 0, 2]}).map(i => gaps[i]);
+  spots[other] = pref.find(open) ?? nearOpen(pref[0], open) ?? pref[0];
   COMET_PARTY.set(key, spots);
   return spots;
 }
