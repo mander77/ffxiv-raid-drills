@@ -187,7 +187,10 @@ test("Arena Split: the tethers swap in the second round", () => {
           const reveal = g.scene.steps[g.scene.steps.length - 1].reveal ?? [],
             cords = reveal.flatMap((o) => (o.t === "tether" ? [o] : []));
           // A tethered player stands at the end of a tether; the others are the markers.
-          const onCord = reveal.flatMap((o) => (o.t === "mark" && cords.some((c) => c.x2 === o.x && c.y2 === o.y) ? [o.l] : []));
+          const party = g.scene.steps[g.scene.steps.length - 1].party ?? {};
+          const onCord = Object.entries(party).flatMap(([l, p]) =>
+            p !== "you" && cords.some((c) => c.x2 === p[0] && c.y2 === p[1]) ? [l] : [],
+          );
           return [...(g.scene.tether ? [s] : []), ...onCord];
         });
       for (const t of tethered) assert.equal(t.length, 4, `${s}: four tethered players each round`);

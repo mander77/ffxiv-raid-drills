@@ -224,6 +224,9 @@ export interface Step {
   /** The players of `party` who go to their spot as soon as the step is asked, because their spot
       gives nothing away (the tanks' and melee's fixed Comet spots). */
   early?: readonly SlotName[];
+  /** Where each other player's knockback comes from at this step's hit, when it is not
+      `knock.from`: each Arena Split tower knocks its own soakers. */
+  partyKnock?: Partial<Record<SlotName, Point>>;
 }
 
 /** Where another player stands: a spot in the scene's own units, or "you": with you, where the

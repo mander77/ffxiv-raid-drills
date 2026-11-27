@@ -2,7 +2,7 @@
 // Times and ability names come from the cactbot timeline for M11S
 // (ui/raidboss/data/07-dt/raid/r11s.txt), with its branch offsets removed.
 // It covers the whole fight, from the pull to the enrage (Heartbreaker at 10:59.6, `ENRAGE`).
-import { DRILLS, ECL_CORNERS, eclFourWayScene, eclTwoWayScene, eclipticFreeScene, eclipticScene, eclStarts, eclWallOf, type EclMeteors, type EclStart, SPLIT_INNER, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, massiveScene, randomStackWearer, otherEnd, otherSide, portalAt, randomEndsSide, randomHalf, randomOthers, splitRound, splitTowers, swappedOthers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, randomStackHealer, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
+import { DRILLS, splitPlans, ECL_CORNERS, eclFourWayScene, eclTwoWayScene, eclipticFreeScene, eclipticScene, eclStarts, eclWallOf, type EclMeteors, type EclStart, SPLIT_INNER, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, massiveScene, randomStackWearer, otherEnd, otherSide, portalAt, randomEndsSide, randomHalf, splitRound, splitTowers, type SplitEnd, type SplitSide, buildAssault, buildAssault2, buildUltimate, assaultScene, ultimateScene, voidIntoWeapons, voidAgain, randomStackHealer, behind, FIRST_PUDDLE, type WeaponType } from "./drills";
 import { ABILITIES, ENRAGE, FIGHT_END } from "./abilities";
 import { newCode, random, withSeed } from "../../../util";
 import { nearClock } from "../../../time";
@@ -204,7 +204,6 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   end(); end();
   const face: SplitSide = random() < 0.5 ? "west" : "east", swing = end();
   const cover1 = randomHalf(), cover2 = randomHalf(), ends1 = randomEndsSide(), ends2 = randomEndsSide();
-  const others1 = randomOthers(s, t1 ? 3 : 4), others2 = swappedOthers(s, others1);
   // The side of your tether's portal in each round: you end on the platform across from it.
   const portalSide1 = randomEndsSide(), portalSide2 = randomEndsSide();
   // The end the side portal lines' portals stand at, in each round.
@@ -216,6 +215,8 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   const thrownEnd = (side: SplitSide, at: SplitEnd, portalSide: SplitSide | null): SplitEnd => portalSide === side ? at : otherEnd(at);
   const end1 = thrownEnd(home, tower1, t1 ? portalSide1 : null), side1 = t1 ? otherSide(portalSide1) : home;
   const end2 = thrownEnd(side1, end1, t1 ? null : portalSide2), side2 = t1 ? side1 : otherSide(portalSide2);
+  // Where everyone else resolves each round, around your own quadrants.
+  const plans = splitPlans(s, t1, {side:side1, end:end1}, {side:side2, end:end2});
   const WRATH = "Majestic Meteowrath/Majestic Meteorain/Fire Breath";
   const round = (n: number, tether: boolean): number[] =>
     [...(tether ? [cactbot("--Fire Breath Markers--", n)] : []), cactbot("--meteor 1--", n), cactbot("--meteor 2--", n), cactbot("--meteor 3--", n), cactbot(WRATH, n)];
@@ -223,18 +224,18 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   // so you can see before the knockback which way it needs you to go. Its portal is in the half
   // away from where round 1 ends.
   const first = segs.find(g => g.drills[0] === "m-split-tower");
-  if (first) first.scene = firstTowersScene(s, t1 ? {portal:portalAt(portalSide1, otherEnd(end1), ends1)} : null);
+  if (first) first.scene = firstTowersScene(s, t1 ? {portal:portalAt(portalSide1, otherEnd(end1), ends1)} : null, plans);
   segs.push(
-    {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, {tether:t1, side:side1, end:end1, covered:cover1, endsSide:ends1, others:others1, lineEnd:lineEnd1}), k:0, from:cactbot("Explosion", 6), due:round(1, t1)},
-    {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, side1, end1, t1 ? null : {portal:portalAt(portalSide2, otherEnd(end2), ends2)}), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
-    {title:"Arena Split: Fire Breath (Second Time)", drills:["m-split-fire"], scene:splitRound(s, {tether:!t1, side:side2, end:end2, covered:cover2, endsSide:ends2, others:others2, lineEnd:lineEnd2}), k:0, from:cactbot("Explosion", 7), due:round(2, !t1)},
-    {title:"Massive Meteor", drills:["m-massive"], scene:massiveScene(s, side2, {who:s, end:end2}), k:0, from:castStart("MassiveMeteorBoss", "Massive Meteor (castbar)"), due:[lineEnd("Massive Meteor x5")],
+    {title:"Arena Split: Fire Breath", drills:["m-split-fire"], scene:splitRound(s, {tether:t1, side:side1, end:end1, covered:cover1, endsSide:ends1, plan:plans.r1, lineEnd:lineEnd1}), k:0, from:cactbot("Explosion", 6), due:round(1, t1)},
+    {title:"Arena Split: Second Towers", drills:["m-split-towers2"], scene:splitTowers(s, side1, end1, t1 ? null : {portal:portalAt(portalSide2, otherEnd(end2), ends2)}, plans), k:0, from:cactbot("--tethers--", 4), due:[cactbot("Explosion", 7)]},
+    {title:"Arena Split: Fire Breath (Second Time)", drills:["m-split-fire"], scene:splitRound(s, {tether:!t1, side:side2, end:end2, covered:cover2, endsSide:ends2, plan:plans.r2, lineEnd:lineEnd2}), k:0, from:cactbot("Explosion", 7), due:round(2, !t1)},
+    {title:"Massive Meteor", drills:["m-massive"], scene:massiveScene(s, side2, {who:s, end:end2}, plans.r2), k:0, from:castStart("MassiveMeteorBoss", "Massive Meteor (castbar)"), due:[lineEnd("Massive Meteor x5")],
       // The party waits where the stack goes, and holds it from the first hit until the fifth.
       pre:zoneCenter(SPLIT_INNER[side2]), firstHit:cactbot("Massive Meteor x5")},
     /* The towers' cast starts at 7:28.8, while Massive Meteor still hits, so they show once it ends.
        The boss turns to the platform he grabs when his own cast starts (7:33.1): before that,
        nobody can know where to go. */
-    {title:"Arcadion Avalanche", drills:["m-avalanche"], scene:avalancheScene(s, side2, end2, face, swing), k:0, from:lineEnd("Massive Meteor x5"),
+    {title:"Arcadion Avalanche", drills:["m-avalanche"], scene:avalancheScene(s, side2, end2, face, swing, plans.r2), k:0, from:lineEnd("Massive Meteor x5"),
       turn:{at:castStart("ArcadionAvalancheBoss1", "Arcadion Avalanche (castbar)"), f:face === "west" ? 270 : 90, weapons:2},
       due:[cactbot("Explosion", 8), cactbot("Arcadion Avalanche")]}
   );
@@ -258,7 +259,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   if (fireSeg) fireSeg.scene = four ? eclFourWayScene(place, meteors, eclScene.ecl) : eclTwoWayScene(place, meteors, eclScene.ecl);
   // Who has Massive Meteor's stack marker is random too, so it is drawn after them all.
   const massive = segs.find(g => g.drills[0] === "m-massive");
-  if (massive) massive.scene = massiveScene(s, side2, randomStackWearer(s));
+  if (massive) massive.scene = massiveScene(s, side2, randomStackWearer(s, plans.r2), plans.r2);
   // So is the healer with Crushing Comet's stack marker, in the Void Stardust that ends in a stack.
   const comet = randomStackHealer(s);
   const voids = segs.filter(g => g.drills[0] === "m-void" || g.drills[0] === "m-void-2");

@@ -109,7 +109,11 @@ function segStops(
   answeredAt?: (si: number, j: number) => number | undefined,
 ): Stop[] {
   const start = g.scene.party?.start?.[who];
-  const out: Stop[] = start ? [{ p: rot(start, g.k), hit: g.from, show: g.from, si, j: -1 }] : [];
+  // On the split arena the rest formation is the gap between the platforms, so there they go
+  // straight to their start, where the last mechanic left them, and never rest.
+  const out: Stop[] = start
+    ? [{ p: rot(start, g.k), hit: g.from, show: g.from, si, j: -1, ...(g.scene.split ? { pre: rot(start, g.k) } : {}) }]
+    : [];
   g.scene.steps.forEach((st, j) => {
     const spot = st.party?.[who];
     if (spot == null) return;
@@ -120,7 +124,9 @@ function segStops(
     const click = answeredAt && !early ? (answeredAt(si, j) ?? Number.POSITIVE_INFINITY) : undefined;
     // The pre-position of the whole party, known in advance, when they go with you first.
     const pre = out.length === 0 && spot === "you" ? g.pre : undefined;
-    out.push({ p, hit: g.due[j], show: showOf(g, j), si, j, ...(pre ? { pre } : {}), ...(click != null ? { click } : {}) });
+    // A knockback throws them too, from the step's source or from their own (each tower its soakers).
+    const knock = st.knock ? { knock: { from: rot(st.partyKnock?.[who] ?? st.knock.from, g.k), dist: st.knock.dist } } : {};
+    out.push({ p, hit: g.due[j], show: showOf(g, j), si, j, ...(pre ? { pre } : {}), ...(click != null ? { click } : {}), ...knock });
   });
   return out;
 }

@@ -7,6 +7,7 @@ import {
   avalancheScene,
   buildAssault2,
   DRILLS,
+  lineupPlan,
   splitRound,
   spreadMarks,
   voidAgain,
@@ -76,7 +77,7 @@ test("the next step's cue shows after a correct answer, and waits after an incor
       end: "north",
       covered: "inner",
       endsSide: "west",
-      others: ["MT", "OT", "M1", "R2"],
+      plan: lineupPlan("H1", false, { side: "west", end: "north" }),
     }),
     puddles: StepResult[] = [];
   for (const st of scene.steps.slice(0, 3)) {
@@ -170,7 +171,7 @@ test("Arena Split: your tether follows you, red until it is stretched, and the o
       covered: "inner",
       // The west portals near the middle: from the middle of the east platform, yours is short.
       endsSide: "east",
-      others: ["MT", "M2", "R1"],
+      plan: lineupPlan("H1", true, { side: "east", end: "south" }),
     }),
     results: StepResult[] = [];
   const { rerender } = render(<LiveArena scene={scene} k={0} results={results} showLast={false} hint={false} />);
@@ -224,7 +225,9 @@ test("Massive Meteor: the stack marker shows on its player, then the stack goes 
   const before = render(<LiveArena scene={scene} k={0} results={[]} showLast={false} hint={false} />);
   const mark = before.container.querySelector(".stackmk");
   assert.ok(mark, "the marker shows before you answer");
-  assert.equal(mark.getAttribute("transform"), `translate(${round2(head.on.x)} ${round2(head.on.y)})`);
+  // On the player who has it: you, at the head mark's spot, or another player, on their mark.
+  const on = head.you ? [round2(head.on.x), round2(head.on.y)] : marksOn(before.container).get(head.on.l);
+  assert.equal(mark.getAttribute("transform"), `translate(${on?.[0]} ${on?.[1]})`);
   before.unmount();
   const z = stepZone(st, []);
   if (!z) throw new Error("no zone");

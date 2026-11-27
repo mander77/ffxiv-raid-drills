@@ -1281,8 +1281,10 @@ static wins.
 
 - The arena shows every player where they belong, not only you (owner, November 27). The plan,
   the spot of every slot at every step with its source, and the owner's answers are in
-  `docs/party-plan.md`. It is built one slice at a time; a drill draws the party once its scene
-  has `party`.
+  `docs/party-plan.md`. Every mechanic draws the party (the owner: "the whole party needs to show
+  up in the entire fight"). The owner asked that spots come from the sources (wtfdig, the guide
+  videos, cactbot and BossMod), not from questions mechanic by mechanic; spots read from a video
+  are for the owner to check.
 - While a step is asked, the others stand where they were for the step before. They go to the
   step's spot once you answer it, so a mark never gives the answer away. A step's `early` players
   go as soon as it is asked, when their spot gives nothing away (Comet's tanks and melee).
@@ -1300,6 +1302,14 @@ static wins.
   Comet, R1 takes the gap in front of the boss and R2 the gap behind him (owner). Every player has
   a spread marker while Comet is asked, and the markers go once you spread. This fixed the tank
   and melee marks that stayed into the weapons (#218).
+- Arena Split: one plan for all eight through both rounds (`splitPlans`), around your own path.
+  Four tethers in the first round, two in each light party, so each platform keeps two players
+  with no tether; a player with no tether is never knocked across; as many tethered players cross
+  from each side, so each quadrant ends with one tethered player and one marker (Hector's video).
+  The tethers swap in the second round. This replaced the random list of other tethered players.
+- Ecliptic Stampede: one plan (`EclPlan`) of who is marked and which corner each tethered player
+  takes runs through the puddles, towers, tethers and the fireball, so the fireball starts where
+  the tethers left everyone.
 
 ### Scale and sizes
 
