@@ -1,6 +1,6 @@
 // The rules of a Practice mechanic, as plain functions: build its pattern from a code, and answer
 // a step with a click. The Practice page and its tests both use them.
-import { inZone, rotOverlay, rotZone, stepZone, zoneCenter } from "../geometry";
+import { inZone, rotOverlay, rotZone, stepZone, whyNotAt, zoneCenter } from "../geometry";
 import type { Boss, Drill, DrillKind, Point, Scene, Slot, StepResult } from "../types";
 import { random, withSeed } from "../util";
 import { facingNext } from "./scene";
@@ -46,7 +46,8 @@ export function answerStep(scene: Scene, k: number, results: readonly StepResult
   if (!step || !base) return null;
   const zone = rotZone(base, k);
   const ok = inZone(p, zone);
-  return { p, ok, z: zone, drop: step.drop ? (ok ? p : zoneCenter(zone)) : null };
+  const why = ok ? undefined : whyNotAt(step, [...results], p, k);
+  return { p, ok, z: zone, drop: step.drop ? (ok ? p : zoneCenter(zone)) : null, ...(why ? { why } : {}) };
 }
 
 /** The status after an answer: a correct spot stays on screen until the next click; an incorrect one waits

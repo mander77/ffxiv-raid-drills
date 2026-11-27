@@ -53,7 +53,7 @@ import {
 } from "../src/data/fights/m11s/drills";
 import { bossmod } from "../src/data/fights/m11s/sources";
 import { angOf, inZone, stepZone, zoneCenter } from "../src/geometry";
-import { changes } from "../src/lib/practice";
+import { answerStep, buildPattern, changes } from "../src/lib/practice";
 import { facingNext, jumpsNext } from "../src/lib/scene";
 import type { Point, PolyShape, ScytheOverlay, Slot, SlotName, StepResult, Zone } from "../src/types";
 import { withSeed } from "../src/util";
@@ -1197,4 +1197,48 @@ test("Heartbreak Kick with the tanks: out of the tower is one ring with the towe
   const ring = z.show[0];
   assert.ok("poly" in ring && ring.hole, "the tower is a hole, so no line joins the two edges");
   drawnMatchesRule(z);
+});
+
+test("Arena Split lineup: an incorrect click says what is wrong there", () => {
+  // H1's pattern 7M75: a tether on the west platform, your end south, the portal lines over its
+  // outer half, H2's marker at waymark 4.
+  const d = DRILLS.find((x) => x.id === "m-split-fire");
+  if (!d) throw new Error("missing drill m-split-fire");
+  const sc = buildPattern(d, "H1", "7M75").scene,
+    results: StepResult[] = [];
+  for (const st of sc.steps.slice(0, -1)) {
+    const p = zoneCenter(zoneOf(stepZone(st, results)));
+    results.push({ p, ok: true, z: zoneOf(stepZone(st, results)), drop: st.drop ? p : null });
+  }
+  const lineup = sc.steps.at(-1);
+  if (!lineup?.whyNot) throw new Error("the lineup step names what hits you");
+  const why = (p: Point): string | undefined => lineup.whyNot?.(p, results);
+  assert.equal(why([11, 99]), "From there, your tether line hits H2.", "the click from the owner's screenshot");
+  assert.equal(why([3, 95]), "The portal lines hit you there.");
+  assert.equal(why([20, 93]), "Go right up to the south wall.");
+  assert.equal(why([20, 5]), "Your end is the south end.");
+  assert.equal(why([70, 95]), "That is not your platform.");
+  assert.equal(why([0, 95]), "The portal lines hit you there.");
+  const puddle = results.at(-1)?.drop;
+  if (!puddle) throw new Error("no third puddle");
+  assert.equal(why(puddle), "The third puddle is still there.");
+  // answerStep keeps the reason with an incorrect result, and none with a correct one.
+  assert.equal(answerStep(sc, 0, results, [11, 99])?.why, "From there, your tether line hits H2.");
+  assert.isUndefined(answerStep(sc, 0, results, zoneCenter(zoneOf(stepZone(lineup, results))))?.why);
+});
+
+test("Arena Split lineup: a marker off the waymark's corner is told where to stand", () => {
+  const d = DRILLS.find((x) => x.id === "m-split-fire");
+  if (!d) throw new Error("missing drill m-split-fire");
+  const code = ["2222", "2345", "3K7Q", "4ZZ9", "5MPA", "6BXR"].find((c) =>
+    buildPattern(d, "H1", c).scene.setup?.[0].startsWith("No tether"),
+  );
+  if (!code) throw new Error("no marker pattern");
+  const sc = buildPattern(d, "H1", code).scene,
+    lineup = sc.steps.at(-1),
+    side = sc.setup?.[0].includes("west") ? "west" : "east",
+    end = sc.setup?.[1].includes("north") ? "north" : "south";
+  // In the middle of your end, on your platform, clear of the wall and the waymark: not the corner.
+  const mid: Point = [(PLATFORM_X[side][0] + PLATFORM_X[side][1]) / 2, end === "north" ? 40 : 60];
+  assert.match(lineup?.whyNot?.(mid, []) ?? "", /^Stand at waymark \d's wall-side corner\.$|hits you there\.$/);
 });

@@ -218,7 +218,7 @@ export function DrillScreen({
       }
     >
       <p role="status">
-        <span className="font-semibold">Not there.</span> {sc.steps[n - 1].a[0]}
+        <span className="font-semibold">Not there.</span> {last.why ?? sc.steps[n - 1].a[0]}
       </p>
     </PromptBar>
   ) : (
@@ -261,7 +261,11 @@ export function DrillScreen({
       {/* During the try the chips only show how far you got; after it, they go to a step. */}
       {multi && <StepChips count={sc.steps.length} results={results} at={at ?? undefined} onPick={done ? goToStep : undefined} />}
       {/* Your answer goes under the chips: the last one, or the step the chips show. */}
-      {seen ? <LastAnswer ok={seen.r.ok} answer={sc.steps[seen.at].a} /> : last && <LastAnswer ok={last.ok} answer={sc.steps[n - 1].a} />}
+      {seen ? (
+        <LastAnswer ok={seen.r.ok} answer={sc.steps[seen.at].a} why={seen.r.why} />
+      ) : (
+        last && <LastAnswer ok={last.ok} answer={sc.steps[n - 1].a} why={last.why} />
+      )}
       {/* The rule says why the spot is correct: at the end, and with Show me, which gives where. */}
       {(done || shown) && <RuleBox rule={sc.rule} />}
       {!done && sc.spawnPlay && (

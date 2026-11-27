@@ -3,7 +3,7 @@
 // to look ahead to. The fight screen calls them on every frame; the tests call them too.
 
 import { clickRoute, correctRoute, type Stop, showOf } from "../data/route";
-import { inZone, rotOverlay, rotZone, stepZone, zoneCenter } from "../geometry";
+import { inZone, rotOverlay, rotZone, stepZone, whyNotAt, zoneCenter } from "../geometry";
 import type { Boss, Category, Fight, FightSeg, Hit, Point, Scene, StepResult, Zone } from "../types";
 import { facingNext, jumpsNext } from "./scene";
 
@@ -235,7 +235,8 @@ export function answerFightStep(s: FightState, si: number, p: Point | null, miss
   const zone = rotZone(base, g.k);
   const at: Point = p ?? zoneCenter(zone);
   const ok = !missed && inZone(at, zone);
-  res.push({ p: at, ok, z: zone, drop: step.drop ? (ok ? at : zoneCenter(zone)) : null, missed });
+  const why = ok || missed ? undefined : whyNotAt(step, res, at, g.k);
+  res.push({ p: at, ok, z: zone, drop: step.drop ? (ok ? at : zoneCenter(zone)) : null, missed, ...(why ? { why } : {}) });
   if (s.mode !== "run") return { kind: ok ? "ok" : "bad", scored: null };
   s.answeredAt = s.t;
   if (p) {
@@ -471,7 +472,7 @@ export function promptOf(s: FightState): Prompt {
         ? "Too slow"
         : ahead
           ? "Not there. Look Ahead: the purple one is the first weapon."
-          : "Not there. The green area was correct.";
+          : `Not there. ${x.why ?? "The green area was correct."}`;
     return { look: x.ok ? "ok" : "bad", count: x.ok ? "✓" : "✗", text, ring: null };
   }
   if (g && held >= 0) {

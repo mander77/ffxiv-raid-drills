@@ -15,7 +15,7 @@ import { describe, expect, test } from "vitest";
 import { ATOMIC_PUDDLE } from "../src/data/fights/m11s/attacks";
 import { DRILLS, ECL_SOAK_R, FIRST_PUDDLE } from "../src/data/fights/m11s/drills";
 import { buildFight } from "../src/data/fights/m11s/fight";
-import { dist, inZone, stepZone, zoneCenter } from "../src/geometry";
+import { dist, attackHits as hits, inZone, isAttack, stepZone, zoneCenter } from "../src/geometry";
 import { buildPattern } from "../src/lib/practice";
 import type { Drill, Overlay, Point, Slot, Step, StepResult } from "../src/types";
 import { random, withSeed } from "../src/util";
@@ -30,64 +30,6 @@ const CODES =
 /** A correct answer that stands in an attack on purpose, with the reason. Empty today: a new
     failure goes to the owner first, and is listed here (with the question) only until they answer. */
 const KNOWN: readonly { drill: string; step: number; attack: string; why: string }[] = [];
-
-/** True for an overlay that hurts the players inside it. */
-const isAttack = (o: Overlay): boolean =>
-  o.t === "aoe" ||
-  o.t === "donut" ||
-  o.t === "lineaoe" ||
-  o.t === "band" ||
-  o.t === "puddle" ||
-  o.t === "poly" ||
-  (o.t === "raidwide" && o.cover !== undefined) ||
-  (o.t === "lane" && !o.soft);
-
-/** True when p is inside the rectangle along the line from a to b, w units wide. Its ends are
-    square, as the arena draws a line. */
-function inLine(p: Point, a: Point, b: Point, w: number): boolean {
-  const d: Point = [b[0] - a[0], b[1] - a[1]];
-  const len = Math.hypot(d[0], d[1]);
-  const v: Point = [p[0] - a[0], p[1] - a[1]];
-  const along = (v[0] * d[0] + v[1] * d[1]) / len;
-  const across = Math.abs(v[0] * d[1] - v[1] * d[0]) / len;
-  return along > 0 && along < len && across < w / 2;
-}
-
-/** True when p is inside the polygon (the even-odd rule: count the edges a ray from p crosses). */
-function inPoly(p: Point, pts: readonly Point[]): boolean {
-  let inside = false;
-  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
-    const [xi, yi] = pts[i];
-    const [xj, yj] = pts[j];
-    if (yi > p[1] !== yj > p[1] && p[0] < ((xj - xi) * (p[1] - yi)) / (yj - yi) + xi) inside = !inside;
-  }
-  return inside;
-}
-
-/** True when the attack hits a player at p. A spot on the attack's edge is outside it. */
-function hits(o: Overlay, p: Point): boolean {
-  switch (o.t) {
-    case "aoe":
-    case "puddle":
-      return dist(p, [o.x, o.y]) < o.r;
-    case "donut": {
-      const d = dist(p, [o.x, o.y]);
-      return d > o.r1 && d < o.r2;
-    }
-    case "lineaoe":
-      return inLine(p, [o.x, o.y], [o.x2, o.y2], o.w ?? 1.3);
-    case "band":
-      return inLine(p, [o.x, o.y], [o.x2, o.y2], o.w);
-    case "poly":
-      return inPoly(p, o.pts);
-    case "raidwide":
-      return !o.cover || !inPoly(p, o.cover);
-    case "lane":
-      return p[0] > o.rect[0] && p[0] < o.rect[2] && p[1] > o.rect[1] && p[1] < o.rect[3];
-    default:
-      return false;
-  }
-}
 
 /** A short name for an attack, for the failure message. */
 function nameOf(o: Overlay): string {

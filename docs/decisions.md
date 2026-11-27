@@ -1198,6 +1198,13 @@ static wins.
     platform from the first puddle on, because it changes each round. The answers say why: "Your
     end is away from your portal" or "where you got knocked", and "Each portal line runs between
     its two portals". The safe area still shows only after you answer.
+  - Name the hit (the owner, November 2026): after an incorrect lineup click, the screen says
+    what is wrong there, in one line (`Step.whyNot`): not your platform, not your end, the third
+    puddle, the portal lines, another marker's Fire Breath or tether line, a tether not stretched
+    or not at the wall, your own tether line hitting another player, or a marker off the
+    waymark's corner. Practice shows it in the prompt bar and the answer card; Pressure's run in
+    the answer card. The correct area is so small in some patterns that a click a yalm off is
+    incorrect, so the reason matters more than the picture there.
   - The towers (the owner, issue #166): after the answer, the four towers go off (Explosion) and
     an arrow shows your knockback from your tower's best side. The tower spots (`SPLIT_TOWER`)
     are the app's, one in each quadrant next to its number waymark, from Hector's video ("one in

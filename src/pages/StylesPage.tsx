@@ -309,7 +309,7 @@ const ANSWER_STYLES: readonly { name: string; meaning: string; sample: ReactNode
     sample: (
       <div className="space-y-2">
         <LastAnswer ok answer={["The correct move.", "A detail."]} />
-        <LastAnswer ok={false} answer={["The correct move.", "A detail."]} />
+        <LastAnswer ok={false} answer={["The correct move.", "A detail."]} why="What hit you there, when the step can say." />
       </div>
     ),
   },

@@ -1,8 +1,8 @@
 // Map drills: the arena scenes and the rules that decide each answer zone.
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
-import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, flatlinerThrow, wrathLine, eclipticWrath, eclTowerHit, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, towerThrow, ROCK_GAP, meteorHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
+import { DEG, unit, addVec, leftOf, angOf, attackHits, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
+import { PLATFORM_X, PORTAL_OUT, isStretched, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, flatlinerThrow, wrathLine, eclipticWrath, eclTowerHit, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, towerThrow, ROCK_GAP, meteorHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -1334,6 +1334,34 @@ const yourBreath = (r: SplitRound): Band => {
   return fireBreath(CENTER, mine ? mine.p : markerCorner(r.side, r.end, r.covered));
 };
 
+/** Why a lineup spot at p is not correct, as one sentence, for the screen after an incorrect click:
+    the wrong platform or end, the third puddle, the portal lines, another marker's Fire Breath or
+    another tether's line, or (with a tether) a tether that is not stretched. Undefined when none
+    of these says it. */
+function lineupWhyNot(s: Slot, r: SplitRound, portal: Point | null): (p: Point, results: StepResult[]) => string | undefined {
+  return (p, results) => {
+    const [x0, x1] = PLATFORM_X[r.side];
+    if (p[0] < x0 || p[0] > x1) return "That is not your platform.";
+    if (r.end === "north" ? p[1] > 50 : p[1] < 50) return "Your end is the " + r.end + " end.";
+    const puddle = results.at(-1)?.drop;
+    if (puddle && dist(p, puddle) < MAJESTIC_PUDDLE.r) return "The third puddle is still there.";
+    if (portalLines(r.side, r.covered).some(o => o.t === "lane" && attackHits(o, p))) return "The portal lines hit you there.";
+    const names = SLOT_NAMES.filter(x => x !== s && !r.others.includes(x));
+    const breath = markersAtLineup(r).findIndex(q => attackHits(fireBreath(CENTER, q), p));
+    if (breath >= 0 && names[breath]) return names[breath] + "'s Fire Breath hits you there.";
+    const line = othersAtLineup(r).find(o => attackHits(wrathLine(o.portal, o.p), p));
+    if (line) return line.who + "'s tether line hits you there.";
+    if (!portal) return inZone(p, {rect:markerRect(r.side, r.end, r.covered)}) ? undefined : "Stand at waymark " + WAYMARK[r.side][r.end].n + "'s wall-side corner.";
+    if (!isStretched(portal, p)) return "Your tether is not stretched there.";
+    if (Math.min(p[1], 100 - p[1]) > WALL_STRIP) return "Go right up to the " + r.end + " wall.";
+    // Your own line runs from your portal through you: it must miss the other players.
+    const own = wrathLine(portal, tetherBest(r.side, r.end, r.covered)).w;
+    const players = [...othersAtLineup(r).map(o => ({who:o.who, p:o.p})), ...markersAtLineup(r).map((q, i) => ({who:names[i], p:q}))];
+    const hit = players.find(o => o.who && !clearOf(p, lineWouldHit(portal, o.p, own)));
+    return hit ? "From there, your tether line hits " + hit.who + "." : undefined;
+  };
+}
+
 /** One round of tethers and Fire Breath markers, on your platform, ending at your end. Without a
     tether you bait Fire Breath and get a marker. */
 export function splitRound(s: Slot, r: SplitRound): Scene {
@@ -1363,11 +1391,11 @@ export function splitRound(s: Slot, r: SplitRound): Scene {
       tether
         ? {q:"The portal lines cover half of each platform. Where do you stretch your tether?", zf:tetherSpot(side, end, covered, portal, [...otherWraths(r), ...otherBreaths(r)], [...othersAtLineup(r).map(o => o.p), ...markersAtLineup(r)]),
           // Your own line goes through you, as it should; the others' lines and Fire Breath must miss you.
-          cue:portalLinePortals(side, covered), reveal:[...portalLines(side, covered), wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
+          whyNot:lineupWhyNot(s, r, portal), cue:portalLinePortals(side, covered), reveal:[...portalLines(side, covered), wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
           a:["The " + end + " wall, just outside the portal lines.", "That end is away from your portal.", PORTAL_LINES_WHY, "Stay out of the third puddle."]}
         : {q:"The portal lines cover half of each platform. You have a marker. Where do you stand?", zf:markerSpot(side, end, covered, [...otherWraths(r), ...otherBreaths(r)]),
           // Your own Fire Breath goes through you, as it should; the others' lines must miss you.
-          cue:portalLinePortals(side, covered), reveal:[...portalLines(side, covered), yourBreath(r), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
+          whyNot:lineupWhyNot(s, r, null), cue:portalLinePortals(side, covered), reveal:[...portalLines(side, covered), yourBreath(r), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
           a:["The wall-side corner of waymark " + wm.n + ", out of the portal lines.", PORTAL_LINES_WHY, "Stay out of the third puddle."]}],
     rule:SPLIT_ROUND_RULE};
 }

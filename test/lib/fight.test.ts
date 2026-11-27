@@ -381,3 +381,14 @@ test("between mechanics, the boss stays on his last weapon until cactbot's --mid
     expect(at(middle + 0.1).boss, `${title}: in the middle after --middle--`).toMatchObject({ x: 50, y: 50 });
   }
 });
+
+test("in the run, an incorrect click keeps what was wrong there, for the answer card", () => {
+  const s = newFightState("run", fight(), { paused: true });
+  const si = s.fight.segs.findIndex((g) => g.title === "Arena Split: Fire Breath");
+  const g = s.fight.segs[si];
+  for (let j = 0; j < g.due.length - 1; j++) answerFightStep(s, si, null);
+  // The gap between the platforms, at the lineup, while it is asked.
+  s.t = askFrom(g, g.due.length - 1) + 0.1;
+  expect(answerFightStep(s, si, [50, 95])?.kind).toBe("bad");
+  expect(s.results[si].at(-1)?.why).toBe("That is not your platform.");
+});
