@@ -31,29 +31,34 @@ function phaseAt({ abilities, phases }: FightData, now: number): number {
 }
 
 /** The timeline row a Timeline card asks about (ids "n-<row>" and "r-<row>": row <row> just
-    happened), or null for any other card. */
+    happened; "h-<row>": the raidwide in row <row> just hit), or null for any other card. */
 export function timelineRowOf(item: QuizItem): number | null {
-  const m = /^[nr]-(\d+)$/.exec(item.id);
+  const m = /^[nrh]-(\d+)$/.exec(item.id);
   return m ? Number(m[1]) : null;
 }
 
 export interface TimelinePictureProps {
-  /** The timeline row that just happened. */
+  /** The timeline row that just happened, or is still going on. */
   row: number;
+  /** The card's moment, such as "2:26". The countdowns count from it. */
+  time: string;
   answered: boolean;
-  /** The name of the correct answer, outlined after the answer. */
+  /** The name of the correct answer, outlined after the answer. It may end with " again". */
   correctName: string;
 }
 
 /** The picture on a Timeline card: the fight timeline at that moment, the way the cactbot overlay
     shows it, and a strip of the four phases with where you are in the fight. Before the answer
     the coming rows show their bars and countdowns but not their names. */
-export function TimelinePicture({ row, answered, correctName }: TimelinePictureProps) {
+export function TimelinePicture({ row, time, answered, correctName }: TimelinePictureProps) {
   const fight = useFight();
   const { timeline, timelineCategories, enrage } = fight;
   const strip = useMemo(() => stripOf(fight), [fight]);
-  const now = sec(timeline[row].t);
-  const correct = timeline.findIndex((e, x) => x > row && e.n === correctName);
+  const now = sec(time);
+  // The row going on now can be the answer: its raidwide comes after the boss's cast. With
+  // " again", the answer is a later row of the same name.
+  const name = correctName.replace(/ again$/, "");
+  const correct = correctName === timeline[row].n ? row : timeline.findIndex((e, x) => x > row && e.n === name);
   const last = Math.min(timeline.length - 1, row + MAX_ROWS, Math.max(row + MIN_ROWS, correct));
   const phase = phaseAt(fight, now);
   const rows = Array.from({ length: last - row }, (_x, k) => row + 1 + k);
@@ -87,7 +92,14 @@ export function TimelinePicture({ row, answered, correctName }: TimelinePictureP
       </p>
       {!answered && <p className="text-xs text-muted-foreground">Coming up: the names show after you answer.</p>}
       <ol aria-label="Fight timeline" className="space-y-1 text-sm">
-        <TimelineRow fill={1} name={timeline[row].n} cats={timelineCategories(row)} when={timeline[row].t} now />
+        <TimelineRow
+          fill={1}
+          name={timeline[row].n}
+          cats={timelineCategories(row)}
+          when={timeline[row].t}
+          now
+          correct={answered && correct === row}
+        />
         {rows.map((x) => {
           const left = sec(timeline[x].t) - now;
           return (
