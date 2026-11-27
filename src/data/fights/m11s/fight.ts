@@ -181,7 +181,7 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
       due:wall === "none"
         ? [castStart("MammothMeteor", "Mammoth Meteor x2"), cactbot("Atomic Impact 1"), cactbot("Cosmic Kiss", 4), cactbot("Majestic Meteowrath x4")]
         : [castStart("MammothMeteor", "Mammoth Meteor x2"), ...([1, 2, 3, 4, 5, 6] as const).map(n => cactbot(`Atomic Impact ${n}`)), cactbot("Majestic Meteowrath x4")]},
-    {title:"Ecliptic Stampede: " + fireball, drills:[ecl], scene:four ? eclFourWayScene(place, meteors) : eclTwoWayScene(place, meteors), k:0, from:cactbot("Majestic Meteowrath x4"), due:[cactbot("Two-way Fireball / Four-way Fireball")]}
+    {title:"Ecliptic Stampede: " + fireball, drills:[ecl], scene:LATER, k:0, from:cactbot("Majestic Meteowrath x4"), due:[cactbot("Two-way Fireball / Four-way Fireball")]}
   );
   /* The rest of Arena Split, built last so the random parts above keep their codes. You have a
      tether in one round of the two and not in the other. Each tower knocks you away from its
@@ -251,7 +251,11 @@ function fightFor(s: Slot, code: string, c: Choices): Fight {
   /* Ecliptic Stampede with no puddles rolls its own random parts (the tank towers, the other player
      in the middle), so its scene is built last: the parts above keep their codes whatever your pick. */
   const eclSeg = segs.find(g => g.drills[0] === "m-ecl-start" || g.drills[0] === "m-ecl-towers");
-  if (eclSeg) eclSeg.scene = start.partner ? eclipticScene(s, start) : eclipticFreeScene(s, corner, meteors);
+  const eclScene = start.partner ? eclipticScene(s, start) : eclipticFreeScene(s, corner, meteors);
+  if (eclSeg) eclSeg.scene = eclScene;
+  // The fireballs go on from where Ecliptic Stampede left every player.
+  const fireSeg = segs.find(g => g.drills[0] === ecl);
+  if (fireSeg) fireSeg.scene = four ? eclFourWayScene(place, meteors, eclScene.ecl) : eclTwoWayScene(place, meteors, eclScene.ecl);
   // Who has Massive Meteor's stack marker is random too, so it is drawn after them all.
   const massive = segs.find(g => g.drills[0] === "m-massive");
   if (massive) massive.scene = massiveScene(s, side2, randomStackWearer(s));
