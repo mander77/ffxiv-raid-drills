@@ -176,20 +176,19 @@ export function LiveArena({
         <Shape key={`leave-${i}`} overlay={leave} />,
       );
   });
-  // Cues show with their step's question and stay. Player marks in a cue go in the marks layer.
-  const cues = sc.steps
-    .slice(0, asked + 1)
-    .flatMap((st) => st.cue ?? [])
-    .map((o) => rotOverlay(o, k));
+  // Cues show with their step's question and stay, each piece in its layer. Their floor pieces go
+  // over the puddles.
+  const cues = pieceLayers(
+    sc.steps
+      .slice(0, asked + 1)
+      .flatMap((st) => st.cue ?? [])
+      .map((o) => rotOverlay(o, k)),
+  );
 
   // Show me: the correct area of the step asked.
   const hintStep = hint ? sc.steps[n] : undefined;
   const hintBase = hintStep ? stepZone(hintStep, [...results]) : undefined;
   const hintZone = hintBase ? rotZone(hintBase, k) : undefined;
-
-  const shapes = (os: readonly Overlay[]): ReactNode =>
-    // biome-ignore lint/suspicious/noArrayIndexKey: these pieces never change order.
-    os.map((o, i) => <Shape key={i} overlay={o} />);
 
   return (
     <Arena
@@ -219,9 +218,14 @@ export function LiveArena({
         drops: (
           <>
             {drops}
-            {base.drops}
-            {reveal.drops}
-            {shapes(cues.filter((o) => o.t !== "mark"))}
+            {cues.ground}
+          </>
+        ),
+        tethers: (
+          <>
+            {base.tethers}
+            {reveal.tethers}
+            {cues.tethers}
             {mine && tetherTo && asked >= (mine.from ?? 0) && <Tether portal={mine.portal} to={tetherTo} fixed={mine.fixed} />}
           </>
         ),
@@ -237,6 +241,7 @@ export function LiveArena({
           <>
             {base.labels}
             {reveal.labels}
+            {cues.labels}
             {last && lastStep && (lastStep.lookAhead || correctLabel) && (
               <ZoneLabel zone={last.z} kind={lastStep.lookAhead ? "later" : "correct"} boss={bossAt} />
             )}
@@ -247,7 +252,7 @@ export function LiveArena({
           <>
             {base.marks}
             {reveal.marks}
-            {shapes(cues.filter((o) => o.t === "mark"))}
+            {cues.marks}
             {mine && results.length === 0 && !mine.from && <Shape overlay={mine.you} />}
             {headOn && head && (
               <>

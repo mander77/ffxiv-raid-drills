@@ -1129,6 +1129,12 @@ static wins.
       tether pattern in Practice.
     - A tether is a solid cord on a light outline; a guide stays thin white dashes. `/styles` shows
       both. To fit the portals, the split arena is drawn smaller (`SPLIT_SCALE`).
+    - The portals are drawn where the stretch check measures from, cactbot's spot (the owner,
+      issue #150), not against the wall. Tethers have their own layer (`tethers`), which is not
+      clipped to the floor, so the whole cord shows, from its portal to its player. Puddles and
+      the other floor pieces stay clipped.
+    - At a tower, your portal is in the half away from where the tower throws you, so the tether
+      can stretch: in Practice as in the full fight (the owner, issue #166; `towerPortal`).
   - Majestic Meteor (owner's answers, November 2026): three puddles, one click each. The first
     goes in close at the middle of the inner edge. Each next one goes just outside the last, tight
     against the inner edge (`INNER_STRIP`, the app's choice), toward your end. A puddle drops when
@@ -1161,9 +1167,21 @@ static wins.
   - The lineup step draws, after you answer, every marker at its spot with its Fire Breath line
     (yours too without a tether), and every tether's line (issue #167). Pressure's casts coming
     up show "Tethers" and "Fire Breath markers" (cactbot's "--tethers--" and "--Fire Breath
-    Markers--"). The drills draw no slam size. The portal
-    lines show as a soft area over the half they cover (`PORTAL_LINE_X`), with the lineup
-    question (the app's choice: in the game they show from the start of the round).
+    Markers--"). The drills draw no slam size.
+  - The portal lines (the owner, issue #150): the lineup question shows only their portals, one
+    outside the north wall and one outside the south wall at each line's ends, touching the wall
+    (`portalLinePortals`; the spot is the app's choice). You work out from them which half the
+    line hits. The half itself, a soft area (`PORTAL_LINE_X`), shows only after you answer, in
+    the drills and in Learn's lineup card. In the game the portals show from the start of the
+    round; the app shows them with the lineup question.
+  - Your end (the owner, issue #151): a "YOUR END" tag marks the north or south end of your
+    platform from the first puddle on, because it changes each round. The answers say why: "Your
+    end is away from your portal" or "where you got knocked", and "Each portal line runs between
+    its two portals". The safe area still shows only after you answer.
+  - The towers (the owner, issue #166): after the answer, the four towers go off (Explosion) and
+    an arrow shows your knockback from your tower's best side. The tower spots (`SPLIT_TOWER`)
+    are the app's, one in each quadrant next to its number waymark, from Hector's video ("one in
+    each corner"); cactbot and BossMod give none. The owner is to check them against the video.
 
 ### The moving marker (data/route.ts)
 

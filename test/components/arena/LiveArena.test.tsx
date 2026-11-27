@@ -58,7 +58,9 @@ test("the arena's name says that a click picks where you stand, only when it doe
 });
 
 test("the next step's cue shows after a correct answer, and waits after an incorrect one", () => {
-  // Arena Split: the portal lines are the cue of the lineup, after the three puddles.
+  // Arena Split: the portal lines' portals are the cue of the lineup, after the three puddles. The
+  // four tether portals show from the start.
+  const portals = (): number => document.querySelectorAll(".portal").length;
   const scene = splitRound("H1", {
       tether: false,
       side: "west",
@@ -76,11 +78,11 @@ test("the next step's cue shows after a correct answer, and waits after an incor
   const last = puddles[2];
   const answer = (ok: boolean): StepResult[] => [...puddles.slice(0, 2), { ...last, ok, p: ok ? last.p : [50, 90] }];
   const { rerender } = render(<LiveArena scene={scene} k={0} results={answer(true)} showLast hint={false} />);
-  assert.ok(screen.queryByText("PORTAL LINES"), "shown with the next question");
+  assert.equal(portals(), 8, "shown with the next question");
   rerender(<LiveArena scene={scene} k={0} results={answer(false)} showLast hint={false} />);
-  assert.isNull(screen.queryByText("PORTAL LINES"), "not before Next step");
+  assert.equal(portals(), 4, "not before Next step");
   rerender(<LiveArena scene={scene} k={0} results={answer(false)} showLast={false} hint={false} />);
-  assert.ok(screen.queryByText("PORTAL LINES"), "shown once the next step is asked");
+  assert.equal(portals(), 8, "shown once the next step is asked");
 });
 
 test("Void Stardust: every puddle fades when Comet is asked, but stays for the stack", () => {

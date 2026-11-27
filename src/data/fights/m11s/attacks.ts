@@ -84,6 +84,9 @@ export const TETHER_STRETCH = yalms(SPLIT.stretch);
 /** How far an Arena Split tower knocks the players in it, straight away from its middle (BossMod's
     ExplosionKnockback). */
 export const TOWER_KNOCKBACK = yalms(SPLIT.towerKnockback);
+/** An Arena Split tower's knockback, for a player standing at p: one arrow straight away from
+    the tower's middle. */
+export const towerThrow = (tower: Point, p: Point): Overlay[] => ATTACK.knockback(tower, SPLIT.towerKnockback, p);
 /** How far Flatliner knocks the party, straight away from the arena's center (BossMod's Flatliner
     knockback). It splits the arena as it lands: a landing in the gap falls. */
 export const FLATLINER_KNOCKBACK = yalms(SPLIT.flatlinerKnockback);

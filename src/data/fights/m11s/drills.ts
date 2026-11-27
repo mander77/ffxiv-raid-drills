@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, flatlinerThrow, wrathLine, eclipticWrath, eclTowerHit, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, ROCK_GAP, meteorHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, flatlinerThrow, wrathLine, eclipticWrath, eclTowerHit, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, towerThrow, ROCK_GAP, meteorHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -1045,11 +1045,26 @@ export const SPLIT_INNER: Record<SplitSide, RectZone> = {
     closest players. Its size and the gap are the app's choice. */
 export const SPLIT_BACK: Record<SplitSide, RectZone> = {
   west:{rect:[SPLIT_INNER.west.rect[0] - 11, 38, SPLIT_INNER.west.rect[0] - 5, 62]}, east:{rect:[SPLIT_INNER.east.rect[2] + 5, 38, SPLIT_INNER.east.rect[2] + 11, 62]}};
-/** The four towers, one in each quadrant (as in the first towers). */
+/** The four towers, one in each quadrant, next to its number waymark (the first and second towers
+    and Arcadion Avalanche). The app's spots, from Hector's video ("one in each corner"): cactbot
+    and BossMod give no tower spots (BossMod reads them from the game). The owner to check them
+    against the video's frames. */
 export const SPLIT_TOWER: Record<SplitSide, Record<SplitEnd, Point>> = {west:{north:[11, 23], south:[11, 77]}, east:{north:[89, 23], south:[89, 77]}};
 /** How many players soak each Arena Split tower (the drills of the split and Arcadion Avalanche). */
 const SPLIT_SOAK = 2;
-const SPLIT_TOWERS: Overlay[] = [SPLIT_TOWER.west.north, SPLIT_TOWER.east.north, SPLIT_TOWER.west.south, SPLIT_TOWER.east.south].map(p => soakTower(p, SPLIT_SOAK));
+const SPLIT_TOWER_SPOTS: readonly Point[] = [SPLIT_TOWER.west.north, SPLIT_TOWER.east.north, SPLIT_TOWER.west.south, SPLIT_TOWER.east.south];
+const SPLIT_TOWERS: Overlay[] = SPLIT_TOWER_SPOTS.map(p => soakTower(p, SPLIT_SOAK));
+/** What your tower step shows after the answer: the four towers going off (Explosion) and your
+    knockback, from the best spot of your tower. The other three towers must miss you. */
+function towerReveal(side: SplitSide, end: SplitEnd, knock: Knock): Pick<Step, "reveal" | "hits"> {
+  const c = SPLIT_TOWER[side][end], best = addVec(c, knockDir(side, end, knock), TOWER_R / 2);
+  return {reveal:[...SPLIT_TOWER_SPOTS.map(towerHit), ...towerThrow(c, best)], hits:SPLIT_TOWER_SPOTS.filter(p => p !== c).map(towerHit)};
+}
+/** Your tether's portal at a tower: on `portalSide`, in the half away from where the tower throws
+    you, so the tether can stretch (as in the full fight). Across (portal on your side) keeps you at
+    the tower's end; staying sends you to the other end. */
+const towerPortal = (side: SplitSide, towerEnd: SplitEnd, portalSide: SplitSide): Point =>
+  portalAt(portalSide, portalSide === side ? otherEnd(towerEnd) : towerEnd, randomEndsSide());
 /** The number waymark at each end of each platform, where a Fire Breath marker goes. */
 const WAYMARK: Record<SplitSide, Record<SplitEnd, {n: number; p: Point}>> = {
   west:{north:{n:1, p:[10, 22.5]}, south:{n:4, p:[10, 77.5]}}, east:{north:{n:2, p:[90, 22.5]}, south:{n:3, p:[90, 77.5]}}};
@@ -1100,7 +1115,21 @@ export function portalLines(side: SplitSide, covered: SplitHalf): Overlay[] {
   // The tag sits north of the middle, clear of waymarks B and D and of the first puddle.
   return [band(side, covered), band(otherSide(side), otherHalf(covered)), {t:"tag", x:(x0 + x1) / 2, y:33, s:"PORTAL LINES"}];
 }
+/** How far outside the north and south walls a portal line's portals are drawn: half a portal's
+    depth, so they touch the wall. The app's choice: no source gives their spot. */
+const LINE_PORTAL_OUT = 2.2;
+/** The portals of the side portal lines, before they go off: one outside the north wall and one
+    outside the south wall at each end of each line. You work out from them which half is hit. */
+export function portalLinePortals(side: SplitSide, covered: SplitHalf): Overlay[] {
+  const ends = (sd: SplitSide, h: SplitHalf): Overlay[] => {
+    const [x0, x1] = halfX(sd, h), x = (x0 + x1) / 2;
+    return [{t:"portal", x, y:-LINE_PORTAL_OUT, vert:true}, {t:"portal", x, y:100 + LINE_PORTAL_OUT, vert:true}];
+  };
+  return [...ends(side, covered), ...ends(otherSide(side), otherHalf(covered))];
+}
 
+/** How to read the side portal lines before they go off. */
+const PORTAL_LINES_WHY = "Each portal line runs between its two portals, north to south.";
 const SPLIT_ROUND_RULE: Lines = ["No tether: go in close to bait Fire Breath.", "Tether: wait a step back until the markers are out.",
   "Everyone baits the first puddle in close.",
   "Then each puddle just outside the last, toward your end.",
@@ -1324,6 +1353,9 @@ export function splitRound(s: Slot, r: SplitRound): Scene {
   const {tether, side, end, covered} = r, wm = WAYMARK[side][end], next = splitPuddleAfter(side, end);
   const far = otherSide(side), toward = otherEnd(end), portal = portalAt(far, toward, r.endsSide);
   // Before your first answer you stand in the middle of your platform: the app's choice.
+  // Your end changes each round, so a tag marks it from the first puddle on. Its spot is the app's.
+  const yourEnd: Overlay = {t:"tag", x:platformMid(side), y:end === "north" ? 10 : 90, s:"YOUR END"};
+  const whyEnd = tether ? "Your end is away from your portal." : "Your end is where you got knocked.";
   const you: Extract<Overlay, {t: "mark"}> = {t:"mark", x:platformMid(side), y:50, l:s, r:"H"};
   return {setup:[tether ? "You have a tether. You are on the " + side + " platform." : "No tether. You are on the " + side + " platform.",
       tether ? "Your portal is on the " + far + " side, toward the " + toward + "." : "You got knocked to the " + end + " end.",
@@ -1333,23 +1365,23 @@ export function splitRound(s: Slot, r: SplitRound): Scene {
       ...(tether
         ? [{q:"Where do you wait for the Fire Breath markers?", z:SPLIT_BACK[side],
           a:["A step back from the middle of the platform's inner edge.", "Fire Breath marks the four players closest to the boss."]},
-          {q:"Where do you bait the first puddle?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE,
+          {q:"Where do you bait the first puddle?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE, cue:[yourEnd],
             a:["In close, at the middle of the platform's inner edge.", "Bait the puddles with the party."]}]
-        : [{q:"No tether. Where do you go?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE,
+        : [{q:"No tether. Where do you go?", z:SPLIT_INNER[side], drop:MAJESTIC_PUDDLE, cue:[yourEnd],
           a:["In close, at the middle of the platform's inner edge.", "Bait Fire Breath and the first puddle there."]}]),
       {q:"Second puddle?", zf:next, drop:MAJESTIC_PUDDLE,
-        a:["Just outside the first puddle, toward the " + end + " end.", "Stay tight against the inner edge."]},
+        a:["Just outside the first puddle, toward the " + end + " end.", whyEnd, "Stay tight against the inner edge."]},
       {q:"Third puddle?", zf:next, drop:MAJESTIC_PUDDLE,
         a:["Just outside the second puddle, toward the " + end + " end again.", "Stay tight against the inner edge."]},
       tether
         ? {q:"The portal lines cover half of each platform. Where do you stretch your tether?", zf:tetherSpot(side, end, covered, portal, [...otherWraths(r), ...otherBreaths(r)], [...othersAtLineup(r).map(o => o.p), ...markersAtLineup(r)]),
           // Your own line goes through you, as it should; the others' lines and Fire Breath must miss you.
-          cue:portalLines(side, covered), reveal:[wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
-          a:["The " + end + " wall, just outside the portal lines.", "That end is away from your portal.", "Stay out of the third puddle."]}
+          cue:portalLinePortals(side, covered), reveal:[...portalLines(side, covered), wrathLine(portal, tetherBest(side, end, covered)), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
+          a:["The " + end + " wall, just outside the portal lines.", "That end is away from your portal.", PORTAL_LINES_WHY, "Stay out of the third puddle."]}
         : {q:"The portal lines cover half of each platform. You have a marker. Where do you stand?", zf:markerSpot(side, end, covered, [...otherWraths(r), ...otherBreaths(r)]),
           // Your own Fire Breath goes through you, as it should; the others' lines must miss you.
-          cue:portalLines(side, covered), reveal:[yourBreath(r), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
-          a:["The wall-side corner of waymark " + wm.n + ", out of the portal lines.", "Stay out of the third puddle."]}],
+          cue:portalLinePortals(side, covered), reveal:[...portalLines(side, covered), yourBreath(r), ...otherWraths(r), ...otherTethers(r), ...otherMarkers(s, r)], hits:[...otherWraths(r), ...otherBreaths(r)],
+          a:["The wall-side corner of waymark " + wm.n + ", out of the portal lines.", PORTAL_LINES_WHY, "Stay out of the third puddle."]}],
     rule:SPLIT_ROUND_RULE};
 }
 
@@ -1445,7 +1477,7 @@ export function firstTowersScene(s: Slot, tether: {portal: Point} | null): Scene
   return {setup:["Four towers appear: two on each platform.", "Every player soaks a tower.", tether ? "You have a tether this time." : "No tether this time."],
     split:true, boss:BOSS, overlays:[...SPLIT_TOWERS, ...(tether ? [{t:"portal", x:tether.portal[0], y:tether.portal[1], vert:false} as const] : [])],
     ...(tether ? {tether:{portal:tether.portal, you:mark}} : {}),
-    steps:[{q:"Where in your tower do you stand?", zf:() => towerHalf(home, end, knock), knock:{from:at, dist:TOWER_KNOCKBACK},
+    steps:[{q:"Where in your tower do you stand?", zf:() => towerHalf(home, end, knock), knock:{from:at, dist:TOWER_KNOCKBACK}, ...towerReveal(home, end, knock),
       a:[...towerAnswer(home, end, knock, tether !== null), bySlot(s, {H1:"Your tower is the SW one, with M1.", H2:"Your tower is the SE one, with M2."})]}],
     rule:TOWER_RULE};
 }
@@ -1460,7 +1492,7 @@ export function splitTowers(s: Slot, side: SplitSide, end: SplitEnd, tether: {po
     // With a tether, your mark is the tether's end, drawn with it.
     overlays:mine ? [...SPLIT_TOWERS, {t:"portal", x:mine.portal[0], y:mine.portal[1], vert:false}] : [...SPLIT_TOWERS, mark],
     ...(mine ? {tether:mine} : {}),
-    steps:[{q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, knock), knock:{from:SPLIT_TOWER[side][end], dist:TOWER_KNOCKBACK},
+    steps:[{q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, knock), knock:{from:SPLIT_TOWER[side][end], dist:TOWER_KNOCKBACK}, ...towerReveal(side, end, knock),
       a:[...towerAnswer(side, end, knock, tether !== null), "Your tower is in the quadrant you ended in."]}],
     rule:["Towers: the quadrant you ended the last tethers and markers in.", ...TOWER_RULE]};
 }
@@ -1513,7 +1545,7 @@ export function avalancheScene(s: Slot, side: SplitSide, end: SplitEnd, face: Sp
   return {setup:["The boss faces the " + face + " platform: he grabs it.", "Towers appear, one in each quadrant.", "Then he turns and slams the platform down."], ordered:true,
     split:true, boss:{x:50, y:50, f}, overlays:[...SPLIT_TOWERS, lastSpot(s, side, end)],
     steps:[
-      {q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, side === back ? "along" : "across"), knock:{from:SPLIT_TOWER[side][end], dist:TOWER_KNOCKBACK},
+      {q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, side === back ? "along" : "across"), knock:{from:SPLIT_TOWER[side][end], dist:TOWER_KNOCKBACK}, ...towerReveal(side, end, side === back ? "along" : "across"),
         a:[side === back
           ? "The " + way(knockDir(side, end, "along")) + " side of the " + quadrant(side, end) + " tower: stay on this platform."
           : "The " + way(knockDir(side, end, "across")) + " side of the " + quadrant(side, end) + " tower: get knocked across.",
@@ -1711,7 +1743,7 @@ export const DRILLS: readonly Drill[] = [
   {id:"m-split-tower", order:19, phase:P3, time:"6:29", title:"Arena Split: First Towers", kind:"towerKnockback", soak:SPLIT_SOAK,
     variants:["tether", "marker"], random:true,
     // A tether's portal is on either side, so the tether may need the knockback across or not.
-    build:(s, v)=>firstTowersScene(s, v === "tether" ? {portal:portalAt(randomSide(), randomEnd(), randomEndsSide())} : null)},
+    build:(s, v)=>firstTowersScene(s, v === "tether" ? {portal:towerPortal(homeSide(s), firstTowerEnd(s), randomSide())} : null)},
   // A round of tethers and markers: a tether ends on either platform, across from its portal.
   {id:"m-split-fire", order:19.1, variants:["tether", "marker"], random:true, phase:P3, time:"6:35", title:"Arena Split: Fire Breath", kind:["bait", "chains"],
     build:(s, v)=>{ const tether = v === "tether", home = homeSide(s);
@@ -1719,7 +1751,7 @@ export const DRILLS: readonly Drill[] = [
   // The second towers: you start in the quadrant where the first round ended, on either platform.
   {id:"m-split-towers2", order:19.2, variants:["tether", "marker"], random:true, phase:P3, time:"7:01", title:"Arena Split: Second Towers", kind:"towerKnockback", soak:SPLIT_SOAK,
     build:(s, v)=>{ const side = randomSide(), end = randomEnd();
-      return splitTowers(s, side, end, v === "tether" ? {portal:portalAt(randomSide(), randomEnd(), randomEndsSide())} : null); }},
+      return splitTowers(s, side, end, v === "tether" ? {portal:towerPortal(side, end, randomSide())} : null); }},
   {id:"m-massive", order:20, phase:P3, time:"7:25", title:"Massive Meteor", kind:"platformStack", random:true,
     build:s=>{ const side = randomSide(); return massiveScene(s, side, randomStackWearer(s)); }},
   {id:"m-avalanche", order:21, random:true, phase:P3, time:"7:39", title:"Arcadion Avalanche", kind:"towerKnockback", soak:SPLIT_SOAK,

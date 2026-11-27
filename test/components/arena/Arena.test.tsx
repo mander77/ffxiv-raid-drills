@@ -54,6 +54,19 @@ test("pieces go to their layers: attacks on the ground, weapons over the waymark
   assert.equal(layer("marks")?.textContent, "H1");
 });
 
+test("a tether runs all the way to its portal outside the wall: its layer is not clipped, the floor's are", () => {
+  const os: Overlay[] = [
+    { t: "portal", x: -5, y: 20, vert: false },
+    { t: "tether", x: -5, y: 20, x2: 30, y2: 50 },
+  ];
+  render(<Arena label="x" layers={pieceLayers(os)} />);
+  const layer = (l: string): Element | null => document.querySelector(`[data-layer="${l}"]`);
+  assert.ok(layer("tethers")?.querySelector(".tether"), "the tether is in its own layer");
+  assert.isNull(layer("tethers")?.getAttribute("clip-path"), "not cut at the wall");
+  for (const l of ["ground", "drops", "zones"]) assert.ok(layer(l)?.getAttribute("clip-path"), `${l} stays clipped`);
+  assert.ok(layer("labels")?.querySelector(".portal"), "the portal");
+});
+
 test("an aim is an arrow on the ground, drawn over the cone it points along", () => {
   const os: Overlay[] = [
     { t: "aim", x: 20, y: 50, x2: 4, y2: 34 },

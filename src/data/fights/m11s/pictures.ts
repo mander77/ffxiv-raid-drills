@@ -8,7 +8,7 @@
 import { bySlot, withSeed } from "../../../util";
 import { markRole, partyOf } from "../../../party";
 import { angOf, dist, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, ECL_PORTAL, ECL_TOWER_AT, CORNER_STAND, type Weapon, type WeaponType } from "./drills";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLinePortals, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, ECL_PORTAL, ECL_TOWER_AT, CORNER_STAND, type Weapon, type WeaponType } from "./drills";
 import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, flatlinerThrow, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, meteorHit, pairTower, proteanCone, proximityDot, raidwide, rawSteelBuster, rawSteelImpact, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, WALL_SECOND_FACING, wallOfFire } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Scene, Slot, StepResult, Zone, ZoneShape } from "../../../types";
 
@@ -461,8 +461,10 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
     const tethered = bySlot<Point>(s, {H1:[4, 3], H2:[85, 97]}), nextTo = bySlot<Point>(s, {H1:[3, 9], H2:[80, 92]}), middle = bySlot<Point>(s, {H1:[10, 50], H2:[90, 50]});
     // The tank's tether at the wall, stretched from a portal on the other side, at the other end.
     const tankTether = tether(portalAt(otherSide(side), bySlot(s, {H1:"south", H2:"north"}), "west"), tethered);
-    return {overlays:[...portalsOf("west"), ...lines], split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[31, 50], H2:[69, 50]}))], answer:markers.map(p => circle(p, 4.5)),
-      note:"Example: the portal lines cover the half shown. Tethers go to the north or south wall.", options:[
+    // The portal lines' portals show before the answer; the half they hit only after it.
+    return {overlays:[...portalsOf("west"), ...portalLinePortals(side, covered)], split:true, boss:BOSS, before:[you(s, bySlot<Point>(s, {H1:[31, 50], H2:[69, 50]}))],
+      after:[...lines, breath(corner), you(s, corner)], answer:markers.map(p => circle(p, 4.5)),
+      note:"Example: read the portal lines from their portals. Tethers go to the north or south wall.", options:[
         show([breath(corner), you(s, corner)], markers.map(p => circle(p, 4.5))),
         show([breath(edge), you(s, edge)], [bySlot(s, {H1:rect(-15, 10, -10, 90), H2:rect(110, 10, 115, 90)})]),
         show([breath(nextTo), you(s, nextTo), tankTether, mark(...tethered, bySlot(s, {H1:"MT", H2:"OT"}), "T")]),
