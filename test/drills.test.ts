@@ -113,6 +113,16 @@ test("Assault Evolved, second set: the boss does not point at the first weapon",
 // Both sets: cactbot's "R11S Trophy Weapons" trigger reads the order from the weapons' facing.
 const ASSAULT_SETS: Record<string, (s: Slot) => JumpSet> = { "first set": buildAssault, "second set": buildAssault2 };
 
+test.each(Object.entries(ASSAULT_SETS))("Assault Evolved, %s: the weapons stand in a triangle, gaps 90, 135 and 135", (_name, build) => {
+  for (let i = 0; i < REPEATS; i++) {
+    const a = build("H1")
+      .W.map((w) => w.a)
+      .sort((x, y) => x - y);
+    const gaps = [a[1] - a[0], a[2] - a[1], 360 - a[2] + a[0]].sort((x, y) => x - y);
+    assert.deepEqual(gaps, [90, 135, 135], `weapons at ${a.join(", ")}`);
+  }
+});
+
 test.each(Object.entries(ASSAULT_SETS))(
   "Assault Evolved, %s: each weapon faces where he jumps from, the first faces the middle",
   (_name, build) => {

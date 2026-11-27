@@ -19,7 +19,8 @@ const WEAPON_TYPES: WeaponType[] = ["axe", "sword", "scythe"];
 const ORDINALS = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"];
 /** A weapon spot's direction as the text says it: a cardinal as a word, an intercardinal short. */
 const WHERE = ["north", "NE", "east", "SE", "south", "SW", "west", "NW"] as const;
-/** A weapon spot: 29 units from the arena center, `a` degrees clockwise from north. */
+/** A weapon spot: 29 units (11.6 yalms) from the arena center, `a` degrees clockwise from north.
+    No source gives the distance: it is the app's choice, close to the spots in Hector's diagram. */
 export const atAngle = (a: number): Point => polar(a, 29);
 /** Just outside the boss's hitbox: where the first puddle and his butt spot are. */
 const OUTSIDE = HITBOX + 4.5;
@@ -165,19 +166,19 @@ function scytheSpot(P: Point, spot: Point): Zone {
    `order` forces the weapon types in the order he takes them (the fight pattern picks); without it,
    the order is random. */
 export function buildAssault(s: Slot, order?: WeaponType[]): JumpSet {
-  return buildJumpSet(s, faceApproach(noJumpAcross(assaultWeapons(order))));
+  return buildJumpSet(s, faceApproach(assaultWeapons(order)));
 }
 
-/** Three weapons at least 90 degrees apart, in the order he takes them: the first, then clockwise. */
+/** Three weapons in a triangle, in the order he takes them: the first, then clockwise. Two are
+    90 degrees apart and the third is across from the gap between them, so the gaps are 90, 135 and
+    135 (Hector's "triangle format", the owner's choice). No two are ever straight across, so he
+    never jumps across the middle: a weapon reached that way would face the middle, as square as
+    the first one, and cactbot's "R11S Trophy Weapons" trigger finds the first weapon that way. */
 function assaultWeapons(order?: WeaponType[]): Weapon[] {
-  const spots = [0,45,90,135,180,225,270,315];
-  let pick = [0,135,225];
-  for(let t = 0; t < 60; t++){
-    const cand = shuffle(spots.slice()).slice(0, 3);
-    if(cand.every((a, i) => cand.every((b, j) => i === j || Math.min((a - b + 360) % 360, (b - a + 360) % 360) >= 90))){ pick = cand; break; }
-  }
-  const a0 = pick[0];
-  const angles = [a0].concat(pick.slice(1).sort((x, y) => ((x - a0 + 360) % 360) - ((y - a0 + 360) % 360)));
+  const base = 45 * Math.floor(random() * 8);
+  const spots = [base, base + 90, base + 225].map((a) => a % 360);
+  const a0 = spots[Math.floor(random() * 3)];
+  const angles = [a0].concat(spots.filter((a) => a !== a0).sort((x, y) => ((x - a0 + 360) % 360) - ((y - a0 + 360) % 360)));
   // A forced order replaces the shuffle's result, but the shuffle still runs, so the random
   // calls stay the same and a fight code still rebuilds every other part the same way.
   const shuffled = shuffle([...WEAPON_TYPES]), types = order ?? shuffled;
@@ -196,25 +197,11 @@ export function faceApproach(W: Weapon[]): Weapon[] {
   });
 }
 
-/** No jump straight across the middle, in either set. A weapon he reaches that way would face
-    the middle too, as square as the first one. cactbot's "R11S Trophy Weapons" trigger (r11s.ts)
-    finds the first weapon as the one facing the middle, so the game never has two. Where the spots would give a
-    180-degree jump, that jump's weapon moves 45 degrees back toward the weapon before it (the
-    owner's choice): 180/90 becomes 135/135, and 90/180 becomes 90/135. No random call is added,
-    so a fight code still builds every other part the same way. */
-function noJumpAcross(W: Weapon[]): Weapon[] {
-  return W.map((w, i): Weapon => {
-    if(i === 0 || (w.a - W[i - 1].a + 360) % 360 !== 180) return w;
-    const a = (w.a - 45 + 360) % 360;
-    return {...w, a, p:atAngle(a)};
-  });
-}
-
 /* Assault Evolved, second set (1:33, after Void Stardust). The boss does not face a weapon until
    his cast starts, but the weapons show the order (cactbot reads it from their facing): the one
    that faces the middle, square to the boss, goes first. Then clockwise. */
 export function buildAssault2(s: Slot, order?: WeaponType[]): JumpSet {
-  const W = faceApproach(noJumpAcross(assaultWeapons(order)));
+  const W = faceApproach(assaultWeapons(order));
   // The weapons used to get a random turn and flip. Those random numbers are still drawn, so a
   // fight code made before this change builds the rest of the fight the same way.
   for(let i = 0; i < W.length; i++){ if(i){ random(); random(); } random(); }
