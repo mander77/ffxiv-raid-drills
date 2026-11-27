@@ -225,6 +225,9 @@ export interface Scene {
   boss?: Boss;
   bossAt?: (n: number) => Boss;
   split?: boolean;
+  /** With `split`: the arena stays whole until step `splitAfter` goes off, then splits (Flatliner
+      splits it as its knockback lands). Practice splits it once that step is answered. */
+  splitAfter?: number;
   spawnPlay?: boolean;
   /** How many weapons show before the first hit. Each answered step shows one more. The full
       fight shows them at their spawn times instead (FightSeg.spawns). */

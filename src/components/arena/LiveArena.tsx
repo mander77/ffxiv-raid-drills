@@ -194,7 +194,7 @@ export function LiveArena({
   return (
     <Arena
       label={arenaLabel(done, pickSpot && onPointClick !== undefined)}
-      split={sc.split}
+      split={sc.split && (sc.splitAfter === undefined || n > sc.splitAfter)}
       className={cn("live", done && "locked", sc.spawnPlay && "play", className)}
       onPointClick={done ? undefined : onPointClick}
       layers={{

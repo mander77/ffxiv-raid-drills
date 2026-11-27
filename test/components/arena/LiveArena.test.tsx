@@ -281,3 +281,15 @@ test("Ecliptic Stampede: your tether shows from the tether step, follows you to 
     "it follows you to the corner",
   );
 });
+
+test("Arena Split: Lineup: the arena splits only once you answer where you stand for Flatliner", () => {
+  const drill = DRILLS.find((d) => d.id === "m-split-line");
+  if (!drill) throw new Error("no m-split-line");
+  const { scene, k } = buildPattern(drill, "H1", "K7Q2");
+  const z = stepZone(scene.steps[0], []);
+  if (!z) throw new Error("no zone");
+  const { container, rerender } = render(<LiveArena scene={scene} k={k} results={[]} showLast={false} hint={false} />);
+  assert.isNull(container.querySelector(".voidr"), "whole before Flatliner");
+  rerender(<LiveArena scene={scene} k={k} results={[{ p: zoneCenter(z), ok: true, z, drop: null }]} showLast hint={false} />);
+  assert.isNotNull(container.querySelector(".voidr"), "split once Flatliner went off");
+});

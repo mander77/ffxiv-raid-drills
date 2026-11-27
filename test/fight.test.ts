@@ -109,12 +109,15 @@ test("the arena is split from Flatliner until the Crown of Arcadia that joins it
     f.split.map((t) => f.events.find((e) => Math.abs(e.t - t) < 0.05)?.name),
     ["Flatliner", "Crown of Arcadia"],
   );
-  for (const g of f.segs)
+  for (const g of f.segs) {
+    // A scene that splits the arena at one of its hits (Flatliner, in the lineup) splits it then.
+    const splits = g.scene.splitAfter === undefined ? g.from : g.due[g.scene.splitAfter];
     assert.equal(
       Boolean(g.scene.split),
-      g.from >= f.split[0] && g.from < f.split[1],
+      splits >= f.split[0] && splits < f.split[1],
       `${g.title}: split arena only between Flatliner and the Crown`,
     );
+  }
 });
 
 test("the second Raw Steel Trophy and the second Void Stardust go the other way", () => {

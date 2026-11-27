@@ -171,15 +171,19 @@ export function parseVoidzones(text) {
     center ("p + new WDir(16, 0)"), its half width and half length ("CurveApprox.Rect(new WDir(0,
     20), new WDir(10, 0))"), the x of each side portal line ("0x16 => -21"), and how far from its
     portal a tether counts as stretched ("StretchDistance = 48f", which BossMod calls an estimate),
-    and how far a tower knocks the players in it ("KnockbackFromCastTarget(module,
-    AID.ExplosionTower, 23"). */
+    how far a tower knocks the players in it ("KnockbackFromCastTarget(module,
+    AID.ExplosionTower, 23"), and how far Flatliner knocks the party away from the arena's center
+    (its class Flatliner: "yield return new(Arena.Center, 15, _activation)"). */
 export function parseSplit(flatliner) {
   const rect = /var plat = CurveApprox\.Rect\(new WDir\(0, (\d+(?:\.\d+)?)\), new WDir\((\d+(?:\.\d+)?), 0\)\)/.exec(flatliner);
   const offset = /plat\.Select\(p => p \+ new WDir\((\d+(?:\.\d+)?), 0\)\)/.exec(flatliner);
   const lines = /class MajesticMeteorain[\s\S]*?var xpos = index switch\s*\{([\s\S]*?)\};/.exec(flatliner);
   const stretch = /StretchDistance = (\d+(?:\.\d+)?)f;/.exec(flatliner);
   const knockback = /class ExplosionKnockback[^\n]*KnockbackFromCastTarget\(module, AID\.ExplosionTower, (\d+(?:\.\d+)?)/.exec(flatliner);
-  if (!rect || !offset || !lines || !stretch || !knockback) throw new Error("bossmod: no Arena Split in the Flatliner file");
+  const flat = /class Flatliner\(BossModule module\)[\s\S]*?yield return new\(Arena\.Center, (\d+(?:\.\d+)?), _activation\)/.exec(
+    flatliner,
+  );
+  if (!rect || !offset || !lines || !stretch || !knockback || !flat) throw new Error("bossmod: no Arena Split in the Flatliner file");
   const xs = [...lines[1].matchAll(/0x[0-9A-F]+ => (-?\d+(?:\.\d+)?)/g)].map((m) => Number(m[1]));
   if (xs.length === 0) throw new Error("bossmod: no Majestic Meteorain lines in the Flatliner file");
   return {
@@ -189,6 +193,7 @@ export function parseSplit(flatliner) {
     lines: xs,
     stretch: Number(stretch[1]),
     towerKnockback: Number(knockback[1]),
+    flatlinerKnockback: Number(flat[1]),
   };
 }
 
@@ -672,7 +677,8 @@ const EXTRAS = {
       "/** BossMod's Arena Split, in yalms from the arena's center: the center of each platform (west",
       "    and east), its half width and half length, the x of each side portal line (Majestic",
       "    Meteorain), how far from its portal a tether counts as stretched (BossMod's estimate), and",
-      "    how far a tower knocks the players in it. */",
+      "    how far a tower knocks the players in it, and how far Flatliner knocks the party away from",
+      "    the arena's center. */",
       `export const BOSSMOD_SPLIT = ${ts(v)} as const;`,
       "",
     ],

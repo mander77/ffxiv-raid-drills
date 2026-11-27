@@ -249,12 +249,12 @@ test("a tower's knockback throws the runner straight away from the tower, to whe
   assert.ok(near(thrownTo(tower, 57.5, [16, 77]), land));
 });
 
-test("in the full fight, every Arena Split tower throws the runner onto a platform", () => {
+test("in the full fight, Flatliner and every Arena Split tower throw the runner onto a platform", () => {
   for (const s of SLOTS)
     for (let i = 0; i < 20; i++) {
       const f = buildFight(s, newCode(), RANDOM),
         knocks = correctRoute(f).filter((st) => st.knock);
-      assert.equal(knocks.length, 3, `${s}: the first towers, the second towers and Arcadion Avalanche`);
+      assert.equal(knocks.length, 4, `${s}: Flatliner, the first towers, the second towers and Arcadion Avalanche`);
       for (const st of knocks) {
         const at = runnerAt(correctRoute(f), st.hit + THROW_TIME + 0.01).at,
           onPlatform = at[1] >= 0 && at[1] <= 100 && (at[0] <= 35 ? at[0] >= -15 : at[0] >= 65 && at[0] <= 115);
@@ -269,7 +269,7 @@ test("after each tower's throw, the next round's puddles go toward where you lan
       const f = buildFight(s, newCode(), RANDOM),
         route = correctRoute(f),
         rounds = f.segs.filter((g) => g.drills[0] === "m-split-fire"),
-        throws = route.filter((st) => st.knock).slice(0, 2);
+        throws = route.filter((st) => st.knock && f.segs[st.si].drills[0] !== "m-split-line").slice(0, 2);
       throws.forEach((st, r) => {
         const at = runnerAt(route, st.hit + THROW_TIME + 0.01).at,
           setup = rounds[r].scene.setup.join(" "),
@@ -297,5 +297,22 @@ test("the watched run shows no Ultimate Trophy Weapons spot before its weapon sp
     for (const st of route.filter((x) => x.si === si)) assert.isAtLeast(st.show, spawns[st.j], `weapon ${st.j + 1}`);
     const before = runnerAt(route, spawns[0] - 0.05).target;
     assert.isFalse(before?.si === si, "the first weapon's spot shows before it spawns");
+  }
+});
+
+test("Watch the Correct Moves stands on your side before Flatliner, and it throws you to your lineup spot", () => {
+  for (const s of SLOTS) {
+    const f = buildFight(s, newCode(), RANDOM),
+      si = f.segs.findIndex((g) => g.drills[0] === "m-split-line"),
+      g = f.segs[si],
+      route = correctRoute(f),
+      [flatliner, lineup] = [0, 1].map((j) => g.scene.steps[j].z),
+      west = s === "H1";
+    if (!flatliner || !lineup) throw new Error("the lineup steps have no zone");
+    const before = runnerAt(route, g.due[0] - 0.01).at,
+      after = runnerAt(route, g.due[0] + THROW_TIME + 0.01).at;
+    assert.ok(inZone(before, flatliner), `${s}: before Flatliner at (${before.map((v) => v.toFixed(1))})`);
+    assert.equal(before[0] < 50, west, `${s}: on your own side of the boss`);
+    assert.ok(inZone(after, lineup), `${s}: thrown to the lineup spot, at (${after.map((v) => v.toFixed(1))})`);
   }
 });
