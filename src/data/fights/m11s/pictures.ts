@@ -10,7 +10,7 @@ import { partyNow, restSpot, stackedAt } from "../../partyRoute";
 import { SLOT_NAMES } from "../../../party";
 import { markRole, partyOf } from "../../../party";
 import { angOf, dist, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, spreadMarks, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLinePortals, portalLines, portalsOf, splitRound, lineupPlan, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, ECL_PORTAL, ECL_TOWER_AT, CORNER_STAND, type Weapon, type WeaponType } from "./drills";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, spreadMarks, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLinePortals, portalLines, portalsOf, splitRound, lineupPlan, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, FIRST_STACK_TANKS, wallSpots, ECL_PORTAL, ECL_TOWER_AT, CORNER_STAND, type Weapon, type WeaponType } from "./drills";
 import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, flatlinerThrow, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, twoWayFireball, fourWayFireball, crushingComet, eyeOfTheHurricane, meteorHit, pairTower, proteanCone, proximityDot, raidwide, rawSteelBuster, rawSteelImpact, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, WALL_SECOND_FACING, wallOfFire } from "./attacks";
 import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Scene, Slot, SlotName, StepResult, Zone, ZoneShape } from "../../../types";
 
@@ -591,18 +591,21 @@ const PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
   // The tether goes to the player in the middle of the tower, so it draws from its portal (here
   // the north one) to whoever the answer puts there. M1 stands on the tower's edge. The answers put
   // you in the middle, just inside the edge, outside the tower, and on the edge.
-  "k-ecl-center": s => { const c: Point = [28, 30], m1 = at(135, TOWER_R, c), inside = at(225, TOWER_R * 0.8, c), tether = (p: Point): Overlay => eclTether(ECL_PORTAL.north, p);
-    return {overlays:[...eclPortals(), pairTower(c), mark(...m1, "M1", "D")], boss:BOSS, after:[tether(c), you(s, c)], answer:[circle(c, 3.5)], options:[
+  // The shared Ecliptic example: H1 soaks the SW tower with M1 (both clockwise from A), H2 the NW
+  // one with M2 (both counterclockwise). The angles are NW's, turned for SW.
+  "k-ecl-center": s => { const c = bySlot<Point>(s, {H1:[28, 70], H2:[28, 30]}), turn = (d: number): number => s === "H1" ? 180 - d : d;
+    const edgeWho = bySlot(s, {H1:"M1", H2:"M2"}), m1 = at(turn(135), TOWER_R, c), inside = at(turn(225), TOWER_R * 0.8, c), tether = (p: Point): Overlay => eclTether(ECL_PORTAL.north, p);
+    return {overlays:[...eclPortals(), pairTower(c), mark(...m1, edgeWho, "D")], boss:BOSS, after:[tether(c), you(s, c)], answer:[circle(c, 3.5)], options:[
       hit(youAt(s, c, 3.5), [tether(c)]), hit(youAt(s, inside, 3.5), [tether(inside)]),
-      hit(youAt(s, at(225, TOWER_R * 1.45, c), 3.5), [tether(m1)]), hit(youAt(s, at(225, TOWER_R, c), 3.5), [tether(m1)])]}; },
+      hit(youAt(s, at(turn(225), TOWER_R * 1.45, c), 3.5), [tether(m1)]), hit(youAt(s, at(turn(225), TOWER_R, c), 3.5), [tether(m1)])]}; },
   // The drill's no-puddle pattern: a portal in the middle of each wall, your tower on an
   // intercard. Your tether comes from the north portal, so you go to the south wall, then
   // clockwise into the SW corner. Going by your tower (NW) would send you to SE instead.
-  "k-ecl-tether": s => { const tower = ECL_TOWER_AT.nw, portal = ECL_PORTAL.north, wall: Point = [tower[0], CORNER_STAND.sw[1]];
+  "k-ecl-tether": s => { const tower = ECL_TOWER_AT[bySlot<"sw" | "nw">(s, {H1:"sw", H2:"nw"})], portal = ECL_PORTAL.north, wall: Point = [tower[0], CORNER_STAND.sw[1]];
     const sw = rect(0, 85, 15, 100), se = rect(85, 85, 100, 100), walk = (to: Point): Overlay[] => [guide(tower, wall), guide(wall, to), you(s, to)];
     return {overlays:[...eclPortals(), pairTower(tower)], boss:BOSS, before:[eclTether(portal, tower), you(s, tower)],
       after:walk(CORNER_STAND.sw), answer:[sw],
-      note:"Example: your tower is NW, your tether from the north portal. South wall, then clockwise to SW.", options:[
+      note:"Example: your tether comes from the north portal. South wall, then clockwise to SW.", options:[
         show(walk(CORNER_STAND.sw), [sw]),
         youAt(s, tower, 6),
         show([guide(tower, CENTER), you(s, [50, 60])], [circle(CENTER, 10)]),
@@ -633,8 +636,7 @@ const PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
 };
 
 /* Where the other players stand on each answer picture, for the pictures that do not get it from
-   their drill step (fromDrill). An empty map: the card draws an example that no pattern of the
-   drill matches, so it keeps only the players it draws itself (the owner to check). */
+   their drill step (fromDrill). */
 const PARTY_OF: Partial<Record<string, (s: Slot) => Partial<Record<SlotName, Point>>>> = {
   "k-dance": s => fromDrill("m-dance", s).party ?? {},
   "k-sword": s => jumpParty(s, "sword", 270),
@@ -653,9 +655,35 @@ const PARTY_OF: Partial<Record<string, (s: Slot) => Partial<Record<SlotName, Poi
   "k-split-fb": s => sceneParty(splitRound(s, {tether:false, side:homeSide(s), end:"north", covered:"inner", endsSide:"west", plan:lineupPlan(s, false, {side:homeSide(s), end:"north"})}), 0, bySlot<Point>(s, {H1:[29, 42], H2:[71, 58]})),
   "k-split-towers23": s => sceneParty(withSeed("k-split-towers23", () => splitTowers(s, bySlot<SplitSide>(s, {H1:"west", H2:"east"}), bySlot<SplitEnd>(s, {H1:"south", H2:"north"}), null)), 0),
   "k-ecl-adjust": s => fromDrill("m-ecl-start", s).party ?? {},
-  "k-ecl-prio": () => ({}), "k-ecl-center": () => ({}), "k-ecl-tether": () => ({}),
-  "k-split-corner": () => ({}), "k-slab": () => ({}), "k-meteor-order": () => ({}),
+  "k-ecl-prio": s => eclExample(s, "towers"),
+  "k-ecl-center": s => eclExample(s, "towers"),
+  "k-ecl-tether": s => eclExample(s, "tethers"),
+  "k-split-corner": s => { const side = homeSide(s), covered = bySlot<"inner" | "outer">(s, {H1:"inner", H2:"outer"});
+    // The card's round: your tank tethered at your end, as its third answer draws.
+    const order = bySlot<SlotName[]>(s, {H1:["MT", "M1", "R1", "OT", "R2", "M2", "H2"], H2:["MT", "R1", "M1", "H1", "OT", "M2", "R2"]});
+    const sc = splitRound(s, {tether:false, side, end:"north", covered, endsSide:"west", plan:lineupPlan(s, false, {side, end:"north"}, order)});
+    return sceneParty(sc, sc.steps.length - 1, markerCorner(side, "north", covered)); },
+  // Everyone landed on the back platform with you, before the slam.
+  "k-slab": s => around(s, [90, 40]),
+  // The tanks stand in front for the first Line Stack, under the boss (wtfdig).
+  "k-meteor-order": () => FIRST_STACK_TANKS,
 };
+
+/* The Ecliptic example of k-ecl-prio, k-ecl-center and k-ecl-tether: proximity AoEs NW and SE,
+   R1 and R2 marked. R1 starts NW, where an AoE lands, so R1 crosses to the south wall and R2 takes
+   the north wall (wtfdig). Tank towers NE and SE, two-player towers SW and NW. At the towers: MT
+   NE, OT SE, H1 and M1 SW, H2 and M2 NW, each melee on the edge (decisions); R1 and R2 by their
+   last puddles. At the tethers: the tethered in the corners (yours SW, from the north portal; the
+   others' portals are the example's), the others in a square inside the hitbox (Hector's video). */
+function eclExample(s: Slot, when: "towers" | "tethers"): Partial<Record<SlotName, Point>> {
+  const edge = (t: Point): Point => at(angOf([CENTER[0] - t[0], CENTER[1] - t[1]]), 6, t);
+  const towers: Record<SlotName, Point> = {MT:ECL_TOWER_AT.ne, OT:ECL_TOWER_AT.se, H1:ECL_TOWER_AT.sw, M1:edge(ECL_TOWER_AT.sw), H2:ECL_TOWER_AT.nw, M2:edge(ECL_TOWER_AT.nw),
+    R2:wallSpots("north", "nw-se")[5], R1:wallSpots("south", "nw-se")[5]};
+  const tethers: Record<SlotName, Point> = {[s]:CORNER_STAND.sw, MT:CORNER_STAND.ne, OT:CORNER_STAND.se, [s === "H1" ? "H2" : "H1"]:CORNER_STAND.nw,
+    R2:at(315, 5), R1:at(45, 5), M1:at(225, 5), M2:at(135, 5)} as Record<SlotName, Point>;
+  const spots = when === "towers" ? towers : tethers;
+  return Object.fromEntries(SLOT_NAMES.filter(x => x !== s).map(x => [x, spots[x]]));
+}
 
 /** One picture per Mechanics question, by question id, each with the other players on its answer
     picture: from its drill step, from PARTY_OF, or else in the rest formation around the boss

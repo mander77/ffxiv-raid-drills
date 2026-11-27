@@ -107,6 +107,9 @@ path as the fight already builds it (V 12:04 to 16:58, W):
 3. The square inside the hitbox for the Ecliptic tethers, and the melee's spots there.
 4. Where the others wait in Heartbreak Kick when the tanks soak it.
 5. The Arena Split tethers: two in each light party in the first round.
-6. Learn: six cards draw an example that no drill pattern matches, so they keep only their own
-   players: k-ecl-prio, k-ecl-center, k-ecl-tether, k-split-corner, k-slab, k-meteor-order.
+6. Learn, the Ecliptic examples (k-ecl-prio, k-ecl-center, k-ecl-tether): proximity AoEs NW and
+   SE, R1 and R2 marked, so R1 crosses to the south wall and R2 takes the north wall. k-ecl-center
+   and k-ecl-tether used to put you in the NW tower, which the tower priority never gives H1, so
+   their tower is now SW for H1 (with M1 on its edge) and NW for H2 (with M2). The text and the
+   answers did not change.
 7. Learn, Dance of Domination: MT and OT now stand on waymarks D and B on the answer picture.

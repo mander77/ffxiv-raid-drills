@@ -157,9 +157,6 @@ test("Orbital Omen: the incorrect previews (behind, in front, far away) draw the
   }
 });
 
-/** The cards that draw an example no drill pattern matches: they keep only their own players. */
-const OWN_PLAYERS_ONLY = ["k-ecl-prio", "k-ecl-center", "k-ecl-tether", "k-split-corner", "k-slab", "k-meteor-order"];
-
 test("every answer picture shows the other seven players, and no one is added before you answer", () => {
   for (const item of LEARN_CARDS)
     for (const s of SLOTS) {
@@ -169,7 +166,6 @@ test("every answer picture shows the other seven players, and no one is added be
         new Set([...figSVG(f, answered, item.id).matchAll(/<g class="mk [THD]">.*?<text[^>]*>(\w+)<\/text>/g)].map((m) => m[1]));
       const before = renderToStaticMarkup(<LearnPicture fig={f} answered={false} label={item.id} />);
       assert.notInclude(before.match(/data-layer="party">(.*?)<\/g><g data-layer="labels"/)?.[1] ?? "", "mk", `${item.id} ${s}: before`);
-      if (OWN_PLAYERS_ONLY.includes(item.id)) continue;
       const after = names(true);
       for (const who of ["MT", "OT", "H1", "H2", "M1", "M2", "R1", "R2"].filter((x) => x !== s))
         assert.isTrue(after.has(who), `${item.id} ${s}: ${who} on the answer picture`);
