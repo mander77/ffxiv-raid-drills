@@ -943,6 +943,10 @@ static wins.
   scholar's Expedient.
 - The second Void Stardust: the boss stays on the third weapon. The group starts at his butt,
   directly behind him, and goes clockwise around him.
+- Between mechanics, Pressure keeps the boss where the last mechanic left him until cactbot's
+  next "--middle--" line (issue #153). Before, he went to the middle 3 seconds after the last
+  hit. This changes two gaps: after the first Assault Evolved (on the third weapon until 1:07.7)
+  and after the second Void Stardust (until 2:10.4). Every other mechanic ends in the middle.
 - The second Comet spread turns the fixed spots with the boss (owner, 2026-11-25, issue #125):
   his front is relative north, so MT is front left, OT front right, M1 back left, M2 back
   right. In the first one he counts as facing north. A turned spot that reaches past the wall

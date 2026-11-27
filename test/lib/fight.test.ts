@@ -356,3 +356,28 @@ test("the lineup's arena splits when Flatliner goes off, in the run too", () => 
     }
   }
 });
+
+test("between mechanics, the boss stays on his last weapon until cactbot's --middle--", () => {
+  for (const [title, n] of [
+    ["Assault Evolved", 2],
+    ["Void Stardust (Second Time)", 3],
+  ] as const) {
+    const s = newFightState("watch", fight(), { paused: true });
+    const si = s.fight.segs.findIndex((g) => g.title === title);
+    const g = s.fight.segs[si];
+    const middle = cactbot("--middle--", n);
+    // Each frame fills in one correct move that the seek jumped over.
+    const at = (t: number) => {
+      seek(s, t);
+      for (let i = 0; i < 5; i++) tickFight(s, 0, 1);
+      return viewOf(s);
+    };
+    const last = at(g.due[g.due.length - 1] + 2.9).boss;
+    if (!last) throw new Error(`${title}: no boss`);
+    expect(last.x !== 50 || last.y !== 50, `${title} ends away from the middle`).toBe(true);
+    const between = at(middle - 0.1);
+    expect(between.si, `${title}: no mechanic just before --middle--`).toBe(-1);
+    expect(between.boss, `${title}: he stays put`).toEqual(last);
+    expect(at(middle + 0.1).boss, `${title}: in the middle after --middle--`).toMatchObject({ x: 50, y: 50 });
+  }
+});
