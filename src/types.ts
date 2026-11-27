@@ -229,9 +229,10 @@ export interface Scene {
   /** How many weapons show before the first hit. Each answered step shows one more. The full
       fight shows them at their spawn times instead (FightSeg.spawns). */
   spawnAhead?: number;
-  /** Your tether: it runs from its portal to where you stand, from the first step. Before your
-      first answer you stand at your mark `you`. */
-  tether?: { portal: Point; you: Extract<Overlay, { t: "mark" }> };
+  /** Your tether: it runs from its portal to where you stand, from step `from` (the first step
+      when left out). Before your first answer you stand at your mark `you`. A `fixed` tether is
+      never shown as stretched (no source gives its stretch distance). */
+  tether?: { portal: Point; you: Extract<Overlay, { t: "mark" }>; from?: number; fixed?: boolean };
   /** A stack marker on one player (Massive Meteor's), from the start until the step is answered:
       then the stack is where the party went. `on` is the player who has it, where they stand.
       `you` says it is yours: the full fight puts it on your moving marker. `n` is its hits. */

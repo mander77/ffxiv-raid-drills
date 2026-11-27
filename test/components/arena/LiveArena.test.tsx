@@ -247,3 +247,37 @@ test("Ultimate Trophy Weapons: Practice shows three weapons, the fight clock sho
     cleanup();
   }
 });
+
+test("Ecliptic Stampede: your tether shows from the tether step, follows you to the corner, and never reads as stretched", () => {
+  const drill = DRILLS.find((m) => m.id === "m-ecl-towers");
+  if (!drill) throw new Error("missing drill m-ecl-towers");
+  const { scene } = buildPattern(drill, "H1", "K7Q2");
+  const results: StepResult[] = [];
+  const answer = () => {
+    const st = scene.steps[results.length];
+    const z = stepZone(st, results);
+    if (!z) throw new Error("no zone");
+    const p = st.stand ?? zoneCenter(z);
+    results.push({ p, ok: true, z, drop: null });
+    return p;
+  };
+  const { container, rerender } = render(<LiveArena scene={scene} k={0} results={results} showLast={false} hint={false} />);
+  // The start, under the boss, the tower: no tether yet.
+  for (let i = 0; i < 3; i++) {
+    assert.isNull(screen.queryByLabelText(/^Tether/), `no tether before step ${i + 1}`);
+    answer();
+    rerender(<LiveArena scene={scene} k={0} results={[...results]} showLast={false} hint={false} />);
+  }
+  // The tether step is asked: the tether runs from its portal to you in your tower.
+  assert.ok(screen.getByLabelText("Tether"));
+  const corner = answer();
+  rerender(<LiveArena scene={scene} k={0} results={[...results]} showLast hint={false} />);
+  assert.ok(screen.getByLabelText("Tether"));
+  assert.isNull(screen.queryByLabelText(/^Tether, /), "never stretched or not stretched");
+  const cord = container.querySelector(".tether line");
+  assert.deepEqual(
+    [cord?.getAttribute("x2"), cord?.getAttribute("y2")],
+    corner.map((v) => String(round2(v))),
+    "it follows you to the corner",
+  );
+});

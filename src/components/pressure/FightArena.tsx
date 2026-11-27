@@ -39,6 +39,7 @@ export interface FightArenaProps {
 export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay, onPointClick, className }: FightArenaProps) {
   const g = v.si;
   const bossAt: Point = v.boss ? [v.boss.x, v.boss.y] : [50, 50];
+  const tether = v.scene.tether;
   return (
     <LiveArena
       // A new mechanic draws a new arena, so its weapons spawn in again.
@@ -66,7 +67,8 @@ export function FightArena({ view: v, slot, correctLabel, pickSpot, hit, replay,
       runner={
         <Runner
           slot={slot}
-          portal={v.scene.tether?.portal}
+          portal={tether && v.results.length >= (tether.from ?? 0) ? tether.portal : undefined}
+          fixed={tether?.fixed}
           stack={v.scene.headMark?.you && v.results.length === 0 ? v.scene.headMark.n : undefined}
         />
       }
@@ -165,6 +167,8 @@ interface RunnerProps {
   slot: Slot;
   /** Your tether's portal, when you have a tether: the tether runs from it to your marker. */
   portal?: Point;
+  /** The tether is never shown as stretched. */
+  fixed?: boolean;
   /** You have a stack marker: it hits this many times. */
   stack?: number;
 }
@@ -172,7 +176,7 @@ interface RunnerProps {
 /** Your marker: it runs the correct spots on the player, and to your clicks in the run. It waits on
     each spot until the hit lands, then runs to the next one. While it has to get there, a dotted
     line goes to the spot, and a ring marks it. With a tether, the tether follows it. */
-function Runner({ slot, portal, stack }: RunnerProps) {
+function Runner({ slot, portal, fixed = false, stack }: RunnerProps) {
   const me = useRef<SVGGElement>(null);
   const path = useRef<SVGLineElement>(null);
   const next = useRef<SVGCircleElement>(null);
@@ -186,7 +190,7 @@ function Runner({ slot, portal, stack }: RunnerProps) {
     const to = target?.p;
     me.current?.setAttribute("transform", `translate(${at[0].toFixed(2)} ${at[1].toFixed(2)})`);
     if (portal) {
-      const stretched = dist(portal, at) >= reach;
+      const stretched = !fixed && dist(portal, at) >= reach;
       for (const [g, show] of [
         [short.current, !stretched],
         [long.current, stretched],
@@ -222,7 +226,7 @@ function Runner({ slot, portal, stack }: RunnerProps) {
       {portal && (
         <>
           <g ref={short}>
-            <Tether portal={portal} to={portal} stretched={false} />
+            <Tether portal={portal} to={portal} stretched={false} fixed={fixed} />
           </g>
           <g ref={long} style={{ display: "none" }}>
             <Tether portal={portal} to={portal} stretched />

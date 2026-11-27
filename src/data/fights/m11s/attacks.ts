@@ -153,6 +153,9 @@ export const soloTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("CosmicK
 /** An Ecliptic Stampede pair tower (Weighty Impact, "range 4 circle"): two players soak it, a melee
     and a healer or ranged (BossMod's ImpactKiss: 2 soakers). */
 export const pairTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("WeightyImpact").range, 2);
+/** An Ecliptic Stampede tower going off: a solo tower (Cosmic Kiss) or a pair tower (Weighty
+    Impact), both "range 4 circle". */
+export const eclTowerHit = (p: Point, solo: boolean): Overlay => ATTACK.circle(p, bossmod(solo ? "CosmicKissEcliptic" : "WeightyImpact").range);
 /** The Heartbreak Kick tower ("range 4 circle"). BossMod lets up to 8 soak it; the app shows all 8
     (the owner's choice): either the whole party soaks it, or the tanks do with invulns. */
 export const kickTower = (p: Point): Overlay => ATTACK.tower(p, bossmod("HeartbreakKickTower").range, 8);

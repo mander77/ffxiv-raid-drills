@@ -176,7 +176,7 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
 - Ecliptic Stampede with no puddles (November 24, the owner asked for it to follow Hector's Fixed
   Stampede mini-guide, https://www.youtube.com/watch?v=p8cL88OKEWE, read in a browser, 1:20 to
   2:45): the Settings pick "Your Ecliptic puddles" has a third value, "No puddles", and the drills
-  `m-ecl-start`, `m-ecl-two` and `m-ecl-four` a third variant, `none`. In a random fight you have
+  `m-ecl-two` and `m-ecl-four` a third variant, `none` (the towers and tether are `m-ecl-towers`). In a random fight you have
   puddles half the time (two of the four healers and ranged are marked).
   - The steps: your start spot; under the boss (due at Atomic Impact 1); dead center of your
     two-player tower (due at Cosmic Kiss 4); your tether's corner (due at Majestic Meteowrath x4).
@@ -200,6 +200,20 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
     spot (4 units from its center) and the Four-way spot (24 units out). Owner to check.
   - Not in the drill: the small puddles the middle group dodges while the marked players drop
     theirs.
+- Ecliptic towers and tethers (November 26, owner's choices, issue 171):
+  - The no-puddle path is its own drill, `m-ecl-towers` ("Ecliptic Stampede: Towers and
+    Tether"), linked from the Cheat Sheet's "Ecliptic Towers". `m-ecl-start` keeps only the two
+    walls. In the full fight, the stretch takes the drill that fits your pick.
+  - The marked player's wait spot moved in, to 5 units NW or NE of the middle (r 3.5). With the
+    app's portal and corner spots, the four Majestic Meteowrath lines (BossMod, 10 yalms wide)
+    leave only about 8 units around the middle clear. The old spot, (43,43) r 5.5, was mostly in
+    the north or east portal's line. The Four-way Fireball bait keeps the old spot.
+  - All four tether lines go off on the arena: at the wait step, and at the tether step, where
+    the other three must miss you. The towers go off too (Cosmic Kiss and Weighty Impact), as the
+    sixth puddle drops and at the tower step.
+  - Your tether shows from the tether step and follows you to the corner (`Scene.tether.from`).
+    No source gives its stretch distance, so it never shows as stretched (`fixed`).
+  - The Learn cards draw the tether from a portal: "the wall opposite your portal", not your tower.
 - Arcadion Avalanche: the boss's turn is a bright blue arrow on a dark outline (`turn` overlay),
   not white dashes, so it shows on the dark floor between the platforms and on the sand (owner).
 - Heartbreak Kick in Practice and Pressure: the drill `m-hb` has two variants, from a new
