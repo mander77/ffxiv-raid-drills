@@ -8,9 +8,9 @@
 import { bySlot, withSeed } from "../../../util";
 import { markRole, partyOf } from "../../../party";
 import { angOf, dist, polar, rotOverlay, stepZone, zoneCenter } from "../../../geometry";
-import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLinePortals, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, ECL_PORTAL, ECL_TOWER_AT, CORNER_STAND, type Weapon, type WeaponType } from "./drills";
+import { DRILLS, BOSS, AXE_TANKS, AXE_SPREAD_SPOTS, CLOCK, DANCE_PAIRS, faceApproach, nextPuddle, FIXED_SPREAD_MARKS, spreadMarks, SCYTHE_CLEAVES, HELD_TAG, heldWeapon, buildJumpSet, buildOrbital, atAngle, cometSpread, SPLIT_INNER, TORNADO_BAITS, FIRE_AND_FURY, FIRST_PUDDLE, SPLIT_TOWER, behind, voidAgain, avalancheScene, firstTowerEnd, firstTowersScene, homeSide, markerCorner, otherSide, platformZone, portalAt, portalLinePortals, portalLines, portalsOf, splitRound, splitTowers, type SplitEnd, type SplitSide, METEOR_ROCKS, BEHIND_ROCK, ECL_PORTAL, ECL_TOWER_AT, CORNER_STAND, type Weapon, type WeaponType } from "./drills";
 import { ATTACK, PLATFORM_X, PUDDLE_R, SPREAD_R, TOWER_R, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, flatlinerThrow, axeHit, fireBreath, gust, inYalms, kickTower, lineStack, twoWayFireball, fourWayFireball, crushingComet, eyeOfTheHurricane, meteorHit, pairTower, proteanCone, proximityDot, raidwide, rawSteelBuster, rawSteelImpact, sharedCone, soloTower, spreadHit, swordCross, tankCone, towerHit, voidPuddle, WALL_SECOND_FACING, wallOfFire } from "./attacks";
-import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Scene, Slot, StepResult, Zone, ZoneShape } from "../../../types";
+import type { Boss, Picture, MarkRole, Overlay, Point, Preview, RectZone, Scene, Slot, SlotName, StepResult, Zone, ZoneShape } from "../../../types";
 
 type Who = [string, MarkRole];
 const tag = (x: number, y: number, s: string): Overlay => ({t:"tag", x, y, s});
@@ -117,7 +117,11 @@ function fromDrill(id: string, s: Slot, v: string | null = null, k = 0): Picture
   if(!st.z) throw new Error(id + " step " + k + " has no fixed zone");
   // `hits` is what the step hits, without you, for previews that draw their own players.
   const hits = st.reveal ?? [];
-  return {overlays:sc.overlays, boss:sc.boss ?? sc.bossAt?.(k), split:sc.split, after:[...hits, you(s, st.stand ?? zoneCenter(st.z))], answer:[st.z], zone:st.z, hits};
+  // The players with a start spot show from the start, and the players with a fixed spot of
+  // their own (not with you) show after the answer.
+  const start = Object.entries(sc.party?.start ?? {}).map(([l, p]) => mark(p[0], p[1], l, markRole(partyOf(l as SlotName).role)));
+  const placed = Object.entries(st.party ?? {}).flatMap(([l, p]) => p === "you" || l in (sc.party?.start ?? {}) ? [] : [mark(p[0], p[1], l, markRole(partyOf(l as SlotName).role))]);
+  return {overlays:[...sc.overlays, ...start], boss:sc.boss ?? sc.bossAt?.(k), split:sc.split, after:[...hits, ...placed, you(s, st.stand ?? zoneCenter(st.z))], answer:[st.z], zone:st.z, hits};
 }
 
 /** The boss jumps from the middle to one weapon. `zone` is your spot, `zoneOther` your co-healer's,
@@ -312,7 +316,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       youAt(s, VOID_2_FRONT, 5, [puddle(VOID_2_FRONT)])]}; },
   // Every puddle went off before Comet, so the spread draws none. The stack still shows them, as
   // a guide to its spot.
-  "k-void-2": s => { const sc = voidAgain(s, true, VOID_2_BOSS), spread = sc.steps[3], gaps = stepZone(spread, VOID_RESULTS), marks = (spread.cue ?? []).filter(o => o.t === "mark");
+  "k-void-2": s => { const sc = voidAgain(s, true, VOID_2_BOSS), spread = sc.steps[3], gaps = stepZone(spread, VOID_RESULTS), marks = spreadMarks(VOID_2_AT, VOID_2_BOSS.f ?? 0);
     if(!gaps) throw new Error("the spread step has no zone");
     const stackSc = voidAgain(s, false, VOID_2_BOSS), ps = puddlesOf(stackSc), stackZone = stepZone(stackSc.steps[3], asDrops(ps));
     if(!stackZone) throw new Error("the stack step has no zone");
@@ -323,7 +327,7 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...pairs.map(p => stackHit(p)), ...pairs.flat()]),
       show([fakeCircle(VOID_2_FRONT, FAKE.buster), mark(...VOID_2_FRONT, "MT", "T"), target(VOID_2_FRONT), say("TANK BUSTER", 94)])]}; },
   // The reverse of k-void-2: the first ended with a spread, so the second ends with the stack.
-  "k-void-2-stack": s => { const sc = voidAgain(s, true, VOID_2_BOSS), spread = sc.steps[3], gaps = stepZone(spread, VOID_RESULTS), marks = (spread.cue ?? []).filter(o => o.t === "mark");
+  "k-void-2-stack": s => { const sc = voidAgain(s, true, VOID_2_BOSS), spread = sc.steps[3], gaps = stepZone(spread, VOID_RESULTS), marks = spreadMarks(VOID_2_AT, VOID_2_BOSS.f ?? 0);
     if(!gaps) throw new Error("the spread step has no zone");
     const stackSc = voidAgain(s, false, VOID_2_BOSS), ps = puddlesOf(stackSc), stackZone = stepZone(stackSc.steps[3], asDrops(ps));
     if(!stackZone) throw new Error("the stack step has no zone");

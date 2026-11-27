@@ -18,9 +18,11 @@ import { hitsFirst, isWeapon, Shape } from "./Shape";
     weapons: the boss's weapons, over the waymarks they often land next to, and over the boss
     when he stands on one (his dot shows through the clear badge).
     pushes: knockback arrows, over the waymarks and the boss so the push is never hidden.
+    party: the other players at their spots, under the labels, so a stack around you never hides
+    the name of the spot.
     labels: name tags for weapons and zones, over the boss so they stay readable.
     effects: what the full fight adds over the arena (the flash, the countdown ring, a tank buster).
-    marks: the other players. me: your own click and your moving marker, on top of everything. */
+    marks: one-off player marks. me: your own click and your moving marker, on top of everything. */
 export const LAYERS = [
   "ground",
   "drops",
@@ -30,6 +32,7 @@ export const LAYERS = [
   "boss",
   "weapons",
   "pushes",
+  "party",
   "labels",
   "effects",
   "marks",

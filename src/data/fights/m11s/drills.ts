@@ -6,14 +6,15 @@ import { PLATFORM_X, PORTAL_OUT, isStretched, SPLIT_HALF_W, TETHER_STRETCH, TOWE
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
-import type { Boss, CircleZone, Drill, Lines, Overlay, Point, PolyShape, RectZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../../../types";
+import { stackedAt } from "../../partyRoute";
+import type { Boss, CircleZone, Drill, Lines, Overlay, PartySpot, PartySpots, Point, PolyShape, RectZone, RuleZone, Scene, Slot, SlotName, Step, StepResult, Zone } from "../../../types";
 
 export type WeaponType = "axe" | "sword" | "scythe";
 /** One weapon in a jump set. `a` is its direction from the arena center, in degrees clockwise from north.
     `axis`, when set, turns the icon: it is the long side, from the handle end to the tip. */
 export interface Weapon { a: number; p: Point; type: WeaponType; where?: string; tornado?: boolean; axis?: Point }
 /** Everything a jump-set drill needs: the weapons, where the boss stands after each jump, the steps and the drawing. */
-export interface JumpSet { W: Weapon[]; states: Boss[]; steps: Step[]; overlays: Overlay[] }
+export interface JumpSet { W: Weapon[]; states: Boss[]; steps: Step[]; overlays: Overlay[]; slot: Slot }
 
 const WEAPON_TYPES: WeaponType[] = ["axe", "sword", "scythe"];
 const ORDINALS = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth"];
@@ -131,9 +132,25 @@ export function buildJumpSet(s: Slot, W: Weapon[]): JumpSet {
     const tornado = w.tornado ? tornadoNear(P) : null;
     const leave: Overlay | null = tornado ? {t:"tornado", x:tornado[0], y:tornado[1]} : null;
     if(tornado) tornadoes.push(tornado);
-    return {q:ORDINALS[i] + " weapon: click where you go.", z, a, reveal, leave, stand, ...(hits ? {hits} : {})};
+    const party = weaponParty(s, w.type, P, angOf(scytheAxis(w, i)) - 90, addVec(addVec(P, d, -(HW + 5)), sv, -(HW + 5)));
+    return {q:ORDINALS[i] + " weapon: click where you go.", z, a, reveal, leave, stand, party, ...(hits ? {hits} : {})};
   });
-  return {W, states, steps, overlays};
+  return {W, states, steps, overlays, slot:s};
+}
+
+/** How far from the boss the party takes its clock spots for the scythe: the healers' spot, 9.5
+    units out (the app's choice). */
+const SCYTHE_CLOCK_R = 9.5;
+/* Where the other players go for a weapon at P (wtfdig): the axe's Party Stack is with you; the
+   sword's Light Party stacks are with you for your light party, and for the other one on the
+   other healer in the pocket on his other side (`pocket`), the others around them; the scythe's
+   proteans put each player on their clock spot (CLOCK) around him, from his front (`front`,
+   degrees clockwise from north). */
+function weaponParty(s: Slot, type: WeaponType, P: Point, front: number, pocket: Point): PartySpots {
+  const mine = partyOf(s).lp;
+  return Object.fromEntries(SLOT_NAMES.filter(x => x !== s).map((x): [SlotName, PartySpot] => [x,
+    type === "axe" ? "you" : type === "sword" ? (partyOf(x).lp === mine ? "you" : partyOf(x).role === "Healer" ? pocket : stackedAt(x, pocket))
+      : polar(front + CLOCK[x], SCYTHE_CLOCK_R, P)]));
 }
 
 /** How far from the scythe spot a click still counts, before the safe ground cuts it down: the
@@ -241,7 +258,7 @@ export function assaultScene(A: JumpSet, s: Slot): Scene {
       "Scythe: the butt is the end with the upright handle. The point is the blade tip."],
     overlays:A.overlays,
     bossAt:n => A.states[Math.min(n, A.states.length - 1)],
-    steps:A.steps,
+    steps:A.steps, party:{slot:s},
     rule:["First: the weapon he faces. Then clockwise.",
       "Sword: the pocket on the side he jumped from, " + bySlot(s, {H1:"on his left", H2:"on his right"}) + ".", "Stand a few steps in from its inner corner.",
       "Scythe: " + bySlot(s, {H1:"H1 at the butt", H2:"H2 at the point"}) + ", close in.",
@@ -256,7 +273,7 @@ export function ultimateScene(U: JumpSet, onClock = false): Scene {
       ...(onClock ? [] : ["Three show now. Each hit brings in the next one."]),
       "Look Ahead: where does the first one spawn?", "South and slightly west = clockwise.",
       "South and slightly east = counterclockwise."],
-    spawnPlay:true, spawnAhead:3, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps,
+    spawnPlay:true, spawnAhead:3, overlays:U.overlays, bossAt:n => U.states[Math.min(n, U.states.length - 1)], steps:U.steps, party:{slot:U.slot},
     rule:["First weapon south: slightly west = clockwise, slightly east = counterclockwise.",
       "The second is NW or NE. Then the cardinals, ending north.",
       "Use the normal rule for each weapon."]};
@@ -388,16 +405,39 @@ const POINT_AT = (deg: number, r: number): Point => polar(deg, r);
    boss (front, right, back and left, between the fixed spots), out to the arena edge. The shown
    spot, where the moving marker runs, is H1's gap on his left or H2's on his right: west and
    east when he faces north. */
-export function cometSpread(s: Slot, c: Point = CENTER, f = 0): (results: StepResult[]) => Zone {
+/** True when p is open ground for Comet's spread around a boss at c facing f: out of his hitbox
+    and a spread away from every tank and melee spot. */
+const cometOpen = (c: Point, f: number): (p: Point) => boolean => {
+  const fixed = fixedAround(c, f);
+  return p => inArena(p) && far(p, c, HITBOX + 2.5) && fixed.every(m => far(p, m.p, SPREAD_R));
+};
+/** The open gap `i` (0 front, 1 right, 2 back, 3 left) around a boss at c facing f, or the open
+    spot nearest it when it is off the arena. */
+function cometGap(c: Point, f: number, i: number): Point {
+  const g = gapsAround(c, f)[i], fn = cometOpen(c, f);
+  return fn(g) ? g : nearestTo(g, fn) ?? g;
+}
+/** Where the other players spread for Comet: the tanks and melee on their fixed spots, the other
+    healer in their own gap, R1 in the gap in front of him and R2 in the gap behind him (owner,
+    2026-11-27). */
+function cometParty(s: Slot, c: Point, f: number): PartySpots {
+  const fixed = fixedAround(c, f), spots: PartySpots = {R1:cometGap(c, f, 0), R2:cometGap(c, f, 2)};
+  for (const m of fixed) spots[m.l as SlotName] = m.p;
+  const other: Slot = s === "H1" ? "H2" : "H1";
+  spots[other] = cometSpread(other, c, f)([]).label;
+  return spots;
+}
+
+export function cometSpread(s: Slot, c: Point = CENTER, f = 0): (results: StepResult[]) => RuleZone {
   const fixed = fixedAround(c, f), gaps = gapsAround(c, f);
-  const fn = (p: Point): boolean => inArena(p) && far(p, c, HITBOX + 2.5) && fixed.every(m => far(p, m.p, SPREAD_R));
+  const fn = cometOpen(c, f);
   const holes = fixed.map(m => ({q:m.p, r:SPREAD_R}));
   const part = (deg: number): Stretch | null => cutOut([[HITBOX + 2.5, toEdge(c, deg)]], c, deg, holes)[0] ?? null;
   const slices = [0, 90, 180, 270].flatMap(a => rayArea(c, Array.from({length:91}, (_x, i) => f + a - 45 + i), part));
   // Next to a wall a gap can be off the arena.
   const pref = bySlot(s, {H1:[3, 1, 0, 2], H2:[1, 3, 0, 2]}).map(i => gaps[i]);
   const label = pref.find(fn) ?? nearestTo(pref[0], fn) ?? pref[0];
-  const zone: Zone = {fn, label, show:slices};
+  const zone: RuleZone = {fn, label, show:slices};
   return () => zone;
 }
 
@@ -464,20 +504,23 @@ const NORTH_START = {p:FIRST_PUDDLE, a:["North of the boss, in max melee."]};
 function voidSteps(s: Slot, spread: boolean, c: Point = CENTER, start = NORTH_START, f = 0, spreadMore: Lines = []): Step[] {
   const next = puddleAfter(c);
   const fixed = fixedAround(c, f), tankMeleeSpreads = fixed.map(m => spreadHit(m.p));
-  // Comet's spread markers on the tanks and melee, at their fixed spots. Yours is the scene's headMark.
-  const tankMeleeMarkers = fixed.map((m): Overlay => ({t:"target", x:m.p[0], y:m.p[1]}));
+  // The whole party drops its puddles together and stacks together (the owner, 2026-11-27).
+  const withYou = Object.fromEntries(SLOT_NAMES.filter(x => x !== s).map((x): [SlotName, PartySpot] => [x, "you"]));
   return [
     // Until the first puddle drops, a puddle-sized circle is on every player (BossMod VoidStardustBait).
-    {q:"Where do you drop the first puddle?", z:firstPuddle(start.p, c), a:start.a, drop:VOID_PUDDLE, bait:VOID_PUDDLE.r},
-    {q:"Second puddle?", zf:next, a:["Just outside your first puddle, one small step clockwise.", "Stay in max melee."], drop:VOID_PUDDLE},
-    {q:"Third puddle?", zf:next, a:["Just outside the second puddle, clockwise again.", "Stay in max melee."], drop:VOID_PUDDLE},
+    {q:"Where do you drop the first puddle?", z:firstPuddle(start.p, c), a:start.a, drop:VOID_PUDDLE, bait:VOID_PUDDLE.r, party:withYou},
+    {q:"Second puddle?", zf:next, a:["Just outside your first puddle, one small step clockwise.", "Stay in max melee."], drop:VOID_PUDDLE, party:withYou},
+    {q:"Third puddle?", zf:next, a:["Just outside the second puddle, clockwise again.", "Stay in max melee."], drop:VOID_PUDDLE, party:withYou},
     spread
       ? {q:"Puddles done. Comet: every player spreads. Tanks and melee go to fixed spots. Where do you go?",
-          zf:cometSpread(s, c, f), cue:[...tankMeleeMarkers, ...spreadMarks(c, f)], puddlesOff:true,
+          zf:cometSpread(s, c, f), puddlesOff:true,
+          // The tanks and melee go to their fixed spots as soon as Comet is asked: those spots
+          // give nothing away. The others spread once you have.
+          party:cometParty(s, c, f), early:["MT", "OT", "M1", "M2"],
           // Comet's spread circles: yours, and the tanks' and melee's on their fixed spots, which must miss you.
           revealAt:p => [spreadHit(p), ...tankMeleeSpreads], hits:tankMeleeSpreads,
           a:["Any open spot. Healers and ranged have no fixed spread spot.", "Keep away from the tank and melee spots.", ...spreadMore]}
-      : {q:"Puddles done. Where does the party stack?", zf:next, revealAt:p => [crushingComet(p)],
+      : {q:"Puddles done. Where does the party stack?", zf:next, revealAt:p => [crushingComet(p)], party:withYou,
           a:["Stack one more step clockwise, just past the third puddle.", "Stay in max melee."]}];
 }
 
@@ -494,7 +537,7 @@ function cometMark(s: Slot, on: Slot, at: number): Scene["headMark"] {
 /** Comet's spread marker on you, from the spread step (`at`) until you spread. It shows on your
     last spot (cactbot's head marker 008B: a spread marker on every player). */
 function spreadMarker(s: Slot, at: number): Scene["headMark"] {
-  return {on:{t:"mark", x:50, y:50, l:s, r:markRole(partyOf(s).role)}, you:true, n:1, at, follow:true, spread:true};
+  return {on:{t:"mark", x:50, y:50, l:s, r:markRole(partyOf(s).role)}, you:true, n:1, at, follow:true, spread:true, all:true};
 }
 
 /* The first Void Stardust runs straight into the second weapon set: the weapons are already
@@ -526,7 +569,7 @@ export function voidIntoWeapons(s: Slot, spread: boolean, A: JumpSet, stackOn: S
     // Then his cast starts and he faces the first weapon, as the fight shows from 1:26.7.
     bossAt:n => n === 5 ? {...A.states[0], f:first.a} : A.states[Math.max(0, Math.min(n - 5, A.states.length - 1))],
     headMark:spread ? spreadMarker(s, 4) : cometMark(s, stackOn, 4),
-    steps,
+    steps, party:{slot:s},
     rule:["Look Ahead: find the first weapon before the puddles.", "Its flat side is square to the boss.",
       "Puddles: start north. Each one just outside the last, clockwise, in max melee.",
       spread ? "Comet spread fixed spots: MT NW, OT NE, M1 SW, M2 SE." : "Stack one more step clockwise, just past the third puddle.",
@@ -555,7 +598,7 @@ export function voidAgain(s: Slot, spread: boolean, boss: Boss, stackOn: Slot = 
       "It is always the opposite of the first."],
     ordered:true,
     boss, overlays:[], steps:voidSteps(s, spread, c, {p:butt, a:["Directly behind the boss, in max melee."]}, boss.f ?? 0, VOID_2_SPREAD_RULE),
-    headMark:spread ? spreadMarker(s, 3) : cometMark(s, stackOn, 3),
+    headMark:spread ? spreadMarker(s, 3) : cometMark(s, stackOn, 3), party:{slot:s},
     rule:[...VOID_2_START_RULE,
       "Each one just outside the last, clockwise around him.",
       ...(spread ? VOID_2_SPREAD_RULE : ["Stack one more step clockwise, just past the third puddle."]),
@@ -602,14 +645,22 @@ function axeSpread(s: Slot): Zone {
   return {fn, label:c, show:rayArea(c, Array.from({length:361}, (_x, d) => d), part)};
 }
 /** The axe going off, as you (s) see it: the Shared Tank Buster on the tanks, and a spread on
-    each of the other six on their spots, with the other five's marks. `hits` leaves out your own
-    spread: you take it, and only the others must miss you. */
+    each of the other six on their spots. `hits` leaves out your own spread: you take it, and only
+    the others must miss you. */
 function axeHits(s: Slot): {reveal: Overlay[]; hits: Overlay[]} {
   const others = Object.entries(AXE_SPREAD_SPOTS).filter(([l]) => l !== s);
   const hits = [rawSteelBuster(AXE_TANKS), ...others.map(([, p]) => rawSteelImpact(p))];
-  const marks = others.map(([l, p]): Overlay => ({t:"mark", x:p[0], y:p[1], l, r:l[0] === "H" ? "H" : "D"}));
-  return {reveal:[...hits, rawSteelImpact(AXE_SPREAD_SPOTS[s]), ...marks], hits};
+  return {reveal:[...hits, rawSteelImpact(AXE_SPREAD_SPOTS[s])], hits};
 }
+/** The tanks side by side in front of the boss, for the axe's Shared Tank Buster. */
+const AXE_TANK_SPOTS: Record<"MT" | "OT", Point> = {MT:[AXE_TANKS[0] - 3, AXE_TANKS[1]], OT:[AXE_TANKS[0] + 3, AXE_TANKS[1]]};
+/** The tanks' spots for the scythe's two tank cones, NW and NE (wtfdig). */
+const SCYTHE_TANK_SPOTS: Record<"MT" | "OT", Point> = {MT:[37, 36], OT:[63, 36]};
+/** Where the others go for the axe: the tanks together in front, the other six on their spread spots. */
+const axeParty = (s: Slot): PartySpots => ({...AXE_TANK_SPOTS, ...Object.fromEntries(Object.entries(AXE_SPREAD_SPOTS).filter(([l]) => l !== s))});
+/** Where the others go for the scythe: the tanks on their cones, the other five stacked with you. */
+const scytheParty = (s: Slot): PartySpots =>
+  ({...SCYTHE_TANK_SPOTS, ...Object.fromEntries(SLOT_NAMES.filter(x => x !== s && partyOf(x).role !== "Tank").map((x): [SlotName, PartySpot] => [x, "you"]))});
 /* Raw Steel Trophy, scythe: three cleaves. A 90-degree cone on each tank (MT at 317 degrees, OT
    at 43), and a 45-degree cone behind him that the rest of the party shares. The party's spot is
    inside that shared cone, outside his hitbox. */
@@ -1694,14 +1745,18 @@ const lineThrough = (deg: number): Overlay => lineStack(CENTER, stackBehind(deg)
 export const DRILLS: readonly Drill[] = [
   {id:"m-raw-axe", order:2, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: Axe", kind:"spread",
     build:s=>({setup:["The boss pulls out an axe.", "The two tanks stack for a Shared Tank Buster.", "The other six players each get an AoE, so they spread."],
-      boss:BOSS, overlays:[...heldWeapon("axe"),{t:"mark",x:AXE_TANKS[0] - 3,y:AXE_TANKS[1],l:"MT",r:"T"},{t:"mark",x:AXE_TANKS[0] + 3,y:AXE_TANKS[1],l:"OT",r:"T"}],
-      steps:[{q:"Click your spread spot.", z:axeSpread(s), a:bySlot(s, {H1:["SSW, far out."], H2:["SSE, far out."]}), ...axeHits(s)}],
+      boss:BOSS, overlays:heldWeapon("axe"),
+      // The tanks stand together in front from the start: their spot gives nothing away.
+      party:{slot:s, start:AXE_TANK_SPOTS},
+      steps:[{q:"Click your spread spot.", z:axeSpread(s), a:bySlot(s, {H1:["SSW, far out."], H2:["SSE, far out."]}), ...axeHits(s), party:axeParty(s)}],
       rule:RAW_STEEL_RULE})},
   {id:"m-raw-scythe", order:2.1, phase:P1, time:"0:18 or 2:36", title:"Raw Steel Trophy: Scythe", kind:"roleStack",
     build:s=>({setup:["The boss pulls out a scythe.", "He cleaves three times.", "One cone on each tank, and one cone the rest of the party shares.", "So the tanks spread, and the rest of the party stacks."],
-      boss:BOSS, overlays:[...heldWeapon("scythe"),{t:"mark",x:37,y:36,l:"MT",r:"T"},{t:"mark",x:63,y:36,l:"OT",r:"T"}],
+      boss:BOSS, overlays:heldWeapon("scythe"),
+      // The tanks stand on their cones from the start: their spots give nothing away.
+      party:{slot:s, start:SCYTHE_TANK_SPOTS},
       // The party takes the shared cone (the third), so only the two tank cones must miss it.
-      steps:[{q:"Click where the party stacks.", z:SCYTHE_STACK, a:["South, directly behind the boss, inside the shared cone."], reveal:SCYTHE_CLEAVES, hits:SCYTHE_CLEAVES.slice(0, 2)}],
+      steps:[{q:"Click where the party stacks.", z:SCYTHE_STACK, a:["South, directly behind the boss, inside the shared cone."], reveal:SCYTHE_CLEAVES, hits:SCYTHE_CLEAVES.slice(0, 2), party:scytheParty(s)}],
       rule:["Scythe: three cleaves.", "The tanks spread to the front.", "The party stacks behind."]})},
   {id:"m-assault", order:3, random:true, follows:{pick:"set1"}, phase:P1, time:"0:48", title:"Assault Evolved: Three Weapons", kind:["stack", "protean", "lightPartyStack"],
     build:(s, _v, pick)=>assaultScene(buildAssault(s, orderFrom(pick)), s)},

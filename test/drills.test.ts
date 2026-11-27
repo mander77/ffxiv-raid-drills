@@ -409,11 +409,7 @@ test("Raw Steel Trophy axe: it draws the tank stack and six spreads, at BossMod'
   assert.equal(st.hits?.length, 6, "every hit but your own spread must miss you");
   const r = ATTACK.yalms(bossmod("RawSteelAxeImpact").range);
   for (const c of circles) if (c.t === "aoe") assert.closeTo(c.r, r, 1e-9);
-  const marks = (st.reveal ?? []).filter((o) => o.t === "mark");
-  assert.sameMembers(
-    marks.map((o) => (o.t === "mark" ? o.l : "")),
-    ["H2", "M1", "M2", "R1", "R2"],
-  );
+  assert.sameMembers(Object.keys(st.party ?? {}), ["MT", "OT", "H2", "M1", "M2", "R1", "R2"], "every other player has a spot");
 });
 
 test("Void Stardust into the second weapons: every correct spot is inside its zone", () => {
@@ -1263,11 +1259,9 @@ test("Void Stardust ending in a stack: a healer has the marker from the stack st
   assert.deepInclude(second, { you: true, at: 3 });
   assert.deepInclude(
     voidIntoWeapons("H1", true, A, "H2").headMark,
-    { you: true, at: 4, spread: true },
-    "a spread puts a spread marker on you",
+    { you: true, at: 4, spread: true, all: true },
+    "a spread puts a spread marker on every player",
   );
-  const cue = voidIntoWeapons("H1", true, A).steps[4].cue ?? [];
-  assert.equal(cue.filter((o) => o.t === "target").length, 4, "spread markers on the four tank and melee spots");
 });
 
 test("Void Stardust into the second weapons: at the first weapon step the boss faces it", () => {

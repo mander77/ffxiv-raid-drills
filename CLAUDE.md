@@ -218,6 +218,8 @@ src/data/fights/types.ts  FightData: what a fight gives the site (its data, aren
 src/data/categories.ts    the ability categories' names (CATEGORIES), shared by every fight
 src/data/sourceLookups.ts the lookups a fight binds to its source.gen.ts (cactbot, bossmod...)
 src/data/route.ts    the moving marker's route (correctRoute, clickRoute, runnerAt, showOf), shared
+src/data/partyRoute.ts  the other players: where each stands at each step (partyNow), the rest
+                     formation (restSpot), and each one's route in the full fight (partyRoutes)
 src/data/fights/m11s/  M11S, one folder per fight:
   index.ts           M11S's FightData: joins the files below for the site. The shared code reads
                      only this.
@@ -411,6 +413,9 @@ One idea has one name. Use these, and add to the list when a new idea comes in.
 - **Overlay**: a piece drawn on the arena (an attack, a weapon, a tag, a player mark); `Shape`
   draws one.
 - **Mark**: a player's mark on the arena, or the boss (`BossMark`).
+- **Party**: the other seven players on the arena, each at their spot (`Step.party`,
+  `Scene.party`). They go to a step's spot once you answer it; `early` players go when it is asked.
+  The **rest formation** is where they stand between mechanics (`restSpot`).
 - **Stack marker**: the marker on the player a stack goes on (`{t:"stackMark"}`). A scene's
   `headMark` is on its player until the step is answered; when it is yours, the full fight puts it
   on your moving marker.

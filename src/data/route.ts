@@ -104,11 +104,12 @@ export function clickRoute(f: Fight, clicks: Array<{si: number; j: number; p: Po
     own pre-position (Stop.pre), it goes there just after the last hit. Before any other
     mechanic, after a quiet stretch of REST_GAP seconds or more, it goes to HOME. Look-ahead
     stops are skipped: the player does not move for them. A stop with a knockback throws the
-    runner at its hit, over THROW_TIME, to where it lands; it moves on from there. */
-export function runnerAt(route: Stop[], t: number): {at: Point; target: Stop | null} {
+    runner at its hit, over THROW_TIME, to where it lands; it moves on from there. `home` is where
+    the runner starts and rests: HOME for you, a rest spot for another player. */
+export function runnerAt(route: Stop[], t: number, home: Point = HOME): {at: Point; target: Stop | null} {
   const moves = route.filter(s => !s.lookAhead);
   const target = moves.find(s => s.hit > t && s.show <= t) ?? null;
-  let at = HOME, lastHit = -Infinity, seg = -1;
+  let at = home, lastHit = -Infinity, seg = -1;
   /* One straight run from `at` to p, leaving at `leave`. Returns where the runner is at t if t
      falls before the end of this run, or null when the run is over by t. */
   const leg = (p: Point, leave: number): Point | null => {
@@ -121,7 +122,7 @@ export function runnerAt(route: Stop[], t: number): {at: Point; target: Stop | n
   for(const s of moves){
     if(s.si !== seg){   // the first move of a mechanic
       seg = s.si;
-      const pre = s.pre ?? (s.show - lastHit >= REST_GAP ? HOME : null);
+      const pre = s.pre ?? (s.show - lastHit >= REST_GAP ? home : null);
       const go = pre && dist(at, pre) > 0.5 ? leg(pre, lastHit + REACT) : null;
       if(go) return {at:go, target};
     }
