@@ -37,7 +37,7 @@ export const REFERENCE: readonly ReferenceEntry[] = [
   {
     name: "Raw Steel Trophy (Second Time)",
     picture: "k-raw-second",
-    cards: ["k-raw-second"],
+    cards: ["k-raw-second", "k-raw-second-axe"],
     drills: ["m-raw-axe", "m-raw-scythe"],
     timeline: "n-7",
   },
