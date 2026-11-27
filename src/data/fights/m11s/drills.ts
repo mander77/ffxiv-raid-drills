@@ -2,7 +2,7 @@
 import { bySlot, shuffle, random } from "../../../util";
 import { P1, P2, P3, P4 } from "./timeline";
 import { DEG, unit, addVec, leftOf, angOf, attackHits, inArena, inZone, polar, dist, zoneCenter } from "../../../geometry";
-import { PLATFORM_X, PORTAL_OUT, isStretched, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, LINE_PORTAL_OUT, flatlinerThrow, wrathLine, eclipticWrath, eclTowerHit, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, LINE_STACK_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, towerThrow, ROCK_GAP, meteorHit, spreadHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
+import { PLATFORM_X, PORTAL_OUT, isStretched, SPLIT_HALF_W, TETHER_STRETCH, TOWER_KNOCKBACK, FLATLINER_KNOCKBACK, LINE_PORTAL_OUT, flatlinerThrow, wrathLine, eclipticWrath, eclTowerHit, fireBreath, HITBOX, MELEE_R, SWORD_HALF, ORBITAL_LANE, TORNADO_R, SPREAD_R, PUDDLE_R, VOID_PUDDLE, MAJESTIC_PUDDLE, ATOMIC_PUDDLE, FOUR_WAY_HALF, TOWER_R, RAW_STACK_HALF, SCYTHE_CLEAR_DEG, SCYTHE_SAFE, atomicPuddle, axeHit, axeStack, proximityDot, behindRock, crushingComet, eyeOfTheHurricane, fireAndFury, massiveMeteor, gust, hurricaneLine, kickTower, lineStack, twoWayFireball, fourWayFireball, pairTower, safeRing, scytheDonut, scytheProteans, rockShadow, sharedCone, shockwave, soakTower, soloTower, swordCross, swordLine, swordPocket, tankCone, towerHit, towerThrow, ROCK_GAP, meteorHit, spreadHit, rockExplosion, rawSteelBuster, rawSteelImpact } from "./attacks";
 import { FOUR_WAY_RULE, METEOR_ORDER_RULE, ORBITAL_RULE, RAW_STEEL_RULE, TWO_WAY_RULE, VOID_2_SPREAD_RULE, VOID_2_START_RULE } from "./rules";
 import { markRole, partyOf } from "../../../party";
 import { thrownTo } from "../../route";
@@ -966,7 +966,7 @@ export function eclTwoWayScene(p: EclPlace, meteors: EclMeteors): Scene {
       a:tethered ? [`The ${side} Line Stack, behind the players by the boss.`, "The melee bait it under the boss, so stay farther out."]
         : [`The ${side} Line Stack, in max melee.`, "The melee bait it under the boss, in front of you."],
       // You join one Line Stack; the other must miss you.
-      reveal:[lineStack([50, 50], [0, 50]), lineStack([50, 50], [100, 50])], hits:[lineStack([50, 50], east ? [0, 50] : [100, 50])]}],
+      reveal:[twoWayFireball([50, 50], [0, 50]), twoWayFireball([50, 50], [100, 50])], hits:[twoWayFireball([50, 50], east ? [0, 50] : [100, 50])]}],
     rule:TWO_WAY_RULE};
 }
 
@@ -978,10 +978,10 @@ function fourWayNear(deg: number, {c, r}: CircleZone): Zone {
   const part = (d: number): Stretch | null => {
     const x = crossCircle(CENTER, d, c, r);
     if(!x) return null;
-    const lo = Math.max(x[0], LINE_STACK_HALF / Math.cos((d - deg) * DEG));
+    const lo = Math.max(x[0], FOUR_WAY_HALF / Math.cos((d - deg) * DEG));
     return x[1] - lo > 0.3 ? [lo, x[1]] : null;
   };
-  return {fn:p => dist(p, c) <= r && out(p) >= LINE_STACK_HALF, label:c,
+  return {fn:p => dist(p, c) <= r && out(p) >= FOUR_WAY_HALF, label:c,
     show:rayArea(CENTER, Array.from({length:81}, (_x, i) => deg - 40 + i), part)};
 }
 
@@ -999,7 +999,7 @@ function fourWayOut(deg: number, {c, r}: CircleZone, meteors: EclMeteors): Zone 
 
 /** Ecliptic Stampede's Four-way Fireball: Pair Stacks on the four closest players. A marked player
     takes NW (north wall) or NE (south wall), under the boss. A tethered player stays on their
-    corner's intercard, further out, behind the player at max melee (the mini-guide, 2:25). The
+    corner's intercard, further out, behind the player by the boss (the mini-guide, 2:25). The
     spot 24 units out is the app's choice. */
 export function eclFourWayScene(p: EclPlace, meteors: EclMeteors): Scene {
   const deg = isEclCorner(p) ? CORNER_DEG[p] : p === "south" ? 45 : 315;
@@ -1007,11 +1007,11 @@ export function eclFourWayScene(p: EclPlace, meteors: EclMeteors): Scene {
   return {setup:[eclFireSetup(p), "The boss casts Four-way Fireball: Pair Stacks on the four closest players."], ordered:true,
     boss:BOSS, overlays:allPuddles(meteors),
     steps:[{q:"Which Pair Stack do you take?", z,
-      a: isEclCorner(p) ? [`${p.toUpperCase()}, on your corner's intercard, behind the player at max melee.`] : p === "south" ? ["NE, under the boss."] : ["NW, under the boss."],
+      a: isEclCorner(p) ? [`${p.toUpperCase()}, on your corner's intercard, behind the player by the boss.`] : p === "south" ? ["NE, under the boss."] : ["NW, under the boss."],
       // Four line stacks from the boss through the four closest pairs: NW, NE, SW and SE.
-      reveal:[315, 45, 225, 135].map(a => lineStack([50, 50], POINT_AT(a, 10))),
+      reveal:[315, 45, 225, 135].map(a => fourWayFireball([50, 50], POINT_AT(a, 10))),
       // You take yours; the other three must miss you.
-      hits:[315, 45, 225, 135].filter(a => a !== deg).map(a => lineStack([50, 50], POINT_AT(a, 10)))}],
+      hits:[315, 45, 225, 135].filter(a => a !== deg).map(a => fourWayFireball([50, 50], POINT_AT(a, 10)))}],
     rule:FOUR_WAY_RULE};
 }
 
@@ -1575,7 +1575,7 @@ export function avalancheScene(s: Slot, side: SplitSide, end: SplitEnd, face: Sp
   // His turn: half a circle around him, 17 units out, with an arrowhead at its end. The app's choice.
   const turn: Overlay[] = [{t:"turn", x:50, y:50, r:17, from:f, to:f + dir * 180}];
   const [y0, y1] = safe === "north" ? [0, 32] : [68, 100], [x0, x1] = PLATFORM_X[back];
-  return {setup:["The boss faces the " + face + " platform: he grabs it.", "Towers appear, one in each quadrant.", "Then he turns and slams the platform down."], ordered:true,
+  return {setup:["Towers appear, one in each quadrant.", "The boss faces the " + face + " platform: he grabs it.", "Then he turns and slams the platform down."], ordered:true,
     split:true, boss:{x:50, y:50, f}, overlays:[...SPLIT_TOWERS, lastSpot(s, side, end)],
     steps:[
       {q:"Which tower, and which side of it?", zf:() => towerHalf(side, end, side === back ? "along" : "across"), knock:{from:SPLIT_TOWER[side][end], dist:TOWER_KNOCKBACK}, ...towerReveal(side, end, side === back ? "along" : "across"),

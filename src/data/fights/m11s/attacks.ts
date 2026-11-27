@@ -135,8 +135,8 @@ export const rockShadow = (from: Point, rock: Point): Point[] => ATTACK.shadow(f
     the shadow behind `rock`, the nearest rock still standing. The rocks stand in one line from the
     boss, so the nearest one's shadow holds the shadows of the rocks behind it. */
 export const shockwave = (from: Point, rock: Point): Overlay => ATTACK.lineOfSight(from, rock, BOSSMOD_LOS.cometRadius);
-/** Every spread and stack: Raw Steel, Comet, Crushing Comet and Eye of the Hurricane ("range 6
-    circle"), on the player at p. */
+/** A Comet spread (CometSpread, "range 6 circle"), on the player at p. Incorrect answers use it for
+    any spread too. */
 export const spreadHit = (p: Point): Overlay => ATTACK.circle(p, bossmod("CometSpread").range);
 /** Raw Steel Trophy, axe: the spread on each of the six who are not tanks (RawSteelAxeImpact,
     "range 6 circle"), on the player at p. */
@@ -222,13 +222,26 @@ export const fireAndFury = (c: Point, facing: number): Overlay[] => {
   const front = bossmod("FireAndFuryFront"), back = bossmod("FireAndFuryBack");
   return [ATTACK.cone(c, facing, front.angle, front.range), ATTACK.cone(c, facing + 180, back.angle, back.range)];
 };
-/** Half a line stack's width, in arena units: a spot this far or further from its middle line is
-    out of it. */
+/** Half a line stack's width (Fearsome Fireball), in arena units: a spot this far or further
+    from its middle line is out of it. */
 export const LINE_STACK_HALF = yalms(bossmod("FearsomeFireballCharge").width) / 2;
-/** A line stack from `from` through `to`: the Meteorain charge (Fearsome Fireball) and Two-way and
-    Four-way Fireball ("range 60 width 6 rect"). */
+/** Half a Four-way Fireball line's width, in arena units: a spot this far or further from its
+    middle line is out of it. */
+export const FOUR_WAY_HALF = yalms(bossmod("FourWayFireball").width) / 2;
+/** A line stack from `from` through `to`: the Meteorain charge (Fearsome Fireball, "range 60 width 6
+    rect"). */
 export const lineStack = (from: Point, to: Point): Band => {
   const s = bossmod("FearsomeFireballCharge");
+  return ATTACK.line(from, toward(from, to), s.range, s.width);
+};
+/** One Two-way Fireball Line Stack, from `from` through `to` ("range 60 width 6 rect"). */
+export const twoWayFireball = (from: Point, to: Point): Band => {
+  const s = bossmod("TwoWayFireball");
+  return ATTACK.line(from, toward(from, to), s.range, s.width);
+};
+/** One Four-way Fireball Pair Stack line, from `from` through `to` ("range 60 width 6 rect"). */
+export const fourWayFireball = (from: Point, to: Point): Band => {
+  const s = bossmod("FourWayFireball");
   return ATTACK.line(from, toward(from, to), s.range, s.width);
 };
 /** A Hurricane Explosion line in Dance of Domination, from `from` toward `to` ("range 60 width 10

@@ -142,7 +142,7 @@ test("on the Cheat Sheet, the corner buttons go to the next section, the one bef
   await page.goto("/sheet");
   const go = page.getByRole("navigation", { name: "Go to a section" });
   await expect(go).toHaveCount(0);
-  await page.getByText("Ecliptic Puddles", { exact: true }).scrollIntoViewIfNeeded();
+  await page.getByText("Ecliptic Fireball", { exact: true }).scrollIntoViewIfNeeded();
   await go.getByRole("link", { name: "↓ Panic reset" }).click();
   await expect(page.getByText("Feet: go to your spot for the next mechanic.")).toBeInViewport();
   await go.getByRole("link", { name: "↑ Phase 4" }).click();

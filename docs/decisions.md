@@ -187,7 +187,7 @@ November 24: every fight draws its attacks with one set of functions, `src/lib/a
     portal, then clockwise: a north portal sends you SW, east NW, south NE, west SE. Which portal
     is yours is random.
   - Two-way Fireball: a tether in a west corner joins the west Line Stack, an east corner the
-    east one. Four-way: stay on your corner's intercard, behind the player at max melee.
+    east one. Four-way: stay on your corner's intercard, behind the player by the boss.
   - Two-way Fireball, how far out (owner, November 25, after a fight review): the melee bait each
     Line Stack under the boss. A marked player stands just outside his hitbox, 13.5 to 20 units out
     (best 16), and a tethered player behind them, 18 to 34 (best 20), so nobody else baits the line
