@@ -247,6 +247,13 @@ export const LEARN_PICTURES: Partial<Record<string, (s: Slot) => Picture>> = {
       show([...AXE_HITS, ...heldWeapon("axe"), ...TANKS_TOGETHER, ...AXE_SPREAD]),
       show([tag(...HELD_TAG, "AXE OR SCYTHE")]),
       show([...swordCross(CENTER, [0, -1]), ...heldWeapon("sword")])]}; },
+  // The reverse of k-raw-second: the first was a scythe, so the second is the axe.
+  "k-raw-second-axe": s => { const d = fromDrill("m-raw-axe", s);
+    return {overlays:[tag(50, 8, "0:18 WAS SCYTHE")], boss:d.boss, before:[tag(...HELD_TAG, "?")], after:[...d.overlays, ...(d.after ?? [])], answer:d.answer, options:[
+      show([...AXE_HITS, ...heldWeapon("axe"), ...TANKS_TOGETHER, ...AXE_SPREAD]),
+      show([...SCYTHE_CLEAVES, ...heldWeapon("scythe"), ...TANKS_APART]),
+      show([tag(...HELD_TAG, "AXE OR SCYTHE")]),
+      show([...swordCross(CENTER, [0, -1]), ...heldWeapon("sword")])]}; },
   "k-first-weapon": s => { const R = buildJumpSet(s, faceApproach(weapons([[315, "scythe"], [90, "axe"], [180, "sword"]]))), W = R.W;
     return {overlays:R.overlays, boss:R.states[0], after:inOrder(W, [0, 1, 2]), answer:[circle(W[0].p, 9)], options:[
       show(inOrder(W, [0, 1, 2]), [circle(W[0].p, 9)]),

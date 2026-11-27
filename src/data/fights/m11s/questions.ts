@@ -25,6 +25,10 @@ export const LEARN_CARDS: QuizItem[] = [
     options:[{t:"A scythe. It is always the opposite of the first.", ok:true},{t:"An axe again."},{t:"It is random."},{t:"A sword."}],
     why:["The second Raw Steel Trophy always uses the weapon you did not see first."],
     rule:["The second Raw Steel Trophy is the opposite of the first."]})),
+  mq("k-raw-second-axe", 9.1, P1, "2:36", s=>({prompt:"The first Raw Steel Trophy was a scythe. What is the second one, at 2:36?",
+    options:[{t:"An axe. It is always the opposite of the first.", ok:true},{t:"A scythe again."},{t:"It is random."},{t:"A sword."}],
+    why:["The second Raw Steel Trophy always uses the weapon you did not see first."],
+    rule:["The second Raw Steel Trophy is the opposite of the first."]})),
   mq("k-first-weapon", 3, P1, "0:48", s=>({prompt:"Trophy Weapons: three weapons are on the floor. Which one does the boss do first?",
     options:[{t:"The one he turns to face. Then the other two, clockwise.", ok:true},{t:"Always the sword first."},{t:"The one closest to the tank, then counterclockwise."},{t:"A random one each time."}],
     why:["During the Assault Evolved cast, he faces his first weapon.", "After it, he goes clockwise through the other two."],
@@ -286,7 +290,7 @@ TIMELINE.slice(0, -1).forEach((ev, i) => {
 /** The Learn cards by mechanic, for the chips over a card: a chip jumps to the first card of its
     mechanic. The tests check that every Learn card is in exactly one. */
 export const LEARN_GROUPS: Array<{name: string; ids: string[]}> = [
-  {name:"Raw Steel", ids:["k-raw-first", "k-raw-axe", "k-raw-second"]},
+  {name:"Raw Steel", ids:["k-raw-first", "k-raw-axe", "k-raw-second", "k-raw-second-axe"]},
   {name:"Weapons", ids:["k-first-weapon", "k-sword", "k-axe", "k-scythe", "k-assault-2"]},
   {name:"Void Stardust", ids:["k-void", "k-void-target", "k-void-spread", "k-void-sprint", "k-void-2-start", "k-void-2", "k-void-2-stack"]},
   {name:"Dance", ids:["k-dance", "k-dance-north", "k-dance-pair"]},

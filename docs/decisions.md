@@ -882,6 +882,8 @@ static wins.
   shares. Tanks spread, and the party stacks south behind him.
 - Axe: the reverse. A shared tank buster, and six spread hits. Tanks stack, and the party spreads.
 - The held weapon is drawn on top of the boss's dot, with its name under the dot.
+- Learn asks both second weapons (issue #156, the owner's answer, November 27): `k-raw-second`
+  (the first was an axe) and `k-raw-second-axe` (the first was a scythe).
 
 ### Assault Evolved (he jumps to the weapons)
 
