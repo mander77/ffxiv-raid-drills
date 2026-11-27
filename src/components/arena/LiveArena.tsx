@@ -47,6 +47,8 @@ export interface LiveArenaProps {
   /** How many weapons have spawned on the fight clock. Each one shows as it spawns. Left out,
       the scene's spawnAhead rule shows them. */
   spawned?: number;
+  /** Attacks the fight draws on the floor (a fire trail going off), clipped to the arena. */
+  floor?: ReactNode;
   /** What the fight draws over the arena: the flash of a hit, the countdown ring, a tank buster. */
   effects?: ReactNode;
   /** Your moving marker, on top of everything. It draws your tether too, so the arena leaves it out. */
@@ -70,6 +72,7 @@ export function LiveArena({
   pickSpot = true,
   target,
   spawned,
+  floor,
   effects,
   runner,
 }: LiveArenaProps) {
@@ -211,6 +214,7 @@ export function LiveArena({
           <>
             {reveal.ground}
             {base.ground}
+            {floor}
           </>
         ),
         weapons: (
