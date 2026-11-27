@@ -24,8 +24,9 @@ Sources, short:
   melee behind him, the healers and ranged about 12 yalms out behind him, light party 1 on his left.
 - The party draws in its own layer, under the labels; your own mark stays on top.
 - A knockback throws the others too, each from their own tower (`Step.partyKnock`).
-- Learn and the Cheat Sheet: the whole party on the answer picture only, in a later slice. Today
-  they draw the same players as before.
+- Learn and the Cheat Sheet: the whole party on the answer picture only (O). A picture built
+  from a drill step takes that step's party; a card about an order or a time, with no one moment,
+  shows the others in the rest formation. A player the picture draws itself keeps their own mark.
 
 ## Where each player goes
 
@@ -106,3 +107,6 @@ path as the fight already builds it (V 12:04 to 16:58, W):
 3. The square inside the hitbox for the Ecliptic tethers, and the melee's spots there.
 4. Where the others wait in Heartbreak Kick when the tanks soak it.
 5. The Arena Split tethers: two in each light party in the first round.
+6. Learn: six cards draw an example that no drill pattern matches, so they keep only their own
+   players: k-ecl-prio, k-ecl-center, k-ecl-tether, k-split-corner, k-slab, k-meteor-order.
+7. Learn, Dance of Domination: MT and OT now stand on waymarks D and B on the answer picture.

@@ -1,6 +1,8 @@
-import type { Picture, Preview } from "../../types";
+import { markRole, partyOf } from "../../party";
+import type { Picture, Preview, SlotName } from "../../types";
 import { Arena, pieceLayers, withoutChangedRocks } from "./Arena";
 import { BossMark } from "./BossMark";
+import { Shape } from "./Shape";
 import { ZoneArea } from "./ZoneArea";
 
 export interface LearnPictureProps {
@@ -20,6 +22,10 @@ export interface LearnPictureProps {
 export function LearnPicture({ fig: f, answered, label, preview, className }: LearnPictureProps) {
   const extra = answered ? (f.after ?? []) : preview ? preview.pieces : (f.before ?? []);
   const pieces = [...f.overlays, ...extra];
+  // The other players on the answer picture, but not those the picture draws itself.
+  const drawn = new Set(pieces.flatMap((o) => (o.t === "mark" ? [o.l] : [])));
+  // TS note: Object.entries gives [key, value] pairs with string keys; `as` names them as slots.
+  const party = answered ? (Object.entries(f.party ?? {}) as [SlotName, [number, number]][]).filter(([who]) => !drawn.has(who)) : [];
   const zones = answered
     ? // biome-ignore lint/suspicious/noArrayIndexKey: the zones of a picture never change order.
       (f.answer ?? []).map((z, i) => <ZoneArea key={i} zone={z} look="ok" />)
@@ -30,7 +36,12 @@ export function LearnPicture({ fig: f, answered, label, preview, className }: Le
       label={label}
       split={f.split}
       className={className}
-      layers={{ ...pieceLayers(withoutChangedRocks(pieces, pieces)), zones, boss: f.boss ? <BossMark boss={f.boss} /> : null }}
+      layers={{
+        ...pieceLayers(withoutChangedRocks(pieces, pieces)),
+        zones,
+        boss: f.boss ? <BossMark boss={f.boss} /> : null,
+        party: party.map(([who, [x, y]]) => <Shape key={who} overlay={{ t: "mark", x, y, l: who, r: markRole(partyOf(who).role) }} />),
+      }}
     />
   );
 }

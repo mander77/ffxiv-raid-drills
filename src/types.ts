@@ -366,6 +366,9 @@ export interface Picture {
   answer?: ZoneShape[];
   options?: Preview[];
   note?: string;
+  /** Where the other players stand on the answer picture. A player the picture draws itself keeps
+      their own mark. */
+  party?: Partial<Record<SlotName, Point>>;
 }
 
 export interface Option {
