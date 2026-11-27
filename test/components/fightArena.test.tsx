@@ -4,7 +4,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, assert, test } from "vitest";
 import { FightArena } from "../../src/components/pressure/FightArena";
 import { TOWER_R } from "../../src/data/fights/m11s/attacks";
-import { type FightMode, newFightState, seek, viewOf } from "../../src/lib/fight";
+import { type FightMode, newFightState, seek, tickFight, viewOf } from "../../src/lib/fight";
 import { newCode } from "../../src/util";
 import { buildFight } from "../m11s";
 
@@ -80,4 +80,27 @@ test("a Heartbreak Kick hit flashes only its tower, not the whole floor", () => 
   const flash = container.querySelector(".hitfx");
   assert.equal(flash?.tagName.toLowerCase(), "circle");
   assert.deepEqual([flash?.getAttribute("cx"), flash?.getAttribute("cy"), flash?.getAttribute("r")], ["50", "50", String(TOWER_R)]);
+});
+
+test("Void Stardust: a puddle-sized bait circle is on your marker until the first puddle drops", () => {
+  const s = newFightState("watch", buildFight("H1", "K7Q2"), { paused: true });
+  const voids = s.fight.segs.filter((g) => g.scene.steps.some((st) => st.bait != null));
+  assert.equal(voids.length, 2, "both Void Stardusts");
+  for (const g of voids) {
+    const i = g.scene.steps.findIndex((st) => st.bait != null);
+    const baitAt = (t: number) => {
+      seek(s, t);
+      tickFight(s, 0, 1); // gives the answers due by then
+      const { container, unmount } = render(
+        <FightArena view={viewOf(s)} slot="H1" correctLabel={false} pickSpot={false} hit={null} replay={0} onPointClick={() => {}} />,
+      );
+      const circles = [...container.querySelectorAll(".runner .bait")];
+      unmount();
+      return circles;
+    };
+    const before = baitAt(g.due[i] - 0.1);
+    assert.equal(before.length, 1, `${g.title}: the circle is on you before the first puddle`);
+    assert.equal(Number(before[0].getAttribute("r")), g.scene.steps[i].bait);
+    assert.equal(baitAt(g.due[i] + 0.1).length, 0, `${g.title}: it goes when the first puddle drops`);
+  }
 });

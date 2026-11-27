@@ -467,7 +467,8 @@ function voidSteps(s: Slot, spread: boolean, c: Point = CENTER, start = NORTH_ST
   // Comet's spread markers on the tanks and melee, at their fixed spots. Yours is the scene's headMark.
   const tankMeleeMarkers = fixed.map((m): Overlay => ({t:"target", x:m.p[0], y:m.p[1]}));
   return [
-    {q:"Where do you drop the first puddle?", z:firstPuddle(start.p, c), a:start.a, drop:VOID_PUDDLE},
+    // Until the first puddle drops, a puddle-sized circle is on every player (BossMod VoidStardustBait).
+    {q:"Where do you drop the first puddle?", z:firstPuddle(start.p, c), a:start.a, drop:VOID_PUDDLE, bait:VOID_PUDDLE.r},
     {q:"Second puddle?", zf:next, a:["Just outside your first puddle, one small step clockwise.", "Stay in max melee."], drop:VOID_PUDDLE},
     {q:"Third puddle?", zf:next, a:["Just outside the second puddle, clockwise again.", "Stay in max melee."], drop:VOID_PUDDLE},
     spread

@@ -937,6 +937,10 @@ static wins.
     on you, on your last spot, until you spread (`headMark` with `spread`). In the full fight
     yours rides on your moving marker. The Learn pictures show the spread after it went off, so
     they draw no markers.
+  - Before the first puddle drops, Pressure draws a puddle-sized bait circle (6 yalms) on your
+    moving marker (BossMod `VoidStardustBait`, which draws it until the first `Cometite` cast).
+    It is `Step.bait` on the first puddle step. Practice has no spot for you before your first
+    click, so it draws none.
   - Practice `m-void`: at the first weapon step the boss faces the first weapon, as Pressure
     shows him from 1:26.7.
   - Learn has both second endings: `k-void-2` (the first was a stack) and `k-void-2-stack` (the
