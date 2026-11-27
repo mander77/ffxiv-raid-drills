@@ -61,6 +61,7 @@ import { facingNext, jumpsNext } from "../src/lib/scene";
 import type { Point, PolyShape, ScytheOverlay, Slot, SlotName, StepResult, Zone } from "../src/types";
 import { withSeed } from "../src/util";
 import { assertLines } from "./lines";
+import { MANY_FIGHTS_TIMEOUT } from "./m11s";
 
 const REPEATS = 300;
 const SLOTS: Slot[] = ["H1", "H2"];
@@ -283,7 +284,7 @@ test("Ultimate Trophy Weapons: the first spawn sets the direction, and the last 
   }
 });
 
-test("Ultimate Trophy Weapons: no correct spot is in a tornado already on the floor", () => {
+test("Ultimate Trophy Weapons: no correct spot is in a tornado already on the floor", { timeout: MANY_FIGHTS_TIMEOUT }, () => {
   // Every weapon order comes up: two shuffles of three, and both directions.
   for (const s of SLOTS)
     for (let i = 0; i < 200; i++) {

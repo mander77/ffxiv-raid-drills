@@ -11,12 +11,9 @@ import {
   RANDOM,
 } from "../src/data/fights/m11s/fight";
 import { newCode } from "../src/util";
+import { MANY_FIGHTS_TIMEOUT } from "./m11s";
 
 const REPEATS = 40;
-/** The time limit of the test that builds REPEATS fights for every value of every pick, in
-    milliseconds. It takes about 1 second on an idle computer, but near 4 seconds with other work
-    beside it, close to Vitest's default 5 seconds, so it gets more room. */
-const CHOICE_TIMEOUT = 20_000;
 const seg = (f: Fight, title: string) => {
   const g = f.segs.find((x) => x.title.startsWith(title));
   if (!g) throw new Error(`no stretch ${title}`);
@@ -73,7 +70,7 @@ const SHOWS: { [K in keyof Picks]: (f: Fight, v: string) => boolean } = {
     seg(f, "Heartbreak Kick").scene.steps[0].a[0] === (v === "party" ? "In the tower, with the party." : "Anywhere out of the tower."),
 };
 
-test("each choice gives the chosen pattern, in every run", { timeout: CHOICE_TIMEOUT }, () => {
+test("each choice gives the chosen pattern, in every run", { timeout: MANY_FIGHTS_TIMEOUT }, () => {
   for (const row of CHOICE_ROWS)
     for (const [v] of row.options) {
       const c: Choices = { ...RANDOM, [row.key]: v };
@@ -102,7 +99,7 @@ test("Random still gives every pattern", () => {
 // these two picks can change each other.
 const COUPLED = new Set(["meteors", "wall"]);
 
-test("a choice changes only its own part: the rest still comes from the fight code", () => {
+test("a choice changes only its own part: the rest still comes from the fight code", { timeout: MANY_FIGHTS_TIMEOUT }, () => {
   for (let i = 0; i < 20; i++) {
     const code = newCode(),
       plain = buildFight("H1", code);
